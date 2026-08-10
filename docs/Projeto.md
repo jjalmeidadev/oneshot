@@ -7,39 +7,86 @@
   </tr>
 </table>
 
-# Agente Inteligente para Gestão de Portfólio de Projetos do Metrô
+# Nome do Projeto: <nome do projeto>
 
-## Grupo (nome a ser definido)
+## Nome do Grupo: <nome do grupo>
 
-### Integrantes
+## Integrantes:
 
-- Felipe Teixeira
-- Henrique Diniz
-- Jaime Almeida
-- Leonardo Ramos
-- Pedro Uchoa
-- Wendel Feitosa
-
----
+- <a href="https://www.linkedin.com/in/username/">Nome</a>
+- <a href="https://www.linkedin.com/in/username/">Nome</a>
+- <a href="https://www.linkedin.com/in/username/">Nome</a>
+- <a href="https://www.linkedin.com/in/username/">Nome</a>
+- <a href="https://www.linkedin.com/in/username/">Nome</a>
+- <a href="https://www.linkedin.com/in/username/">Nome</a>
+- <a href="https://www.linkedin.com/in/username/">Nome</a>
+- <a href="https://www.linkedin.com/in/username/">Nome</a>
 
 # Sumário
 
 - [1. Introdução](#1-introdução)
   - [1.1 Termos e Abreviações](#11-termos-e-abreviações)
   - [1.2 Objetivo do Documento](#12-objetivo-do-documento)
-
 - [2. Entendimento do Projeto e do Negócio](#2-entendimento-do-projeto-e-do-negócio)
   - [2.1 Contexto da Indústria do Parceiro](#21-contexto-da-indústria-do-parceiro)
   - [2.2 Problema](#22-problema)
   - [2.3 Visão do Projeto e do Produto](#23-visão-do-projeto-e-do-produto)
-    - [2.3.1 Visão do Produto](#231-visão-do-produto)
-    - [2.3.2 Proposta de Valor](#232-proposta-de-valor)
-    - [2.3.3 O que o Produto Faz e Não Faz](#233-o-que-o-produto-faz-e-não-faz)
-    - [2.3.4 Objetivos Estratégicos e Mensuráveis](#234-objetivos-estratégicos-e-mensuráveis)
-    - [2.3.5 Ownership e Accountability Estratégico](#236-ownership-e-accountability-estratégico)    
+  - [2.4 Personas e Jornada do Usuário](#24-personas-e-jornada-do-usuário)
+  - [2.5 Modelagem do Fluxo de Negócio](#25-modelagem-do-fluxo-de-negócio)
+    - [2.5.1 Cadeia de Valor](#251-cadeia-de-valor)
+    - [2.5.2 Fluxo de Negócio Proposto (AS-IS e TO-BE)](#252-fluxo-de-negócio-proposto-as-is-e-to-be)
+  - [2.6 Matriz de Risco do Projeto](#26-matriz-de-risco-do-projeto)
+  - [2.7 Ideação](#27-ideação)
+  - [2.8 Canvas do Projeto](#28-canvas-do-projeto)
+- [3. Requisitos do Projeto](#3-requisitos-do-projeto)
+  - [3.1 Requisitos Funcionais (RFs)](#31-requisitos-funcionais-rfs)
+  - [3.2 Requisitos Não Funcionais (RNFs)](#32-requisitos-não-funcionais-rnfs)
+  - [3.3 Correlação RFs e RNFs](#33-correlação-rfs-e-rnfs)
+  - [3.4 Casos de Uso](#34-casos-de-uso)
+  - [3.5 Casos de Uso x Requisitos Funcionais](#35-casos-de-uso-x-requisitos-funcionais)
+- [4. Modelagem de Dados](#4-modelagem-de-dados)
+  - [4.1 Especificação da Base de Dados para Modelo de Recomendação](#41-especificação-da-base-de-dados-para-modelo-de-recomendação)
+  - [4.2 Modelo Conceitual de Dados](#42-modelo-conceitual-de-dados)
+  - [4.3 Modelo Lógico de Dados](#43-modelo-lógico-de-dados)
+  - [4.4 Modelo Físico de Dados](#44-modelo-físico-de-dados)
+- [5. Solução Técnica (Design)](#5-solução-técnica-design)
+  - [5.1 Diagrama de Classes](#51-diagrama-de-classes)
+  - [5.2 Diagrama de Componentes da UML](#52-diagrama-de-componentes-da-uml)
+  - [5.3 Diagramas de Sequência da UML](#53-diagramas-de-sequência-da-uml)
+- [6. Mapeamento Técnico de Infraestrutura e Implantação](#6-mapeamento-técnico-de-infraestrutura-e-implantação)
+  - [6.1 Diagrama de Implantação da UML](#61-diagrama-de-implantação-da-uml)
+  - [6.2 Justificativa das Escolhas de Implantação](#62-justificativa-das-escolhas-de-implantação)
+  - [6.3 Considerações sobre Desempenho e Segurança](#63-considerações-sobre-desempenho-e-segurança)
+- [7. Projeto Visual da Solução](#7-projeto-visual-da-solução)
+  - [7.1 Desenvolvimento de Wireframes](#71-desenvolvimento-de-wireframes)
+  - [7.2 Desenvolvimento de Mockups](#72-desenvolvimento-de-mockups)
+  - [7.3 Guia Visual](#73-guia-visual)
+- [8. Desenvolvimento do Projeto](#8-desenvolvimento-do-projeto)
+  - [8.1 Arquitetura de Codificação e Estrutura de Diretórios](#81-arquitetura-de-codificação-e-estrutura-de-diretórios)
+  - [8.2 Modelo de Recomendação](#82-modelo-de-recomendação)
+  - [8.3 Desenvolvimento de Features](#83-desenvolvimento-de-features)
+    - [8.3.1 Sprint 3](#831-sprint-3)
+    - [8.3.2 Sprint 4](#832-sprint-4)
+    - [8.3.3 Sprint 5](#833-sprint-5)
+  - [8.4 Testes Unitários e de Integração](#84-testes-unitários-e-de-integração)
+  - [8.5 Documentações automáticas](#85-documentações-automáticas)
+- [9. Planejamento e Execução de Testes](#9-planejamento-e-execução-de-testes)
+  - [9.1 Testes Funcionais](#91-testes-funcionais)
+    - [9.1.1 Planejamento](#911-planejamento)
+    - [9.1.2 Resultados](#912-resultados)
+  - [9.2 Testes de RNFs](#92-testes-de-rnfs)
+    - [9.2.1 Planejamento](#921-planejamento)
+    - [9.2.2 Resultados](#922-resultados)
+  - [9.3 Testes de Usabilidade](#93-testes-de-usabilidade)
+    - [9.3.1 Planejamento](#931-planejamento)
+    - [9.3.2 Resultados](#932-resultados)
+- [10. Procedimentos de Implantação](#10-procedimentos-de-implantação)
+  - [10.1 Implantação e Configuração do Banco de Dados](#101-implantação-e-configuração-do-banco-de-dados)
+  - [10.2 Implantação do Protótipo para uso por equipe de desenvolvimento](#102-implantação-do-protótipo-para-uso-por-equipe-de-desenvolvimento)
+- [Referências](#referências)
+
 
 # 1. Introdução
-
 Este documento apresenta a especificação da solução desenvolvida para a Plataforma Tecnológica do Metrô de São Paulo, no contexto do projeto acadêmico realizado em parceria entre o Instituto de Tecnologia e Liderança (Inteli) e a Companhia do Metropolitano de São Paulo (Metrô).
 
 A proposta consiste no desenvolvimento de um agente inteligente para apoio à Gestão de Portfólio de Projetos (PMO), capaz de utilizar Inteligência Artificial e processamento de linguagem natural para facilitar o acesso às informações estratégicas do portfólio, apoiar consultas em linguagem natural e reduzir atividades operacionais atualmente realizadas de forma manual.
@@ -49,9 +96,7 @@ Ao longo deste documento são apresentados o contexto do problema, a visão do p
 Além de servir como registro técnico do desenvolvimento realizado pela equipe, este documento busca consolidar as principais decisões arquiteturais, funcionais e estratégicas que fundamentam a construção da solução, permitindo sua compreensão, evolução e futura manutenção.
 
 ---
-
 ## 1.1 Termos e Abreviações
-
 A Tabela 1 apresenta os principais termos e abreviações utilizados ao longo deste documento.
 
 | Termo | Descrição |
@@ -74,15 +119,23 @@ A Tabela 1 apresenta os principais termos e abreviações utilizados ao longo de
 ---
 
 ## 1.2 Objetivo do Documento
-
 Este documento tem como objetivo especificar a solução proposta para o desenvolvimento do Agente Inteligente para Gestão de Portfólio de Projetos do Metrô, consolidando os aspectos estratégicos, funcionais e técnicos necessários para sua compreensão e implementação.
 
 Além de apoiar o desenvolvimento da solução ao longo das diferentes etapas do projeto, este documento também estabelece uma base de referência para validação junto aos representantes do Metrô, registro das decisões tomadas pela equipe e documentação das principais características da plataforma desenvolvida, favorecendo sua evolução e futura manutenção.
 
 ---
 
-## 2.3 Visão do Projeto e do Produto
 
+# 2. Entendimento do Projeto e do Negócio
+_conteúdo_
+
+## 2.1 Contexto da Indústria do Parceiro
+_conteúdo_
+
+## 2.2 Problema
+_conteúdo_
+
+## 2.3 Visão do Projeto e do Produto
 Este tópico apresenta a visão estratégica do produto proposto, sua proposta de valor e os objetivos que orientam seu desenvolvimento, estabelecendo o alinhamento entre a solução, os desafios identificados pela área de Gestão de Portfólio de Projetos (PMO) do Metrô e as necessidades do negócio. A definição desses elementos busca orientar as decisões arquiteturais, funcionais e de priorização do projeto, delimitando claramente seu escopo, as capacidades esperadas e o valor agregado aos diferentes perfis de usuários.
 
 A proposta surge em um contexto de evolução da plataforma tecnológica utilizada pelo PMO, que já dispõe de ferramentas corporativas para armazenamento, organização e acompanhamento das informações do portfólio, mas ainda depende de atividades manuais para localizar documentos, consolidar informações, interpretar normativos, produzir relatórios e acompanhar o andamento dos projetos. Como consequência, parte significativa do conhecimento institucional permanece distribuída entre diferentes repositórios e depende da experiência dos profissionais para ser acessada de forma eficiente.
@@ -217,4 +270,170 @@ Ao preservar o ecossistema tecnológico já adotado pelo Metrô e incorporar rec
 
 
 
-<p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://github.com/ENDEREÇOGRUPO>"><nome do projeto></a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://github.com/ENDEREÇOGRUPO">INTELI, <aluno1>, <aluno2>, <aluno3>, <aluno4>, <aluno5>, <aluno6></a> is licensed under <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">Attribution 4.0 International<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"></a></p>
+## 2.4 Personas e Jornada do Usuário
+_conteúdo_
+
+## 2.5 Modelagem do Fluxo de Negócio
+_conteúdo_
+
+## 2.5.1 Cadeia de Valor
+_conteúdo_
+
+## 2.5.2 Fluxo de Negócio Proposto (AS-IS e TO-BE)
+_conteúdo_
+
+## 2.6 Matriz de Risco do Projeto
+_conteúdo_
+
+## 2.7 Ideação
+_conteúdo_
+Obs.: Seção dedicada a discussão sobre ideias e priorização de features.
+
+## 2.8 Canvas do Projeto
+_conteúdo_
+
+# 3. Requisitos do Projeto
+_conteúdo_
+
+## 3.1 Requisitos Funcionais (RFs)
+_conteúdo_ 
+
+## 3.2 Requisitos Não Funcionais (RNFs)
+_conteúdo_
+
+## 3.3 Correlação RFs e RNFs
+_conteúdo_
+
+## 3.4 Casos de Uso
+_conteúdo_
+
+## 3.5 Casos de Uso x Requisitos Funcionais
+_conteúdo_
+
+# 4. Modelagem de Dados
+_conteúdo_
+
+## 4.1 Especificação da Base de Dados para Modelo de Recomendação
+_conteúdo_
+Obs.: Insira aqui informações sobre a construção do artefato da Sprint 1. 
+
+## 4.2 Modelo Conceitual de Dados
+_conteúdo_
+
+## 4.3 Modelo Lógico de Dados
+_conteúdo_
+
+## 4.4 Modelo Físico de Dados
+_conteúdo_
+
+**Nota:** Insira uma explicação e direcionamento para o readme.md da pasta database.
+
+# 5. Solução Técnica (Design)
+_conteúdo_
+
+## 5.1 Diagrama de Classes
+_conteúdo_
+
+## 5.2 Diagrama de Componentes da UML
+_conteúdo_
+
+## 5.3 Diagramas de Sequência da UML
+_conteúdo_
+
+# 6. Mapeamento Técnico de Infraestrutura e Implantação
+_conteúdo_
+
+## 6.1 Diagrama de Implantação da UML
+_conteúdo_
+
+## 6.2 Justificativa das Escolhas de Implantação
+_conteúdo_
+
+## 6.3 Considerações sobre Desempenho e Segurança
+_conteúdo_
+
+# 7. Projeto Visual da Solução
+_conteúdo_
+
+## 7.1 Desenvolvimento de Wireframes
+_conteúdo_
+
+## 7.2 Desenvolvimento de Mockups
+_conteúdo_
+
+## 7.3 Guia Visual
+_conteúdo_
+
+# 8. Desenvolvimento do Projeto
+_conteúdo_
+
+## 8.1 Arquitetura de Codificação e Estrutura de Diretórios
+_conteúdo_
+
+## 8.2 Modelo de Recomendação
+_conteúdo_
+
+## 8.3 Desenvolvimento de Features
+_conteúdo_
+
+**Nota:** Insira uma explicação de entregas em cada Sprint.
+
+## 8.3.1 Sprint 3
+_conteúdo_
+
+## 8.3.2 Sprint 4
+_conteúdo_
+
+## 8.3.3 Sprint 5
+_conteúdo_
+
+## 8.4 Testes Unitários e de Integração
+_conteúdo_
+Obs.: Insira informações sobre estratégias para realização dos testes
+
+## 8.5 Documentações automáticas
+_conteúdo_
+Obs.: Insira informações sobre quais frameworks foram usados e como acessar.
+
+# 9. Planejamento e Execução de Testes
+_conteúdo_
+
+## 9.1 Testes Funcionais
+_conteúdo_
+
+## 9.1.1 Planejamento
+_conteúdo_
+
+## 9.1.2 Resultados
+_conteúdo_
+
+## 9.2 Testes de RNFs
+_conteúdo_
+
+## 9.2.1 Planejamento
+_conteúdo_
+
+## 9.2.2 Resultados
+_conteúdo_
+
+## 9.3 Testes de Usabilidade
+_conteúdo_
+
+## 9.3.1 Planejamento
+_conteúdo_
+
+## 9.3.2 Resultados
+_conteúdo_
+
+# 10. Procedimentos de Implantação
+_conteúdo_
+
+## 10.1 Implantação e Configuração do Banco de Dados
+_conteúdo_
+
+## 10.2 Implantação do Protótipo para uso por equipe de desenvolvimento
+_conteúdo_
+
+# Referências
+_conteúdo_
+
