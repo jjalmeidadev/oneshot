@@ -37,6 +37,8 @@ A documentação do projeto segue a seguinte organização:
  ┃ ┗ 📄 Manual-Instalacao.md
  ┗ 📄 README.md
 
+```
+
 ---
 
 ## 📚 Documentação
