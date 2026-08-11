@@ -283,6 +283,7 @@ A visão e os objetivos apresentados consolidam o direcionamento estratégico da
 
 Ao preservar o ecossistema tecnológico já adotado pelo Metrô e incorporar recursos de Inteligência Artificial de maneira integrada e escalável, a solução contribui para fortalecer a governança das informações, reduzir esforços operacionais e ampliar a capacidade analítica do PMO. 
 
+---
 
 
 ## 2.4 Personas e Jornada do Usuário
@@ -310,8 +311,153 @@ _conteúdo_
 # 3. Requisitos do Projeto
 _conteúdo_
 
-## 3.1 Requisitos Funcionais (RFs)
-_conteúdo_ 
+## 3.1 Requisitos Funcionais
+
+Os requisitos funcionais definem as funcionalidades que deverão ser contempladas pela prova de conceito desenvolvida no MVP. Sua definição considera o escopo estabelecido para o projeto e as oportunidades levantadas durante o processo de ideação apresentado na Seção 2.7, priorizando as funcionalidades diretamente relacionadas ao pipeline de Processamento de Linguagem Natural (PLN).
+
+O núcleo do MVP consiste em um pipeline de PLN capaz de receber comandos em linguagem natural, interpretar as solicitações dos usuários, identificar suas intenções e classificá-las em categorias como consulta, transação e alerta. A partir dessa classificação, a solução deve processar informações de documentos de projetos e retornar respostas estruturadas que apoiem atividades operacionais, análises e a obtenção de informações para tomada de decisão.
+
+Por se tratar de uma prova de conceito em contexto acadêmico, o funcionamento do MVP será validado sobre dados sintéticos. Integrações com dados reais do portfólio do Metrô de São Paulo e demais funcionalidades corporativas identificadas durante a ideação são consideradas possibilidades de evolução da solução e não constituem requisitos obrigatórios para a validação do núcleo funcional do MVP.
+
+| ID | Requisito Funcional | Feature relacionada | Prioridade | Status |
+| :---: | --- | --- | :---: | :---: |
+| RF01 | O sistema deve receber comandos textuais em linguagem natural relacionados à gestão de projetos e portfólio. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF02 | O sistema deve processar semanticamente os comandos recebidos e identificar a intenção expressa pelo usuário. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF03 | O sistema deve classificar as solicitações recebidas de acordo com as categorias de intenção previstas pelo MVP, incluindo consulta, transação e alerta. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF04 | O sistema deve recuperar informações relevantes dos documentos e dados sintéticos disponibilizados ao pipeline de acordo com a solicitação realizada. | Ingestão de informações dos projetos | Muito Alta | Não iniciado |
+| RF05 | O sistema deve responder a consultas sobre as informações disponíveis nos documentos de projetos utilizados na prova de conceito. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF06 | O sistema deve realizar análises e comparações entre informações de diferentes projetos quando solicitado pelo usuário. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF07 | O sistema deve executar ou simular ações compatíveis com a intenção classificada, incluindo operações de consulta, transação e alerta previstas para validação do pipeline. | Ingestão de informações dos projetos | Muito Alta | Não iniciado |
+| RF08 | O sistema deve gerar respostas estruturadas e fundamentadas nas informações disponíveis nos dados sintéticos, indicando quando não houver informações suficientes para atender à solicitação. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+
+### 3.1.1 User Stories dos Requisitos Funcionais
+
+As User Stories apresentadas nesta subseção estão diretamente integradas aos respectivos requisitos funcionais da Seção 3.1. Cada história segue a estrutura "Como [usuário], quero [necessidade], para [valor]", estabelecendo a necessidade que fundamenta o requisito e o benefício esperado pelo usuário.
+
+Os critérios de aceitação estabelecem condições verificáveis para validação das funcionalidades dentro dos limites da prova de conceito, considerando a utilização de dados sintéticos e o desenvolvimento do pipeline de PLN como núcleo do MVP.
+
+#### RF01 — Entrada de comandos em linguagem natural
+
+**User Story — US01**
+
+Como usuário da solução, quero realizar solicitações utilizando linguagem natural, para interagir com as informações dos projetos sem precisar utilizar comandos técnicos ou conhecer a estrutura dos dados.
+
+**Critérios de aceitação:**
+- O sistema deve aceitar solicitações textuais em linguagem natural.
+- O usuário não deve precisar utilizar uma sintaxe técnica específica.
+- A solicitação recebida deve ser encaminhada ao pipeline de PLN para processamento.
+
+**Feature relacionada:** Consulta de informações dos projetos.
+
+---
+
+#### RF02 — Identificação de intenção
+
+**User Story — US02**
+
+Como usuário da solução, quero que o sistema compreenda a intenção da minha solicitação, para que ela seja processada de acordo com a ação que desejo realizar.
+
+**Critérios de aceitação:**
+- O sistema deve processar semanticamente a solicitação recebida.
+- O sistema deve identificar a intenção presente no comando do usuário.
+- A intenção identificada deve ser utilizada nas etapas seguintes do pipeline.
+
+**Feature relacionada:** Consulta de informações dos projetos.
+
+---
+
+#### RF03 — Classificação das solicitações
+
+**User Story — US03**
+
+Como usuário da solução, quero que minha solicitação seja classificada de acordo com sua finalidade, para que o sistema utilize o fluxo de processamento adequado.
+
+**Critérios de aceitação:**
+- O sistema deve classificar as solicitações conforme as categorias previstas no MVP.
+- A classificação deve contemplar, no mínimo, as categorias de consulta, transação e alerta previstas para validação.
+- A categoria identificada deve determinar o fluxo de processamento da solicitação.
+
+**Feature relacionada:** Consulta de informações dos projetos.
+
+---
+
+#### RF04 — Recuperação de informações
+
+**User Story — US04**
+
+Como usuário da solução, quero que o sistema localize informações relevantes nos documentos de projetos, para obter respostas relacionadas ao contexto da minha solicitação.
+
+**Critérios de aceitação:**
+- O sistema deve consultar os documentos e dados sintéticos disponibilizados para a prova de conceito.
+- O sistema deve recuperar informações relacionadas à solicitação realizada.
+- As informações recuperadas devem ser utilizadas como contexto para o processamento da resposta.
+
+**Feature relacionada:** Ingestão de informações dos projetos.
+
+---
+
+#### RF05 — Consulta de informações dos projetos
+
+**User Story — US05**
+
+Como usuário da solução, quero consultar informações sobre os projetos utilizando linguagem natural, para acessar rapidamente os dados necessários para acompanhamento e análise.
+
+**Critérios de aceitação:**
+- O sistema deve responder a consultas relacionadas às informações disponíveis nos dados sintéticos.
+- A resposta deve considerar o projeto ou contexto solicitado pelo usuário.
+- A resposta deve utilizar as informações recuperadas pelo pipeline.
+- Quando a informação solicitada não estiver disponível, o sistema deve indicar essa limitação.
+
+**Feature relacionada:** Consulta de informações dos projetos.
+
+---
+
+#### RF06 — Análise e comparação de projetos
+
+**User Story — US06**
+
+Como gestor do portfólio, quero solicitar análises e comparações entre projetos, para identificar diferenças, semelhanças e informações relevantes que apoiem a tomada de decisão.
+
+**Critérios de aceitação:**
+- O sistema deve identificar quando a solicitação exigir análise ou comparação.
+- O sistema deve permitir comparar informações disponíveis de dois ou mais projetos.
+- A comparação deve considerar os critérios informados pelo usuário quando aplicável.
+- O resultado deve ser fundamentado nos dados sintéticos disponíveis.
+
+**Feature relacionada:** Consulta de informações dos projetos.
+
+---
+
+#### RF07 — Tratamento das intenções classificadas
+
+**User Story — US07**
+
+Como usuário da solução, quero que o sistema direcione minha solicitação para o fluxo correspondente à intenção identificada, para obter um comportamento adequado ao tipo de operação solicitada.
+
+**Critérios de aceitação:**
+- Solicitações classificadas como consulta devem ser encaminhadas ao fluxo de recuperação de informações.
+- Solicitações classificadas como transação devem ser encaminhadas ao fluxo correspondente previsto na prova de conceito.
+- Solicitações classificadas como alerta devem ser encaminhadas ao fluxo correspondente previsto na prova de conceito.
+- O comportamento de cada fluxo deve poder ser demonstrado utilizando dados sintéticos.
+
+**Feature relacionada:** Ingestão de informações dos projetos.
+
+---
+
+#### RF08 — Geração de respostas estruturadas e fundamentadas
+
+**User Story — US08**
+
+Como usuário da solução, quero receber respostas estruturadas e fundamentadas nas informações disponíveis, para compreender os resultados apresentados pelo agente e utilizá-los com maior confiança.
+
+**Critérios de aceitação:**
+- A resposta deve considerar as informações recuperadas dos dados sintéticos disponibilizados ao pipeline.
+- O sistema não deve apresentar como fato informações que não estejam sustentadas pelos dados disponíveis.
+- Quando não houver informações suficientes, o sistema deve indicar a limitação ao usuário.
+- A resposta deve ser estruturada de forma coerente com a intenção identificada.
+- Em solicitações analíticas, o sistema deve diferenciar informações recuperadas de interpretações produzidas pelo agente.
+
+**Feature relacionada:** Consulta de informações dos projetos.
 
 ## 3.2 Requisitos Não Funcionais (RNFs)
 _conteúdo_
