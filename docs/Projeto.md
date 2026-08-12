@@ -303,7 +303,12 @@ Dessa forma, o fluxo proposto não busca retirar a participação humana do proc
 ---
 
 ## 2.5.1 Cadeia de Valor
-_conteúdo_
+
+A cadeia de valor evidencia como o processo de elaboração do mapa de benefícios evolui entre o cenário atual **(AS-IS)** e o cenário futuro **(TO-BE)**. No processo atual, grande parte das informações necessárias para construir o mapa é obtida manualmente, exigindo consulta a múltiplos documentos, interpretação do conhecimento tácito do gestor e preenchimento manual do artefato. No processo futuro, essas atividades continuam sendo responsabilidade do líder do projeto, porém passam a ser apoiadas por um agente inteligente capaz de consultar a documentação corporativa, recuperar informações relevantes, sugerir relações entre entregas, resultados e benefícios e gerar automaticamente o mapa para validação final do usuário.
+
+
+
+---
 
 ## 2.5.2 Fluxo de Negócio Proposto (AS-IS e TO-BE)
 _conteúdo_
