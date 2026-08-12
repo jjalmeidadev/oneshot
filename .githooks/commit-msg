@@ -1,0 +1,50 @@
+#!/bin/sh
+
+commit_msg_file="$1"
+commit_format='^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\([A-Za-z0-9._-]+\))?!?: .+$'
+issue_format='#[0-9]+'
+
+if [ -z "$commit_msg_file" ] || [ ! -f "$commit_msg_file" ]; then
+  echo "commit-msg: arquivo de mensagem de commit nao encontrado." >&2
+  exit 1
+fi
+
+IFS= read -r first_line < "$commit_msg_file"
+
+case "$first_line" in
+  "Merge "*|"Revert "*)
+    echo "commit-msg: commit automatico ignorado."
+    exit 0
+    ;;
+esac
+
+if [ -z "$first_line" ]; then
+  echo "commit-msg: a mensagem de commit nao pode ficar vazia." >&2
+  exit 1
+fi
+
+if [ "${#first_line}" -gt 72 ]; then
+  echo "commit-msg: a primeira linha deve ter no maximo 72 caracteres." >&2
+  echo "Formato esperado: <tipo>(<escopo opcional>): <descricao curta> (#<issue>)" >&2
+  echo "Exemplo: feat(auth): adicionar login (#12)" >&2
+  exit 1
+fi
+
+if ! printf '%s\n' "$first_line" | grep -Eq "$commit_format"; then
+  echo "commit-msg: mensagem fora do padrao Conventional Commits." >&2
+  echo "Formato esperado: <tipo>(<escopo opcional>): <descricao curta> (#<issue>)" >&2
+  echo "Tipos aceitos: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert" >&2
+  echo "Breaking change permitido com ! antes de ':'." >&2
+  echo "Exemplo: feat(auth): adicionar login (#12)" >&2
+  exit 1
+fi
+
+if ! grep -Eq "$issue_format" "$commit_msg_file"; then
+  echo "commit-msg: informe a issue da sprint usando #N." >&2
+  echo "Formato esperado: <tipo>(<escopo opcional>): <descricao curta> (#<issue>)" >&2
+  echo "Exemplo: chore: configurar hooks do projeto (#7)" >&2
+  exit 1
+fi
+
+echo "commit-msg: validacao concluida."
+exit 0
