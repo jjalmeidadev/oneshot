@@ -306,7 +306,11 @@ Dessa forma, o fluxo proposto não busca retirar a participação humana do proc
 
 A cadeia de valor evidencia como o processo de elaboração do mapa de benefícios evolui entre o cenário atual **(AS-IS)** e o cenário futuro **(TO-BE)**. No processo atual, grande parte das informações necessárias para construir o mapa é obtida manualmente, exigindo consulta a múltiplos documentos, interpretação do conhecimento tácito do gestor e preenchimento manual do artefato. No processo futuro, essas atividades continuam sendo responsabilidade do líder do projeto, porém passam a ser apoiadas por um agente inteligente capaz de consultar a documentação corporativa, recuperar informações relevantes, sugerir relações entre entregas, resultados e benefícios e gerar automaticamente o mapa para validação final do usuário.
 
+<img src="img/Cadeia-de-valor-m07.png" alt="Cadeia de Valor" width="500"><br>
 
+No cenário **AS-IS**, o processo é composto pelas etapas de **Identificação do Projeto**, **Definição das Entregas**, **Identificação dos Resultados**, **Definição dos Benefícios**, **Alinhamento Estratégico**, **Preenchimento Manual do Mapa** e **Revisão e Armazenamento**.
+
+Nesse cenário, o processo depende principalmente da atuação manual do responsável pelo projeto. A identificação das informações necessárias ocorre por meio da consulta e análise de diferentes fontes, exigindo que o responsável localize, interprete e organize os dados relevantes para a elaboração do mapa. A definição dos benefícios e o alinhamento estratégico também dependem do conhecimento e da análise do responsável. Ao final, o Mapa de Benefícios é preenchido manualmente e posteriormente revisado e armazenado, sem o mesmo nível de padronização proposto no cenário futuro.
 
 ---
 
