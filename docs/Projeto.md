@@ -800,6 +800,31 @@ Essa oportunidade é especialmente relevante para aumentar o valor estratégico 
 
 ---
 
+### 2.6.5 Matriz Probabilidade × Impacto
+
+A representação gráfica abaixo utiliza a probabilidade no eixo vertical e o impacto no eixo horizontal. Os identificadores dos riscos são posicionados conforme suas respectivas avaliações.
+
+Para facilitar a leitura, os riscos negativos são representados por **R** e as oportunidades por **O**.
+
+| Probabilidade ↓ / Impacto → | **1** | **2** | **3** | **4** | **5** |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| **5 Muito alta** | 🟢 | 🟢 | 🟠 | 🟠 | 🔴 |
+| **4 Alta** | 🟢 | 🟢 | 🟠 | 🔴 R05, R07, R08, O11, O14 | 🔴 R01, R02, R03 |
+| **3 Média** | 🟢 | 🟢 | 🟡 R10 | 🟠 R06, R09, O15 | 🔴 R04, O12, O13, O16 |
+| **2 Baixa** | 🟢 | 🟢 | 🟡 | 🟡 | 🟠 |
+| **1 Muito baixa** | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
+
+**Legenda:**
+
+- 🟢 **Baixa:** 1–4
+- 🟡 **Moderada:** 5–9
+- 🟠 **Alta:** 10–14
+- 🔴 **Crítica:** 15–25
+
+> **Observação:** as oportunidades **O11, O12, O13, O14, O15 e O16** utilizam a mesma escala de probabilidade e impacto, porém sua interpretação é positiva: quanto maior a pontuação, maior o potencial de aproveitamento da oportunidade.
+
+---
+
 
 ## 2.7 Ideação
 
