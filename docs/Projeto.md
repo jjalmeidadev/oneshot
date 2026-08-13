@@ -825,6 +825,58 @@ Para facilitar a leitura, os riscos negativos são representados por **R** e as 
 
 ---
 
+## 2.6.6 Análise dos Três Itens Mais Críticos
+
+A aplicação da regra **Severidade = Probabilidade × Impacto** identifica três itens com a maior pontuação da matriz: **R01, R02 e R03**, todos com severidade **20**, correspondendo à combinação de probabilidade alta (4) e impacto muito alto (5).
+
+### R01  - Indisponibilidade ou baixa qualidade dos dados
+
+O risco relacionado aos dados é considerado crítico porque a proposta do agente depende diretamente das informações utilizadas como contexto para suas respostas. O projeto prevê uma camada inteligente sobre as fontes de conhecimento existentes, buscando disponibilizar respostas contextualizadas e fundamentadas nas fontes oficiais da organização.
+
+Dessa forma, dados incompletos, indisponíveis ou inconsistentes não representam apenas um problema operacional de alimentação da solução, mas podem comprometer diretamente a principal finalidade do produto: disponibilizar informações confiáveis aos usuários.
+
+Por esse motivo, a disponibilidade e a qualidade das fontes devem ser acompanhadas desde as primeiras etapas do projeto.
+
+---
+
+### R02  - Dificuldades nas integrações com o ecossistema Microsoft
+
+A integração tecnológica também possui criticidade elevada porque a solução foi concebida para operar no ecossistema Microsoft, utilizando componentes como **Teams, SharePoint e Power Platform**.
+
+Problemas relacionados a permissões, conectores, configurações ou limitações das plataformas podem impedir que funcionalidades que dependem dessas integrações sejam implementadas conforme planejado. Além disso, uma dificuldade de integração pode gerar impacto simultaneamente sobre desenvolvimento, validação e cronograma.
+
+Por isso, a realização de validações técnicas antecipadas é uma das principais estratégias de redução desse risco.
+
+---
+
+### R03  - Respostas inadequadas ou não fundamentadas
+
+O terceiro risco crítico está relacionado ao próprio comportamento da Inteligência Artificial. O agente deverá interpretar solicitações em linguagem natural e disponibilizar respostas contextualizadas, seguras e fundamentadas nas fontes oficiais.
+
+Uma resposta incorreta ou sem fundamentação pode comprometer a confiança dos usuários na solução e reduzir seu valor para o PMO. Esse risco possui impacto elevado justamente porque a qualidade da resposta é um dos elementos centrais da proposta de valor do produto.
+
+Por esse motivo, a estratégia deve priorizar fontes controladas, mecanismos de fundamentação, validação das respostas e comportamento explícito para situações nas quais não existam informações suficientes.
+
+---
+
+### 2.6.7 Acompanhamento da Matriz
+
+A matriz deverá ser revisada durante a evolução do projeto, especialmente quando ocorrerem mudanças relevantes no escopo, arquitetura, disponibilidade de dados, integração com sistemas corporativos ou entendimento das necessidades dos stakeholders.
+
+A atualização deverá considerar:
+
+- inclusão de novos riscos identificados durante o desenvolvimento;
+- alteração da probabilidade ou impacto de riscos existentes;
+- atualização dos responsáveis;
+- registro das ações de mitigação e contingência realizadas;
+- atualização do status dos riscos;
+- encerramento de riscos que deixarem de representar ameaça ao projeto;
+- registro de novas oportunidades identificadas durante a evolução da solução.
+
+Dessa forma, a matriz não deve ser tratada apenas como um artefato documental, mas como um instrumento de acompanhamento contínuo das condições que podem afetar a execução e os resultados do projeto.
+
+A análise realizada evidencia que os principais pontos de atenção estão concentrados na **qualidade e disponibilidade dos dados, nas dependências de integração tecnológica e na confiabilidade das respostas produzidas pela Inteligência Artificial**. Esses fatores possuem relação direta com a proposta central do produto e, por isso, devem permanecer sob acompanhamento prioritário ao longo das próximas etapas do projeto.
+
 
 ## 2.7 Ideação
 
