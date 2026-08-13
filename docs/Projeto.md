@@ -125,15 +125,30 @@ Além de apoiar o desenvolvimento da solução ao longo das diferentes etapas do
 
 ---
 
-
 # 2. Entendimento do Projeto e do Negócio
 _conteúdo_
 
+---
+
 ## 2.1 Contexto da Indústria do Parceiro
-_conteúdo_
+
+O transporte metroviário desempenha um papel estratégico na mobilidade urbana das grandes metrópoles, sendo responsável pelo deslocamento diário de milhões de passageiros com elevados requisitos de segurança, confiabilidade e eficiência. Além da operação da infraestrutura ferroviária, o setor envolve projetos contínuos de expansão da malha, modernização tecnológica, manutenção e renovação de ativos, acessibilidade e melhoria da experiência dos passageiros. Nesse cenário, destacam-se tendências como a digitalização das operações, o uso crescente de dados e Inteligência Artificial (IA) como apoio à gestão, a automação de processos e a busca por maior integração das informações organizacionais.
+
+Ao mesmo tempo, o setor enfrenta desafios relacionados à complexidade e ao alto custo dos projetos de infraestrutura, à necessidade de modernização contínua dos sistemas, ao gerenciamento de grandes volumes de informações e à coordenação de projetos com diferentes objetivos, prazos e partes interessadas. No contexto de organizações públicas, somam-se ainda requisitos de governança, transparência, prestação de contas e uso eficiente dos recursos públicos. Dessa forma, a capacidade de organizar, consultar e utilizar informações confiáveis sobre projetos torna-se relevante tanto para a eficiência operacional quanto para a tomada de decisões estratégicas.
+
+Inserida nesse setor, a Companhia do Metropolitano de São Paulo (Metrô) é uma empresa pública vinculada ao Governo do Estado de São Paulo e possui papel relevante no sistema de transporte de alta capacidade da Região Metropolitana de São Paulo. A companhia atua na operação de parte da rede metroviária e no planejamento e execução de investimentos estratégicos relacionados à expansão, modernização e melhoria da infraestrutura de transporte. Seu posicionamento não se caracteriza por uma participação de mercado tradicional, mas por sua relevância como operador público e agente de desenvolvimento da infraestrutura metroviária paulista, atendendo diariamente uma parcela significativa da demanda por transporte coletivo da região e administrando projetos de elevada complexidade e impacto social.
+
+Nesse contexto, o Escritório Corporativo de Projetos (PMO) desempenha a função de coordenar e acompanhar o portfólio de projetos da organização, lidando com informações relacionadas a objetivos, cronogramas, riscos, indicadores e documentação técnica. Conforme identificado junto ao parceiro, a quantidade de projetos e a dispersão das informações em diferentes documentos dificultam a localização e a consolidação do conhecimento necessário para consultas e análises. Além disso, experiências anteriores com ferramentas de IA generativa apresentaram limitações relacionadas à confiabilidade das respostas, reforçando a necessidade de uma solução que utilize como referência a documentação oficial do Metrô.
+
+Diante desse cenário, o projeto propõe o desenvolvimento de um agente inteligente baseado em Processamento de Linguagem Natural (PLN) para apoiar o PMO na gestão e consulta das informações do portfólio de projetos. A solução busca permitir consultas rápidas e contextualizadas sobre a documentação disponibilizada, reduzindo o esforço necessário para localizar informações e aumentando a confiabilidade das respostas. Dessa forma, o projeto se alinha às tendências de digitalização e aplicação de IA no setor, ao mesmo tempo em que atende às necessidades específicas de governança, gestão do conhecimento e apoio à tomada de decisão do Metrô de São Paulo.
+
+---
+
 
 ## 2.2 Problema
 _conteúdo_
+
+---
 
 ## 2.3 Visão do Projeto e do Produto
 Este tópico apresenta a visão estratégica do produto proposto, sua proposta de valor e os objetivos que orientam seu desenvolvimento, estabelecendo o alinhamento entre a solução, os desafios identificados pela área de Gestão de Portfólio de Projetos (PMO) do Metrô e as necessidades do negócio. A definição desses elementos busca orientar as decisões arquiteturais, funcionais e de priorização do projeto, delimitando claramente seu escopo, as capacidades esperadas e o valor agregado aos diferentes perfis de usuários.
@@ -268,10 +283,43 @@ A visão e os objetivos apresentados consolidam o direcionamento estratégico da
 
 Ao preservar o ecossistema tecnológico já adotado pelo Metrô e incorporar recursos de Inteligência Artificial de maneira integrada e escalável, a solução contribui para fortalecer a governança das informações, reduzir esforços operacionais e ampliar a capacidade analítica do PMO. 
 
+---
 
 
 ## 2.4 Personas e Jornada do Usuário
-_conteúdo_
+
+As personas desenvolvidas representam diferentes perfis de usuários envolvidos na gestão do portfólio de projetos do Metrô. Elas ajudam a compreender como a solução proposta impacta rotinas distintas, desde a tomada de decisão estratégica até o acompanhamento operacional e a consolidação de informações. Considerando que o projeto propõe um agente inteligente para consulta, análise e apoio à gestão do portfólio, as personas evidenciam necessidades relacionadas à confiabilidade das respostas, redução de tarefas manuais, acesso rápido a indicadores e melhor organização das informações distribuídas entre documentos e plataformas corporativas.
+
+### 2.4.1 Personas
+
+### 2.4.1.1 Roberto
+
+<div align="center">
+  <img src="img/Persona - Roberto.png" alt="Persona Roberto" width="800">
+  <p><strong>Figura X</strong> - Persona Roberto.</p>
+</div>
+
+Roberto é Diretor de Planejamento e Gestão Estratégica, tem 54 anos e atua em São Paulo. Sua rotina é marcada pelo acompanhamento executivo do portfólio de projetos, com foco em decisões estratégicas, riscos, resultados e alinhamento das iniciativas às prioridades organizacionais do Metrô. Por ocupar uma posição de diretoria, Roberto não dispõe de tempo para analisar documentos extensos ou acompanhar detalhes operacionais de cada projeto. Ele precisa receber informações sintetizadas, confiáveis e apresentadas em linguagem executiva, com destaque para projetos críticos, tendências, decisões pendentes e impactos organizacionais. No dia a dia, utiliza ferramentas como Word, Excel, PowerPoint, Teams e SharePoint, mas prefere soluções integradas ao ambiente corporativo que já utiliza.
+
+### 2.4.1.2 Mariana
+
+<div align="center">
+  <img src="img/Persona - Mariana.png" alt="Persona Roberto" width="800">
+  <p><strong>Figura X</strong> - Persona Mariana.</p>
+</div>
+
+Mariana é Analista Sênior de Gestão de Portfólio no PMO do Metrô, tem 38 anos e atua diretamente na qualidade, atualização e desempenho das informações do portfólio. Seu dia a dia envolve consolidar dados de diferentes projetos, identificar inconsistências, acompanhar indicadores e produzir análises para gestores e diretoria. Por ser organizada, analítica e orientada a processos, Mariana valoriza informações claras, rastreáveis e confiáveis, especialmente porque suas entregas dependem da consistência dos dados disponíveis. Entre seus principais desafios estão o esforço manual para comparar projetos, produzir relatórios e obter respostas rápidas sobre status, riscos, marcos e pendências. Ela possui alta afinidade tecnológica, domina o ecossistema Microsoft e utiliza diariamente Power BI, SharePoint, Excel e PowerPoint, embora dependa de ferramentas intuitivas e confiáveis para reduzir retrabalho.
+
+### 2.4.1.3 Carlos
+
+<div align="center">
+  <img src="img/Persona - Carlos.png" alt="Persona Roberto" width="800">
+  <p><strong>Figura X</strong> - Persona Carlos.</p>
+</div>
+
+Carlos é Gerente de Portfólio de Projeto, tem 44 anos e coordena um conjunto de projetos relacionados à sua área de atuação. Sua rotina envolve acompanhar o desempenho do subportfólio, identificar dependências entre projetos, orientar líderes, priorizar recursos e reportar informações ao PMO. Por atuar em uma posição intermediária entre a operação dos projetos e a gestão corporativa, Carlos precisa transformar informações dispersas em uma visão consolidada que apoie decisões táticas. No dia a dia, enfrenta desafios como dependências difíceis de acompanhar, disputa de recursos e demora para reunir informações sobre desvios e impactos. Ele utiliza SharePoint, Power BI, Excel e ferramentas corporativas, interpreta dashboards com facilidade e possui familiaridade intermediária com automações e agentes de IA, valorizando alertas, informações consolidadas e apoio para priorizar ações.
+
+### 2.4.2 Jornada de Usuário
 
 ## 2.5 Modelagem do Fluxo de Negócio
 _conteúdo_
@@ -286,8 +334,117 @@ _conteúdo_
 _conteúdo_
 
 ## 2.7 Ideação
-_conteúdo_
-Obs.: Seção dedicada a discussão sobre ideias e priorização de features.
+
+Esta seção consolida o processo de ideação realizado pela equipe durante as etapas de entendimento do negócio, brainstorming e validação inicial com os representantes do Metrô. O objetivo é registrar as funcionalidades identificadas como oportunidades para o produto, independentemente de sua implementação imediata, preservando um histórico das necessidades levantadas e das possibilidades de evolução da solução.
+
+As ideias foram priorizadas considerando dois critérios principais:
+
+- **Importância para o negócio:** potencial de geração de valor para o PMO e para os diferentes perfis de usuários;
+- **Viabilidade para o MVP:** possibilidade de implementação dentro do escopo, prazo e recursos disponíveis para a primeira versão da solução.
+
+Essa priorização orienta o roadmap do produto, permitindo que funcionalidades estratégicas sejam incorporadas progressivamente sem comprometer os objetivos centrais do MVP.
+
+---
+
+### 2.7.1 Matriz de Priorização das Features
+
+| Prioridade | Feature | Justificativa |
+|---|---|---|
+| 🔴 Muito Alta | Consulta de informações dos projetos | Principal necessidade identificada pelo PMO e base de funcionamento do agente. |
+| 🔴 Muito Alta | Ingestão de informações dos projetos | Permite estruturar e manter atualizada a base de conhecimento utilizada pelo agente. |
+| 🔴 Muito Alta | Autenticação e definição de perfis | Garante controle de acesso e personalização das respostas conforme o usuário. |
+| 🔴 Muito Alta | Integração com Microsoft Teams | Interface oficial de utilização do agente dentro da organização. |
+| 🔴 Muito Alta | Transcrição de áudio | Facilita consultas durante deslocamentos e reuniões externas. |
+| 🔴 Muito Alta | Perfil de linguagem executivo | Adapta automaticamente o nível de profundidade das respostas conforme o cargo do usuário. |
+| 🟠 Alta | Diferença de profundidade de pesquisa | Permite consultas rápidas ou análises detalhadas conforme a intenção do usuário. |
+| 🟠 Alta | Fluxo de lembretes de atualização dos projetos | Reduz cobranças manuais realizadas pelo PMO aos responsáveis pelos projetos. |
+| 🟠 Alta | Relatório anual automático | Automatiza parte da produção documental da diretoria e do PMO. |
+| 🟡 Média | Apresentações automáticas por template | Gera apresentações executivas reutilizando modelos institucionais. |
+| 🟡 Média | Fluxo de avaliação das respostas | Coleta feedback para evolução contínua do agente e da base de conhecimento. |
+| 🟡 Média | Interface personalizada e intuitiva | Fundamental para adoção por usuários sem perfil técnico. |
+| 🟢 Evolução | Integração com Power BI | Amplia o acesso a indicadores estratégicos já existentes na organização. |
+| 🟢 Evolução | Edição das configurações do agente por menu | Permite manutenção funcional sem necessidade de desenvolvimento técnico. |
+| 🟢 Evolução | Fluxo de notificações de riscos | Comunica automaticamente eventos críticos identificados no portfólio. |
+
+### 2.7.2 Descrição das Features Priorizadas
+
+As funcionalidades levantadas durante o processo de ideação foram analisadas considerando sua relevância para os objetivos do produto, o valor potencial para os usuários e a viabilidade de desenvolvimento dentro das diferentes etapas do projeto. A seguir, são apresentadas as descrições das features priorizadas, organizadas de acordo com o nível de prioridade estabelecido na matriz de ideação.
+
+#### 🔴 Muito Alta
+
+**Consulta de informações dos projetos**
+
+Permite que o usuário consulte informações relacionadas aos projetos do portfólio por meio de linguagem natural, incluindo dados de acompanhamento, cronogramas, Termos de Abertura do Projeto (TAP), indicadores e demais informações disponibilizadas pelas fontes integradas à solução. Essa funcionalidade constitui o principal ponto de interação entre o usuário e o agente.
+
+**Ingestão de informações dos projetos**
+
+Responsável por incorporar à base de conhecimento da solução as informações provenientes das fontes utilizadas pelo PMO. A funcionalidade permite estruturar os dados e documentos necessários para que o agente consiga realizar consultas contextualizadas e fornecer respostas fundamentadas nas informações disponibilizadas pela organização.
+
+**Autenticação e definição de perfis**
+
+Permite identificar o usuário e associá-lo ao respectivo perfil de acesso, possibilitando que as informações apresentadas pelo agente sejam compatíveis com suas responsabilidades e permissões. A funcionalidade também fornece a base necessária para diferenciação do nível de detalhamento das respostas conforme o perfil de utilização.
+
+**Integração com Microsoft Teams**
+
+Disponibiliza o agente no ambiente Microsoft Teams, utilizando uma plataforma já presente no ecossistema tecnológico da organização como canal de interação com os usuários. A integração busca facilitar a adoção da solução e incorporá-la ao ambiente de trabalho utilizado pelas equipes.
+
+**Transcrição de áudio**
+
+Permite que solicitações realizadas por meio de áudio sejam convertidas em texto para posterior interpretação pelo agente. A funcionalidade amplia as possibilidades de interação com a solução, permitindo consultas em situações nas quais a entrada textual não seja a forma mais conveniente de utilização.
+
+**Perfil de linguagem executivo**
+
+Permite adaptar a forma de apresentação das respostas conforme o perfil do usuário, priorizando uma comunicação mais objetiva e orientada a informações estratégicas para usuários executivos. Para perfis envolvidos diretamente no acompanhamento dos projetos, o agente poderá apresentar informações com maior nível de detalhamento.
+
+#### 🟠 Alta
+
+**Diferença de profundidade de pesquisa**
+
+Permite que o agente realize consultas com diferentes níveis de profundidade, adequando o esforço de pesquisa e o volume de informações apresentado ao contexto da solicitação. Dessa forma, consultas simples podem receber respostas objetivas, enquanto questões mais complexas podem utilizar uma análise mais aprofundada das fontes disponíveis.
+
+**Fluxo de lembretes de atualização dos projetos**
+
+Possibilita a criação de mecanismos de comunicação para lembrar os responsáveis pela necessidade de atualização das informações dos projetos. A funcionalidade busca apoiar o PMO na manutenção da atualidade da base de informações e reduzir a necessidade de cobranças realizadas manualmente.
+
+**Relatório anual automático**
+
+Permite utilizar as informações consolidadas do portfólio para apoiar a geração automatizada de relatórios anuais. A funcionalidade busca reduzir o esforço associado à consolidação manual das informações e facilitar a preparação de materiais recorrentes utilizados pela gestão.
+
+#### 🟡 Média
+
+**Apresentações automáticas por template**
+
+Permite gerar apresentações a partir de informações disponíveis no portfólio, utilizando modelos previamente definidos pela organização. A funcionalidade busca facilitar a preparação de materiais executivos e reduzir atividades repetitivas relacionadas à organização das informações em apresentações.
+
+**Fluxo de avaliação das respostas**
+
+Disponibiliza mecanismos para que os usuários avaliem as respostas fornecidas pelo agente. Os registros obtidos podem ser utilizados para identificar problemas recorrentes, avaliar a qualidade das interações e orientar futuras melhorias da solução.
+
+**Interface personalizada e intuitiva**
+
+Busca proporcionar uma experiência de interação simples, clara e adequada aos diferentes perfis de usuários. A interface deve reduzir barreiras de utilização e permitir que usuários com diferentes níveis de familiaridade tecnológica consigam interagir com o agente de maneira natural.
+
+#### 🟢 Evolução
+
+**Integração com Power BI**
+
+Possibilita a utilização de informações e indicadores disponibilizados no Power BI como parte da experiência de consulta do agente. A funcionalidade amplia o conjunto de fontes utilizadas pela solução e pode facilitar o acesso conversacional a indicadores estratégicos já existentes no ambiente corporativo.
+
+**Edição das configurações do agente por menu**
+
+Permite que configurações relacionadas ao comportamento e à utilização do agente sejam ajustadas por meio de uma interface funcional, reduzindo a necessidade de alterações diretamente na implementação técnica. Essa capacidade favorece a manutenção e a evolução da solução por usuários responsáveis pela administração do produto.
+
+**Fluxo de notificações de riscos**
+
+Permite identificar situações relacionadas a riscos dos projetos e utilizar essas informações para apoiar o envio de notificações aos responsáveis. A funcionalidade amplia o caráter proativo do agente, passando de um modelo baseado exclusivamente em consultas realizadas pelo usuário para uma experiência capaz de comunicar informações relevantes de forma contextualizada.
+
+
+
+O processo de ideação resultou em um conjunto de funcionalidades que contempla tanto as necessidades centrais identificadas para a primeira versão do produto quanto oportunidades de evolução para versões posteriores. A priorização realizada não representa o descarte das funcionalidades classificadas em níveis inferiores, mas estabelece uma sequência de implementação baseada na importância, no valor esperado e na viabilidade de cada iniciativa.
+
+Dessa forma, esta estabelece não apenas um conjunto de funcionalidades possíveis, mas também uma visão evolutiva para o produto, permitindo que novas capacidades sejam incorporadas progressivamente sem perder de vista o objetivo central da solução: **utilizar Inteligência Artificial para tornar o acesso às informações e o acompanhamento do portfólio de projetos mais simples, contextualizado, eficiente e alinhado às necessidades dos diferentes usuários do Metrô.**
+
+---
 
 ## 2.8 Canvas do Projeto
 _conteúdo_
@@ -295,8 +452,153 @@ _conteúdo_
 # 3. Requisitos do Projeto
 _conteúdo_
 
-## 3.1 Requisitos Funcionais (RFs)
-_conteúdo_ 
+## 3.1 Requisitos Funcionais
+
+Os requisitos funcionais definem as funcionalidades que deverão ser contempladas pela prova de conceito desenvolvida no MVP. Sua definição considera o escopo estabelecido para o projeto e as oportunidades levantadas durante o processo de ideação apresentado na Seção 2.7, priorizando as funcionalidades diretamente relacionadas ao pipeline de Processamento de Linguagem Natural (PLN).
+
+O núcleo do MVP consiste em um pipeline de PLN capaz de receber comandos em linguagem natural, interpretar as solicitações dos usuários, identificar suas intenções e classificá-las em categorias como consulta, transação e alerta. A partir dessa classificação, a solução deve processar informações de documentos de projetos e retornar respostas estruturadas que apoiem atividades operacionais, análises e a obtenção de informações para tomada de decisão.
+
+Por se tratar de uma prova de conceito em contexto acadêmico, o funcionamento do MVP será validado sobre dados sintéticos. Integrações com dados reais do portfólio do Metrô de São Paulo e demais funcionalidades corporativas identificadas durante a ideação são consideradas possibilidades de evolução da solução e não constituem requisitos obrigatórios para a validação do núcleo funcional do MVP.
+
+| ID | Requisito Funcional | Feature relacionada | Prioridade | Status |
+| :---: | --- | --- | :---: | :---: |
+| RF01 | O sistema deve receber comandos textuais em linguagem natural relacionados à gestão de projetos e portfólio. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF02 | O sistema deve processar semanticamente os comandos recebidos e identificar a intenção expressa pelo usuário. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF03 | O sistema deve classificar as solicitações recebidas de acordo com as categorias de intenção previstas pelo MVP, incluindo consulta, transação e alerta. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF04 | O sistema deve recuperar informações relevantes dos documentos e dados sintéticos disponibilizados ao pipeline de acordo com a solicitação realizada. | Ingestão de informações dos projetos | Muito Alta | Não iniciado |
+| RF05 | O sistema deve responder a consultas sobre as informações disponíveis nos documentos de projetos utilizados na prova de conceito. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF06 | O sistema deve realizar análises e comparações entre informações de diferentes projetos quando solicitado pelo usuário. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF07 | O sistema deve executar ou simular ações compatíveis com a intenção classificada, incluindo operações de consulta, transação e alerta previstas para validação do pipeline. | Ingestão de informações dos projetos | Muito Alta | Não iniciado |
+| RF08 | O sistema deve gerar respostas estruturadas e fundamentadas nas informações disponíveis nos dados sintéticos, indicando quando não houver informações suficientes para atender à solicitação. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+
+### 3.1.1 User Stories dos Requisitos Funcionais
+
+As User Stories apresentadas nesta subseção estão diretamente integradas aos respectivos requisitos funcionais da Seção 3.1. Cada história segue a estrutura "Como [usuário], quero [necessidade], para [valor]", estabelecendo a necessidade que fundamenta o requisito e o benefício esperado pelo usuário.
+
+Os critérios de aceitação estabelecem condições verificáveis para validação das funcionalidades dentro dos limites da prova de conceito, considerando a utilização de dados sintéticos e o desenvolvimento do pipeline de PLN como núcleo do MVP.
+
+#### RF01 — Entrada de comandos em linguagem natural
+
+**User Story — US01**
+
+Como usuário da solução, quero realizar solicitações utilizando linguagem natural, para interagir com as informações dos projetos sem precisar utilizar comandos técnicos ou conhecer a estrutura dos dados.
+
+**Critérios de aceitação:**
+- O sistema deve aceitar solicitações textuais em linguagem natural.
+- O usuário não deve precisar utilizar uma sintaxe técnica específica.
+- A solicitação recebida deve ser encaminhada ao pipeline de PLN para processamento.
+
+**Feature relacionada:** Consulta de informações dos projetos.
+
+---
+
+#### RF02 — Identificação de intenção
+
+**User Story — US02**
+
+Como usuário da solução, quero que o sistema compreenda a intenção da minha solicitação, para que ela seja processada de acordo com a ação que desejo realizar.
+
+**Critérios de aceitação:**
+- O sistema deve processar semanticamente a solicitação recebida.
+- O sistema deve identificar a intenção presente no comando do usuário.
+- A intenção identificada deve ser utilizada nas etapas seguintes do pipeline.
+
+**Feature relacionada:** Consulta de informações dos projetos.
+
+---
+
+#### RF03 — Classificação das solicitações
+
+**User Story — US03**
+
+Como usuário da solução, quero que minha solicitação seja classificada de acordo com sua finalidade, para que o sistema utilize o fluxo de processamento adequado.
+
+**Critérios de aceitação:**
+- O sistema deve classificar as solicitações conforme as categorias previstas no MVP.
+- A classificação deve contemplar, no mínimo, as categorias de consulta, transação e alerta previstas para validação.
+- A categoria identificada deve determinar o fluxo de processamento da solicitação.
+
+**Feature relacionada:** Consulta de informações dos projetos.
+
+---
+
+#### RF04 — Recuperação de informações
+
+**User Story — US04**
+
+Como usuário da solução, quero que o sistema localize informações relevantes nos documentos de projetos, para obter respostas relacionadas ao contexto da minha solicitação.
+
+**Critérios de aceitação:**
+- O sistema deve consultar os documentos e dados sintéticos disponibilizados para a prova de conceito.
+- O sistema deve recuperar informações relacionadas à solicitação realizada.
+- As informações recuperadas devem ser utilizadas como contexto para o processamento da resposta.
+
+**Feature relacionada:** Ingestão de informações dos projetos.
+
+---
+
+#### RF05 — Consulta de informações dos projetos
+
+**User Story — US05**
+
+Como usuário da solução, quero consultar informações sobre os projetos utilizando linguagem natural, para acessar rapidamente os dados necessários para acompanhamento e análise.
+
+**Critérios de aceitação:**
+- O sistema deve responder a consultas relacionadas às informações disponíveis nos dados sintéticos.
+- A resposta deve considerar o projeto ou contexto solicitado pelo usuário.
+- A resposta deve utilizar as informações recuperadas pelo pipeline.
+- Quando a informação solicitada não estiver disponível, o sistema deve indicar essa limitação.
+
+**Feature relacionada:** Consulta de informações dos projetos.
+
+---
+
+#### RF06 — Análise e comparação de projetos
+
+**User Story — US06**
+
+Como gestor do portfólio, quero solicitar análises e comparações entre projetos, para identificar diferenças, semelhanças e informações relevantes que apoiem a tomada de decisão.
+
+**Critérios de aceitação:**
+- O sistema deve identificar quando a solicitação exigir análise ou comparação.
+- O sistema deve permitir comparar informações disponíveis de dois ou mais projetos.
+- A comparação deve considerar os critérios informados pelo usuário quando aplicável.
+- O resultado deve ser fundamentado nos dados sintéticos disponíveis.
+
+**Feature relacionada:** Consulta de informações dos projetos.
+
+---
+
+#### RF07 — Tratamento das intenções classificadas
+
+**User Story — US07**
+
+Como usuário da solução, quero que o sistema direcione minha solicitação para o fluxo correspondente à intenção identificada, para obter um comportamento adequado ao tipo de operação solicitada.
+
+**Critérios de aceitação:**
+- Solicitações classificadas como consulta devem ser encaminhadas ao fluxo de recuperação de informações.
+- Solicitações classificadas como transação devem ser encaminhadas ao fluxo correspondente previsto na prova de conceito.
+- Solicitações classificadas como alerta devem ser encaminhadas ao fluxo correspondente previsto na prova de conceito.
+- O comportamento de cada fluxo deve poder ser demonstrado utilizando dados sintéticos.
+
+**Feature relacionada:** Ingestão de informações dos projetos.
+
+---
+
+#### RF08 — Geração de respostas estruturadas e fundamentadas
+
+**User Story — US08**
+
+Como usuário da solução, quero receber respostas estruturadas e fundamentadas nas informações disponíveis, para compreender os resultados apresentados pelo agente e utilizá-los com maior confiança.
+
+**Critérios de aceitação:**
+- A resposta deve considerar as informações recuperadas dos dados sintéticos disponibilizados ao pipeline.
+- O sistema não deve apresentar como fato informações que não estejam sustentadas pelos dados disponíveis.
+- Quando não houver informações suficientes, o sistema deve indicar a limitação ao usuário.
+- A resposta deve ser estruturada de forma coerente com a intenção identificada.
+- Em solicitações analíticas, o sistema deve diferenciar informações recuperadas de interpretações produzidas pelo agente.
+
+**Feature relacionada:** Consulta de informações dos projetos.
 
 ## 3.2 Requisitos Não Funcionais (RNFs)
 _conteúdo_
