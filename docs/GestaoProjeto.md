@@ -1,171 +1,399 @@
-<Table>
-  <tr>
-    <td><a href= "https://www.btgpactual.com/"><img src="img/logo-btg.png" alt="Centro Paula Souza" border="0"></td>
-    <td>
-      <a href= "https://www.inteli.edu.br/"><img src="img/logo-Inteli.png" alt="Inteli - Instituto de Tecnologia e Liderança" border="0"></a>
-    </td>
-  </tr>
-</table>
+# Gestão de Projeto
 
-# Nome do Projeto: <nome do projeto>
-
-## Nome do Grupo: <nome do grupo>
-
-## Integrantes:
-
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-
+## Projeto G05
 
 # Sumário
 
 - [1. Introdução](#1-introdução)
-  - [1.1 Objetivo do Documento](#11-objetivo-do-documento)
-- [2. Política de Branches](#2-política-de-branches)
-  - [2.1 Visão Geral do Gitflow](#21-visão-geral-do-gitflow)
-  - [2.2 Estrutura de Branches](#22-estrutura-de-branches)
-  - [2.3 Diretrizes de Uso das Branches](#23-diretrizes-de-uso-das-branches)
-- [3. Políticas de Commit](#3-políticas-de-commit)
-- [4. Política de Push e Pull Requests](#4-política-de-push-e-pull-requests)
-- [5. Infraestrutura como Código](#5-infraestrutura-como-código)
-- [6. Gestão de Arquivos Sensíveis](#6-gestao-de-arquivos-sensiveis)
-- [7. Política de Rollback](#7-política-de-rollback)
-- [8. Registro de Variáveis de Ambiente][#8-registro-de-variaveis-de-ambiente]
-- [Referências](#referências)
+  - [1.1 Objetivo do documento](#11-objetivo-do-documento)
+  - [1.2 Escopo do documento](#12-escopo-do-documento)
+- [2. Análise da sprint 1](#2-análise-da-sprint-1)
+  - [2.1 Contexto da sprint](#21-contexto-da-sprint)
+  - [2.2 Pontos fortes](#22-pontos-fortes)
+  - [2.3 Pontos de melhoria](#23-pontos-de-melhoria)
+  - [2.4 Ações de melhoria para a sprint 2](#24-ações-de-melhoria-para-a-sprint-2)
+- [3. Matriz de papéis e responsabilidades](#3-matriz-de-papéis-e-responsabilidades)
+  - [3.1 Matriz de responsabilidades - Sprint 1](#31-matriz-de-responsabilidades---sprint-1)
+- [4. Contrato de convivência, SLA e rituais](#4-contrato-de-convivência-sla-e-rituais)
+  - [4.1 Regra de ouro](#41-regra-de-ouro)
+  - [4.2 Dailies](#42-dailies)
+  - [4.3 Evidências de entrega](#43-evidências-de-entrega)
+  - [4.4 Entrega, revisão e fechamento semanal](#44-entrega-revisão-e-fechamento-semanal)
+  - [4.5 Resolução de impasses](#45-resolução-de-impasses)
+  - [4.6 Gestão de conflitos](#46-gestão-de-conflitos)
+  - [4.7 Comunicação oficial](#47-comunicação-oficial)
+- [5. Planejamento da sprint 2](#5-planejamento-da-sprint-2)
+  - [5.1 Pendência de preenchimento](#51-pendência-de-preenchimento)
+  - [5.2 Estrutura esperada para a planning](#52-estrutura-esperada-para-a-planning)
+- [6. Gestão do processo de desenvolvimento do grupo](#6-gestão-do-processo-de-desenvolvimento-do-grupo)
+  - [6.1 Fluxo de trabalho no Kanban](#61-fluxo-de-trabalho-no-kanban)
+  - [6.2 Regras obrigatórias para issues](#62-regras-obrigatórias-para-issues)
+  - [6.3 Critérios de Ready e Done](#63-critérios-de-ready-e-done)
+  - [6.4 Commits, merge requests e evidências](#64-commits-merge-requests-e-evidências)
+  - [6.5 SLA Operacional](#65-sla-operacional)
+  - [6.6 Função do Scrum Master no Merge](#66-função-do-scrum-master-no-merge)
 
 # 1. Introdução
-_conteúdo_
 
-## 1.1 Objetivo do Documento
-Este documento estabelece diretrizes claras para a utilização de boas práticas no desenvolvimento de software, visando a organização e a qualidade do código. Todos os membros da equipe devem seguir as instruções definidas.
+Este documento consolida as práticas de gestão de projeto do G05, cobrindo análise das sprints, matriz de papéis e responsabilidades, contrato de convivência, planejamento das sprints e gestão do processo de desenvolvimento do grupo.
 
-# 2. Política de Branches
-_conteúdo_
+O arquivo `docs/GestaoConfiguracao.md` fica reservado exclusivamente ao GitFlow e às política de branches.
 
-## 2.1 Visão Geral do Gitflow
-Nota: Fornecer uma breve explicação sobre o Gitflow e sua importância para o gerenciamento eficiente do código fonte.
+## 1.1 Objetivo do documento
 
-## 2.2 Estrutura de Branches
-Padrão de Nomenclatura das Branches:
+O objetivo deste documento é estabelecer uma forma clara de organização do trabalho da equipe, garantindo visibilidade das tarefas, previsibilidade de entregas, revisão por pares e comunicação objetiva ao longo da sprint.
 
-> **main**: Contém o código pronto para produção.
-> **dev**: Integração contínua das novas funcionalidades em desenvolvimento.
-> **feature/[nome-da-feature]**: Para desenvolvimento de novas funcionalidades. Exemplo: feature/integracao-api
-> **bugfix/[nome-do-bug]**: Para correção de bugs. Exemplo: bugfix/corrige-login
-> **release/[versao]**: Preparação para lançamento de uma nova versão. Exemplo: release/v1.0.0
-> **hotfix/[nome-do-hotfix]**: Correção urgente diretamente na produção. Exemplo: hotfix/corrige-bug-em-producao
+Além de registrar o processo, este documento também funciona como acordo operacional do grupo: as regras aqui descritas devem orientar dailies, uso do Kanban, revisões, fechamento semanal e atuação do Scrum Master.
 
-## 2.3 Diretrizes de Uso das Branches
-- Cada nova funcionalidade deve ser desenvolvida em uma branch de feature criada a partir da branch develop.
-  - Nomeação das branches de features deve seguir o padrão feature/[nome-da-feature].
-- Todas as novas funcionalidades devem ser desenvolvidas em branches de features e integradas na branch develop através de pull requests.
-- Commits diretos na branch main são proibidos! 
-  - Configurem o Github para proteger de commits direto para a main.
-- Branches de hotfix devem ser criadas a partir da branch main para corrigir problemas críticos em produção.
-  - Nomeação das branches de hotfix deve seguir o padrão hotfix/[nome-do-hotfix].
+## 1.2 Escopo do documento
 
-# 3. Políticas de Commit
-Integrar "Conventional Commits" nas políticas de commit ajuda a manter um histórico de commits claro e estruturado, facilitando a automação de processos como geração de changelogs e versionamento semântico.
+Este documento contempla:
 
-As mensagens de commit devem seguir o padrão de Conventional Commits para garantir clareza e consistência.
+- Retrospectiva e análise da Sprint 1;
+- Ações de melhoria para a Sprint 2;
+- Matriz de papéis e responsabilidades;
+- Contrato de convivência, SLA e rituais;
+- Planejamento da Sprint 2;
+- Gestão do processo de desenvolvimento, incluindo Kanban, dailies, revisão e merge.
 
-Formato: [Tipo][Escopo opcional]: Mensagem clara e descritiva.
+# 2. Análise da Sprint 1
 
-Os tipos devem ser:
+## 2.1 Contexto da sprint
 
-> **feat**: Uma nova funcionalidade para o usuário.
-> **fix**: Correção de bug.
-> **docs**: Mudanças na documentação.
-> **style**: Mudanças que não afetam o significado do código (espaços em branco, formatação, etc.).
-> **refactor**: Uma mudança de código que não corrige um bug nem adiciona uma funcionalidade.
-> **test**: Adição ou correção de testes.
-> **chore**: Atualizações de tarefas de build ou ferramentas auxiliares e bibliotecas, como a geração de documentação.
+A Sprint 1 teve como foco principal a construção dos primeiros artefatos de entendimento do negócio, especificação de requisitos e organização do processo de trabalho do grupo. De forma geral, a equipe apresentou boa produtividade, conseguiu desenvolver as entregas dentro do prazo estipulado e manteve uma divisão clara das frentes individuais.
 
-Exemplo de commit: feat(auth): add login feature with JWT
+Cada integrante assumiu uma frente principal, mas o grupo também conseguiu revezar apoios pontuais entre as tarefas. Esse revezamento foi importante para evitar que as entregas ficassem isoladas demais e para permitir que os membros acompanhassem minimamente o que estava sendo produzido fora da própria frente.
 
-Proibido:
-- O uso de emojis nas mensagens de commit, e commits com mensagens vagas como "melhorias" ou "atualizações".
+Ao longo da sprint, o grupo também utilizou horários de desenvolvimento no Inteli para discutir ideias, fazer brainstorm de features e alinhar a visão inicial do produto. Esses momentos presenciais foram relevantes porque ajudaram a transformar percepções individuais em decisões coletivas, principalmente nas discussões sobre escopo, funcionalidades possíveis e forma de organização da equipe.
 
-IMPORTANTE!
-- Realizar commits frequentes (diários) para facilitar o rastreamento de mudanças e a colaboração.
+## 2.2 Pontos fortes
 
-# 4. Política de Push e Pull Requests
+O principal ponto positivo da Sprint 1 foi a capacidade de entrega dentro do prazo. Mesmo com tarefas distribuídas entre frentes diferentes, os integrantes conseguiram cumprir suas responsabilidades e avançar nos artefatos planejados para a sprint.
 
-**Políticas de Push**:
-- Não é permitido fazer push diretamente para a main ou dev.
-- Todas as contribuições devem ser feitas via branches e submetidas por meio de pull requests.
+Outro ponto forte foi o aproveitamento dos momentos presenciais de desenvolvimento. O grupo usou esses períodos para discutir ideias de features, alinhar entendimento sobre o problema e formalizar combinados de trabalho. Isso foi especialmente importante porque a Sprint 1 ainda tinha um caráter exploratório, exigindo consenso sobre o caminho inicial do projeto.
 
-**Regras de Push**:
-- Todo código deve passar por revisão de código por pares antes de ser mergeado.
-- A revisão só deve ser aprovada se os testes automatizados forem bem-sucedidos e os critérios de qualidade (cobertura de testes, análise de código) forem atendidos.
+Também se destacou a formalização do contrato de convivência. Esse contrato surgiu a partir de uma dinâmica de liderança conduzida na aula do professor Filipe, em que o grupo refletiu sobre a própria aprendizagem em equipe. Durante essa reflexão, ficou claro que os integrantes estavam trabalhando de forma muito separada, o que dificultava o fluxo de desenvolvimento, a troca de contexto e a colaboração.
 
-**Revisão por Pares - Critério de Aprovação**:
-- O pull request deve ser revisado por, no mínimo, uma pessoa.
-- A revisão de código deve considerar: 
-  - Está funcional e resolve o problema proposto.
-  - Passou em todos os testes automatizados.
-  - Cobertura mínima de testes (60% ou mais). 
-  - Verificação de boas práticas de código.
-  - Não introduz duplicidade de código.
-- Após a aprovação, a branch deve ser mergeada na dev e o pull request pode ser fechado. 
-- O Scrum Master da Sprint é responsável por subir os artefatos para a MAIN ao final da Sprint.
+A partir dessa percepção, o grupo se reuniu para definir boas práticas de convivência, prazos de entrega, critérios de revisão e formato das dailies. A decisão de registrar essas regras representou uma evolução importante de maturidade, pois transformou um problema percebido em um acordo operacional verificável.
+
+## 2.3 Pontos de melhoria
+
+Apesar da produtividade, a Sprint 1 mostrou que o grupo ainda precisa melhorar a integração entre os integrantes. A execução individual funcionou para cumprir as tarefas, mas também evidenciou o risco de cada frente evoluir de forma isolada, com pouca troca durante o desenvolvimento.
+
+Os rituais também podem ser melhor aproveitados. As dailies e momentos de alinhamento precisam deixar de ser apenas atualizações rápidas de status e passar a funcionar como espaços de sincronização real, com registro de evidências, identificação de impedimentos e conexão entre tarefas dependentes.
+
+Outro ponto de melhoria está na antecipação das revisões. Como boa parte das entregas depende de documentação e alinhamento conceitual, revisar apenas no final aumenta o risco de inconsistências entre seções, retrabalho e divergência entre os artefatos.
+
+Por fim, o grupo precisa fortalecer a visão coletiva sobre o projeto. Mesmo que cada integrante tenha uma frente principal, todos devem conhecer minimamente o estado das entregas centrais, os riscos ativos e as decisões tomadas.
+
+## 2.4 Ações de melhoria para a Sprint 2
+
+Com base na retrospectiva da Sprint 1, o grupo definiu as seguintes ações de melhoria para a Sprint 2:
+
+| Ação de melhoria | Problema tratado | Como será verificada |
+| --- | --- | --- |
+| Usar as dailies para registrar o que foi feito, evidências, próximos passos e impedimentos. | Rituais pouco aproveitados e baixa visibilidade entre frentes. | Registro diário seguindo o modelo do contrato de convivência. |
+| Antecipar entregas para quinta-feira e reservar tempo para revisão por pares. | Risco de revisão concentrada no fim da sprint. | Tarefas em revisão até quinta-feira, com evidências anexadas. |
+| Promover maior integração entre frentes de trabalho. | Desenvolvimento muito separado entre integrantes. | Pelo menos um momento semanal de alinhamento coletivo sobre artefatos e dependências. |
+| Registrar decisões relevantes em canal oficial ou issue do GitLab. | Perda de contexto e dificuldade de rastrear decisões. | Decisões importantes vinculadas a issues, documentos ou mensagens formais do grupo. |
+| Reforçar o uso de DoR, DoD, labels, milestones e assignee nas issues. | Necessidade de aderência às regras do Dashboard Ágil. | Issues da sprint revisadas antes de avançarem de `Open` para `Backlog`. |
+| Manter o contrato de convivência como referência prática. | Falta de combinados explícitos no início da sprint. | Contrato consultado durante dailies, revisões e fechamento semanal. |
+
+Essas ações conectam a análise da Sprint 1 ao planejamento da Sprint 2 e buscam tornar o processo menos individualizado, mais rastreável e mais consistente com as boas práticas exigidas pelo módulo.
+
+# 3. Matriz de papéis e responsabilidades
+
+A matriz de responsabilidades deve variar a cada sprint. A intenção não é fixar cargos permanentes para todo o módulo, mas registrar qual foi a principal frente assumida por cada integrante na sprint corrente, deixando claro quem respondeu por cada artefato e reduzindo centralização de trabalho.
+
+## 3.1 Matriz de responsabilidades - Sprint 1
+
+Artefatos da Sprint 1:
+
+- Entendimento do negócio;
+- Especificação de requisitos funcionais e não funcionais;
+- Gestão de projeto e configuração.
+
+| Integrante | Frente principal na Sprint 1 | Artefato relacionado | Responsabilidades e entregas esperadas |
+| --- | --- | --- | --- |
+| Felipe | Design: personas e jornadas do usuário | Entendimento do negócio | Mapear perfis de usuário, consolidar personas, descrever jornadas e apoiar a conexão entre dores do usuário e proposta de solução. |
+| Jaime | Documentação do problema e soluções mapeadas | Entendimento do negócio | Descrever o problema central, contextualizar as dores identificadas e registrar alternativas ou soluções analisadas pelo grupo. |
+| Henrique | Documentação da parte técnica da solução | Entendimento do negócio / base técnica da solução | Explicar a visão técnica inicial da solução, tecnologias previstas, limitações técnicas e relação entre arquitetura proposta e necessidade do parceiro. |
+| Leonardo | Documentação da gestão de projeto e configuração | Gestão de projeto e configuração | Estruturar os documentos GestaoProjeto.md e GestaoConfiguracao.md, garantindo aderência ao barema, ao contrato de trabalho e às regras de GitFlow. |
+| Pedro | Documentação dos requisitos do projeto | Especificação de requisitos funcionais e não funcionais | Consolidar requisitos funcionais, requisitos não funcionais, critérios de aceite e relação dos requisitos com o escopo da solução. |
+| Wendel | Modelagem do fluxo de negócios e matriz de riscos | Entendimento do negócio | Mapear o fluxo de negócio, registrar riscos iniciais, classificar impacto/probabilidade e propor mitigação para os riscos da Sprint 1. |
+
+Essa matriz deve ser revisada a cada nova sprint, substituindo as frentes de acordo com os artefatos e prioridades planejados.
+
+# 4. Contrato de convivência
+
+O contrato de convivência define as regras práticas de trabalho do grupo. Ele prioriza comunicação clara, evidências objetivas, revisão antecipada e fechamento controlado da sprint.
+
+## 4.1 Regra de ouro
+
+Nenhuma entrega é considerada pronta sem evidência e revisão por outro integrante.
+
+Isso vale para código, documentação, scripts, artefatos visuais e qualquer ajuste que impacte a entrega. A evidência pode ser um link, print, log de execução, trecho do GitLab, resumo de validação ou referência direta ao arquivo alterado.
+
+## 4.2 Dailies
+
+As dailies devem ser curtas, objetivas e focadas em visibilidade real do trabalho. Cada integrante deve responder aos quatro pontos abaixo:
+
+1. O que fez desde a última daily;
+2. Quais evidências comprovam o que foi feito;
+3. O que vai fazer até a próxima daily;
+4. Quais impedimentos existem.
+
+Modelo de registro:
+
+text
+Integrante:
+O que fiz:
+Evidências:
+O que vou fazer:
+Impedimentos:
 
 
-## 5. Infraestrutura como Código
-- Uso obrigatório de Docker para padronizar ambientes de desenvolvimento e produção.
-- Incluir na raiz do repositório:
-  - Dockerfile(s) para build de aplicações e serviços.
-  - .dockerignore para excluir arquivos desnecessários do contexto de build.
-  - docker-compose.yml para orquestrar múltiplos serviços/containers localmente.
-- Cada serviço/contêiner deve ter seu próprio Dockerfile customizável, se necessário.
-- O Docker Compose deve funcionar para rodar toda a stack do sistema localmente com um único comando (docker-compose up).
+Regras:
 
-## 6. Gestão de Arquivos Sensíveis
-- É obrigatório o uso de .gitignore bem configurado para bloquear:
-  - Arquivos contendo senhas, segredos ou informações sensíveis.
-  - Arquivos de configuração individuais (por exemplo, .env, configs locais, etc).
-- Explicação/documentação das diferenças entre arquivos de configuração locais, de desenvolvimento e de produção (ex.: .env.local, .env.dev, .env.prod).
-- Nunca commitar dados sensíveis ou credenciais diretamente no repositório.
+- A daily deve durar no máximo 15 minutos quando síncrona;
+- Quem não puder participar deve registrar a atualização de forma assíncrona no canal oficial;
+- Tarefas sem evidência não devem ser tratadas como concluídas;
+- Impedimentos devem ser sinalizados no mesmo dia em que forem identificados.
 
-## 7. Política de Rollback
-- Documentar o processo básico para rollback de uma release defeituosa.
-- Passos mínimos recomendados:
-  - Identificar rapidamente a versão estável anterior (tag/release/commit).
-  - Criar uma branch/selecione a tag da versão a ser restaurada.
-  - Realizar o deploy dessa versão, conforme procedimento do time.
-  - Comunicar o time e stakeholders sobre a reversão.
-- Deixar esses procedimentos registrados no repositório (ex: docs/rollback.md).
+## 4.3 Evidências de entrega
 
-## 8. Registro de Variáveis de Ambiente
-- Obrigatório manter um arquivo .env.example documentando todas as variáveis de ambiente exigidas pela aplicação.
-- O arquivo deve listar todas as keys (sem valores reais/sensíveis) e breve explicação de cada variável.
-- Todos os membros devem usar esse exemplo para criar seus próprios arquivos .env locais.
-- Exemplo:
-  - DB_HOST= # Endereço do banco de dados
-  - DB_USER= # Usuário do banco
-  - DB_PASS= # Senha do banco (NUNCA commitada)
-  - SECRET_KEY= # Chave secreta do sistema
+Toda entrega deve ter evidência associada. O objetivo é reduzir ambiguidades como "finalizado" sem comprovação.
 
-# Referências
-- Conventional Commits: https://www.conventionalcommits.org/en/v1.0.0/
-- GitFlow: https://nvie.com/posts/a-successful-git-branching-model/
-- Gitihub/iuricode: https://github.com/iuricode/padroes-de-commits
-- Docker (documentação oficial): https://docs.docker.com/
-- Best Practices for Writing Dockerfiles: https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
-- Docker Compose (documentação oficial): https://docs.docker.com/compose/
-- .dockerignore Reference: https://docs.docker.com/engine/reference/builder/#dockerignore-file
-- .gitignore (documentação oficial): https://git-scm.com/docs/gitignore
-- gitignore.io (gerador de .gitignore para diferentes stacks): https://www.toptal.com/developers/gitignore/
-- Handling secrets in Git repos (GitHub Guide): https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-and-storing-encrypted-secrets
-- Creating a pull request template for your repository: https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository
-- Exemplo de Checklists para PRs: https://github.com/othneildrew/Best-README-Template#pull-request-template
-- Best Practices for Rollbacks (Atlassian): https://www.atlassian.com/continuous-delivery/principles/rollback-strategies
-- How to Use Git Revert and Git Reset: https://www.git-tower.com/learn/git/faq/git-reset-vs-revert/
-- 12 Factor App: Config: https://12factor.net/config
-- Dotenv (Exemplo e uso de arquivos .env): https://github.com/motdotla/dotenv#usage
+São evidências válidas:
+
+- Link da issue no GitLab;
+- Link do Merge Request;
+- Print da tela ou do resultado;
+- Log de execução;
+- Arquivo alterado no repositório;
+- Commit relacionado;
+- Comentário de revisão;
+- Checklist de DoD preenchido.
+
+Critério mínimo: uma tarefa só pode avançar para revisão quando houver evidência suficiente para outro integrante validar o resultado.
+
+## 4.4 Entrega, revisão e fechamento
+
+A equipe adota a seguinte regra de fechamento:
+
+| Marco | Prazo | Regra |
+| --- | --- | --- |
+| Entrega das tarefas | Até quinta-feira | Cada responsável deve concluir sua parte e disponibilizar evidências. |
+| Revisão por pares | Até quinta-feira | Outro integrante deve revisar a entrega antes do fechamento. |
+| Ajustes finais | Quinta-feira, após revisão | Correções pequenas podem ser feitas após apontamentos. |
+| Merge para main | Sexta-feira, como cadência padrão | O Scrum Master coordena o merge final da versão validada. Entregas prontas podem ser promovidas antes, desde que sigam MR, pipeline, aprovação e DoD. |
+| Fechamento formal | Só se necessário | O fechamento deve ocorrer apenas quando houver necessidade real de consolidar versão, resolver pendências ou registrar decisão final. |
+
+Essa regra existe para evitar acúmulo de revisão na sexta-feira e reduzir risco de merge apressado sem validação.
+
+## 4.5 Resolução de impasses
+
+Quando houver discordância técnica ou de escopo, o grupo deve seguir a ordem abaixo:
+
+1. Discussão objetiva entre os envolvidos, usando evidências e critérios do barema;
+2. Consulta ao responsável pela frente afetada;
+3. Decisão por maioria simples quando houver mais de uma alternativa aceitável;
+4. Em caso de empate ou risco relevante, consulta ao orientador.
+
+A decisão final deve ser registrada no canal oficial ou na issue relacionada.
+
+## 4.6 Gestão de conflitos
+
+Atrasos, falta de engajamento ou ausência de evidências devem ser tratados cedo.
+
+Fluxo de gestão:
+
+1. Feedback direto na daily ou no canal oficial;
+2. Redistribuição ou apoio na tarefa, se houver risco de atraso;
+3. Registro formal na retrospectiva da sprint, quando o problema se repetir;
+4. Escalonamento ao orientador se o comportamento comprometer a entrega do grupo.
+
+O foco da gestão de conflitos é proteger a entrega e a colaboração, não expor integrantes.
+
+## 4.7 Comunicação oficial
+
+As decisões relevantes devem ser registradas em canal oficial da equipe ou na própria issue do GitLab.
+
+Devem ser registrados:
+
+- Mudanças de escopo;
+- Impedimentos;
+- Decisões técnicas;
+- Alteração de responsável;
+- Critérios de aceite;
+- Evidências de entrega;
+- Aprovações e revisões.
+
+Discussões informais podem acontecer em outros canais, mas a decisão final precisa ficar rastreável.
+
+# 5. Planejamento da sprint 2
+
+## 5.1 Pendência de preenchimento
+
+O planejamento detalhado da Sprint 2 permanece como pendência assumida. Ele deve ser preenchido a partir do Kanban real, com issues criadas em `Open`, refinadas com DoR, DoD, labels, milestone e assignee antes de avançarem para o backlog.
+
+## 5.2 Estrutura esperada para a planning
+
+Quando preenchido, o planning deve seguir o modelo abaixo:
+
+| ID | Tarefa | Tipo | Prioridade | Estimativa | Responsável | DoR | DoD | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| A definir | A definir | A definir | A definir | PP/P/M/G | A definir | A definir | A definir | Pendente |
+
+Escala de estimativa:
+
+| Tamanho | Critério |
+| --- | --- |
+| PP | Até 30 minutos |
+| P | Até 30 minutos |
+| M | De 30 a 60 minutos |
+| G | De 60 a 120 minutos |
+
+Tarefas maiores que G devem ser quebradas antes de entrarem na sprint.
+
+# 6. Gestão do processo de desenvolvimento do grupo
+
+## 6.1 Fluxo de trabalho no Kanban
+
+O Kanban do GitLab deve refletir o estado real das tarefas.
+
+Fluxo recomendado:
+
+```text
+Open -> Backlog -> Doing -> Waiting Review -> Review -> Closed
+```
+
+Regras:
+
+- Toda tarefa deve nascer como issue na coluna `Open`;
+- A issue só deve avançar de `Open` para `Backlog` depois de refinada;
+- A issue deve ter responsável único, tipo, estimativa, prioridade e milestone;
+- O card deve ser atualizado sempre que houver mudança real de estado;
+- Tarefas bloqueadas devem ser sinalizadas como impedimento na daily;
+- Nenhuma tarefa deve ir para `Closed` sem evidência e revisão.
+
+## 6.2 Regras obrigatórias para issues
+
+As issues devem seguir as regras avaliadas pelo Dashboard Ágil do módulo.
+
+| Critério | Regra |
+| --- | --- |
+| Coluna inicial | Toda issue nasce em `Open`. |
+| Título | Deve usar verbo no infinitivo, por exemplo: `Criar diagrama de classes`. |
+| Descrição | Deve conter contexto e objetivo, com mais de um parágrafo curto quando necessário. |
+| Objetivo | Deve usar o cabeçalho `**Objetivo da tarefa:**`. |
+| DoR | Deve usar `**DoR (Definition of Ready):**` com checklist de pré-condições. |
+| DoD | Deve usar `**DoD (Definition of Done):**` com checklist verificável. |
+| Assignee | Deve haver exatamente um responsável pela execução. |
+| Labels | Deve conter tipo (`FEATURE`, `BUG FIX` ou `DOCUMENTATION`), tamanho (`SIZE_PP`, `SIZE_P`, `SIZE_M` ou `SIZE_G`) e prioridade (`PRIORIDADE ALTA` quando aplicável). |
+| Milestone | Deve estar vinculada à sprint correspondente, como `Sprint 01` ou `Sprint 02`. |
+
+Template mínimo:
+
+```markdown
+**Objetivo da tarefa:** <1-2 linhas>
+
+**Contexto:** <por que estamos fazendo isso>
+
+**DoR (Definition of Ready):**
+- [ ] Dependências mapeadas
+- [ ] Critérios de aceite definidos
+- [ ] Ambiente ou documento base disponível
+
+**DoD (Definition of Done):**
+- [ ] Implementado ou documentado
+- [ ] Evidências registradas
+- [ ] MR aprovado por 1 revisor, quando aplicável
+- [ ] Documentação atualizada, quando aplicável
+```
+
+## 6.3 Critérios de Ready e Done
+
+Definition of Ready mínima:
+
+- Objetivo da tarefa claro;
+- Escopo delimitado;
+- Responsável definido;
+- Dependências conhecidas;
+- Critérios de aceite registrados;
+- Estimativa em PP, P, M ou G;
+- Labels obrigatórias configuradas;
+- Milestone da sprint vinculada.
+
+Definition of Done mínima:
+
+- Entrega concluída conforme objetivo;
+- Evidência registrada;
+- Revisão feita por outro integrante;
+- Documentação atualizada, quando necessário;
+- Merge Request aprovado, quando houver alteração versionada;
+- Card atualizado no Kanban.
+
+## 6.4 Commits, merge requests e evidências
+
+O Dashboard Ágil avalia a conexão entre issue, commit, branch, Merge Request, milestone e revisão. Por isso, todo trabalho versionado deve manter rastreabilidade.
+
+Regras de commits:
+
+- Usar Conventional Commits;
+- Referenciar a issue da sprint com `#N`;
+- Manter a primeira linha com até 72 caracteres;
+- Usar uma intenção por commit;
+- Usar descrição no infinitivo, como `adicionar`, `corrigir`, `documentar` ou `validar`.
+
+Formato:
+
+```text
+<tipo>(<escopo opcional>): <descrição curta> (#<issue>)
+```
+
+Exemplos:
+
+```text
+docs(projeto): documentar personas e jornadas (#12)
+docs(requisitos): consolidar requisitos funcionais (#18)
+chore(config): ajustar template de issues (#27)
+```
+
+Critérios mínimos para Merge Request:
+
+- Título descritivo, com mais de três palavras, sem `WIP:` ou `Draft:`;
+- Descrição substantiva com as mudanças realizadas;
+- Issue vinculada;
+- Evidências registradas;
+- Reviewer definido;
+- Aprovação por pelo menos um revisor;
+- Pipeline, testes, lint ou validação manual registrados conforme o tipo de entrega;
+- DoD atendida antes do merge.
+
+## 6.5 SLA operacional
+
+| Situação | SLA | Responsável por acionar |
+| --- | --- | --- |
+| Atualização de daily | Até o horário combinado da daily | Cada integrante |
+| Registro de impedimento | No mesmo dia da identificação | Responsável pela tarefa |
+| Primeira resposta a impedimento | Até 24 horas | Scrum Master ou responsável pela frente |
+| Entrega para revisão | Até quinta-feira | Responsável pela tarefa |
+| Revisão por pares | Até quinta-feira | Reviewer definido |
+| Promoção para `hmg` | Quando a entrega estiver pronta e revisada | Responsável pela frente e Scrum Master |
+| Merge final para `main` | Sexta-feira como cadência padrão, ou antes se houver entrega pronta e aprovada | Scrum Master |
+
+## 6.6 Função do scrum master no merge
+
+O Scrum Master não é o único responsável pela qualidade das entregas, mas é o responsável por coordenar o merge final da sprint.
+
+Antes do merge para `main`, o Scrum Master deve verificar:
+
+- Se as tarefas previstas para a versão estão revisadas;
+- Se existem evidências mínimas de entrega;
+- Se os Merge Requests necessários foram aprovados;
+- Se não há impedimento crítico aberto;
+- Se o conteúdo de `dev` representa a versão que o grupo deseja entregar;
+- Se a promoção seguiu o fluxo obrigatório `feature/* -> dev -> hmg -> main`.
+
+Na sexta-feira, o Scrum Master executa ou coordena o merge para `main` e comunica o grupo sobre o estado final da entrega. Quando uma entrega estiver pronta antes da sexta-feira, o Scrum Master pode coordenar a promoção antecipada, desde que exista Merge Request, aprovação, evidência e validação.
