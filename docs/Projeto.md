@@ -339,6 +339,18 @@ Assim, a Cadeia de Valor complementa os fluxos **AS-IS** e **TO-BE**, demonstran
 
 Os fluxos de negócio apresentados a seguir detalham operacionalmente o processo de elaboração do Mapa de Benefícios nos cenários **AS-IS** e **TO-BE**. Enquanto a Cadeia de Valor apresentada na seção anterior evidencia as principais transformações entre os cenários, os diagramas BPMN detalham a sequência das atividades, os responsáveis pela execução, as consultas ao repositório corporativo e os pontos de decisão existentes em cada fluxo.
 
+### AS-IS — Fluxo Atual
+
+<img src="img/As-is_corrigido.png" alt="Fluxo de Negócio AS-IS" width="700"><br>
+
+O fluxo **AS-IS** representa a elaboração manual do Mapa de Benefícios pelo líder do projeto ou usuário responsável. O processo inicia-se com a **identificação da necessidade do mapa**, seguida pela **consulta de documentos e normativos** que fornecem as informações necessárias para contextualizar a iniciativa.
+
+Após essa consulta, o responsável realiza a **identificação do programa ou projeto** que será analisado e, posteriormente, define as **entregas**, os **resultados esperados** e os **benefícios** relacionados à iniciativa. Na sequência, são definidos os **objetivos estratégicos** associados ao mapa.
+
+Com essas informações levantadas, o responsável realiza o **preenchimento manual do mapa**. Após o preenchimento, o documento passa pela etapa de **revisão**.
+
+O fluxo possui um gateway de decisão **XOR** representado pela pergunta **"Mapa aprovado?"**. Caso a resposta seja **"Sim"**, o documento é armazenado e o processo é encerrado. Caso a resposta seja **"Não"**, o documento é encaminhado para **correção** e retorna ao fluxo de revisão, permitindo que o responsável realize novos ajustes até que o mapa seja aprovado.
+
 
 ## 2.6 Matriz de Risco do Projeto
 _conteúdo_
