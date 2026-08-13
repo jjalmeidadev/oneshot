@@ -1,171 +1,453 @@
-<Table>
-  <tr>
-    <td><a href= "https://www.btgpactual.com/"><img src="img/logo-btg.png" alt="Centro Paula Souza" border="0"></td>
-    <td>
-      <a href= "https://www.inteli.edu.br/"><img src="img/logo-Inteli.png" alt="Inteli - Instituto de Tecnologia e Liderança" border="0"></a>
-    </td>
-  </tr>
-</table>
+# Gestão de configuração
 
-# Nome do Projeto: <nome do projeto>
-
-## Nome do Grupo: <nome do grupo>
-
-## Integrantes:
-
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-
+## Projeto G05
 
 # Sumário
 
 - [1. Introdução](#1-introdução)
-  - [1.1 Objetivo do Documento](#11-objetivo-do-documento)
-- [2. Política de Branches](#2-política-de-branches)
-  - [2.1 Visão Geral do Gitflow](#21-visão-geral-do-gitflow)
-  - [2.2 Estrutura de Branches](#22-estrutura-de-branches)
-  - [2.3 Diretrizes de Uso das Branches](#23-diretrizes-de-uso-das-branches)
-- [3. Políticas de Commit](#3-políticas-de-commit)
-- [4. Política de Push e Pull Requests](#4-política-de-push-e-pull-requests)
-- [5. Infraestrutura como Código](#5-infraestrutura-como-código)
-- [6. Gestão de Arquivos Sensíveis](#6-gestao-de-arquivos-sensiveis)
-- [7. Política de Rollback](#7-política-de-rollback)
-- [8. Registro de Variáveis de Ambiente][#8-registro-de-variaveis-de-ambiente]
-- [Referências](#referências)
+  - [1.1 Objetivo do documento](#11-objetivo-do-documento)
+  - [1.2 Escopo](#12-escopo)
+- [2. Visão geral do GitFlow](#2-visão-geral-do-gitflow)
+- [3. Estrutura de branches](#3-estrutura-de-branches)
+  - [3.1 Branches permanentes](#31-branches-permanentes)
+  - [3.2 Branches temporárias](#32-branches-temporárias)
+- [4. Política de nomenclatura de branches](#4-política-de-nomenclatura-de-branches)
+- [5. Procedimentos operacionais](#5-procedimentos-operacionais)
+  - [5.1 Criação de branch](#51-criação-de-branch)
+  - [5.2 Atualização da branch](#52-atualização-da-branch)
+  - [5.3 Mesclagem por merge request](#53-mesclagem-por-merge-request)
+  - [5.4 Exclusão de branch](#54-exclusão-de-branch)
+- [6. Fluxo de desenvolvimento](#6-fluxo-de-desenvolvimento)
+  - [6.1 Fluxo de feature](#61-fluxo-de-feature)
+  - [6.2 Fluxo de release](#62-fluxo-de-release)
+  - [6.3 Fluxo de hotfix](#63-fluxo-de-hotfix)
+- [7. Hooks de Git](#7-hooks-de-git)
+  - [7.1 Como ativar, verificar e desativar](#71-como-ativar-verificar-e-desativar)
+  - [7.2 Validações executadas](#72-validações-executadas)
+- [8. Exemplos práticos](#8-exemplos-práticos)
+- [9. Regras de governança do GitFlow](#9-regras-de-governança-do-gitflow)
 
 # 1. Introdução
-_conteúdo_
 
-## 1.1 Objetivo do Documento
-Este documento estabelece diretrizes claras para a utilização de boas práticas no desenvolvimento de software, visando a organização e a qualidade do código. Todos os membros da equipe devem seguir as instruções definidas.
+A gestão de configuração deste projeto define como o grupo organiza o versionamento do código-fonte e da documentação por meio do GitLab. Este arquivo à documentação do GitFlow, uso correto das branches, convenções de nomenclatura e procedimentos para criação, mesclagem e exclusão de branches.
 
-# 2. Política de Branches
-_conteúdo_
+## 1.1 Objetivo do documento
 
-## 2.1 Visão Geral do Gitflow
-Nota: Fornecer uma breve explicação sobre o Gitflow e sua importância para o gerenciamento eficiente do código fonte.
+O objetivo deste documento é garantir que todos os integrantes utilizem o mesmo fluxo de trabalho no Git, reduzindo conflitos, perdas de rastreabilidade e integrações diretas em branches permanentes.
 
-## 2.2 Estrutura de Branches
-Padrão de Nomenclatura das Branches:
+Este documento estabelece:
 
-> **main**: Contém o código pronto para produção.
-> **dev**: Integração contínua das novas funcionalidades em desenvolvimento.
-> **feature/[nome-da-feature]**: Para desenvolvimento de novas funcionalidades. Exemplo: feature/integracao-api
-> **bugfix/[nome-do-bug]**: Para correção de bugs. Exemplo: bugfix/corrige-login
-> **release/[versao]**: Preparação para lançamento de uma nova versão. Exemplo: release/v1.0.0
-> **hotfix/[nome-do-hotfix]**: Correção urgente diretamente na produção. Exemplo: hotfix/corrige-bug-em-producao
+- Modelo GitFlow adotado pelo grupo;
+- Finalidade de cada tipo de branch;
+- Convenções para nomear branches;
+- Procedimentos para criar, atualizar, mesclar e excluir branches;
+- Exemplos práticos de aplicação do fluxo no contexto do projeto.
 
-## 2.3 Diretrizes de Uso das Branches
-- Cada nova funcionalidade deve ser desenvolvida em uma branch de feature criada a partir da branch develop.
-  - Nomeação das branches de features deve seguir o padrão feature/[nome-da-feature].
-- Todas as novas funcionalidades devem ser desenvolvidas em branches de features e integradas na branch develop através de pull requests.
-- Commits diretos na branch main são proibidos! 
-  - Configurem o Github para proteger de commits direto para a main.
-- Branches de hotfix devem ser criadas a partir da branch main para corrigir problemas críticos em produção.
-  - Nomeação das branches de hotfix deve seguir o padrão hotfix/[nome-do-hotfix].
+## 1.2 Escopo
 
-# 3. Políticas de Commit
-Integrar "Conventional Commits" nas políticas de commit ajuda a manter um histórico de commits claro e estruturado, facilitando a automação de processos como geração de changelogs e versionamento semântico.
+Este documento cobre exclusivamente a gestão de branches e o fluxo GitFlow. Políticas detalhadas de daily, Kanban, contrato de trabalho, papéis e planejamento de sprint pertencem ao documento de gestão de projeto.
 
-As mensagens de commit devem seguir o padrão de Conventional Commits para garantir clareza e consistência.
+# 2. Visão geral do GitFlow
 
-Formato: [Tipo][Escopo opcional]: Mensagem clara e descritiva.
+O GitFlow é um modelo de organização de branches que separa o desenvolvimento diário, a homologação e a versão estável do projeto. No G05, ele segue a orientação do Módulo 7 e do Dashboard Ágil, mantendo uma linha clara entre trabalho em andamento, revisão, homologação e entrega final.
 
-Os tipos devem ser:
+O fluxo obrigatório do módulo é:
 
-> **feat**: Uma nova funcionalidade para o usuário.
-> **fix**: Correção de bug.
-> **docs**: Mudanças na documentação.
-> **style**: Mudanças que não afetam o significado do código (espaços em branco, formatação, etc.).
-> **refactor**: Uma mudança de código que não corrige um bug nem adiciona uma funcionalidade.
-> **test**: Adição ou correção de testes.
-> **chore**: Atualizações de tarefas de build ou ferramentas auxiliares e bibliotecas, como a geração de documentação.
+```text
+feature/* -> dev -> hmg -> main
+```
 
-Exemplo de commit: feat(auth): add login feature with JWT
+O fluxo operacional é:
 
-Proibido:
-- O uso de emojis nas mensagens de commit, e commits com mensagens vagas como "melhorias" ou "atualizações".
+1. A tarefa é criada no GitLab.
+2. A issue nasce em `Open` e só avança após refinamento com DoR, DoD, labels, milestone e assignee.
+3. O integrante cria uma branch temporária a partir de `dev`.
+4. A branch representa uma única issue.
+5. A alteração é desenvolvida, testada e enviada para o GitLab.
+6. O integrante abre um Merge Request para `dev`.
+7. Outro integrante revisa a entrega.
+8. Após aprovação e validação, a branch é mesclada em `dev`.
+9. A versão integrada é promovida de `dev` para `hmg` por Merge Request.
+10. A versão homologada é promovida de `hmg` para `main` por Merge Request.
 
-IMPORTANTE!
-- Realizar commits frequentes (diários) para facilitar o rastreamento de mudanças e a colaboração.
+Promoções podem acontecer durante a sprint quando uma entrega estiver pronta. A sprint define a cadência de planejamento, mas não obriga a equipe a concentrar todos os merges no último dia.
 
-# 4. Política de Push e Pull Requests
+# 3. Estrutura de branches
 
-**Políticas de Push**:
-- Não é permitido fazer push diretamente para a main ou dev.
-- Todas as contribuições devem ser feitas via branches e submetidas por meio de pull requests.
+## 3.1 Branches permanentes
 
-**Regras de Push**:
-- Todo código deve passar por revisão de código por pares antes de ser mergeado.
-- A revisão só deve ser aprovada se os testes automatizados forem bem-sucedidos e os critérios de qualidade (cobertura de testes, análise de código) forem atendidos.
+| Branch | Finalidade | Regra de uso |
+| --- | --- | --- |
+| `main` | Contém a versão estável e entregue do projeto. | Não recebe commits diretos. Recebe apenas Merge Requests aprovados a partir de `hmg`, com DoD atendida. |
+| `dev` | Integra as entregas em desenvolvimento durante a sprint. | Recebe somente Merge Requests aprovados a partir de branches temporárias. |
+| `hmg` | Representa o ambiente compartilhado de homologação. | Não recebe commits diretos. Recebe Merge Requests de `dev` para validação funcional antes da promoção para `main`. |
+| `develop` | Branch permanente herdada de fluxos anteriores ou integrações externas. | Não recebe commits diretos. Deve ser evitada como base de trabalho nova, salvo decisão explícita do grupo. |
+| `homologacao` / `homologação` | Nomes alternativos bloqueados pelos hooks para evitar push direto em branch de homologação. | Não devem receber commits diretos. O uso preferencial do projeto é `hmg`. |
 
-**Revisão por Pares - Critério de Aprovação**:
-- O pull request deve ser revisado por, no mínimo, uma pessoa.
-- A revisão de código deve considerar: 
-  - Está funcional e resolve o problema proposto.
-  - Passou em todos os testes automatizados.
-  - Cobertura mínima de testes (60% ou mais). 
-  - Verificação de boas práticas de código.
-  - Não introduz duplicidade de código.
-- Após a aprovação, a branch deve ser mergeada na dev e o pull request pode ser fechado. 
-- O Scrum Master da Sprint é responsável por subir os artefatos para a MAIN ao final da Sprint.
+As branches permanentes não devem ser usadas para desenvolvimento direto. Qualquer alteração deve partir de uma branch temporária e entrar no fluxo por Merge Request.
 
+## 3.2 Branches temporárias
 
-## 5. Infraestrutura como Código
-- Uso obrigatório de Docker para padronizar ambientes de desenvolvimento e produção.
-- Incluir na raiz do repositório:
-  - Dockerfile(s) para build de aplicações e serviços.
-  - .dockerignore para excluir arquivos desnecessários do contexto de build.
-  - docker-compose.yml para orquestrar múltiplos serviços/containers localmente.
-- Cada serviço/contêiner deve ter seu próprio Dockerfile customizável, se necessário.
-- O Docker Compose deve funcionar para rodar toda a stack do sistema localmente com um único comando (docker-compose up).
+| Tipo de branch | Finalidade | Branch de origem | Branch de destino |
+| --- | --- | --- | --- |
+| `feature/*` | Desenvolvimento de nova funcionalidade vinculada a uma issue. | `dev` | `dev` |
+| `feat/*` | Alternativa aceita pelo Dashboard para desenvolvimento de nova funcionalidade. | `dev` | `dev` |
+| `fix/*` | Correção de defeito não emergencial. | `dev` | `dev` |
+| `bugfix/*` | Alternativa aceita para correção de defeito não emergencial. | `dev` | `dev` |
+| `docs/*` | Alteração de documentação. | `dev` | `dev` |
+| `doc/*` | Alternativa aceita para documentação. | `dev` | `dev` |
+| `style/*` | Ajuste de formatação sem mudança de comportamento. | `dev` | `dev` |
+| `refactor/*` | Reorganização técnica sem nova funcionalidade ou correção direta. | `dev` | `dev` |
+| `test/*` | Criação ou ajuste de testes. | `dev` | `dev` |
+| `chore/*` | Ajustes de configuração, scripts, organização ou manutenção. | `dev` | `dev` |
+| `perf/*` | Melhoria de performance. | `dev` | `dev` |
+| `ci/*` | Ajustes de pipeline e integração contínua. | `dev` | `dev` |
+| `build/*` | Ajustes de build, empacotamento ou release. | `dev` | `dev` |
+| `release/*` | Preparação de uma versão candidata à entrega. | `dev` | `hmg`, `main` e `dev` |
+| `hotfix/*` | Correção urgente em uma versão já estável. | `main` | `main` e `dev` |
 
-## 6. Gestão de Arquivos Sensíveis
-- É obrigatório o uso de .gitignore bem configurado para bloquear:
-  - Arquivos contendo senhas, segredos ou informações sensíveis.
-  - Arquivos de configuração individuais (por exemplo, .env, configs locais, etc).
-- Explicação/documentação das diferenças entre arquivos de configuração locais, de desenvolvimento e de produção (ex.: .env.local, .env.dev, .env.prod).
-- Nunca commitar dados sensíveis ou credenciais diretamente no repositório.
+# 4. Política de nomenclatura de branches
 
-## 7. Política de Rollback
-- Documentar o processo básico para rollback de uma release defeituosa.
-- Passos mínimos recomendados:
-  - Identificar rapidamente a versão estável anterior (tag/release/commit).
-  - Criar uma branch/selecione a tag da versão a ser restaurada.
-  - Realizar o deploy dessa versão, conforme procedimento do time.
-  - Comunicar o time e stakeholders sobre a reversão.
-- Deixar esses procedimentos registrados no repositório (ex: docs/rollback.md).
+Todas as branches temporárias devem seguir o padrão:
 
-## 8. Registro de Variáveis de Ambiente
-- Obrigatório manter um arquivo .env.example documentando todas as variáveis de ambiente exigidas pela aplicação.
-- O arquivo deve listar todas as keys (sem valores reais/sensíveis) e breve explicação de cada variável.
-- Todos os membros devem usar esse exemplo para criar seus próprios arquivos .env locais.
-- Exemplo:
-  - DB_HOST= # Endereço do banco de dados
-  - DB_USER= # Usuário do banco
-  - DB_PASS= # Senha do banco (NUNCA commitada)
-  - SECRET_KEY= # Chave secreta do sistema
+```text
+<tipo>/<descrição-curta-em-kebab-case>
+```
 
-# Referências
-- Conventional Commits: https://www.conventionalcommits.org/en/v1.0.0/
-- GitFlow: https://nvie.com/posts/a-successful-git-branching-model/
-- Gitihub/iuricode: https://github.com/iuricode/padroes-de-commits
-- Docker (documentação oficial): https://docs.docker.com/
-- Best Practices for Writing Dockerfiles: https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
-- Docker Compose (documentação oficial): https://docs.docker.com/compose/
-- .dockerignore Reference: https://docs.docker.com/engine/reference/builder/#dockerignore-file
-- .gitignore (documentação oficial): https://git-scm.com/docs/gitignore
-- gitignore.io (gerador de .gitignore para diferentes stacks): https://www.toptal.com/developers/gitignore/
-- Handling secrets in Git repos (GitHub Guide): https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-and-storing-encrypted-secrets
-- Creating a pull request template for your repository: https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository
-- Exemplo de Checklists para PRs: https://github.com/othneildrew/Best-README-Template#pull-request-template
-- Best Practices for Rollbacks (Atlassian): https://www.atlassian.com/continuous-delivery/principles/rollback-strategies
-- How to Use Git Revert and Git Reset: https://www.git-tower.com/learn/git/faq/git-reset-vs-revert/
-- 12 Factor App: Config: https://12factor.net/config
-- Dotenv (Exemplo e uso de arquivos .env): https://github.com/motdotla/dotenv#usage
+Regras:
+
+- O prefixo deve seguir a regex validada pelo Dashboard: `^(feature|feat|fix|bugfix|hotfix|docs|doc|style|refactor|test|chore|perf|ci|build|release)/`;
+- Usar letras minúsculas;
+- Separar palavras com hífen;
+- Não usar espaços;
+- Não usar nomes genéricos como `ajustes`, `teste`, `final` ou `coisas`;
+- A descrição deve indicar o escopo da tarefa;
+- Cada branch deve estar relacionada a uma única issue do GitLab.
+
+Exemplos válidos:
+
+```text
+docs/gestao-configuracao
+docs/gestao-projeto
+feature/importar-dados-projetos
+feat/importar-dados-projetos
+fix/corrigir-query-inicial
+test/validar-carga-dados
+chore/automacoes-qualidade-repositorio
+release/0.1.0
+hotfix/corrigir-falha-env
+```
+
+# 5. Procedimentos operacionais
+
+## 5.1 Criação de branch
+
+Para tarefas comuns de desenvolvimento, documentação, testes ou manutenção, a issue deve existir antes da branch e estar vinculada à sprint por milestone.
+
+```bash
+git checkout dev
+git pull origin dev
+git checkout -b feature/login-com-google
+git push -u origin feature/login-com-google
+```
+
+Para uma correção urgente em produção ou na versão estável:
+
+```bash
+git checkout main
+git pull origin main
+git checkout -b hotfix/corrigir-falha-env
+git push -u origin hotfix/corrigir-falha-env
+```
+
+## 5.2 Atualização da branch
+
+Durante a execução da tarefa, a branch temporária deve ser mantida atualizada com `dev` para reduzir conflitos no Merge Request.
+
+```bash
+git checkout docs/gestao-projeto
+git fetch origin
+git merge origin/dev
+```
+
+Quando houver conflito, o responsável pela branch deve resolvê-lo localmente, testar a alteração e registrar a correção em novo commit.
+
+## 5.3 Mesclagem por merge request
+
+Toda integração deve acontecer por Merge Request no GitLab. O Merge Request deve conter:
+
+- Branch de origem e destino corretas;
+- Título descritivo com mais de três palavras, sem `WIP:` ou `Draft:`;
+- Descrição substantiva do que foi alterado;
+- Issue ou tarefa relacionada;
+- Evidências da entrega;
+- Revisor definido;
+- Confirmação de que a branch pode ser removida após o merge;
+- Validação de pipeline, testes, lint, build ou validação manual conforme o tipo de entrega.
+
+Critérios mínimos para merge:
+
+- A entrega atende ao objetivo da tarefa;
+- A revisão foi feita por outro integrante;
+- Não há discussões pendentes;
+- A branch está atualizada em relação ao destino;
+- A DoD da issue está atendida;
+- O responsável pelo merge confirma que a alteração não quebra a entrega da sprint.
+
+## 5.4 Exclusão de branch
+
+Após o merge, a branch temporária deve ser excluída para manter o repositório limpo.
+
+Pelo GitLab, a exclusão pode ser feita pela opção de remover a source branch após o merge.
+
+Por comando:
+
+```bash
+git push origin --delete docs/gestao-projeto
+git branch -d docs/gestao-projeto
+```
+
+Branches temporárias só devem permanecer abertas quando houver trabalho ainda em andamento ou revisão pendente.
+
+# 6. Fluxo de desenvolvimento
+
+## 6.1 Fluxo de feature
+
+O fluxo de feature é usado para novas funcionalidades ou incrementos planejados.
+
+```text
+dev -> feature/nome-da-feature -> Merge Request -> dev
+```
+
+Etapas:
+
+1. Criar a issue no GitLab.
+2. Refinar a issue com DoR, DoD, labels, milestone e assignee.
+3. Criar a branch `feature/*` a partir de `dev`.
+4. Desenvolver e testar a funcionalidade.
+5. Fazer commits semânticos vinculados à issue.
+6. Enviar a branch para o GitLab.
+7. Abrir Merge Request para `dev`.
+8. Revisar e corrigir apontamentos.
+9. Fazer merge após aprovação, validação e DoD atendida.
+10. Excluir a branch temporária.
+
+## 6.2 Fluxo de release
+
+O fluxo de release é usado quando uma versão candidata precisa ser estabilizada sem misturar novas funcionalidades.
+
+```text
+dev -> release/x.y.z -> hmg -> main
+```
+
+Regras:
+
+- Não entram novas funcionalidades em `release/*`;
+- Só são permitidos ajustes finais, correções, documentação e validações;
+- A versão deve ser validada em `hmg` antes de chegar à `main`;
+- Depois do merge em `main`, qualquer ajuste feito na release deve voltar para `dev`;
+- Se uma entrega estiver pronta e outra não, o grupo deve usar MR individual, feature flag ou branch de release para não bloquear promoção de trabalho concluído.
+
+Exemplo:
+
+```bash
+git checkout dev
+git pull origin dev
+git checkout -b release/0.1.0
+git push -u origin release/0.1.0
+```
+
+## 6.3 Fluxo de hotfix
+
+O fluxo de hotfix é usado para corrigir rapidamente uma falha crítica encontrada na versão estável.
+
+```text
+main -> hotfix/nome-do-ajuste -> main
+                              -> dev
+```
+
+Regras:
+
+- A branch nasce de `main`;
+- O escopo deve ser mínimo e focado na correção;
+- O Merge Request deve ir para `main`;
+- Depois da correção em `main`, o mesmo ajuste deve ser levado para `dev` e, quando aplicável, para `hmg`.
+
+# 7. Hooks de Git
+
+O repositório possui hooks versionados na pasta `.githooks/`. Eles funcionam como uma camada local de proteção antes de commits e pushes, reduzindo divergências entre o fluxo documentado, as regras dos professores e o que chega ao GitLab.
+
+Os hooks não substituem revisão por pares nem Merge Request. Eles apenas bloqueiam erros objetivos, como commit direto em branch permanente, branch sem prefixo aceito, commit fora do padrão ou commit sem referência à issue.
+
+## 7.1 Como ativar, verificar e desativar
+
+Para ativar os hooks neste repositório:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Para verificar se os hooks estão ativos:
+
+```bash
+git config core.hooksPath
+```
+
+Resultado esperado:
+
+```text
+.githooks
+```
+
+Para desativar os hooks locais:
+
+```bash
+git config --unset core.hooksPath
+```
+
+Também existe um script de instalação para Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/install-hooks.ps1
+```
+
+## 7.2 Validações executadas
+
+| Hook | Momento de execução | Validações |
+| --- | --- | --- |
+| `.githooks/pre-commit` | Antes de criar um commit | Bloqueia commit direto em branch permanente, valida prefixo da branch, bloqueia arquivos sensíveis no stage e executa `git diff --cached --check`. |
+| `.githooks/commit-msg` | Ao validar a mensagem de commit | Exige Conventional Commits, primeira linha com no máximo 72 caracteres e referência a issue no formato `#N`. |
+| `.githooks/pre-push` | Antes do push | Bloqueia push direto para branches permanentes, valida prefixo da branch local e confere se commits novos seguem Conventional Commits e referenciam issue. |
+
+Branches bloqueadas pelos hooks:
+
+```text
+main
+dev
+develop
+hmg
+homologacao
+homologação
+```
+
+Prefixos de branch aceitos pelos hooks:
+
+```text
+feature/
+feat/
+fix/
+bugfix/
+hotfix/
+docs/
+doc/
+style/
+refactor/
+test/
+chore/
+perf/
+ci/
+build/
+release/
+```
+
+Tipos de commit aceitos pelos hooks:
+
+```text
+feat
+fix
+docs
+style
+refactor
+test
+chore
+perf
+ci
+build
+revert
+```
+
+Formato aceito para commits:
+
+```text
+<tipo>(<escopo opcional>): <descrição curta> (#<issue>)
+```
+
+Exemplos válidos:
+
+```text
+docs(gestao-projeto): atualizar matriz da sprint (#12)
+feat(auth): adicionar login com Google (#23)
+fix(api): corrigir retorno de erro (#31)
+```
+
+O escopo opcional do commit aceita apenas letras sem acento, números, ponto, underline e hífen. Não use espaço nem acentos no escopo.
+
+Exemplo rejeitado:
+
+```text
+docs(gestão projeto): atualizar matriz da sprint (#12)
+```
+
+# 8. Exemplos Práticos
+
+## Exemplo 1: Atualização da gestão de projeto
+
+```text
+Issue: Estruturar documento de gestão de projeto
+Branch: docs/gestao-projeto
+Destino do MR: dev
+Fluxo: dev -> docs/gestao-projeto -> dev
+Após aprovação: excluir docs/gestao-projeto
+```
+
+Comandos:
+
+```bash
+git checkout dev
+git pull origin dev
+git checkout -b docs/gestao-projeto
+git push -u origin docs/gestao-projeto
+```
+
+## Exemplo 2: Preparação de entrega
+
+```text
+Branch de integração: dev
+Branch de homologação: hmg
+Branch final: main
+Responsável pelo merge final: Scrum Master
+Prazo de revisão: quinta-feira
+Prazo de merge para main: sexta-feira como cadência padrão
+```
+
+Fluxo:
+
+```text
+branches temporárias -> dev -> hmg -> main
+```
+
+## Exemplo 3: Hotfix
+
+```text
+Problema: arquivo de configuração impede execução da versão estável
+Branch: hotfix/corrigir-configuracao-env
+Origem: main
+Destino: main e dev
+```
+
+# 9. Regras de governança do GitFlow
+
+- Não é permitido commitar diretamente em `main`, `dev` ou `hmg`;
+- Os hooks também bloqueiam commits e pushes diretos em `develop`, `homologacao` e `homologação`;
+- Toda tarefa versionada deve ser desenvolvida em branch temporária;
+- Cada branch temporária deve representar uma issue;
+- Toda integração deve passar por Merge Request;
+- O fluxo obrigatório de promoção é `feature/* -> dev -> hmg -> main`;
+- `dev` recebe apenas MR aprovado;
+- `hmg` recebe versão candidata para validação funcional;
+- `main` recebe apenas MR aprovado, com pipeline verde quando disponível e DoD atendida;
+- A revisão deve acontecer até quinta-feira como cadência interna, para reduzir risco de acúmulo no fechamento;
+- O merge para `main` ocorre na sexta-feira como cadência padrão, sob responsabilidade do Scrum Master, mas entregas prontas podem ser promovidas antes por MR, pipeline e aprovação;
+- Branches temporárias devem ser removidas após o merge;
+- Hotfixes devem voltar para `dev` após serem aplicados em `main`;
+- O histórico do Git deve permitir rastrear o que foi alterado, por quem, em qual branch e com qual finalidade.
