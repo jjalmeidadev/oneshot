@@ -337,7 +337,7 @@ Assim, a Cadeia de Valor complementa os fluxos **AS-IS** e **TO-BE**, demonstran
 
 ## 2.5.2 Fluxo de Negócio Proposto (AS-IS e TO-BE)
 
-Os fluxos de negócio apresentados a seguir detalham operacionalmente o processo de elaboração do Mapa de Benefícios nos cenários **AS-IS** e **TO-BE**. Enquanto a Cadeia de Valor apresentada na seção anterior evidencia as principais transformações entre os cenários, os diagramas BPMN detalham a sequência das atividades, os responsáveis pela execução, as consultas ao repositório corporativo e os pontos de decisão existentes em cada fluxo.
+Os fluxos de negócio apresentados a seguir detalham o processo de elaboração do Mapa de Benefícios nos cenários **AS-IS** e **TO-BE**, evidenciando como as atividades são executadas em cada contexto. A modelagem em BPMN complementa a Cadeia de Valor apresentada anteriormente ao representar a sequência das atividades, os participantes envolvidos, as interações com o repositório corporativo e os pontos de decisão que orientam a execução do processo. Dessa forma, os diagramas permitem visualizar as diferenças operacionais entre o processo atual e o processo proposto com o apoio do agente inteligente.
 
 ### AS-IS — Fluxo Atual
 
