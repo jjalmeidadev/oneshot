@@ -432,7 +432,59 @@ Caso o mapa seja aprovado, o líder realiza a ação de **exportar e salvar o do
 
 
 ## 2.6 Matriz de Risco do Projeto
-_conteúdo_
+
+
+A matriz de risco do projeto tem como objetivo registrar, avaliar e acompanhar eventos que possam afetar positiva ou negativamente a execução do desenvolvimento do **Agente Inteligente para Gestão de Portfólio de Projetos do Metrô**.
+
+A identificação dos riscos foi realizada considerando o contexto atual do projeto, suas dependências técnicas e organizacionais, as características do produto proposto e o estágio de desenvolvimento da solução. Entre os principais fatores considerados estão a dependência de informações e documentos disponibilizados pelo parceiro, a utilização do ecossistema Microsoft, a necessidade de integração com diferentes fontes de conhecimento, o controle de acesso às informações e a necessidade de garantir respostas fundamentadas para os usuários.
+
+A matriz também contempla **oportunidades**, representadas por eventos de natureza positiva que, caso ocorram ou sejam adequadamente explorados, podem contribuir para a evolução, qualidade ou eficiência da solução.
+
+Como o projeto encontra-se em etapa de desenvolvimento e consolidação da documentação, os riscos identificados deverão ser revisados periodicamente conforme novas decisões arquiteturais, validações com o parceiro, disponibilização de dados e evolução do escopo.
+
+---
+
+### 2.6.1 Critérios de Avaliação
+
+A avaliação dos riscos utiliza uma escala de **1 a 5** para probabilidade e impacto.
+
+### Probabilidade
+
+| Valor | Classificação | Descrição |
+| :---: | --- | --- |
+| **1** | Muito baixa | Evento improvável de ocorrer durante o projeto. |
+| **2** | Baixa | Evento pouco provável, mas possível. |
+| **3** | Média | Evento com possibilidade moderada de ocorrência. |
+| **4** | Alta | Evento provável de ocorrer durante o projeto. |
+| **5** | Muito alta | Evento muito provável ou recorrente durante o projeto. |
+
+### Impacto
+
+| Valor | Classificação | Descrição |
+| :---: | --- | --- |
+| **1** | Muito baixo | Consequências praticamente desprezíveis para o projeto. |
+| **2** | Baixo | Pequeno impacto sobre uma atividade ou entrega, sem comprometer significativamente o projeto. |
+| **3** | Médio | Impacto relevante sobre uma atividade, entrega ou prazo, exigindo intervenção da equipe. |
+| **4** | Alto | Pode comprometer uma entrega importante, gerar retrabalho significativo ou afetar o cronograma. |
+| **5** | Muito alto | Pode comprometer diretamente objetivos do projeto, funcionalidades centrais ou a viabilidade de uma entrega. |
+
+A **severidade** é calculada pela seguinte regra:
+
+> **Severidade = Probabilidade × Impacto**
+
+A classificação resultante segue as seguintes faixas:
+
+| Severidade | Criticidade | Interpretação |
+| :---: | --- | --- |
+| **1–4** | 🟢 Baixa | Risco deve ser acompanhado, mas não exige intervenção prioritária. |
+| **5–9** | 🟡 Moderada | Requer acompanhamento e ações preventivas quando aplicável. |
+| **10–14** | 🟠 Alta | Deve possuir acompanhamento ativo e ações planejadas. |
+| **15–25** | 🔴 Crítica | Deve receber tratamento prioritário pela equipe. |
+
+Para as oportunidades, a mesma pontuação é utilizada para representar o **potencial de aproveitamento** do evento positivo.
+
+---
+
 
 ## 2.7 Ideação
 
