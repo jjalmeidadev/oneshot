@@ -694,6 +694,111 @@ Diferenças de interpretação entre equipe e stakeholders podem gerar requisito
 
 ---
 
+### 2.6.4 Oportunidades
+
+### O1  - Aproveitamento do ecossistema Microsoft
+
+**Categoria:** Técnico  
+**Probabilidade:** 4  
+**Impacto:** 4  
+**Potencial:** 16  - 🟢 Alta oportunidade
+
+A utilização de tecnologias já presentes no ambiente corporativo pode facilitar a integração do agente ao cotidiano dos usuários, reduzir barreiras de adoção e aproveitar recursos existentes na organização.
+
+**Estratégia de aproveitamento:** priorizar componentes do ecossistema Microsoft já adotados pelo parceiro sempre que forem tecnicamente adequados ao escopo, validando antecipadamente suas capacidades e limitações.
+
+**Responsável:** Wendel Feitosa.  
+**Status:** Em Monitoramento.
+
+---
+
+### O2  - Disponibilização de fontes oficiais e conhecimento do PMO
+
+**Categoria:** Stakeholders / Dados  
+**Probabilidade:** 3  
+**Impacto:** 5  
+**Potencial:** 15  - 🟢 Alta oportunidade
+
+A disponibilização de documentos oficiais, normativos e conhecimento especializado dos representantes do PMO pode aumentar significativamente a qualidade do contexto utilizado pelo agente e permitir respostas mais alinhadas à realidade organizacional.
+
+**Estratégia de aproveitamento:** priorizar as fontes oficiais disponibilizadas pelo parceiro e utilizar o conhecimento dos stakeholders para validar a interpretação dos conteúdos e orientar a construção da base de conhecimento.
+
+**Responsável:** Leonardo Ramos.  
+**Status:** Em Monitoramento.
+
+---
+
+### O3  - Arquitetura modular e escalável
+
+**Categoria:** Técnico / Arquitetura  
+**Probabilidade:** 3  
+**Impacto:** 5  
+**Potencial:** 15  - 🟢 Alta oportunidade
+
+A concepção de uma arquitetura modular e escalável pode permitir que novas capacidades de Inteligência Artificial, fluxos de negócio e integrações sejam incorporados progressivamente sem necessidade de reestruturar integralmente a solução.
+
+Essa oportunidade é coerente com a necessidade de construir uma solução preparada para futuras melhorias e evoluções, mantendo flexibilidade para ampliar suas capacidades ao longo do tempo.
+
+**Estratégia de aproveitamento:** definir componentes e responsabilidades de forma modular, mantendo interfaces e dependências suficientemente desacopladas para permitir substituições ou extensões futuras.
+
+**Responsável:** Henrique Diniz.  
+**Status:** Em Monitoramento.
+
+---
+
+### O4  - Automação proativa de pendências
+
+**Categoria:** Processo  
+**Probabilidade:** 4  
+**Impacto:** 4  
+**Potencial:** 16  - 🟢 Alta oportunidade
+
+A solução possui potencial para evoluir de uma experiência predominantemente reativa, baseada em consultas dos usuários, para uma atuação proativa capaz de identificar pendências e apoiar sua resolução.
+
+Essa oportunidade está diretamente alinhada à necessidade identificada para que o agente lembre e ofereça apoio em pendências de preenchimento e acompanhe informações dos projetos.
+
+**Estratégia de aproveitamento:** identificar inicialmente os eventos recorrentes e de maior valor operacional que possam gerar lembretes ou ações proativas, priorizando aqueles que apresentem regras claras e baixo risco de interpretação.
+
+**Responsável:** Jaime Almeida.  
+**Status:** Em Monitoramento.
+
+---
+
+### O5  - Reutilização do conhecimento institucional
+
+**Categoria:** Dados / Negócio  
+**Probabilidade:** 3  
+**Impacto:** 4  
+**Potencial:** 12  - 🟠 Alta oportunidade
+
+A organização estruturada do conhecimento utilizado pelo agente pode permitir seu reaproveitamento em diferentes fluxos de gestão do portfólio, reduzindo duplicação de informações e ampliando o valor dos mesmos conteúdos institucionais.
+
+Essa oportunidade pode favorecer a expansão da solução para diferentes necessidades do ciclo de vida dos projetos sem exigir a construção independente de bases para cada nova funcionalidade.
+
+**Estratégia de aproveitamento:** organizar as fontes e conceitos de maneira reutilizável, preservando metadados e relações que permitam sua utilização por diferentes fluxos do agente.
+
+**Responsável:** Leonardo Ramos.  
+**Status:** Em Monitoramento.
+
+---
+
+### O6  - Ampliação da capacidade analítica
+
+**Categoria:** Análise / Stakeholders  
+**Probabilidade:** 3  
+**Impacto:** 5  
+**Potencial:** 15  - 🟢 Alta oportunidade
+
+O agente pode evoluir para além de consultas isoladas, apoiando análises comparativas entre projetos, perguntas sugeridas e utilização conjunta de documentos e indicadores do portfólio.
+
+Essa oportunidade é especialmente relevante para aumentar o valor estratégico da solução para o PMO, uma vez que a proposta contempla apoio à análise e comparação de projetos e utilização de perguntas sugeridas para orientar os usuários.
+
+**Estratégia de aproveitamento:** priorizar inicialmente análises com critérios claramente definidos e fontes confiáveis, evoluindo posteriormente para comparações mais abrangentes conforme a qualidade e disponibilidade das informações.
+
+**Responsável:** Pedro Uchoa.  
+**Status:** Em Monitoramento.
+
+---
 
 
 ## 2.7 Ideação
