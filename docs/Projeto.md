@@ -485,7 +485,7 @@ Para as oportunidades, a mesma pontuação é utilizada para representar o **pot
 
 ---
 
-## 2.6.2 Registro dos Riscos e Oportunidades
+### 2.6.2 Registro dos Riscos e Oportunidades
 
 A matriz abaixo consolida os riscos identificados para o projeto, contemplando riscos negativos e positivos, suas categorias, avaliação, responsáveis, ações planejadas e status.
 
@@ -511,6 +511,189 @@ A matriz abaixo consolida os riscos identificados para o projeto, contemplando r
 | **O6** | 🟢 Oportunidade | Análise / Stakeholders | Ampliação da capacidade analítica do PMO por meio de respostas comparativas, perguntas sugeridas e utilização integrada de indicadores e documentos do portfólio. | 3 | 5 | **15** | 🟢 Alta oportunidade | Pedro Uchoa | Em Monitoramento |
 
 ---
+
+### 2.6.3 Ações de Tratamento
+
+### R01  - Indisponibilidade ou baixa qualidade dos dados
+
+**Categoria:** Dados  
+**Probabilidade:** 4  
+**Impacto:** 5  
+**Severidade:** 20  - 🔴 Crítica
+
+A solução depende de informações e documentos institucionais para que o agente consiga responder às consultas de maneira contextualizada e fundamentada. A indisponibilidade, incompletude ou baixa qualidade dessas informações pode comprometer diretamente a capacidade do agente de produzir respostas confiáveis.
+
+**Mitigação:** identificar antecipadamente as fontes necessárias, validar sua disponibilidade com o parceiro e estabelecer critérios mínimos de qualidade e completude para os dados e documentos utilizados.
+
+**Contingência:** restringir temporariamente o escopo das consultas às fontes disponíveis e sinalizar explicitamente ao usuário quando não houver informação suficiente para fundamentar uma resposta.
+
+**Responsável:** Jaime Almeida.  
+**Status:** Em Monitoramento.
+
+---
+
+### R02  - Dificuldades nas integrações com o ecossistema Microsoft
+
+**Categoria:** Técnico  
+**Probabilidade:** 4  
+**Impacto:** 5  
+**Severidade:** 20  - 🔴 Crítica
+
+A solução está prevista para operar integrada ao ecossistema tecnológico Microsoft, incluindo Microsoft Teams e componentes da Power Platform. Dependências de configuração, permissões, conectores ou limitações das plataformas podem afetar a implementação do agente.
+
+**Mitigação:** validar antecipadamente as integrações necessárias e realizar provas de conceito dos componentes críticos antes da implementação completa dos fluxos.
+
+**Contingência:** utilizar uma interface ou fluxo alternativo disponível no ambiente de desenvolvimento para validar as funcionalidades centrais do agente, mantendo a integração definitiva como etapa posterior.
+
+**Responsável:** Felipe Teixeira.  
+**Status:** Em Monitoramento.
+
+---
+
+### R03  - Respostas inadequadas ou não fundamentadas
+
+**Categoria:** Técnico  
+**Probabilidade:** 4  
+**Impacto:** 5  
+**Severidade:** 20  - 🔴 Crítica
+
+Como a solução utiliza Inteligência Artificial para interpretar consultas e gerar respostas, existe o risco de o agente apresentar informações incorretas, incompletas ou sem fundamentação suficiente. Esse risco é particularmente relevante porque a solução pretende apoiar atividades de gestão e disponibilizar informações provenientes das fontes oficiais do Metrô.
+
+**Mitigação:** utilizar fontes documentais controladas, estruturar adequadamente a base de conhecimento, definir mecanismos de validação da qualidade das interações e estabelecer comportamento explícito para situações nas quais não existam informações suficientes.
+
+**Contingência:** fazer com que o agente informe a ausência de informações suficientes e evite apresentar uma resposta como fato quando não houver fonte adequada para fundamentá-la.
+
+**Responsável:** Henrique Diniz.  
+**Status:** Em Monitoramento.
+
+---
+
+### R04  - Limitações de autenticação e controle de acesso
+
+**Categoria:** Técnico  
+**Probabilidade:** 3  
+**Impacto:** 5  
+**Severidade:** 15  - 🔴 Crítica
+
+A solução deverá respeitar os diferentes níveis de acesso às informações do portfólio. Uma implementação inadequada das regras de autenticação ou autorização pode permitir acesso indevido ou limitar o acesso legítimo de determinados usuários.
+
+**Mitigação:** definir previamente os perfis de acesso, as permissões associadas a cada perfil e os limites de informação que podem ser disponibilizados pelo agente.
+
+**Contingência:** restringir o acesso às funcionalidades ou fontes que apresentem problemas de autorização até que a configuração seja corrigida e validada.
+
+**Responsável:** Wendel Feitosa.  
+**Status:** Em Monitoramento.
+
+---
+
+### R05  - Alteração ou desatualização das fontes
+
+**Categoria:** Dados  
+**Probabilidade:** 4  
+**Impacto:** 4  
+**Severidade:** 16  - 🔴 Crítica
+
+Informações utilizadas pelo agente podem sofrer alterações, atualizações ou substituições ao longo do projeto. Caso a base utilizada pela solução não acompanhe essas mudanças, o agente poderá responder utilizando informações desatualizadas.
+
+**Mitigação:** estabelecer uma estratégia de atualização das fontes e identificar quais documentos possuem caráter prioritário para atualização.
+
+**Contingência:** suspender temporariamente a utilização de uma fonte identificada como desatualizada e informar a necessidade de atualização antes de utilizá-la novamente como referência.
+
+**Responsável:** Leonardo Ramos.  
+**Status:** Em Monitoramento.
+
+---
+
+### R06  - Indisponibilidade dos stakeholders
+
+**Categoria:** Stakeholders  
+**Probabilidade:** 3  
+**Impacto:** 4  
+**Severidade:** 12  - 🟠 Alta
+
+A compreensão dos processos do PMO e a validação da solução dependem da participação dos representantes do Metrô. A baixa disponibilidade desses stakeholders pode atrasar decisões e dificultar a validação das funcionalidades.
+
+**Mitigação:** organizar previamente os pontos que dependem de validação do parceiro e concentrar dúvidas e decisões em momentos de alinhamento previamente definidos.
+
+**Contingência:** registrar as decisões pendentes, utilizar apenas informações previamente validadas e postergar funcionalidades cuja implementação dependa de uma definição do parceiro.
+
+**Responsável:** Jaime Almeida.  
+**Status:** Aberto.
+
+---
+
+### R07  - Ampliação do escopo
+
+**Categoria:** Escopo  
+**Probabilidade:** 4  
+**Impacto:** 4  
+**Severidade:** 16  - 🔴 Crítica
+
+O levantamento de novas possibilidades para o agente pode gerar solicitações adicionais ao longo do projeto. A incorporação indiscriminada dessas funcionalidades pode aumentar o esforço de desenvolvimento e comprometer as entregas prioritárias.
+
+**Mitigação:** manter uma priorização formal das funcionalidades e diferenciar claramente capacidades essenciais do MVP de oportunidades de evolução futura.
+
+**Contingência:** retirar ou postergar funcionalidades de menor prioridade quando novas demandas forem incorporadas, preservando as funcionalidades essenciais do MVP.
+
+**Responsável:** Pedro Uchoa.  
+**Status:** Em Monitoramento.
+
+---
+
+### R08  - Tempo insuficiente para implementação e validação
+
+**Categoria:** Cronograma  
+**Probabilidade:** 4  
+**Impacto:** 4  
+**Severidade:** 16  - 🔴 Crítica
+
+A quantidade de atividades necessárias para compreender o problema, definir requisitos, estruturar a solução, validar as decisões e produzir a documentação pode superar o tempo disponível para o projeto.
+
+**Mitigação:** priorizar as funcionalidades e entregas de maior valor, acompanhar continuamente o progresso e antecipar atividades que possuam dependências com outras tarefas.
+
+**Contingência:** reduzir o escopo da implementação para preservar as capacidades essenciais e registrar funcionalidades secundárias como oportunidades de evolução.
+
+**Responsável:** Felipe Teixeira.  
+**Status:** Em Monitoramento.
+
+---
+
+### R09  - Sobrecarga ou indisponibilidade da equipe
+
+**Categoria:** Equipe  
+**Probabilidade:** 3  
+**Impacto:** 4  
+**Severidade:** 12  - 🟠 Alta
+
+A execução simultânea de atividades de análise, documentação, arquitetura, desenvolvimento e validação pode gerar concentração excessiva de trabalho em determinados integrantes.
+
+**Mitigação:** distribuir responsabilidades antecipadamente, acompanhar a carga de trabalho e compartilhar conhecimento sobre atividades críticas.
+
+**Contingência:** redistribuir tarefas entre os integrantes e priorizar atividades diretamente relacionadas às entregas do ciclo atual.
+
+**Responsável:** Henrique Diniz.  
+**Status:** Aberto.
+
+---
+
+### R10  - Divergência de entendimento
+
+**Categoria:** Comunicação  
+**Probabilidade:** 3  
+**Impacto:** 3  
+**Severidade:** 9  - 🟡 Moderada
+
+Diferenças de interpretação entre equipe e stakeholders podem gerar requisitos inconsistentes, retrabalho ou desenvolvimento de funcionalidades diferentes da expectativa do parceiro.
+
+**Mitigação:** registrar decisões, requisitos e validações realizadas e utilizar reuniões de alinhamento para esclarecer pontos ambíguos.
+
+**Contingência:** interromper a implementação do item divergente, revisar o entendimento com os envolvidos e atualizar a documentação antes de prosseguir.
+
+**Responsável:** Pedro Uchoa.  
+**Status:** Em Monitoramento.
+
+---
+
 
 
 ## 2.7 Ideação
