@@ -3,7 +3,7 @@
 echo "pre-commit: executando validacoes locais..."
 
 current_branch="$(git symbolic-ref --quiet --short HEAD || true)"
-protected_branches="main dev develop hmg homologacao homologação"
+protected_branches="main develop hmg"
 valid_prefixes="feature/ feat/ fix/ bugfix/ hotfix/ docs/ doc/ style/ refactor/ test/ chore/ perf/ ci/ build/ release/"
 
 if [ -n "$current_branch" ]; then
