@@ -1,0 +1,143 @@
+#!/bin/sh
+
+zero_sha="0000000000000000000000000000000000000000"
+protected_branches="main develop hmg"
+valid_prefixes="feature/ feat/ fix/ bugfix/ hotfix/ docs/ doc/ style/ refactor/ test/ chore/ perf/ ci/ build/ release/"
+commit_format='^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\([A-Za-z0-9._-]+\))?!?: .+$'
+issue_format='#[0-9]+'
+
+branch_name_from_ref() {
+  ref="$1"
+  case "$ref" in
+    refs/heads/*)
+      printf '%s\n' "${ref#refs/heads/}"
+      ;;
+    HEAD)
+      git symbolic-ref --quiet --short HEAD || true
+      ;;
+    *)
+      printf '%s\n' "$ref"
+      ;;
+  esac
+}
+
+is_protected_branch() {
+  branch="$1"
+  for protected_branch in $protected_branches; do
+    if [ "$branch" = "$protected_branch" ]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+has_valid_prefix() {
+  branch="$1"
+  for valid_prefix in $valid_prefixes; do
+    case "$branch" in
+      "$valid_prefix"*)
+        return 0
+        ;;
+    esac
+  done
+  return 1
+}
+
+validate_local_branch() {
+  branch="$1"
+
+  if [ -z "$branch" ]; then
+    echo "pre-push: estado detached HEAD detectado; validacao de nome de branch local ignorada."
+    return 0
+  fi
+
+  if is_protected_branch "$branch"; then
+    echo "pre-push: push direto a partir da branch permanente '$branch' foi bloqueado." >&2
+    echo "Crie uma branch de trabalho, por exemplo: feature/minha-tarefa ou docs/atualizar-readme." >&2
+    return 1
+  fi
+
+  if ! has_valid_prefix "$branch"; then
+    echo "pre-push: branch local '$branch' nao segue um prefixo aceito." >&2
+    echo "Prefixos aceitos: feature/, feat/, fix/, bugfix/, hotfix/, docs/, doc/, style/, refactor/, test/, chore/, perf/, ci/, build/, release/" >&2
+    return 1
+  fi
+
+  return 0
+}
+
+new_commits_for_push() {
+  local_sha="$1"
+  remote_sha="$2"
+
+  if [ "$local_sha" = "$zero_sha" ]; then
+    return 0
+  fi
+
+  if [ "$remote_sha" != "$zero_sha" ] && git cat-file -e "$remote_sha^{commit}" 2>/dev/null; then
+    git rev-list --no-merges "$remote_sha..$local_sha" --not --remotes=origin
+    return 0
+  fi
+
+  git rev-list --no-merges "$local_sha" --not --remotes
+}
+
+validate_commit() {
+  commit_sha="$1"
+  subject="$(git log -1 --format=%s "$commit_sha")"
+
+  if ! printf '%s\n' "$subject" | grep -Eq "$commit_format"; then
+    echo "pre-push: commit $commit_sha nao segue Conventional Commits." >&2
+    echo "Mensagem encontrada: $subject" >&2
+    echo "Formato esperado: <tipo>(<escopo opcional>): <descricao curta> (#<issue>)" >&2
+    return 1
+  fi
+
+  if ! git log -1 --format='%s%n%b' "$commit_sha" | grep -Eq "$issue_format"; then
+    echo "pre-push: commit $commit_sha nao referencia issue da sprint com #N." >&2
+    echo "Mensagem encontrada: $subject" >&2
+    echo "Exemplo valido: feat(auth): adicionar login (#12)" >&2
+    return 1
+  fi
+
+  return 0
+}
+
+echo "pre-push: executando validacoes locais..."
+
+input_found=false
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  input_found=true
+  local_branch="$(branch_name_from_ref "$local_ref")"
+  remote_branch="$(branch_name_from_ref "$remote_ref")"
+
+  if is_protected_branch "$remote_branch"; then
+    echo "pre-push: push direto para a branch permanente '$remote_branch' foi bloqueado." >&2
+    echo "Abra uma Merge Request a partir de uma branch de trabalho." >&2
+    exit 1
+  fi
+
+  if ! validate_local_branch "$local_branch"; then
+    exit 1
+  fi
+
+  commits="$(new_commits_for_push "$local_sha" "$remote_sha")"
+  if [ -z "$commits" ]; then
+    echo "pre-push: nenhum commit novo detectavel para '$remote_branch'."
+    continue
+  fi
+
+  for commit_sha in $commits; do
+    if ! validate_commit "$commit_sha"; then
+      exit 1
+    fi
+  done
+done
+
+if [ "$input_found" != "true" ]; then
+  echo "pre-push: nenhuma referencia recebida do Git; nada para validar."
+fi
+
+echo "pre-push: validacao concluida."
+exit 0
