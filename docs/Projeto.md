@@ -43,6 +43,7 @@
 - [3. Requisitos do Projeto](#3-requisitos-do-projeto)
   - [3.1 Requisitos Funcionais (RFs)](#31-requisitos-funcionais-rfs)
   - [3.2 Requisitos Não Funcionais (RNFs)](#32-requisitos-não-funcionais-rnfs)
+    - [3.2.1 RNFs descritos como histórias de usuário](#321-rnfs-descritos-como-histórias-de-usuário)
   - [3.3 Visão Inicial sobre a Solução Técnica de Engenharia](#33-visão-inicial-sobre-a-solução-técnica-de-engenharia)
   - [3.4 Visão Inicial sobre Tecnologias e Ferramentas](#34-visão-inicial-sobre-tecnologias-e-ferramentas)
   - [3.5 Correlação RFs e RNFs](#35-correlação-rfs-e-rnfs)
@@ -312,6 +313,18 @@ Os objetivos apresentados representam os resultados estratégicos esperados para
 - Facilitar a manutenção da solução utilizando recursos aderentes ao ecossistema Microsoft e acessíveis a equipes com perfil predominantemente funcional;
 - Promover uma solução sustentável, preparada para acompanhar a evolução das necessidades da Gestão de Portfólio de Projetos ao longo do tempo.
 
+#### Consolidação dos objetivos por métrica
+
+Para reduzir ambiguidades entre objetivo estratégico, indicador e validação do MVP, os objetivos foram consolidados na matriz abaixo.
+
+| Objetivo | Métrica de acompanhamento | Meta inicial do MVP | Forma de verificação | Relação com o escopo |
+| --- | --- | --- | --- | --- |
+| Reduzir esforço de localização de informações | Tempo médio para encontrar uma informação de projeto | Redução esperada de 50% em cenário controlado | Comparação entre busca manual e consulta ao agente usando os mesmos casos sintéticos | Consulta de informações dos projetos |
+| Aumentar confiabilidade das respostas | Percentual de respostas fundamentadas em fontes disponíveis | 100% das respostas do escopo devem indicar base documental ou limitação | Testes com perguntas de consulta, comparação e ausência de informação | Respostas estruturadas e fundamentadas |
+| Melhorar autonomia dos usuários | Percentual de solicitações compreendidas sem sintaxe técnica | Pelo menos 80% das solicitações em português devem ser compreendidas ou orientadas para reformulação | Casos de teste com variações de linguagem natural | Entrada textual e interpretação de intenção |
+| Apoiar decisões do PMO | Capacidade de comparar projetos, riscos, marcos e indicadores | Consultas analíticas demonstráveis com dados sintéticos | Cenários de comparação entre dois ou mais projetos | Fluxos de consulta e análise comparativa |
+| Preservar governança e confidencialidade | Uso de dados sintéticos/anonimizados e rastreio das interações | 100% da prova de conceito sem dados sensíveis reais | Auditoria da base utilizada e dos registros gerados pelo pipeline | Segurança, rastreabilidade e aderência tecnológica |
+
 ---
 
 ### 2.4.5 Ownership e Accountability Estratégico
@@ -381,6 +394,17 @@ Carlos é Gerente de Portfólio de Projeto, tem 44 anos e coordena um conjunto d
 ### 2.5.2 Jornadas do Usuário
 
 As jornadas do usuário foram desenvolvidas para representar como diferentes perfis interagem com o processo de gestão e consulta das informações do portfólio de projetos. Elas evidenciam objetivos, ações, pensamentos, dores, emoções e oportunidades em cada etapa da experiência, permitindo compreender com mais clareza onde a solução proposta pode gerar valor. No contexto do agente inteligente para apoio à Gestão de Portfólio de Projetos do Metrô, as jornadas ajudam a identificar momentos em que a centralização das informações, a geração de respostas confiáveis e a redução de consultas manuais podem melhorar a tomada de decisão e a rotina dos usuários.
+
+Além dos mapas visuais, as jornadas foram sintetizadas em etapas funcionais para explicitar a relação entre necessidade do usuário, dor observada e oportunidade de produto.
+
+| Persona | Etapa da jornada | Necessidade principal | Dor observada | Oportunidade para a solução |
+| --- | --- | --- | --- | --- |
+| Roberto | Identificar temas críticos do portfólio | Obter visão executiva rápida sobre riscos, atrasos e decisões pendentes | Relatórios extensos e pouco tempo para análise | Resumo executivo fundamentado em fontes disponíveis |
+| Roberto | Avaliar cenários antes de decidir | Comparar impactos e priorizar ações estratégicas | Dependência de consolidação manual pelo PMO | Consulta analítica com diferenciação entre fato recuperado e interpretação |
+| Roberto | Acompanhar efeitos das decisões | Verificar mudanças relevantes após direcionamentos anteriores | Dificuldade de recuperar histórico e mudanças recentes | Respostas rastreáveis com referência aos documentos consultados |
+| Carlos | Preparar reunião de acompanhamento | Consolidar status, riscos e dependências do subportfólio | Informações distribuídas em diferentes fontes | Consulta por linguagem natural sobre projetos e subportfólios |
+| Carlos | Investigar desvios | Aprofundar atrasos, riscos e impactos antes de acionar líderes | Retrabalho para cruzar Power BI, documentos e relatos | Comparação estruturada entre projetos e recuperação de evidências |
+| Carlos | Coordenar ações do subportfólio | Direcionar responsáveis com base em informação confiável | Baixa confiança em respostas sem contexto | Respostas com fonte, limitação explícita e indicação de dados ausentes |
 
 #### 2.5.2.1 Mapa de jornada - Roberto
 
@@ -928,7 +952,25 @@ As ideias foram priorizadas considerando dois critérios principais:
 - **Importância para o negócio:** potencial de geração de valor para o PMO e para os diferentes perfis de usuários;
 - **Viabilidade para o MVP:** possibilidade de implementação dentro do escopo, prazo e recursos disponíveis para a primeira versão da solução.
 
-Essa priorização orienta o roadmap do produto, permitindo que funcionalidades estratégicas sejam incorporadas progressivamente sem comprometer os objetivos centrais do MVP.
+Cada critério foi classificado em escala de 1 a 5. A prioridade resulta da combinação entre valor de negócio e viabilidade técnica, evitando que funcionalidades desejáveis, mas pouco viáveis para a primeira entrega, sejam tratadas como parte obrigatória do MVP. Essa priorização orienta o roadmap do produto, permitindo que funcionalidades estratégicas sejam incorporadas progressivamente sem comprometer os objetivos centrais do MVP.
+
+| Feature | Importância para o negócio | Viabilidade para o MVP | Decisão de prioridade | Justificativa de priorização |
+| --- | :---: | :---: | --- | --- |
+| Consulta de informações dos projetos | 5 | 5 | Muito Alta | Resolve a dor central de acesso rápido a informações do portfólio. |
+| Ingestão de informações dos projetos | 5 | 4 | Muito Alta | Sustenta a base de conhecimento, ainda que no MVP use dados sintéticos/controlados. |
+| Autenticação e definição de perfis | 5 | 4 | Muito Alta | Garante coerência com permissões e responsabilidades de cada usuário. |
+| Integração com Microsoft Teams | 5 | 3 | Muito Alta | Mantém aderência ao canal corporativo esperado, mesmo que parte seja simulada no MVP. |
+| Transcrição de áudio | 4 | 3 | Muito Alta | Amplia usabilidade, mas depende de APIs e validações específicas. |
+| Perfil de linguagem executivo | 4 | 4 | Muito Alta | Aumenta valor para perfis decisórios sem ampliar o núcleo funcional. |
+| Diferença de profundidade de pesquisa | 4 | 3 | Alta | Melhora a experiência, mas pode evoluir depois da consulta básica. |
+| Fluxo de lembretes de atualização dos projetos | 4 | 2 | Alta | Tem valor operacional, porém depende de regras e integrações transacionais. |
+| Relatório anual automático | 4 | 2 | Alta | Possui valor para gestão, mas exige templates e consolidação documental mais madura. |
+| Apresentações automáticas por template | 3 | 2 | Média | Útil para evolução, mas secundária frente ao pipeline de consulta. |
+| Fluxo de avaliação das respostas | 3 | 3 | Média | Importante para melhoria contínua, mas não bloqueia a prova de conceito inicial. |
+| Interface personalizada e intuitiva | 3 | 3 | Média | Relevante para adoção, mas o MVP prioriza funcionamento do agente e do pipeline. |
+| Integração com Power BI | 4 | 1 | Evolução | Depende de integração corporativa e permissões fora do núcleo inicial. |
+| Edição das configurações do agente por menu | 2 | 2 | Evolução | Facilita manutenção futura, mas não é essencial para validar valor do MVP. |
+| Fluxo de notificações de riscos | 4 | 1 | Evolução | Exige automações e regras de alerta mais estáveis do que as previstas para a primeira versão. |
 
 ---
 
@@ -1657,6 +1699,21 @@ Os requisitos não funcionais definem os atributos de qualidade que a solução 
 | RNF10 | Manutenibilidade | O código e os artefatos técnicos devem ser organizados de forma a facilitar testes, evolução e manutenção pela equipe. | Validar a existência de separação entre interface, lógica de negócio e acesso a dados, documentação da API, testes automatizados e instruções de execução do serviço. | Alta | Não iniciado |
 | RNF11 | Disponibilidade e tratamento de falhas | A solução deve tratar falhas de classificação, recuperação, indisponibilidade de fonte ou ausência de informação sem interromper a experiência do usuário. | Verificar que 100% dos cenários de erro previstos retornam mensagens controladas, indicando a limitação encontrada, sem expor detalhes técnicos desnecessários ao usuário final. | Alta | Não iniciado |
 | RNF12 | Qualidade dos dados sintéticos | Os dados sintéticos utilizados no MVP devem representar a estrutura dos documentos e informações esperadas no contexto do portfólio do Metrô. | Validar que a massa sintética contempla projetos, subportfólios, marcos, riscos, indicadores e documentos compatíveis com os fluxos de consulta e análise previstos. | Alta | Não iniciado |
+
+### 3.2.1 RNFs descritos como histórias de usuário
+
+Para aproximar os RNFs do mesmo formato usado nos requisitos funcionais, os principais atributos de qualidade também foram descritos como histórias de usuário. Essas histórias não adicionam novas funcionalidades; elas tornam explícitas as condições de qualidade que devem ser observadas durante a implementação e validação dos RFs.
+
+| História de usuário não funcional | RNFs relacionados | Critério de aceite resumido |
+| --- | --- | --- |
+| Como representante do PMO, quero que a solução use apenas dados sintéticos, anonimizados ou homologados no MVP, para evitar exposição de informações sensíveis do portfólio. | RNF01, RNF08, RNF12 | A base de testes não contém dados sensíveis reais e todos os cenários documentam a origem controlada das informações. |
+| Como usuário com perfil definido, quero receber apenas informações compatíveis com minhas permissões, para que a consulta respeite responsabilidades e limites de acesso. | RNF02 | Cenários simulados com perfis distintos retornam respostas compatíveis com cada permissão. |
+| Como auditor técnico, quero que cada interação registre intenção, fontes consultadas e resposta produzida, para permitir rastreabilidade das decisões do agente. | RNF03 | Todas as interações testadas geram registro estruturado com usuário/perfil, horário, intenção, documentos recuperados e resposta. |
+| Como usuário do PMO, quero respostas fundamentadas e transparentes sobre limitações, para confiar no resultado e saber quando a base não possui informação suficiente. | RNF04, RNF11 | Respostas do escopo indicam fundamento ou limitação, sem apresentar inferências não sustentadas como fato. |
+| Como usuário em rotina operacional, quero receber respostas em tempo compatível com uma conversa, para que o agente seja útil durante consultas e reuniões. | RNF05 | Consultas simples retornam em até 10 segundos e análises comparativas em até 20 segundos no ambiente de MVP. |
+| Como equipe de desenvolvimento, quero avaliar a qualidade do núcleo de PLN com métricas objetivas, para saber se a classificação de intenções e a recuperação de informações são aceitáveis. | RNF06 | O conjunto sintético de teste atinge F1 macro e recall iguais ou superiores a 0,80. |
+| Como usuário sem perfil técnico, quero formular solicitações em português natural, para não depender de comandos internos ou sintaxe específica. | RNF07 | Pelo menos 80% das solicitações testadas são compreendidas corretamente ou recebem orientação adequada de reformulação. |
+| Como equipe responsável pela evolução da solução, quero um núcleo organizado e portável, para permitir manutenção, testes e futura troca da camada de dados. | RNF09, RNF10 | O pipeline possui separação entre interface, lógica e dados, além de instruções de execução e testes automatizados. |
 
 As metas numéricas apresentadas nesta seção representam valores iniciais para validação do MVP em ambiente controlado e com dados sintéticos. Esses limites deverão ser revisados nas sprints seguintes conforme a base de testes for ampliada, os dados sintéticos forem validados com o PMO e a solução for aproximada do ambiente tecnológico homologado pelo Metrô.
 
