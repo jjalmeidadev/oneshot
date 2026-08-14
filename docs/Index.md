@@ -1,9 +1,7 @@
-<Table>
+<table>
   <tr>
-    <td><a href= "https://www.btgpactual.com/"><img src="img/logo-btg.png" alt="Centro Paula Souza" border="0"></td>
-    <td>
-      <a href= "https://www.inteli.edu.br/"><img src="img/logo-Inteli.png" alt="Inteli - Instituto de Tecnologia e Liderança" border="0"></a>
-    </td>
+    <td><a href="https://www.metro.sp.gov.br/"><img src="img/logo-metro.png" alt="Companhia do Metropolitano de Sao Paulo - Metro" border="0" width="180"></a></td>
+    <td><a href="https://www.inteli.edu.br/"><img src="img/logo-Inteli.png" alt="Inteli - Instituto de Tecnologia e Lideranca" border="0" width="180"></a></td>
   </tr>
 </table>
 
@@ -11,22 +9,35 @@
 
 ## Nome do Grupo: <nome do grupo>
 
+## Índice da documentação
 
-Esta documentação está organizada em diferentes arquivos conforme apresentado abaixo.
+Este arquivo reúne os documentos que compõem a documentação do projeto e indica a finalidade de cada um.
 
 ### Gestão do Projeto
 
-- **GestaoProjeto.md**: ESCREVER PARA QUE SERVE O DOC 
+| Documento | Conteúdo |
+|---|---|
+| [GestaoProjeto.md](GestaoProjeto.md) | Análise das sprints, matriz de papéis e responsabilidades, contrato de convivência, planejamento das sprints e gestão do processo de desenvolvimento. |
 
 ### Processo de Desenvolvimento de Software
 
-- **GestaoConfiguracao.md**: ESCREVER PARA QUE SERVE O DOC
-- **GuiaPadroesDesenvolvimento.md**: ESCREVER PARA QUE SERVE O DOC
+| Documento | Conteúdo |
+|---|---|
+| [GestaoConfiguracao.md](GestaoConfiguracao.md) | Fluxo GitFlow, políticas de branch, commit e merge request, com convenções de nomenclatura e exemplos práticos. |
+| [GuiaPadroesDesenvolvimento.md](GuiaPadroesDesenvolvimento.md) | Padrões de desenvolvimento adotados pela equipe. |
 
 ### Desenvolvimento do Produto
 
-- **Projeto.md**: ESCREVER PARA QUE SERVE O DOC
-- **Manual-Instalacao.md**: ESCREVER PARA QUE SERVE O DOC
+| Documento | Conteúdo |
+|---|---|
+| [Projeto.md](Projeto.md) | Entendimento do negócio e especificação de requisitos: problema e SWOT, contexto da indústria, visão e objetivo do produto, personas e jornada, fluxo do negócio, brainstorming de features, canvas do MVP, matriz de risco, business drivers, requisitos funcionais e não funcionais, visão técnica da solução e visão inicial sobre tecnologias e ferramentas. |
+| [Manual-instalacao.md](Manual-instalacao.md) | Instruções de instalação e execução da solução. |
 
+### Recursos
 
-<p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://github.com/ENDEREÇOGRUPO>"><nome do projeto></a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://github.com/ENDEREÇOGRUPO">INTELI, <aluno1>, <aluno2>, <aluno3>, <aluno4>, <aluno5>, <aluno6></a> is licensed under <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">Attribution 4.0 International<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"></a></p>
+| Pasta | Conteúdo |
+|---|---|
+| [img/](img/) | Imagens utilizadas na documentação (logotipos, diagramas). |
+| [diagrams/](diagrams/) | Código-fonte dos diagramas em PlantUML, versionado para permitir revisão e regeração. |
+
+<p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">[nome do projeto]</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">INTELI, [aluno 1], [aluno 2], [aluno 3], [aluno 4], [aluno 5], [aluno 6], [aluno 7]</a> is licensed under <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">Attribution 4.0 International<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"></a></p>

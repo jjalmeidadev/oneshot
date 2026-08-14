@@ -1,9 +1,7 @@
-<Table>
+<table>
   <tr>
-    <td><a href= "https://www.btgpactual.com/"><img src="img/logo-btg.png" alt="Centro Paula Souza" border="0"></td>
-    <td>
-      <a href= "https://www.inteli.edu.br/"><img src="img/logo-Inteli.png" alt="Inteli - Instituto de Tecnologia e Liderança" border="0"></a>
-    </td>
+    <td><a href="https://www.metro.sp.gov.br/"><img src="img/logo-metro.png" alt="Companhia do Metropolitano de Sao Paulo - Metro" border="0" width="180"></a></td>
+    <td><a href="https://www.inteli.edu.br/"><img src="img/logo-Inteli.png" alt="Inteli - Instituto de Tecnologia e Lideranca" border="0" width="180"></a></td>
   </tr>
 </table>
 
@@ -30,21 +28,28 @@
 - [2. Entendimento do Projeto e do Negócio](#2-entendimento-do-projeto-e-do-negócio)
   - [2.1 Contexto da Indústria do Parceiro](#21-contexto-da-indústria-do-parceiro)
   - [2.2 Problema](#22-problema)
-  - [2.3 Visão do Projeto e do Produto](#23-visão-do-projeto-e-do-produto)
-  - [2.4 Personas e Jornada do Usuário](#24-personas-e-jornada-do-usuário)
-  - [2.5 Modelagem do Fluxo de Negócio](#25-modelagem-do-fluxo-de-negócio)
-    - [2.5.1 Cadeia de Valor](#251-cadeia-de-valor)
-    - [2.5.2 Fluxo de Negócio Proposto (AS-IS e TO-BE)](#252-fluxo-de-negócio-proposto-as-is-e-to-be)
-  - [2.6 Matriz de Risco do Projeto](#26-matriz-de-risco-do-projeto)
-  - [2.7 Ideação](#27-ideação)
-  - [2.8 Canvas do Projeto](#28-canvas-do-projeto)
-  - [2.9 Business Drivers](#29-business-drivers)
+  - [2.3 Análise SWOT](#23-análise-swot)
+    - [2.3.1 Forças](#231-forças)
+    - [2.3.2 Fraquezas](#232-fraquezas)
+    - [2.3.3 Oportunidades](#233-oportunidades)
+    - [2.3.4 Ameaças](#234-ameaças)
+  - [2.4 Visão do Projeto e do Produto](#24-visão-do-projeto-e-do-produto)
+  - [2.5 Personas e Jornada do Usuário](#25-personas-e-jornada-do-usuário)
+  - [2.6 Modelagem do Fluxo de Negócio](#26-modelagem-do-fluxo-de-negócio)
+    - [2.6.1 Cadeia de Valor](#261-cadeia-de-valor)
+    - [2.6.2 Fluxo de Negócio Proposto (AS-IS e TO-BE)](#262-fluxo-de-negócio-proposto-as-is-e-to-be)
+  - [2.7 Matriz de Risco do Projeto](#27-matriz-de-risco-do-projeto)
+  - [2.8 Ideação](#28-ideação)
+  - [2.9 Canvas do Projeto](#29-canvas-do-projeto)
+  - [2.10 Business Drivers](#210-business-drivers)
 - [3. Requisitos do Projeto](#3-requisitos-do-projeto)
   - [3.1 Requisitos Funcionais (RFs)](#31-requisitos-funcionais-rfs)
   - [3.2 Requisitos Não Funcionais (RNFs)](#32-requisitos-não-funcionais-rnfs)
-  - [3.3 Correlação RFs e RNFs](#33-correlação-rfs-e-rnfs)
-  - [3.4 Casos de Uso](#34-casos-de-uso)
-  - [3.5 Casos de Uso x Requisitos Funcionais](#35-casos-de-uso-x-requisitos-funcionais)
+  - [3.3 Visão Inicial sobre a Solução Técnica de Engenharia](#33-visão-inicial-sobre-a-solução-técnica-de-engenharia)
+  - [3.4 Visão Inicial sobre Tecnologias e Ferramentas](#34-visão-inicial-sobre-tecnologias-e-ferramentas)
+  - [3.5 Correlação RFs e RNFs](#35-correlação-rfs-e-rnfs)
+  - [3.6 Casos de Uso](#36-casos-de-uso)
+  - [3.7 Casos de Uso x Requisitos Funcionais](#37-casos-de-uso-x-requisitos-funcionais)
 - [4. Modelagem de Dados](#4-modelagem-de-dados)
   - [4.1 Especificação da Base de Dados para Modelo de Recomendação](#41-especificação-da-base-de-dados-para-modelo-de-recomendação)
   - [4.2 Modelo Conceitual de Dados](#42-modelo-conceitual-de-dados)
@@ -111,6 +116,10 @@ A Tabela 1 apresenta os principais termos e abreviações utilizados ao longo de
 | Portfólio | Conjunto de projetos gerenciados pela área de Gestão de Portfólio do Metrô. |
 | Projeto | Iniciativa acompanhada pelo PMO, composta por cronograma, TAP, indicadores, documentos e demais artefatos de gestão. |
 | TAP | Termo de Abertura do Projeto. |
+| TAPI | Termo de Abertura do Projeto Inteli, documento que formaliza o escopo, as restrições e as premissas acordadas entre o Metrô e o Inteli. |
+| GTI | Gerência de Tecnologia da Informação do Metrô, responsável pelo provisionamento e homologação dos recursos tecnológicos. |
+| NOR-00-223 | Normativo interno do Metrô que define a Gestão do Portfólio Organizacional. |
+| Subportfólio | Categoria de agrupamento dos projetos e programas do portfólio organizacional. |
 | Teams | Plataforma Microsoft Teams utilizada como principal interface de interação com o agente. |
 | MVP | Minimum Viable Product (Produto Mínimo Viável), correspondente à primeira versão funcional da solução. |
 | RAG | Retrieval-Augmented Generation, abordagem utilizada para geração de respostas fundamentadas em bases documentais. |
@@ -147,11 +156,62 @@ Diante desse cenário, o projeto propõe o desenvolvimento de um agente intelige
 
 
 ## 2.2 Problema
-_conteúdo_
+
+O Escritório Corporativo de Projetos (PMO) do Metrô de São Paulo é responsável por estabelecer e gerir a governança de estratégia, portfólio, programas, projetos e indicadores estratégicos da companhia, acompanhando iniciativas de expansão da malha, modernização tecnológica, manutenção de ativos e melhoria da experiência dos passageiros. As informações necessárias a esse acompanhamento — Termos de Abertura do Projeto (TAP), cronogramas, mapas de benefícios, entregas e marcos, riscos, mudanças, indicadores e normativos institucionais — encontram-se distribuídas entre o SharePoint, listas corporativas, relatórios do Power BI e documentos produzidos em Word, Excel e PowerPoint. Atualmente, a localização, a interpretação e a consolidação dessas informações ocorrem de forma predominantemente manual, sem uma camada unificada de consulta que relacione as diferentes fontes.
+
+A ausência dessa camada faz com que responder a perguntas rotineiras de gestão — qual o avanço de um projeto, qual o prazo vigente, quais riscos estão em aberto, o que determina um normativo específico — exija navegação entre múltiplas plataformas e conhecimento prévio sobre onde cada informação está armazenada. Como consequência, atividades como a elaboração dos balanços mensais, o acompanhamento do andamento dos projetos e a consolidação dos relatórios de partida e de encerramento consomem parte significativa do tempo da equipe do PMO em tarefas administrativas de busca e compilação, reduzindo a capacidade de atuação analítica e estratégica da área e retardando a resposta às demandas de gestão.
+
+Além da perda de eficiência, a consulta manual a fontes dispersas introduz riscos à confiabilidade da informação. Documentos com versões distintas, dados desatualizados e interpretações divergentes de um mesmo normativo podem gerar inconsistências entre os registros consultados e os efetivamente vigentes, comprometendo a rastreabilidade das informações utilizadas nas decisões. Conforme identificado junto ao parceiro, experiências anteriores com ferramentas de Inteligência Artificial generativa apresentaram limitações justamente nesse aspecto: as respostas obtidas nem sempre estavam fundamentadas na documentação oficial da companhia, o que reduziu a confiança das equipes no uso desse tipo de recurso. Soma-se a isso a restrição de confidencialidade, que impede que dados sensíveis de projeto sejam processados por serviços externos não homologados pelas áreas técnicas e de compliance.
+
+O problema afeta tanto usuários internos quanto os processos de governança da organização. Internamente, a equipe do PMO e os gestores responsáveis pelos projetos permanecem sujeitos a processos manuais, retrabalho e forte dependência do conhecimento tácito de profissionais experientes, o que concentra a capacidade de consulta em poucas pessoas e fragiliza a continuidade das atividades. Externamente ao PMO, as demais áreas e instâncias que dependem dessas informações encontram maior dificuldade para acompanhar o portfólio de forma autônoma, o que reduz a agilidade da prestação de contas e do suporte à tomada de decisão. Em conjunto, esses fatores tornam a gestão do portfólio mais lenta, menos padronizada e mais suscetível a inconsistências, limitando o aproveitamento do conhecimento institucional já produzido pela companhia.
 
 ---
 
-## 2.3 Visão do Projeto e do Produto
+## 2.3 Análise SWOT
+
+A Análise SWOT é uma ferramenta de planejamento estratégico utilizada para avaliar os fatores internos (forças e fraquezas) e externos (oportunidades e ameaças) que influenciam a posição competitiva e o desempenho de uma organização no longo prazo. No contexto deste projeto, a análise oferece uma visão estruturada do posicionamento da Companhia do Metropolitano de São Paulo no setor de mobilidade urbana sobre trilhos e evidencia como a melhoria da gestão e da consulta às informações do portfólio de projetos atua diretamente sobre suas fragilidades internas, apoiando os objetivos de eficiência, governança e modernização tecnológica.
+
+<div align="center">
+<sub>Figura 01 - Análise SWOT</sub><br>
+  <img src="img/analise-swot.png" width="100%" alt="Análise SWOT da Companhia do Metropolitano de São Paulo"><br>
+  <sup>Fonte: Material produzido pelos autores, 2026.</sup>
+</div>
+
+### 2.3.1 Forças
+
+- **Operador consolidado de alta capacidade:** o Metrô opera quatro linhas próprias, somando 71,4 km de extensão e 63 estações, por onde circulam cerca de 3 milhões de passageiros por dia, com reconhecimento internacional pelos resultados de produção e qualidade do serviço prestado.
+
+- **Governança de portfólio estruturada:** o PMO Corporativo (GPM) é responsável pela governança de estratégia, portfólio, programas, projetos e indicadores estratégicos, apoiado por normativo próprio (NOR-00-223) e por processos padronizados de partida, acompanhamento e encerramento.
+
+- **Base tecnológica corporativa madura:** a companhia já dispõe de um ecossistema Microsoft implantado e sustentado pela equipe interna — SharePoint, Power Automate, Power BI e Copilot Studio —, o que reduz o custo de adoção de novas soluções e favorece a autonomia técnica da organização.
+
+### 2.3.2 Fraquezas
+
+- **Fragmentação da informação:** os dados do portfólio estão distribuídos entre listas, documentos, planilhas e normativos, sem uma camada unificada de consulta que relacione as diferentes fontes e permita acesso integrado ao conhecimento institucional.
+
+- **Processos manuais e dependência de conhecimento tácito:** a consolidação de status, balanços mensais e relatórios de fechamento depende de esforço humano e da experiência de profissionais específicos, concentrando a capacidade de consulta e fragilizando a continuidade das atividades.
+
+- **Ciclo de homologação restritivo:** a adoção de novas tecnologias depende do provisionamento de ambiente pela Gerência de Tecnologia da Informação (GTI) e da aprovação das áreas de compliance, o que alonga o tempo entre a concepção de uma solução e sua disponibilização efetiva.
+
+### 2.3.3 Oportunidades
+
+- **Maturidade do Processamento de Linguagem Natural e da IA generativa:** recursos já disponíveis e homologáveis no ecossistema Microsoft viabilizam interfaces de consulta em linguagem natural com baixo custo de sustentação, aproveitando a plataforma tecnológica existente.
+
+- **Digitalização do setor metroviário:** a automação de processos e o uso de dados como apoio à gestão consolidam-se como tendência entre operadores de transporte de alta capacidade, criando referências e fornecedores maduros para iniciativas dessa natureza.
+
+- **Agenda de transparência e eficiência no setor público:** a exigência crescente de prestação de contas, rastreabilidade e uso eficiente dos recursos públicos favorece investimentos em governança da informação e em ferramentas de apoio à decisão.
+
+### 2.3.4 Ameaças
+
+- **Exigências de confidencialidade e proteção de dados:** dados sensíveis de projeto não podem trafegar por serviços externos não homologados pelas áreas técnicas e de compliance, o que restringe o uso direto de soluções de mercado e impõe requisitos adicionais de arquitetura.
+
+- **Dependência de orçamento público:** restrições fiscais e mudanças de prioridade governamental podem postergar investimentos em modernização tecnológica e em projetos de expansão, afetando a continuidade das iniciativas do portfólio.
+
+- **Evolução acelerada das plataformas de mercado:** a eventual substituição ou complementação da plataforma atual de gestão de portfólio — por exemplo, pela adoção do Dynamics Project Operations — pode exigir readequação das soluções construídas sobre o ambiente vigente.
+
+---
+
+## 2.4 Visão do Projeto e do Produto
 Este tópico apresenta a visão estratégica do produto proposto, sua proposta de valor e os objetivos que orientam seu desenvolvimento, estabelecendo o alinhamento entre a solução, os desafios identificados pela área de Gestão de Portfólio de Projetos (PMO) do Metrô e as necessidades do negócio. A definição desses elementos busca orientar as decisões arquiteturais, funcionais e de priorização do projeto, delimitando claramente seu escopo, as capacidades esperadas e o valor agregado aos diferentes perfis de usuários.
 
 A proposta surge em um contexto de evolução da plataforma tecnológica utilizada pelo PMO, que já dispõe de ferramentas corporativas para armazenamento, organização e acompanhamento das informações do portfólio, mas ainda depende de atividades manuais para localizar documentos, consolidar informações, interpretar normativos, produzir relatórios e acompanhar o andamento dos projetos. Como consequência, parte significativa do conhecimento institucional permanece distribuída entre diferentes repositórios e depende da experiência dos profissionais para ser acessada de forma eficiente.
@@ -162,7 +222,7 @@ Mais do que introduzir um novo canal de consulta, a solução propõe uma camada
 
 ---
 
-### 2.3.1 Visão do Produto
+### 2.4.1 Visão do Produto
 
 A visão do produto é transformar a interação entre os colaboradores e o portfólio de projetos do Metrô em uma experiência conversacional inteligente, integrada e orientada ao contexto de cada usuário, permitindo que informações estratégicas sejam acessadas por meio de linguagem natural de forma rápida, segura, rastreável e aderente às diretrizes de governança da organização.
 
@@ -174,7 +234,7 @@ Conceitualmente, a solução funciona como uma camada de inteligência sobre os 
 
 ---
 
-### 2.3.2 Proposta de Valor
+### 2.4.2 Proposta de Valor
 
 A proposta de valor do produto fundamenta-se na utilização de Inteligência Artificial para transformar a maneira como gestores e equipes acessam, interpretam e utilizam as informações do portfólio de projetos, reduzindo barreiras operacionais e ampliando a capacidade de tomada de decisão baseada em dados.
 
@@ -192,7 +252,7 @@ O produto entrega valor ao:
 
 Mais do que responder perguntas, o agente busca atuar como uma camada inteligente de apoio à gestão do portfólio, reduzindo esforços operacionais, aumentando a disponibilidade das informações e contribuindo para uma gestão mais eficiente, padronizada e orientada à tomada de decisão.
 
-### 2.3.3 O que o Produto Faz e Não Faz
+### 2.4.3 O que o Produto Faz e Não Faz
 
 #### O que o Produto Faz
 
@@ -215,7 +275,7 @@ O produto não tem como objetivo:
 
 Da mesma forma, funcionalidades que envolvam automações de maior complexidade, ampliação das integrações entre processos corporativos ou expansão do escopo funcional do agente serão implementadas de forma incremental, respeitando o roadmap do produto e as prioridades definidas em conjunto com o PMO.
 
-### 2.3.4 Objetivos Estratégicos e Mensuráveis
+### 2.4.4 Objetivos Estratégicos e Mensuráveis
 
 O sucesso do produto será acompanhado por indicadores relacionados à eficiência operacional, qualidade das informações disponibilizadas, experiência dos usuários e capacidade de apoiar a gestão do portfólio de projetos.
 
@@ -256,7 +316,7 @@ Os objetivos apresentados representam os resultados estratégicos esperados para
 
 ---
 
-### 2.3.5 Ownership e Accountability Estratégico
+### 2.4.5 Ownership e Accountability Estratégico
 
 O desenvolvimento da solução envolve responsabilidades compartilhadas entre os representantes do Metrô e a equipe responsável pelo projeto, garantindo que as decisões técnicas permaneçam alinhadas às necessidades de negócio e às diretrizes institucionais da organização.
 
@@ -287,13 +347,13 @@ Ao preservar o ecossistema tecnológico já adotado pelo Metrô e incorporar rec
 ---
 
 
-## 2.4 Personas e Jornada do Usuário
+## 2.5 Personas e Jornada do Usuário
 
 As personas desenvolvidas representam diferentes perfis de usuários envolvidos na gestão do portfólio de projetos do Metrô. Elas ajudam a compreender como a solução proposta impacta rotinas distintas, desde a tomada de decisão estratégica até o acompanhamento operacional e a consolidação de informações. Considerando que o projeto propõe um agente inteligente para consulta, análise e apoio à gestão do portfólio, as personas evidenciam necessidades relacionadas à confiabilidade das respostas, redução de tarefas manuais, acesso rápido a indicadores e melhor organização das informações distribuídas entre documentos e plataformas corporativas.
 
-### 2.4.1 Personas
+### 2.5.1 Personas
 
-### 2.4.1.1 Roberto
+### 2.5.1.1 Roberto
 
 <div align="center">
   <img src="img/Persona - Roberto.png" alt="Persona Roberto" width="800">
@@ -302,7 +362,7 @@ As personas desenvolvidas representam diferentes perfis de usuários envolvidos 
 
 Roberto é Diretor de Planejamento e Gestão Estratégica, tem 54 anos e atua em São Paulo. Sua rotina é marcada pelo acompanhamento executivo do portfólio de projetos, com foco em decisões estratégicas, riscos, resultados e alinhamento das iniciativas às prioridades organizacionais do Metrô. Por ocupar uma posição de diretoria, Roberto não dispõe de tempo para analisar documentos extensos ou acompanhar detalhes operacionais de cada projeto. Ele precisa receber informações sintetizadas, confiáveis e apresentadas em linguagem executiva, com destaque para projetos críticos, tendências, decisões pendentes e impactos organizacionais. No dia a dia, utiliza ferramentas como Word, Excel, PowerPoint, Teams e SharePoint, mas prefere soluções integradas ao ambiente corporativo que já utiliza.
 
-### 2.4.1.2 Mariana
+### 2.5.1.2 Mariana
 
 <div align="center">
   <img src="img/Persona - Mariana.png" alt="Persona Roberto" width="800">
@@ -311,7 +371,7 @@ Roberto é Diretor de Planejamento e Gestão Estratégica, tem 54 anos e atua em
 
 Mariana é Analista Sênior de Gestão de Portfólio no PMO do Metrô, tem 38 anos e atua diretamente na qualidade, atualização e desempenho das informações do portfólio. Seu dia a dia envolve consolidar dados de diferentes projetos, identificar inconsistências, acompanhar indicadores e produzir análises para gestores e diretoria. Por ser organizada, analítica e orientada a processos, Mariana valoriza informações claras, rastreáveis e confiáveis, especialmente porque suas entregas dependem da consistência dos dados disponíveis. Entre seus principais desafios estão o esforço manual para comparar projetos, produzir relatórios e obter respostas rápidas sobre status, riscos, marcos e pendências. Ela possui alta afinidade tecnológica, domina o ecossistema Microsoft e utiliza diariamente Power BI, SharePoint, Excel e PowerPoint, embora dependa de ferramentas intuitivas e confiáveis para reduzir retrabalho.
 
-### 2.4.1.3 Carlos
+### 2.5.1.3 Carlos
 
 <div align="center">
   <img src="img/Persona - Carlos.png" alt="Persona Roberto" width="800">
@@ -320,11 +380,11 @@ Mariana é Analista Sênior de Gestão de Portfólio no PMO do Metrô, tem 38 an
 
 Carlos é Gerente de Portfólio de Projeto, tem 44 anos e coordena um conjunto de projetos relacionados à sua área de atuação. Sua rotina envolve acompanhar o desempenho do subportfólio, identificar dependências entre projetos, orientar líderes, priorizar recursos e reportar informações ao PMO. Por atuar em uma posição intermediária entre a operação dos projetos e a gestão corporativa, Carlos precisa transformar informações dispersas em uma visão consolidada que apoie decisões táticas. No dia a dia, enfrenta desafios como dependências difíceis de acompanhar, disputa de recursos e demora para reunir informações sobre desvios e impactos. Ele utiliza SharePoint, Power BI, Excel e ferramentas corporativas, interpreta dashboards com facilidade e possui familiaridade intermediária com automações e agentes de IA, valorizando alertas, informações consolidadas e apoio para priorizar ações.
 
-### 2.4.2 Jornadas do Usuário
+### 2.5.2 Jornadas do Usuário
 
 As jornadas do usuário foram desenvolvidas para representar como diferentes perfis interagem com o processo de gestão e consulta das informações do portfólio de projetos. Elas evidenciam objetivos, ações, pensamentos, dores, emoções e oportunidades em cada etapa da experiência, permitindo compreender com mais clareza onde a solução proposta pode gerar valor. No contexto do agente inteligente para apoio à Gestão de Portfólio de Projetos do Metrô, as jornadas ajudam a identificar momentos em que a centralização das informações, a geração de respostas confiáveis e a redução de consultas manuais podem melhorar a tomada de decisão e a rotina dos usuários.
 
-#### 2.4.2.1 Mapa de jornada - Roberto
+#### 2.5.2.1 Mapa de jornada - Roberto
 
 <div align="center">
   <img src="img/User Journey Map - Roberto.png" alt="Mapa de Jornada do Usuário - Roberto" width="900">
@@ -335,7 +395,7 @@ A jornada de Roberto representa a experiência de um usuário com perfil executi
 
 Com a introdução da solução, Roberto passa a buscar uma síntese rápida e confiável por meio de consultas ao novo agente, fazendo perguntas por texto ou voz e aprofundando pontos críticos conforme necessário. Nessa etapa, a principal oportunidade está em evidenciar a confiabilidade das fontes, oferecer respostas objetivas e guiar aprofundamentos. Ao avançar para a definição de prioridades e direcionamentos, Roberto compara cenários, discute com gestores e define ações com maior segurança, utilizando a solução para compreender impactos e apoiar decisões de alta responsabilidade. Por fim, ao verificar os impactos das decisões tomadas, ele acompanha mudanças relevantes, indicadores e direcionamentos anteriores, com a expectativa de antecipar novos riscos e avaliar se as decisões produziram os efeitos esperados.
 
-#### 2.4.2.2 Mapa de jornada - Carlos
+#### 2.5.2.2 Mapa de jornada - Carlos
 
 <div align="center">
   <img src="img/User Journey Map - Carlos.png" alt="Mapa de Jornada do Usuário - Carlos" width="900">
@@ -349,7 +409,7 @@ Ao tentar obter rapidamente o status do subportfólio, Carlos consulta o agente 
 
 ---
 
-## 2.5 Modelagem do Fluxo de Negócio
+## 2.6 Modelagem do Fluxo de Negócio
 
 A modelagem do fluxo de negócio tem como objetivo representar o processo de elaboração do Mapa de Benefícios, permitindo compreender o funcionamento atual da atividade e as mudanças propostas com a utilização do agente inteligente. Para isso, foram utilizados três artefatos complementares: a Cadeia de Valor, que apresenta uma visão consolidada do processo atual e futuro, e os diagramas BPMN dos fluxos AS-IS e TO-BE.
 
@@ -361,7 +421,7 @@ Dessa forma, o fluxo proposto não busca retirar a participação humana do proc
 
 ---
 
-## 2.5.1 Cadeia de Valor
+## 2.6.1 Cadeia de Valor
 
 A cadeia de valor evidencia como o processo de elaboração do mapa de benefícios evolui entre o cenário atual **(AS-IS)** e o cenário futuro **(TO-BE)**. No processo atual, grande parte das informações necessárias para construir o mapa é obtida manualmente, exigindo consulta a múltiplos documentos, interpretação do conhecimento tácito do gestor e preenchimento manual do artefato. No processo futuro, essas atividades permanecem sob condução do líder do projeto, mas passam a contar com o apoio de um agente inteligente capaz de consultar a documentação corporativa, recuperar informações relevantes, sugerir relações entre entregas, resultados e benefícios e gerar automaticamente o mapa para validação final do usuário.
 
@@ -394,7 +454,7 @@ Assim, a Cadeia de Valor complementa os fluxos **AS-IS** e **TO-BE**, demonstran
 
 ---
 
-## 2.5.2 Fluxo de Negócio Proposto (AS-IS e TO-BE)
+## 2.6.2 Fluxo de Negócio Proposto (AS-IS e TO-BE)
 
 Os fluxos de negócio apresentados a seguir detalham o processo de elaboração do Mapa de Benefícios nos cenários **AS-IS** e **TO-BE**, evidenciando como as atividades são executadas em cada contexto. A modelagem em BPMN complementa a Cadeia de Valor apresentada anteriormente ao representar a sequência das atividades, os participantes envolvidos, as interações com o repositório corporativo e os pontos de decisão que orientam a execução do processo. Dessa forma, os diagramas permitem visualizar as diferenças operacionais entre o processo atual e o processo proposto com o apoio do agente inteligente.
 
@@ -430,8 +490,9 @@ A partir desse ponto, o fluxo retorna ao **líder do projeto**, que realiza a **
 
 Caso o mapa seja aprovado, o líder realiza a ação de **exportar e salvar o documento**, encerrando o processo. Caso não seja aprovado, o líder **solicita ajustes**. O fluxo de ajustes retorna ao processo de elaboração, permitindo que as informações sejam complementadas ou modificadas e que um novo mapa seja gerado para posterior revisão.
 
+---
 
-## 2.6 Matriz de Risco do Projeto
+## 2.7 Matriz de Risco do Projeto
 
 
 A matriz de risco do projeto tem como objetivo registrar, avaliar e acompanhar eventos que possam afetar positiva ou negativamente a execução do desenvolvimento do **Agente Inteligente para Gestão de Portfólio de Projetos do Metrô**.
@@ -444,7 +505,7 @@ Como o projeto encontra-se em etapa de desenvolvimento e consolidação da docum
 
 ---
 
-### 2.6.1 Critérios de Avaliação
+### 2.7.1 Critérios de Avaliação
 
 A avaliação dos riscos utiliza uma escala de **1 a 5** para probabilidade e impacto.
 
@@ -485,11 +546,9 @@ Para as oportunidades, a mesma pontuação é utilizada para representar o **pot
 
 ---
 
-### 2.6.2 Registro dos Riscos e Oportunidades
+### 2.7.2 Registro dos Riscos e Oportunidades
 
 A matriz abaixo consolida os riscos identificados para o projeto, contemplando riscos negativos e positivos, suas categorias, avaliação, responsáveis, ações planejadas e status.
-
-<img src="img/Matriz-de-risco.png" alt="Matriz de Riscos" width="800"><br>
 
 | ID | Tipo | Categoria | Risco / Oportunidade | P | I | Sev. | Criticidade | Responsável | Status |
 | :---: | :---: | --- | --- | :---: | :---: | :---: | --- | --- | --- |
@@ -512,7 +571,7 @@ A matriz abaixo consolida os riscos identificados para o projeto, contemplando r
 
 ---
 
-### 2.6.3 Ações de Tratamento
+### 2.7.3 Ações de Tratamento
 
 ### R01  - Indisponibilidade ou baixa qualidade dos dados
 
@@ -694,7 +753,7 @@ Diferenças de interpretação entre equipe e stakeholders podem gerar requisito
 
 ---
 
-### 2.6.4 Oportunidades
+### 2.7.4 Oportunidades
 
 ### O1  - Aproveitamento do ecossistema Microsoft
 
@@ -800,28 +859,11 @@ Essa oportunidade é especialmente relevante para aumentar o valor estratégico 
 
 ---
 
-### 2.6.5 Matriz Probabilidade × Impacto
+### 2.7.5 Matriz Probabilidade × Impacto
 
-A representação gráfica abaixo utiliza a probabilidade no eixo vertical e o impacto no eixo horizontal. Os identificadores dos riscos são posicionados conforme suas respectivas avaliações.
+A representação gráfica abaixo utiliza a probabilidade no eixo vertical e o impacto no eixo horizontal. Os identificadores dos riscos são posicionados conforme suas respectivas avaliações:
 
-Para facilitar a leitura, os riscos negativos são representados por **R** e as oportunidades por **O**.
-
-| Probabilidade ↓ / Impacto → | **1** | **2** | **3** | **4** | **5** |
-| :---: | :---: | :---: | :---: | :---: | :---: |
-| **5 Muito alta** | 🟢 | 🟢 | 🟠 | 🟠 | 🔴 |
-| **4 Alta** | 🟢 | 🟢 | 🟠 | 🔴 R05, R07, R08, O11, O14 | 🔴 R01, R02, R03 |
-| **3 Média** | 🟢 | 🟢 | 🟡 R10 | 🟠 R06, R09, O15 | 🔴 R04, O12, O13, O16 |
-| **2 Baixa** | 🟢 | 🟢 | 🟡 | 🟡 | 🟠 |
-| **1 Muito baixa** | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
-
-**Legenda:**
-
-- 🟢 **Baixa:** 1–4
-- 🟡 **Moderada:** 5–9
-- 🟠 **Alta:** 10–14
-- 🔴 **Crítica:** 15–25
-
-> **Observação:** as oportunidades **O11, O12, O13, O14, O15 e O16** utilizam a mesma escala de probabilidade e impacto, porém sua interpretação é positiva: quanto maior a pontuação, maior o potencial de aproveitamento da oportunidade.
+<img src="img/Matriz-de-risco.png" alt="Matriz de Riscos" width="800"><br>
 
 ---
 
@@ -877,8 +919,9 @@ Dessa forma, a matriz não deve ser tratada apenas como um artefato documental, 
 
 A análise realizada evidencia que os principais pontos de atenção estão concentrados na **qualidade e disponibilidade dos dados, nas dependências de integração tecnológica e na confiabilidade das respostas produzidas pela Inteligência Artificial**. Esses fatores possuem relação direta com a proposta central do produto e, por isso, devem permanecer sob acompanhamento prioritário ao longo das próximas etapas do projeto.
 
+---
 
-## 2.7 Ideação
+## 2.8 Ideação
 
 Esta seção consolida o processo de ideação realizado pela equipe durante as etapas de entendimento do negócio, brainstorming e validação inicial com os representantes do Metrô. O objetivo é registrar as funcionalidades identificadas como oportunidades para o produto, independentemente de sua implementação imediata, preservando um histórico das necessidades levantadas e das possibilidades de evolução da solução.
 
@@ -891,7 +934,7 @@ Essa priorização orienta o roadmap do produto, permitindo que funcionalidades 
 
 ---
 
-### 2.7.1 Matriz de Priorização das Features
+### 2.8.1 Matriz de Priorização das Features
 
 | Prioridade | Feature | Justificativa |
 |---|---|---|
@@ -911,7 +954,7 @@ Essa priorização orienta o roadmap do produto, permitindo que funcionalidades 
 | 🟢 Evolução | Edição das configurações do agente por menu | Permite manutenção funcional sem necessidade de desenvolvimento técnico. |
 | 🟢 Evolução | Fluxo de notificações de riscos | Comunica automaticamente eventos críticos identificados no portfólio. |
 
-### 2.7.2 Descrição das Features Priorizadas
+### 2.8.2 Descrição das Features Priorizadas
 
 As funcionalidades levantadas durante o processo de ideação foram analisadas considerando sua relevância para os objetivos do produto, o valor potencial para os usuários e a viabilidade de desenvolvimento dentro das diferentes etapas do projeto. A seguir, são apresentadas as descrições das features priorizadas, organizadas de acordo com o nível de prioridade estabelecido na matriz de ideação.
 
@@ -991,12 +1034,12 @@ Dessa forma, esta estabelece não apenas um conjunto de funcionalidades possíve
 
 ---
 
-## 2.8 Canvas do Projeto
+## 2.9 Canvas do Projeto
 _conteúdo_
 
 ---
 
-## 2.9 Business Drivers
+## 2.10 Business Drivers
 
 Os Business Drivers representam os principais fatores de negócio que motivam o desenvolvimento da solução e orientam os resultados esperados com sua implementação. No contexto deste projeto, esses direcionadores estabelecem a relação entre as necessidades identificadas na Gestão de Portfólio de Projetos do Metrô e as capacidades proporcionadas pelo Processamento de Linguagem Natural (PLN).
 
@@ -1008,7 +1051,7 @@ Além da eficiência na obtenção das informações, a confiabilidade constitui
 
 Considerando o problema identificado, os objetivos do projeto e os limites estabelecidos para o MVP, foram definidos os seguintes Business Drivers.
 
-### 2.9.1 Business Drivers do Projeto
+### 2.10.1 Business Drivers do Projeto
 
 | ID   | Business Driver                                   | Necessidade de negócio                                                                                                               | Aplicação de PLN                                                                                                                                                                   | Resultado esperado                                                                                       |
 | ---- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
@@ -1017,7 +1060,7 @@ Considerando o problema identificado, os objetivos do projeto e os limites estab
 | BD03 | Aumentar a confiabilidade das respostas           | Reduzir inconsistências e o risco de respostas não sustentadas pelas informações disponibilizadas para processamento.                | Fundamentar as respostas nas informações recuperadas da base utilizada pelo pipeline e identificar situações nas quais não existam dados suficientes para responder adequadamente. | Respostas mais confiáveis, fundamentadas e adequadas às informações disponíveis.                         |
 | BD04 | Tornar a interação com o portfólio mais acessível | Reduzir a dependência do conhecimento sobre a estrutura dos documentos e sistemas utilizados para localizar informações.             | Permitir que diferentes formulações em linguagem natural sejam interpretadas e associadas às intenções suportadas pelo agente.                                                     | Maior autonomia dos usuários para consultar informações relacionadas ao portfólio.                       |
 
-### 2.9.2 Indicadores Computacionais
+### 2.10.2 Indicadores Computacionais
 
 Para avaliar se as capacidades de PLN contribuem efetivamente para os direcionadores definidos, são utilizados indicadores computacionais associados às principais etapas do pipeline. Esses indicadores permitem verificar não apenas o funcionamento técnico da solução, mas também sua capacidade de produzir resultados compatíveis com as necessidades de negócio identificadas.
 
@@ -1036,13 +1079,13 @@ A taxa de alucinação é tratada como um indicador negativo de qualidade, porta
 
 Os indicadores deverão ser avaliados utilizando os dados sintéticos definidos para a prova de conceito, respeitando a delimitação estabelecida para o MVP. Caso a entrada por áudio seja incorporada à avaliação da solução, poderão ser utilizados adicionalmente indicadores específicos relacionados à qualidade da transcrição.
 
-### 2.9.3 Fluxos de Negócio Impactados
+### 2.10.3 Fluxos de Negócio Impactados
 
 A aplicação de PLN modifica principalmente a forma como os usuários acessam e analisam as informações relacionadas ao portfólio. Em vez de depender exclusivamente da localização manual de documentos e da consolidação das informações encontradas, o usuário passa a iniciar esses processos por meio de uma solicitação em linguagem natural.
 
 Dentro do escopo definido para o MVP, dois fluxos representam diretamente essa transformação: a consulta de informações de um projeto e a análise e comparação de informações entre projetos.
 
-#### 2.9.3.1 Fluxo 1 — Consulta de Informações de Projetos
+#### 2.10.3.1 Fluxo 1 — Consulta de Informações de Projetos
 
 No processo atual, a obtenção de uma informação específica sobre determinado projeto pode exigir que o usuário identifique onde a informação está armazenada, localize o documento correspondente e consulte seu conteúdo para encontrar o dado desejado. Dependendo da natureza da solicitação, também pode ser necessário consultar diferentes fontes ou consolidar informações manualmente.
 
@@ -1064,7 +1107,7 @@ Esse fluxo está diretamente relacionado aos Business Drivers BD01, BD03 e BD04.
 
 A classificação correta da intenção é especialmente importante nesse processo, pois determina como a solicitação deverá ser tratada pelo pipeline. Da mesma forma, a precisão e a cobertura da recuperação permitem avaliar se o sistema encontrou as informações adequadas, enquanto a taxa de respostas fundamentadas e a taxa de alucinação permitem avaliar a confiabilidade do conteúdo apresentado.
 
-#### 2.9.3.2 Fluxo 2 — Análise e Comparação entre Projetos
+#### 2.10.3.2 Fluxo 2 — Análise e Comparação entre Projetos
 
 Além das consultas individuais, a gestão do portfólio exige a análise conjunta de informações provenientes de diferentes projetos. Atualmente, esse processo pode exigir a localização das informações de cada iniciativa e sua posterior consolidação para permitir a comparação dos elementos relevantes.
 
@@ -1088,7 +1131,7 @@ Esse fluxo está diretamente relacionado aos Business Drivers BD02 e BD03.
 
 Nesse fluxo, a confiabilidade possui importância ainda maior, pois a resposta pode combinar informações provenientes de diferentes projetos. A redução da taxa de alucinação e a manutenção de uma elevada taxa de respostas fundamentadas contribuem para evitar que informações inexistentes ou inferências não sustentadas sejam apresentadas ao usuário como fatos durante uma análise comparativa.
 
-### 2.9.4 Relação entre Business Drivers, Fluxos e Indicadores
+### 2.10.4 Relação entre Business Drivers, Fluxos e Indicadores
 
 Os Business Drivers, fluxos de negócio e indicadores computacionais estabelecem diferentes níveis de avaliação da transformação proposta. Os Business Drivers representam os resultados desejados para o negócio; os fluxos demonstram como a interação atual é modificada pela aplicação de PLN; e os indicadores permitem avaliar quantitativamente o desempenho das capacidades computacionais responsáveis por essa transformação.
 
@@ -1101,7 +1144,7 @@ Os Business Drivers, fluxos de negócio e indicadores computacionais estabelecem
 
 Essa relação permite que a avaliação técnica do pipeline seja associada aos resultados esperados para o negócio. Uma elevada acurácia na identificação das intenções, por exemplo, possui valor para o PMO porque permite que as solicitações sejam direcionadas corretamente. Da mesma forma, uma elevada precisão na recuperação das informações contribui para respostas mais pertinentes, enquanto uma baixa taxa de alucinação contribui diretamente para a confiabilidade das informações apresentadas.
 
-### 2.9.5 Impacto Esperado no Negócio
+### 2.10.5 Impacto Esperado no Negócio
 
 A principal transformação proposta pelo projeto não consiste na substituição dos processos de gestão de projetos existentes, mas na mudança da forma como os usuários interagem com as informações produzidas e utilizadas nesses processos. O PLN introduz uma camada capaz de transformar solicitações expressas naturalmente pelos usuários em operações estruturadas sobre as informações disponíveis.
 
@@ -1267,13 +1310,232 @@ Como usuário da solução, quero receber respostas estruturadas e fundamentadas
 ## 3.2 Requisitos Não Funcionais (RNFs)
 _conteúdo_
 
-## 3.3 Correlação RFs e RNFs
+## 3.3 Visão Inicial sobre a Solução Técnica de Engenharia
+
+Esta seção apresenta o esboço preliminar da solução como um conjunto de blocos conectados, organizados nas três camadas previstas para o projeto: interface humano-computador, lógica de negócio e acesso a dados e serviços. O objetivo é registrar **como os componentes se relacionam**, ou seja, quais falam com quais, em que sentido e por meio de qual interface. O detalhamento interno de cada bloco fica para as seções de modelagem e de solução técnica das próximas sprints.
+
+O esboço traduz a divisão em dois pilares definida pelo parceiro no Termo de Abertura. O **Pilar 1** corresponde ao núcleo de Processamento de Linguagem Natural, construído e avaliado pela equipe, responsável por interpretar a solicitação do usuário, identificar sua intenção, validar se ela pertence ao catálogo aceitável de interações sobre o portfólio e extrair as entidades necessárias à consulta. O **Pilar 2** corresponde aos recursos de IA generativa do ecossistema Microsoft, aplicados sobre dados já filtrados e estruturados pelo Pilar 1 para produzir a resposta em linguagem natural e os documentos derivados.
+
+### 3.3.1 Organização em camadas
+
+| Camada | Papel na solução | Componentes previstos |
+|---|---|---|
+| **Interface humano-computador** | Recebe a solicitação do usuário em texto ou áudio e devolve a resposta, sem exigir novo aplicativo ou novo login. | Microsoft Teams (canal), agente no Copilot Studio (orquestrador), conversão de áudio em texto. |
+| **Lógica de negócio (Pilar 1)** | Núcleo autoral. Interpreta a linguagem natural e devolve uma resposta estruturada, sem que o texto do usuário transite por serviço externo não homologado. | API de PLN (FastAPI), pré-processamento, classificador de intenções, validador de escopo, extração de entidades, busca semântica e análise comparativa. |
+| **Lógica de negócio (Pilar 2)** | Transforma a resposta estruturada em linguagem natural e gera os artefatos solicitados pelo PMO. | Orquestração generativa do Copilot Studio, prompts do AI Builder, Microsoft 365 Copilot. |
+| **Acesso a dados e serviços** | Fornece e persiste os dados do portfólio e integra a solução aos serviços já usados pelo parceiro. | Conector personalizado (OpenAPI), Power Automate, SharePoint e Listas, índice vetorial, extratores de documentos, gerador de dados sintéticos, Power BI e Fabric Activator. |
+| **Transversal** | Atende dois requisitos que atravessam todas as camadas: permissão por perfil e rastreabilidade das consultas e ações. | Microsoft Entra ID, trilha de auditoria. |
+
+### 3.3.2 Diagrama de Componentes (UML)
+
+A Figura 1 representa os componentes da solução e suas conexões. O diagrama mostra a **estrutura**, isto é, quais componentes se conectam a quais e em que sentido. A sequência de uma solicitação típica está descrita em 3.3.3.
+
+![Diagrama de componentes da solução, organizado nas camadas de interface humano-computador, lógica de negócio (Pilar 1 e Pilar 2), acesso a dados e serviços, e camada transversal](img/componentes-mvp.png)
+
+<p align="center"><em>Figura 1. Visão inicial da solução técnica: diagrama de componentes do MVP sobre dados sintéticos.</em></p>
+
+O código-fonte do diagrama está versionado em [`docs/diagrams/componentes-mvp.puml`](diagrams/componentes-mvp.puml). Para regerar a imagem é necessário ter o PlantUML e o Graphviz instalados:
+
+```bash
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/componentes-mvp.puml
+```
+
+### 3.3.3 Fluxo principal entre os componentes
+
+O caminho percorrido por uma solicitação típica, como *"Qual o prazo do projeto XPTO?"*, atravessa as camadas na seguinte ordem:
+
+1. O usuário do PMO envia a mensagem, por texto ou áudio, pelo **Microsoft Teams**. Sendo áudio, o **componente de conversão de áudio em texto** devolve a transcrição em português ao agente.
+2. O **agente no Copilot Studio** encaminha o texto ao **conector personalizado**, que chama a **API de PLN** por HTTP.
+3. Dentro do Pilar 1, o texto passa pelo **pré-processamento**, é submetido ao **classificador de intenções** e, em seguida, ao **validador de escopo**. Solicitações fora do catálogo aceitável de interações são interrompidas aqui: o usuário é orientado e a solicitação é descartada, sem alcançar os dados do portfólio.
+4. Sendo a intenção válida, a **extração de entidades** identifica os elementos da consulta, como código do projeto, período e subportfólio, e aciona a **busca semântica** sobre o índice vetorial ou a **análise comparativa** sobre os dados estruturados.
+5. A API devolve uma **resposta estruturada** ao agente. É esse recorte já filtrado, e não o texto original do usuário, que alimenta o Pilar 2.
+6. A **orquestração generativa** converte a resposta estruturada em linguagem natural e a devolve ao usuário pelo Teams. Quando a intenção é transacional, o **Power Automate** executa a escrita nas listas do SharePoint. Quando é de geração documental, o **Microsoft 365 Copilot** produz a prévia da apresentação ou do relatório.
+7. Em paralelo, o **Entra ID** garante que a consulta respeite as permissões do perfil e a **trilha de auditoria** registra a interação, a intenção identificada e os documentos consultados.
+
+### 3.3.4 Decisões refletidas no esboço
+
+- **O núcleo de PLN é um serviço independente, não um recurso interno do Copilot Studio.** Isso preserva a exigência de autoria e avaliação do Pilar 1 e permite que o pipeline seja testado, medido e evoluído sem depender do provisionamento do ambiente do parceiro.
+- **A fronteira de confidencialidade fica no validador de escopo.** Nenhum texto livre do usuário segue para a camada generativa. O que trafega a partir dali é um conjunto estruturado de campos já validados.
+- **A camada de dados é substituível.** O acesso ao portfólio ocorre por meio do Power Automate e das listas do SharePoint. Caso a plataforma seja trocada no futuro, o impacto se concentra nesses conectores e o núcleo de PLN é preservado, o que atende à premissa de portabilidade registrada no Termo de Abertura.
+- **Rastreabilidade e permissão são componentes, não observações.** Ambas aparecem no diagrama como blocos transversais, por serem requisitos explicitamente nomeados pelo parceiro.
+
+O detalhamento dos componentes internos, das interfaces e dos contratos de dados será desenvolvido nas seções *Solução Técnica (Design)* e *Mapeamento Técnico de Infraestrutura e Implantação* deste documento, ao longo das próximas sprints.
+
+## 3.4 Visão Inicial sobre Tecnologias e Ferramentas
+
+Esta seção apresenta a estimativa inicial das tecnologias e ferramentas que o grupo pretende utilizar na construção da solução. As escolhas aqui registradas são **preliminares** e derivam diretamente das restrições declaradas pelo parceiro no Termo de Abertura (TAPI) e no documento *Plataforma Tecnológica do Metrô*. Espera-se que sejam revisadas e refinadas ao longo das próximas sprints, à medida que os requisitos não funcionais forem detalhados e que a equipe validar hipóteses com a área de TI/GTI do Metrô.
+
+### 3.4.1 Critérios de seleção
+
+Toda decisão tecnológica desta seção foi avaliada contra cinco critérios, extraídos das restrições e premissas do projeto:
+
+| # | Critério | Origem |
+|---|---|---|
+| C1 | **Aderência ao ecossistema Microsoft.** A solução deve ser operada, mantida e evoluída pela própria equipe do Metrô dentro de Power Platform, Microsoft 365 e Azure. | TAPI, seção *Restrições* e *Benefícios esperados* |
+| C2 | **Confidencialidade.** Nenhum dado sensível pode ser processado por serviço externo não homologado. Os experimentos de desenvolvimento usam dados sintéticos ou anonimizados e ambientes homologados pelo Metrô. | TAPI, seção *Restrições* |
+| C3 | **Autoria do núcleo de PLN.** O pipeline de Processamento de Linguagem Natural do Pilar 1 deve ser construído e avaliado pela equipe, não terceirizado a um serviço de caixa-preta. | TAPI, seção *Objetivo*, Pilar 1 |
+| C4 | **Custo e licenciamento.** Evitar recursos que exijam licenciamento adicional para os usuários finais do Metrô, como os conectores premium no Power Apps. | *Plataforma Tecnológica do Metrô*, seção Power Platform |
+| C5 | **Portabilidade.** A plataforma de portfólio pode ser substituída no futuro, por exemplo pelo Dynamics 365 Project Operations. A camada de IA deve permanecer funcional mesmo com troca da plataforma de origem dos dados. | TAPI, seção *Premissas* |
+
+### 3.4.2 Listagem organizada das tecnologias e ferramentas
+
+A stack é apresentada por camada, seguindo a mesma divisão adotada na visão técnica da solução (interface humano-computador, lógica de negócio, e acesso a dados e serviços).
+
+#### 3.4.2.1 Camada de interface humano-computador
+
+| Tecnologia / Ferramenta | Função na solução | Critérios atendidos |
+|---|---|---|
+| **Microsoft Copilot Studio** | Canal principal de conversa em linguagem natural. Hospeda o agente, os tópicos e a orquestração generativa. O TAPI define o Copilot Studio como *"camada de orquestração e integração do agente"*. | C1, C5 |
+| **Microsoft Teams** | Canal de distribuição do agente para os usuários do PMO, sem exigir novo aplicativo ou novo login. | C1, C4 |
+| **Captura de voz nativa do canal (Teams / Copilot Studio)** | Primeira opção para a conversão de áudio em texto prevista no escopo macro, por não exigir provisionamento adicional nem sair do canal já homologado. | C1, C4 |
+| **Azure AI Speech (Speech-to-Text, pt-BR)** | Alternativa para a conversão de áudio em texto, caso a captura nativa do canal não atenda ao português ou à qualidade necessária. **A disponibilidade precisa ser confirmada com a GTI.** O documento *Plataforma Tecnológica do Metrô* descreve o Azure AI de forma geral, mas destaca apenas o Azure Machine Learning Studio e o Azure OpenAI, sem citar o serviço de fala. | C1, C2 |
+
+> **Base já existente.** O TAPI registra, entre as restrições, que a plataforma atual de portfólio já utiliza *"Copilot Studio para Bot de apoio na obtenção e atualização de status dos projetos e sub portfólios"*, e o documento *Arquitetura Portfólio Metrô* identifica a consulta de situação do portfólio e o suporte de FAQ como recursos "ainda em desenvolvimento". A solução deste projeto, portanto, **não parte de um cenário vazio**. Ela amplia esse agente com o núcleo de PLN autoral e com as transações do Pilar 2. A decisão entre estender o agente existente ou publicar um novo agente no mesmo ambiente será tomada com a GTI na Sprint 2.
+
+#### 3.4.2.2 Camada de lógica de negócio: núcleo de PLN (Pilar 1)
+
+Este é o componente autoral da equipe: recebe o texto transcrito, identifica a intenção, valida se ela pertence ao catálogo aceitável de interações e extrai as entidades necessárias para a consulta.
+
+| Tecnologia / Ferramenta | Função na solução | Critérios atendidos |
+|---|---|---|
+| **Python 3.11+** | Linguagem do pipeline de PLN. | C3 |
+| **Jupyter Notebook** | Ambiente de experimentação, avaliação e documentação executável dos modelos. | C3 |
+| **spaCy** (modelo `pt_core_news_lg`) | Pré-processamento em português: tokenização, lematização, *part-of-speech* e reconhecimento de entidades nomeadas (códigos de projeto, datas, valores). | C2, C3 |
+| **scikit-learn** | *Baseline* de classificação de intenções (TF-IDF + Regressão Logística / SVM) e cálculo das métricas de avaliação. | C3 |
+| **Hugging Face Transformers** + **Sentence-Transformers** | Modelos de linguagem em português (ex.: BERTimbau, `multilingual-e5`) executados localmente para gerar *embeddings* de sentenças, usados na classificação de intenções e na busca semântica sobre os documentos de projeto. | C2, C3 |
+| **FAISS** ou **ChromaDB** | Índice vetorial local para a busca semântica e a análise comparativa entre projetos do portfólio. | C2, C3 |
+| **pandas** / **NumPy** | Manipulação dos dados sintéticos e consolidação das análises comparativas. | C3 |
+| **FastAPI** | Exposição do pipeline de PLN como API REST documentada em OpenAPI, consumida pelo Copilot Studio. | C1, C5 |
+| **Docker** | Empacotamento do serviço de PLN, garantindo reprodutibilidade entre as máquinas da equipe e o ambiente do parceiro. | C5 |
+| **Azure Container Apps** (ou **Azure App Service**) | Destino de execução do contêiner do serviço de PLN dentro do *tenant* do parceiro, mantendo o processamento em ambiente homologado. Enquanto o provisionamento não ocorrer, o serviço roda localmente para desenvolvimento e avaliação. | C1, C2 |
+
+> **Dependência de provisionamento.** A hospedagem do serviço de PLN em ambiente Azure do Metrô depende da GTI e não estava confirmada na abertura do projeto. Por isso o pipeline foi desenhado para ser executável de três formas equivalentes (local, em contêiner e como serviço publicado), de modo que a ausência do ambiente atrase a integração, mas não bloqueie o desenvolvimento e a avaliação do núcleo (Pilar 1).
+
+> **Decisão registrada.** O grupo optou por construir o classificador de intenções com modelos executados localmente, e não delegar a identificação de intenção a um LLM externo. A justificativa é dupla: atende à exigência do Pilar 1 (núcleo autoral e avaliado pela equipe, critério C3) e mantém o texto do usuário fora de serviços não homologados (C2). O uso de LLM fica reservado ao Pilar 2, sobre conteúdo já filtrado.
+
+#### 3.4.2.3 Camada de lógica de negócio: recursos de IA generativa (Pilar 2)
+
+| Tecnologia / Ferramenta | Função na solução | Critérios atendidos |
+|---|---|---|
+| **Orquestração generativa do Copilot Studio** | Geração das respostas em linguagem natural a partir dos dados estruturados devolvidos pelo pipeline de PLN, e condução de diálogos de múltiplos turnos (ex.: criação de projeto por etapas). | C1, C2 |
+| **AI Builder (prompts personalizados)** | Prompts específicos para as transações do Pilar 2, como alertas de risco, verificação de marcos e aderência a normativos. | C1 |
+| **Microsoft 365 Copilot** | Geração das prévias de apresentação mensal para a diretoria (PowerPoint) e do relatório de fechamento (Word), a partir do conteúdo consolidado pelo agente. | C1 |
+
+> **Ponto em aberto.** O documento *Plataforma Tecnológica do Metrô* (22/10/2025) registra que o ambiente do parceiro está no Brasil (pt-BR) e que recursos em *preview* habilitados apenas no ambiente americano podiam ainda não estar disponíveis para uso, citando explicitamente o *computer use* (CUA) e o interpretador de Python (*code interpreter*). Como o documento tem quase um ano na data de abertura deste projeto e o Copilot Studio evolui de forma contínua, **o grupo não assume nem descarta a disponibilidade desses recursos. O levantamento do que está efetivamente habilitado no *tenant* do Metrô é uma tarefa da Sprint 2, a ser conduzida junto à GTI.** Nenhuma funcionalidade do MVP depende desses recursos.
+
+#### 3.4.2.4 Camada de acesso a dados e serviços
+
+| Tecnologia / Ferramenta | Função na solução | Critérios atendidos |
+|---|---|---|
+| **SharePoint Online + Listas** | Fonte de dados do portfólio no ambiente do parceiro. No MVP, é o formato-alvo replicado com dados sintéticos. | C1, C5 |
+| **Power Automate (cloud flows)** | Automação dos fluxos de escrita e atualização (registro de status, lembretes de pendências, notificações). O modelo *cloud-flow* é o indicado pelo parceiro, por não haver sistema *on-premises* envolvido. | C1, C4 |
+| **Conector personalizado (OpenAPI)** | Ponte entre o Copilot Studio e a API de PLN da equipe, a partir da especificação OpenAPI gerada pelo FastAPI. É a opção principal, por ser o mecanismo consolidado de extensão da Power Platform. | C1, C5 |
+| **Model Context Protocol (MCP)**, a avaliar | Alternativa ao conector personalizado, potencialmente com menor acoplamento. Depende de confirmação da GTI quanto ao suporte e ao licenciamento no *tenant* do Metrô, e não é assumida como caminho no MVP. | C1, C5 |
+| **Power BI (Microsoft Fabric)** | Painéis de indicadores do portfólio e visualizações citadas nas intenções do usuário (ex.: *dashboard* de compliance financeiro). | C1 |
+| **Fabric Activator** | Alertas sobre métricas do portfólio (marcos próximos do vencimento, pendências), com envio via Outlook e Teams pela integração com Power Automate. | C1 |
+| **python-docx**, **openpyxl**, **pdfplumber** | Extração de conteúdo dos documentos de projeto (Word, Excel, PDF) para alimentar o índice semântico. | C2, C3 |
+| **openpyxl** / **python-pptx** (escrita) | Geração dos artefatos de saída solicitados pelo parceiro: exportação do cronograma para Excel e prévia da apresentação mensal para a diretoria. As histórias de usuário do Metrô preveem a pergunta *"Quer exportar para o Excel ou MS Project?"* ao final da construção do cronograma. | C1 |
+| **Faker** | Geração da massa de dados sintéticos que substitui as informações reais do portfólio durante todo o MVP. | C2 |
+
+> **Restrição herdada: ingestão para RAG.** O parceiro informou que a estratégia de ingestão de arquivos para RAG é executada pela GTI e que o grupo focal não possui autonomia nessa atividade. Por isso, no MVP a equipe constrói sua própria camada de recuperação sobre os dados sintéticos, e documenta a interface esperada para que a ingestão homologada seja plugada posteriormente sem reescrita do núcleo.
+
+> **Restrição herdada: engenharia de dados.** A mesma lógica vale para o Power BI. O documento *Plataforma Tecnológica do Metrô* registra que o grupo responsável pela análise e criação dos painéis *"é um cliente, ou seja, não executa a etapa de engenharia de dados (ingestão/persistir no storage)"*. O MVP, portanto, consome e produz dados no formato das listas do SharePoint, sem assumir responsabilidade por pipelines de ingestão no Fabric.
+
+**Corpus documental do MVP.** A base sobre a qual o agente responde é composta por dois conjuntos. O primeiro são os documentos de projeto gerados sinteticamente no formato dos anexos do parceiro, ou seja, Partida do portfólio, Balanço, Relatório Anual de fechamento do portfólio e Relatório Anual de fechamento de projeto ou programa. O segundo é o normativo **NOR-00-223, Gestão do Portfólio Organizacional**, indicado pelo parceiro nas histórias de usuário como a referência a ser usada para esclarecer dúvidas sobre conceitos e normativos de gestão de portfólio.
+
+#### 3.4.2.5 Camada transversal: identidade, permissões e rastreabilidade
+
+Dois requisitos do TAPI atravessam todas as camadas anteriores e por isso são tratados separadamente. O primeiro é a **rastreabilidade**, listada entre os benefícios esperados como *"registro de todas as consultas e ações realizadas no sistema, com suporte ao não repúdio"* e repetida em todas as intenções do quadro de exemplos do Apêndice. O segundo é a **atuação dentro dos limites de permissão**, item explícito do escopo macro: *"Atuar dentro dos limites de permissão e acesso à informação de cada perfil"*.
+
+| Tecnologia / Ferramenta | Função na solução | Critérios atendidos |
+|---|---|---|
+| **Microsoft Entra ID** | Identidade corporativa já usada pelos usuários do Metrô. O agente herda a autenticação do canal (Teams), sem login adicional, e a identidade autenticada é propagada até a camada de dados. | C1, C2 |
+| **Grupos e permissões do SharePoint** | Autorização efetiva por perfil. A visibilidade de projetos e subportfólios segue as permissões já configuradas nas listas do portfólio, evitando um segundo modelo de permissões paralelo ao do parceiro. | C1, C2 |
+| **Lista de auditoria (SharePoint) ou tabela do Dataverse** | Trilha de auditoria da aplicação: registro de cada solicitação recebida, da intenção classificada, dos documentos consultados e da resposta devolvida, com identificação do usuário e carimbo de tempo. | C1, C2 |
+| **Logs estruturados do serviço de PLN** (`logging` do Python, formato JSON) | Registro técnico das decisões do pipeline, como intenção identificada, confiança da classificação e trechos recuperados, permitindo auditar *por que* o agente respondeu o que respondeu. | C2, C3 |
+| **Application Insights (Azure Monitor)** | Telemetria de disponibilidade, latência e erros do serviço de PLN, quando publicado no ambiente do parceiro. | C1 |
+
+> **Escopo no MVP.** Como o MVP opera sobre dados sintéticos, a trilha de auditoria é implementada de forma funcional, mas sobre a base sintética. O objetivo é demonstrar o mecanismo e deixar a interface pronta, não produzir registros de auditoria com valor legal. A definição da política de retenção e do formato definitivo do registro cabe às áreas de TI e compliance do Metrô.
+
+#### 3.4.2.6 Ferramentas de engenharia, gestão e qualidade
+
+| Ferramenta | Função no projeto |
+|---|---|
+| **GitLab (`git.inteli.edu.br`)** | Versionamento do código e da documentação, quadro Kanban, *issues*, *merge requests* e registro de contribuições. |
+| **GitFlow + Conventional Commits** | Política de branches e padronização das mensagens de commit, detalhadas em `GestaoConfiguracao.md`. |
+| **Visual Studio Code** | Ambiente de desenvolvimento, com extensões de Python, Jupyter e Markdown. |
+| **Draw.io / Mermaid / PlantUML** | Diagramas UML (componentes e pacotes), BPMN e diagramas de sequência da documentação. |
+| **Figma** | Prototipação das interfaces conversacionais e dos fluxos de interação. |
+| **pytest** | Testes automatizados do pipeline de PLN e da API. |
+| **scikit-learn (metrics)** | Avaliação do desempenho do núcleo de PLN: acurácia, precisão, revocação e F1 macro para a classificação de intenções, matriz de confusão, *recall@k* e MRR para a busca semântica. |
+| **Markdown** | Formato de toda a documentação do repositório. |
+
+### 3.4.3 Alternativas avaliadas e não adotadas
+
+O registro das opções descartadas é parte da decisão: ele documenta o que foi considerado e por que não seguiu adiante.
+
+| Alternativa | Por que foi considerada | Por que não foi adotada |
+|---|---|---|
+| **API de LLM externo** (OpenAI, Anthropic, Google) para classificação de intenções | Menor esforço de implementação e boa acurácia sem treinamento. | Viola C2 (trânsito de dados por serviço não homologado) e C3 (o Pilar 1 exige núcleo autoral e avaliado pela equipe). |
+| **Azure OpenAI Service** provisionado à parte | Permaneceria dentro do *tenant* Azure do parceiro. | O próprio parceiro registra que o Copilot Studio já conta com os modelos mais recentes, *"não sendo necessário provisionar modelo adicional"*. Custo adicional sem ganho claro no MVP. |
+| ***Fine-tuning*** de um modelo de linguagem | Potencial ganho de acurácia no domínio de gestão de portfólio. | O parceiro declara explicitamente que não trabalha com *fine-tuning*, apenas com RAG. Além disso, o volume de dados sintéticos do MVP não sustentaria o treinamento. |
+| **Power Apps** como interface principal | Interface visual rica para preenchimento de formulários de projeto. | O escopo do módulo pede interface primariamente em linguagem natural (texto e áudio). Somam-se as restrições de licenciamento (C4), sem conectores premium e com limite de 500 linhas por leitura de lista. |
+| **Aplicação web própria** (React/Next.js) fora do ecossistema Microsoft | Liberdade total de implementação e melhor experiência de voz. | Viola C1 e comprometeria a sustentação pela equipe interna do Metrô, que é um benefício esperado explícito do projeto. |
+| **Elasticsearch / OpenSearch** para busca | Recurso maduro de busca textual e vetorial. | Exigiria infraestrutura adicional a ser provisionada e mantida. FAISS/ChromaDB atendem à escala do MVP com custo operacional próximo de zero. |
+| **Azure Machine Learning** como ambiente de treino e *endpoint* | Citado pelo parceiro como recurso disponível. Ofereceria *endpoints* gerenciados de inferência. | Mantido como **evolução prevista**, não como dependência do MVP. O provisionamento depende da GTI e não pode bloquear a Sprint 2. O empacotamento em Docker foi escolhido justamente para tornar essa migração de baixo atrito. |
+
+### 3.4.4 Riscos e dependências tecnológicas
+
+Os itens abaixo alimentam a seção *Matriz de risco do projeto* deste documento, na categoria técnica.
+
+| Risco / dependência | Impacto no projeto | Encaminhamento |
+|---|---|---|
+| Disponibilidade de licença e ambiente de Copilot Studio para a equipe Inteli | Sem o ambiente, o Pilar 2 e a integração ficam apenas em especificação. | Confirmar com a GTI logo na Sprint 2 e manter o núcleo de PLN independente do Copilot Studio, testável via API. |
+| Recursos do Copilot Studio indisponíveis no ambiente pt-BR | Funcionalidades em *preview* citadas pelo parceiro (CUA, interpretador de Python) podem não existir no *tenant*. | Levantar com a GTI na Sprint 2 o que está habilitado e manter o MVP sem dependência desses recursos. |
+| Ausência de ambiente Azure provisionado para hospedar o serviço de PLN | A integração entre o Copilot Studio e a API da equipe fica apenas especificada. | Manter o pipeline executável localmente e em contêiner. Solicitar o provisionamento à GTI logo na Sprint 2, tratando a publicação como etapa de integração e não como pré-requisito do Pilar 1. |
+| Conectores personalizados classificados como *premium* na Power Platform | Custo de licenciamento adicional inviabilizaria a adoção. | Verificar a cobertura pelo licenciamento do Copilot Studio e avaliar MCP como alternativa. |
+| Qualidade e representatividade dos dados sintéticos | Modelo com boa métrica em laboratório e desempenho ruim no cenário real. | Derivar a **estrutura** dos dados sintéticos dos anexos do parceiro, com os cinco subportfólios (Turnaround, Expansão da Rede, Desempenho/Eficiência/Segurança Operacional, Receitas Não Tarifárias, Pessoas e Patrimônio), identificadores no padrão `TUR-01` e os campos dos relatórios de partida, balanço e fechamento. As amostras devem ser validadas com o PMO. |
+| Modelo de permissões do portfólio mais granular do que o previsto | O agente pode expor a um perfil informação restrita a outro, violando item explícito do escopo macro. | Espelhar as permissões já existentes nas listas do SharePoint em vez de criar um modelo próprio. Validar com o PMO os perfis e o que cada um enxerga antes de implementar as consultas. |
+| Desempenho de modelos de linguagem em português executados localmente | Latência ou acurácia insuficientes na classificação de intenções. | Estabelecer o *baseline* leve (TF-IDF + SVM) antes dos modelos maiores, e comparar as métricas antes de decidir. |
+
+### 3.4.5 Fora do escopo do MVP (evolução "Ir Além")
+
+As tecnologias a seguir foram identificadas como pertinentes à solução final, mas **não** integram o MVP validado sobre dados sintéticos:
+
+- Integração em produção com o portfólio real do Metrô (SharePoint e Listas do ambiente produtivo)
+- Ingestão homologada de documentos para RAG, executada pela GTI
+- *Endpoints* de inferência gerenciados no Azure Machine Learning
+- Microsoft Planner Premium e Dynamics 365 Project Operations, caso a plataforma de portfólio seja substituída
+- Síntese de fala (*text-to-speech*) para respostas faladas. O escopo macro do TAPI exige a conversão de **áudio em texto** na entrada, e a resposta falada é tratada como evolução desejável
+- Integração com MS Project e Businessmap, citados nas histórias de usuário como destinos possíveis de exportação do cronograma. No MVP a exportação é feita para Excel
+- Adoção de serviços de IA generativa homologados sobre dados reais e sensíveis
+
+### 3.4.6 Referências
+
+**Documentos do parceiro**
+
+- Companhia do Metropolitano de São Paulo. *TAPI: MOD7 ES Agente de IA Portfólio de Projetos Metrô*, rev. 2.
+- Companhia do Metropolitano de São Paulo. *Plataforma Tecnológica do Metrô*, 22/10/2025.
+- Companhia do Metropolitano de São Paulo. *Arquitetura Portfólio Metrô*, 22/10/2025.
+- Companhia do Metropolitano de São Paulo. *História do Usuário: Agente de IA*.
+- Companhia do Metropolitano de São Paulo. *NOR-00-223: Gestão do Portfólio Organizacional*.
+- Companhia do Metropolitano de São Paulo. Anexos 1 a 4: *Partida do portfólio*, *Balanço do portfólio*, *Relatório Anual de fechamento do portfólio* e *Relatório Anual de fechamento de projeto ou programa*.
+
+> Os documentos acima são de uso restrito e foram disponibilizados pelo Metrô apenas para contextualização do projeto junto ao Inteli. Nenhum conteúdo desses arquivos é reproduzido neste repositório. Os anexos são utilizados como referência de **estrutura** para a geração dos dados sintéticos, e os dois relatórios anuais estão classificados pelo parceiro como *Corporativo* e *Confidencial*.
+
+**Materiais de estudo indicados pelo parceiro**
+
+- Microsoft. *Documentação oficial do Microsoft Copilot Studio*. Disponível em: https://learn.microsoft.com/pt-br/microsoft-copilot-studio/
+- Microsoft. *Criar relatórios com o Copilot no Power BI*. Disponível em: https://learn.microsoft.com/pt-br/power-bi/create-reports/copilot-create-desktop-report
+- DataCamp. *Power BI Copilot*. Disponível em: https://www.datacamp.com/pt/tutorial/power-bi-copilot
+
+## 3.5 Correlação RFs e RNFs
 _conteúdo_
 
-## 3.4 Casos de Uso
+## 3.6 Casos de Uso
 _conteúdo_
 
-## 3.5 Casos de Uso x Requisitos Funcionais
+## 3.7 Casos de Uso x Requisitos Funcionais
 _conteúdo_
 
 # 4. Modelagem de Dados
@@ -1403,3 +1665,4 @@ _conteúdo_
 # Referências
 _conteúdo_
 
+<p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">[nome do projeto]</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">INTELI, [aluno 1], [aluno 2], [aluno 3], [aluno 4], [aluno 5], [aluno 6], [aluno 7]</a> is licensed under <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">Attribution 4.0 International<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"></a></p>
