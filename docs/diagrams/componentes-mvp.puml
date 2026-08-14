@@ -1,0 +1,131 @@
+@startuml componentes-mvp
+' Diagrama de Componentes (UML): visao inicial da solucao tecnica de engenharia
+' Agente de IA para Gestao de Portfolio de Projetos do Metro de Sao Paulo
+' Escopo: MVP validado sobre dados sinteticos (Modulo ES07)
+'
+' Geracao da imagem (requer PlantUML e Graphviz instalados):
+'   java -jar plantuml.jar -charset UTF-8 -tpng -o ../img componentes-mvp.puml
+
+title Visao Inicial da Solucao Tecnica: Diagrama de Componentes (MVP sobre dados sinteticos)
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam ArrowColor #37474F
+skinparam package {
+  BorderColor #546E7A
+  BackgroundColor #FAFAFA
+  FontStyle bold
+}
+skinparam component {
+  BorderColor #37474F
+  BackgroundColor #FFFFFF
+  FontSize 12
+}
+skinparam database {
+  BorderColor #37474F
+  BackgroundColor #FFFFFF
+}
+skinparam note {
+  BorderColor #F9A825
+  BackgroundColor #FFFDE7
+}
+
+actor "Usuario do PMO" as Usuario
+
+package "Camada de Interface Humano-Computador" as L1 {
+  component "Microsoft Teams" as Teams <<canal>>
+  component "Agente no Copilot Studio" as Agente <<orquestrador>>
+  component "Conversao de Audio em Texto" as STT <<speech-to-text>>
+}
+
+package "Camada de Logica de Negocio" as L2 {
+
+  package "Pilar 1: Nucleo de PLN (autoral)" as P1 {
+    component "API de PLN" as API <<FastAPI / REST>>
+    component "Pre-processamento" as Prep <<spaCy>>
+    component "Classificador de Intencoes" as Intencao <<scikit-learn / Transformers>>
+    component "Validador de Escopo" as Validador <<catalogo aceitavel>>
+    component "Extracao de Entidades" as NER <<NER>>
+    component "Busca Semantica" as Busca <<embeddings>>
+    component "Analise Comparativa" as Comparativa <<pandas>>
+  }
+
+  package "Pilar 2: Recursos de IA Generativa" as P2 {
+    component "Orquestracao Generativa" as Generativa <<Copilot Studio>>
+    component "Prompts Personalizados" as AIBuilder <<AI Builder>>
+    component "Geracao de Documentos" as M365 <<Microsoft 365 Copilot>>
+  }
+}
+
+package "Camada de Acesso a Dados e Servicos" as L3 {
+  component "Conector Personalizado" as Conector <<OpenAPI>>
+  component "Power Automate" as Automate <<cloud flows>>
+  database "SharePoint + Listas" as SharePoint <<dados sinteticos>>
+  database "Indice Vetorial" as Indice <<FAISS / ChromaDB>>
+  component "Extratores de Documentos" as Extratores <<docx, xlsx, pdf>>
+  component "Gerador de Dados Sinteticos" as Faker <<Faker>>
+  component "Power BI + Fabric Activator" as PowerBI <<indicadores e alertas>>
+}
+
+package "Camada Transversal" as L4 {
+  component "Microsoft Entra ID" as Entra <<identidade e permissoes>>
+  component "Trilha de Auditoria" as Auditoria <<rastreabilidade>>
+}
+
+' --- Fluxo principal: interface ---
+Usuario <--> Teams : texto ou audio
+Teams <--> Agente : mensagem e resposta
+Agente --> STT : audio
+
+' --- Interface -> logica de negocio ---
+Agente --> Conector : solicitacao
+Conector <--> API : HTTP / JSON
+
+' --- Pipeline interno do Pilar 1 ---
+API --> Prep
+Prep --> Intencao
+Intencao --> Validador
+Validador --> NER : intencao valida
+NER --> Busca
+NER --> Comparativa
+Busca --> Indice : consulta por similaridade
+Comparativa --> SharePoint : leitura
+
+' --- Retorno e Pilar 2 ---
+Agente --> Generativa : dados estruturados
+Generativa --> AIBuilder : alertas e compliance
+Agente --> M365 : conteudo consolidado
+
+' --- Escrita e servicos ---
+Agente --> Automate : transacoes de escrita
+Automate --> SharePoint : escrita
+SharePoint --> PowerBI : replicacao
+PowerBI --> Automate : alertas
+
+' --- Preparacao do corpus ---
+Faker --> SharePoint : massa sintetica
+Faker --> Extratores : documentos sinteticos
+Extratores --> Indice : indexacao (+ NOR-00-223)
+
+' --- Transversais ---
+Entra ..> Agente : autenticacao
+Entra ..> SharePoint : autorizacao por perfil
+Agente ..> Auditoria : interacao
+API ..> Auditoria : intencao e trechos
+
+note left of API
+  Componente autoral da equipe,
+  construido e avaliado internamente.
+  Executa modelos localmente, sem
+  transito de texto por servico
+  externo nao homologado.
+end note
+
+note bottom of L3
+  No MVP, todo o conteudo e sintetico.
+  A integracao com o portfolio real e a
+  ingestao homologada para RAG (executada
+  pela GTI) sao evolucao "Ir Alem".
+end note
+
+@enduml

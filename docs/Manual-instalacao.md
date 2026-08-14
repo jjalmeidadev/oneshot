@@ -1,9 +1,7 @@
-<Table>
+<table>
   <tr>
-    <td><a href= "https://www.btgpactual.com/"><img src="img/logo-btg.png" alt="Centro Paula Souza" border="0"></td>
-    <td>
-      <a href= "https://www.inteli.edu.br/"><img src="img/logo-Inteli.png" alt="Inteli - Instituto de Tecnologia e Liderança" border="0"></a>
-    </td>
+    <td><a href="https://www.metro.sp.gov.br/"><img src="img/logo-metro.png" alt="Companhia do Metropolitano de Sao Paulo - Metro" border="0" width="180"></a></td>
+    <td><a href="https://www.inteli.edu.br/"><img src="img/logo-Inteli.png" alt="Inteli - Instituto de Tecnologia e Lideranca" border="0" width="180"></a></td>
   </tr>
 </table>
 
@@ -11,6 +9,63 @@
 
 ## Nome do Grupo: <nome do grupo>
 
+# Manual de Instalação
 
+# Sumário
 
-Explica como montar, conectar e utilizar o protótipo.
+- [1. Introdução](#1-introdução)
+- [2. Pré-requisitos](#2-pré-requisitos)
+- [3. Instalação](#3-instalação)
+- [4. Configuração](#4-configuração)
+- [5. Execução](#5-execução)
+- [6. Verificação da instalação](#6-verificação-da-instalação)
+- [7. Solução de problemas](#7-solução-de-problemas)
+- [Referências](#referências)
+
+# 1. Introdução
+
+_conteúdo_
+
+**Nota:** descrever o objetivo deste documento e a quem ele se destina.
+
+# 2. Pré-requisitos
+
+_conteúdo_
+
+**Nota:** listar sistema operacional, versões de runtime, contas e permissões necessárias no ambiente do parceiro.
+
+# 3. Instalação
+
+_conteúdo_
+
+**Nota:** descrever o passo a passo de obtenção do código e instalação de dependências.
+
+# 4. Configuração
+
+_conteúdo_
+
+**Nota:** descrever variáveis de ambiente e arquivos de configuração. Não versionar credenciais.
+
+# 5. Execução
+
+_conteúdo_
+
+**Nota:** descrever como iniciar a aplicação e cada um de seus componentes.
+
+# 6. Verificação da instalação
+
+_conteúdo_
+
+**Nota:** descrever como confirmar que a instalação foi bem-sucedida.
+
+# 7. Solução de problemas
+
+_conteúdo_
+
+**Nota:** registrar os erros mais comuns e suas resoluções.
+
+# Referências
+
+_conteúdo_
+
+<p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">[nome do projeto]</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">INTELI, [aluno 1], [aluno 2], [aluno 3], [aluno 4], [aluno 5], [aluno 6], [aluno 7]</a> is licensed under <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">Attribution 4.0 International<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"></a></p>
