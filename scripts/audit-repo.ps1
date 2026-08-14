@@ -4,8 +4,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$homologacaoComAcento = "homologa" + [char]0x00E7 + [char]0x00E3 + "o"
-$protectedBranches = @("main", "dev", "develop", "hmg", "homologacao", $homologacaoComAcento)
+$protectedBranches = @("main", "develop", "hmg")
 $validPrefixes = @(
     "feature/",
     "feat/",

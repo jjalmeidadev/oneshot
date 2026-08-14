@@ -32,6 +32,8 @@
   - [2.2 Pontos fortes](#22-pontos-fortes)
   - [2.3 Pontos de melhoria](#23-pontos-de-melhoria)
   - [2.4 Ações de melhoria para a sprint 2](#24-ações-de-melhoria-para-a-sprint-2)
+  - [2.5 Revisão dos riscos da Sprint 1](#25-revisão-dos-riscos-da-sprint-1)
+  - [2.6 Mecanismo contínuo de acompanhamento dos riscos](#26-mecanismo-contínuo-de-acompanhamento-dos-riscos)
 - [3. Matriz de papéis e responsabilidades](#3-matriz-de-papéis-e-responsabilidades)
   - [3.1 Matriz de responsabilidades - Sprint 1](#31-matriz-de-responsabilidades---sprint-1)
 - [4. Contrato de convivência, SLA e rituais](#4-contrato-de-convivência-sla-e-rituais)
@@ -121,6 +123,31 @@ Com base na retrospectiva da Sprint 1, o grupo definiu as seguintes ações de m
 | Manter o contrato de convivência como referência prática. | Falta de combinados explícitos no início da sprint. | Contrato consultado durante dailies, revisões e fechamento semanal. |
 
 Essas ações conectam a análise da Sprint 1 ao planejamento da Sprint 2 e buscam tornar o processo menos individualizado, mais rastreável e mais consistente com as boas práticas exigidas pelo módulo.
+
+## 2.5 Revisão dos riscos da Sprint 1
+
+A matriz de riscos construída na Sprint 1 foi revisada a partir da retrospectiva do grupo e dos pontos de melhoria identificados. A revisão confirmou que os riscos mais relevantes para a Sprint 2 não estavam apenas no escopo técnico da solução, mas também na forma de colaboração, revisão e integração dos artefatos.
+
+| Risco revisado | Situação observada na Sprint 1 | Decisão para Sprint 2 |
+| --- | --- | --- |
+| Trabalho isolado entre frentes | O grupo conseguiu entregar, mas parte das frentes evoluiu com pouca troca de contexto. | Manter o risco ativo e mitigá-lo com dailies mais objetivas, pareamento pontual e registro de dependências. |
+| Revisão concentrada no fim da sprint | A revisão tardia aumentou a chance de inconsistências entre documentos e retrabalho. | Elevar a prioridade do risco e adotar quinta-feira como marco interno de revisão por pares. |
+| Falta de evidência objetiva de conclusão | Algumas entregas dependiam de validação manual e poderiam gerar ambiguidades sobre o status real. | Manter o risco ativo e exigir evidência anexada à issue antes de mover tarefas para `Closed`. |
+| Divergência entre decisões e documentação | Decisões discutidas informalmente poderiam não aparecer nos artefatos finais. | Mitigar com registro das decisões no WhatsApp, Slack ou issue relacionada. |
+
+Essa revisão transforma os riscos identificados na Sprint 1 em regras operacionais para a Sprint 2, evitando que a matriz seja apenas um artefato estático.
+
+## 2.6 Mecanismo contínuo de acompanhamento dos riscos
+
+O acompanhamento dos riscos será feito de forma contínua durante a sprint, com registro simples e verificável:
+
+| Momento | Responsável | Ação esperada | Evidência |
+| --- | --- | --- | --- |
+| Daily | Responsável pela tarefa | Informar impedimentos, dependências e mudanças de probabilidade ou impacto. | Mensagem no canal oficial ou comentário na issue. |
+| Revisão de quinta-feira | Revisor da entrega | Verificar se a tarefa possui risco aberto, evidência suficiente e pendências de integração. | Comentário de revisão ou checklist atualizado. |
+| Fechamento da sprint | Scrum Master | Consolidar riscos materializados, riscos reduzidos e novos riscos para a sprint seguinte. | Atualização da seção de riscos em `GestaoProjeto.md` ou issue de retrospectiva. |
+
+Um risco deve ser atualizado quando houver aumento de probabilidade, aumento de impacto, materialização do problema, remoção da causa ou definição de nova ação de mitigação. Quando o risco afetar prazo, escopo ou qualidade da entrega, ele deve ser comunicado no mesmo dia no canal oficial e vinculado à issue correspondente.
 
 # 3. Matriz de papéis e responsabilidades
 
@@ -238,7 +265,9 @@ O foco da gestão de conflitos é proteger a entrega e a colaboração, não exp
 
 ## 4.7 Comunicação oficial
 
-As decisões relevantes devem ser registradas em canal oficial da equipe ou na própria issue do GitLab.
+Os canais oficiais de comunicação da equipe são o **grupo do WhatsApp** e o **Slack do grupo**. O WhatsApp será usado para alinhamentos rápidos, avisos urgentes, confirmação de presença e sinalização imediata de impedimentos. O Slack será usado para registros mais estruturados, decisões de trabalho, links de evidências, acompanhamento assíncrono e organização de discussões por tema quando necessário.
+
+As decisões relevantes devem ser registradas em um desses canais oficiais ou na própria issue do GitLab. Quando uma conversa começar de forma informal, a decisão final precisa ser consolidada no WhatsApp, no Slack ou na issue relacionada para manter rastreabilidade.
 
 Devem ser registrados:
 
@@ -250,7 +279,7 @@ Devem ser registrados:
 - Evidências de entrega;
 - Aprovações e revisões.
 
-Discussões informais podem acontecer em outros canais, mas a decisão final precisa ficar rastreável.
+Discussões informais podem acontecer em outros canais, mas a decisão final precisa ficar rastreável. Para conflitos entre registros, prevalece a ordem: issue do GitLab, Slack do grupo e, por fim, WhatsApp, desde que a mensagem identifique a decisão tomada, os responsáveis e a data do acordo.
 
 # 5. Planejamento da sprint 2
 
@@ -479,7 +508,7 @@ Antes do merge para `main`, o Scrum Master deve verificar:
 - Se existem evidências mínimas de entrega;
 - Se os Merge Requests necessários foram aprovados;
 - Se não há impedimento crítico aberto;
-- Se o conteúdo de `dev` representa a versão que o grupo deseja entregar;
-- Se a promoção seguiu o fluxo obrigatório `feature/* -> dev -> hmg -> main`.
+- Se o conteúdo de `hmg` representa a versão que o grupo deseja entregar;
+- Se a promoção seguiu o fluxo obrigatório `feature/* -> develop -> hmg -> main`.
 
 Na sexta-feira, o Scrum Master executa ou coordena o merge para `main` e comunica o grupo sobre o estado final da entrega. Quando uma entrega estiver pronta antes da sexta-feira, o Scrum Master pode coordenar a promoção antecipada, desde que exista Merge Request, aprovação, evidência e validação.
