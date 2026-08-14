@@ -65,7 +65,7 @@ O GitFlow é um modelo de organização de branches que separa o desenvolvimento
 O fluxo obrigatório do módulo é:
 
 ```text
-feature/* -> develop -> homologação -> main
+feature/* -> develop -> hmg -> main
 ```
 
 O fluxo operacional é:
@@ -78,8 +78,8 @@ O fluxo operacional é:
 6. O integrante abre um Merge Request para `develop`.
 7. Outro integrante revisa a entrega.
 8. Após aprovação e validação, a branch é mesclada em `develop`.
-9. A versão integrada é promovida de `develop` para `homologação` por Merge Request.
-10. A versão homologada é promovida de `homologação` para `main` por Merge Request.
+9. A versão integrada é promovida de `develop` para `hmg` por Merge Request.
+10. A versão homologada é promovida de `hmg` para `main` por Merge Request.
 
 Promoções podem acontecer durante a sprint quando uma entrega estiver pronta. A sprint define a cadência de planejamento, mas não obriga a equipe a concentrar todos os merges no último dia.
 
@@ -89,11 +89,11 @@ Promoções podem acontecer durante a sprint quando uma entrega estiver pronta. 
 
 | Branch | Finalidade | Regra de uso |
 | --- | --- | --- |
-| `main` | Contém a versão estável e entregue do projeto. | Não recebe commits diretos. Recebe apenas Merge Requests aprovados a partir de `homologação`, com DoD atendida. |
+| `main` | Contém a versão estável e entregue do projeto. | Não recebe commits diretos. Recebe apenas Merge Requests aprovados a partir de `hmg`, com DoD atendida. |
 | `develop` | Integra as entregas em desenvolvimento durante a sprint. | Recebe somente Merge Requests aprovados a partir de branches temporárias. |
-| `homologação` | Representa o ambiente compartilhado de homologação. | Não recebe commits diretos. Recebe Merge Requests de `develop` para validação funcional antes da promoção para `main`. |
-| `dev` | Branch permanente herdada de fluxos anteriores ou integrações externas. | Não recebe commits diretos. Deve ser evitada como base de trabalho nova, salvo decisão explícita do grupo. |
-| `hmg` / `homologacao` | Nomes alternativos bloqueados pelos hooks para evitar push direto em branch de homologação. | Não devem receber commits diretos. O uso preferencial do projeto é `homologação`. |
+| `hmg` | Representa o ambiente compartilhado de homologação. | Não recebe commits diretos. Recebe Merge Requests de `develop` para validação funcional antes da promoção para `main`. |
+
+As branches `dev`, `homologacao` e `homologação` não fazem mais parte do fluxo oficial do projeto. O grupo removeu `dev` e padronizou a homologação como `hmg`, mantendo apenas `main`, `develop` e `hmg` como branches permanentes.
 
 As branches permanentes não devem ser usadas para desenvolvimento direto. Qualquer alteração deve partir de uma branch temporária e entrar no fluxo por Merge Request.
 
@@ -114,7 +114,7 @@ As branches permanentes não devem ser usadas para desenvolvimento direto. Qualq
 | `perf/*` | Melhoria de performance. | `develop` | `develop` |
 | `ci/*` | Ajustes de pipeline e integração contínua. | `develop` | `develop` |
 | `build/*` | Ajustes de build, empacotamento ou release. | `develop` | `develop` |
-| `release/*` | Preparação de uma versão candidata à entrega. | `develop` | `homologação`, `main` e `develop` |
+| `release/*` | Preparação de uma versão candidata à entrega. | `develop` | `hmg`, `main` e `develop` |
 | `hotfix/*` | Correção urgente em uma versão já estável. | `main` | `main` e `develop` |
 
 # 4. Política de nomenclatura de branches
@@ -248,14 +248,14 @@ Etapas:
 O fluxo de release é usado quando uma versão candidata precisa ser estabilizada sem misturar novas funcionalidades.
 
 ```text
-develop -> release/x.y.z -> homologação -> main
+develop -> release/x.y.z -> hmg -> main
 ```
 
 Regras:
 
 - Não entram novas funcionalidades em `release/*`;
 - Só são permitidos ajustes finais, correções, documentação e validações;
-- A versão deve ser validada em `homologação` antes de chegar à `main`;
+- A versão deve ser validada em `hmg` antes de chegar à `main`;
 - Depois do merge em `main`, qualquer ajuste feito na release deve voltar para `develop`;
 - Se uma entrega estiver pronta e outra não, o grupo deve usar MR individual, feature flag ou branch de release para não bloquear promoção de trabalho concluído.
 
@@ -282,7 +282,7 @@ Regras:
 - A branch nasce de `main`;
 - O escopo deve ser mínimo e focado na correção;
 - O Merge Request deve ir para `main`;
-- Depois da correção em `main`, o mesmo ajuste deve ser levado para `develop` e, quando aplicável, para `homologação`.
+- Depois da correção em `main`, o mesmo ajuste deve ser levado para `develop` e, quando aplicável, para `hmg`.
 
 # 7. Hooks de Git
 
@@ -365,12 +365,11 @@ Branches bloqueadas pelos hooks:
 
 ```text
 main
-dev
 develop
 hmg
-homologacao
-homologação
 ```
+
+Tentativas de recriar ou usar `dev`, `homologacao` ou `homologação` devem ser tratadas como desvio do fluxo oficial e corrigidas antes da abertura do Merge Request.
 
 Prefixos de branch aceitos pelos hooks:
 
@@ -467,7 +466,7 @@ git push -u origin docs/gestao-projeto
 
 ```text
 Branch de integração: develop
-Branch de homologação: homologação
+Branch de homologação: hmg
 Branch final: main
 Responsável pelo merge final: Scrum Master
 Prazo de revisão: quinta-feira
@@ -477,7 +476,7 @@ Prazo de merge para main: sexta-feira como cadência padrão
 Fluxo:
 
 ```text
-branches temporárias -> develop -> homologação -> main
+branches temporárias -> develop -> hmg -> main
 ```
 
 ## 8.3 Hotfix
@@ -491,14 +490,14 @@ Destino: main e develop
 
 # 9. Regras de governança do GitFlow
 
-- Não é permitido commitar diretamente em `main`, `develop` ou `homologação`;
-- Os hooks também bloqueiam commits e pushes diretos em `develop`, `homologacao` e `homologação`;
+- Não é permitido commitar diretamente em `main`, `develop` ou `hmg`;
+- Os hooks também bloqueiam commits e pushes diretos em `develop` e `hmg`;
 - Toda tarefa versionada deve ser desenvolvida em branch temporária;
 - Cada branch temporária deve representar uma issue;
 - Toda integração deve passar por Merge Request;
-- O fluxo obrigatório de promoção é `feature/* -> develop -> homologação -> main`;
+- O fluxo obrigatório de promoção é `feature/* -> develop -> hmg -> main`;
 - `develop` recebe apenas MR aprovado;
-- `homologação` recebe versão candidata para validação funcional;
+- `hmg` recebe versão candidata para validação funcional;
 - `main` recebe apenas MR aprovado, com pipeline verde quando disponível e DoD atendida;
 - A revisão deve acontecer até quinta-feira como cadência interna, para reduzir risco de acúmulo no fechamento;
 - O merge para `main` ocorre na sexta-feira como cadência padrão, sob responsabilidade do Scrum Master, mas entregas prontas podem ser promovidas antes por MR, pipeline e aprovação;
