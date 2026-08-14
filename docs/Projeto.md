@@ -490,9 +490,436 @@ A partir desse ponto, o fluxo retorna ao **líder do projeto**, que realiza a **
 
 Caso o mapa seja aprovado, o líder realiza a ação de **exportar e salvar o documento**, encerrando o processo. Caso não seja aprovado, o líder **solicita ajustes**. O fluxo de ajustes retorna ao processo de elaboração, permitindo que as informações sejam complementadas ou modificadas e que um novo mapa seja gerado para posterior revisão.
 
+---
 
 ## 2.7 Matriz de Risco do Projeto
-_conteúdo_
+
+
+A matriz de risco do projeto tem como objetivo registrar, avaliar e acompanhar eventos que possam afetar positiva ou negativamente a execução do desenvolvimento do **Agente Inteligente para Gestão de Portfólio de Projetos do Metrô**.
+
+A identificação dos riscos foi realizada considerando o contexto atual do projeto, suas dependências técnicas e organizacionais, as características do produto proposto e o estágio de desenvolvimento da solução. Entre os principais fatores considerados estão a dependência de informações e documentos disponibilizados pelo parceiro, a utilização do ecossistema Microsoft, a necessidade de integração com diferentes fontes de conhecimento, o controle de acesso às informações e a necessidade de garantir respostas fundamentadas para os usuários.
+
+A matriz também contempla **oportunidades**, representadas por eventos de natureza positiva que, caso ocorram ou sejam adequadamente explorados, podem contribuir para a evolução, qualidade ou eficiência da solução.
+
+Como o projeto encontra-se em etapa de desenvolvimento e consolidação da documentação, os riscos identificados deverão ser revisados periodicamente conforme novas decisões arquiteturais, validações com o parceiro, disponibilização de dados e evolução do escopo.
+
+---
+
+### 2.7.1 Critérios de Avaliação
+
+A avaliação dos riscos utiliza uma escala de **1 a 5** para probabilidade e impacto.
+
+### Probabilidade
+
+| Valor | Classificação | Descrição |
+| :---: | --- | --- |
+| **1** | Muito baixa | Evento improvável de ocorrer durante o projeto. |
+| **2** | Baixa | Evento pouco provável, mas possível. |
+| **3** | Média | Evento com possibilidade moderada de ocorrência. |
+| **4** | Alta | Evento provável de ocorrer durante o projeto. |
+| **5** | Muito alta | Evento muito provável ou recorrente durante o projeto. |
+
+### Impacto
+
+| Valor | Classificação | Descrição |
+| :---: | --- | --- |
+| **1** | Muito baixo | Consequências praticamente desprezíveis para o projeto. |
+| **2** | Baixo | Pequeno impacto sobre uma atividade ou entrega, sem comprometer significativamente o projeto. |
+| **3** | Médio | Impacto relevante sobre uma atividade, entrega ou prazo, exigindo intervenção da equipe. |
+| **4** | Alto | Pode comprometer uma entrega importante, gerar retrabalho significativo ou afetar o cronograma. |
+| **5** | Muito alto | Pode comprometer diretamente objetivos do projeto, funcionalidades centrais ou a viabilidade de uma entrega. |
+
+A **severidade** é calculada pela seguinte regra:
+
+> **Severidade = Probabilidade × Impacto**
+
+A classificação resultante segue as seguintes faixas:
+
+| Severidade | Criticidade | Interpretação |
+| :---: | --- | --- |
+| **1–4** | 🟢 Baixa | Risco deve ser acompanhado, mas não exige intervenção prioritária. |
+| **5–9** | 🟡 Moderada | Requer acompanhamento e ações preventivas quando aplicável. |
+| **10–14** | 🟠 Alta | Deve possuir acompanhamento ativo e ações planejadas. |
+| **15–25** | 🔴 Crítica | Deve receber tratamento prioritário pela equipe. |
+
+Para as oportunidades, a mesma pontuação é utilizada para representar o **potencial de aproveitamento** do evento positivo.
+
+---
+
+### 2.7.2 Registro dos Riscos e Oportunidades
+
+A matriz abaixo consolida os riscos identificados para o projeto, contemplando riscos negativos e positivos, suas categorias, avaliação, responsáveis, ações planejadas e status.
+
+| ID | Tipo | Categoria | Risco / Oportunidade | P | I | Sev. | Criticidade | Responsável | Status |
+| :---: | :---: | --- | --- | :---: | :---: | :---: | --- | --- | --- |
+| **R01** | 🔴 Risco | Dados | Indisponibilidade ou baixa qualidade das informações e documentos necessários para alimentar a base de conhecimento do agente. | 4 | 5 | **20** | 🔴 Crítica | Jaime Almeida | Em Monitoramento |
+| **R02** | 🔴 Risco | Técnico | Dificuldades ou limitações nas integrações com Microsoft Teams, Power Platform ou demais componentes do ecossistema Microsoft. | 4 | 5 | **20** | 🔴 Crítica | Felipe Teixeira | Em Monitoramento |
+| **R03** | 🔴 Risco | Técnico | Respostas inadequadas, imprecisas ou não suficientemente fundamentadas geradas pelo agente de IA. | 4 | 5 | **20** | 🔴 Crítica | Henrique Diniz | Em Monitoramento |
+| **R04** | 🔴 Risco | Técnico | Limitações na implementação do controle de autenticação, permissões e acesso às informações conforme o perfil do usuário. | 3 | 5 | **15** | 🔴 Crítica | Wendel Feitosa | Em Monitoramento |
+| **R05** | 🔴 Risco | Dados | Alterações, inconsistências ou desatualização das fontes utilizadas pelo agente durante o desenvolvimento. | 4 | 4 | **16** | 🔴 Crítica | Leonardo Ramos | Em Monitoramento |
+| **R06** | 🔴 Risco | Stakeholders | Indisponibilidade ou baixa participação dos representantes do Metrô durante validações e esclarecimento de dúvidas de negócio. | 3 | 4 | **12** | 🟠 Alta | Jaime Almeida | Aberto |
+| **R07** | 🔴 Risco | Escopo | Ampliação do escopo decorrente da incorporação de novas funcionalidades ou necessidades levantadas durante o projeto. | 4 | 4 | **16** | 🔴 Crítica | Pedro Uchoa | Em Monitoramento |
+| **R08** | 🔴 Risco | Cronograma | Tempo insuficiente para implementar, validar e documentar todas as funcionalidades previstas para a solução. | 4 | 4 | **16** | 🔴 Crítica | Felipe Teixeira | Em Monitoramento |
+| **R09** | 🔴 Risco | Equipe | Sobrecarga ou indisponibilidade de integrantes para execução simultânea das atividades de análise, documentação, desenvolvimento e validação. | 3 | 4 | **12** | 🟠 Alta | Henrique Diniz | Aberto |
+| **R10** | 🔴 Risco | Comunicação | Divergência de entendimento entre equipe e stakeholders sobre requisitos, prioridades ou comportamento esperado do agente. | 3 | 3 | **9** | 🟡 Moderada | Pedro Uchoa | Em Monitoramento |
+| **O1** | 🟢 Oportunidade | Técnico | Aproveitamento do ecossistema Microsoft já utilizado pelo parceiro para facilitar integração, adoção e disponibilização do agente. | 4 | 4 | **16** | 🟢 Alta oportunidade | Wendel Feitosa | Em Monitoramento |
+| **O2** | 🟢 Oportunidade | Stakeholders / Dados | Disponibilização de fontes oficiais e conhecimento especializado do PMO para aumentar a qualidade e a contextualização das respostas do agente. | 3 | 5 | **15** | 🟢 Alta oportunidade | Leonardo Ramos | Em Monitoramento |
+| **O3** | 🟢 Oportunidade | Técnico / Arquitetura | Aproveitamento de uma arquitetura modular e escalável para incorporar progressivamente novos fluxos, integrações e capacidades de IA sem reestruturar integralmente a solução. | 3 | 5 | **15** | 🟢 Alta oportunidade | Henrique Diniz | Em Monitoramento |
+| **O4** | 🟢 Oportunidade | Processo | Automação proativa de pendências e acompanhamentos recorrentes, reduzindo cobranças manuais do PMO e aumentando a atualização das informações dos projetos. | 4 | 4 | **16** | 🟢 Alta oportunidade | Jaime Almeida | Em Monitoramento |
+| **O5** | 🟢 Oportunidade | Dados / Negócio | Reutilização estruturada do conhecimento institucional para apoiar diferentes fluxos do portfólio, evitando duplicação de informações e ampliando o valor da base de conhecimento. | 3 | 4 | **12** | 🟠 Alta oportunidade | Leonardo Ramos | Em Monitoramento |
+| **O6** | 🟢 Oportunidade | Análise / Stakeholders | Ampliação da capacidade analítica do PMO por meio de respostas comparativas, perguntas sugeridas e utilização integrada de indicadores e documentos do portfólio. | 3 | 5 | **15** | 🟢 Alta oportunidade | Pedro Uchoa | Em Monitoramento |
+
+---
+
+### 2.7.3 Ações de Tratamento
+
+### R01  - Indisponibilidade ou baixa qualidade dos dados
+
+**Categoria:** Dados  
+**Probabilidade:** 4  
+**Impacto:** 5  
+**Severidade:** 20  - 🔴 Crítica
+
+A solução depende de informações e documentos institucionais para que o agente consiga responder às consultas de maneira contextualizada e fundamentada. A indisponibilidade, incompletude ou baixa qualidade dessas informações pode comprometer diretamente a capacidade do agente de produzir respostas confiáveis.
+
+**Mitigação:** identificar antecipadamente as fontes necessárias, validar sua disponibilidade com o parceiro e estabelecer critérios mínimos de qualidade e completude para os dados e documentos utilizados.
+
+**Contingência:** restringir temporariamente o escopo das consultas às fontes disponíveis e sinalizar explicitamente ao usuário quando não houver informação suficiente para fundamentar uma resposta.
+
+**Responsável:** Jaime Almeida.  
+**Status:** Em Monitoramento.
+
+---
+
+### R02  - Dificuldades nas integrações com o ecossistema Microsoft
+
+**Categoria:** Técnico  
+**Probabilidade:** 4  
+**Impacto:** 5  
+**Severidade:** 20  - 🔴 Crítica
+
+A solução está prevista para operar integrada ao ecossistema tecnológico Microsoft, incluindo Microsoft Teams e componentes da Power Platform. Dependências de configuração, permissões, conectores ou limitações das plataformas podem afetar a implementação do agente.
+
+**Mitigação:** validar antecipadamente as integrações necessárias e realizar provas de conceito dos componentes críticos antes da implementação completa dos fluxos.
+
+**Contingência:** utilizar uma interface ou fluxo alternativo disponível no ambiente de desenvolvimento para validar as funcionalidades centrais do agente, mantendo a integração definitiva como etapa posterior.
+
+**Responsável:** Felipe Teixeira.  
+**Status:** Em Monitoramento.
+
+---
+
+### R03  - Respostas inadequadas ou não fundamentadas
+
+**Categoria:** Técnico  
+**Probabilidade:** 4  
+**Impacto:** 5  
+**Severidade:** 20  - 🔴 Crítica
+
+Como a solução utiliza Inteligência Artificial para interpretar consultas e gerar respostas, existe o risco de o agente apresentar informações incorretas, incompletas ou sem fundamentação suficiente. Esse risco é particularmente relevante porque a solução pretende apoiar atividades de gestão e disponibilizar informações provenientes das fontes oficiais do Metrô.
+
+**Mitigação:** utilizar fontes documentais controladas, estruturar adequadamente a base de conhecimento, definir mecanismos de validação da qualidade das interações e estabelecer comportamento explícito para situações nas quais não existam informações suficientes.
+
+**Contingência:** fazer com que o agente informe a ausência de informações suficientes e evite apresentar uma resposta como fato quando não houver fonte adequada para fundamentá-la.
+
+**Responsável:** Henrique Diniz.  
+**Status:** Em Monitoramento.
+
+---
+
+### R04  - Limitações de autenticação e controle de acesso
+
+**Categoria:** Técnico  
+**Probabilidade:** 3  
+**Impacto:** 5  
+**Severidade:** 15  - 🔴 Crítica
+
+A solução deverá respeitar os diferentes níveis de acesso às informações do portfólio. Uma implementação inadequada das regras de autenticação ou autorização pode permitir acesso indevido ou limitar o acesso legítimo de determinados usuários.
+
+**Mitigação:** definir previamente os perfis de acesso, as permissões associadas a cada perfil e os limites de informação que podem ser disponibilizados pelo agente.
+
+**Contingência:** restringir o acesso às funcionalidades ou fontes que apresentem problemas de autorização até que a configuração seja corrigida e validada.
+
+**Responsável:** Wendel Feitosa.  
+**Status:** Em Monitoramento.
+
+---
+
+### R05  - Alteração ou desatualização das fontes
+
+**Categoria:** Dados  
+**Probabilidade:** 4  
+**Impacto:** 4  
+**Severidade:** 16  - 🔴 Crítica
+
+Informações utilizadas pelo agente podem sofrer alterações, atualizações ou substituições ao longo do projeto. Caso a base utilizada pela solução não acompanhe essas mudanças, o agente poderá responder utilizando informações desatualizadas.
+
+**Mitigação:** estabelecer uma estratégia de atualização das fontes e identificar quais documentos possuem caráter prioritário para atualização.
+
+**Contingência:** suspender temporariamente a utilização de uma fonte identificada como desatualizada e informar a necessidade de atualização antes de utilizá-la novamente como referência.
+
+**Responsável:** Leonardo Ramos.  
+**Status:** Em Monitoramento.
+
+---
+
+### R06  - Indisponibilidade dos stakeholders
+
+**Categoria:** Stakeholders  
+**Probabilidade:** 3  
+**Impacto:** 4  
+**Severidade:** 12  - 🟠 Alta
+
+A compreensão dos processos do PMO e a validação da solução dependem da participação dos representantes do Metrô. A baixa disponibilidade desses stakeholders pode atrasar decisões e dificultar a validação das funcionalidades.
+
+**Mitigação:** organizar previamente os pontos que dependem de validação do parceiro e concentrar dúvidas e decisões em momentos de alinhamento previamente definidos.
+
+**Contingência:** registrar as decisões pendentes, utilizar apenas informações previamente validadas e postergar funcionalidades cuja implementação dependa de uma definição do parceiro.
+
+**Responsável:** Jaime Almeida.  
+**Status:** Aberto.
+
+---
+
+### R07  - Ampliação do escopo
+
+**Categoria:** Escopo  
+**Probabilidade:** 4  
+**Impacto:** 4  
+**Severidade:** 16  - 🔴 Crítica
+
+O levantamento de novas possibilidades para o agente pode gerar solicitações adicionais ao longo do projeto. A incorporação indiscriminada dessas funcionalidades pode aumentar o esforço de desenvolvimento e comprometer as entregas prioritárias.
+
+**Mitigação:** manter uma priorização formal das funcionalidades e diferenciar claramente capacidades essenciais do MVP de oportunidades de evolução futura.
+
+**Contingência:** retirar ou postergar funcionalidades de menor prioridade quando novas demandas forem incorporadas, preservando as funcionalidades essenciais do MVP.
+
+**Responsável:** Pedro Uchoa.  
+**Status:** Em Monitoramento.
+
+---
+
+### R08  - Tempo insuficiente para implementação e validação
+
+**Categoria:** Cronograma  
+**Probabilidade:** 4  
+**Impacto:** 4  
+**Severidade:** 16  - 🔴 Crítica
+
+A quantidade de atividades necessárias para compreender o problema, definir requisitos, estruturar a solução, validar as decisões e produzir a documentação pode superar o tempo disponível para o projeto.
+
+**Mitigação:** priorizar as funcionalidades e entregas de maior valor, acompanhar continuamente o progresso e antecipar atividades que possuam dependências com outras tarefas.
+
+**Contingência:** reduzir o escopo da implementação para preservar as capacidades essenciais e registrar funcionalidades secundárias como oportunidades de evolução.
+
+**Responsável:** Felipe Teixeira.  
+**Status:** Em Monitoramento.
+
+---
+
+### R09  - Sobrecarga ou indisponibilidade da equipe
+
+**Categoria:** Equipe  
+**Probabilidade:** 3  
+**Impacto:** 4  
+**Severidade:** 12  - 🟠 Alta
+
+A execução simultânea de atividades de análise, documentação, arquitetura, desenvolvimento e validação pode gerar concentração excessiva de trabalho em determinados integrantes.
+
+**Mitigação:** distribuir responsabilidades antecipadamente, acompanhar a carga de trabalho e compartilhar conhecimento sobre atividades críticas.
+
+**Contingência:** redistribuir tarefas entre os integrantes e priorizar atividades diretamente relacionadas às entregas do ciclo atual.
+
+**Responsável:** Henrique Diniz.  
+**Status:** Aberto.
+
+---
+
+### R10  - Divergência de entendimento
+
+**Categoria:** Comunicação  
+**Probabilidade:** 3  
+**Impacto:** 3  
+**Severidade:** 9  - 🟡 Moderada
+
+Diferenças de interpretação entre equipe e stakeholders podem gerar requisitos inconsistentes, retrabalho ou desenvolvimento de funcionalidades diferentes da expectativa do parceiro.
+
+**Mitigação:** registrar decisões, requisitos e validações realizadas e utilizar reuniões de alinhamento para esclarecer pontos ambíguos.
+
+**Contingência:** interromper a implementação do item divergente, revisar o entendimento com os envolvidos e atualizar a documentação antes de prosseguir.
+
+**Responsável:** Pedro Uchoa.  
+**Status:** Em Monitoramento.
+
+---
+
+### 2.7.4 Oportunidades
+
+### O1  - Aproveitamento do ecossistema Microsoft
+
+**Categoria:** Técnico  
+**Probabilidade:** 4  
+**Impacto:** 4  
+**Potencial:** 16  - 🟢 Alta oportunidade
+
+A utilização de tecnologias já presentes no ambiente corporativo pode facilitar a integração do agente ao cotidiano dos usuários, reduzir barreiras de adoção e aproveitar recursos existentes na organização.
+
+**Estratégia de aproveitamento:** priorizar componentes do ecossistema Microsoft já adotados pelo parceiro sempre que forem tecnicamente adequados ao escopo, validando antecipadamente suas capacidades e limitações.
+
+**Responsável:** Wendel Feitosa.  
+**Status:** Em Monitoramento.
+
+---
+
+### O2  - Disponibilização de fontes oficiais e conhecimento do PMO
+
+**Categoria:** Stakeholders / Dados  
+**Probabilidade:** 3  
+**Impacto:** 5  
+**Potencial:** 15  - 🟢 Alta oportunidade
+
+A disponibilização de documentos oficiais, normativos e conhecimento especializado dos representantes do PMO pode aumentar significativamente a qualidade do contexto utilizado pelo agente e permitir respostas mais alinhadas à realidade organizacional.
+
+**Estratégia de aproveitamento:** priorizar as fontes oficiais disponibilizadas pelo parceiro e utilizar o conhecimento dos stakeholders para validar a interpretação dos conteúdos e orientar a construção da base de conhecimento.
+
+**Responsável:** Leonardo Ramos.  
+**Status:** Em Monitoramento.
+
+---
+
+### O3  - Arquitetura modular e escalável
+
+**Categoria:** Técnico / Arquitetura  
+**Probabilidade:** 3  
+**Impacto:** 5  
+**Potencial:** 15  - 🟢 Alta oportunidade
+
+A concepção de uma arquitetura modular e escalável pode permitir que novas capacidades de Inteligência Artificial, fluxos de negócio e integrações sejam incorporados progressivamente sem necessidade de reestruturar integralmente a solução.
+
+Essa oportunidade é coerente com a necessidade de construir uma solução preparada para futuras melhorias e evoluções, mantendo flexibilidade para ampliar suas capacidades ao longo do tempo.
+
+**Estratégia de aproveitamento:** definir componentes e responsabilidades de forma modular, mantendo interfaces e dependências suficientemente desacopladas para permitir substituições ou extensões futuras.
+
+**Responsável:** Henrique Diniz.  
+**Status:** Em Monitoramento.
+
+---
+
+### O4  - Automação proativa de pendências
+
+**Categoria:** Processo  
+**Probabilidade:** 4  
+**Impacto:** 4  
+**Potencial:** 16  - 🟢 Alta oportunidade
+
+A solução possui potencial para evoluir de uma experiência predominantemente reativa, baseada em consultas dos usuários, para uma atuação proativa capaz de identificar pendências e apoiar sua resolução.
+
+Essa oportunidade está diretamente alinhada à necessidade identificada para que o agente lembre e ofereça apoio em pendências de preenchimento e acompanhe informações dos projetos.
+
+**Estratégia de aproveitamento:** identificar inicialmente os eventos recorrentes e de maior valor operacional que possam gerar lembretes ou ações proativas, priorizando aqueles que apresentem regras claras e baixo risco de interpretação.
+
+**Responsável:** Jaime Almeida.  
+**Status:** Em Monitoramento.
+
+---
+
+### O5  - Reutilização do conhecimento institucional
+
+**Categoria:** Dados / Negócio  
+**Probabilidade:** 3  
+**Impacto:** 4  
+**Potencial:** 12  - 🟠 Alta oportunidade
+
+A organização estruturada do conhecimento utilizado pelo agente pode permitir seu reaproveitamento em diferentes fluxos de gestão do portfólio, reduzindo duplicação de informações e ampliando o valor dos mesmos conteúdos institucionais.
+
+Essa oportunidade pode favorecer a expansão da solução para diferentes necessidades do ciclo de vida dos projetos sem exigir a construção independente de bases para cada nova funcionalidade.
+
+**Estratégia de aproveitamento:** organizar as fontes e conceitos de maneira reutilizável, preservando metadados e relações que permitam sua utilização por diferentes fluxos do agente.
+
+**Responsável:** Leonardo Ramos.  
+**Status:** Em Monitoramento.
+
+---
+
+### O6  - Ampliação da capacidade analítica
+
+**Categoria:** Análise / Stakeholders  
+**Probabilidade:** 3  
+**Impacto:** 5  
+**Potencial:** 15  - 🟢 Alta oportunidade
+
+O agente pode evoluir para além de consultas isoladas, apoiando análises comparativas entre projetos, perguntas sugeridas e utilização conjunta de documentos e indicadores do portfólio.
+
+Essa oportunidade é especialmente relevante para aumentar o valor estratégico da solução para o PMO, uma vez que a proposta contempla apoio à análise e comparação de projetos e utilização de perguntas sugeridas para orientar os usuários.
+
+**Estratégia de aproveitamento:** priorizar inicialmente análises com critérios claramente definidos e fontes confiáveis, evoluindo posteriormente para comparações mais abrangentes conforme a qualidade e disponibilidade das informações.
+
+**Responsável:** Pedro Uchoa.  
+**Status:** Em Monitoramento.
+
+---
+
+### 2.7.5 Matriz Probabilidade × Impacto
+
+A representação gráfica abaixo utiliza a probabilidade no eixo vertical e o impacto no eixo horizontal. Os identificadores dos riscos são posicionados conforme suas respectivas avaliações:
+
+<img src="img/Matriz-de-risco.png" alt="Matriz de Riscos" width="800"><br>
+
+---
+
+## 2.6.6 Análise dos Três Itens Mais Críticos
+
+A aplicação da regra **Severidade = Probabilidade × Impacto** identifica três itens com a maior pontuação da matriz: **R01, R02 e R03**, todos com severidade **20**, correspondendo à combinação de probabilidade alta (4) e impacto muito alto (5).
+
+### R01  - Indisponibilidade ou baixa qualidade dos dados
+
+O risco relacionado aos dados é considerado crítico porque a proposta do agente depende diretamente das informações utilizadas como contexto para suas respostas. O projeto prevê uma camada inteligente sobre as fontes de conhecimento existentes, buscando disponibilizar respostas contextualizadas e fundamentadas nas fontes oficiais da organização.
+
+Dessa forma, dados incompletos, indisponíveis ou inconsistentes não representam apenas um problema operacional de alimentação da solução, mas podem comprometer diretamente a principal finalidade do produto: disponibilizar informações confiáveis aos usuários.
+
+Por esse motivo, a disponibilidade e a qualidade das fontes devem ser acompanhadas desde as primeiras etapas do projeto.
+
+---
+
+### R02  - Dificuldades nas integrações com o ecossistema Microsoft
+
+A integração tecnológica também possui criticidade elevada porque a solução foi concebida para operar no ecossistema Microsoft, utilizando componentes como **Teams, SharePoint e Power Platform**.
+
+Problemas relacionados a permissões, conectores, configurações ou limitações das plataformas podem impedir que funcionalidades que dependem dessas integrações sejam implementadas conforme planejado. Além disso, uma dificuldade de integração pode gerar impacto simultaneamente sobre desenvolvimento, validação e cronograma.
+
+Por isso, a realização de validações técnicas antecipadas é uma das principais estratégias de redução desse risco.
+
+---
+
+### R03  - Respostas inadequadas ou não fundamentadas
+
+O terceiro risco crítico está relacionado ao próprio comportamento da Inteligência Artificial. O agente deverá interpretar solicitações em linguagem natural e disponibilizar respostas contextualizadas, seguras e fundamentadas nas fontes oficiais.
+
+Uma resposta incorreta ou sem fundamentação pode comprometer a confiança dos usuários na solução e reduzir seu valor para o PMO. Esse risco possui impacto elevado justamente porque a qualidade da resposta é um dos elementos centrais da proposta de valor do produto.
+
+Por esse motivo, a estratégia deve priorizar fontes controladas, mecanismos de fundamentação, validação das respostas e comportamento explícito para situações nas quais não existam informações suficientes.
+
+---
+
+### 2.6.7 Acompanhamento da Matriz
+
+A matriz deverá ser revisada durante a evolução do projeto, especialmente quando ocorrerem mudanças relevantes no escopo, arquitetura, disponibilidade de dados, integração com sistemas corporativos ou entendimento das necessidades dos stakeholders.
+
+A atualização deverá considerar:
+
+- inclusão de novos riscos identificados durante o desenvolvimento;
+- alteração da probabilidade ou impacto de riscos existentes;
+- atualização dos responsáveis;
+- registro das ações de mitigação e contingência realizadas;
+- atualização do status dos riscos;
+- encerramento de riscos que deixarem de representar ameaça ao projeto;
+- registro de novas oportunidades identificadas durante a evolução da solução.
+
+Dessa forma, a matriz não deve ser tratada apenas como um artefato documental, mas como um instrumento de acompanhamento contínuo das condições que podem afetar a execução e os resultados do projeto.
+
+A análise realizada evidencia que os principais pontos de atenção estão concentrados na **qualidade e disponibilidade dos dados, nas dependências de integração tecnológica e na confiabilidade das respostas produzidas pela Inteligência Artificial**. Esses fatores possuem relação direta com a proposta central do produto e, por isso, devem permanecer sob acompanhamento prioritário ao longo das próximas etapas do projeto.
+
+---
 
 ## 2.8 Ideação
 
