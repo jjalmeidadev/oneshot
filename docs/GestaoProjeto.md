@@ -1,4 +1,4 @@
-<table>
+﻿<table>
   <tr>
     <td><a href="https://www.metro.sp.gov.br/"><img src="img/logo-metro.png" alt="Companhia do Metropolitano de Sao Paulo - Metro" border="0" width="180"></a></td>
     <td><a href="https://www.inteli.edu.br/"><img src="img/logo-Inteli.png" alt="Inteli - Instituto de Tecnologia e Lideranca" border="0" width="180"></a></td>
@@ -43,8 +43,9 @@
   - [4.6 Gestão de conflitos](#46-gestão-de-conflitos)
   - [4.7 Comunicação oficial](#47-comunicação-oficial)
 - [5. Planejamento da sprint 2](#5-planejamento-da-sprint-2)
-  - [5.1 Pendência de preenchimento](#51-pendência-de-preenchimento)
-  - [5.2 Estrutura esperada para a planning](#52-estrutura-esperada-para-a-planning)
+  - [5.1 Visão geral da planning](#51-visão-geral-da-planning)
+  - [5.2 Backlog planejado no Kanban](#52-backlog-planejado-no-kanban)
+  - [5.3 Escala de estimativa](#53-escala-de-estimativa)
 - [6. Gestão do processo de desenvolvimento do grupo](#6-gestão-do-processo-de-desenvolvimento-do-grupo)
   - [6.1 Fluxo de trabalho no Kanban](#61-fluxo-de-trabalho-no-kanban)
   - [6.2 Regras obrigatórias para issues](#62-regras-obrigatórias-para-issues)
@@ -253,23 +254,88 @@ Discussões informais podem acontecer em outros canais, mas a decisão final pre
 
 # 5. Planejamento da sprint 2
 
-## 5.1 Pendência de preenchimento
+## 5.1 Visão geral da planning
 
-O planejamento detalhado da Sprint 2 permanece como pendência assumida. Ele deve ser preenchido a partir do Kanban real, com issues criadas em `Open`, refinadas com DoR, DoD, labels, milestone e assignee antes de avançarem para o backlog.
+A Sprint 2 foi planejada a partir de três artefatos principais:
 
-## 5.2 Estrutura esperada para a planning
+- Design Compreensivo e Projeto Visual;
+- Estratégia Técnica da Solução;
+- Gestão de Projetos Evolutiva.
 
-Quando preenchido, o planning deve seguir o modelo abaixo:
+O backlog foi quebrado em 48 issues no GitLab, todas vinculadas à milestone `Sprint 02`, com descrição, tipo de atividade, prioridade, estimativa, DoR e DoD. As issues foram criadas inicialmente em `Open` para posterior movimentação no Kanban conforme o fluxo definido na seção 6.
 
-| ID | Tarefa | Tipo | Prioridade | Estimativa | Responsável | DoR | DoD | Status |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| A definir | A definir | A definir | A definir | PP/P/M/G | A definir | A definir | A definir | Pendente |
+A capacidade planejada considera 6 integrantes, com 16 horas por integrante, totalizando 96 horas de trabalho. Cada task foi estimada como `SIZE_G`, equivalente a até 2 horas, pois representa uma unidade completa de entrega documental, técnica ou de validação.
 
-Escala de estimativa:
+## 5.2 Backlog planejado no Kanban
+
+### Artefato 1 - Design Compreensivo e Projeto Visual
+
+| ID | Issue | Seção | Tarefa | Tipo | Prioridade | Estimativa | DoR | DoD | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| A1-01 | [#41](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/41) | Estudo sobre o usuário | Mapear perfis de usuários e stakeholders | RESEARCH | Alta | SIZE_G | Requisitos e entendimento de negócio da Sprint 1 disponíveis. | Perfis registrados com necessidades, dores, objetivos, limitações e vínculo com requisitos existentes. | Open |
+| A1-02 | [#42](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/42) | Estudo sobre o usuário | Planejar pesquisa com usuários | RESEARCH | Alta | SIZE_G | Perfis preliminares e hipóteses de usuário definidos. | Instrumento de pesquisa revisado, coerente com o escopo e pronto para aplicação. | Open |
+| A1-03 | [#43](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/43) | Estudo sobre o usuário | Executar coleta e sintetizar insights | RESEARCH | Alta | SIZE_G | Roteiro de pesquisa aprovado e participantes/canais definidos. | Insights documentados com evidências, achados principais e implicações para o produto. | Open |
+| A1-04 | [#44](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/44) | Estudo sobre o usuário | Documentar necessidades, habilidades e limitações | DOCS | Alta | SIZE_G | Síntese de pesquisa e materiais do parceiro disponíveis. | Seção escrita com clareza, sem contradição com requisitos da Sprint 1 e com evidências citadas. | Open |
+| A1-05 | [#45](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/45) | Experiências do usuário | Desenhar jornada ponta a ponta | FRONTEND | Alta | SIZE_G | Perfis e necessidades de usuários documentados. | Jornada apresenta etapas, objetivos, pontos de contato, dores e oportunidades de melhoria. | Open |
+| A1-06 | [#46](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/46) | Experiências do usuário | Definir fluxos de tarefas críticas | FRONTEND | Média | SIZE_G | Jornada principal definida e requisitos funcionais disponíveis. | Fluxos cobrem caminhos principais, estados de erro e pontos de decisão relevantes. | Open |
+| A1-07 | [#47](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/47) | Experiências do usuário | Registrar experiências desejadas | DOCS | Média | SIZE_G | Jornada e fluxos críticos desenhados. | Experiências descritas de forma objetiva e conectadas às necessidades do usuário. | Open |
+| A1-08 | [#48](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/48) | Proposta de UX | Definir princípios de UX da solução | FRONTEND | Média | SIZE_G | Experiências desejadas documentadas. | Princípios de UX registrados e rastreáveis aos achados de usuário e requisitos. | Open |
+| A1-09 | [#49](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/49) | Proposta de UX | Projetar arquitetura de informação | FRONTEND | Média | SIZE_G | Princípios de UX definidos. | Mapa de navegação ou estrutura de informação validável e coerente com os fluxos. | Open |
+| A1-10 | [#50](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/50) | Proposta de UX | Detalhar proposta de UX multimodal | DOCS | Média | SIZE_G | Arquitetura de informação e fluxos críticos definidos. | Proposta contempla canais de interação relevantes, feedbacks, acessibilidade e estados de exceção. | Open |
+| A1-11 | [#51](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/51) | Proposta de UI e projeto visual | Criar wireframes das telas principais | FRONTEND | Média | SIZE_G | Arquitetura de informação e princípios de UX definidos. | Wireframes cobrem fluxos principais e apresentam hierarquia, conteúdo e ações esperadas. | Open |
+| A1-12 | [#52](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/52) | Proposta de UI e projeto visual | Definir identidade visual e componentes base | FRONTEND | Média | SIZE_G | Wireframes principais disponíveis. | Guia visual mínimo documentado com componentes reutilizáveis e coerentes com o contexto da solução. | Open |
+| A1-13 | [#53](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/53) | Proposta de UI e projeto visual | Produzir mockups ou protótipo navegável | FRONTEND | Baixa | SIZE_G | Wireframes e guia visual definidos. | Protótipo/mockups permitem avaliar fluxo, consistência visual e principais estados de uso. | Open |
+| A1-14 | [#54](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/54) | Proposta de UI e projeto visual | Validar consistência UX/UI com requisitos | TEST | Baixa | SIZE_G | Conteúdo de UX/UI consolidado. | Checklist interno concluído, gaps corrigidos e evidências de coerência registradas. | Open |
+| A1-15 | [#55](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/55) | Organização do artefato | Consolidar texto final do artefato de design | DOCS | Baixa | SIZE_G | Todas as seções de design produzidas e validadas. | Artefato final possui estrutura completa, escrita objetiva e anexos/figuras identificados. | Open |
+| A1-16 | [#56](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/56) | Publicação no repositório | Revisar entrega de design no GitLab | DEVOPS | Baixa | SIZE_G | Artefato consolidado no repositório. | Merge request ou commit revisado, sem arquivos faltantes, imagens quebradas ou pendências críticas. | Open |
+
+### Artefato 2 - Estratégia Técnica da Solução
+
+| ID | Issue | Seção | Tarefa | Tipo | Prioridade | Estimativa | DoR | DoD | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| A2-01 | [#57](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/57) | APIs STT/TTS | Levantar requisitos das APIs de voz | RESEARCH | Alta | SIZE_G | Especificação técnica da Sprint 1 e materiais do parceiro disponíveis. | Requisitos de entrada, saída, formatos e restrições registrados sem criar escopo novo. | Open |
+| A2-02 | [#58](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/58) | APIs STT/TTS | Documentar endpoints de STT | DOCS | Alta | SIZE_G | Requisitos de voz levantados. | Endpoint STT descrito com exemplos de request/response e critérios de erro. | Open |
+| A2-03 | [#59](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/59) | APIs STT/TTS | Documentar endpoints de TTS | DOCS | Alta | SIZE_G | Requisitos de voz levantados. | Endpoint TTS descrito com exemplos de request/response e formatos de áudio esperados. | Open |
+| A2-04 | [#60](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/60) | API de recebimento de áudios | Definir API de upload de áudio | DOCS | Alta | SIZE_G | Requisitos de entrada de áudio conhecidos. | API documentada com exemplos claros, limites técnicos e tratamento de erros. | Open |
+| A2-05 | [#61](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/61) | Algoritmo de NLP | Selecionar algoritmo e abordagem de NLP | RESEARCH | Alta | SIZE_G | Especificação técnica e requisitos funcionais disponíveis. | Escolha técnica explicada com trade-offs, aderência ao escopo e limitações conhecidas. | Open |
+| A2-06 | [#62](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/62) | Algoritmo de NLP | Criar exemplo funcional de NLP | BACKEND | Média | SIZE_G | Abordagem de NLP selecionada. | Exemplo executável ou pseudocódigo técnico validável incluído no artefato. | Open |
+| A2-07 | [#63](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/63) | Pilha de tecnologias | Definir stack web/mobile e backend | DOCS | Média | SIZE_G | Requisitos técnicos e escopo de entrega definidos. | Stack documentada com justificativa e compatibilidade entre componentes. | Open |
+| A2-08 | [#64](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/64) | Modelagem de dados | Modelar entidades conceituais | RESEARCH | Média | SIZE_G | Requisitos funcionais e fluxos principais disponíveis. | Modelo conceitual cobre dados essenciais e é coerente com casos de uso. | Open |
+| A2-09 | [#65](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/65) | Modelagem de dados | Detalhar modelo lógico e físico | DOCS | Média | SIZE_G | Modelo conceitual aprovado. | Modelo lógico/físico completo, consistente e pronto para orientar implementação. | Open |
+| A2-10 | [#66](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/66) | Deploy em nuvem | Descrever processo de deploy do NLP | DEVOPS | Média | SIZE_G | Stack e algoritmo de NLP definidos. | Guia inclui criação/configuração de ambiente, implantação, variáveis, integração e evidências visuais quando aplicável. | Open |
+| A2-11 | [#67](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/67) | Arquitetura UML | Atualizar diagrama de classes | DOCS | Média | SIZE_G | Modelo lógico/físico e requisitos disponíveis. | Diagrama de classes está consistente com dados, domínio e funcionalidades críticas. | Open |
+| A2-12 | [#68](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/68) | Arquitetura UML | Atualizar diagrama de componentes | DOCS | Média | SIZE_G | Stack e APIs documentadas. | Diagrama mostra componentes físicos/lógicos e interações entre módulos. | Open |
+| A2-13 | [#69](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/69) | Arquitetura UML | Criar diagramas de sequência críticos | DOCS | Baixa | SIZE_G | Fluxos UX e componentes definidos. | Diagramas cobrem cenários críticos, chamadas de API e respostas esperadas. | Open |
+| A2-14 | [#70](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/70) | Estratégia de entrega | Planejar entregas das Sprints 3, 4 e 5 | DOCS | Baixa | SIZE_G | Arquitetura, stack e UX consolidados. | Roadmap técnico apresenta sequência realista, dependências e critérios de qualidade. | Open |
+| A2-15 | [#71](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/71) | Validação técnica | Validar coerência técnica do artefato | TEST | Baixa | SIZE_G | Seções técnicas completas. | Inconsistências corrigidas, lacunas registradas e critérios essenciais atendidos. | Open |
+| A2-16 | [#72](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/72) | Organização do artefato | Consolidar revisão final técnica no GitLab | DEVOPS | Baixa | SIZE_G | Artefato técnico validado. | Entrega final versionada e revisada, com links e imagens funcionando. | Open |
+
+### Artefato 3 - Gestão de Projetos Evolutiva
+
+| ID | Issue | Seção | Tarefa | Tipo | Prioridade | Estimativa | DoR | DoD | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| A3-01 | [#73](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/73) | Análise da Sprint 2 | Consolidar evidências da Sprint 2 | DOCS | Alta | SIZE_G | Registro de execução da Sprint 2 disponível no Kanban/GitLab. | Evidências organizadas e referenciáveis para retrospectiva e planejamento posterior. | Open |
+| A3-02 | [#74](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/74) | Análise da Sprint 2 | Registrar pontos fortes e fracos | DOCS | Alta | SIZE_G | Evidências da Sprint 2 consolidadas. | Análise contém causas, impactos e exemplos concretos, sem generalidades soltas. | Open |
+| A3-03 | [#75](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/75) | Análise da Sprint 2 | Definir ações de melhoria para Sprint 3 | DOCS | Alta | SIZE_G | Pontos fortes/fracos documentados. | Cada ação possui objetivo, responsável sugerido, critério de verificação e prazo de acompanhamento. | Open |
+| A3-04 | [#76](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/76) | Matriz de risco | Revisar riscos existentes | RESEARCH | Alta | SIZE_G | Matriz original do Projeto.md e histórico da sprint disponíveis. | Todos os riscos existentes têm status revisado e justificativa de alteração quando houver. | Open |
+| A3-05 | [#77](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/77) | Matriz de risco | Adicionar novos riscos e oportunidades | DOCS | Alta | SIZE_G | Retrospectiva e acompanhamento da sprint disponíveis. | Novos itens classificados com probabilidade, impacto, severidade, dono e resposta planejada. | Open |
+| A3-06 | [#78](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/78) | Matriz de risco | Atualizar matriz probabilidade-impacto | DOCS | Média | SIZE_G | Riscos existentes e novos classificados. | Matriz atualizada, top 3 críticos explicados e histórico preservado no GestaoProjeto.md. | Open |
+| A3-07 | [#79](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/79) | Papéis e responsabilidades | Montar matriz de papéis da Sprint 2 | DOCS | Média | SIZE_G | Lista de integrantes e divisão real da Sprint 2 disponíveis. | Matriz completa evidencia distribuição equilibrada e responsabilidades claras. | Open |
+| A3-08 | [#80](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/80) | Papéis e responsabilidades | Evidenciar rotação de papéis | DOCS | Média | SIZE_G | Matriz da Sprint 1 e Sprint 2 disponíveis. | Rotação demonstrada por integrante, sem centralização indevida de funções. | Open |
+| A3-09 | [#81](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/81) | Contrato, SLA e rituais | Revisar contrato de convivência | DOCS | Média | SIZE_G | Contrato da Sprint 1 e aprendizados da Sprint 2 disponíveis. | Mudanças necessárias registradas; se não houver mudanças, manutenção do contrato justificada. | Open |
+| A3-10 | [#82](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/82) | Processo de desenvolvimento | Atualizar políticas de dailies e comunicação | DOCS | Média | SIZE_G | Contrato e retrospectiva disponíveis. | Políticas revisadas são coerentes com SLA e problemas observados na sprint. | Open |
+| A3-11 | [#83](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/83) | GitLab e commits | Atualizar política de commits e issues | DOCS | Média | SIZE_G | Processo atual e problemas de versionamento conhecidos. | Política clara com exemplos aplicáveis ao projeto e rastreabilidade entre issue, branch e commit. | Open |
+| A3-12 | [#84](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/84) | Gestão de configuração | Atualizar fluxo Gitflow | DOCS | Média | SIZE_G | Política de GitLab e fluxo atual disponíveis. | Gitflow atualizado com passos práticos e coerentes com o processo da equipe. | Open |
+| A3-13 | [#85](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/85) | Gestão de configuração | Definir convenção de branches | DOCS | Baixa | SIZE_G | Gitflow atualizado. | Convenção contém prefixos, exemplos, regras de abertura/fechamento e vínculo com issues. | Open |
+| A3-14 | [#86](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/86) | Planejamento Sprint 3 | Montar backlog Kanban da Sprint 3 | DOCS | Baixa | SIZE_G | Retrospectiva, riscos e estratégia técnica das próximas sprints disponíveis. | Backlog da Sprint 3 está priorizado, estimado e utilizável no Kanban. | Open |
+| A3-15 | [#87](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/87) | Organização do artefato | Consolidar GestaoProjeto.md | DOCS | Baixa | SIZE_G | Todas as seções de gestão produzidas. | GestaoProjeto.md atualizado, organizado e mantendo histórico rastreável. | Open |
+| A3-16 | [#88](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/88) | Validação final | Revisar critérios do Escritório de Projetos | DEVOPS | Baixa | SIZE_G | GestaoProjeto.md consolidado. | Checklist de critérios atendido, inconsistências corrigidas e entrega final versionada. | Open |
+
+## 5.3 Escala de estimativa
 
 | Tamanho | Critério |
 | --- | --- |
-| PP | Até 30 minutos |
+| PP | Até 15 minutos |
 | P | Até 30 minutos |
 | M | De 30 a 60 minutos |
 | G | De 60 a 120 minutos |
