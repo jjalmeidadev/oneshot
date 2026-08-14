@@ -1190,153 +1190,454 @@ No contexto acadêmico do MVP, esses resultados serão avaliados por meio do pip
 # 3. Requisitos do Projeto
 _conteúdo_
 
-## 3.1 Requisitos Funcionais
+# 3.1 Requisitos Funcionais
 
-Os requisitos funcionais definem as funcionalidades que deverão ser contempladas pela prova de conceito desenvolvida no MVP. Sua definição considera o escopo estabelecido para o projeto e as oportunidades levantadas durante o processo de ideação apresentado na Seção 2.7, priorizando as funcionalidades diretamente relacionadas ao pipeline de Processamento de Linguagem Natural (PLN).
+Os requisitos funcionais definem as funcionalidades que deverão ser contempladas pela prova de conceito desenvolvida no MVP. Sua definição considera o escopo estabelecido para o projeto e as oportunidades levantadas durante o processo de ideação, priorizando as funcionalidades diretamente relacionadas ao pipeline de Processamento de Linguagem Natural (PLN).
 
-O núcleo do MVP consiste em um pipeline de PLN capaz de receber comandos em linguagem natural, interpretar as solicitações dos usuários, identificar suas intenções e classificá-las em categorias como consulta, transação e alerta. A partir dessa classificação, a solução deve processar informações de documentos de projetos e retornar respostas estruturadas que apoiem atividades operacionais, análises e a obtenção de informações para tomada de decisão.
+O núcleo do MVP consiste em um pipeline de PLN capaz de receber comandos em linguagem natural, interpretar semanticamente as solicitações dos usuários, identificar suas intenções e classificá-las em categorias como consulta, transação e alerta. A partir dessa classificação, a solução deve processar informações de documentos de projetos e retornar respostas estruturadas que apoiem atividades operacionais, análises e a obtenção de informações para tomada de decisão.
 
 Por se tratar de uma prova de conceito em contexto acadêmico, o funcionamento do MVP será validado sobre dados sintéticos. Integrações com dados reais do portfólio do Metrô de São Paulo e demais funcionalidades corporativas identificadas durante a ideação são consideradas possibilidades de evolução da solução e não constituem requisitos obrigatórios para a validação do núcleo funcional do MVP.
 
-| ID | Requisito Funcional | Feature relacionada | Prioridade | Status |
-| :---: | --- | --- | :---: | :---: |
-| RF01 | O sistema deve receber comandos textuais em linguagem natural relacionados à gestão de projetos e portfólio. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
-| RF02 | O sistema deve processar semanticamente os comandos recebidos e identificar a intenção expressa pelo usuário. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
-| RF03 | O sistema deve classificar as solicitações recebidas de acordo com as categorias de intenção previstas pelo MVP, incluindo consulta, transação e alerta. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
-| RF04 | O sistema deve recuperar informações relevantes dos documentos e dados sintéticos disponibilizados ao pipeline de acordo com a solicitação realizada. | Ingestão de informações dos projetos | Muito Alta | Não iniciado |
-| RF05 | O sistema deve responder a consultas sobre as informações disponíveis nos documentos de projetos utilizados na prova de conceito. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
-| RF06 | O sistema deve realizar análises e comparações entre informações de diferentes projetos quando solicitado pelo usuário. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
-| RF07 | O sistema deve executar ou simular ações compatíveis com a intenção classificada, incluindo operações de consulta, transação e alerta previstas para validação do pipeline. | Ingestão de informações dos projetos | Muito Alta | Não iniciado |
+|  ID  | Requisito Funcional                                                                                                                                                                           | Feature relacionada                  | Prioridade |    Status    |
+| :--: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ | :--------: | :----------: |
+| RF01 | O sistema deve receber comandos textuais em linguagem natural relacionados à gestão de projetos e portfólio.                                                                                  | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF02 | O sistema deve processar semanticamente os comandos recebidos e identificar a intenção expressa pelo usuário.                                                                                 | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF03 | O sistema deve classificar a intenção identificada de acordo com o catálogo de categorias previsto pelo MVP, incluindo consulta, transação e alerta.                                          | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF04 | O sistema deve recuperar informações relevantes dos documentos e dados sintéticos disponibilizados ao pipeline de acordo com a solicitação realizada.                                         | Ingestão de informações dos projetos | Muito Alta | Não iniciado |
+| RF05 | O sistema deve responder a consultas sobre as informações disponíveis nos documentos de projetos utilizados na prova de conceito.                                                             | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF06 | O sistema deve realizar análises e comparações entre informações de diferentes projetos quando solicitado pelo usuário.                                                                       | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF07 | O sistema deve executar ou simular ações compatíveis com a intenção classificada, incluindo operações de consulta, transação e alerta previstas para validação do pipeline.                   | Ingestão de informações dos projetos | Muito Alta | Não iniciado |
 | RF08 | O sistema deve gerar respostas estruturadas e fundamentadas nas informações disponíveis nos dados sintéticos, indicando quando não houver informações suficientes para atender à solicitação. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
 
-### 3.1.1 User Stories dos Requisitos Funcionais
+## 3.1.1 User Stories dos Requisitos Funcionais
 
 As User Stories apresentadas nesta subseção estão diretamente integradas aos respectivos requisitos funcionais da Seção 3.1. Cada história segue a estrutura "Como [usuário], quero [necessidade], para [valor]", estabelecendo a necessidade que fundamenta o requisito e o benefício esperado pelo usuário.
 
 Os critérios de aceitação estabelecem condições verificáveis para validação das funcionalidades dentro dos limites da prova de conceito, considerando a utilização de dados sintéticos e o desenvolvimento do pipeline de PLN como núcleo do MVP.
 
-#### RF01 — Entrada de comandos em linguagem natural
+### RF01 — Entrada de comandos em linguagem natural
 
 **User Story — US01**
 
 Como usuário da solução, quero realizar solicitações utilizando linguagem natural, para interagir com as informações dos projetos sem precisar utilizar comandos técnicos ou conhecer a estrutura dos dados.
 
 **Critérios de aceitação:**
-- O sistema deve aceitar solicitações textuais em linguagem natural.
-- O usuário não deve precisar utilizar uma sintaxe técnica específica.
-- A solicitação recebida deve ser encaminhada ao pipeline de PLN para processamento.
+
+* O sistema deve aceitar solicitações textuais em linguagem natural.
+* O usuário não deve precisar utilizar uma sintaxe técnica específica.
+* A solicitação recebida deve ser encaminhada ao pipeline de PLN para processamento.
 
 **Feature relacionada:** Consulta de informações dos projetos.
 
 ---
 
-#### RF02 — Identificação de intenção
+### RF02 — Identificação semântica da intenção
 
 **User Story — US02**
 
-Como usuário da solução, quero que o sistema compreenda a intenção da minha solicitação, para que ela seja processada de acordo com a ação que desejo realizar.
+Como usuário da solução, quero que o sistema compreenda semanticamente o que desejo realizar, para que minha solicitação seja interpretada de acordo com seu contexto.
 
 **Critérios de aceitação:**
-- O sistema deve processar semanticamente a solicitação recebida.
-- O sistema deve identificar a intenção presente no comando do usuário.
-- A intenção identificada deve ser utilizada nas etapas seguintes do pipeline.
+
+* O sistema deve processar semanticamente a solicitação recebida.
+* O sistema deve identificar a intenção presente no comando do usuário.
+* A intenção identificada deve ser encaminhada para classificação nas categorias suportadas pelo MVP.
 
 **Feature relacionada:** Consulta de informações dos projetos.
 
 ---
 
-#### RF03 — Classificação das solicitações
+### RF03 — Classificação da intenção
 
 **User Story — US03**
 
-Como usuário da solução, quero que minha solicitação seja classificada de acordo com sua finalidade, para que o sistema utilize o fluxo de processamento adequado.
+Como usuário da solução, quero que a intenção identificada seja associada ao tipo de operação adequado, para que o sistema utilize o fluxo de processamento correspondente à minha solicitação.
 
 **Critérios de aceitação:**
-- O sistema deve classificar as solicitações conforme as categorias previstas no MVP.
-- A classificação deve contemplar, no mínimo, as categorias de consulta, transação e alerta previstas para validação.
-- A categoria identificada deve determinar o fluxo de processamento da solicitação.
+
+* O sistema deve classificar a intenção conforme as categorias previstas no MVP.
+* A classificação deve contemplar, no mínimo, consulta, transação e alerta.
+* A categoria identificada deve determinar o fluxo de processamento utilizado pelo sistema.
 
 **Feature relacionada:** Consulta de informações dos projetos.
 
 ---
 
-#### RF04 — Recuperação de informações
+### RF04 — Recuperação de informações
 
 **User Story — US04**
 
 Como usuário da solução, quero que o sistema localize informações relevantes nos documentos de projetos, para obter respostas relacionadas ao contexto da minha solicitação.
 
 **Critérios de aceitação:**
-- O sistema deve consultar os documentos e dados sintéticos disponibilizados para a prova de conceito.
-- O sistema deve recuperar informações relacionadas à solicitação realizada.
-- As informações recuperadas devem ser utilizadas como contexto para o processamento da resposta.
+
+* O sistema deve consultar os documentos e dados sintéticos disponibilizados para a prova de conceito.
+* O sistema deve recuperar informações relacionadas à solicitação realizada.
+* As informações recuperadas devem ser utilizadas como contexto para o processamento da resposta.
 
 **Feature relacionada:** Ingestão de informações dos projetos.
 
 ---
 
-#### RF05 — Consulta de informações dos projetos
+### RF05 — Consulta de informações dos projetos
 
 **User Story — US05**
 
 Como usuário da solução, quero consultar informações sobre os projetos utilizando linguagem natural, para acessar rapidamente os dados necessários para acompanhamento e análise.
 
 **Critérios de aceitação:**
-- O sistema deve responder a consultas relacionadas às informações disponíveis nos dados sintéticos.
-- A resposta deve considerar o projeto ou contexto solicitado pelo usuário.
-- A resposta deve utilizar as informações recuperadas pelo pipeline.
-- Quando a informação solicitada não estiver disponível, o sistema deve indicar essa limitação.
+
+* O sistema deve responder a consultas relacionadas às informações disponíveis nos dados sintéticos.
+* A resposta deve considerar o projeto ou contexto solicitado pelo usuário.
+* A resposta deve utilizar as informações recuperadas pelo pipeline.
+* Quando a informação solicitada não estiver disponível, o sistema deve indicar essa limitação.
 
 **Feature relacionada:** Consulta de informações dos projetos.
 
 ---
 
-#### RF06 — Análise e comparação de projetos
+### RF06 — Análise e comparação de projetos
 
 **User Story — US06**
 
 Como gestor do portfólio, quero solicitar análises e comparações entre projetos, para identificar diferenças, semelhanças e informações relevantes que apoiem a tomada de decisão.
 
 **Critérios de aceitação:**
-- O sistema deve identificar quando a solicitação exigir análise ou comparação.
-- O sistema deve permitir comparar informações disponíveis de dois ou mais projetos.
-- A comparação deve considerar os critérios informados pelo usuário quando aplicável.
-- O resultado deve ser fundamentado nos dados sintéticos disponíveis.
+
+* O sistema deve identificar quando a solicitação exigir análise ou comparação.
+* O sistema deve permitir comparar informações disponíveis de dois ou mais projetos.
+* A comparação deve considerar os critérios informados pelo usuário quando aplicável.
+* O resultado deve ser fundamentado nos dados sintéticos disponíveis.
 
 **Feature relacionada:** Consulta de informações dos projetos.
 
 ---
 
-#### RF07 — Tratamento das intenções classificadas
+### RF07 — Tratamento das intenções classificadas
 
 **User Story — US07**
 
 Como usuário da solução, quero que o sistema direcione minha solicitação para o fluxo correspondente à intenção identificada, para obter um comportamento adequado ao tipo de operação solicitada.
 
 **Critérios de aceitação:**
-- Solicitações classificadas como consulta devem ser encaminhadas ao fluxo de recuperação de informações.
-- Solicitações classificadas como transação devem ser encaminhadas ao fluxo correspondente previsto na prova de conceito.
-- Solicitações classificadas como alerta devem ser encaminhadas ao fluxo correspondente previsto na prova de conceito.
-- O comportamento de cada fluxo deve poder ser demonstrado utilizando dados sintéticos.
+
+* Solicitações classificadas como consulta devem ser encaminhadas ao fluxo de recuperação de informações.
+* Solicitações classificadas como transação devem ser encaminhadas ao fluxo correspondente previsto na prova de conceito.
+* Solicitações classificadas como alerta devem ser encaminhadas ao fluxo correspondente previsto na prova de conceito.
+* O comportamento de cada fluxo deve poder ser demonstrado utilizando dados sintéticos.
 
 **Feature relacionada:** Ingestão de informações dos projetos.
 
 ---
 
-#### RF08 — Geração de respostas estruturadas e fundamentadas
+### RF08 — Geração de respostas estruturadas e fundamentadas
 
 **User Story — US08**
 
 Como usuário da solução, quero receber respostas estruturadas e fundamentadas nas informações disponíveis, para compreender os resultados apresentados pelo agente e utilizá-los com maior confiança.
 
 **Critérios de aceitação:**
-- A resposta deve considerar as informações recuperadas dos dados sintéticos disponibilizados ao pipeline.
-- O sistema não deve apresentar como fato informações que não estejam sustentadas pelos dados disponíveis.
-- Quando não houver informações suficientes, o sistema deve indicar a limitação ao usuário.
-- A resposta deve ser estruturada de forma coerente com a intenção identificada.
-- Em solicitações analíticas, o sistema deve diferenciar informações recuperadas de interpretações produzidas pelo agente.
+
+* A resposta deve considerar as informações recuperadas dos dados sintéticos disponibilizados ao pipeline.
+* O sistema não deve apresentar como fato informações que não estejam sustentadas pelos dados disponíveis.
+* Quando não houver informações suficientes, o sistema deve indicar a limitação ao usuário.
+* A resposta deve ser estruturada de forma coerente com a intenção identificada.
+* Em solicitações analíticas, o sistema deve diferenciar informações recuperadas de interpretações produzidas pelo agente.
 
 **Feature relacionada:** Consulta de informações dos projetos.
+
+
+## 3.1.2 Modelagem Estática Inicial dos Requisitos Funcionais
+
+A modelagem estática apresentada nesta subseção representa as principais classes de domínio necessárias para descrever o comportamento previsto pelos requisitos funcionais do MVP. O objetivo nesta etapa não é definir integralmente a arquitetura ou a implementação do sistema, mas demonstrar a relação entre as histórias de usuário, os dados manipulados e as responsabilidades necessárias ao funcionamento do pipeline.
+
+A modelagem considera a `Solicitacao` como elemento de entrada do sistema. Cada solicitação possui uma `Intencao`, identificada e posteriormente classificada pelo pipeline. Quando necessário, entidades como projetos e critérios de comparação são extraídas do texto. A recuperação utiliza documentos associados aos projetos e produz trechos relevantes, que posteriormente fundamentam uma `Resposta`.
+
+```mermaid
+classDiagram
+    direction LR
+
+    class Solicitacao {
+        +String id
+        +String texto
+        +DateTime dataHora
+        +String contexto
+    }
+
+    class Intencao {
+        +String nome
+        +CategoriaIntencao categoria
+        +Float confianca
+    }
+
+    class CategoriaIntencao {
+        <<enumeration>>
+        CONSULTA
+        TRANSACAO
+        ALERTA
+    }
+
+    class EntidadeExtraida {
+        +String tipo
+        +String valor
+        +Float confianca
+    }
+
+    class Projeto {
+        +String id
+        +String codigo
+        +String nome
+        +String status
+        +String subportfolio
+    }
+
+    class DocumentoProjeto {
+        +String id
+        +String titulo
+        +String tipo
+        +String conteudo
+        +String referencia
+    }
+
+    class TrechoRecuperado {
+        +String conteudo
+        +Float relevancia
+        +String referencia
+    }
+
+    class Resposta {
+        +String id
+        +String conteudo
+        +Boolean fundamentada
+        +String tipoResposta
+    }
+
+    class PipelinePLN {
+        +processarSolicitacao()
+        +estruturarResposta()
+    }
+
+    class ClassificadorIntencao {
+        +identificarIntencao()
+        +classificarIntencao()
+    }
+
+    class RecuperadorInformacao {
+        +buscarInformacoes()
+        +verificarDisponibilidade()
+    }
+
+    class AnalisadorComparativo {
+        +compararProjetos()
+        +estruturarComparacao()
+    }
+
+    Solicitacao "1" --> "1" Intencao : possui
+    Intencao --> CategoriaIntencao : classificada como
+    Solicitacao "1" --> "0..*" EntidadeExtraida : origina
+
+    EntidadeExtraida --> Projeto : pode identificar
+    Projeto "1" --> "0..*" DocumentoProjeto : possui
+    DocumentoProjeto "1" --> "0..*" TrechoRecuperado : fornece
+
+    PipelinePLN --> ClassificadorIntencao : utiliza
+    PipelinePLN --> RecuperadorInformacao : utiliza
+    PipelinePLN --> AnalisadorComparativo : utiliza
+
+    ClassificadorIntencao --> Intencao : produz
+    RecuperadorInformacao --> TrechoRecuperado : recupera
+    AnalisadorComparativo --> Projeto : compara
+
+    PipelinePLN --> Resposta : produz
+    Resposta "1" --> "0..*" TrechoRecuperado : fundamentada por
+```
+
+O modelo estático mantém relação direta com os requisitos funcionais. `Solicitacao` e `PipelinePLN` representam a entrada em linguagem natural prevista no RF01; `Intencao` e `ClassificadorIntencao` representam os RF02 e RF03; `DocumentoProjeto`, `TrechoRecuperado` e `RecuperadorInformacao` representam o RF04; `Projeto` e `Resposta` sustentam o RF05; `AnalisadorComparativo` representa o RF06; a categoria associada à intenção permite o direcionamento previsto no RF07; e a associação entre `Resposta` e `TrechoRecuperado` representa a fundamentação exigida pelo RF08.
+
+| Elemento da modelagem                                            | Requisitos relacionados |
+| ---------------------------------------------------------------- | ----------------------- |
+| `Solicitacao`                                                    | RF01                    |
+| `ClassificadorIntencao` e `Intencao`                             | RF02, RF03              |
+| `RecuperadorInformacao`, `DocumentoProjeto` e `TrechoRecuperado` | RF04                    |
+| `Projeto` e `Resposta`                                           | RF05                    |
+| `AnalisadorComparativo`                                          | RF06                    |
+| `CategoriaIntencao`                                              | RF03, RF07              |
+| `Resposta` fundamentada por `TrechoRecuperado`                   | RF08                    |
+
+Essa modelagem representa uma visão inicial do domínio da solução. O modelo de classes definitivo, incluindo decisões de implementação, tipos de persistência, interfaces técnicas e demais entidades identificadas durante o desenvolvimento, será aprofundado na seção de Solução Técnica em uma etapa posterior do projeto.
+
+
+
+## 3.1.3 Modelagem Dinâmica Inicial dos Requisitos Funcionais
+
+A modelagem dinâmica apresenta os principais cenários de interação derivados das histórias de usuário. Para esta etapa foram selecionados três fluxos que, em conjunto, representam o funcionamento central previsto para o MVP: consulta de informações de um projeto, análise comparativa entre projetos e direcionamento conforme a categoria da intenção.
+
+Os diagramas representam o comportamento esperado do sistema em nível funcional. Componentes e integrações poderão ser refinados posteriormente conforme a arquitetura definitiva da solução for desenvolvida.
+
+### 3.1.3.1 Cenário 1 — Consulta de informação de um projeto
+
+Este cenário representa uma solicitação como **"Qual o prazo do projeto XPTO?"**. O fluxo cobre principalmente os requisitos RF01, RF02, RF03, RF04, RF05 e RF08.
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    actor Usuario
+    participant Sistema as Interface do Sistema
+    participant PLN as Pipeline de PLN
+    participant Classificador as Classificador de Intenção
+    participant Recuperador as Recuperador de Informação
+    participant Base as Base de Dados Sintéticos
+    participant Gerador as Estruturador de Resposta
+
+    Usuario->>Sistema: Envia solicitação em linguagem natural
+    Sistema->>PLN: Encaminha texto da solicitação
+
+    PLN->>Classificador: Identificar intenção semântica
+    Classificador-->>PLN: Intenção identificada
+
+    PLN->>Classificador: Classificar intenção
+    Classificador-->>PLN: Categoria = CONSULTA
+
+    PLN->>Recuperador: Solicitar informações do projeto e critério
+    Recuperador->>Base: Consultar documentos e dados sintéticos
+    Base-->>Recuperador: Retornar informações relevantes
+    Recuperador-->>PLN: Retornar trechos e referências
+
+    alt Informação encontrada
+        PLN->>Gerador: Estruturar resposta fundamentada
+        Gerador-->>PLN: Resposta + referências
+        PLN-->>Sistema: Retornar resposta estruturada
+        Sistema-->>Usuario: Apresentar resposta
+    else Informação insuficiente
+        PLN-->>Sistema: Informar ausência de dados suficientes
+        Sistema-->>Usuario: Apresentar limitação da consulta
+    end
+```
+
+O cenário começa com o RF01, quando o usuário envia uma solicitação em linguagem natural. O RF02 é representado pela identificação semântica da intenção e o RF03 pela classificação dessa intenção como consulta. Em seguida, o RF04 determina a recuperação dos dados relevantes. O RF05 corresponde à resposta sobre o projeto solicitado e o RF08 é representado pela necessidade de utilizar as informações recuperadas como fundamento ou declarar explicitamente quando os dados forem insuficientes.
+
+### 3.1.3.2 Cenário 2 — Análise e comparação entre projetos
+
+Este cenário representa uma solicitação como **"Compare os riscos e os prazos dos projetos XPTO e ABC"**. O fluxo cobre principalmente os requisitos RF01, RF02, RF03, RF04, RF06 e RF08.
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    actor Gestor as Gestor do Portfólio
+    participant Sistema as Interface do Sistema
+    participant PLN as Pipeline de PLN
+    participant Classificador as Classificador de Intenção
+    participant Recuperador as Recuperador de Informação
+    participant Base as Base de Dados Sintéticos
+    participant Analisador as Analisador Comparativo
+    participant Gerador as Estruturador de Resposta
+
+    Gestor->>Sistema: Solicita comparação em linguagem natural
+    Sistema->>PLN: Encaminha solicitação
+
+    PLN->>Classificador: Identificar e classificar intenção
+    Classificador-->>PLN: Intenção analítica / CONSULTA
+
+    PLN->>PLN: Identificar projetos e critérios da comparação
+
+    PLN->>Recuperador: Buscar dados do primeiro projeto
+    Recuperador->>Base: Consultar Projeto XPTO
+    Base-->>Recuperador: Dados e documentos relevantes
+    Recuperador-->>PLN: Informações do Projeto XPTO
+
+    PLN->>Recuperador: Buscar dados do segundo projeto
+    Recuperador->>Base: Consultar Projeto ABC
+    Base-->>Recuperador: Dados e documentos relevantes
+    Recuperador-->>PLN: Informações do Projeto ABC
+
+    alt Dados suficientes para comparação
+        PLN->>Analisador: Comparar riscos e prazos
+        Analisador-->>PLN: Resultado estruturado da comparação
+        PLN->>Gerador: Gerar resposta fundamentada
+        Gerador-->>PLN: Comparação + referências
+        PLN-->>Sistema: Retornar resultado
+        Sistema-->>Gestor: Apresentar comparação
+    else Dados insuficientes
+        PLN-->>Sistema: Indicar quais informações estão ausentes
+        Sistema-->>Gestor: Apresentar limitação da análise
+    end
+```
+
+Nesse cenário, o RF06 diferencia o fluxo de uma consulta simples, pois exige recuperar informações referentes a dois ou mais projetos e aplicar uma etapa adicional de comparação. O resultado continua sujeito ao RF08: somente informações sustentadas pelos dados disponíveis devem ser apresentadas como fato.
+
+### 3.1.3.3 Cenário 3 — Classificação e direcionamento da solicitação
+
+Este cenário representa o comportamento do pipeline após compreender a intenção do usuário, demonstrando como a categoria classificada direciona a solicitação para um dos fluxos suportados pelo MVP. Ele cobre principalmente RF01, RF02, RF03, RF07 e RF08.
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    actor Usuario
+    participant Sistema as Interface do Sistema
+    participant PLN as Pipeline de PLN
+    participant Classificador as Classificador de Intenção
+    participant Consulta as Fluxo de Consulta
+    participant Transacao as Fluxo de Transação
+    participant Alerta as Fluxo de Alerta
+
+    Usuario->>Sistema: Envia solicitação em linguagem natural
+    Sistema->>PLN: Encaminha solicitação
+
+    PLN->>Classificador: Identificar intenção semântica
+    Classificador-->>PLN: Intenção identificada
+
+    PLN->>Classificador: Associar intenção ao catálogo
+    Classificador-->>PLN: Categoria da solicitação
+
+    alt Categoria = CONSULTA
+        PLN->>Consulta: Encaminhar solicitação
+        Consulta-->>PLN: Resultado da consulta
+
+    else Categoria = TRANSACAO
+        PLN->>Transacao: Encaminhar operação
+        Transacao-->>PLN: Resultado ou simulação da transação
+
+    else Categoria = ALERTA
+        PLN->>Alerta: Encaminhar solicitação
+        Alerta-->>PLN: Resultado ou simulação do alerta
+
+    else Intenção fora do catálogo suportado
+        PLN-->>Sistema: Solicitação não suportada pelo MVP
+        Sistema-->>Usuario: Orientar reformulação ou informar limite
+    end
+
+    PLN-->>Sistema: Retornar resposta estruturada
+    Sistema-->>Usuario: Apresentar resultado
+```
+
+A separação entre identificação e classificação da intenção é importante nesse fluxo. O RF02 corresponde à compreensão semântica da necessidade expressa pelo usuário, enquanto o RF03 associa essa necessidade a uma categoria controlada pelo sistema. O RF07 utiliza essa categoria para determinar qual fluxo deverá ser acionado.
+
+No contexto do MVP, operações de transação e alerta podem ser implementadas ou simuladas sobre dados sintéticos, preservando o objetivo principal da prova de conceito de demonstrar a capacidade do pipeline de interpretar e direcionar corretamente diferentes tipos de intenção.
+
+
+## 3.1.4 Rastreabilidade entre User Stories e Modelagem UML
+
+A tabela a seguir consolida a relação entre os requisitos funcionais, suas histórias de usuário e os elementos de modelagem estática e dinâmica apresentados nesta seção.
+
+| RF   | User Story                                 | Elementos do diagrama de classes                                | Cenário de sequência |
+| ---- | ------------------------------------------ | --------------------------------------------------------------- | -------------------- |
+| RF01 | US01 — Entrada em linguagem natural        | `Solicitacao`, `PipelinePLN`                                    | Cenários 1, 2 e 3    |
+| RF02 | US02 — Identificação semântica da intenção | `ClassificadorIntencao`, `Intencao`                             | Cenários 1, 2 e 3    |
+| RF03 | US03 — Classificação da intenção           | `Intencao`, `CategoriaIntencao`                                 | Cenários 1, 2 e 3    |
+| RF04 | US04 — Recuperação de informações          | `RecuperadorInformacao`, `DocumentoProjeto`, `TrechoRecuperado` | Cenários 1 e 2       |
+| RF05 | US05 — Consulta de projetos                | `Projeto`, `Resposta`                                           | Cenário 1            |
+| RF06 | US06 — Análise e comparação                | `AnalisadorComparativo`, `Projeto`                              | Cenário 2            |
+| RF07 | US07 — Tratamento das intenções            | `CategoriaIntencao`, `PipelinePLN`                              | Cenário 3            |
+| RF08 | US08 — Resposta fundamentada               | `Resposta`, `TrechoRecuperado`                                  | Cenários 1 e 2       |
+
+Essa rastreabilidade demonstra que os requisitos funcionais não estão isolados da modelagem: as classes representam os conceitos necessários para sua execução e os diagramas de sequência demonstram como esses elementos colaboram nos principais cenários previstos pelas histórias de usuário.
+
+A modelagem apresentada nesta seção possui caráter inicial e está diretamente associada à Especificação de Requisitos da Sprint 1. Nas etapas posteriores do projeto, os diagramas poderão ser refinados na seção de Solução Técnica, incorporando as decisões definitivas de arquitetura, interfaces, componentes, persistência e implementação.
+
+
 
 ## 3.2 Requisitos Não Funcionais (RNFs)
 
