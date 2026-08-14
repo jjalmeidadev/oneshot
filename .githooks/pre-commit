@@ -1,0 +1,68 @@
+#!/bin/sh
+
+echo "pre-commit: executando validacoes locais..."
+
+current_branch="$(git symbolic-ref --quiet --short HEAD || true)"
+protected_branches="main develop hmg"
+valid_prefixes="feature/ feat/ fix/ bugfix/ hotfix/ docs/ doc/ style/ refactor/ test/ chore/ perf/ ci/ build/ release/"
+
+if [ -n "$current_branch" ]; then
+  for protected_branch in $protected_branches; do
+    if [ "$current_branch" = "$protected_branch" ]; then
+      echo "pre-commit: commits diretos na branch permanente '$current_branch' sao bloqueados." >&2
+      echo "Crie uma branch de trabalho, por exemplo: feature/minha-tarefa ou docs/atualizar-readme." >&2
+      exit 1
+    fi
+  done
+
+  branch_has_valid_prefix=false
+  for valid_prefix in $valid_prefixes; do
+    case "$current_branch" in
+      "$valid_prefix"*)
+        branch_has_valid_prefix=true
+        break
+        ;;
+    esac
+  done
+
+  if [ "$branch_has_valid_prefix" != "true" ]; then
+    echo "pre-commit: branch '$current_branch' nao segue um prefixo aceito." >&2
+    echo "Prefixos aceitos: feature/, feat/, fix/, bugfix/, hotfix/, docs/, doc/, style/, refactor/, test/, chore/, perf/, ci/, build/, release/" >&2
+    echo "Renomeie ou crie uma branch de trabalho valida antes de commitar." >&2
+    exit 1
+  fi
+else
+  echo "pre-commit: estado detached HEAD detectado; validacao de nome de branch ignorada."
+fi
+
+staged_files="$(git diff --cached --name-only --diff-filter=ACMRT)"
+sensitive_files=""
+
+if [ -n "$staged_files" ]; then
+  while IFS= read -r staged_file; do
+    lower_file="$(printf '%s' "$staged_file" | tr '[:upper:]' '[:lower:]')"
+    case "$lower_file" in
+      .env|*/.env|.env.*|*/.env.*|*.pem|*.key|*secret*|*credential*)
+        sensitive_files="${sensitive_files}
+$staged_file"
+        ;;
+    esac
+  done <<EOF
+$staged_files
+EOF
+fi
+
+if [ -n "$sensitive_files" ]; then
+  echo "pre-commit: arquivos sensiveis staged foram detectados:" >&2
+  printf '%s\n' "$sensitive_files" | sed '/^$/d; s/^/  - /' >&2
+  echo "Remova estes arquivos do stage antes de commitar, por exemplo: git restore --staged <arquivo>" >&2
+  exit 1
+fi
+
+if ! git diff --cached --check; then
+  echo "pre-commit: corrija os problemas apontados antes de commitar." >&2
+  exit 1
+fi
+
+echo "pre-commit: validacao concluida."
+exit 0
