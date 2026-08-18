@@ -49,6 +49,7 @@
   - [3.5 Correlação RFs e RNFs](#35-correlação-rfs-e-rnfs)
   - [3.6 Casos de Uso](#36-casos-de-uso)
   - [3.7 Casos de Uso x Requisitos Funcionais](#37-casos-de-uso-x-requisitos-funcionais)
+  - [3.8 Prototipação Exploratória](#38-prototipação-exploratória)
 - [4. Modelagem de Dados](#4-modelagem-de-dados)
   - [4.1 Especificação da Base de Dados para Modelo de Recomendação](#41-especificação-da-base-de-dados-para-modelo-de-recomendação)
   - [4.2 Modelo Conceitual de Dados](#42-modelo-conceitual-de-dados)
@@ -1948,6 +1949,111 @@ _conteúdo_
 
 ## 3.7 Casos de Uso x Requisitos Funcionais
 _conteúdo_
+
+## 3.8 Prototipação Exploratória
+
+### 3.8.1 Questão de Projeto
+
+*placeholder — formular a questão em uma frase e justificar por que ela permanece genuinamente em aberto e altera o comportamento do sistema diante das pessoas.*
+
+### 3.8.2 Alternativas e Formatos de Prototipação
+
+#### 3.8.2.1 Protótipo 1 — [Nome da alternativa]
+
+*placeholder — descrever a alternativa comportamental.*
+
+**Formato de prototipação:**  
+*placeholder — descrever brevemente o formato escolhido e por que ele é adequado à questão.*
+
+#### 3.8.2.2 Protótipo 2 — Agente Proativo e Orientado à Jornada
+
+O segundo protótipo explora uma alternativa em que o agente não depende exclusivamente de solicitações explícitas do usuário para iniciar uma interação. Nesse regime, o sistema considera o contexto da atividade realizada pela pessoa, identifica possíveis necessidades relacionadas ao momento da interação e pode apresentar sugestões de conteúdos, informações ou ações pertinentes.
+
+A alternativa parte da hipótese de que um agente capaz de interpretar o contexto de uso e atuar de forma proativa pode reduzir a dependência do usuário de conhecer previamente quais informações ou funcionalidades estão disponíveis. Em vez de limitar sua atuação à resposta de perguntas, o agente passa a participar da jornada realizada pelo usuário, identificando situações nas quais uma intervenção contextual possa agregar valor.
+
+O comportamento explorado pode ser representado conceitualmente como:
+
+```text
+Usuário realiza uma atividade
+            ↓
+Agente identifica o contexto disponível
+            ↓
+Agente interpreta a situação
+            ↓
+Existe uma oportunidade relevante de assistência?
+         /                         \
+       Não                         Sim
+        ↓                           ↓
+Sem intervenção             Agente apresenta sugestão
+                                    ↓
+                           Usuário aceita ou recusa
+                              /            \
+                            Aceita          Recusa
+                              ↓               ↓
+                    Agente conduz fluxo   Retorna ao
+                       relacionado         contexto
+```
+
+Nesse modelo, a interação pode ocorrer diretamente no ambiente em que o usuário já está trabalhando, sem depender necessariamente de uma interface conversacional centralizada. O agente pode apresentar informações, sugestões, perguntas de confirmação ou conteúdos relacionados à atividade observada, buscando reduzir a distância entre a necessidade do usuário e a informação ou ação que pode auxiliá-lo.
+
+No contexto do projeto, essa abordagem pode ser explorada a partir de situações em que o usuário esteja navegando por informações do portfólio, consultando documentos ou realizando atividades relacionadas a um projeto. A partir do contexto identificado, o agente poderá hipoteticamente sugerir recursos relacionados ao que está sendo realizado, como documentos, conceitos, indicadores, cronogramas, riscos ou próximos passos.
+
+Entre os comportamentos que serão explorados estão:
+
+- identificar situações relevantes durante a atividade do usuário;
+- reconhecer quando o contexto disponível é suficiente para justificar uma intervenção;
+- apresentar informações relacionadas ao conteúdo ou atividade em andamento;
+- sugerir possíveis próximos passos;
+- recomendar documentos, conceitos ou conteúdos potencialmente pertinentes;
+- utilizar perguntas de confirmação antes de iniciar uma nova ação;
+- adaptar a interação de acordo com a resposta do usuário;
+- tratar a recusa de uma sugestão sem comprometer a continuidade da atividade;
+- preservar ou modificar o contexto quando o usuário alterar sua intenção;
+- limitar a frequência e a intensidade das intervenções para evitar que a proatividade se torne excessivamente intrusiva.
+
+### 3.8.3 Construção e Execução dos Protótipos
+
+#### 3.8.3.1 Protótipo 1 — [Nome da alternativa]
+
+**Execução dos cenários de sucesso:**  
+*placeholder*
+
+**Execução dos cenários de falha:**  
+*placeholder*
+
+**Diário de construção e execução:**  
+*placeholder*
+
+#### 3.8.3.2 Protótipo 2 — Agente Proativo e Orientado à Jornada
+
+**Execução dos cenários de sucesso:**  
+*placeholder*
+
+**Execução dos cenários de falha:**  
+*placeholder*
+
+**Diário de construção e execução:**  
+*placeholder*
+
+### 3.8.4 Comparação das Alternativas
+
+*placeholder — registrar o que cada protótipo tornou visível, o que apareceu em um e não no outro, o que surpreendeu o grupo e o que o formato não digital revelou.*
+
+### 3.8.5 Limites da Exploração
+
+*placeholder — declarar especificamente o que os protótipos não conseguem informar e o que dependeria de usuários reais, dados reais ou ambiente real.*
+
+### 3.8.6 Insumos para a Equipe
+
+#### 3.8.6.1 Inventário de Decisões em Aberto
+
+*placeholder — listar as decisões de comportamento reveladas pela exploração, suas alternativas e o que está em jogo em cada uma.*
+
+#### 3.8.6.2 Repertório de Situações
+
+*placeholder — registrar os casos, falas e pedidos efetivamente utilizados nos cenários, especialmente os que revelaram falhas ou lacunas.*
+
+---
 
 # 4. Modelagem de Dados
 _conteúdo_
