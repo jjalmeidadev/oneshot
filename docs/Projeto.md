@@ -2026,14 +2026,84 @@ Entre os comportamentos que serão explorados estão:
 
 #### 3.8.3.2 Protótipo 2 — Agente Proativo e Orientado à Jornada
 
-**Execução dos cenários de sucesso:**  
-*placeholder*
+O protótipo foi construído e executado a partir de situações em que o agente atua de maneira contextual durante uma atividade realizada pela pessoa. Para explorar tanto os comportamentos esperados quanto seus limites, foram produzidas duas tirinhas para cada situação: uma representando uma execução de sucesso e outra representando uma execução de falha.
 
-**Execução dos cenários de falha:**  
-*placeholder*
+As situações foram representadas considerando o ambiente tecnológico já utilizado no contexto da solução, especialmente o ecossistema corporativo baseado em SharePoint. A proatividade do agente foi representada por intervenções dinâmicas na própria interface utilizada pela pessoa, por meio de elementos sobrepostos à tela, sem exigir que o usuário abandone a atividade em andamento para iniciar uma conversa independente.
 
-**Diário de construção e execução:**  
-*placeholder*
+#### Execução dos cenários de sucesso
+
+##### Cenário 1 — Pendência identificada durante a elaboração do Mapa de Benefícios
+
+![Tirinha 1A — Execução de sucesso](docs/img/tirinha-1A-2.png)
+
+A primeira execução explora a atuação proativa do agente durante uma atividade realizada por Carlos no ambiente corporativo. Enquanto acompanha informações relacionadas ao portfólio, o agente identifica, a partir do contexto disponível na tela, uma situação que pode demandar atenção ou representar uma oportunidade de assistência.
+
+Em vez de aguardar que Carlos formule uma solicitação explícita, o agente apresenta uma intervenção contextual diretamente no ambiente em que ele já está trabalhando. A sugestão é apresentada como uma possibilidade de assistência, permitindo que Carlos decida se deseja consultar as informações disponibilizadas.
+
+Ao aceitar a intervenção, Carlos recebe informações relacionadas ao contexto da atividade, permitindo que identifique aspectos relevantes para sua análise, como informações do portfólio, riscos, pendências ou possíveis próximos passos. A interação ocorre sem exigir que ele abandone a atividade principal ou procure manualmente essas informações em diferentes fontes.
+
+O cenário foi considerado bem-sucedido porque a intervenção está relacionada à atividade realizada por Carlos e ocorre em um momento em que o contexto disponível é suficiente para justificar a assistência. O agente atua como uma camada de apoio à decisão, sem substituir a avaliação do usuário ou assumir automaticamente uma ação.
+
+##### Cenário 2 — Informação relevante identificada durante uma atividade de acompanhamento
+
+![Tirinha 2A — Execução de sucesso](docs/img/tirinha-2A-2.png)
+
+A segunda execução explora uma situação em que o agente identifica uma informação potencialmente relevante enquanto Mariana realiza uma atividade de acompanhamento e análise do portfólio.
+
+Durante a navegação pelo ambiente corporativo, Mariana consulta informações relacionadas aos projetos e ao desempenho do portfólio. O agente interpreta o contexto da atividade e identifica uma informação que pode contribuir para a análise que está sendo realizada.
+
+Em vez de exigir que Mariana interrompa sua atividade para formular uma nova consulta, o agente apresenta uma sugestão diretamente na interface utilizada. A intervenção funciona como uma camada dinâmica sobre o ambiente de trabalho, permitindo que Mariana consulte a informação apresentada e decida se deseja utilizá-la.
+
+A execução demonstra o potencial de uma atuação proativa orientada à jornada, na qual o agente acompanha o contexto da atividade e apresenta informações que podem reduzir o esforço necessário para localizar dados, indicadores ou conteúdos relacionados.
+
+O cenário foi considerado bem-sucedido porque a informação apresentada possui relação direta com a atividade realizada e porque a decisão de utilizá-la permanece sob controle de Mariana. A interação demonstra, portanto, uma situação em que a proatividade pode complementar uma atividade já em andamento sem substituir a intenção original da usuária.
+
+#### Execução dos cenários de falha
+
+##### Cenário 1 — Intervenção prematura diante de contexto insuficiente
+
+![Tirinha 1B — Execução de falha](docs/img/tirinha-1B-2.png)
+
+A primeira execução de falha apresenta uma situação semelhante à explorada no cenário 1A, tendo Carlos como usuário, porém em uma condição na qual o contexto disponível ainda não é suficiente para determinar se uma intervenção proativa é realmente necessária.
+
+Carlos está realizando uma atividade relacionada ao acompanhamento do portfólio e ainda está reunindo, analisando ou organizando informações para compreender a situação em andamento. O agente identifica uma possível lacuna ou oportunidade de assistência e interpreta essa condição como justificativa para iniciar uma intervenção.
+
+A partir dessa interpretação, o agente apresenta uma sugestão diretamente na interface utilizada por Carlos. Entretanto, a intervenção ocorre antes que sua necessidade esteja suficientemente caracterizada. Carlos demonstra que, naquele momento, sua intenção era continuar a atividade que já estava realizando, sem a necessidade da assistência apresentada.
+
+A execução revela que a identificação de uma possível pendência ou lacuna não é suficiente, por si só, para determinar que uma intervenção deve ocorrer. A mesma condição observada pelo sistema pode representar uma necessidade efetiva de assistência ou apenas uma etapa intermediária de uma atividade ainda em andamento.
+
+A falha, portanto, está principalmente na decisão de quando intervir. O protótipo torna visível a necessidade de estabelecer critérios capazes de diferenciar uma oportunidade legítima de assistência de uma situação em que a intervenção poderia apenas interromper ou distrair Carlos.
+
+##### Cenário 2 — Intervenção baseada em interpretação incorreta do contexto
+
+![Tirinha 2B — Execução de falha](docs/img/tirinha-2B-2.png)
+
+A segunda execução de falha explora uma situação em que o agente interpreta incorretamente a atividade realizada por Mariana.
+
+Mariana está navegando pelo ambiente corporativo e alternando entre diferentes informações relacionadas ao portfólio. A partir dos elementos disponíveis na interface, o agente interpreta que ela está realizando uma determinada análise e identifica uma informação que considera relevante para aquele contexto.
+
+O sistema apresenta então uma intervenção proativa diretamente na tela, oferecendo a informação ou consulta correspondente. Entretanto, Mariana indica que sua atividade naquele momento possui outro objetivo e que a sugestão apresentada não corresponde à sua intenção atual.
+
+A execução demonstra que uma informação pode ser correta e possuir relação com o domínio do projeto, mas ainda assim ser inadequada para o momento específico da jornada da usuária. O problema, nesse caso, não está necessariamente na informação recuperada, mas na interpretação realizada pelo agente sobre o que Mariana está tentando fazer naquele momento.
+
+A falha também evidencia a necessidade de definir o comportamento do sistema após uma correção ou recusa. Uma vez que Mariana demonstra que a interpretação estava incorreta, permanece em aberto se o agente deve simplesmente encerrar a intervenção, solicitar esclarecimento, atualizar o contexto identificado ou aguardar novos sinais antes de realizar outra intervenção.
+
+O cenário, portanto, torna visível uma decisão importante para a solução: a proatividade precisa estar associada não apenas à disponibilidade de informações relevantes, mas também à capacidade de interpretar continuamente a intenção e o contexto da pessoa durante sua jornada.
+
+#### Diário de construção e execução
+
+A construção das tirinhas evidenciou que a principal dificuldade do Protótipo 2 não está na representação da intervenção proativa em si, mas na definição das condições que devem permitir ao agente decidir **quando**, **como** e **com que intensidade** iniciar uma interação.
+
+Durante a construção dos cenários de sucesso, foi necessário definir quais elementos da atividade realizada pela pessoa seriam suficientes para justificar uma intervenção. A exploração mostrou que a proatividade possui maior potencial de valor quando está diretamente relacionada ao contexto visível da atividade e quando a intervenção pode ser aceita ou recusada sem interromper o fluxo principal.
+
+Na construção dos cenários de falha, a equipe precisou representar situações nas quais o agente possui informações potencialmente úteis, mas não dispõe de contexto suficiente para determinar se aquela informação deve ser apresentada naquele momento ou interpreta incorretamente a atividade realizada pela pessoa. Essa diferença revelou que a qualidade da proatividade depende não apenas da capacidade de recuperar informações, mas também da capacidade de interpretar corretamente a intenção e o momento da pessoa.
+
+Outro ponto identificado durante a execução foi a necessidade de tratar explicitamente a recusa de uma intervenção. A recusa não representa necessariamente uma rejeição permanente da assistência do agente: ela pode significar que a sugestão é inadequada apenas para aquele momento. Dessa forma, permanece em aberto como o agente deve atualizar seu contexto após uma recusa e em que condições uma nova intervenção pode ocorrer.
+
+As tirinhas também permitiram explorar a forma da intervenção. A utilização de elementos dinâmicos sobre a interface existente mostrou-se adequada para representar um agente que acompanha a jornada sem exigir que a pessoa abandone o ambiente de trabalho para acessar uma interface conversacional independente. Ao mesmo tempo, a exploração revelou a necessidade de controlar a frequência e a intensidade dessas intervenções para evitar que a proatividade se transforme em interrupção ou sobrecarga.
+
+Como resultado, a execução dos cenários não foi utilizada para validar uma implementação final, mas para tornar visíveis decisões comportamentais que ainda permanecem em aberto, especialmente relacionadas ao nível mínimo de contexto necessário para uma intervenção, ao tratamento de recusas, à atualização da interpretação sobre a intenção do usuário e aos limites de frequência da atuação proativa.
+
 
 ### 3.8.4 Comparação das Alternativas
 
