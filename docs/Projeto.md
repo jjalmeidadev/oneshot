@@ -2056,6 +2056,58 @@ Os requisitos considerados para a escolha da API foram:
 - integração por uma interface HTTP que possa ser substituída por outro provedor;
 - retorno estruturado com texto e confiança do reconhecimento.
 
+### 8.6.2 Benchmark das APIs
+
+O benchmark a seguir é documental, baseado nas funcionalidades e nos preços publicados pelos fornecedores em 19 de agosto de 2026. Não foram atribuídas métricas de acurácia ou latência porque ainda não existe um corpus padronizado de áudios do projeto para um teste empírico.
+
+#### Comparação funcional e de custo
+
+| API | `pt-BR` | Modos disponíveis | Custo para desenvolvimento inicial | Custo após a gratuidade | Portabilidade e integração |
+|---|---|---|---|---|---|
+| **Azure AI Speech** | Sim | Tempo real, áudio curto, transcrição rápida e lote | **5 horas de áudio por mês no nível Free (F0)**. A franquia gratuita é recorrente, mas limitada à transcrição em tempo real e a uma requisição simultânea. | O nível Standard (S0) é cobrado pelo tempo de áudio, em incrementos de segundo. O valor varia por região, moeda e contrato e deve ser consultado na calculadora Azure. | Disponibiliza API REST e SDKs. O endpoint de áudio curto permite uma integração HTTP direta, mas utiliza formatos e autenticação específicos do provedor. |
+| **Google Cloud Speech-to-Text V2** | Sim | Síncrono, assíncrono e streaming | A API V2 não apresenta franquia mensal recorrente na tabela vigente; novos clientes podem utilizar créditos promocionais da plataforma. | Reconhecimento padrão: **US$ 0,016 por minuto** até 500 mil minutos/mês. O lote dinâmico custa **US$ 0,003 por minuto**. Armazenamento e outros recursos podem gerar cobranças adicionais. | Oferece REST, gRPC e bibliotecas para diferentes linguagens, com operações síncronas e assíncronas que favorecem diferentes formas de implantação. |
+| **Amazon Transcribe** | Sim | Lote e streaming | **60 minutos por mês durante os primeiros 12 meses**, contados a partir da primeira solicitação. A franquia não é permanente. | Cobrança por segundo de áudio, com mínimo de 15 segundos por solicitação e preço dependente da região e da faixa de uso. | Oferece APIs e SDKs, porém usa assinatura AWS nas requisições e, no processamento em lote, depende de arquivos no Amazon S3. |
+| **OpenAI Audio API** | Sim | Arquivo e transcrição em tempo real | Não possui franquia recorrente gratuita para uso da API. | Entre os modelos comparados, `gpt-4o-mini-transcribe` tem custo estimado de **US$ 0,003 por minuto**; outros modelos têm preços diferentes. | Possui endpoint REST simples para envio direto de arquivos, o que reduz o acoplamento da integração à infraestrutura de um provedor específico. |
+
+Os valores acima são referências públicas, não cotações. Impostos, câmbio, região, armazenamento, tráfego e condições contratuais podem alterar o custo efetivo.
+
+#### Matriz de decisão com prioridade ao custo inicial
+
+Cada opção recebeu uma nota de 1 (baixa aderência) a 5 (alta aderência). Como o objetivo inicial é desenvolver sem custo, esse critério recebeu o maior peso.
+
+| Critério | Peso |
+|---|---:|
+| Gratuidade e custo inicial | 35% |
+| Suporte funcional a `pt-BR` | 25% |
+| Modos de transcrição e adequação a perguntas curtas | 15% |
+| Recursos para vocabulário do domínio | 10% |
+| Portabilidade e facilidade de integração | 10% |
+| Qualidade da documentação | 5% |
+
+| API | Custo 35% | `pt-BR` 25% | Modos 15% | Vocabulário 10% | Portabilidade 10% | Docs 5% | Nota ponderada |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **Azure AI Speech** | 5 | 5 | 5 | 4 | 4 | 5 | **4,80** |
+| **Amazon Transcribe** | 4 | 5 | 5 | 4 | 3 | 5 | **4,35** |
+| **Google Cloud Speech-to-Text V2** | 2 | 5 | 5 | 5 | 5 | 5 | **3,95** |
+| **OpenAI Audio API** | 3 | 4 | 4 | 4 | 5 | 4 | **3,75** |
+
+A nota ponderada é calculada por `Σ(nota × peso)`. O Azure AI Speech é a opção recomendada para o desenvolvimento inicial porque oferece a maior franquia gratuita recorrente entre as alternativas avaliadas, suporta `pt-BR` e fornece um endpoint REST adequado às perguntas curtas do projeto.
+
+#### Vencedor sem considerar a gratuidade
+
+Para deixar explícita a decisão técnica além da fase gratuita, a matriz também foi recalculada removendo o critério de custo e normalizando os 65% restantes.
+
+| API | Nota sem o critério de custo |
+|---|---:|
+| **Google Cloud Speech-to-Text V2** | **5,00** |
+| **Azure AI Speech** | **4,69** |
+| **Amazon Transcribe** | **4,54** |
+| **OpenAI Audio API** | **4,15** |
+
+Sem o critério de custo, o **Google Cloud Speech-to-Text V2 é o vencedor do benchmark documental**, devido à combinação de modalidades de transcrição, adaptação de vocabulário, suporte a `pt-BR` e interfaces REST e gRPC. Esse resultado não substitui uma comparação empírica de acurácia e latência com áudios representativos do projeto.
+
+Para a fase inicial, permanece selecionado o **Azure AI Speech**, pois a orientação do projeto prioriza uma alternativa gratuita e sua franquia recorrente de cinco horas mensais é suficiente para o desenvolvimento. A aplicação deve acessar o serviço por uma interface interna genérica, de modo que o provedor possa ser substituído sem alterar o restante do pipeline.
+
 
 # 9. Planejamento e Execução de Testes
 _conteúdo_
