@@ -75,6 +75,11 @@
     - [8.3.3 Sprint 5](#833-sprint-5)
   - [8.4 Testes Unitários e de Integração](#84-testes-unitários-e-de-integração)
   - [8.5 Documentações automáticas](#85-documentações-automáticas)
+  - [8.6 Speech-to-Text](#86-speech-to-text)
+    - [8.6.1 Introdução](#861-introdução)
+    - [8.6.2 Benchmark das APIs](#862-benchmark-das-apis)
+    - [8.6.3 API escolhida: Azure AI Speech](#863-api-escolhida-azure-ai-speech)
+    - [8.6.4 Referências](#864-referências)
 - [9. Planejamento e Execução de Testes](#9-planejamento-e-execução-de-testes)
   - [9.1 Testes Funcionais](#91-testes-funcionais)
     - [9.1.1 Planejamento](#911-planejamento)
@@ -2033,6 +2038,24 @@ Obs.: Insira informações sobre estratégias para realização dos testes
 ## 8.5 Documentações automáticas
 _conteúdo_
 Obs.: Insira informações sobre quais frameworks foram usados e como acessar.
+
+## 8.6 Speech-to-Text
+
+### 8.6.1 Introdução
+
+Speech-to-Text (STT), ou reconhecimento automático de fala, é a tecnologia responsável por converter a fala presente em um áudio para texto. O serviço recebe um arquivo ou fluxo de áudio, identifica os trechos falados e devolve a transcrição reconhecida. Dependendo da configuração, a resposta também pode incluir pontuação, normalização de números, alternativas de reconhecimento e um índice de confiança.
+
+No projeto, o STT é utilizado como modalidade de entrada do agente. O usuário grava uma pergunta, o áudio é convertido em texto e a transcrição resultante é encaminhada ao pipeline de Processamento de Linguagem Natural. Portanto, a responsabilidade desta etapa é somente reconhecer a fala e produzir o texto da solicitação.
+
+Os requisitos considerados para a escolha da API foram:
+
+- suporte a português do Brasil (`pt-BR`);
+- resposta rápida para perguntas curtas;
+- disponibilidade de uma faixa gratuita para o desenvolvimento inicial;
+- custo previsível após o término da faixa gratuita;
+- integração por uma interface HTTP que possa ser substituída por outro provedor;
+- retorno estruturado com texto e confiança do reconhecimento.
+
 
 # 9. Planejamento e Execução de Testes
 _conteúdo_
