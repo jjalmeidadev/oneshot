@@ -2108,6 +2108,203 @@ Sem o critério de custo, o **Google Cloud Speech-to-Text V2 é o vencedor do be
 
 Para a fase inicial, permanece selecionado o **Azure AI Speech**, pois a orientação do projeto prioriza uma alternativa gratuita e sua franquia recorrente de cinco horas mensais é suficiente para o desenvolvimento. A aplicação deve acessar o serviço por uma interface interna genérica, de modo que o provedor possa ser substituído sem alterar o restante do pipeline.
 
+### 8.6.3 API escolhida: Azure AI Speech
+
+Para o desenvolvimento inicial será utilizada a **API REST do Azure AI Speech para áudio curto**, compatível com o nível Free (F0). Esse endpoint recebe uma gravação de até 60 segundos e retorna o resultado final de forma síncrona, o que atende às perguntas curtas enviadas ao agente.
+
+#### Endpoints relevantes
+
+| Finalidade | Método HTTP | Endpoint | Uso no projeto |
+|---|---|---|---|
+| Converter áudio curto em texto | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/stt/speech/recognition/conversation/cognitiveservices/v1` | Endpoint principal do desenvolvimento inicial. |
+| Obter token temporário | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/sts/v1.0/issueToken` | Opcional; troca a chave do recurso por um token válido por 10 minutos. |
+| Transcrever arquivo com a API rápida | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/speechtotext/transcriptions:transcribe?api-version=2025-10-15` | Disponível no nível Standard (S0) para uma futura ampliação dos limites. |
+
+O endpoint de áudio curto é o único necessário para a funcionalidade atual. O endpoint de token é utilizado somente quando a aplicação opta por não enviar a chave diretamente em cada requisição. A transcrição rápida não está disponível no nível Free (F0), por isso não é adotada no desenvolvimento inicial.
+
+#### Requisição de transcrição
+
+```http
+POST /stt/speech/recognition/conversation/cognitiveservices/v1?language=pt-BR&format=detailed&profanity=masked HTTP/1.1
+Host: <NOME-DO-RECURSO>.cognitiveservices.azure.com
+Ocp-Apim-Subscription-Key: <CHAVE-DO-RECURSO>
+Content-Type: audio/wav; codecs=audio/pcm; samplerate=16000
+Accept: application/json
+
+<CONTEÚDO-BINÁRIO-DO-ÁUDIO>
+```
+
+##### Parâmetros de consulta
+
+| Parâmetro | Tipo | Obrigatório | Valores | Descrição |
+|---|---|---:|---|---|
+| `language` | `string` | Sim | `pt-BR` | Idioma falado no áudio. A ausência desse parâmetro resulta em erro HTTP `4xx`. |
+| `format` | `string` | Não | `simple` ou `detailed` | Formato da resposta. O padrão é `simple`. O projeto utiliza `detailed` para obter alternativas e confiança. |
+| `profanity` | `string` | Não | `masked`, `removed` ou `raw` | Define o tratamento de linguagem ofensiva. O padrão e a configuração adotada são `masked`. |
+
+##### Cabeçalhos
+
+| Cabeçalho | Obrigatório | Descrição |
+|---|---:|---|
+| `Ocp-Apim-Subscription-Key` | Condicional | Chave do recurso. Deve ser enviado este cabeçalho **ou** `Authorization`, nunca é necessário enviar ambos. |
+| `Authorization` | Condicional | Token no formato `Bearer <TOKEN>`, usado como alternativa à chave. |
+| `Content-Type` | Sim | Para WAV adotado no projeto: `audio/wav; codecs=audio/pcm; samplerate=16000`. Também é aceito `audio/ogg; codecs=opus`. |
+| `Accept` | Recomendado | Deve ser `application/json`. |
+| `Transfer-Encoding` | Não | Usar `chunked` quando o áudio for enviado em partes. |
+| `Expect` | Condicional | Usar `100-continue` quando houver transferência em partes. |
+
+##### Corpo e limites de entrada
+
+O corpo da requisição contém somente os bytes do áudio; não é enviado JSON. A API aceita:
+
+| Formato | Codec | Taxa de bits | Taxa de amostragem |
+|---|---|---:|---|
+| WAV | PCM | 256 kbps | 16 kHz, mono |
+| OGG | OPUS | 256 kbps | 16 kHz, mono |
+
+O áudio enviado diretamente pode ter no máximo **60 segundos**. Para o projeto, recomenda-se WAV PCM, 16 kHz e mono, pois esse formato é simples de validar e evita incompatibilidades de codec.
+
+##### Exemplo de requisição com cURL
+
+```bash
+curl --location --request POST \
+  "https://${AZURE_SPEECH_RESOURCE}.cognitiveservices.azure.com/stt/speech/recognition/conversation/cognitiveservices/v1?language=pt-BR&format=detailed&profanity=masked" \
+  --header "Ocp-Apim-Subscription-Key: ${AZURE_SPEECH_KEY}" \
+  --header "Content-Type: audio/wav; codecs=audio/pcm; samplerate=16000" \
+  --header "Accept: application/json" \
+  --data-binary "@pergunta.wav"
+```
+
+As variáveis `AZURE_SPEECH_RESOURCE` e `AZURE_SPEECH_KEY` devem ser configuradas no ambiente de execução. A chave não deve ser escrita no código-fonte nem versionada no repositório.
+
+#### Resposta de sucesso
+
+Status HTTP esperado: `200 OK`.
+
+```json
+{
+  "RecognitionStatus": "Success",
+  "Offset": 500000,
+  "Duration": 38200000,
+  "NBest": [
+    {
+      "Confidence": 0.93,
+      "Lexical": "qual é o avanço do projeto tur zero um",
+      "ITN": "qual é o avanço do projeto tur 01",
+      "MaskedITN": "qual é o avanço do projeto tur 01",
+      "Display": "Qual é o avanço do projeto TUR-01?"
+    }
+  ]
+}
+```
+
+O conteúdo é ilustrativo: o texto e a confiança variam conforme o áudio recebido.
+
+##### Campos da resposta detalhada
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `RecognitionStatus` | `string` | Resultado do reconhecimento. `Success` indica que uma transcrição foi produzida. |
+| `Offset` | `integer` | Instante de início da fala, em unidades de 100 nanossegundos. |
+| `Duration` | `integer` | Duração da fala reconhecida, em unidades de 100 nanossegundos. |
+| `NBest` | `array` | Alternativas de reconhecimento ordenadas pelo serviço. |
+| `NBest[].Confidence` | `number` | Confiança da alternativa, entre 0 e 1. |
+| `NBest[].Lexical` | `string` | Forma lexical, próxima das palavras efetivamente reconhecidas. |
+| `NBest[].ITN` | `string` | Texto após normalização inversa, como conversão de números falados para algarismos. |
+| `NBest[].MaskedITN` | `string` | Forma normalizada com o filtro de linguagem ofensiva aplicado. |
+| `NBest[].Display` | `string` | Texto final com capitalização, pontuação e normalização. Este é o campo encaminhado ao pipeline de PLN. |
+
+Quando `format=simple`, a resposta é reduzida:
+
+```json
+{
+  "RecognitionStatus": "Success",
+  "DisplayText": "Qual é o avanço do projeto TUR-01?",
+  "Offset": 500000,
+  "Duration": 38200000
+}
+```
+
+#### Estados e respostas HTTP esperadas
+
+Mesmo com HTTP `200`, `RecognitionStatus` pode indicar que não houve uma transcrição utilizável:
+
+| `RecognitionStatus` | Significado |
+|---|---|
+| `Success` | Reconhecimento concluído; o texto está presente. |
+| `NoMatch` | Houve detecção de fala, mas nenhuma correspondência foi encontrada. |
+| `InitialSilenceTimeout` | O áudio começou apenas com silêncio e excedeu o tempo de espera. |
+| `BabbleTimeout` | O início continha ruído e o serviço não identificou fala válida. |
+| `Error` | O serviço encontrou um erro interno. |
+
+| HTTP | Resposta esperada |
+|---:|---|
+| `200 OK` | Requisição processada; o corpo contém o objeto JSON de reconhecimento. |
+| `400 Bad Request` | `language` ausente ou inválido, idioma sem suporte ou áudio incompatível. |
+| `401 Unauthorized` | Chave, token, região ou endpoint inválido. |
+| `403 Forbidden` | Cabeçalho de autenticação ausente ou acesso proibido. |
+
+#### Requisição de transcrição rápida no nível Standard
+
+Caso o projeto ultrapasse os limites do desenvolvimento inicial, o Azure AI Speech continua sendo a API escolhida, mas pode utilizar o endpoint de transcrição rápida do nível Standard (S0). Ele aceita um arquivo por requisição e devolve o resultado de forma síncrona.
+
+| Entrada | Local | Tipo | Obrigatório | Descrição |
+|---|---|---|---:|---|
+| `api-version` | Query string | `string` | Sim | Versão da API. Usar `2025-10-15`. |
+| `Ocp-Apim-Subscription-Key` | Cabeçalho | `string` | Sim, quando usada chave | Chave do recurso Azure AI Speech. |
+| `audio` | `multipart/form-data` | Arquivo binário | Sim | Arquivo a ser transcrito. |
+| `definition` | `multipart/form-data` | JSON serializado | Sim no projeto | Configuração da transcrição; deve informar `{"locales":["pt-BR"]}`. |
+
+```bash
+curl --request POST \
+  --url "https://${AZURE_SPEECH_RESOURCE}.cognitiveservices.azure.com/speechtotext/transcriptions:transcribe?api-version=2025-10-15" \
+  --header "Ocp-Apim-Subscription-Key: ${AZURE_SPEECH_KEY}" \
+  --form "audio=@pergunta.wav;type=audio/wav" \
+  --form 'definition={"locales":["pt-BR"]}'
+```
+
+Resposta esperada: `200 OK`.
+
+```json
+{
+  "durationMilliseconds": 4320,
+  "combinedPhrases": [
+    {
+      "text": "Qual é o avanço do projeto TUR-01?"
+    }
+  ],
+  "phrases": [
+    {
+      "offsetMilliseconds": 160,
+      "durationMilliseconds": 3820,
+      "text": "Qual é o avanço do projeto TUR-01?",
+      "locale": "pt-BR",
+      "confidence": 0.93
+    }
+  ]
+}
+```
+
+#### Requisição opcional de token
+
+Para trocar a chave por um token temporário:
+
+```http
+POST /sts/v1.0/issueToken HTTP/1.1
+Host: <NOME-DO-RECURSO>.cognitiveservices.azure.com
+Ocp-Apim-Subscription-Key: <CHAVE-DO-RECURSO>
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 0
+```
+
+Resposta esperada: `200 OK`, com o token no corpo como texto. O token é válido por 10 minutos e deve ser enviado na transcrição como:
+
+```http
+Authorization: Bearer <TOKEN>
+```
+
+
+
 
 # 9. Planejamento e Execução de Testes
 _conteúdo_
