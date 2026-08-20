@@ -2012,19 +2012,41 @@ _conteúdo_
 ## 8.2 Modelo de Recomendação
 _conteúdo_
 
-## 8.3 Desenvolvimento de Features
-_conteúdo_
+## 8.3 Planejamento estratégico de desenvolvimento
 
-**Nota:** Insira uma explicação de entregas em cada Sprint.
+O desenvolvimento das features será conduzido de forma incremental nas Sprints 3, 4 e 5, usando como insumo os artefatos já concluídos nas Sprints 1 e 2. Esses artefatos anteriores não compõem novas entregas neste planejamento; eles funcionam apenas como referência para orientar implementação, integração, testes e fechamento do projeto. A entrega será organizada para reduzir riscos de integração: primeiro serão implementados os fluxos essenciais de entrada, processamento e consulta; em seguida, serão estabilizadas as integrações, o banco de dados, os webhooks, o deploy e a execução dos testes sistêmicos; por fim, a solução será consolidada, documentada e preparada para apresentação final.
+
+Essa estratégia considera que a solução deve evoluir como uma prova de conceito funcional, usando dados sintéticos ou anonimizados, preservando a rastreabilidade entre requisitos, testes e componentes implementados. Ao final de cada sprint, a documentação técnica deverá ser atualizada junto com o código, evitando que arquitetura, APIs, decisões de implementação e evidências de teste fiquem desconectadas da versão real do sistema.
+
+| Sprint | Foco principal | Principais frentes de trabalho | Qualidade e validação | Resultado esperado |
+| --- | --- | --- | --- | --- |
+| Sprint 3 | Implementação inicial e planejamento de testes | API de recebimento de áudio, início da integração Speech-to-Text e NLP, frontend básico e preparação do fluxo mínimo integrado | Definição dos testes funcionais, RNFs, integração, desempenho e usabilidade, com critérios de aceitação e estratégia de evidências | Primeira versão funcional da PoC e plano de testes sistêmicos pronto para execução |
+| Sprint 4 | Integração, estabilização e execução dos testes | Webhooks, banco de dados, persistência, integração entre componentes e início do deploy em ambiente controlado | Execução dos testes planejados, registro de logs, evidências, falhas, correções e análise de cobertura | Solução demonstrável, principais integrações operando e diagnóstico claro de qualidade |
+| Sprint 5 | Finalização, consolidação e entrega final | Frontend completo, mensageria assíncrona, integração frontend-backend, ajustes finais e revisão técnica/documental | Complementação ou reexecução dos testes, validação final da documentação, conformidade do repositório e preparação da apresentação | PoC integrada, documentada, testada e pronta para apresentação aos stakeholders |
 
 ## 8.3.1 Sprint 3
-_conteúdo_
+
+Na Sprint 3, o foco será aplicar as definições técnicas e visuais já existentes em uma primeira versão funcional da solução, suficiente para validar os fluxos principais e sustentar o planejamento dos testes sistêmicos. A equipe deverá priorizar a implementação da API de recebimento de áudios, o início da integração entre Speech-to-Text e o algoritmo de NLP, e uma interface básica para envio de texto ou áudio e visualização dos resultados retornados pelo backend.
+
+Como esta sprint será a base para a validação do sistema, o planejamento de testes será tratado como uma entrega central. A equipe deverá derivar os cenários de teste a partir dos requisitos funcionais e não funcionais, contemplando casos positivos, casos de falha, testes de integração entre componentes, testes de desempenho e roteiro de usabilidade com usuários externos. Também deverão ser definidos os critérios de aceitação, as ferramentas de automação, a forma de registro de evidências e a estratégia de uso de cache para chamadas externas, quando aplicável.
+
+Ao final da sprint, espera-se que exista um fluxo mínimo integrado entre frontend, backend e processamento de linguagem natural, mesmo que ainda incompleto. Esse fluxo servirá como base concreta para executar testes na Sprint 4, identificar riscos técnicos antecipadamente e ajustar o escopo da Sprint 5 com maior previsibilidade.
 
 ## 8.3.2 Sprint 4
-_conteúdo_
+
+Na Sprint 4, a prioridade será ampliar e estabilizar a solução iniciada na Sprint 3, com foco na integração entre componentes e na execução dos testes planejados. O desenvolvimento deverá avançar na implementação dos webhooks definidos pelo grupo, na criação e população do banco de dados com dados sintéticos ou anonimizados, na integração das operações de leitura e escrita e no início do processo de deploy da prova de conceito em ambiente controlado.
+
+Essa sprint será marcada pela execução dos testes sistêmicos planejados anteriormente. A equipe deverá rodar os testes funcionais, de requisitos não funcionais, de integração e de usabilidade, registrando evidências, logs, falhas encontradas, ajustes realizados e limitações de cobertura. O objetivo não será apenas demonstrar que a solução funciona em cenários esperados, mas também identificar problemas antes da consolidação final, especialmente em pontos críticos como comunicação entre frontend e backend, processamento de áudio/texto, persistência de dados e respostas do agente.
+
+Ao final da sprint, a solução deverá estar mais próxima de uma versão demonstrável, com integrações principais em funcionamento, documentação técnica atualizada e um diagnóstico claro da qualidade atingida. Os resultados dos testes deverão orientar a priorização da Sprint 5, separando correções obrigatórias, melhorias desejáveis e itens que ficarão como evolução futura.
 
 ## 8.3.3 Sprint 5
-_conteúdo_
+
+Na Sprint 5, o foco será a finalização do projeto e a consolidação da prova de conceito. A equipe deverá completar o desenvolvimento do frontend, finalizar a integração frontend-backend, implementar o sistema de mensagens assíncronas integrado aos webhooks e complementar os testes sistêmicos que não tenham sido concluídos ou que precisem ser reexecutados após correções da Sprint 4.
+
+Também será a sprint de fechamento técnico e documental. A documentação do projeto deverá ser revisada para refletir a solução efetivamente implementada, incluindo componentes e tecnologias utilizadas, funcionalidades entregues, benefícios alcançados, custos estimados, análise financeira, feedbacks incorporados, arquitetura revisada, aperfeiçoamentos futuros e relação com os ODS aplicáveis. A equipe também deverá verificar a conformidade do repositório, a organização dos arquivos, a reprodutibilidade da execução e a consistência entre código, testes e documentação.
+
+Ao final da Sprint 5, a entrega esperada é uma solução integrada, demonstrável e documentada, acompanhada das evidências de teste, instruções de implantação e apresentação final para stakeholders. O objetivo principal será encerrar o projeto com qualidade, deixando claro o que foi implementado, quais limitações permanecem, quais aprendizados foram obtidos e quais caminhos de evolução podem ser seguidos após a prova de conceito.
 
 ## 8.4 Testes Unitários e de Integração
 _conteúdo_
