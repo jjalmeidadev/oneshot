@@ -75,6 +75,11 @@
     - [8.3.3 Sprint 5](#833-sprint-5)
   - [8.4 Testes Unitários e de Integração](#84-testes-unitários-e-de-integração)
   - [8.5 Documentações automáticas](#85-documentações-automáticas)
+  - [8.6 Speech-to-Text](#86-speech-to-text)
+    - [8.6.1 Introdução](#861-introdução)
+    - [8.6.2 Benchmark das APIs](#862-benchmark-das-apis)
+    - [8.6.3 API escolhida: Azure AI Speech](#863-api-escolhida-azure-ai-speech)
+    - [8.6.4 Referências](#864-referências)
 - [9. Planejamento e Execução de Testes](#9-planejamento-e-execução-de-testes)
   - [9.1 Testes Funcionais](#91-testes-funcionais)
     - [9.1.1 Planejamento](#911-planejamento)
@@ -2034,6 +2039,273 @@ Obs.: Insira informações sobre estratégias para realização dos testes
 _conteúdo_
 Obs.: Insira informações sobre quais frameworks foram usados e como acessar.
 
+## 8.6 Speech-to-Text
+
+### 8.6.1 Introdução
+
+Speech-to-Text (STT), ou reconhecimento automático de fala, é a tecnologia responsável por converter a fala presente em um áudio para texto. O serviço recebe um arquivo ou fluxo de áudio, identifica os trechos falados e devolve a transcrição reconhecida. Dependendo da configuração, a resposta também pode incluir pontuação, normalização de números, alternativas de reconhecimento e um índice de confiança.
+
+No projeto, o STT é utilizado como modalidade de entrada do agente. O usuário grava uma pergunta, o áudio é convertido em texto e a transcrição resultante é encaminhada ao pipeline de Processamento de Linguagem Natural. Portanto, a responsabilidade desta etapa é somente reconhecer a fala e produzir o texto da solicitação.
+
+Os requisitos considerados para a escolha da API foram:
+
+- suporte a português do Brasil (`pt-BR`);
+- resposta rápida para perguntas curtas;
+- disponibilidade de uma faixa gratuita para o desenvolvimento inicial;
+- custo previsível após o término da faixa gratuita;
+- integração por uma interface HTTP que possa ser substituída por outro provedor;
+- retorno estruturado com texto e confiança do reconhecimento.
+
+### 8.6.2 Benchmark das APIs
+
+O benchmark a seguir é documental, baseado nas funcionalidades e nos preços publicados pelos fornecedores em 19 de agosto de 2026. Não foram atribuídas métricas de acurácia ou latência porque ainda não existe um corpus padronizado de áudios do projeto para um teste empírico.
+
+#### Comparação funcional e de custo
+
+| API | `pt-BR` | Modos disponíveis | Custo para desenvolvimento inicial | Custo após a gratuidade | Portabilidade e integração |
+|---|---|---|---|---|---|
+| **Azure AI Speech** | Sim | Tempo real, áudio curto, transcrição rápida e lote | **5 horas de áudio por mês no nível Free (F0)**. A franquia gratuita é recorrente, mas limitada à transcrição em tempo real e a uma requisição simultânea. | O nível Standard (S0) é cobrado pelo tempo de áudio, em incrementos de segundo. O valor varia por região, moeda e contrato e deve ser consultado na calculadora Azure. | Disponibiliza API REST e SDKs. O endpoint de áudio curto permite uma integração HTTP direta, mas utiliza formatos e autenticação específicos do provedor. |
+| **Google Cloud Speech-to-Text V2** | Sim | Síncrono, assíncrono e streaming | A API V2 não apresenta franquia mensal recorrente na tabela vigente; novos clientes podem utilizar créditos promocionais da plataforma. | Reconhecimento padrão: **US$ 0,016 por minuto** até 500 mil minutos/mês. O lote dinâmico custa **US$ 0,003 por minuto**. Armazenamento e outros recursos podem gerar cobranças adicionais. | Oferece REST, gRPC e bibliotecas para diferentes linguagens, com operações síncronas e assíncronas que favorecem diferentes formas de implantação. |
+| **Amazon Transcribe** | Sim | Lote e streaming | **60 minutos por mês durante os primeiros 12 meses**, contados a partir da primeira solicitação. A franquia não é permanente. | Cobrança por segundo de áudio, com mínimo de 15 segundos por solicitação e preço dependente da região e da faixa de uso. | Oferece APIs e SDKs, porém usa assinatura AWS nas requisições e, no processamento em lote, depende de arquivos no Amazon S3. |
+| **OpenAI Audio API** | Sim | Arquivo e transcrição em tempo real | Não possui franquia recorrente gratuita para uso da API. | Entre os modelos comparados, `gpt-4o-mini-transcribe` tem custo estimado de **US$ 0,003 por minuto**; outros modelos têm preços diferentes. | Possui endpoint REST simples para envio direto de arquivos, o que reduz o acoplamento da integração à infraestrutura de um provedor específico. |
+
+Os valores acima são referências públicas, não cotações. Impostos, câmbio, região, armazenamento, tráfego e condições contratuais podem alterar o custo efetivo.
+
+#### Matriz de decisão com prioridade ao custo inicial
+
+Cada opção recebeu uma nota de 1 (baixa aderência) a 5 (alta aderência). Como o objetivo inicial é desenvolver sem custo, esse critério recebeu o maior peso.
+
+| Critério | Peso |
+|---|---:|
+| Gratuidade e custo inicial | 35% |
+| Suporte funcional a `pt-BR` | 25% |
+| Modos de transcrição e adequação a perguntas curtas | 15% |
+| Recursos para vocabulário do domínio | 10% |
+| Portabilidade e facilidade de integração | 10% |
+| Qualidade da documentação | 5% |
+
+| API | Custo 35% | `pt-BR` 25% | Modos 15% | Vocabulário 10% | Portabilidade 10% | Docs 5% | Nota ponderada |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **Azure AI Speech** | 5 | 5 | 5 | 4 | 4 | 5 | **4,80** |
+| **Amazon Transcribe** | 4 | 5 | 5 | 4 | 3 | 5 | **4,35** |
+| **Google Cloud Speech-to-Text V2** | 2 | 5 | 5 | 5 | 5 | 5 | **3,95** |
+| **OpenAI Audio API** | 3 | 4 | 4 | 4 | 5 | 4 | **3,75** |
+
+A nota ponderada é calculada por `Σ(nota × peso)`. O Azure AI Speech é a opção recomendada para o desenvolvimento inicial porque oferece a maior franquia gratuita recorrente entre as alternativas avaliadas, suporta `pt-BR` e fornece um endpoint REST adequado às perguntas curtas do projeto.
+
+#### Vencedor sem considerar a gratuidade
+
+Para deixar explícita a decisão técnica além da fase gratuita, a matriz também foi recalculada removendo o critério de custo e normalizando os 65% restantes.
+
+| API | Nota sem o critério de custo |
+|---|---:|
+| **Google Cloud Speech-to-Text V2** | **5,00** |
+| **Azure AI Speech** | **4,69** |
+| **Amazon Transcribe** | **4,54** |
+| **OpenAI Audio API** | **4,15** |
+
+Sem o critério de custo, o **Google Cloud Speech-to-Text V2 é o vencedor do benchmark documental**, devido à combinação de modalidades de transcrição, adaptação de vocabulário, suporte a `pt-BR` e interfaces REST e gRPC. Esse resultado não substitui uma comparação empírica de acurácia e latência com áudios representativos do projeto.
+
+Para a fase inicial, permanece selecionado o **Azure AI Speech**, pois a orientação do projeto prioriza uma alternativa gratuita e sua franquia recorrente de cinco horas mensais é suficiente para o desenvolvimento. A aplicação deve acessar o serviço por uma interface interna genérica, de modo que o provedor possa ser substituído sem alterar o restante do pipeline.
+
+### 8.6.3 API escolhida: Azure AI Speech
+
+Para o desenvolvimento inicial será utilizada a **API REST do Azure AI Speech para áudio curto**, compatível com o nível Free (F0). Esse endpoint recebe uma gravação de até 60 segundos e retorna o resultado final de forma síncrona, o que atende às perguntas curtas enviadas ao agente.
+
+#### Endpoints relevantes
+
+| Finalidade | Método HTTP | Endpoint | Uso no projeto |
+|---|---|---|---|
+| Converter áudio curto em texto | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/stt/speech/recognition/conversation/cognitiveservices/v1` | Endpoint principal do desenvolvimento inicial. |
+| Obter token temporário | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/sts/v1.0/issueToken` | Opcional; troca a chave do recurso por um token válido por 10 minutos. |
+| Transcrever arquivo com a API rápida | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/speechtotext/transcriptions:transcribe?api-version=2025-10-15` | Disponível no nível Standard (S0) para uma futura ampliação dos limites. |
+
+O endpoint de áudio curto é o único necessário para a funcionalidade atual. O endpoint de token é utilizado somente quando a aplicação opta por não enviar a chave diretamente em cada requisição. A transcrição rápida não está disponível no nível Free (F0), por isso não é adotada no desenvolvimento inicial.
+
+#### Requisição de transcrição
+
+```http
+POST /stt/speech/recognition/conversation/cognitiveservices/v1?language=pt-BR&format=detailed&profanity=masked HTTP/1.1
+Host: <NOME-DO-RECURSO>.cognitiveservices.azure.com
+Ocp-Apim-Subscription-Key: <CHAVE-DO-RECURSO>
+Content-Type: audio/wav; codecs=audio/pcm; samplerate=16000
+Accept: application/json
+
+<CONTEÚDO-BINÁRIO-DO-ÁUDIO>
+```
+
+##### Parâmetros de consulta
+
+| Parâmetro | Tipo | Obrigatório | Valores | Descrição |
+|---|---|---:|---|---|
+| `language` | `string` | Sim | `pt-BR` | Idioma falado no áudio. A ausência desse parâmetro resulta em erro HTTP `4xx`. |
+| `format` | `string` | Não | `simple` ou `detailed` | Formato da resposta. O padrão é `simple`. O projeto utiliza `detailed` para obter alternativas e confiança. |
+| `profanity` | `string` | Não | `masked`, `removed` ou `raw` | Define o tratamento de linguagem ofensiva. O padrão e a configuração adotada são `masked`. |
+
+##### Cabeçalhos
+
+| Cabeçalho | Obrigatório | Descrição |
+|---|---:|---|
+| `Ocp-Apim-Subscription-Key` | Condicional | Chave do recurso. Deve ser enviado este cabeçalho **ou** `Authorization`, nunca é necessário enviar ambos. |
+| `Authorization` | Condicional | Token no formato `Bearer <TOKEN>`, usado como alternativa à chave. |
+| `Content-Type` | Sim | Para WAV adotado no projeto: `audio/wav; codecs=audio/pcm; samplerate=16000`. Também é aceito `audio/ogg; codecs=opus`. |
+| `Accept` | Recomendado | Deve ser `application/json`. |
+| `Transfer-Encoding` | Não | Usar `chunked` quando o áudio for enviado em partes. |
+| `Expect` | Condicional | Usar `100-continue` quando houver transferência em partes. |
+
+##### Corpo e limites de entrada
+
+O corpo da requisição contém somente os bytes do áudio; não é enviado JSON. A API aceita:
+
+| Formato | Codec | Taxa de bits | Taxa de amostragem |
+|---|---|---:|---|
+| WAV | PCM | 256 kbps | 16 kHz, mono |
+| OGG | OPUS | 256 kbps | 16 kHz, mono |
+
+O áudio enviado diretamente pode ter no máximo **60 segundos**. Para o projeto, recomenda-se WAV PCM, 16 kHz e mono, pois esse formato é simples de validar e evita incompatibilidades de codec.
+
+##### Exemplo de requisição com cURL
+
+```bash
+curl --location --request POST \
+  "https://${AZURE_SPEECH_RESOURCE}.cognitiveservices.azure.com/stt/speech/recognition/conversation/cognitiveservices/v1?language=pt-BR&format=detailed&profanity=masked" \
+  --header "Ocp-Apim-Subscription-Key: ${AZURE_SPEECH_KEY}" \
+  --header "Content-Type: audio/wav; codecs=audio/pcm; samplerate=16000" \
+  --header "Accept: application/json" \
+  --data-binary "@pergunta.wav"
+```
+
+As variáveis `AZURE_SPEECH_RESOURCE` e `AZURE_SPEECH_KEY` devem ser configuradas no ambiente de execução. A chave não deve ser escrita no código-fonte nem versionada no repositório.
+
+#### Resposta de sucesso
+
+Status HTTP esperado: `200 OK`.
+
+```json
+{
+  "RecognitionStatus": "Success",
+  "Offset": 500000,
+  "Duration": 38200000,
+  "NBest": [
+    {
+      "Confidence": 0.93,
+      "Lexical": "qual é o avanço do projeto tur zero um",
+      "ITN": "qual é o avanço do projeto tur 01",
+      "MaskedITN": "qual é o avanço do projeto tur 01",
+      "Display": "Qual é o avanço do projeto TUR-01?"
+    }
+  ]
+}
+```
+
+O conteúdo é ilustrativo: o texto e a confiança variam conforme o áudio recebido.
+
+##### Campos da resposta detalhada
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `RecognitionStatus` | `string` | Resultado do reconhecimento. `Success` indica que uma transcrição foi produzida. |
+| `Offset` | `integer` | Instante de início da fala, em unidades de 100 nanossegundos. |
+| `Duration` | `integer` | Duração da fala reconhecida, em unidades de 100 nanossegundos. |
+| `NBest` | `array` | Alternativas de reconhecimento ordenadas pelo serviço. |
+| `NBest[].Confidence` | `number` | Confiança da alternativa, entre 0 e 1. |
+| `NBest[].Lexical` | `string` | Forma lexical, próxima das palavras efetivamente reconhecidas. |
+| `NBest[].ITN` | `string` | Texto após normalização inversa, como conversão de números falados para algarismos. |
+| `NBest[].MaskedITN` | `string` | Forma normalizada com o filtro de linguagem ofensiva aplicado. |
+| `NBest[].Display` | `string` | Texto final com capitalização, pontuação e normalização. Este é o campo encaminhado ao pipeline de PLN. |
+
+Quando `format=simple`, a resposta é reduzida:
+
+```json
+{
+  "RecognitionStatus": "Success",
+  "DisplayText": "Qual é o avanço do projeto TUR-01?",
+  "Offset": 500000,
+  "Duration": 38200000
+}
+```
+
+#### Estados e respostas HTTP esperadas
+
+Mesmo com HTTP `200`, `RecognitionStatus` pode indicar que não houve uma transcrição utilizável:
+
+| `RecognitionStatus` | Significado |
+|---|---|
+| `Success` | Reconhecimento concluído; o texto está presente. |
+| `NoMatch` | Houve detecção de fala, mas nenhuma correspondência foi encontrada. |
+| `InitialSilenceTimeout` | O áudio começou apenas com silêncio e excedeu o tempo de espera. |
+| `BabbleTimeout` | O início continha ruído e o serviço não identificou fala válida. |
+| `Error` | O serviço encontrou um erro interno. |
+
+| HTTP | Resposta esperada |
+|---:|---|
+| `200 OK` | Requisição processada; o corpo contém o objeto JSON de reconhecimento. |
+| `400 Bad Request` | `language` ausente ou inválido, idioma sem suporte ou áudio incompatível. |
+| `401 Unauthorized` | Chave, token, região ou endpoint inválido. |
+| `403 Forbidden` | Cabeçalho de autenticação ausente ou acesso proibido. |
+
+#### Requisição de transcrição rápida no nível Standard
+
+Caso o projeto ultrapasse os limites do desenvolvimento inicial, o Azure AI Speech continua sendo a API escolhida, mas pode utilizar o endpoint de transcrição rápida do nível Standard (S0). Ele aceita um arquivo por requisição e devolve o resultado de forma síncrona.
+
+| Entrada | Local | Tipo | Obrigatório | Descrição |
+|---|---|---|---:|---|
+| `api-version` | Query string | `string` | Sim | Versão da API. Usar `2025-10-15`. |
+| `Ocp-Apim-Subscription-Key` | Cabeçalho | `string` | Sim, quando usada chave | Chave do recurso Azure AI Speech. |
+| `audio` | `multipart/form-data` | Arquivo binário | Sim | Arquivo a ser transcrito. |
+| `definition` | `multipart/form-data` | JSON serializado | Sim no projeto | Configuração da transcrição; deve informar `{"locales":["pt-BR"]}`. |
+
+```bash
+curl --request POST \
+  --url "https://${AZURE_SPEECH_RESOURCE}.cognitiveservices.azure.com/speechtotext/transcriptions:transcribe?api-version=2025-10-15" \
+  --header "Ocp-Apim-Subscription-Key: ${AZURE_SPEECH_KEY}" \
+  --form "audio=@pergunta.wav;type=audio/wav" \
+  --form 'definition={"locales":["pt-BR"]}'
+```
+
+Resposta esperada: `200 OK`.
+
+```json
+{
+  "durationMilliseconds": 4320,
+  "combinedPhrases": [
+    {
+      "text": "Qual é o avanço do projeto TUR-01?"
+    }
+  ],
+  "phrases": [
+    {
+      "offsetMilliseconds": 160,
+      "durationMilliseconds": 3820,
+      "text": "Qual é o avanço do projeto TUR-01?",
+      "locale": "pt-BR",
+      "confidence": 0.93
+    }
+  ]
+}
+```
+
+#### Requisição opcional de token
+
+Para trocar a chave por um token temporário:
+
+```http
+POST /sts/v1.0/issueToken HTTP/1.1
+Host: <NOME-DO-RECURSO>.cognitiveservices.azure.com
+Ocp-Apim-Subscription-Key: <CHAVE-DO-RECURSO>
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 0
+```
+
+Resposta esperada: `200 OK`, com o token no corpo como texto. O token é válido por 10 minutos e deve ser enviado na transcrição como:
+
+```http
+Authorization: Bearer <TOKEN>
+```
+
+
+
+
 # 9. Planejamento e Execução de Testes
 _conteúdo_
 
@@ -2074,6 +2346,17 @@ _conteúdo_
 _conteúdo_
 
 # Referências
-_conteúdo_
+- Microsoft. [Preços do Azure AI Speech](https://azure.microsoft.com/en-us/pricing/details/speech/). Acesso em: 19 ago. 2026.
+- Microsoft. [Quotas e limites do Azure AI Speech](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-services-quotas-and-limits). Acesso em: 19 ago. 2026.
+- Microsoft. [API REST de conversão de fala em texto para áudio curto](https://learn.microsoft.com/pt-br/azure/ai-services/speech-service/rest-speech-to-text-short). Acesso em: 19 ago. 2026.
+- Microsoft. [Transcriptions — Transcribe, API 2025-10-15](https://learn.microsoft.com/en-us/rest/api/speechtotext/transcriptions/transcribe?view=rest-speechtotext-2025-10-15). Acesso em: 19 ago. 2026.
+- Microsoft. [Suporte a idiomas do Azure AI Speech](https://learn.microsoft.com/pt-br/azure/ai-services/speech-service/language-support). Acesso em: 19 ago. 2026.
+- Microsoft. [Regiões do Azure AI Speech](https://learn.microsoft.com/pt-br/azure/ai-services/speech-service/regions). Acesso em: 19 ago. 2026.
+- Google. [Preços do Speech-to-Text](https://cloud.google.com/speech-to-text/pricing). Acesso em: 19 ago. 2026.
+- Google. [Idiomas do Cloud Speech-to-Text V2](https://docs.cloud.google.com/speech-to-text/docs/speech-to-text-supported-languages). Acesso em: 19 ago. 2026.
+- Amazon Web Services. [Preços do Amazon Transcribe](https://aws.amazon.com/transcribe/pricing/). Acesso em: 19 ago. 2026.
+- Amazon Web Services. [Idiomas do Amazon Transcribe](https://docs.aws.amazon.com/pt_br/transcribe/latest/dg/supported-languages.html). Acesso em: 19 ago. 2026.
+- OpenAI. [Preços da API](https://platform.openai.com/pricing). Acesso em: 19 ago. 2026.
+- OpenAI. [Audio API — Create transcription](https://platform.openai.com/docs/api-reference/audio/createTranscription). Acesso em: 19 ago. 2026.
 
 <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">[nome do projeto]</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">INTELI, [aluno 1], [aluno 2], [aluno 3], [aluno 4], [aluno 5], [aluno 6], [aluno 7]</a> is licensed under <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">Attribution 4.0 International<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"></a></p>
