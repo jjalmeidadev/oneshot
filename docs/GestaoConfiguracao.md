@@ -5,9 +5,20 @@
   </tr>
 </table>
 
-# Gestão de configuração
+# Agente de IA para o Portfólio de Projetos do Metrô
 
-## Projeto G05
+## Nome do grupo: Oneshot
+
+## Integrantes:
+
+- <a href="https://www.linkedin.com/in/ntsfelipe/">Felipe Neves</a>
+- <a href="https://www.linkedin.com/in/henrique-rodrigues-diniz-b7b011319/">Henrique Diniz</a>
+- <a href="https://www.linkedin.com/in/jaimeandradedealmeida/">Jaime Almeida</a>
+- <a href="https://www.linkedin.com/in/leonardoramosvieira">Leonardo Ramos</a>
+- <a href="https://www.linkedin.com/in/pedro-uchoaa/">Pedro Uchoa</a>
+- <a href="https://www.linkedin.com/in/wendel-feitosa-975bb1346/">Wendel Feitosa</a>
+
+## Gestão de configuração
 
 # Sumário
 

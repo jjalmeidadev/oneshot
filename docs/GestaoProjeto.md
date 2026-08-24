@@ -5,56 +5,56 @@
   </tr>
 </table>
 
-# Nome do Projeto: <nome do projeto>
+# Agente de IA para o Portfólio de Projetos do Metrô
 
-## Nome do Grupo: <nome do grupo>
+## Nome do grupo: Oneshot
 
 ## Integrantes:
 
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-- <a href="https://www.linkedin.com/in/username/">Nome</a>
-
-## Projeto G05
+- <a href="https://www.linkedin.com/in/ntsfelipe/">Felipe Neves</a>
+- <a href="https://www.linkedin.com/in/henrique-rodrigues-diniz-b7b011319/">Henrique Diniz</a>
+- <a href="https://www.linkedin.com/in/jaimeandradedealmeida/">Jaime Almeida</a>
+- <a href="https://www.linkedin.com/in/leonardoramosvieira">Leonardo Ramos</a>
+- <a href="https://www.linkedin.com/in/pedro-uchoaa/">Pedro Uchoa</a>
+- <a href="https://www.linkedin.com/in/wendel-feitosa-975bb1346/">Wendel Feitosa</a>
 
 # Sumário
 
 - [1. Introdução](#1-introdução)
   - [1.1 Objetivo do documento](#11-objetivo-do-documento)
   - [1.2 Escopo do documento](#12-escopo-do-documento)
-- [2. Análise da sprint 1](#2-análise-da-sprint-1)
+- [2. Análise da Sprint 1](#2-análise-da-sprint-1)
   - [2.1 Contexto da sprint](#21-contexto-da-sprint)
-  - [2.2 Pontos fortes](#22-pontos-fortes)
-  - [2.3 Pontos de melhoria](#23-pontos-de-melhoria)
-  - [2.4 Ações de melhoria para a sprint 2](#24-ações-de-melhoria-para-a-sprint-2)
-  - [2.5 Revisão dos riscos da Sprint 1](#25-revisão-dos-riscos-da-sprint-1)
-  - [2.6 Mecanismo contínuo de acompanhamento dos riscos](#26-mecanismo-contínuo-de-acompanhamento-dos-riscos)
+  - [2.2 Linha de base medida da Sprint 1](#22-linha-de-base-medida-da-sprint-1)
+  - [2.3 Pontos fortes](#23-pontos-fortes)
+  - [2.4 Pontos de melhoria](#24-pontos-de-melhoria)
+  - [2.5 Ações de melhoria para a Sprint 2](#25-ações-de-melhoria-para-a-sprint-2)
+  - [2.6 Revisão dos riscos da Sprint 1](#26-revisão-dos-riscos-da-sprint-1)
+  - [2.7 Mecanismo contínuo de acompanhamento dos riscos](#27-mecanismo-contínuo-de-acompanhamento-dos-riscos)
 - [3. Matriz de papéis e responsabilidades](#3-matriz-de-papéis-e-responsabilidades)
   - [3.1 Matriz de responsabilidades - Sprint 1](#31-matriz-de-responsabilidades---sprint-1)
-- [4. Contrato de convivência, SLA e rituais](#4-contrato-de-convivência-sla-e-rituais)
+- [4. Contrato de convivência](#4-contrato-de-convivência)
   - [4.1 Regra de ouro](#41-regra-de-ouro)
   - [4.2 Dailies](#42-dailies)
   - [4.3 Evidências de entrega](#43-evidências-de-entrega)
-  - [4.4 Entrega, revisão e fechamento semanal](#44-entrega-revisão-e-fechamento-semanal)
+  - [4.4 Entrega, revisão e fechamento](#44-entrega-revisão-e-fechamento)
   - [4.5 Resolução de impasses](#45-resolução-de-impasses)
   - [4.6 Gestão de conflitos](#46-gestão-de-conflitos)
   - [4.7 Comunicação oficial](#47-comunicação-oficial)
 - [5. Planejamento da sprint 2](#5-planejamento-da-sprint-2)
   - [5.1 Visão geral da planning](#51-visão-geral-da-planning)
   - [5.2 Backlog planejado no Kanban](#52-backlog-planejado-no-kanban)
+    - [Artefato 1 - Design Compreensivo e Projeto Visual](#artefato-1---design-compreensivo-e-projeto-visual)
+    - [Artefato 2 - Estratégia Técnica da Solução](#artefato-2---estratégia-técnica-da-solução)
+    - [Artefato 3 - Gestão de Projetos Evolutiva](#artefato-3---gestão-de-projetos-evolutiva)
   - [5.3 Escala de estimativa](#53-escala-de-estimativa)
 - [6. Gestão do processo de desenvolvimento do grupo](#6-gestão-do-processo-de-desenvolvimento-do-grupo)
   - [6.1 Fluxo de trabalho no Kanban](#61-fluxo-de-trabalho-no-kanban)
   - [6.2 Regras obrigatórias para issues](#62-regras-obrigatórias-para-issues)
   - [6.3 Critérios de Ready e Done](#63-critérios-de-ready-e-done)
   - [6.4 Commits, merge requests e evidências](#64-commits-merge-requests-e-evidências)
-  - [6.5 SLA Operacional](#65-sla-operacional)
-  - [6.6 Função do Scrum Master no Merge](#66-função-do-scrum-master-no-merge)
+  - [6.5 SLA operacional](#65-sla-operacional)
+  - [6.6 Função do scrum master no merge](#66-função-do-scrum-master-no-merge)
 
 # 1. Introdução
 
@@ -89,27 +89,45 @@ Cada integrante assumiu uma frente principal, mas o grupo também conseguiu reve
 
 Ao longo da sprint, o grupo também utilizou horários de desenvolvimento no Inteli para discutir ideias, fazer brainstorm de features e alinhar a visão inicial do produto. Esses momentos presenciais foram relevantes porque ajudaram a transformar percepções individuais em decisões coletivas, principalmente nas discussões sobre escopo, funcionalidades possíveis e forma de organização da equipe.
 
-## 2.2 Pontos fortes
+## 2.2 Linha de base medida da Sprint 1
 
-O principal ponto positivo da Sprint 1 foi a capacidade de entrega dentro do prazo. Mesmo com tarefas distribuídas entre frentes diferentes, os integrantes conseguiram cumprir suas responsabilidades e avançar nos artefatos planejados para a sprint.
+Os pontos fortes e os pontos de melhoria descritos a seguir são acompanhados dos números que os sustentam. A finalidade é prática: sem linha de base não há como saber, no fim da Sprint 2, se as ações de melhoria funcionaram. Todos os indicadores abaixo foram apurados sobre o histórico do repositório no período da Sprint 1 (05/08/2026 a 14/08/2026) e são reprodutíveis pelos comandos indicados.
 
-Outro ponto forte foi o aproveitamento dos momentos presenciais de desenvolvimento. O grupo usou esses períodos para discutir ideias de features, alinhar entendimento sobre o problema e formalizar combinados de trabalho. Isso foi especialmente importante porque a Sprint 1 ainda tinha um caráter exploratório, exigindo consenso sobre o caminho inicial do projeto.
+| Indicador | Sprint 1 | Como foi apurado | Meta para a Sprint 2 |
+| --- | :---: | --- | :---: |
+| Commits no período | 69 | `git rev-list --count --until=2026-08-15 HEAD` | — |
+| Merge requests integrados | 27 | `git rev-list --count --merges --until=2026-08-15 HEAD` | — |
+| Commits nos dois últimos dias da sprint | 45 de 69 (65%) | distribuição diária obtida de `git log --date=short --format=%ad` | ≤ 40% |
+| MRs integrados nos dois últimos dias | 19 de 27 (70%) | mesma apuração, restrita a merges | ≤ 40% |
+| Commits no dia de maior concentração (13/08) | 29 de 69 (42%) | mesma apuração | ≤ 25% |
+| Commits locais dentro da convenção | 22 de 23 (96%) | commits em que autor e committer coincidem | 100% |
+| Commits de squash dentro da convenção | 6 de 19 (32%) | commits gerados no servidor pelo merge com squash | 100% |
+| Integrantes que tocaram mais de um artefato | 3 de 6 | arquivos `.md` distintos alterados por autor | ≥ 5 de 6 |
+| Amplitude de commits entre integrantes | 23 contra 5 (4,6×) | commits por autor no período | ≤ 2,5× |
 
-Também se destacou a formalização do contrato de convivência. Esse contrato surgiu a partir de uma dinâmica de liderança conduzida na aula do professor Filipe, em que o grupo refletiu sobre a própria aprendizagem em equipe. Durante essa reflexão, ficou claro que os integrantes estavam trabalhando de forma muito separada, o que dificultava o fluxo de desenvolvimento, a troca de contexto e a colaboração.
+## 2.3 Pontos fortes
 
-A partir dessa percepção, o grupo se reuniu para definir boas práticas de convivência, prazos de entrega, critérios de revisão e formato das dailies. A decisão de registrar essas regras representou uma evolução importante de maturidade, pois transformou um problema percebido em um acordo operacional verificável.
+**Entrega dentro do prazo, com volume distribuído entre todas as frentes.** Os seis integrantes produziram commits no período e todos os artefatos planejados foram entregues. O grupo integrou 27 merge requests em oito dias de atividade.
 
-## 2.3 Pontos de melhoria
+**Aproveitamento dos momentos presenciais de desenvolvimento.** O grupo usou esses períodos para discutir ideias de features, alinhar entendimento sobre o problema e formalizar combinados de trabalho. Isso foi especialmente importante porque a Sprint 1 ainda tinha um caráter exploratório, exigindo consenso sobre o caminho inicial do projeto.
 
-Apesar da produtividade, a Sprint 1 mostrou que o grupo ainda precisa melhorar a integração entre os integrantes. A execução individual funcionou para cumprir as tarefas, mas também evidenciou o risco de cada frente evoluir de forma isolada, com pouca troca durante o desenvolvimento.
+**Aderência real à convenção de commits.** Dos 23 commits criados nas máquinas do grupo, 22 seguem o padrão `<tipo>: <descrição> (#issue)` — 96%. O número é consequência direta do hook `commit-msg` documentado na Seção 7 do `GestaoConfiguracao.md`: a regra não ficou no papel, ela bloqueia.
 
-Os rituais também podem ser melhor aproveitados. As dailies e momentos de alinhamento precisam deixar de ser apenas atualizações rápidas de status e passar a funcionar como espaços de sincronização real, com registro de evidências, identificação de impedimentos e conexão entre tarefas dependentes.
+**Formalização do contrato de convivência.** Esse contrato surgiu a partir de uma dinâmica de liderança conduzida na aula do professor Filipe, em que o grupo refletiu sobre a própria aprendizagem em equipe. Durante essa reflexão, ficou claro que os integrantes estavam trabalhando de forma muito separada, o que dificultava o fluxo de desenvolvimento, a troca de contexto e a colaboração. A partir dessa percepção, o grupo definiu boas práticas de convivência, prazos de entrega, critérios de revisão e formato das dailies, transformando um problema percebido em um acordo operacional verificável.
 
-Outro ponto de melhoria está na antecipação das revisões. Como boa parte das entregas depende de documentação e alinhamento conceitual, revisar apenas no final aumenta o risco de inconsistências entre seções, retrabalho e divergência entre os artefatos.
+## 2.4 Pontos de melhoria
 
-Por fim, o grupo precisa fortalecer a visão coletiva sobre o projeto. Mesmo que cada integrante tenha uma frente principal, todos devem conhecer minimamente o estado das entregas centrais, os riscos ativos e as decisões tomadas.
+**Revisão concentrada no fim da sprint.** Este é o ponto mais nítido dos dados: 45 dos 69 commits (65%) e 19 dos 27 merge requests (70%) ocorreram nos dois últimos dias do período, sendo 29 commits (42%) apenas em 13/08. Uma revisão que chega junto com o prazo tem pouco espaço para gerar correção, e é isso que explica as inconsistências entre seções encontradas na entrega. A meta da Sprint 2 é reduzir a concentração dos dois últimos dias para no máximo 40% dos commits.
 
-## 2.4 Ações de melhoria para a Sprint 2
+**Trabalho isolado entre frentes.** Três dos seis integrantes alteraram apenas um arquivo `.md` durante toda a sprint, e a diferença entre quem mais e quem menos commitou foi de 4,6 vezes (23 contra 5). Os dois números medem a mesma coisa por ângulos diferentes: cada frente evoluiu dentro do seu próprio arquivo, com pouca troca durante o desenvolvimento. A meta é que ao menos cinco dos seis integrantes toquem mais de um artefato e que a amplitude caia para 2,5 vezes.
+
+**Rituais pouco aproveitados.** O contrato de convivência foi formalizado durante a própria Sprint 1 e, por isso, nenhuma daily do período foi registrada no modelo definido na Seção 4.2. A ausência de registro é, ela mesma, o indicador: não há como recuperar quais impedimentos foram levantados nem quando. A meta da Sprint 2 é registro em todos os dias úteis da sprint.
+
+**Efeito colateral do squash sobre a rastreabilidade.** Dos 19 commits gerados pelo servidor ao aplicar squash nos merge requests, apenas 6 seguem a convenção — 32%. O commit de squash nasce no GitLab, não passa pelos hooks locais e herda o título do merge request, que por padrão vem do nome da branch. O efeito não é apenas cosmético: como o squash grava no campo de committer o nome de quem aprovou o merge, parte do trabalho de integrantes deixa de aparecer como autoria própria no histórico. A ação correspondente está na Seção 2.5.
+
+**Visão coletiva sobre o projeto.** Mesmo que cada integrante tenha uma frente principal, todos devem conhecer minimamente o estado das entregas centrais, os riscos ativos e as decisões tomadas. Esse ponto é o que os dois primeiros indicadores produzem como consequência.
+
+## 2.5 Ações de melhoria para a Sprint 2
 
 Com base na retrospectiva da Sprint 1, o grupo definiu as seguintes ações de melhoria para a Sprint 2:
 
@@ -121,10 +139,12 @@ Com base na retrospectiva da Sprint 1, o grupo definiu as seguintes ações de m
 | Registrar decisões relevantes em canal oficial ou issue do GitLab. | Perda de contexto e dificuldade de rastrear decisões. | Decisões importantes vinculadas a issues, documentos ou mensagens formais do grupo. |
 | Reforçar o uso de DoR, DoD, labels, milestones e assignee nas issues. | Necessidade de aderência às regras do Dashboard Ágil. | Issues da sprint revisadas antes de avançarem de `Open` para `Backlog`. |
 | Manter o contrato de convivência como referência prática. | Falta de combinados explícitos no início da sprint. | Contrato consultado durante dailies, revisões e fechamento semanal. |
+| Padronizar o título do merge request na convenção de commit antes de aprovar o merge. | 32% dos commits de squash fora do padrão, por herdarem o nome da branch. | Verificação do título do MR pelo revisor antes do merge; ao fim da sprint, 100% dos commits de squash na convenção. |
+| Distribuir revisão entre frentes diferentes daquela em que o revisor trabalhou. | Três integrantes tocaram um único artefato na Sprint 1. | Ao menos cinco dos seis integrantes com alteração em mais de um artefato ao fim da sprint. |
 
 Essas ações conectam a análise da Sprint 1 ao planejamento da Sprint 2 e buscam tornar o processo menos individualizado, mais rastreável e mais consistente com as boas práticas exigidas pelo módulo.
 
-## 2.5 Revisão dos riscos da Sprint 1
+## 2.6 Revisão dos riscos da Sprint 1
 
 A matriz de riscos construída na Sprint 1 foi revisada a partir da retrospectiva do grupo e dos pontos de melhoria identificados. A revisão confirmou que os riscos mais relevantes para a Sprint 2 não estavam apenas no escopo técnico da solução, mas também na forma de colaboração, revisão e integração dos artefatos.
 
@@ -137,7 +157,7 @@ A matriz de riscos construída na Sprint 1 foi revisada a partir da retrospectiv
 
 Essa revisão transforma os riscos identificados na Sprint 1 em regras operacionais para a Sprint 2, evitando que a matriz seja apenas um artefato estático.
 
-## 2.6 Mecanismo contínuo de acompanhamento dos riscos
+## 2.7 Mecanismo contínuo de acompanhamento dos riscos
 
 O acompanhamento dos riscos será feito de forma contínua durante a sprint, com registro simples e verificável:
 
@@ -161,14 +181,18 @@ Artefatos da Sprint 1:
 - Especificação de requisitos funcionais e não funcionais;
 - Gestão de projeto e configuração.
 
-| Integrante | Frente principal na Sprint 1 | Artefato relacionado | Responsabilidades e entregas esperadas |
-| --- | --- | --- | --- |
-| Felipe | Design: personas e jornadas do usuário | Entendimento do negócio | Mapear perfis de usuário, consolidar personas, descrever jornadas e apoiar a conexão entre dores do usuário e proposta de solução. |
-| Jaime | Documentação do problema e soluções mapeadas | Entendimento do negócio | Descrever o problema central, contextualizar as dores identificadas e registrar alternativas ou soluções analisadas pelo grupo. |
-| Henrique | Documentação da parte técnica da solução | Entendimento do negócio / base técnica da solução | Explicar a visão técnica inicial da solução, tecnologias previstas, limitações técnicas e relação entre arquitetura proposta e necessidade do parceiro. |
-| Leonardo | Documentação da gestão de projeto e configuração | Gestão de projeto e configuração | Estruturar os documentos GestaoProjeto.md e GestaoConfiguracao.md, garantindo aderência ao barema, ao contrato de trabalho e às regras de GitFlow. |
-| Pedro | Documentação dos requisitos do projeto | Especificação de requisitos funcionais e não funcionais | Consolidar requisitos funcionais, requisitos não funcionais, critérios de aceite e relação dos requisitos com o escopo da solução. |
-| Wendel | Modelagem do fluxo de negócios e matriz de riscos | Entendimento do negócio | Mapear o fluxo de negócio, registrar riscos iniciais, classificar impacto/probabilidade e propor mitigação para os riscos da Sprint 1. |
+A coluna de issues liga cada integrante ao trabalho efetivamente registrado no board, e é por ela que a distribuição de carga pode ser conferida sem depender da descrição da frente.
+
+| Integrante | Frente principal na Sprint 1 | Artefato relacionado | Issues no board | Responsabilidades e entregas esperadas |
+| --- | --- | --- | --- | --- |
+| Felipe Neves | Design: personas, jornadas do usuário e requisitos não funcionais | Entendimento do negócio / Requisitos | [#5](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/5), [#6](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/6), [#16](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/16) | Mapear perfis de usuário, consolidar personas, descrever jornadas e especificar os requisitos não funcionais da solução. |
+| Henrique Diniz | Problema, análise SWOT e visão técnica da solução | Entendimento do negócio / base técnica | [#2](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/2), [#26](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/26) | Descrever o problema e a SWOT, explicar a visão técnica inicial, as tecnologias previstas e a relação entre arquitetura e necessidade do parceiro. |
+| Jaime Almeida | Visão estratégica, ideação e estruturação do documento | Entendimento do negócio | [#4](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/4), [#37](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/37) | Estruturar a visão estratégica, registrar o brainstorm de features e organizar a estrutura do documento de projeto. |
+| Leonardo Ramos | Gestão de projeto, configuração e automações do repositório | Gestão de projeto e configuração | [#9](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/9), [#20](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/20), [#22](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/22), [#24](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/24), [#25](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/25), [#26](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/26), [#27](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/27) | Estruturar `GestaoProjeto.md` e `GestaoConfiguracao.md`, implementar os hooks de qualidade e garantir aderência ao GitFlow e ao contrato de trabalho. |
+| Pedro Uchoa | Requisitos funcionais, modelagem UML e business drivers | Requisitos / Entendimento do negócio | Sem vínculo recuperável¹ | Consolidar RF01–RF08 e as user stories, produzir a modelagem estática e dinâmica e documentar os business drivers e o contexto da indústria. |
+| Wendel Feitosa | Modelagem do fluxo de negócio e matriz de riscos | Entendimento do negócio | [#10](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/10), [#34](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/34), [#35](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/35), [#36](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/36) | Modelar cadeia de valor e fluxos AS-IS e TO-BE, registrar riscos, classificar probabilidade e impacto e propor tratamento. |
+
+¹ Os quatro commits de autoria do Pedro na Sprint 1 foram integrados por merge com squash e herdaram o título do merge request, sem o número da issue. O trabalho está no repositório e é atribuído a ele no campo de autor, mas não é recuperável pela busca por issue. É a mesma causa descrita na Seção 2.4, e a ação de correção está na Seção 2.5.
 
 Essa matriz deve ser revisada a cada nova sprint, substituindo as frentes de acordo com os artefatos e prioridades planejados.
 
@@ -193,12 +217,13 @@ As dailies devem ser curtas, objetivas e focadas em visibilidade real do trabalh
 
 Modelo de registro:
 
-text
+```text
 Integrante:
 O que fiz:
 Evidências:
 O que vou fazer:
 Impedimentos:
+```
 
 
 Regras:
