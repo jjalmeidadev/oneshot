@@ -49,6 +49,7 @@
   - [3.5 Correlação RFs e RNFs](#35-correlação-rfs-e-rnfs)
   - [3.6 Casos de Uso](#36-casos-de-uso)
   - [3.7 Casos de Uso x Requisitos Funcionais](#37-casos-de-uso-x-requisitos-funcionais)
+  - [3.8 Prototipação Exploratória](#38-prototipação-exploratória)
 - [4. Modelagem de Dados](#4-modelagem-de-dados)
   - [4.1 Especificação da Base de Dados para Modelo de Recomendação](#41-especificação-da-base-de-dados-para-modelo-de-recomendação)
   - [4.2 Modelo Conceitual de Dados](#42-modelo-conceitual-de-dados)
@@ -1977,6 +1978,345 @@ _conteúdo_
 
 ## 3.7 Casos de Uso x Requisitos Funcionais
 _conteúdo_
+
+## 3.8 Prototipação Exploratória
+
+### 3.8.1 Questão de Projeto
+
+**Questão:** De quem parte a iniciativa da interação — o agente age somente quando é explicitamente solicitado, ou age a partir do que observa da atividade que a pessoa está realizando?
+
+**Justificativa.** A documentação produzida até aqui sustenta os dois regimes sem decidir entre eles. Todos os requisitos funcionais partem de um comando formulado pelo usuário (RF01), mas o catálogo de intenções previsto no RF03 e no RF07 inclui a categoria *alerta*, que pressupõe um agente capaz de se manifestar sem ter sido consultado. A jornada de Carlos (2.5.2.2) atribui valor explícito a "alertas relevantes" e à "identificação proativa de desvios", enquanto a visão do produto (2.4.1) descreve o agente como uma interface conversacional acionada por linguagem natural. A resposta altera o comportamento do sistema diante das pessoas em dois pontos: define se o silêncio é o estado padrão do agente ou uma decisão que ele precisa justificar a cada momento, e determina se o sistema precisa observar continuamente a atividade do usuário — o que incide diretamente sobre as restrições de confidencialidade e de controle de acesso estabelecidas no RNF01 e no RNF02.
+
+### 3.8.2 Alternativas e Formatos de Prototipação
+
+As duas alternativas exploradas respondem à mesma questão a partir de regimes opostos de iniciativa. No Protótipo 1, a interação só existe quando a pessoa a inicia; no Protótipo 2, o agente pode iniciá-la a partir do contexto observado. Ambas são defensáveis no contexto do PMO do Metrô e nenhuma foi construída para perder: o regime reativo oferece controle, previsibilidade e rastreabilidade direta entre pergunta e resposta, enquanto o regime proativo oferece cobertura para situações que a pessoa não sabe que precisa consultar.
+
+#### 3.8.2.1 Protótipo 1 — Agente Reativo sob Demanda
+
+O primeiro protótipo explora uma alternativa em que o agente permanece inteiramente silencioso até ser explicitamente acionado. Nesse regime, o sistema não observa a atividade da pessoa, não interpreta o que está na tela e não avalia oportunidades de assistência: ele existe como um canal de consulta que é aberto pelo usuário, responde ao que foi perguntado, indica quando não possui informação suficiente e volta ao silêncio.
+
+A alternativa parte da hipótese de que, no contexto do PMO, o valor do agente está menos em antecipar necessidades e mais em eliminar o esforço de localizar e consolidar informações que já estão distribuídas entre SharePoint, listas corporativas, relatórios e documentos. Sob essa hipótese, a pessoa continua sendo a única responsável por decidir o que precisa saber, e o agente reduz apenas o custo de obter a resposta.
+
+Três argumentos sustentam a alternativa no contexto específico do parceiro. Primeiro, a confidencialidade: um agente que só age quando chamado não precisa observar continuamente a atividade do usuário, o que elimina uma superfície permanente de leitura de contexto e simplifica a aderência ao RNF01 e ao RNF02. Segundo, a rastreabilidade: como toda resposta responde a uma solicitação explícita, o registro exigido pelo RNF03 tem sempre um par pergunta–resposta bem delimitado, sem necessidade de justificar por que o sistema decidiu falar. Terceiro, a confiança: conforme registrado na Seção 2.2, experiências anteriores do parceiro com IA generativa foram prejudicadas por respostas não fundamentadas na documentação oficial; um regime em que o agente nunca se manifesta espontaneamente reduz o número de oportunidades em que ele pode errar sem ter sido solicitado.
+
+O comportamento explorado pode ser representado conceitualmente como:
+
+```text
+Pessoa identifica uma necessidade
+            ↓
+Pessoa formula uma solicitação explícita
+            ↓
+Agente interpreta a solicitação
+            ↓
+   Há informação suficiente na base?
+         /                         \
+       Não                         Sim
+        ↓                           ↓
+Agente declara a            Agente responde com
+limitação encontrada        fonte referenciada
+        ↓                           ↓
+Pessoa reformula ou       Pessoa aprofunda ou
+abandona a consulta       encerra a interação
+            ↓                       ↓
+        Agente retorna ao silêncio
+```
+
+Entre os comportamentos explorados por esta alternativa estão:
+
+- responder exclusivamente ao que foi solicitado, sem ampliar o escopo da resposta;
+- declarar explicitamente a ausência de informação em vez de inferir ou completar lacunas;
+- manter ou descartar o contexto entre perguntas sucessivas de uma mesma sessão;
+- referenciar a fonte consultada em cada resposta;
+- permanecer em silêncio diante de informações relevantes que não foram perguntadas;
+- tratar solicitações formuladas com vocabulário diferente do utilizado nos documentos da base;
+- decidir se, ao não encontrar informação, o agente deve apenas informar a limitação ou orientar uma reformulação.
+
+**Formato de prototipação:** tirinhas ilustradas, mesmo formato utilizado no Protótipo 2.
+
+A escolha do formato é deliberada e responde a duas exigências distintas. A primeira é a exigência do artefato de experimentar um formato não baseado em interface digital: a tirinha não é uma tela navegável nem um protótipo clicável, e por isso não permite que a exploração se transforme em refinamento de interface. Ela obriga o grupo a representar o comportamento do agente por meio do que acontece entre as pessoas e o sistema ao longo do tempo — quem fala primeiro, o que é dito, o que fica sem ser dito e qual é a consequência disso — que é exatamente a dimensão da questão formulada em 3.8.1.
+
+A segunda é a exigência de comparabilidade. Como a questão trata de uma única variável — a origem da iniciativa —, manter o mesmo meio, as mesmas personas e a mesma estrutura de quatro cenários nos dois protótipos permite atribuir as diferenças observadas ao regime de iniciativa, e não ao formato de representação. O custo dessa decisão está registrado na Seção 3.8.5: por utilizar o mesmo meio nas duas alternativas, a exploração não produz comparação entre formatos de prototipação, apenas entre regimes de comportamento.
+
+#### 3.8.2.2 Protótipo 2 — Agente Proativo e Orientado à Jornada
+
+O segundo protótipo explora uma alternativa em que o agente não depende exclusivamente de solicitações explícitas do usuário para iniciar uma interação. Nesse regime, o sistema considera o contexto da atividade realizada pela pessoa, identifica possíveis necessidades relacionadas ao momento da interação e pode apresentar sugestões de conteúdos, informações ou ações pertinentes.
+
+A alternativa parte da hipótese de que um agente capaz de interpretar o contexto de uso e atuar de forma proativa pode reduzir a dependência do usuário de conhecer previamente quais informações ou funcionalidades estão disponíveis. Em vez de limitar sua atuação à resposta de perguntas, o agente passa a participar da jornada realizada pelo usuário, identificando situações nas quais uma intervenção contextual possa agregar valor.
+
+O comportamento explorado pode ser representado conceitualmente como:
+
+```text
+Usuário realiza uma atividade
+            ↓
+Agente identifica o contexto disponível
+            ↓
+Agente interpreta a situação
+            ↓
+Existe uma oportunidade relevante de assistência?
+         /                         \
+       Não                         Sim
+        ↓                           ↓
+Sem intervenção             Agente apresenta sugestão
+                                    ↓
+                           Usuário aceita ou recusa
+                              /            \
+                            Aceita          Recusa
+                              ↓               ↓
+                    Agente conduz fluxo   Retorna ao
+                       relacionado         contexto
+```
+
+Nesse modelo, a interação pode ocorrer diretamente no ambiente em que o usuário já está trabalhando, sem depender necessariamente de uma interface conversacional centralizada. O agente pode apresentar informações, sugestões, perguntas de confirmação ou conteúdos relacionados à atividade observada, buscando reduzir a distância entre a necessidade do usuário e a informação ou ação que pode auxiliá-lo.
+
+No contexto do projeto, essa abordagem pode ser explorada a partir de situações em que o usuário esteja navegando por informações do portfólio, consultando documentos ou realizando atividades relacionadas a um projeto. A partir do contexto identificado, o agente poderá hipoteticamente sugerir recursos relacionados ao que está sendo realizado, como documentos, conceitos, indicadores, cronogramas, riscos ou próximos passos.
+
+Entre os comportamentos que serão explorados estão:
+
+- identificar situações relevantes durante a atividade do usuário;
+- reconhecer quando o contexto disponível é suficiente para justificar uma intervenção;
+- apresentar informações relacionadas ao conteúdo ou atividade em andamento;
+- sugerir possíveis próximos passos;
+- recomendar documentos, conceitos ou conteúdos potencialmente pertinentes;
+- utilizar perguntas de confirmação antes de iniciar uma nova ação;
+- adaptar a interação de acordo com a resposta do usuário;
+- tratar a recusa de uma sugestão sem comprometer a continuidade da atividade;
+- preservar ou modificar o contexto quando o usuário alterar sua intenção;
+- limitar a frequência e a intensidade das intervenções para evitar que a proatividade se torne excessivamente intrusiva.
+
+### 3.8.3 Construção e Execução dos Protótipos
+
+#### 3.8.3.1 Protótipo 1 — Agente Reativo sob Demanda
+
+O protótipo foi construído e executado a partir de situações em que o agente permanece silencioso até ser explicitamente acionado pela pessoa. Foram utilizadas as mesmas duas situações e as mesmas personas do Protótipo 2, de modo que a comparação entre as alternativas isole o regime de iniciativa. Para cada situação foram produzidas duas tirinhas: uma representando uma execução de sucesso e outra representando uma execução de falha.
+
+As situações foram representadas no mesmo ambiente corporativo considerado na solução. A diferença em relação ao Protótipo 2 está na origem da interação: não existem elementos sobrepostos à tela de trabalho, e o agente só aparece na tirinha depois que Carlos ou Mariana o aciona deliberadamente. Entre uma solicitação e outra, o agente retorna ao silêncio.
+
+O roteiro painel a painel das quatro tirinhas e as regras de representação estão em [`prototipo-1-roteiro.md`](prototipo-1-roteiro.md).
+
+| Tirinha | Persona | Situação | O que a execução investiga |
+| :---: | --- | --- | --- |
+| 1A | Carlos | Preparação de reunião de acompanhamento do subportfólio | O regime reativo quando a pessoa sabe exatamente o que precisa perguntar |
+| 1B | Carlos | Mesma preparação, com uma dependência entre projetos não consultada | O que acontece com a informação relevante que ninguém perguntou |
+| 2A | Mariana | Consolidação do balanço mensal | O ganho real quando a solicitação usa o vocabulário dos documentos |
+| 2B | Mariana | Mesma consolidação, com vocabulário divergente da base | O custo transferido à pessoa quando a formulação não encontra correspondência |
+
+#### Execução dos cenários de sucesso
+
+##### Cenário 1 — Carlos consulta o agente para preparar a reunião de acompanhamento
+
+![Tirinha 1A — Execução de sucesso](img/tirinha-1A-1.png)
+
+A primeira execução explora a atuação do agente reativo em uma situação na qual Carlos sabe exatamente qual informação precisa obter. Ele está montando a pauta de uma reunião de acompanhamento do subportfólio e identifica, por conta própria, que precisa confirmar o marco vigente de um dos projetos antes de conduzir a conversa com os líderes.
+
+Carlos abre o canal do agente e formula a solicitação. O agente responde com o marco, a data e a referência ao documento consultado, indicando a versão vigente do cronograma. Em seguida, Carlos aprofunda a consulta perguntando pelos riscos em aberto do mesmo projeto, e recebe uma nova resposta igualmente referenciada.
+
+Concluída a consulta, Carlos encerra o canal e retorna à elaboração da pauta. O agente não se manifesta novamente. Nenhum elemento é apresentado sem ter sido pedido e nenhuma interrupção ocorre durante o restante da atividade.
+
+O cenário foi considerado bem-sucedido porque o agente resolveu, em duas solicitações, uma consolidação que exigiria navegação entre o SharePoint, o Power BI e documentos distintos, mantendo a rastreabilidade de cada informação apresentada. O controle sobre o que é consultado permanece integralmente com Carlos, e a relação entre pergunta e resposta é direta o suficiente para que o registro de auditoria previsto no RNF03 seja produzido sem ambiguidade.
+
+##### Cenário 2 — Mariana consolida o balanço mensal a partir de uma solicitação precisa
+
+![Tirinha 2A — Execução de sucesso](img/tirinha-2A-1.png)
+
+A segunda execução explora uma situação em que Mariana, analista sênior com domínio do vocabulário utilizado nos documentos do portfólio, formula uma solicitação comparativa durante a consolidação do balanço mensal.
+
+Mariana solicita ao agente a comparação do avanço físico dos projetos de um subportfólio entre dois meses. A solicitação é formulada com os mesmos termos empregados nos documentos oficiais, o que permite ao agente localizar as informações correspondentes e retornar uma resposta estruturada, com a fonte de cada item apresentado.
+
+O resultado é utilizado diretamente na elaboração do relatório, sem que Mariana precise consultar manualmente as diferentes plataformas em que essas informações estão distribuídas.
+
+O cenário foi considerado bem-sucedido porque evidencia que o ganho do regime reativo é maior justamente para o perfil que já sabe o que precisa perguntar e como perguntar. Para Mariana, a antecipação de necessidades não representaria um ganho significativo: sua dificuldade não está em identificar a informação necessária, mas no esforço manual de reuni-la.
+
+#### Execução dos cenários de falha
+
+##### Cenário 1 — Informação relevante retida por não ter sido solicitada
+
+![Tirinha 1B — Execução de falha](img/tirinha-1B-1.png)
+
+A primeira execução de falha repete a situação do Cenário 1A, novamente com Carlos preparando a reunião de acompanhamento, mas explora o que acontece com a informação que ele não pensou em consultar.
+
+Carlos formula as mesmas solicitações e recebe as mesmas respostas corretas e referenciadas. Nada de anômalo ocorre durante a interação. Entretanto, existe na base um registro indicando que uma das entregas do subportfólio depende de um contrato pertencente a outro projeto, cuja tramitação está atrasada. O agente dispõe dessa informação e não a apresenta, porque ela não foi solicitada e o regime reativo não prevê que ele fale sem ser chamado.
+
+A consequência aparece fora da interação com o sistema: durante a reunião, o líder do outro projeto informa a dependência, e Carlos é surpreendido por um impacto que poderia ter sido antecipado. A informação estava disponível durante toda a preparação.
+
+A execução revela que a falha do regime reativo não é de recuperação nem de fundamentação — o agente não errou, não inventou e não deixou de responder. Trata-se de uma falha de cobertura, cuja característica mais relevante para o projeto é ser invisível no momento em que ocorre. Nenhum indicador do próprio agente a detecta: do ponto de vista do sistema, a interação foi integralmente bem-sucedida.
+
+O cenário torna visível, portanto, uma decisão de projeto que a alternativa reativa não resolve sozinha: se o sistema dispõe de informação relacionada ao que foi perguntado e capaz de alterar a decisão da pessoa, permanece em aberto se o silêncio continua sendo o comportamento adequado.
+
+##### Cenário 2 — Reformulações sucessivas diante de vocabulário divergente
+
+![Tirinha 2B — Execução de falha](img/tirinha-2B-1.png)
+
+A segunda execução de falha explora uma situação em que Mariana formula sua solicitação com um vocabulário que não corresponde ao utilizado nos documentos da base.
+
+Mariana pergunta quais projetos estão atrasados. O agente responde que não localizou informações correspondentes ao termo empregado — resposta correta segundo o RNF04, uma vez que o agente não infere nem completa lacunas. Mariana reformula a solicitação com outro termo, e recebe a mesma resposta. Apenas na terceira formulação, ao utilizar a expressão registrada nos documentos, obtém a informação que procurava.
+
+A execução demonstra que a informação estava disponível desde a primeira solicitação, e que o obstáculo não estava na base nem na capacidade de recuperação, mas na correspondência entre a formulação da pessoa e o vocabulário do acervo. O custo de acesso não foi eliminado pelo agente: foi transferido para Mariana, que precisou descobrir por tentativa qual termo o sistema reconhece. Essa dinâmica reproduz uma dor já registrada em sua jornada (Seção 2.5.2.2), na qual a usuária reformula perguntas sucessivamente até obter respostas úteis.
+
+O cenário torna visível a decisão mais consequente identificada nesta alternativa. Ao não localizar a informação, o agente poderia indicar o termo equivalente utilizado na base e resolver a situação na primeira tentativa. Ao fazê-lo, entretanto, passaria a oferecer algo que não foi solicitado. A alternativa reativa, levada ao limite, não se sustenta como categoria pura: existe um grau mínimo de iniciativa sem o qual o regime não funciona para quem não domina o vocabulário do domínio. O RNF07 já previa "orientação adequada para reformulação" sem qualificar esse comportamento como proatividade, o que indica que a fronteira entre os dois regimes é menos nítida do que a formulação da questão sugere.
+
+#### Diário de construção e execução
+
+A construção das tirinhas evidenciou que a dificuldade do Protótipo 1 não está em representar o agente respondendo, mas em determinar o que ele faz — ou deixa de fazer — nos intervalos entre as solicitações.
+
+**Decisão forçada: o que "reativo" significa entre uma pergunta e a seguinte.** Ao construir o Cenário 1A, foi necessário decidir se o agente mantém o contexto da solicitação anterior dentro de uma mesma sessão. A alternativa foi enunciada como "só age quando é chamado", mas isso não determina se, ao receber "e os riscos?", o agente deve entender que a pergunta se refere ao projeto citado antes ou exigir que Carlos repita o nome do projeto. Manter o contexto é uma forma de o agente supor algo que não foi dito, o que já constitui uma decisão de iniciativa, ainda que mínima. A equipe optou por manter o contexto dentro da sessão e registrou a decisão como aberta.
+
+**Ambiguidade: até onde vai o escopo de uma resposta.** No Cenário 1A, Carlos pergunta pelo marco vigente de um projeto. Ao construir a tirinha, a equipe percebeu que a informação poderia estar registrada em dois documentos com datas diferentes — situação explicitamente mencionada na Seção 2.2 como um dos riscos à confiabilidade. Não ficou claro se o agente deve responder com o documento mais recente, apresentar os dois e apontar a divergência, ou recusar-se a responder até que a inconsistência seja resolvida. Nenhuma das três opções contraria a alternativa enunciada, e a escolha altera substancialmente o que a pessoa vê.
+
+**Ambiguidade: o silêncio é um comportamento, não a ausência de comportamento.** O Cenário 1B só pôde ser construído depois que a equipe reconheceu que o agente reativo dispõe da informação sobre a dependência entre projetos e a retém. Isso alterou a leitura da alternativa: não se trata de um agente que sabe menos, mas de um agente que sabe e não fala. A distinção não estava clara quando a alternativa foi enunciada.
+
+**Impossibilidade do formato: a tirinha não mostra a pergunta que não foi feita.** A principal dificuldade de construção do Cenário 1B foi representar visualmente uma omissão. A tirinha mostra o que acontece, e a falha, neste caso, é algo que não acontece. Foi necessário deslocar a consequência para um painel posterior, situado na reunião, no qual a informação ausente aparece pela fala de outra pessoa. O formato obrigou a equipe a materializar a falha em um evento externo à interação com o agente — o que, por sua vez, revelou que essa falha só é observável fora do sistema.
+
+**Decisão forçada: o que o agente faz quando não encontra.** Ao construir o Cenário 2B, ao chegar à terceira reformulação, tornou-se necessário decidir se o agente pode indicar o termo equivalente registrado na base. A equipe optou por representar essa sugestão no último painel como comportamento não definido — hachurada e marcada como tal —, mantendo a lacuna visível em vez de resolvê-la, e registrou a decisão como aberta no inventário da Seção 3.8.6.1.
+
+**Ambiguidade: onde termina uma sessão de consulta.** Ao definir as situações que seriam usadas para forçar o protótipo, a equipe não soube responder o que aconteceria se Carlos retomasse a conversa no dia seguinte com uma referência vaga ao projeto consultado. O Cenário 1A trata o contexto como preservado, mas não estabelece por quanto tempo. A duração e o limite de uma sessão permaneceram indefinidos.
+
+**Impossibilidade do formato: a tirinha não mede o acúmulo.** O Cenário 2B representa três reformulações em três painéis. Na prática, o custo do regime reativo é cumulativo e depende de quantas vezes por dia a pessoa erra o vocabulário. A tirinha representa o episódio, não a frequência, e a diferença entre um episódio isolado e uma ocorrência diária é justamente o que determinaria se a alternativa é sustentável.
+
+#### 3.8.3.2 Protótipo 2 — Agente Proativo e Orientado à Jornada
+
+O protótipo foi construído e executado a partir de situações em que o agente atua de maneira contextual durante uma atividade realizada pela pessoa. Para explorar tanto os comportamentos esperados quanto seus limites, foram produzidas duas tirinhas para cada situação: uma representando uma execução de sucesso e outra representando uma execução de falha.
+
+As situações foram representadas considerando o ambiente tecnológico já utilizado no contexto da solução, especialmente o ecossistema corporativo baseado em SharePoint. A proatividade do agente foi representada por intervenções dinâmicas na própria interface utilizada pela pessoa, por meio de elementos sobrepostos à tela, sem exigir que o usuário abandone a atividade em andamento para iniciar uma conversa independente.
+
+#### Execução dos cenários de sucesso
+
+##### Cenário 1 — Pendência identificada durante a elaboração do Mapa de Benefícios
+
+![Tirinha 1A — Execução de sucesso](img/tirinha-1A-2.png)
+
+A primeira execução explora a atuação proativa do agente durante uma atividade realizada por Carlos no ambiente corporativo. Enquanto acompanha informações relacionadas ao portfólio, o agente identifica, a partir do contexto disponível na tela, uma situação que pode demandar atenção ou representar uma oportunidade de assistência.
+
+Em vez de aguardar que Carlos formule uma solicitação explícita, o agente apresenta uma intervenção contextual diretamente no ambiente em que ele já está trabalhando. A sugestão é apresentada como uma possibilidade de assistência, permitindo que Carlos decida se deseja consultar as informações disponibilizadas.
+
+Ao aceitar a intervenção, Carlos recebe informações relacionadas ao contexto da atividade, permitindo que identifique aspectos relevantes para sua análise, como informações do portfólio, riscos, pendências ou possíveis próximos passos. A interação ocorre sem exigir que ele abandone a atividade principal ou procure manualmente essas informações em diferentes fontes.
+
+O cenário foi considerado bem-sucedido porque a intervenção está relacionada à atividade realizada por Carlos e ocorre em um momento em que o contexto disponível é suficiente para justificar a assistência. O agente atua como uma camada de apoio à decisão, sem substituir a avaliação do usuário ou assumir automaticamente uma ação.
+
+##### Cenário 2 — Informação relevante identificada durante uma atividade de acompanhamento
+
+![Tirinha 2A — Execução de sucesso](img/tirinha-2A-2.png)
+
+A segunda execução explora uma situação em que o agente identifica uma informação potencialmente relevante enquanto Mariana realiza uma atividade de acompanhamento e análise do portfólio.
+
+Durante a navegação pelo ambiente corporativo, Mariana consulta informações relacionadas aos projetos e ao desempenho do portfólio. O agente interpreta o contexto da atividade e identifica uma informação que pode contribuir para a análise que está sendo realizada.
+
+Em vez de exigir que Mariana interrompa sua atividade para formular uma nova consulta, o agente apresenta uma sugestão diretamente na interface utilizada. A intervenção funciona como uma camada dinâmica sobre o ambiente de trabalho, permitindo que Mariana consulte a informação apresentada e decida se deseja utilizá-la.
+
+A execução demonstra o potencial de uma atuação proativa orientada à jornada, na qual o agente acompanha o contexto da atividade e apresenta informações que podem reduzir o esforço necessário para localizar dados, indicadores ou conteúdos relacionados.
+
+O cenário foi considerado bem-sucedido porque a informação apresentada possui relação direta com a atividade realizada e porque a decisão de utilizá-la permanece sob controle de Mariana. A interação demonstra, portanto, uma situação em que a proatividade pode complementar uma atividade já em andamento sem substituir a intenção original da usuária.
+
+#### Execução dos cenários de falha
+
+##### Cenário 1 — Intervenção prematura diante de contexto insuficiente
+
+![Tirinha 1B — Execução de falha](img/tirinha-1B-2.png)
+
+A primeira execução de falha apresenta uma situação semelhante à explorada no cenário 1A, tendo Carlos como usuário, porém em uma condição na qual o contexto disponível ainda não é suficiente para determinar se uma intervenção proativa é realmente necessária.
+
+Carlos está realizando uma atividade relacionada ao acompanhamento do portfólio e ainda está reunindo, analisando ou organizando informações para compreender a situação em andamento. O agente identifica uma possível lacuna ou oportunidade de assistência e interpreta essa condição como justificativa para iniciar uma intervenção.
+
+A partir dessa interpretação, o agente apresenta uma sugestão diretamente na interface utilizada por Carlos. Entretanto, a intervenção ocorre antes que sua necessidade esteja suficientemente caracterizada. Carlos demonstra que, naquele momento, sua intenção era continuar a atividade que já estava realizando, sem a necessidade da assistência apresentada.
+
+A execução revela que a identificação de uma possível pendência ou lacuna não é suficiente, por si só, para determinar que uma intervenção deve ocorrer. A mesma condição observada pelo sistema pode representar uma necessidade efetiva de assistência ou apenas uma etapa intermediária de uma atividade ainda em andamento.
+
+A falha, portanto, está principalmente na decisão de quando intervir. O protótipo torna visível a necessidade de estabelecer critérios capazes de diferenciar uma oportunidade legítima de assistência de uma situação em que a intervenção poderia apenas interromper ou distrair Carlos.
+
+##### Cenário 2 — Intervenção baseada em interpretação incorreta do contexto
+
+![Tirinha 2B — Execução de falha](img/tirinha-2B-2.png)
+
+A segunda execução de falha explora uma situação em que o agente interpreta incorretamente a atividade realizada por Mariana.
+
+Mariana está navegando pelo ambiente corporativo e alternando entre diferentes informações relacionadas ao portfólio. A partir dos elementos disponíveis na interface, o agente interpreta que ela está realizando uma determinada análise e identifica uma informação que considera relevante para aquele contexto.
+
+O sistema apresenta então uma intervenção proativa diretamente na tela, oferecendo a informação ou consulta correspondente. Entretanto, Mariana indica que sua atividade naquele momento possui outro objetivo e que a sugestão apresentada não corresponde à sua intenção atual.
+
+A execução demonstra que uma informação pode ser correta e possuir relação com o domínio do projeto, mas ainda assim ser inadequada para o momento específico da jornada da usuária. O problema, nesse caso, não está necessariamente na informação recuperada, mas na interpretação realizada pelo agente sobre o que Mariana está tentando fazer naquele momento.
+
+A falha também evidencia a necessidade de definir o comportamento do sistema após uma correção ou recusa. Uma vez que Mariana demonstra que a interpretação estava incorreta, permanece em aberto se o agente deve simplesmente encerrar a intervenção, solicitar esclarecimento, atualizar o contexto identificado ou aguardar novos sinais antes de realizar outra intervenção.
+
+O cenário, portanto, torna visível uma decisão importante para a solução: a proatividade precisa estar associada não apenas à disponibilidade de informações relevantes, mas também à capacidade de interpretar continuamente a intenção e o contexto da pessoa durante sua jornada.
+
+#### Diário de construção e execução
+
+A construção das tirinhas evidenciou que a principal dificuldade do Protótipo 2 não está na representação da intervenção proativa em si, mas na definição das condições que devem permitir ao agente decidir **quando**, **como** e **com que intensidade** iniciar uma interação.
+
+Durante a construção dos cenários de sucesso, foi necessário definir quais elementos da atividade realizada pela pessoa seriam suficientes para justificar uma intervenção. A exploração mostrou que a proatividade possui maior potencial de valor quando está diretamente relacionada ao contexto visível da atividade e quando a intervenção pode ser aceita ou recusada sem interromper o fluxo principal.
+
+Na construção dos cenários de falha, a equipe precisou representar situações nas quais o agente possui informações potencialmente úteis, mas não dispõe de contexto suficiente para determinar se aquela informação deve ser apresentada naquele momento ou interpreta incorretamente a atividade realizada pela pessoa. Essa diferença revelou que a qualidade da proatividade depende não apenas da capacidade de recuperar informações, mas também da capacidade de interpretar corretamente a intenção e o momento da pessoa.
+
+Outro ponto identificado durante a execução foi a necessidade de tratar explicitamente a recusa de uma intervenção. A recusa não representa necessariamente uma rejeição permanente da assistência do agente: ela pode significar que a sugestão é inadequada apenas para aquele momento. Dessa forma, permanece em aberto como o agente deve atualizar seu contexto após uma recusa e em que condições uma nova intervenção pode ocorrer.
+
+As tirinhas também permitiram explorar a forma da intervenção. A utilização de elementos dinâmicos sobre a interface existente mostrou-se adequada para representar um agente que acompanha a jornada sem exigir que a pessoa abandone o ambiente de trabalho para acessar uma interface conversacional independente. Ao mesmo tempo, a exploração revelou a necessidade de controlar a frequência e a intensidade dessas intervenções para evitar que a proatividade se transforme em interrupção ou sobrecarga.
+
+Como resultado, a execução dos cenários não foi utilizada para validar uma implementação final, mas para tornar visíveis decisões comportamentais que ainda permanecem em aberto, especialmente relacionadas ao nível mínimo de contexto necessário para uma intervenção, ao tratamento de recusas, à atualização da interpretação sobre a intenção do usuário e aos limites de frequência da atuação proativa.
+
+
+### 3.8.4 Comparação das Alternativas
+
+A comparação apresentada nesta seção decorre do que foi registrado nos diários de construção e execução dos dois protótipos (Seções 3.8.3.1 e 3.8.3.2). Conforme previsto no artefato, a comparação não conclui pela adoção de uma das alternativas.
+
+#### O que cada protótipo tornou visível
+
+O Protótipo 1 tornou visível que o silêncio é um comportamento com consequências, e não a ausência de comportamento. As duas execuções de falha mostraram que o agente reativo pode operar corretamente — sem erro de recuperação, sem inferência indevida, sem resposta não fundamentada — e ainda assim deixar de cumprir sua função, seja retendo informação que não foi solicitada, seja obrigando a pessoa a descobrir por tentativa o vocabulário reconhecido pela base.
+
+O Protótipo 2 tornou visível que a dificuldade da proatividade não está em recuperar informação relevante, mas em decidir o momento da intervenção. As duas execuções de falha mostraram que uma informação pode ser correta, pertinente ao domínio e ainda assim inadequada ao instante da jornada, e que a interpretação da intenção da pessoa é uma condição para intervir, não uma consequência da intervenção.
+
+#### O que apareceu em um protótipo e não no outro
+
+| Apareceu apenas no Protótipo 1 (reativo) | Apareceu apenas no Protótipo 2 (proativo) |
+| --- | --- |
+| A falha que o sistema não é capaz de detectar: no Cenário 1B a interação é bem-sucedida do ponto de vista do agente, e a consequência ocorre fora dele. | A necessidade de definir o comportamento após uma recusa: se o agente encerra, solicita esclarecimento, atualiza o contexto ou aguarda novos sinais. |
+| A dependência do vocabulário: o Cenário 2B mostrou que a barreira de acesso pode estar na formulação da pergunta, e não na disponibilidade do dado. | A necessidade de limitar frequência e intensidade das intervenções, para que a proatividade não se converta em interrupção. |
+| A rastreabilidade direta: todo par pergunta–resposta é delimitado, e o registro exigido pelo RNF03 não precisa justificar por que o sistema falou. | A superfície de observação contínua da atividade da pessoa, que incide diretamente sobre o RNF01 e o RNF02. |
+| A dúvida sobre a permanência do contexto entre solicitações e sobre onde termina uma sessão. | A definição do nível mínimo de contexto necessário para que uma intervenção se justifique. |
+
+#### O que surpreendeu o grupo
+
+**A alternativa reativa não se sustenta como categoria pura.** A expectativa ao formular as alternativas era de que "reativo" e "proativo" fossem regimes mutuamente excludentes. O Cenário 2B mostrou o contrário: para que o regime reativo funcione com quem não domina o vocabulário do acervo, o agente precisa ser capaz de orientar uma reformulação — comportamento que ele não foi solicitado a executar. O RNF07 já previa essa orientação sem classificá-la como proatividade. A consequência para o projeto é que a decisão não é binária: a iniciativa é uma escala, e o inventário da Seção 3.8.6.1 precisa tratá-la como tal.
+
+**As duas alternativas dependem de interpretar a intenção.** Ao enunciar o Protótipo 1, a equipe supunha que apenas o regime proativo precisaria interpretar o que a pessoa está tentando fazer. As execuções mostraram que ambos precisam: a diferença é quem arca com o custo do erro de interpretação. No regime proativo, o sistema erra e a pessoa é interrompida; no regime reativo, a pessoa erra a formulação e reformula até acertar. O problema não desaparece com o silêncio, apenas muda de lado.
+
+**Um regime falha em silêncio e o outro falha em voz alta.** A falha do Protótipo 2 é imediatamente perceptível: a intervenção inadequada aparece na tela, incomoda e pode ser corrigida a partir da reação da pessoa. A falha do Protótipo 1 é imperceptível: no Cenário 1B nada indica que algo deixou de acontecer, e o efeito só se manifesta depois, fora do sistema. Essa assimetria não estava prevista e tem consequência direta sobre a estratégia de avaliação da solução, uma vez que as métricas previstas para o MVP — fundamentação, taxa de alucinação, recall — capturam a falha ruidosa e não capturam a silenciosa.
+
+#### O que o formato tornou possível observar
+
+A representação em tirinha obrigou a equipe a explicitar o intervalo entre uma interação e outra, e foi nesse intervalo que as duas falhas mais relevantes apareceram: o painel em que o agente do Protótipo 1 dispõe da informação e não a apresenta, e o painel em que o agente do Protótipo 2 decide intervir antes que a necessidade esteja caracterizada. Um protótipo navegável exibiria as respostas produzidas em cada caso, mas não o tempo entre elas nem a decisão de permanecer em silêncio, que não corresponde a nenhum elemento de interface.
+
+O formato também impôs um limite que se tornou um achado: a tirinha não é capaz de representar a pergunta que não foi feita. Para construir o Cenário 1B foi necessário deslocar a consequência para fora da interação com o agente, e essa impossibilidade do meio revelou uma propriedade do próprio regime — a falha por omissão só é observável fora do sistema.
+
+### 3.8.5 Limites da Exploração
+
+Esta seção declara o que os protótipos produzidos, nos formatos utilizados, não são capazes de informar.
+
+**Nenhum usuário real participou.** As quatro tirinhas de cada protótipo foram construídas e lidas pelos próprios integrantes do grupo. As falas atribuídas a Carlos e Mariana foram escritas pela equipe a partir das personas documentadas na Seção 2.5, que são hipóteses de projeto e não observação de campo. A exploração não informa se profissionais do PMO reconheceriam essas situações como representativas de sua rotina, nem se reagiriam às intervenções do Protótipo 2 da forma representada.
+
+**O perfil executivo não foi explorado.** Roberto não aparece em nenhum dos oito cenários produzidos. Como sua jornada (Seção 2.5.2.1) é caracterizada por escassez de tempo e demanda por síntese, é plausível que o equilíbrio entre os dois regimes seja diferente para ele, mas os protótipos não oferecem nenhuma evidência a respeito.
+
+**O vocabulário do Cenário 2B é uma suposição.** A divergência entre o termo empregado por Mariana e o registrado nos documentos foi inventada pela equipe. Não sabemos se os documentos do portfólio do Metrô efetivamente empregam vocabulário distinto daquele utilizado pelas pessoas ao formular perguntas, nem qual a extensão dessa divergência. Essa é uma hipótese verificável na massa documental real e ainda não verificada.
+
+**A frequência das falhas é desconhecida, e é ela que decidiria a questão.** Cada tirinha representa um episódio. O que determinaria a adequação de cada regime é a taxa: quantas vezes por semana uma informação relevante deixa de ser consultada, e quantas vezes por dia uma intervenção proativa é inadequada. Um regime cuja falha ocorre uma vez por mês e outro cuja falha ocorre cinco vezes por dia produzem decisões de projeto opostas, e os protótipos são silenciosos quanto a isso. Apenas o uso continuado, ao longo de semanas, responderia.
+
+**O custo cumulativo não é representável.** Pelo mesmo motivo, a exploração não informa o efeito acumulado das reformulações sucessivas sobre a disposição da pessoa em continuar utilizando o agente, nem o efeito acumulado das interrupções sobre sua tolerância a novas intervenções. Ambos são fenômenos de uso prolongado.
+
+**Não há comparação entre formatos de prototipação.** Os dois protótipos utilizaram tirinhas, decisão tomada deliberadamente para isolar o regime de iniciativa como única variável entre as alternativas (Seção 3.8.2.1). O custo dessa decisão é que a exploração informa o que a tirinha revela, mas não informa o que outro formato revelaria. Comportamentos que dependem de ritmo, de simultaneidade ou da sensação de ser interrompido no meio de uma tarefa provavelmente apareceriam em uma encenação e não apareceram aqui.
+
+**Nada foi verificado quanto à viabilidade técnica.** Os protótipos representam o comportamento desejado, não a capacidade do sistema de produzi-lo. Se o pipeline consegue identificar o contexto da atividade com a precisão que o Protótipo 2 pressupõe, ou reconhecer formulações divergentes com a cobertura que o Protótipo 1 exigiria, são perguntas que dependem de experimentação com o núcleo de PLN e das métricas previstas no RNF06.
+
+**A aceitação institucional da observação contínua não foi avaliada.** A exploração tornou visível que o regime proativo exige que o sistema acompanhe a atividade da pessoa, e que isso incide sobre as restrições de confidencialidade e controle de acesso do parceiro. Se essa observação seria admissível pelas áreas técnicas e de compliance do Metrô é uma questão a ser tratada com o parceiro, e não algo que os protótipos possam responder.
+
+### 3.8.6 Insumos para a Equipe
+
+#### 3.8.6.1 Inventário de Decisões em Aberto
+
+*placeholder — listar as decisões de comportamento reveladas pela exploração, suas alternativas e o que está em jogo em cada uma.*
+
+#### 3.8.6.2 Repertório de Situações
+
+*placeholder — registrar os casos, falas e pedidos efetivamente utilizados nos cenários, especialmente os que revelaram falhas ou lacunas.*
+
+---
 
 # 4. Modelagem de Dados
 _conteúdo_
