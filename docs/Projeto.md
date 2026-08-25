@@ -2091,7 +2091,7 @@ O protótipo foi construído e executado a partir de situações em que o agente
 
 As situações foram representadas no mesmo ambiente corporativo considerado na solução. A diferença em relação ao Protótipo 2 está na origem da interação: não existem elementos sobrepostos à tela de trabalho, e o agente só aparece na tirinha depois que Carlos ou Mariana o aciona deliberadamente. Entre uma solicitação e outra, o agente retorna ao silêncio.
 
-O roteiro painel a painel das quatro tirinhas e as regras de representação estão em [`prototipo-1-roteiro.md`](prototipo-1-roteiro.md).
+O roteiro painel das quatro tirinhas e as regras de representação estão em [`prototipo-1-roteiro.md`](prototipo-1-roteiro.md).
 
 | Tirinha | Persona | Situação | O que a execução investiga |
 | :---: | --- | --- | --- |
