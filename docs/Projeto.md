@@ -2343,7 +2343,101 @@ _conteúdo_
 _conteúdo_
 
 ## 5.2 Diagrama de Componentes da UML
-_conteúdo_
+
+O Diagrama de Componentes representa a **estrutura lógica e técnica dos principais módulos da solução e suas interações**, consolidando a arquitetura atualmente adotada para o agente inteligente do Metrô. A representação evidencia as fronteiras entre a interface própria de chat, o backend da aplicação, o núcleo autoral de Processamento de Linguagem Natural (PLN), a camada de recuperação aumentada por geração (RAG), o Microsoft Copilot Studio e os serviços corporativos e de Inteligência Artificial utilizados pela solução.
+
+A arquitetura parte de uma **interface própria de chat**, responsável pela interação direta com o usuário, e de uma **API da aplicação**, que centraliza o recebimento das mensagens, o gerenciamento da conversa e a integração com os demais componentes. A entrada pode ocorrer por texto ou, quando habilitada, por voz, cuja transcrição é realizada pelo serviço de Speech-to-Text antes do processamento do núcleo da aplicação.
+
+O processamento da solicitação é realizado pelo **Pilar 1 — Núcleo de PLN e Roteamento**, responsável pelo pré-processamento, identificação e classificação da intenção, validação de escopo e extração das entidades necessárias. A intenção identificada é associada ao **catálogo de intenções da solução**, que relaciona as solicitações às capacidades e funcionalidades previstas para o produto.
+
+A partir dessa classificação, a conversa é encaminhada para a capacidade correspondente. Solicitações de **consulta ou dúvida documental** seguem pela rota de **RAG**, na qual o recuperador consulta o índice vetorial e as fontes documentais do SharePoint, reúne os trechos relevantes e monta o contexto utilizado na geração da resposta. O contexto recuperado é então encaminhado ao **Google Gemini**, que produz a resposta em linguagem natural.
+
+Solicitações associadas a **funcionalidades ou fluxos específicos** são encaminhadas ao **Microsoft Copilot Studio**. Nesse caminho, o Copilot Studio atua como mecanismo de orquestração, selecionando o tópico correspondente à intenção identificada e acionando, quando necessário, fluxos do **Power Automate** para leitura, escrita, atualização ou execução de automações sobre os serviços corporativos.
+
+Dessa forma, os componentes mantêm responsabilidades distintas: o **PLN interpreta e roteia**, o **RAG recupera conhecimento**, o **Gemini gera respostas fundamentadas a partir do contexto recuperado** e o **Copilot Studio executa e orquestra os fluxos funcionais associados às intenções**. O SharePoint permanece como fonte documental e de dados corporativos, enquanto identidade, configuração e rastreabilidade atravessam os demais componentes.
+
+<div align="center">
+  <img src="img/componentes-metro-5.2.png" alt="Diagrama de componentes da arquitetura atual da solução" width="100%">
+  <p><strong>Figura X</strong> - Diagrama de componentes da arquitetura atual da solução.</p>
+</div>
+
+O código-fonte do diagrama está versionado em [`docs/diagrams/componentes-metro-5.2.puml`](diagrams/componentes-metro-5.2.puml). Para regerar a imagem, utilizando PlantUML e Graphviz instalados no ambiente:
+
+```bash
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/componentes-metro-5.2-final.puml
+```
+
+### 5.2.1 Componentes e responsabilidades
+
+| Componente | Responsabilidade |
+|---|---|
+| **Interface Própria de Chat** | Receber as solicitações do usuário e apresentar respostas, referências e resultados dos fluxos executados. |
+| **API da Aplicação** | Expor o ponto de entrada HTTP/JSON, centralizar a comunicação entre interface, processamento e retorno das respostas. |
+| **Gerenciador de Conversação** | Manter o contexto necessário da interação e consolidar os resultados produzidos pelas diferentes rotas de processamento. |
+| **Pré-processamento** | Normalizar e preparar o texto para as etapas posteriores do pipeline de PLN. |
+| **Classificador de Intenções** | Identificar a intenção expressa pelo usuário e atribuir a categoria correspondente com sua confiança. |
+| **Catálogo de Intenções** | Associar as intenções reconhecidas às capacidades e funcionalidades disponíveis, determinando o próximo fluxo de processamento. |
+| **Validador de Escopo** | Verificar se a solicitação pertence ao conjunto de interações suportadas pela solução antes do acesso às fontes e aos fluxos. |
+| **Extração de Entidades** | Identificar entidades relevantes para a execução da intenção, como projeto, subportfólio, período e critérios de análise. |
+| **Recuperador RAG** | Buscar conteúdo relevante para consultas documentais a partir do índice vetorial e das fontes integradas. |
+| **Ingestão / Indexação Documental** | Preparar os documentos utilizados pela solução para posterior recuperação semântica. |
+| **Extração e Normalização** | Extrair e organizar o conteúdo proveniente dos documentos utilizados na base de conhecimento. |
+| **Geração de Embeddings** | Transformar os trechos normalizados em representações vetoriais utilizadas na busca semântica. |
+| **Índice Vetorial** | Armazenar embeddings e metadados para permitir a recuperação dos conteúdos mais relevantes. |
+| **Integração com SharePoint** | Intermediar o acesso aos documentos, listas e metadados disponibilizados pelo SharePoint. |
+| **Microsoft Copilot Studio** | Orquestrar os tópicos e fluxos associados às intenções funcionais identificadas pelo PLN. |
+| **Tópicos / Fluxos por Intenção** | Implementar os comportamentos específicos associados às funcionalidades previstas no catálogo de intenções. |
+| **Power Automate** | Executar automações e operações de integração necessárias aos fluxos funcionais. |
+| **Google Gemini API** | Gerar respostas em linguagem natural a partir do contexto recuperado pelo RAG. |
+| **Azure AI Speech** | Consumir a API de Speech-to-Text documentada para converter entradas de voz em texto em português brasileiro antes do processamento pelo backend. |
+| **Microsoft Entra ID** | Fornecer a identidade do usuário e apoiar o controle de acesso às funcionalidades e informações. |
+| **Trilha de Auditoria** | Registrar eventos relevantes da interação, incluindo intenção, fontes consultadas e fluxos acionados. |
+| **Configuração / Secrets** | Armazenar configurações e credenciais necessárias aos serviços integrados sem expô-las à interface. |
+
+### 5.2.2 Fluxo de interação entre os componentes
+
+O fluxo de uma solicitação conversacional típica ocorre da seguinte forma:
+
+1. O **usuário** envia uma mensagem pela **interface própria de chat**. Quando a entrada é realizada por voz, o áudio pode ser encaminhado ao **Azure AI Speech**, que devolve a transcrição em texto.
+2. A **API da aplicação** recebe a solicitação por HTTP/JSON e a encaminha ao **gerenciador de conversação**.
+3. O **Pilar 1 — Núcleo de PLN e Roteamento** realiza o pré-processamento, identifica e classifica a intenção, valida se a solicitação está no escopo suportado, associa a intenção ao catálogo de capacidades e extrai as entidades relevantes para o fluxo selecionado.
+4. Após a validação de escopo, o **catálogo de intenções** associa a intenção reconhecida à capacidade responsável pelo processamento da solicitação.
+5. Quando a intenção corresponde a uma **consulta ou dúvida documental**, o **Recuperador RAG** busca os conteúdos relevantes no índice vetorial e, quando necessário, na integração com o **SharePoint**. Os resultados são organizados pelo componente de **Montagem de Contexto**.
+6. O contexto recuperado é enviado ao **Google Gemini**, que produz a resposta em linguagem natural. O resultado retorna ao gerenciador de conversação.
+7. Quando a intenção corresponde a uma **funcionalidade estruturada**, a solicitação é encaminhada ao **Microsoft Copilot Studio**, que ativa o tópico ou fluxo correspondente. Quando necessário, o fluxo utiliza o **Power Automate** para executar operações sobre SharePoint, listas ou outros serviços corporativos.
+8. O resultado produzido pela rota escolhida é consolidado pelo **backend** e devolvido à **interface própria de chat**.
+9. Durante o processamento, os componentes de **identidade e auditoria** registram os elementos necessários para controle de acesso e rastreabilidade da interação.
+
+### 5.2.3 Relação entre o catálogo de intenções e os fluxos da solução
+
+O catálogo de intenções atua como elemento de ligação entre o **núcleo de PLN** e as capacidades funcionais do agente. Em vez de vincular a conversa diretamente a uma única tecnologia, a classificação identifica a necessidade do usuário e determina qual componente deve assumir o processamento.
+
+A arquitetura suporta dois grandes grupos de roteamento:
+
+| Tipo de intenção | Destino principal | Objetivo |
+|---|---|---|
+| **Consulta / dúvida documental** | RAG → Gemini | Recuperar informações das fontes documentais e produzir uma resposta fundamentada em linguagem natural. |
+| **Fluxo funcional / transação / automação** | Copilot Studio → tópico/fluxo → Power Automate | Executar uma capacidade estruturada associada à intenção identificada. |
+
+O catálogo pode, portanto, evoluir juntamente com as funcionalidades priorizadas do produto, mantendo a mesma estrutura de interpretação e roteamento. A inclusão de uma nova capacidade exige principalmente o registro da nova intenção e a implementação do fluxo correspondente, sem necessidade de alterar a interface de chat ou o mecanismo central de classificação.
+
+### 5.2.4 Decisões arquiteturais refletidas no diagrama
+
+- **A interface própria de chat é desacoplada da lógica de negócio.** O usuário não depende diretamente do Copilot Studio para iniciar uma conversa; a aplicação controla o ponto de entrada e a apresentação dos resultados.
+- **O núcleo de PLN permanece independente dos modelos generativos.** A identificação da intenção, o controle de escopo e o roteamento são responsabilidades do Pilar 1.
+- **O catálogo de intenções funciona como mecanismo de roteamento.** A mesma entrada conversacional pode ser direcionada a diferentes capacidades conforme a intenção identificada.
+- **O Copilot Studio permanece como componente da arquitetura.** Seu papel é executar e orquestrar tópicos e fluxos específicos, não substituir a interface própria nem o núcleo de PLN.
+- **RAG e geração são componentes distintos.** O SharePoint fornece o conhecimento documental, o mecanismo de recuperação seleciona o contexto relevante e o Gemini produz a resposta a partir desse contexto.
+- **A chave do Gemini é protegida no backend.** A interface não acessa diretamente a API generativa nem recebe suas credenciais.
+- **A camada de conhecimento é desacoplada dos canais e da geração.** A fonte documental e o índice podem evoluir sem exigir mudanças estruturais na interface ou no mecanismo de roteamento.
+- **Identidade e rastreabilidade são transversais.** O controle de acesso e os registros de auditoria devem acompanhar as interações independentemente da rota escolhida.
+- **A arquitetura permanece modular.** Novos tópicos, integrações ou capacidades de RAG podem ser adicionados ao catálogo de intenções sem reestruturar integralmente a solução.
+
+### 5.2.5 Limite de representação
+
+O diagrama de componentes concentra-se nas dependências, responsabilidades e interações entre os módulos da solução. A representação detalhada da infraestrutura física, dos containers, nós de execução e ambientes de implantação deve permanecer no **Diagrama de Implantação da UML**, apresentado na Seção 6.1.
+
+---
 
 ## 5.3 Diagramas de Sequência da UML
 _conteúdo_
