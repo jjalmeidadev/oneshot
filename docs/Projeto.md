@@ -81,6 +81,11 @@
     - [8.6.2 Benchmark das APIs](#862-benchmark-das-apis)
     - [8.6.3 API escolhida: Azure AI Speech](#863-api-escolhida-azure-ai-speech)
     - [8.6.4 Referências](#864-referências)
+  - [8.7 Escolha de algoritmo PLN](#87-escolha-de-algoritmo-pln)
+    - [8.7.1 Objetivo e protocolo de avaliação](#871-objetivo-e-protocolo-de-avaliação)
+    - [8.7.2 Benchmark e decisão](#872-benchmark-e-decisão)
+    - [8.7.3 Configuração e resultados atuais](#873-configuração-e-resultados-atuais)
+    - [8.7.4 Limitações e próximos passos](#874-limitações-e-próximos-passos)
 - [9. Planejamento e Execução de Testes](#9-planejamento-e-execução-de-testes)
   - [9.1 Testes Funcionais](#91-testes-funcionais)
     - [9.1.1 Planejamento](#911-planejamento)
@@ -2688,7 +2693,6 @@ Resposta esperada: `200 OK`, com o token no corpo como texto. O token é válido
 ```http
 Authorization: Bearer <TOKEN>
 ```
-
 
 
 
