@@ -76,6 +76,16 @@
     - [8.3.3 Sprint 5](#833-sprint-5)
   - [8.4 Testes Unitários e de Integração](#84-testes-unitários-e-de-integração)
   - [8.5 Documentações automáticas](#85-documentações-automáticas)
+  - [8.6 Speech-to-Text](#86-speech-to-text)
+    - [8.6.1 Introdução](#861-introdução)
+    - [8.6.2 Benchmark das APIs](#862-benchmark-das-apis)
+    - [8.6.3 API escolhida: Azure AI Speech](#863-api-escolhida-azure-ai-speech)
+    - [8.6.4 Referências](#864-referências)
+  - [8.7 Escolha de algoritmo PLN](#87-escolha-de-algoritmo-pln)
+    - [8.7.1 Objetivo e protocolo de avaliação](#871-objetivo-e-protocolo-de-avaliação)
+    - [8.7.2 Benchmark e decisão](#872-benchmark-e-decisão)
+    - [8.7.3 Configuração e resultados atuais](#873-configuração-e-resultados-atuais)
+    - [8.7.4 Limitações e próximos passos](#874-limitações-e-próximos-passos)
 - [9. Planejamento e Execução de Testes](#9-planejamento-e-execução-de-testes)
   - [9.1 Testes Funcionais](#91-testes-funcionais)
     - [9.1.1 Planejamento](#911-planejamento)
@@ -1775,23 +1785,27 @@ O detalhamento dos componentes internos, das interfaces e dos contratos de dados
 
 ## 3.4 Visão Inicial sobre Tecnologias e Ferramentas
 
-Esta seção apresenta a estimativa inicial das tecnologias e ferramentas que o grupo pretende utilizar na construção da solução. As escolhas aqui registradas são **preliminares** e derivam diretamente das restrições declaradas pelo parceiro no Termo de Abertura (TAPI) e no documento *Plataforma Tecnológica do Metrô*. Espera-se que sejam revisadas e refinadas ao longo das próximas sprints, à medida que os requisitos não funcionais forem detalhados e que a equipe validar hipóteses com a área de TI/GTI do Metrô.
+Esta seção apresenta a seleção inicial de tecnologias e ferramentas consideradas para a implementação da solução. As escolhas foram realizadas a partir das restrições, premissas e objetivos definidos no Termo de Abertura do Projeto (TAPI), considerando principalmente a preferência do Metrô pelo ecossistema Microsoft, os requisitos de confidencialidade e rastreabilidade e a necessidade de desenvolvimento autoral do núcleo de Processamento de Linguagem Natural (PLN).
+
+As tecnologias apresentadas nesta seção são classificadas entre aquelas previstas para utilização no **MVP**, desenvolvido e validado sobre dados sintéticos, e aquelas consideradas como alternativas ou possibilidades de evolução. Essa distinção é necessária porque o TAPI estabelece que a integração com o portfólio real do Metrô constitui uma evolução do MVP, não sendo requisito para a validação inicial da solução.
 
 ### 3.4.1 Critérios de seleção
 
-Toda decisão tecnológica desta seção foi avaliada contra cinco critérios, extraídos das restrições e premissas do projeto:
+Toda decisão tecnológica desta seção foi avaliada contra os critérios abaixo, extraídos das restrições e premissas do projeto:
 
-| # | Critério | Origem |
+| # | Critério | Descrição |
 |---|---|---|
-| C1 | **Aderência ao ecossistema Microsoft.** A solução deve ser operada, mantida e evoluída pela própria equipe do Metrô dentro de Power Platform, Microsoft 365 e Azure. | TAPI, seção *Restrições* e *Benefícios esperados* |
-| C2 | **Confidencialidade.** Nenhum dado sensível pode ser processado por serviço externo não homologado. Os experimentos de desenvolvimento usam dados sintéticos ou anonimizados e ambientes homologados pelo Metrô. | TAPI, seção *Restrições* |
-| C3 | **Autoria do núcleo de PLN.** O pipeline de Processamento de Linguagem Natural do Pilar 1 deve ser construído e avaliado pela equipe, não terceirizado a um serviço de caixa-preta. | TAPI, seção *Objetivo*, Pilar 1 |
-| C4 | **Custo e licenciamento.** Evitar recursos que exijam licenciamento adicional para os usuários finais do Metrô, como os conectores premium no Power Apps. | *Plataforma Tecnológica do Metrô*, seção Power Platform |
-| C5 | **Portabilidade.** A plataforma de portfólio pode ser substituída no futuro, por exemplo pelo Dynamics 365 Project Operations. A camada de IA deve permanecer funcional mesmo com troca da plataforma de origem dos dados. | TAPI, seção *Premissas* |
+| C1 | **Aderência ao ecossistema Microsoft** | Priorizar tecnologias compatíveis com o ambiente já utilizado pelo Metrô, especialmente Microsoft 365, Power Platform e serviços Azure. |
+| C2 | **Confidencialidade e segurança** | Evitar o processamento de informações sensíveis por serviços externos não homologados. Durante o MVP, devem ser utilizados dados sintéticos ou anonimizados. |
+| C3 | **Autoria do núcleo de PLN** | O pipeline responsável pela identificação de intenções, extração de informações e busca semântica deve ser desenvolvido e avaliado pela equipe. |
+| C4 | **Confiabilidade e escalabilidade** | Priorizar tecnologias que permitam testes, monitoramento, evolução e ampliação da solução sem necessidade de reestruturação completa. |
+| C5 | **Custo e licenciamento** | Considerar as restrições de licenciamento do ambiente Microsoft e evitar dependências que possam gerar custos adicionais desnecessários para o MVP. |
+| C6 | **Portabilidade** | Manter o núcleo de IA desacoplado da plataforma de portfólio, permitindo sua adaptação caso o Metrô altere futuramente os sistemas utilizados. |
+| C7 | **Integração** | Priorizar tecnologias capazes de se integrar aos serviços existentes, especialmente SharePoint, Power Automate, Power BI e Copilot Studio. |
 
 ### 3.4.2 Listagem organizada das tecnologias e ferramentas
 
-A stack é apresentada por camada, seguindo a mesma divisão adotada na visão técnica da solução (interface humano-computador, lógica de negócio, e acesso a dados e serviços).
+A pilha tecnológica é organizada por camadas, considerando a separação entre interface de interação, processamento de linguagem natural, recursos de IA generativa, acesso aos dados, segurança e ferramentas de desenvolvimento.
 
 #### 3.4.2.1 Camada de interface humano-computador
 
@@ -1801,6 +1815,8 @@ A stack é apresentada por camada, seguindo a mesma divisão adotada na visão t
 | **Microsoft Teams** | Canal de distribuição do agente para os usuários do PMO, sem exigir novo aplicativo ou novo login. | C1, C4 |
 | **Captura de voz nativa do canal (Teams / Copilot Studio)** | Primeira opção para a conversão de áudio em texto prevista no escopo macro, por não exigir provisionamento adicional nem sair do canal já homologado. | C1, C4 |
 | **Azure AI Speech (Speech-to-Text, pt-BR)** | Alternativa para a conversão de áudio em texto, caso a captura nativa do canal não atenda ao português ou à qualidade necessária. **A disponibilidade precisa ser confirmada com a GTI.** O documento *Plataforma Tecnológica do Metrô* descreve o Azure AI de forma geral, mas destaca apenas o Azure Machine Learning Studio e o Azure OpenAI, sem citar o serviço de fala. | C1, C2 |
+
+No MVP, a solução utilizará os canais disponibilizados pelo ecossistema Microsoft. Não está previsto o desenvolvimento de uma aplicação web ou mobile independente; o acesso por navegador e por dispositivos móveis ocorrerá pelos canais do Copilot Studio e do Microsoft Teams.
 
 > **Base já existente.** O TAPI registra, entre as restrições, que a plataforma atual de portfólio já utiliza *"Copilot Studio para Bot de apoio na obtenção e atualização de status dos projetos e sub portfólios"*, e o documento *Arquitetura Portfólio Metrô* identifica a consulta de situação do portfólio e o suporte de FAQ como recursos "ainda em desenvolvimento". A solução deste projeto, portanto, **não parte de um cenário vazio**. Ela amplia esse agente com o núcleo de PLN autoral e com as transações do Pilar 2. A decisão entre estender o agente existente ou publicar um novo agente no mesmo ambiente será tomada com a GTI na Sprint 2.
 
@@ -1910,16 +1926,34 @@ Os itens abaixo alimentam a seção *Matriz de risco do projeto* deste documento
 | Modelo de permissões do portfólio mais granular do que o previsto | O agente pode expor a um perfil informação restrita a outro, violando item explícito do escopo macro. | Espelhar as permissões já existentes nas listas do SharePoint em vez de criar um modelo próprio. Validar com o PMO os perfis e o que cada um enxerga antes de implementar as consultas. |
 | Desempenho de modelos de linguagem em português executados localmente | Latência ou acurácia insuficientes na classificação de intenções. | Estabelecer o *baseline* leve (TF-IDF + SVM) antes dos modelos maiores, e comparar as métricas antes de decidir. |
 
-### 3.4.5 Fora do escopo do MVP (evolução "Ir Além")
+### 3.4.5 Fora do escopo do MVP e evolução da solução
 
-As tecnologias a seguir foram identificadas como pertinentes à solução final, mas **não** integram o MVP validado sobre dados sintéticos:
+O TAPI estabelece que o MVP deve funcionar como uma prova de conceito validada sobre dados sintéticos, enquanto a integração com o portfólio real do Metrô representa uma evolução posterior.
+
+Assim, ficam inicialmente fora do escopo do MVP:
 
 - Integração em produção com o portfólio real do Metrô (SharePoint e Listas do ambiente produtivo)
+- Processamento de dados reais e sensíveis fora de ambientes homologados
+- Implantação da solução em produção para utilização efetiva pelas equipes do Metrô
 - Ingestão homologada de documentos para RAG, executada pela GTI
+- Criação de aplicativo mobile próprio
+- Criação de uma aplicação web independente do ecossistema Microsoft
+- Provisionamento obrigatório de infraestrutura Azure antes da validação do núcleo de PLN
+- Utilização obrigatória de modelos generativos externos
+- *Fine-tuning* de modelos de linguagem
+- Implementação de mecanismos avançados de monitoramento e auditoria de produção
+
+Como possibilidades de evolução, poderão ser consideradas:
+
+- Integração com SharePoint e listas reais do portfólio
+- Integração com Power BI e demais serviços analíticos
+- Hospedagem do pipeline em infraestrutura Azure homologada
 - *Endpoints* de inferência gerenciados no Azure Machine Learning
 - Microsoft Planner Premium e Dynamics 365 Project Operations, caso a plataforma de portfólio seja substituída
-- Síntese de fala (*text-to-speech*) para respostas faladas. O escopo macro do TAPI exige a conversão de **áudio em texto** na entrada, e a resposta falada é tratada como evolução desejável
+- Expansão da interação por voz, incluindo síntese de fala (*text-to-speech*)
 - Integração com MS Project e Businessmap, citados nas histórias de usuário como destinos possíveis de exportação do cronograma. No MVP a exportação é feita para Excel
+- Geração automatizada de relatórios e apresentações
+- Integração com sistemas externos utilizados pelo portfólio
 - Adoção de serviços de IA generativa homologados sobre dados reais e sensíveis
 
 ### 3.4.6 Referências
@@ -1954,16 +1988,59 @@ _conteúdo_
 
 ### 3.8.1 Questão de Projeto
 
-*placeholder — formular a questão em uma frase e justificar por que ela permanece genuinamente em aberto e altera o comportamento do sistema diante das pessoas.*
+**Questão:** De quem parte a iniciativa da interação — o agente age somente quando é explicitamente solicitado, ou age a partir do que observa da atividade que a pessoa está realizando?
+
+**Justificativa.** A documentação produzida até aqui sustenta os dois regimes sem decidir entre eles. Todos os requisitos funcionais partem de um comando formulado pelo usuário (RF01), mas o catálogo de intenções previsto no RF03 e no RF07 inclui a categoria *alerta*, que pressupõe um agente capaz de se manifestar sem ter sido consultado. A jornada de Carlos (2.5.2.2) atribui valor explícito a "alertas relevantes" e à "identificação proativa de desvios", enquanto a visão do produto (2.4.1) descreve o agente como uma interface conversacional acionada por linguagem natural. A resposta altera o comportamento do sistema diante das pessoas em dois pontos: define se o silêncio é o estado padrão do agente ou uma decisão que ele precisa justificar a cada momento, e determina se o sistema precisa observar continuamente a atividade do usuário — o que incide diretamente sobre as restrições de confidencialidade e de controle de acesso estabelecidas no RNF01 e no RNF02.
 
 ### 3.8.2 Alternativas e Formatos de Prototipação
 
-#### 3.8.2.1 Protótipo 1 — [Nome da alternativa]
+As duas alternativas exploradas respondem à mesma questão a partir de regimes opostos de iniciativa. No Protótipo 1, a interação só existe quando a pessoa a inicia; no Protótipo 2, o agente pode iniciá-la a partir do contexto observado. Ambas são defensáveis no contexto do PMO do Metrô e nenhuma foi construída para perder: o regime reativo oferece controle, previsibilidade e rastreabilidade direta entre pergunta e resposta, enquanto o regime proativo oferece cobertura para situações que a pessoa não sabe que precisa consultar.
 
-*placeholder — descrever a alternativa comportamental.*
+#### 3.8.2.1 Protótipo 1 — Agente Reativo sob Demanda
 
-**Formato de prototipação:**  
-*placeholder — descrever brevemente o formato escolhido e por que ele é adequado à questão.*
+O primeiro protótipo explora uma alternativa em que o agente permanece inteiramente silencioso até ser explicitamente acionado. Nesse regime, o sistema não observa a atividade da pessoa, não interpreta o que está na tela e não avalia oportunidades de assistência: ele existe como um canal de consulta que é aberto pelo usuário, responde ao que foi perguntado, indica quando não possui informação suficiente e volta ao silêncio.
+
+A alternativa parte da hipótese de que, no contexto do PMO, o valor do agente está menos em antecipar necessidades e mais em eliminar o esforço de localizar e consolidar informações que já estão distribuídas entre SharePoint, listas corporativas, relatórios e documentos. Sob essa hipótese, a pessoa continua sendo a única responsável por decidir o que precisa saber, e o agente reduz apenas o custo de obter a resposta.
+
+Três argumentos sustentam a alternativa no contexto específico do parceiro. Primeiro, a confidencialidade: um agente que só age quando chamado não precisa observar continuamente a atividade do usuário, o que elimina uma superfície permanente de leitura de contexto e simplifica a aderência ao RNF01 e ao RNF02. Segundo, a rastreabilidade: como toda resposta responde a uma solicitação explícita, o registro exigido pelo RNF03 tem sempre um par pergunta–resposta bem delimitado, sem necessidade de justificar por que o sistema decidiu falar. Terceiro, a confiança: conforme registrado na Seção 2.2, experiências anteriores do parceiro com IA generativa foram prejudicadas por respostas não fundamentadas na documentação oficial; um regime em que o agente nunca se manifesta espontaneamente reduz o número de oportunidades em que ele pode errar sem ter sido solicitado.
+
+O comportamento explorado pode ser representado conceitualmente como:
+
+```text
+Pessoa identifica uma necessidade
+            ↓
+Pessoa formula uma solicitação explícita
+            ↓
+Agente interpreta a solicitação
+            ↓
+   Há informação suficiente na base?
+         /                         \
+       Não                         Sim
+        ↓                           ↓
+Agente declara a            Agente responde com
+limitação encontrada        fonte referenciada
+        ↓                           ↓
+Pessoa reformula ou       Pessoa aprofunda ou
+abandona a consulta       encerra a interação
+            ↓                       ↓
+        Agente retorna ao silêncio
+```
+
+Entre os comportamentos explorados por esta alternativa estão:
+
+- responder exclusivamente ao que foi solicitado, sem ampliar o escopo da resposta;
+- declarar explicitamente a ausência de informação em vez de inferir ou completar lacunas;
+- manter ou descartar o contexto entre perguntas sucessivas de uma mesma sessão;
+- referenciar a fonte consultada em cada resposta;
+- permanecer em silêncio diante de informações relevantes que não foram perguntadas;
+- tratar solicitações formuladas com vocabulário diferente do utilizado nos documentos da base;
+- decidir se, ao não encontrar informação, o agente deve apenas informar a limitação ou orientar uma reformulação.
+
+**Formato de prototipação:** tirinhas ilustradas, mesmo formato utilizado no Protótipo 2.
+
+A escolha do formato é deliberada e responde a duas exigências distintas. A primeira é a exigência do artefato de experimentar um formato não baseado em interface digital: a tirinha não é uma tela navegável nem um protótipo clicável, e por isso não permite que a exploração se transforme em refinamento de interface. Ela obriga o grupo a representar o comportamento do agente por meio do que acontece entre as pessoas e o sistema ao longo do tempo — quem fala primeiro, o que é dito, o que fica sem ser dito e qual é a consequência disso — que é exatamente a dimensão da questão formulada em 3.8.1.
+
+A segunda é a exigência de comparabilidade. Como a questão trata de uma única variável — a origem da iniciativa —, manter o mesmo meio, as mesmas personas e a mesma estrutura de quatro cenários nos dois protótipos permite atribuir as diferenças observadas ao regime de iniciativa, e não ao formato de representação. O custo dessa decisão está registrado na Seção 3.8.5: por utilizar o mesmo meio nas duas alternativas, a exploração não produz comparação entre formatos de prototipação, apenas entre regimes de comportamento.
 
 #### 3.8.2.2 Protótipo 2 — Agente Proativo e Orientado à Jornada
 
@@ -2013,16 +2090,92 @@ Entre os comportamentos que serão explorados estão:
 
 ### 3.8.3 Construção e Execução dos Protótipos
 
-#### 3.8.3.1 Protótipo 1 — [Nome da alternativa]
+#### 3.8.3.1 Protótipo 1 — Agente Reativo sob Demanda
 
-**Execução dos cenários de sucesso:**  
-*placeholder*
+O protótipo foi construído e executado a partir de situações em que o agente permanece silencioso até ser explicitamente acionado pela pessoa. Foram utilizadas as mesmas duas situações e as mesmas personas do Protótipo 2, de modo que a comparação entre as alternativas isole o regime de iniciativa. Para cada situação foram produzidas duas tirinhas: uma representando uma execução de sucesso e outra representando uma execução de falha.
 
-**Execução dos cenários de falha:**  
-*placeholder*
+As situações foram representadas no mesmo ambiente corporativo considerado na solução. A diferença em relação ao Protótipo 2 está na origem da interação: não existem elementos sobrepostos à tela de trabalho, e o agente só aparece na tirinha depois que Carlos ou Mariana o aciona deliberadamente. Entre uma solicitação e outra, o agente retorna ao silêncio.
 
-**Diário de construção e execução:**  
-*placeholder*
+O roteiro painel das quatro tirinhas e as regras de representação estão em [`prototipo-1-roteiro.md`](prototipo-1-roteiro.md).
+
+| Tirinha | Persona | Situação | O que a execução investiga |
+| :---: | --- | --- | --- |
+| 1A | Carlos | Preparação de reunião de acompanhamento do subportfólio | O regime reativo quando a pessoa sabe exatamente o que precisa perguntar |
+| 1B | Carlos | Mesma preparação, com uma dependência entre projetos não consultada | O que acontece com a informação relevante que ninguém perguntou |
+| 2A | Mariana | Consolidação do balanço mensal | O ganho real quando a solicitação usa o vocabulário dos documentos |
+| 2B | Mariana | Mesma consolidação, com vocabulário divergente da base | O custo transferido à pessoa quando a formulação não encontra correspondência |
+
+#### Execução dos cenários de sucesso
+
+##### Cenário 1 — Carlos consulta o agente para preparar a reunião de acompanhamento
+
+![Tirinha 1A — Execução de sucesso](img/tirinha-1A-1.png)
+
+A primeira execução explora a atuação do agente reativo em uma situação na qual Carlos sabe exatamente qual informação precisa obter. Ele está montando a pauta de uma reunião de acompanhamento do subportfólio e identifica, por conta própria, que precisa confirmar o marco vigente de um dos projetos antes de conduzir a conversa com os líderes.
+
+Carlos abre o canal do agente e formula a solicitação. O agente responde com o marco, a data e a referência ao documento consultado, indicando a versão vigente do cronograma. Em seguida, Carlos aprofunda a consulta perguntando pelos riscos em aberto do mesmo projeto, e recebe uma nova resposta igualmente referenciada.
+
+Concluída a consulta, Carlos encerra o canal e retorna à elaboração da pauta. O agente não se manifesta novamente. Nenhum elemento é apresentado sem ter sido pedido e nenhuma interrupção ocorre durante o restante da atividade.
+
+O cenário foi considerado bem-sucedido porque o agente resolveu, em duas solicitações, uma consolidação que exigiria navegação entre o SharePoint, o Power BI e documentos distintos, mantendo a rastreabilidade de cada informação apresentada. O controle sobre o que é consultado permanece integralmente com Carlos, e a relação entre pergunta e resposta é direta o suficiente para que o registro de auditoria previsto no RNF03 seja produzido sem ambiguidade.
+
+##### Cenário 2 — Mariana consolida o balanço mensal a partir de uma solicitação precisa
+
+![Tirinha 2A — Execução de sucesso](img/tirinha-2A-1.png)
+
+A segunda execução explora uma situação em que Mariana, analista sênior com domínio do vocabulário utilizado nos documentos do portfólio, formula uma solicitação comparativa durante a consolidação do balanço mensal.
+
+Mariana solicita ao agente a comparação do avanço físico dos projetos de um subportfólio entre dois meses. A solicitação é formulada com os mesmos termos empregados nos documentos oficiais, o que permite ao agente localizar as informações correspondentes e retornar uma resposta estruturada, com a fonte de cada item apresentado.
+
+O resultado é utilizado diretamente na elaboração do relatório, sem que Mariana precise consultar manualmente as diferentes plataformas em que essas informações estão distribuídas.
+
+O cenário foi considerado bem-sucedido porque evidencia que o ganho do regime reativo é maior justamente para o perfil que já sabe o que precisa perguntar e como perguntar. Para Mariana, a antecipação de necessidades não representaria um ganho significativo: sua dificuldade não está em identificar a informação necessária, mas no esforço manual de reuni-la.
+
+#### Execução dos cenários de falha
+
+##### Cenário 1 — Informação relevante retida por não ter sido solicitada
+
+![Tirinha 1B — Execução de falha](img/tirinha-1B-1.png)
+
+A primeira execução de falha repete a situação do Cenário 1A, novamente com Carlos preparando a reunião de acompanhamento, mas explora o que acontece com a informação que ele não pensou em consultar.
+
+Carlos formula as mesmas solicitações e recebe as mesmas respostas corretas e referenciadas. Nada de anômalo ocorre durante a interação. Entretanto, existe na base um registro indicando que uma das entregas do subportfólio depende de um contrato pertencente a outro projeto, cuja tramitação está atrasada. O agente dispõe dessa informação e não a apresenta, porque ela não foi solicitada e o regime reativo não prevê que ele fale sem ser chamado.
+
+A consequência aparece fora da interação com o sistema: durante a reunião, o líder do outro projeto informa a dependência, e Carlos é surpreendido por um impacto que poderia ter sido antecipado. A informação estava disponível durante toda a preparação.
+
+A execução revela que a falha do regime reativo não é de recuperação nem de fundamentação — o agente não errou, não inventou e não deixou de responder. Trata-se de uma falha de cobertura, cuja característica mais relevante para o projeto é ser invisível no momento em que ocorre. Nenhum indicador do próprio agente a detecta: do ponto de vista do sistema, a interação foi integralmente bem-sucedida.
+
+O cenário torna visível, portanto, uma decisão de projeto que a alternativa reativa não resolve sozinha: se o sistema dispõe de informação relacionada ao que foi perguntado e capaz de alterar a decisão da pessoa, permanece em aberto se o silêncio continua sendo o comportamento adequado.
+
+##### Cenário 2 — Reformulações sucessivas diante de vocabulário divergente
+
+![Tirinha 2B — Execução de falha](img/tirinha-2B-1.png)
+
+A segunda execução de falha explora uma situação em que Mariana formula sua solicitação com um vocabulário que não corresponde ao utilizado nos documentos da base.
+
+Mariana pergunta quais projetos estão atrasados. O agente responde que não localizou informações correspondentes ao termo empregado — resposta correta segundo o RNF04, uma vez que o agente não infere nem completa lacunas. Mariana reformula a solicitação com outro termo, e recebe a mesma resposta. Apenas na terceira formulação, ao utilizar a expressão registrada nos documentos, obtém a informação que procurava.
+
+A execução demonstra que a informação estava disponível desde a primeira solicitação, e que o obstáculo não estava na base nem na capacidade de recuperação, mas na correspondência entre a formulação da pessoa e o vocabulário do acervo. O custo de acesso não foi eliminado pelo agente: foi transferido para Mariana, que precisou descobrir por tentativa qual termo o sistema reconhece. Essa dinâmica reproduz uma dor já registrada em sua jornada (Seção 2.5.2.2), na qual a usuária reformula perguntas sucessivamente até obter respostas úteis.
+
+O cenário torna visível a decisão mais consequente identificada nesta alternativa. Ao não localizar a informação, o agente poderia indicar o termo equivalente utilizado na base e resolver a situação na primeira tentativa. Ao fazê-lo, entretanto, passaria a oferecer algo que não foi solicitado. A alternativa reativa, levada ao limite, não se sustenta como categoria pura: existe um grau mínimo de iniciativa sem o qual o regime não funciona para quem não domina o vocabulário do domínio. O RNF07 já previa "orientação adequada para reformulação" sem qualificar esse comportamento como proatividade, o que indica que a fronteira entre os dois regimes é menos nítida do que a formulação da questão sugere.
+
+#### Diário de construção e execução
+
+A construção das tirinhas evidenciou que a dificuldade do Protótipo 1 não está em representar o agente respondendo, mas em determinar o que ele faz — ou deixa de fazer — nos intervalos entre as solicitações.
+
+**Decisão forçada: o que "reativo" significa entre uma pergunta e a seguinte.** Ao construir o Cenário 1A, foi necessário decidir se o agente mantém o contexto da solicitação anterior dentro de uma mesma sessão. A alternativa foi enunciada como "só age quando é chamado", mas isso não determina se, ao receber "e os riscos?", o agente deve entender que a pergunta se refere ao projeto citado antes ou exigir que Carlos repita o nome do projeto. Manter o contexto é uma forma de o agente supor algo que não foi dito, o que já constitui uma decisão de iniciativa, ainda que mínima. A equipe optou por manter o contexto dentro da sessão e registrou a decisão como aberta.
+
+**Ambiguidade: até onde vai o escopo de uma resposta.** No Cenário 1A, Carlos pergunta pelo marco vigente de um projeto. Ao construir a tirinha, a equipe percebeu que a informação poderia estar registrada em dois documentos com datas diferentes — situação explicitamente mencionada na Seção 2.2 como um dos riscos à confiabilidade. Não ficou claro se o agente deve responder com o documento mais recente, apresentar os dois e apontar a divergência, ou recusar-se a responder até que a inconsistência seja resolvida. Nenhuma das três opções contraria a alternativa enunciada, e a escolha altera substancialmente o que a pessoa vê.
+
+**Ambiguidade: o silêncio é um comportamento, não a ausência de comportamento.** O Cenário 1B só pôde ser construído depois que a equipe reconheceu que o agente reativo dispõe da informação sobre a dependência entre projetos e a retém. Isso alterou a leitura da alternativa: não se trata de um agente que sabe menos, mas de um agente que sabe e não fala. A distinção não estava clara quando a alternativa foi enunciada.
+
+**Impossibilidade do formato: a tirinha não mostra a pergunta que não foi feita.** A principal dificuldade de construção do Cenário 1B foi representar visualmente uma omissão. A tirinha mostra o que acontece, e a falha, neste caso, é algo que não acontece. Foi necessário deslocar a consequência para um painel posterior, situado na reunião, no qual a informação ausente aparece pela fala de outra pessoa. O formato obrigou a equipe a materializar a falha em um evento externo à interação com o agente — o que, por sua vez, revelou que essa falha só é observável fora do sistema.
+
+**Decisão forçada: o que o agente faz quando não encontra.** Ao construir o Cenário 2B, ao chegar à terceira reformulação, tornou-se necessário decidir se o agente pode indicar o termo equivalente registrado na base. A equipe optou por representar essa sugestão no último painel como comportamento não definido — hachurada e marcada como tal —, mantendo a lacuna visível em vez de resolvê-la, e registrou a decisão como aberta no inventário da Seção 3.8.6.1.
+
+**Ambiguidade: onde termina uma sessão de consulta.** Ao definir as situações que seriam usadas para forçar o protótipo, a equipe não soube responder o que aconteceria se Carlos retomasse a conversa no dia seguinte com uma referência vaga ao projeto consultado. O Cenário 1A trata o contexto como preservado, mas não estabelece por quanto tempo. A duração e o limite de uma sessão permaneceram indefinidos.
+
+**Impossibilidade do formato: a tirinha não mede o acúmulo.** O Cenário 2B representa três reformulações em três painéis. Na prática, o custo do regime reativo é cumulativo e depende de quantas vezes por dia a pessoa erra o vocabulário. A tirinha representa o episódio, não a frequência, e a diferença entre um episódio isolado e uma ocorrência diária é justamente o que determinaria se a alternativa é sustentável.
 
 #### 3.8.3.2 Protótipo 2 — Agente Proativo e Orientado à Jornada
 
@@ -2034,7 +2187,7 @@ As situações foram representadas considerando o ambiente tecnológico já util
 
 ##### Cenário 1 — Pendência identificada durante a elaboração do Mapa de Benefícios
 
-![Tirinha 1A — Execução de sucesso](docs/img/tirinha-1A-2.png)
+![Tirinha 1A — Execução de sucesso](img/tirinha-1A-2.png)
 
 A primeira execução explora a atuação proativa do agente durante uma atividade realizada por Carlos no ambiente corporativo. Enquanto acompanha informações relacionadas ao portfólio, o agente identifica, a partir do contexto disponível na tela, uma situação que pode demandar atenção ou representar uma oportunidade de assistência.
 
@@ -2046,7 +2199,7 @@ O cenário foi considerado bem-sucedido porque a intervenção está relacionada
 
 ##### Cenário 2 — Informação relevante identificada durante uma atividade de acompanhamento
 
-![Tirinha 2A — Execução de sucesso](docs/img/tirinha-2A-2.png)
+![Tirinha 2A — Execução de sucesso](img/tirinha-2A-2.png)
 
 A segunda execução explora uma situação em que o agente identifica uma informação potencialmente relevante enquanto Mariana realiza uma atividade de acompanhamento e análise do portfólio.
 
@@ -2062,7 +2215,7 @@ O cenário foi considerado bem-sucedido porque a informação apresentada possui
 
 ##### Cenário 1 — Intervenção prematura diante de contexto insuficiente
 
-![Tirinha 1B — Execução de falha](docs/img/tirinha-1B-2.png)
+![Tirinha 1B — Execução de falha](img/tirinha-1B-2.png)
 
 A primeira execução de falha apresenta uma situação semelhante à explorada no cenário 1A, tendo Carlos como usuário, porém em uma condição na qual o contexto disponível ainda não é suficiente para determinar se uma intervenção proativa é realmente necessária.
 
@@ -2076,7 +2229,7 @@ A falha, portanto, está principalmente na decisão de quando intervir. O protó
 
 ##### Cenário 2 — Intervenção baseada em interpretação incorreta do contexto
 
-![Tirinha 2B — Execução de falha](docs/img/tirinha-2B-2.png)
+![Tirinha 2B — Execução de falha](img/tirinha-2B-2.png)
 
 A segunda execução de falha explora uma situação em que o agente interpreta incorretamente a atividade realizada por Mariana.
 
@@ -2107,11 +2260,56 @@ Como resultado, a execução dos cenários não foi utilizada para validar uma i
 
 ### 3.8.4 Comparação das Alternativas
 
-*placeholder — registrar o que cada protótipo tornou visível, o que apareceu em um e não no outro, o que surpreendeu o grupo e o que o formato não digital revelou.*
+A comparação apresentada nesta seção decorre do que foi registrado nos diários de construção e execução dos dois protótipos (Seções 3.8.3.1 e 3.8.3.2). Conforme previsto no artefato, a comparação não conclui pela adoção de uma das alternativas.
+
+#### O que cada protótipo tornou visível
+
+O Protótipo 1 tornou visível que o silêncio é um comportamento com consequências, e não a ausência de comportamento. As duas execuções de falha mostraram que o agente reativo pode operar corretamente — sem erro de recuperação, sem inferência indevida, sem resposta não fundamentada — e ainda assim deixar de cumprir sua função, seja retendo informação que não foi solicitada, seja obrigando a pessoa a descobrir por tentativa o vocabulário reconhecido pela base.
+
+O Protótipo 2 tornou visível que a dificuldade da proatividade não está em recuperar informação relevante, mas em decidir o momento da intervenção. As duas execuções de falha mostraram que uma informação pode ser correta, pertinente ao domínio e ainda assim inadequada ao instante da jornada, e que a interpretação da intenção da pessoa é uma condição para intervir, não uma consequência da intervenção.
+
+#### O que apareceu em um protótipo e não no outro
+
+| Apareceu apenas no Protótipo 1 (reativo) | Apareceu apenas no Protótipo 2 (proativo) |
+| --- | --- |
+| A falha que o sistema não é capaz de detectar: no Cenário 1B a interação é bem-sucedida do ponto de vista do agente, e a consequência ocorre fora dele. | A necessidade de definir o comportamento após uma recusa: se o agente encerra, solicita esclarecimento, atualiza o contexto ou aguarda novos sinais. |
+| A dependência do vocabulário: o Cenário 2B mostrou que a barreira de acesso pode estar na formulação da pergunta, e não na disponibilidade do dado. | A necessidade de limitar frequência e intensidade das intervenções, para que a proatividade não se converta em interrupção. |
+| A rastreabilidade direta: todo par pergunta–resposta é delimitado, e o registro exigido pelo RNF03 não precisa justificar por que o sistema falou. | A superfície de observação contínua da atividade da pessoa, que incide diretamente sobre o RNF01 e o RNF02. |
+| A dúvida sobre a permanência do contexto entre solicitações e sobre onde termina uma sessão. | A definição do nível mínimo de contexto necessário para que uma intervenção se justifique. |
+
+#### O que surpreendeu o grupo
+
+**A alternativa reativa não se sustenta como categoria pura.** A expectativa ao formular as alternativas era de que "reativo" e "proativo" fossem regimes mutuamente excludentes. O Cenário 2B mostrou o contrário: para que o regime reativo funcione com quem não domina o vocabulário do acervo, o agente precisa ser capaz de orientar uma reformulação — comportamento que ele não foi solicitado a executar. O RNF07 já previa essa orientação sem classificá-la como proatividade. A consequência para o projeto é que a decisão não é binária: a iniciativa é uma escala, e o inventário da Seção 3.8.6.1 precisa tratá-la como tal.
+
+**As duas alternativas dependem de interpretar a intenção.** Ao enunciar o Protótipo 1, a equipe supunha que apenas o regime proativo precisaria interpretar o que a pessoa está tentando fazer. As execuções mostraram que ambos precisam: a diferença é quem arca com o custo do erro de interpretação. No regime proativo, o sistema erra e a pessoa é interrompida; no regime reativo, a pessoa erra a formulação e reformula até acertar. O problema não desaparece com o silêncio, apenas muda de lado.
+
+**Um regime falha em silêncio e o outro falha em voz alta.** A falha do Protótipo 2 é imediatamente perceptível: a intervenção inadequada aparece na tela, incomoda e pode ser corrigida a partir da reação da pessoa. A falha do Protótipo 1 é imperceptível: no Cenário 1B nada indica que algo deixou de acontecer, e o efeito só se manifesta depois, fora do sistema. Essa assimetria não estava prevista e tem consequência direta sobre a estratégia de avaliação da solução, uma vez que as métricas previstas para o MVP — fundamentação, taxa de alucinação, recall — capturam a falha ruidosa e não capturam a silenciosa.
+
+#### O que o formato tornou possível observar
+
+A representação em tirinha obrigou a equipe a explicitar o intervalo entre uma interação e outra, e foi nesse intervalo que as duas falhas mais relevantes apareceram: o painel em que o agente do Protótipo 1 dispõe da informação e não a apresenta, e o painel em que o agente do Protótipo 2 decide intervir antes que a necessidade esteja caracterizada. Um protótipo navegável exibiria as respostas produzidas em cada caso, mas não o tempo entre elas nem a decisão de permanecer em silêncio, que não corresponde a nenhum elemento de interface.
+
+O formato também impôs um limite que se tornou um achado: a tirinha não é capaz de representar a pergunta que não foi feita. Para construir o Cenário 1B foi necessário deslocar a consequência para fora da interação com o agente, e essa impossibilidade do meio revelou uma propriedade do próprio regime — a falha por omissão só é observável fora do sistema.
 
 ### 3.8.5 Limites da Exploração
 
-*placeholder — declarar especificamente o que os protótipos não conseguem informar e o que dependeria de usuários reais, dados reais ou ambiente real.*
+Esta seção declara o que os protótipos produzidos, nos formatos utilizados, não são capazes de informar.
+
+**Nenhum usuário real participou.** As quatro tirinhas de cada protótipo foram construídas e lidas pelos próprios integrantes do grupo. As falas atribuídas a Carlos e Mariana foram escritas pela equipe a partir das personas documentadas na Seção 2.5, que são hipóteses de projeto e não observação de campo. A exploração não informa se profissionais do PMO reconheceriam essas situações como representativas de sua rotina, nem se reagiriam às intervenções do Protótipo 2 da forma representada.
+
+**O perfil executivo não foi explorado.** Roberto não aparece em nenhum dos oito cenários produzidos. Como sua jornada (Seção 2.5.2.1) é caracterizada por escassez de tempo e demanda por síntese, é plausível que o equilíbrio entre os dois regimes seja diferente para ele, mas os protótipos não oferecem nenhuma evidência a respeito.
+
+**O vocabulário do Cenário 2B é uma suposição.** A divergência entre o termo empregado por Mariana e o registrado nos documentos foi inventada pela equipe. Não sabemos se os documentos do portfólio do Metrô efetivamente empregam vocabulário distinto daquele utilizado pelas pessoas ao formular perguntas, nem qual a extensão dessa divergência. Essa é uma hipótese verificável na massa documental real e ainda não verificada.
+
+**A frequência das falhas é desconhecida, e é ela que decidiria a questão.** Cada tirinha representa um episódio. O que determinaria a adequação de cada regime é a taxa: quantas vezes por semana uma informação relevante deixa de ser consultada, e quantas vezes por dia uma intervenção proativa é inadequada. Um regime cuja falha ocorre uma vez por mês e outro cuja falha ocorre cinco vezes por dia produzem decisões de projeto opostas, e os protótipos são silenciosos quanto a isso. Apenas o uso continuado, ao longo de semanas, responderia.
+
+**O custo cumulativo não é representável.** Pelo mesmo motivo, a exploração não informa o efeito acumulado das reformulações sucessivas sobre a disposição da pessoa em continuar utilizando o agente, nem o efeito acumulado das interrupções sobre sua tolerância a novas intervenções. Ambos são fenômenos de uso prolongado.
+
+**Não há comparação entre formatos de prototipação.** Os dois protótipos utilizaram tirinhas, decisão tomada deliberadamente para isolar o regime de iniciativa como única variável entre as alternativas (Seção 3.8.2.1). O custo dessa decisão é que a exploração informa o que a tirinha revela, mas não informa o que outro formato revelaria. Comportamentos que dependem de ritmo, de simultaneidade ou da sensação de ser interrompido no meio de uma tarefa provavelmente apareceriam em uma encenação e não apareceram aqui.
+
+**Nada foi verificado quanto à viabilidade técnica.** Os protótipos representam o comportamento desejado, não a capacidade do sistema de produzi-lo. Se o pipeline consegue identificar o contexto da atividade com a precisão que o Protótipo 2 pressupõe, ou reconhecer formulações divergentes com a cobertura que o Protótipo 1 exigiria, são perguntas que dependem de experimentação com o núcleo de PLN e das métricas previstas no RNF06.
+
+**A aceitação institucional da observação contínua não foi avaliada.** A exploração tornou visível que o regime proativo exige que o sistema acompanhe a atividade da pessoa, e que isso incide sobre as restrições de confidencialidade e controle de acesso do parceiro. Se essa observação seria admissível pelas áreas técnicas e de compliance do Metrô é uma questão a ser tratada com o parceiro, e não algo que os protótipos possam responder.
 
 ### 3.8.6 Insumos para a Equipe
 
@@ -2150,7 +2348,101 @@ _conteúdo_
 _conteúdo_
 
 ## 5.2 Diagrama de Componentes da UML
-_conteúdo_
+
+O Diagrama de Componentes representa a **estrutura lógica e técnica dos principais módulos da solução e suas interações**, consolidando a arquitetura atualmente adotada para o agente inteligente do Metrô. A representação evidencia as fronteiras entre a interface própria de chat, o backend da aplicação, o núcleo autoral de Processamento de Linguagem Natural (PLN), a camada de recuperação aumentada por geração (RAG), o Microsoft Copilot Studio e os serviços corporativos e de Inteligência Artificial utilizados pela solução.
+
+A arquitetura parte de uma **interface própria de chat**, responsável pela interação direta com o usuário, e de uma **API da aplicação**, que centraliza o recebimento das mensagens, o gerenciamento da conversa e a integração com os demais componentes. A entrada pode ocorrer por texto ou, quando habilitada, por voz, cuja transcrição é realizada pelo serviço de Speech-to-Text antes do processamento do núcleo da aplicação.
+
+O processamento da solicitação é realizado pelo **Pilar 1 — Núcleo de PLN e Roteamento**, responsável pelo pré-processamento, identificação e classificação da intenção, validação de escopo e extração das entidades necessárias. A intenção identificada é associada ao **catálogo de intenções da solução**, que relaciona as solicitações às capacidades e funcionalidades previstas para o produto.
+
+A partir dessa classificação, a conversa é encaminhada para a capacidade correspondente. Solicitações de **consulta ou dúvida documental** seguem pela rota de **RAG**, na qual o recuperador consulta o índice vetorial e as fontes documentais do SharePoint, reúne os trechos relevantes e monta o contexto utilizado na geração da resposta. O contexto recuperado é então encaminhado ao **Google Gemini**, que produz a resposta em linguagem natural.
+
+Solicitações associadas a **funcionalidades ou fluxos específicos** são encaminhadas ao **Microsoft Copilot Studio**. Nesse caminho, o Copilot Studio atua como mecanismo de orquestração, selecionando o tópico correspondente à intenção identificada e acionando, quando necessário, fluxos do **Power Automate** para leitura, escrita, atualização ou execução de automações sobre os serviços corporativos.
+
+Dessa forma, os componentes mantêm responsabilidades distintas: o **PLN interpreta e roteia**, o **RAG recupera conhecimento**, o **Gemini gera respostas fundamentadas a partir do contexto recuperado** e o **Copilot Studio executa e orquestra os fluxos funcionais associados às intenções**. O SharePoint permanece como fonte documental e de dados corporativos, enquanto identidade, configuração e rastreabilidade atravessam os demais componentes.
+
+<div align="center">
+  <img src="img/componentes-metro-5.2.png" alt="Diagrama de componentes da arquitetura atual da solução" width="100%">
+  <p><strong>Figura X</strong> - Diagrama de componentes da arquitetura atual da solução.</p>
+</div>
+
+O código-fonte do diagrama está versionado em [`docs/diagrams/componentes-metro-5.2.puml`](diagrams/componentes-metro-5.2.puml). Para regerar a imagem, utilizando PlantUML e Graphviz instalados no ambiente:
+
+```bash
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/componentes-metro-5.2-final.puml
+```
+
+### 5.2.1 Componentes e responsabilidades
+
+| Componente | Responsabilidade |
+|---|---|
+| **Interface Própria de Chat** | Receber as solicitações do usuário e apresentar respostas, referências e resultados dos fluxos executados. |
+| **API da Aplicação** | Expor o ponto de entrada HTTP/JSON, centralizar a comunicação entre interface, processamento e retorno das respostas. |
+| **Gerenciador de Conversação** | Manter o contexto necessário da interação e consolidar os resultados produzidos pelas diferentes rotas de processamento. |
+| **Pré-processamento** | Normalizar e preparar o texto para as etapas posteriores do pipeline de PLN. |
+| **Classificador de Intenções** | Identificar a intenção expressa pelo usuário e atribuir a categoria correspondente com sua confiança. |
+| **Catálogo de Intenções** | Associar as intenções reconhecidas às capacidades e funcionalidades disponíveis, determinando o próximo fluxo de processamento. |
+| **Validador de Escopo** | Verificar se a solicitação pertence ao conjunto de interações suportadas pela solução antes do acesso às fontes e aos fluxos. |
+| **Extração de Entidades** | Identificar entidades relevantes para a execução da intenção, como projeto, subportfólio, período e critérios de análise. |
+| **Recuperador RAG** | Buscar conteúdo relevante para consultas documentais a partir do índice vetorial e das fontes integradas. |
+| **Ingestão / Indexação Documental** | Preparar os documentos utilizados pela solução para posterior recuperação semântica. |
+| **Extração e Normalização** | Extrair e organizar o conteúdo proveniente dos documentos utilizados na base de conhecimento. |
+| **Geração de Embeddings** | Transformar os trechos normalizados em representações vetoriais utilizadas na busca semântica. |
+| **Índice Vetorial** | Armazenar embeddings e metadados para permitir a recuperação dos conteúdos mais relevantes. |
+| **Integração com SharePoint** | Intermediar o acesso aos documentos, listas e metadados disponibilizados pelo SharePoint. |
+| **Microsoft Copilot Studio** | Orquestrar os tópicos e fluxos associados às intenções funcionais identificadas pelo PLN. |
+| **Tópicos / Fluxos por Intenção** | Implementar os comportamentos específicos associados às funcionalidades previstas no catálogo de intenções. |
+| **Power Automate** | Executar automações e operações de integração necessárias aos fluxos funcionais. |
+| **Google Gemini API** | Gerar respostas em linguagem natural a partir do contexto recuperado pelo RAG. |
+| **Azure AI Speech** | Consumir a API de Speech-to-Text documentada para converter entradas de voz em texto em português brasileiro antes do processamento pelo backend. |
+| **Microsoft Entra ID** | Fornecer a identidade do usuário e apoiar o controle de acesso às funcionalidades e informações. |
+| **Trilha de Auditoria** | Registrar eventos relevantes da interação, incluindo intenção, fontes consultadas e fluxos acionados. |
+| **Configuração / Secrets** | Armazenar configurações e credenciais necessárias aos serviços integrados sem expô-las à interface. |
+
+### 5.2.2 Fluxo de interação entre os componentes
+
+O fluxo de uma solicitação conversacional típica ocorre da seguinte forma:
+
+1. O **usuário** envia uma mensagem pela **interface própria de chat**. Quando a entrada é realizada por voz, o áudio pode ser encaminhado ao **Azure AI Speech**, que devolve a transcrição em texto.
+2. A **API da aplicação** recebe a solicitação por HTTP/JSON e a encaminha ao **gerenciador de conversação**.
+3. O **Pilar 1 — Núcleo de PLN e Roteamento** realiza o pré-processamento, identifica e classifica a intenção, valida se a solicitação está no escopo suportado, associa a intenção ao catálogo de capacidades e extrai as entidades relevantes para o fluxo selecionado.
+4. Após a validação de escopo, o **catálogo de intenções** associa a intenção reconhecida à capacidade responsável pelo processamento da solicitação.
+5. Quando a intenção corresponde a uma **consulta ou dúvida documental**, o **Recuperador RAG** busca os conteúdos relevantes no índice vetorial e, quando necessário, na integração com o **SharePoint**. Os resultados são organizados pelo componente de **Montagem de Contexto**.
+6. O contexto recuperado é enviado ao **Google Gemini**, que produz a resposta em linguagem natural. O resultado retorna ao gerenciador de conversação.
+7. Quando a intenção corresponde a uma **funcionalidade estruturada**, a solicitação é encaminhada ao **Microsoft Copilot Studio**, que ativa o tópico ou fluxo correspondente. Quando necessário, o fluxo utiliza o **Power Automate** para executar operações sobre SharePoint, listas ou outros serviços corporativos.
+8. O resultado produzido pela rota escolhida é consolidado pelo **backend** e devolvido à **interface própria de chat**.
+9. Durante o processamento, os componentes de **identidade e auditoria** registram os elementos necessários para controle de acesso e rastreabilidade da interação.
+
+### 5.2.3 Relação entre o catálogo de intenções e os fluxos da solução
+
+O catálogo de intenções atua como elemento de ligação entre o **núcleo de PLN** e as capacidades funcionais do agente. Em vez de vincular a conversa diretamente a uma única tecnologia, a classificação identifica a necessidade do usuário e determina qual componente deve assumir o processamento.
+
+A arquitetura suporta dois grandes grupos de roteamento:
+
+| Tipo de intenção | Destino principal | Objetivo |
+|---|---|---|
+| **Consulta / dúvida documental** | RAG → Gemini | Recuperar informações das fontes documentais e produzir uma resposta fundamentada em linguagem natural. |
+| **Fluxo funcional / transação / automação** | Copilot Studio → tópico/fluxo → Power Automate | Executar uma capacidade estruturada associada à intenção identificada. |
+
+O catálogo pode, portanto, evoluir juntamente com as funcionalidades priorizadas do produto, mantendo a mesma estrutura de interpretação e roteamento. A inclusão de uma nova capacidade exige principalmente o registro da nova intenção e a implementação do fluxo correspondente, sem necessidade de alterar a interface de chat ou o mecanismo central de classificação.
+
+### 5.2.4 Decisões arquiteturais refletidas no diagrama
+
+- **A interface própria de chat é desacoplada da lógica de negócio.** O usuário não depende diretamente do Copilot Studio para iniciar uma conversa; a aplicação controla o ponto de entrada e a apresentação dos resultados.
+- **O núcleo de PLN permanece independente dos modelos generativos.** A identificação da intenção, o controle de escopo e o roteamento são responsabilidades do Pilar 1.
+- **O catálogo de intenções funciona como mecanismo de roteamento.** A mesma entrada conversacional pode ser direcionada a diferentes capacidades conforme a intenção identificada.
+- **O Copilot Studio permanece como componente da arquitetura.** Seu papel é executar e orquestrar tópicos e fluxos específicos, não substituir a interface própria nem o núcleo de PLN.
+- **RAG e geração são componentes distintos.** O SharePoint fornece o conhecimento documental, o mecanismo de recuperação seleciona o contexto relevante e o Gemini produz a resposta a partir desse contexto.
+- **A chave do Gemini é protegida no backend.** A interface não acessa diretamente a API generativa nem recebe suas credenciais.
+- **A camada de conhecimento é desacoplada dos canais e da geração.** A fonte documental e o índice podem evoluir sem exigir mudanças estruturais na interface ou no mecanismo de roteamento.
+- **Identidade e rastreabilidade são transversais.** O controle de acesso e os registros de auditoria devem acompanhar as interações independentemente da rota escolhida.
+- **A arquitetura permanece modular.** Novos tópicos, integrações ou capacidades de RAG podem ser adicionados ao catálogo de intenções sem reestruturar integralmente a solução.
+
+### 5.2.5 Limite de representação
+
+O diagrama de componentes concentra-se nas dependências, responsabilidades e interações entre os módulos da solução. A representação detalhada da infraestrutura física, dos containers, nós de execução e ambientes de implantação deve permanecer no **Diagrama de Implantação da UML**, apresentado na Seção 6.1.
+
+---
 
 ## 5.3 Diagramas de Sequência da UML
 _conteúdo_
@@ -2188,19 +2480,41 @@ _conteúdo_
 ## 8.2 Modelo de Recomendação
 _conteúdo_
 
-## 8.3 Desenvolvimento de Features
-_conteúdo_
+## 8.3 Planejamento estratégico de desenvolvimento
 
-**Nota:** Insira uma explicação de entregas em cada Sprint.
+O desenvolvimento das features será conduzido de forma incremental nas Sprints 3, 4 e 5, usando como insumo os artefatos já concluídos nas Sprints 1 e 2. Esses artefatos anteriores não compõem novas entregas neste planejamento; eles funcionam apenas como referência para orientar implementação, integração, testes e fechamento do projeto. A entrega será organizada para reduzir riscos de integração: primeiro serão implementados os fluxos essenciais de entrada, processamento e consulta; em seguida, serão estabilizadas as integrações, o banco de dados, os webhooks, o deploy e a execução dos testes sistêmicos; por fim, a solução será consolidada, documentada e preparada para apresentação final.
+
+Essa estratégia considera que a solução deve evoluir como uma prova de conceito funcional, usando dados sintéticos ou anonimizados, preservando a rastreabilidade entre requisitos, testes e componentes implementados. Ao final de cada sprint, a documentação técnica deverá ser atualizada junto com o código, evitando que arquitetura, APIs, decisões de implementação e evidências de teste fiquem desconectadas da versão real do sistema.
+
+| Sprint | Foco principal | Principais frentes de trabalho | Qualidade e validação | Resultado esperado |
+| --- | --- | --- | --- | --- |
+| Sprint 3 | Implementação inicial e planejamento de testes | API de recebimento de áudio, início da integração Speech-to-Text e NLP, frontend básico e preparação do fluxo mínimo integrado | Definição dos testes funcionais, RNFs, integração, desempenho e usabilidade, com critérios de aceitação e estratégia de evidências | Primeira versão funcional da PoC e plano de testes sistêmicos pronto para execução |
+| Sprint 4 | Integração, estabilização e execução dos testes | Webhooks, banco de dados, persistência, integração entre componentes e início do deploy em ambiente controlado | Execução dos testes planejados, registro de logs, evidências, falhas, correções e análise de cobertura | Solução demonstrável, principais integrações operando e diagnóstico claro de qualidade |
+| Sprint 5 | Finalização, consolidação e entrega final | Frontend completo, mensageria assíncrona, integração frontend-backend, ajustes finais e revisão técnica/documental | Complementação ou reexecução dos testes, validação final da documentação, conformidade do repositório e preparação da apresentação | PoC integrada, documentada, testada e pronta para apresentação aos stakeholders |
 
 ## 8.3.1 Sprint 3
-_conteúdo_
+
+Na Sprint 3, o foco será aplicar as definições técnicas e visuais já existentes em uma primeira versão funcional da solução, suficiente para validar os fluxos principais e sustentar o planejamento dos testes sistêmicos. A equipe deverá priorizar a implementação da API de recebimento de áudios, o início da integração entre Speech-to-Text e o algoritmo de NLP, e uma interface básica para envio de texto ou áudio e visualização dos resultados retornados pelo backend.
+
+Como esta sprint será a base para a validação do sistema, o planejamento de testes será tratado como uma entrega central. A equipe deverá derivar os cenários de teste a partir dos requisitos funcionais e não funcionais, contemplando casos positivos, casos de falha, testes de integração entre componentes, testes de desempenho e roteiro de usabilidade com usuários externos. Também deverão ser definidos os critérios de aceitação, as ferramentas de automação, a forma de registro de evidências e a estratégia de uso de cache para chamadas externas, quando aplicável.
+
+Ao final da sprint, espera-se que exista um fluxo mínimo integrado entre frontend, backend e processamento de linguagem natural, mesmo que ainda incompleto. Esse fluxo servirá como base concreta para executar testes na Sprint 4, identificar riscos técnicos antecipadamente e ajustar o escopo da Sprint 5 com maior previsibilidade.
 
 ## 8.3.2 Sprint 4
-_conteúdo_
+
+Na Sprint 4, a prioridade será ampliar e estabilizar a solução iniciada na Sprint 3, com foco na integração entre componentes e na execução dos testes planejados. O desenvolvimento deverá avançar na implementação dos webhooks definidos pelo grupo, na criação e população do banco de dados com dados sintéticos ou anonimizados, na integração das operações de leitura e escrita e no início do processo de deploy da prova de conceito em ambiente controlado.
+
+Essa sprint será marcada pela execução dos testes sistêmicos planejados anteriormente. A equipe deverá rodar os testes funcionais, de requisitos não funcionais, de integração e de usabilidade, registrando evidências, logs, falhas encontradas, ajustes realizados e limitações de cobertura. O objetivo não será apenas demonstrar que a solução funciona em cenários esperados, mas também identificar problemas antes da consolidação final, especialmente em pontos críticos como comunicação entre frontend e backend, processamento de áudio/texto, persistência de dados e respostas do agente.
+
+Ao final da sprint, a solução deverá estar mais próxima de uma versão demonstrável, com integrações principais em funcionamento, documentação técnica atualizada e um diagnóstico claro da qualidade atingida. Os resultados dos testes deverão orientar a priorização da Sprint 5, separando correções obrigatórias, melhorias desejáveis e itens que ficarão como evolução futura.
 
 ## 8.3.3 Sprint 5
-_conteúdo_
+
+Na Sprint 5, o foco será a finalização do projeto e a consolidação da prova de conceito. A equipe deverá completar o desenvolvimento do frontend, finalizar a integração frontend-backend, implementar o sistema de mensagens assíncronas integrado aos webhooks e complementar os testes sistêmicos que não tenham sido concluídos ou que precisem ser reexecutados após correções da Sprint 4.
+
+Também será a sprint de fechamento técnico e documental. A documentação do projeto deverá ser revisada para refletir a solução efetivamente implementada, incluindo componentes e tecnologias utilizadas, funcionalidades entregues, benefícios alcançados, custos estimados, análise financeira, feedbacks incorporados, arquitetura revisada, aperfeiçoamentos futuros e relação com os ODS aplicáveis. A equipe também deverá verificar a conformidade do repositório, a organização dos arquivos, a reprodutibilidade da execução e a consistência entre código, testes e documentação.
+
+Ao final da Sprint 5, a entrega esperada é uma solução integrada, demonstrável e documentada, acompanhada das evidências de teste, instruções de implantação e apresentação final para stakeholders. O objetivo principal será encerrar o projeto com qualidade, deixando claro o que foi implementado, quais limitações permanecem, quais aprendizados foram obtidos e quais caminhos de evolução podem ser seguidos após a prova de conceito.
 
 ## 8.4 Testes Unitários e de Integração
 _conteúdo_
@@ -2209,6 +2523,272 @@ Obs.: Insira informações sobre estratégias para realização dos testes
 ## 8.5 Documentações automáticas
 _conteúdo_
 Obs.: Insira informações sobre quais frameworks foram usados e como acessar.
+
+## 8.6 Speech-to-Text
+
+### 8.6.1 Introdução
+
+Speech-to-Text (STT), ou reconhecimento automático de fala, é a tecnologia responsável por converter a fala presente em um áudio para texto. O serviço recebe um arquivo ou fluxo de áudio, identifica os trechos falados e devolve a transcrição reconhecida. Dependendo da configuração, a resposta também pode incluir pontuação, normalização de números, alternativas de reconhecimento e um índice de confiança.
+
+No projeto, o STT é utilizado como modalidade de entrada do agente. O usuário grava uma pergunta, o áudio é convertido em texto e a transcrição resultante é encaminhada ao pipeline de Processamento de Linguagem Natural. Portanto, a responsabilidade desta etapa é somente reconhecer a fala e produzir o texto da solicitação.
+
+Os requisitos considerados para a escolha da API foram:
+
+- suporte a português do Brasil (`pt-BR`);
+- resposta rápida para perguntas curtas;
+- disponibilidade de uma faixa gratuita para o desenvolvimento inicial;
+- custo previsível após o término da faixa gratuita;
+- integração por uma interface HTTP que possa ser substituída por outro provedor;
+- retorno estruturado com texto e confiança do reconhecimento.
+
+### 8.6.2 Benchmark das APIs
+
+O benchmark a seguir é documental, baseado nas funcionalidades e nos preços publicados pelos fornecedores em 19 de agosto de 2026. Não foram atribuídas métricas de acurácia ou latência porque ainda não existe um corpus padronizado de áudios do projeto para um teste empírico.
+
+#### Comparação funcional e de custo
+
+| API | `pt-BR` | Modos disponíveis | Custo para desenvolvimento inicial | Custo após a gratuidade | Portabilidade e integração |
+|---|---|---|---|---|---|
+| **Azure AI Speech** | Sim | Tempo real, áudio curto, transcrição rápida e lote | **5 horas de áudio por mês no nível Free (F0)**. A franquia gratuita é recorrente, mas limitada à transcrição em tempo real e a uma requisição simultânea. | O nível Standard (S0) é cobrado pelo tempo de áudio, em incrementos de segundo. O valor varia por região, moeda e contrato e deve ser consultado na calculadora Azure. | Disponibiliza API REST e SDKs. O endpoint de áudio curto permite uma integração HTTP direta, mas utiliza formatos e autenticação específicos do provedor. |
+| **Google Cloud Speech-to-Text V2** | Sim | Síncrono, assíncrono e streaming | A API V2 não apresenta franquia mensal recorrente na tabela vigente; novos clientes podem utilizar créditos promocionais da plataforma. | Reconhecimento padrão: **US$ 0,016 por minuto** até 500 mil minutos/mês. O lote dinâmico custa **US$ 0,003 por minuto**. Armazenamento e outros recursos podem gerar cobranças adicionais. | Oferece REST, gRPC e bibliotecas para diferentes linguagens, com operações síncronas e assíncronas que favorecem diferentes formas de implantação. |
+| **Amazon Transcribe** | Sim | Lote e streaming | **60 minutos por mês durante os primeiros 12 meses**, contados a partir da primeira solicitação. A franquia não é permanente. | Cobrança por segundo de áudio, com mínimo de 15 segundos por solicitação e preço dependente da região e da faixa de uso. | Oferece APIs e SDKs, porém usa assinatura AWS nas requisições e, no processamento em lote, depende de arquivos no Amazon S3. |
+| **OpenAI Audio API** | Sim | Arquivo e transcrição em tempo real | Não possui franquia recorrente gratuita para uso da API. | Entre os modelos comparados, `gpt-4o-mini-transcribe` tem custo estimado de **US$ 0,003 por minuto**; outros modelos têm preços diferentes. | Possui endpoint REST simples para envio direto de arquivos, o que reduz o acoplamento da integração à infraestrutura de um provedor específico. |
+
+Os valores acima são referências públicas, não cotações. Impostos, câmbio, região, armazenamento, tráfego e condições contratuais podem alterar o custo efetivo.
+
+#### Matriz de decisão com prioridade ao custo inicial
+
+Cada opção recebeu uma nota de 1 (baixa aderência) a 5 (alta aderência). Como o objetivo inicial é desenvolver sem custo, esse critério recebeu o maior peso.
+
+| Critério | Peso |
+|---|---:|
+| Gratuidade e custo inicial | 35% |
+| Suporte funcional a `pt-BR` | 25% |
+| Modos de transcrição e adequação a perguntas curtas | 15% |
+| Recursos para vocabulário do domínio | 10% |
+| Portabilidade e facilidade de integração | 10% |
+| Qualidade da documentação | 5% |
+
+| API | Custo 35% | `pt-BR` 25% | Modos 15% | Vocabulário 10% | Portabilidade 10% | Docs 5% | Nota ponderada |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **Azure AI Speech** | 5 | 5 | 5 | 4 | 4 | 5 | **4,80** |
+| **Amazon Transcribe** | 4 | 5 | 5 | 4 | 3 | 5 | **4,35** |
+| **Google Cloud Speech-to-Text V2** | 2 | 5 | 5 | 5 | 5 | 5 | **3,95** |
+| **OpenAI Audio API** | 3 | 4 | 4 | 4 | 5 | 4 | **3,75** |
+
+A nota ponderada é calculada por `Σ(nota × peso)`. O Azure AI Speech é a opção recomendada para o desenvolvimento inicial porque oferece a maior franquia gratuita recorrente entre as alternativas avaliadas, suporta `pt-BR` e fornece um endpoint REST adequado às perguntas curtas do projeto.
+
+#### Vencedor sem considerar a gratuidade
+
+Para deixar explícita a decisão técnica além da fase gratuita, a matriz também foi recalculada removendo o critério de custo e normalizando os 65% restantes.
+
+| API | Nota sem o critério de custo |
+|---|---:|
+| **Google Cloud Speech-to-Text V2** | **5,00** |
+| **Azure AI Speech** | **4,69** |
+| **Amazon Transcribe** | **4,54** |
+| **OpenAI Audio API** | **4,15** |
+
+Sem o critério de custo, o **Google Cloud Speech-to-Text V2 é o vencedor do benchmark documental**, devido à combinação de modalidades de transcrição, adaptação de vocabulário, suporte a `pt-BR` e interfaces REST e gRPC. Esse resultado não substitui uma comparação empírica de acurácia e latência com áudios representativos do projeto.
+
+Para a fase inicial, permanece selecionado o **Azure AI Speech**, pois a orientação do projeto prioriza uma alternativa gratuita e sua franquia recorrente de cinco horas mensais é suficiente para o desenvolvimento. A aplicação deve acessar o serviço por uma interface interna genérica, de modo que o provedor possa ser substituído sem alterar o restante do pipeline.
+
+### 8.6.3 API escolhida: Azure AI Speech
+
+Para o desenvolvimento inicial será utilizada a **API REST do Azure AI Speech para áudio curto**, compatível com o nível Free (F0). Esse endpoint recebe uma gravação de até 60 segundos e retorna o resultado final de forma síncrona, o que atende às perguntas curtas enviadas ao agente.
+
+#### Endpoints relevantes
+
+| Finalidade | Método HTTP | Endpoint | Uso no projeto |
+|---|---|---|---|
+| Converter áudio curto em texto | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/stt/speech/recognition/conversation/cognitiveservices/v1` | Endpoint principal do desenvolvimento inicial. |
+| Obter token temporário | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/sts/v1.0/issueToken` | Opcional; troca a chave do recurso por um token válido por 10 minutos. |
+| Transcrever arquivo com a API rápida | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/speechtotext/transcriptions:transcribe?api-version=2025-10-15` | Disponível no nível Standard (S0) para uma futura ampliação dos limites. |
+
+O endpoint de áudio curto é o único necessário para a funcionalidade atual. O endpoint de token é utilizado somente quando a aplicação opta por não enviar a chave diretamente em cada requisição. A transcrição rápida não está disponível no nível Free (F0), por isso não é adotada no desenvolvimento inicial.
+
+#### Requisição de transcrição
+
+```http
+POST /stt/speech/recognition/conversation/cognitiveservices/v1?language=pt-BR&format=detailed&profanity=masked HTTP/1.1
+Host: <NOME-DO-RECURSO>.cognitiveservices.azure.com
+Ocp-Apim-Subscription-Key: <CHAVE-DO-RECURSO>
+Content-Type: audio/wav; codecs=audio/pcm; samplerate=16000
+Accept: application/json
+
+<CONTEÚDO-BINÁRIO-DO-ÁUDIO>
+```
+
+##### Parâmetros de consulta
+
+| Parâmetro | Tipo | Obrigatório | Valores | Descrição |
+|---|---|---:|---|---|
+| `language` | `string` | Sim | `pt-BR` | Idioma falado no áudio. A ausência desse parâmetro resulta em erro HTTP `4xx`. |
+| `format` | `string` | Não | `simple` ou `detailed` | Formato da resposta. O padrão é `simple`. O projeto utiliza `detailed` para obter alternativas e confiança. |
+| `profanity` | `string` | Não | `masked`, `removed` ou `raw` | Define o tratamento de linguagem ofensiva. O padrão e a configuração adotada são `masked`. |
+
+##### Cabeçalhos
+
+| Cabeçalho | Obrigatório | Descrição |
+|---|---:|---|
+| `Ocp-Apim-Subscription-Key` | Condicional | Chave do recurso. Deve ser enviado este cabeçalho **ou** `Authorization`, nunca é necessário enviar ambos. |
+| `Authorization` | Condicional | Token no formato `Bearer <TOKEN>`, usado como alternativa à chave. |
+| `Content-Type` | Sim | Para WAV adotado no projeto: `audio/wav; codecs=audio/pcm; samplerate=16000`. Também é aceito `audio/ogg; codecs=opus`. |
+| `Accept` | Recomendado | Deve ser `application/json`. |
+| `Transfer-Encoding` | Não | Usar `chunked` quando o áudio for enviado em partes. |
+| `Expect` | Condicional | Usar `100-continue` quando houver transferência em partes. |
+
+##### Corpo e limites de entrada
+
+O corpo da requisição contém somente os bytes do áudio; não é enviado JSON. A API aceita:
+
+| Formato | Codec | Taxa de bits | Taxa de amostragem |
+|---|---|---:|---|
+| WAV | PCM | 256 kbps | 16 kHz, mono |
+| OGG | OPUS | 256 kbps | 16 kHz, mono |
+
+O áudio enviado diretamente pode ter no máximo **60 segundos**. Para o projeto, recomenda-se WAV PCM, 16 kHz e mono, pois esse formato é simples de validar e evita incompatibilidades de codec.
+
+##### Exemplo de requisição com cURL
+
+```bash
+curl --location --request POST \
+  "https://${AZURE_SPEECH_RESOURCE}.cognitiveservices.azure.com/stt/speech/recognition/conversation/cognitiveservices/v1?language=pt-BR&format=detailed&profanity=masked" \
+  --header "Ocp-Apim-Subscription-Key: ${AZURE_SPEECH_KEY}" \
+  --header "Content-Type: audio/wav; codecs=audio/pcm; samplerate=16000" \
+  --header "Accept: application/json" \
+  --data-binary "@pergunta.wav"
+```
+
+As variáveis `AZURE_SPEECH_RESOURCE` e `AZURE_SPEECH_KEY` devem ser configuradas no ambiente de execução. A chave não deve ser escrita no código-fonte nem versionada no repositório.
+
+#### Resposta de sucesso
+
+Status HTTP esperado: `200 OK`.
+
+```json
+{
+  "RecognitionStatus": "Success",
+  "Offset": 500000,
+  "Duration": 38200000,
+  "NBest": [
+    {
+      "Confidence": 0.93,
+      "Lexical": "qual é o avanço do projeto tur zero um",
+      "ITN": "qual é o avanço do projeto tur 01",
+      "MaskedITN": "qual é o avanço do projeto tur 01",
+      "Display": "Qual é o avanço do projeto TUR-01?"
+    }
+  ]
+}
+```
+
+O conteúdo é ilustrativo: o texto e a confiança variam conforme o áudio recebido.
+
+##### Campos da resposta detalhada
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `RecognitionStatus` | `string` | Resultado do reconhecimento. `Success` indica que uma transcrição foi produzida. |
+| `Offset` | `integer` | Instante de início da fala, em unidades de 100 nanossegundos. |
+| `Duration` | `integer` | Duração da fala reconhecida, em unidades de 100 nanossegundos. |
+| `NBest` | `array` | Alternativas de reconhecimento ordenadas pelo serviço. |
+| `NBest[].Confidence` | `number` | Confiança da alternativa, entre 0 e 1. |
+| `NBest[].Lexical` | `string` | Forma lexical, próxima das palavras efetivamente reconhecidas. |
+| `NBest[].ITN` | `string` | Texto após normalização inversa, como conversão de números falados para algarismos. |
+| `NBest[].MaskedITN` | `string` | Forma normalizada com o filtro de linguagem ofensiva aplicado. |
+| `NBest[].Display` | `string` | Texto final com capitalização, pontuação e normalização. Este é o campo encaminhado ao pipeline de PLN. |
+
+Quando `format=simple`, a resposta é reduzida:
+
+```json
+{
+  "RecognitionStatus": "Success",
+  "DisplayText": "Qual é o avanço do projeto TUR-01?",
+  "Offset": 500000,
+  "Duration": 38200000
+}
+```
+
+#### Estados e respostas HTTP esperadas
+
+Mesmo com HTTP `200`, `RecognitionStatus` pode indicar que não houve uma transcrição utilizável:
+
+| `RecognitionStatus` | Significado |
+|---|---|
+| `Success` | Reconhecimento concluído; o texto está presente. |
+| `NoMatch` | Houve detecção de fala, mas nenhuma correspondência foi encontrada. |
+| `InitialSilenceTimeout` | O áudio começou apenas com silêncio e excedeu o tempo de espera. |
+| `BabbleTimeout` | O início continha ruído e o serviço não identificou fala válida. |
+| `Error` | O serviço encontrou um erro interno. |
+
+| HTTP | Resposta esperada |
+|---:|---|
+| `200 OK` | Requisição processada; o corpo contém o objeto JSON de reconhecimento. |
+| `400 Bad Request` | `language` ausente ou inválido, idioma sem suporte ou áudio incompatível. |
+| `401 Unauthorized` | Chave, token, região ou endpoint inválido. |
+| `403 Forbidden` | Cabeçalho de autenticação ausente ou acesso proibido. |
+
+#### Requisição de transcrição rápida no nível Standard
+
+Caso o projeto ultrapasse os limites do desenvolvimento inicial, o Azure AI Speech continua sendo a API escolhida, mas pode utilizar o endpoint de transcrição rápida do nível Standard (S0). Ele aceita um arquivo por requisição e devolve o resultado de forma síncrona.
+
+| Entrada | Local | Tipo | Obrigatório | Descrição |
+|---|---|---|---:|---|
+| `api-version` | Query string | `string` | Sim | Versão da API. Usar `2025-10-15`. |
+| `Ocp-Apim-Subscription-Key` | Cabeçalho | `string` | Sim, quando usada chave | Chave do recurso Azure AI Speech. |
+| `audio` | `multipart/form-data` | Arquivo binário | Sim | Arquivo a ser transcrito. |
+| `definition` | `multipart/form-data` | JSON serializado | Sim no projeto | Configuração da transcrição; deve informar `{"locales":["pt-BR"]}`. |
+
+```bash
+curl --request POST \
+  --url "https://${AZURE_SPEECH_RESOURCE}.cognitiveservices.azure.com/speechtotext/transcriptions:transcribe?api-version=2025-10-15" \
+  --header "Ocp-Apim-Subscription-Key: ${AZURE_SPEECH_KEY}" \
+  --form "audio=@pergunta.wav;type=audio/wav" \
+  --form 'definition={"locales":["pt-BR"]}'
+```
+
+Resposta esperada: `200 OK`.
+
+```json
+{
+  "durationMilliseconds": 4320,
+  "combinedPhrases": [
+    {
+      "text": "Qual é o avanço do projeto TUR-01?"
+    }
+  ],
+  "phrases": [
+    {
+      "offsetMilliseconds": 160,
+      "durationMilliseconds": 3820,
+      "text": "Qual é o avanço do projeto TUR-01?",
+      "locale": "pt-BR",
+      "confidence": 0.93
+    }
+  ]
+}
+```
+
+#### Requisição opcional de token
+
+Para trocar a chave por um token temporário:
+
+```http
+POST /sts/v1.0/issueToken HTTP/1.1
+Host: <NOME-DO-RECURSO>.cognitiveservices.azure.com
+Ocp-Apim-Subscription-Key: <CHAVE-DO-RECURSO>
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 0
+```
+
+Resposta esperada: `200 OK`, com o token no corpo como texto. O token é válido por 10 minutos e deve ser enviado na transcrição como:
+
+```http
+Authorization: Bearer <TOKEN>
+```
+
+
 
 # 9. Planejamento e Execução de Testes
 _conteúdo_
@@ -2250,6 +2830,17 @@ _conteúdo_
 _conteúdo_
 
 # Referências
-_conteúdo_
+- Microsoft. [Preços do Azure AI Speech](https://azure.microsoft.com/en-us/pricing/details/speech/). Acesso em: 19 ago. 2026.
+- Microsoft. [Quotas e limites do Azure AI Speech](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-services-quotas-and-limits). Acesso em: 19 ago. 2026.
+- Microsoft. [API REST de conversão de fala em texto para áudio curto](https://learn.microsoft.com/pt-br/azure/ai-services/speech-service/rest-speech-to-text-short). Acesso em: 19 ago. 2026.
+- Microsoft. [Transcriptions — Transcribe, API 2025-10-15](https://learn.microsoft.com/en-us/rest/api/speechtotext/transcriptions/transcribe?view=rest-speechtotext-2025-10-15). Acesso em: 19 ago. 2026.
+- Microsoft. [Suporte a idiomas do Azure AI Speech](https://learn.microsoft.com/pt-br/azure/ai-services/speech-service/language-support). Acesso em: 19 ago. 2026.
+- Microsoft. [Regiões do Azure AI Speech](https://learn.microsoft.com/pt-br/azure/ai-services/speech-service/regions). Acesso em: 19 ago. 2026.
+- Google. [Preços do Speech-to-Text](https://cloud.google.com/speech-to-text/pricing). Acesso em: 19 ago. 2026.
+- Google. [Idiomas do Cloud Speech-to-Text V2](https://docs.cloud.google.com/speech-to-text/docs/speech-to-text-supported-languages). Acesso em: 19 ago. 2026.
+- Amazon Web Services. [Preços do Amazon Transcribe](https://aws.amazon.com/transcribe/pricing/). Acesso em: 19 ago. 2026.
+- Amazon Web Services. [Idiomas do Amazon Transcribe](https://docs.aws.amazon.com/pt_br/transcribe/latest/dg/supported-languages.html). Acesso em: 19 ago. 2026.
+- OpenAI. [Preços da API](https://platform.openai.com/pricing). Acesso em: 19 ago. 2026.
+- OpenAI. [Audio API — Create transcription](https://platform.openai.com/docs/api-reference/audio/createTranscription). Acesso em: 19 ago. 2026.
 
 <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">[nome do projeto]</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">INTELI, [aluno 1], [aluno 2], [aluno 3], [aluno 4], [aluno 5], [aluno 6], [aluno 7]</a> is licensed under <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">Attribution 4.0 International<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"></a></p>
