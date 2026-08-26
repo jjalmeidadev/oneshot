@@ -2460,7 +2460,338 @@ O diagrama de componentes concentra-se nas dependências, responsabilidades e in
 ---
 
 ## 5.3 Diagramas de Sequência da UML
-_conteúdo_
+
+Os diagramas de sequência desta seção detalham a ordem das interações entre os principais componentes da solução nos cenários críticos definidos para a arquitetura atual. Enquanto a modelagem dinâmica inicial da Seção 3.1.3 apresenta os fluxos em nível funcional, os diagramas desta seção incorporam as decisões técnicas consolidadas na solução, especialmente a utilização da interface própria de chat, o serviço de Speech-to-Text, o núcleo autoral de PLN, o catálogo de intenções, a arquitetura RAG, a geração de respostas pelo Gemini e o acionamento de fluxos específicos por meio do Copilot Studio.
+
+A seleção dos cenários considera os caminhos centrais da solução: consultas documentais fundamentadas, análises comparativas, direcionamento para fluxos funcionais e entrada por voz. Em todos os casos, o PLN permanece responsável pela interpretação e classificação da solicitação, enquanto o catálogo de intenções determina a capacidade que deverá processá-la. A partir desse roteamento, a solicitação segue para a recuperação e geração de resposta ou para o tópico/fluxo correspondente no Copilot Studio.
+
+As interações de identidade, autorização e auditoria são tratadas como capacidades transversais. A identidade do usuário deve ser validada antes do acesso às fontes ou da execução de ações, e os eventos relevantes da interação devem ser registrados para fins de rastreabilidade.
+
+### 5.3.1 Consulta documental via RAG
+
+Este cenário representa uma consulta textual sobre informações disponíveis na base utilizada pelo MVP, como **"Qual o prazo do projeto XPTO?"**. O fluxo demonstra o caminho completo desde a interface própria até a recuperação de informações relevantes e a geração da resposta por meio do Gemini.
+
+No contexto do MVP, a fonte utilizada para validação é a **base sintética associada ao índice vetorial**. A integração com SharePoint representa a evolução arquitetural prevista e não deve ser interpretada como dependência do conjunto de dados reais do Metrô.
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    actor Usuario as Usuário do PMO
+    participant Entra as Microsoft Entra ID
+    participant Chat as Interface Própria de Chat
+    participant API as API da Aplicação
+    participant PLN as Núcleo de PLN
+    participant Classificador as Classificador de Intenções
+    participant Escopo as Validador de Escopo
+    participant Catalogo as Catálogo de Intenções
+    participant Entidades as Extração de Entidades
+    participant Retriever as Recuperador RAG
+    participant Fontes as Base sintética / Índice Vetorial
+    participant Contexto as Montagem de Contexto
+    participant Gemini as Gemini API
+    participant Auditoria as Trilha de Auditoria
+
+    Usuario->>Entra: Autenticar-se
+    Entra-->>Chat: Identidade autenticada
+    Usuario->>Chat: Envia pergunta em linguagem natural
+    Chat->>API: POST /chat com a mensagem + identidade
+    API->>Auditoria: Registrar início da interação
+
+    API->>PLN: Encaminhar solicitação
+    PLN->>PLN: Pré-processar texto
+    PLN->>Classificador: Identificar intenção
+    Classificador-->>PLN: Intenção + confiança
+    PLN->>Escopo: Validar solicitação
+
+    alt Solicitação fora do escopo
+        Escopo-->>PLN: Não suportada
+        PLN->>API: Orientação / limite da solução
+        API->>Auditoria: Registrar intenção e resultado
+        API-->>Chat: Resposta de reformulação
+        Chat-->>Usuario: Apresentar orientação
+
+    else Solicitação válida
+        Escopo-->>PLN: Solicitação válida
+        PLN->>Catalogo: Associar intenção a uma capacidade
+        Catalogo-->>PLN: Rota = Consulta documental
+
+        PLN->>Entidades: Extrair projeto, critérios e contexto
+        Entidades-->>PLN: Entidades identificadas
+
+        PLN->>Retriever: Recuperar contexto relevante
+        Retriever->>Fontes: Buscar trechos por relevância semântica
+        Fontes-->>Retriever: Trechos + metadados + referências
+        Retriever-->>PLN: Evidências recuperadas
+
+        alt Informação suficiente
+            PLN->>Contexto: Montar contexto fundamentado
+            Contexto-->>PLN: Contexto + referências
+            PLN->>Gemini: Solicitar geração com contexto recuperado
+            Gemini-->>PLN: Resposta em linguagem natural
+
+            PLN->>API: Resposta + referências
+            API->>Auditoria: Registrar consulta, fontes e resposta
+            API-->>Chat: Resultado estruturado
+            Chat-->>Usuario: Exibir resposta fundamentada
+
+        else Informação insuficiente
+            PLN->>API: Informar ausência de dados suficientes
+            API->>Auditoria: Registrar insuficiência e fontes consultadas
+            API-->>Chat: Limitação da consulta
+            Chat-->>Usuario: Informar que não há dados suficientes
+        end
+    end
+```
+
+O fluxo evidencia que o Gemini não acessa diretamente a fonte documental. A aplicação recupera previamente os conteúdos relevantes e utiliza esses trechos como contexto para a geração da resposta. No MVP, essa recuperação ocorre sobre a base sintética e o índice vetorial; a integração com SharePoint permanece como caminho de evolução para a utilização das fontes corporativas homologadas.
+
+O cenário também explicita o tratamento de informação insuficiente, evitando que a ausência de evidências seja convertida automaticamente em uma resposta generativa. A identidade é validada antes da consulta e os elementos necessários à rastreabilidade são registrados na trilha de auditoria.
+
+### 5.3.2 Análise e comparação entre projetos via RAG
+
+Este cenário representa uma solicitação analítica, como **"Compare os riscos e os prazos dos projetos XPTO e ABC"**. Diferentemente da consulta simples, o pipeline precisa identificar múltiplos projetos e consolidar as informações recuperadas antes da geração da resposta.
+
+Assim como no cenário anterior, o MVP utiliza a **base sintética associada ao índice vetorial**. A eventual integração com SharePoint ocorre em uma etapa posterior, mediante os mecanismos homologados pelo parceiro.
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    actor Gestor as Gestor do Portfólio
+    participant Entra as Microsoft Entra ID
+    participant Chat as Interface Própria de Chat
+    participant API as API da Aplicação
+    participant PLN as Núcleo de PLN
+    participant Classificador as Classificador de Intenções
+    participant Escopo as Validador de Escopo
+    participant Catalogo as Catálogo de Intenções
+    participant Entidades as Extração de Entidades
+    participant Retriever as Recuperador RAG
+    participant Fontes as Base sintética / Índice Vetorial
+    participant Analise as Analisador Comparativo
+    participant Contexto as Montagem de Contexto
+    participant Gemini as Gemini API
+    participant Auditoria as Trilha de Auditoria
+
+    Gestor->>Entra: Autenticar-se
+    Entra-->>Chat: Identidade autenticada
+    Gestor->>Chat: Solicita comparação em linguagem natural
+    Chat->>API: POST /chat com a solicitação + identidade
+    API->>Auditoria: Registrar início da interação
+
+    API->>PLN: Encaminhar solicitação
+    PLN->>PLN: Pré-processar texto
+    PLN->>Classificador: Identificar intenção
+    Classificador-->>PLN: Intenção analítica + confiança
+    PLN->>Escopo: Validar solicitação
+
+    alt Solicitação fora do escopo
+        Escopo-->>PLN: Não suportada
+        PLN->>API: Orientação / limite da solução
+        API->>Auditoria: Registrar intenção e resultado
+        API-->>Chat: Resposta de reformulação
+        Chat-->>Gestor: Apresentar orientação
+
+    else Solicitação válida
+        Escopo-->>PLN: Solicitação válida
+        PLN->>Catalogo: Associar intenção a uma capacidade
+        Catalogo-->>PLN: Rota = Análise comparativa
+
+        PLN->>Entidades: Extrair projetos e critérios
+        Entidades-->>PLN: Projetos + critérios
+
+        PLN->>Retriever: Recuperar evidências dos projetos
+        Retriever->>Fontes: Buscar evidências do Projeto XPTO
+        Fontes-->>Retriever: Trechos + metadados
+        Retriever-->>PLN: Evidências do Projeto XPTO
+
+        PLN->>Retriever: Buscar evidências do Projeto ABC
+        Retriever->>Fontes: Buscar evidências do Projeto ABC
+        Fontes-->>Retriever: Trechos + metadados
+        Retriever-->>PLN: Evidências do Projeto ABC
+
+        alt Dados suficientes
+            PLN->>Analise: Comparar riscos, prazos e critérios
+            Analise-->>PLN: Resultado comparativo estruturado
+
+            PLN->>Contexto: Consolidar evidências + resultado
+            Contexto-->>PLN: Contexto fundamentado
+
+            PLN->>Gemini: Gerar resposta comparativa
+            Gemini-->>PLN: Resposta em linguagem natural
+
+            PLN->>API: Resultado + referências
+            API->>Auditoria: Registrar consulta, fontes e resposta
+            API-->>Chat: Comparação estruturada
+            Chat-->>Gestor: Exibir análise
+
+        else Dados insuficientes
+            PLN->>API: Informar dados ausentes
+            API->>Auditoria: Registrar insuficiência e fontes consultadas
+            API-->>Chat: Limitação da análise
+            Chat-->>Gestor: Exibir insuficiência
+        end
+    end
+```
+
+A sequência preserva a diferenciação entre **fato recuperado** e **resultado interpretativo da comparação**. A análise é executada sobre as informações recuperadas e o Gemini é responsável pela apresentação em linguagem natural, mantendo as referências associadas às evidências utilizadas.
+
+A validação de identidade antecede a recuperação e os eventos da interação são registrados na auditoria, mantendo o cenário alinhado aos requisitos transversais de controle de acesso e rastreabilidade.
+
+### 5.3.3 Direcionamento para fluxo funcional via Copilot Studio
+
+Este cenário representa uma solicitação cuja intenção corresponde a uma capacidade funcional específica do produto. O PLN identifica a intenção e o catálogo a associa ao tópico ou fluxo correspondente. A partir desse ponto, o Copilot Studio assume a execução do tópico selecionado e pode acionar o Power Automate quando houver uma operação automatizada ou integração com serviço corporativo.
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    actor Usuario as Usuário
+    participant Entra as Microsoft Entra ID
+    participant Chat as Interface Própria de Chat
+    participant API as API da Aplicação
+    participant PLN as Núcleo de PLN
+    participant Classificador as Classificador de Intenções
+    participant Escopo as Validador de Escopo
+    participant Catalogo as Catálogo de Intenções
+    participant Copilot as Copilot Studio
+    participant Topico as Tópico / Fluxo Selecionado
+    participant Automacao as Power Automate
+    participant Servico as Serviço Corporativo
+    participant Auditoria as Trilha de Auditoria
+
+    Usuario->>Entra: Autenticar-se
+    Entra-->>Chat: Identidade autenticada
+    Usuario->>Chat: Solicita uma operação funcional
+    Chat->>API: POST /chat com a solicitação + identidade
+    API->>Auditoria: Registrar início da interação
+
+    API->>PLN: Encaminhar solicitação
+    PLN->>PLN: Pré-processar texto
+    PLN->>Classificador: Identificar intenção
+    Classificador-->>PLN: Intenção + confiança
+    PLN->>Escopo: Validar solicitação
+
+    alt Solicitação fora do escopo
+        Escopo-->>PLN: Não suportada
+        PLN->>API: Orientação / limite da solução
+        API->>Auditoria: Registrar intenção e resultado
+        API-->>Chat: Resposta de reformulação
+        Chat-->>Usuario: Apresentar orientação
+
+    else Solicitação válida
+        Escopo-->>PLN: Solicitação válida
+        PLN->>Catalogo: Consultar capacidade associada
+        Catalogo-->>PLN: Tópico / fluxo correspondente
+
+        PLN->>Copilot: Encaminhar intenção + parâmetros estruturados
+        Copilot->>Topico: Acionar tópico correspondente
+
+        alt Fluxo requer automação
+            Topico->>Automacao: Executar ação do fluxo
+
+            alt Fluxo requer serviço corporativo
+                Automacao->>Servico: Executar operação
+                Servico-->>Automacao: Resultado da operação
+            end
+
+            Automacao-->>Topico: Resultado da ação
+            Topico-->>Copilot: Resultado do fluxo
+
+        else Fluxo conversacional
+            Topico-->>Copilot: Resultado / próxima etapa
+        end
+
+        Copilot-->>PLN: Resultado estruturado
+        PLN->>API: Resposta final
+        API->>Auditoria: Registrar intenção, fluxo e resultado
+        API-->>Chat: Resultado da operação
+        Chat-->>Usuario: Apresentar retorno do fluxo
+    end
+```
+
+Neste cenário, o **Copilot Studio não é responsável por descobrir a intenção do usuário**. A decisão já foi tomada pelo núcleo de PLN e pelo catálogo de intenções. O Copilot Studio atua como plataforma de execução do tópico ou fluxo selecionado.
+
+O retorno do **Power Automate** ocorre somente quando o tópico efetivamente o aciona. No ramo puramente conversacional, o tópico retorna diretamente ao Copilot Studio, evitando a associação de um resultado de automação a uma operação que não foi executada.
+
+A identidade do usuário é validada antes da execução do fluxo e a auditoria registra a intenção identificada, o fluxo acionado e seu resultado.
+
+### 5.3.4 Entrada por voz com Speech-to-Text
+
+Este cenário demonstra a entrada por áudio utilizando a API de **Azure AI Speech** documentada no projeto. A responsabilidade do serviço de Speech-to-Text termina na produção de uma transcrição utilizável; depois disso, o conteúdo segue pelo mesmo pipeline utilizado para entradas textuais.
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    actor Usuario as Usuário
+    participant Entra as Microsoft Entra ID
+    participant Chat as Interface Própria de Chat
+    participant API as API da Aplicação
+    participant Speech as Azure AI Speech
+    participant PLN as Núcleo de PLN
+    participant Classificador as Classificador de Intenções
+    participant Escopo as Validador de Escopo
+    participant Catalogo as Catálogo de Intenções
+    participant Roteador as Roteamento da Capacidade
+    participant Auditoria as Trilha de Auditoria
+
+    Usuario->>Entra: Autenticar-se
+    Entra-->>Chat: Identidade autenticada
+    Usuario->>Chat: Grava pergunta em áudio
+    Chat->>API: Envia arquivo de áudio + identidade
+    API->>Auditoria: Registrar início da interação
+
+    API->>Speech: Requisição STT em pt-BR
+    Speech-->>API: Status + transcrição + confiança
+
+    alt Transcrição inválida, NoMatch ou confiança baixa
+        API->>Auditoria: Registrar falha de transcrição
+        API-->>Chat: Solicitar nova gravação / informar ausência de transcrição confiável
+        Chat-->>Usuario: Solicitar repetição do áudio
+
+    else Transcrição válida
+        API->>PLN: Encaminhar transcrição
+        PLN->>PLN: Pré-processar texto
+        PLN->>Classificador: Identificar intenção
+        Classificador-->>PLN: Intenção + confiança
+        PLN->>Escopo: Validar solicitação
+
+        alt Solicitação inválida ou fora do escopo
+            Escopo-->>PLN: Não suportada
+            PLN->>API: Orientação / limite da solução
+            API->>Auditoria: Registrar intenção e resultado
+            API-->>Chat: Resposta de reformulação
+            Chat-->>Usuario: Apresentar orientação
+
+        else Solicitação válida
+            Escopo-->>PLN: Solicitação válida
+            PLN->>Catalogo: Associar intenção à capacidade
+            Catalogo-->>Roteador: Capacidade selecionada
+            Roteador-->>API: Encaminhar para o fluxo correspondente
+            API->>Auditoria: Registrar transcrição, intenção e roteamento
+            API-->>Chat: Resultado
+            Chat-->>Usuario: Apresentar resposta
+        end
+    end
+```
+
+O diagrama evidencia que o áudio não cria um fluxo de negócio independente: após uma transcrição válida, a solicitação torna-se equivalente a uma entrada textual para o restante da arquitetura. O Azure AI Speech atua exclusivamente na etapa de Speech-to-Text, enquanto a interpretação, validação e definição da capacidade permanecem sob responsabilidade da aplicação.
+
+O ramo de falha contempla situações documentadas para o serviço de STT, como ausência de correspondência ou transcrição com confiança insuficiente. Nesses casos, a solicitação não deve avançar automaticamente para o PLN como se houvesse texto confiável.
+
+### 5.3.5 Considerações sobre os cenários
+
+Os quatro cenários apresentados cobrem os principais caminhos de interação da arquitetura atual. A **consulta documental** representa o fluxo central de recuperação e geração fundamentada; a **análise comparativa** acrescenta a consolidação e interpretação de informações de múltiplos projetos; o **direcionamento para fluxos funcionais** demonstra a integração entre o núcleo de PLN, o catálogo de intenções, o Copilot Studio e os serviços de automação; e a **entrada por voz** demonstra a utilização da API de Speech-to-Text como modalidade alternativa de entrada.
+
+Em todos os cenários, o núcleo de PLN permanece como ponto comum de interpretação e decisão. A diferença entre os caminhos ocorre somente após a identificação e validação da intenção: consultas e análises documentais seguem para recuperação de contexto e geração de resposta, enquanto intenções funcionais são encaminhadas para o tópico ou fluxo associado no Copilot Studio.
+
+Os cenários também incorporam os requisitos transversais de **identidade, autorização e rastreabilidade**. A autenticação por Microsoft Entra ID antecede as operações protegidas, o acesso às fontes ou serviços deve respeitar as permissões aplicáveis e os eventos relevantes da interação são registrados na trilha de auditoria. No caso de fontes corporativas, a autorização efetiva deve permanecer alinhada ao modelo de permissões do ambiente do Metrô.
+
+Por fim, a utilização da **base sintética / índice vetorial** nos cenários de recuperação explicita a delimitação do MVP. A arquitetura permanece preparada para receber as fontes corporativas, inclusive SharePoint, em uma evolução posterior, sem fazer da integração com o portfólio real uma dependência da validação inicial.
+
+---
 
 # 6. Mapeamento Técnico de Infraestrutura e Implantação
 _conteúdo_
