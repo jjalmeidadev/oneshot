@@ -2368,7 +2368,30 @@ As principais entidades conceituais do MVP são:
 | Solicitação Fora de Escopo | Pergunta que não pertence ao catálogo suportado pelo agente, mas deve ser registrada para análise futura. |
 | Caso de Teste de Intenção | Exemplo rotulado usado para avaliar o desempenho do classificador, preservando template, split e texto normalizado. |
 
+```mermaid
+erDiagram
+    SUBPORTFOLIO ||--o{ PROJETO : agrupa
+    PROJETO ||--o{ ARTEFATO_DO_PROJETO : possui
+    ARTEFATO_DO_PROJETO ||--o{ TRECHO_DE_CONHECIMENTO : gera
+    ARTEFATO_DO_PROJETO ||--o{ ITEM_DE_CRONOGRAMA : origina
+    PROJETO ||--o{ ATUALIZACAO_DE_STATUS : registra
+    PROJETO ||--o{ RISCO_OU_PROBLEMA : monitora
+    PROJETO ||--o{ MUDANCA : controla
 
+
+    USUARIO ||--o{ CONVERSA : inicia
+    CONVERSA ||--o{ INTERACAO : contem
+    INTENCAO ||--o{ INTERACAO : classifica
+    INTERACAO ||--o{ FONTE_RECUPERADA : utiliza
+    TRECHO_DE_CONHECIMENTO ||--o{ FONTE_RECUPERADA : fundamenta
+    INTERACAO ||--o{ EVENTO_DE_AUDITORIA : gera
+    INTERACAO ||--o| SOLICITACAO_FORA_DE_ESCOPO : pode_gerar
+
+
+    USUARIO ||--o{ REGRA_DE_ACESSO : possui
+    INTENCAO ||--o{ TEMPLATE_DE_PROMPT : orienta
+    INTENCAO ||--o{ CASO_DE_TESTE_DE_INTENCAO : valida
+```
 
 # 5. Solução Técnica (Design)
 _conteúdo_
