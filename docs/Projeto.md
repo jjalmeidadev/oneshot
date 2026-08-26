@@ -132,7 +132,6 @@ A Tabela 1 apresenta os principais termos e abreviações utilizados ao longo de
 | Subportfólio | Categoria de agrupamento dos projetos e programas do portfólio organizacional. |
 | Teams | Plataforma Microsoft Teams utilizada como principal interface de interação com o agente. |
 | MVP | Minimum Viable Product (Produto Mínimo Viável), correspondente à primeira versão funcional da solução. |
-| RAG | Retrieval-Augmented Generation, abordagem utilizada para geração de respostas fundamentadas em bases documentais. |
 | SharePoint | Plataforma Microsoft utilizada para armazenamento e organização de documentos corporativos. |
 | Power Platform | Conjunto de ferramentas Microsoft utilizado para desenvolvimento da solução, incluindo Power Automate, Copilot Studio e demais componentes do ecossistema. |
 
@@ -1797,7 +1796,7 @@ Toda decisão tecnológica desta seção foi avaliada contra os critérios abaix
 |---|---|---|
 | C1 | **Aderência ao ecossistema Microsoft** | Priorizar tecnologias compatíveis com o ambiente já utilizado pelo Metrô, especialmente Microsoft 365, Power Platform e serviços Azure. |
 | C2 | **Confidencialidade e segurança** | Evitar o processamento de informações sensíveis por serviços externos não homologados. Durante o MVP, devem ser utilizados dados sintéticos ou anonimizados. |
-| C3 | **Autoria do núcleo de PLN** | O pipeline responsável pela identificação de intenções, extração de informações e busca semântica deve ser desenvolvido e avaliado pela equipe. |
+| C3 | **Autoria do núcleo de PLN** | O pipeline responsável pela identificação de intenções, extração de informações e consulta de fontes deve ser desenvolvido e avaliado pela equipe. |
 | C4 | **Confiabilidade e escalabilidade** | Priorizar tecnologias que permitam testes, monitoramento, evolução e ampliação da solução sem necessidade de reestruturação completa. |
 | C5 | **Custo e licenciamento** | Considerar as restrições de licenciamento do ambiente Microsoft e evitar dependências que possam gerar custos adicionais desnecessários para o MVP. |
 | C6 | **Portabilidade** | Manter o núcleo de IA desacoplado da plataforma de portfólio, permitindo sua adaptação caso o Metrô altere futuramente os sistemas utilizados. |
@@ -1830,8 +1829,8 @@ Este é o componente autoral da equipe: recebe o texto transcrito, identifica a 
 | **Jupyter Notebook** | Ambiente de experimentação, avaliação e documentação executável dos modelos. | C3 |
 | **spaCy** (modelo `pt_core_news_lg`) | Pré-processamento em português: tokenização, lematização, *part-of-speech* e reconhecimento de entidades nomeadas (códigos de projeto, datas, valores). | C2, C3 |
 | **scikit-learn** | *Baseline* de classificação de intenções (TF-IDF + Regressão Logística / SVM) e cálculo das métricas de avaliação. | C3 |
-| **Hugging Face Transformers** + **Sentence-Transformers** | Modelos de linguagem em português (ex.: BERTimbau, `multilingual-e5`) executados localmente para gerar *embeddings* de sentenças, usados na classificação de intenções e na busca semântica sobre os documentos de projeto. | C2, C3 |
-| **FAISS** ou **ChromaDB** | Índice vetorial local para a busca semântica e a análise comparativa entre projetos do portfólio. | C2, C3 |
+| **Hugging Face Transformers** + **Sentence-Transformers** | Modelos de linguagem em português (ex.: BERTimbau, `multilingual-e5`) executados localmente para representar sentenças e apoiar a classificação de intenções, a comparação de similaridade e a avaliação do núcleo de PLN. | C2, C3 |
+| **Catálogo local de fontes e casos sintéticos** | Organização dos documentos, planilhas, listas simuladas e casos de teste usados pelo núcleo de PLN durante o MVP, sem depender de infraestrutura generativa externa. | C2, C3 |
 | **pandas** / **NumPy** | Manipulação dos dados sintéticos e consolidação das análises comparativas. | C3 |
 | **FastAPI** | Exposição do pipeline de PLN como API REST documentada em OpenAPI, consumida pelo Copilot Studio. | C1, C5 |
 | **Docker** | Empacotamento do serviço de PLN, garantindo reprodutibilidade entre as máquinas da equipe e o ambiente do parceiro. | C5 |
@@ -1861,11 +1860,11 @@ Este é o componente autoral da equipe: recebe o texto transcrito, identifica a 
 | **Model Context Protocol (MCP)**, a avaliar | Alternativa ao conector personalizado, potencialmente com menor acoplamento. Depende de confirmação da GTI quanto ao suporte e ao licenciamento no *tenant* do Metrô, e não é assumida como caminho no MVP. | C1, C5 |
 | **Power BI (Microsoft Fabric)** | Painéis de indicadores do portfólio e visualizações citadas nas intenções do usuário (ex.: *dashboard* de compliance financeiro). | C1 |
 | **Fabric Activator** | Alertas sobre métricas do portfólio (marcos próximos do vencimento, pendências), com envio via Outlook e Teams pela integração com Power Automate. | C1 |
-| **python-docx**, **openpyxl**, **pdfplumber** | Extração de conteúdo dos documentos de projeto (Word, Excel, PDF) para alimentar o índice semântico. | C2, C3 |
+| **python-docx**, **openpyxl**, **pdfplumber** | Extração de conteúdo dos documentos de projeto (Word, Excel, PDF), incluindo planilhas vinculadas por listas do SharePoint, para consulta estruturada e rastreabilidade das fontes. | C2, C3 |
 | **openpyxl** / **python-pptx** (escrita) | Geração dos artefatos de saída solicitados pelo parceiro: exportação do cronograma para Excel e prévia da apresentação mensal para a diretoria. As histórias de usuário do Metrô preveem a pergunta *"Quer exportar para o Excel ou MS Project?"* ao final da construção do cronograma. | C1 |
 | **Faker** | Geração da massa de dados sintéticos que substitui as informações reais do portfólio durante todo o MVP. | C2 |
 
-> **Restrição herdada: ingestão para RAG.** O parceiro informou que a estratégia de ingestão de arquivos para RAG é executada pela GTI e que o grupo focal não possui autonomia nessa atividade. Por isso, no MVP a equipe constrói sua própria camada de recuperação sobre os dados sintéticos, e documenta a interface esperada para que a ingestão homologada seja plugada posteriormente sem reescrita do núcleo.
+> **Restrição herdada: ingestão no ecossistema Microsoft.** O parceiro informou que a estratégia corporativa de ingestão, organização e permissionamento de arquivos é executada pela GTI e pelo ambiente Microsoft do Metrô. Por isso, no MVP a equipe representa essa estrutura com dados sintéticos e documenta a interface esperada com SharePoint, Copilot Studio e Power Automate, sem assumir uma arquitetura generativa paralela ao ambiente homologado.
 
 > **Restrição herdada: engenharia de dados.** A mesma lógica vale para o Power BI. O documento *Plataforma Tecnológica do Metrô* registra que o grupo responsável pela análise e criação dos painéis *"é um cliente, ou seja, não executa a etapa de engenharia de dados (ingestão/persistir no storage)"*. O MVP, portanto, consome e produz dados no formato das listas do SharePoint, sem assumir responsabilidade por pipelines de ingestão no Fabric.
 
@@ -1895,7 +1894,7 @@ Dois requisitos do TAPI atravessam todas as camadas anteriores e por isso são t
 | **Draw.io / Mermaid / PlantUML** | Diagramas UML (componentes e pacotes), BPMN e diagramas de sequência da documentação. |
 | **Figma** | Prototipação das interfaces conversacionais e dos fluxos de interação. |
 | **pytest** | Testes automatizados do pipeline de PLN e da API. |
-| **scikit-learn (metrics)** | Avaliação do desempenho do núcleo de PLN: acurácia, precisão, revocação e F1 macro para a classificação de intenções, matriz de confusão, *recall@k* e MRR para a busca semântica. |
+| **scikit-learn (metrics)** | Avaliação do desempenho do núcleo de PLN: acurácia, precisão, revocação e F1 macro para a classificação de intenções, matriz de confusão e métricas de acerto para a consulta de fontes. |
 | **Markdown** | Formato de toda a documentação do repositório. |
 
 ### 3.4.3 Alternativas avaliadas e não adotadas
@@ -1906,10 +1905,10 @@ O registro das opções descartadas é parte da decisão: ele documenta o que fo
 |---|---|---|
 | **API de LLM externo** (OpenAI, Anthropic, Google) para classificação de intenções | Menor esforço de implementação e boa acurácia sem treinamento. | Viola C2 (trânsito de dados por serviço não homologado) e C3 (o Pilar 1 exige núcleo autoral e avaliado pela equipe). |
 | **Azure OpenAI Service** provisionado à parte | Permaneceria dentro do *tenant* Azure do parceiro. | O próprio parceiro registra que o Copilot Studio já conta com os modelos mais recentes, *"não sendo necessário provisionar modelo adicional"*. Custo adicional sem ganho claro no MVP. |
-| ***Fine-tuning*** de um modelo de linguagem | Potencial ganho de acurácia no domínio de gestão de portfólio. | O parceiro declara explicitamente que não trabalha com *fine-tuning*, apenas com RAG. Além disso, o volume de dados sintéticos do MVP não sustentaria o treinamento. |
+| ***Fine-tuning*** de um modelo de linguagem | Potencial ganho de acurácia no domínio de gestão de portfólio. | O parceiro prioriza recursos homologados do ecossistema Microsoft, especialmente Copilot e Power Platform. Além disso, o volume de dados sintéticos do MVP não sustentaria o treinamento. |
 | **Power Apps** como interface principal | Interface visual rica para preenchimento de formulários de projeto. | O escopo do módulo pede interface primariamente em linguagem natural (texto e áudio). Somam-se as restrições de licenciamento (C4), sem conectores premium e com limite de 500 linhas por leitura de lista. |
 | **Aplicação web própria** (React/Next.js) fora do ecossistema Microsoft | Liberdade total de implementação e melhor experiência de voz. | Viola C1 e comprometeria a sustentação pela equipe interna do Metrô, que é um benefício esperado explícito do projeto. |
-| **Elasticsearch / OpenSearch** para busca | Recurso maduro de busca textual e vetorial. | Exigiria infraestrutura adicional a ser provisionada e mantida. FAISS/ChromaDB atendem à escala do MVP com custo operacional próximo de zero. |
+| **Elasticsearch / OpenSearch** para busca | Recurso maduro de busca textual e análise de documentos. | Exigiria infraestrutura adicional a ser provisionada e mantida. Para o MVP, o catálogo local de fontes e a consulta às listas e planilhas simuladas do SharePoint atendem à escala prevista com menor custo operacional. |
 | **Azure Machine Learning** como ambiente de treino e *endpoint* | Citado pelo parceiro como recurso disponível. Ofereceria *endpoints* gerenciados de inferência. | Mantido como **evolução prevista**, não como dependência do MVP. O provisionamento depende da GTI e não pode bloquear a Sprint 2. O empacotamento em Docker foi escolhido justamente para tornar essa migração de baixo atrito. |
 
 ### 3.4.4 Riscos e dependências tecnológicas
@@ -1935,7 +1934,7 @@ Assim, ficam inicialmente fora do escopo do MVP:
 - Integração em produção com o portfólio real do Metrô (SharePoint e Listas do ambiente produtivo)
 - Processamento de dados reais e sensíveis fora de ambientes homologados
 - Implantação da solução em produção para utilização efetiva pelas equipes do Metrô
-- Ingestão homologada de documentos para RAG, executada pela GTI
+- Ingestão homologada de documentos no ambiente Microsoft, executada pela GTI
 - Criação de aplicativo mobile próprio
 - Criação de uma aplicação web independente do ecossistema Microsoft
 - Provisionamento obrigatório de infraestrutura Azure antes da validação do núcleo de PLN
@@ -2327,11 +2326,11 @@ Esta seção declara o que os protótipos produzidos, nos formatos utilizados, n
 
 Esta seção apresenta a modelagem de dados da solução em três níveis complementares: conceitual, lógico e físico. A modelagem foi definida para o MVP do agente inteligente de Gestão de Portfólio de Projetos do Metrô, considerando os requisitos funcionais e não funcionais descritos na Seção 3, a arquitetura de componentes apresentada na Seção 5.2 e a estrutura observada no SharePoint do parceiro.
 
-O objetivo da modelagem é representar, de forma simples e implementável, os dados necessários para que o agente consiga receber solicitações em linguagem natural, classificar intenções, consultar informações de projetos, acessar documentos e planilhas vinculadas no SharePoint, recuperar trechos relevantes para RAG, produzir respostas fundamentadas, respeitar permissões por perfil e registrar auditoria das interações.
+O objetivo da modelagem é representar, de forma simples e implementável, os dados necessários para que o agente consiga receber solicitações em linguagem natural, classificar intenções, consultar informações de projetos, acessar documentos e planilhas vinculadas no SharePoint, preparar contexto controlado para o Copilot, respeitar permissões por perfil e registrar auditoria das interações.
 
 ## 4.1 Especificação da Base de Dados 
 
-A base de dados do MVP foi desenhada para funcionar como uma camada intermediária entre o agente conversacional, o núcleo de PLN, o mecanismo de RAG e as fontes simuladas do SharePoint. Como o projeto utiliza dados sintéticos, a modelagem não replica dados reais do Metrô; ela replica a estrutura necessária para representar projetos, subportfólios, artefatos documentais, cronogramas, atualizações de status, riscos, mudanças, intenções e registros de auditoria.
+A base de dados do MVP foi desenhada para funcionar como uma camada intermediária entre o agente conversacional, o núcleo de PLN, o Copilot Studio, os fluxos do Power Automate e as fontes simuladas do SharePoint. Como o projeto utiliza dados sintéticos, a modelagem não replica dados reais do Metrô; ela replica a estrutura necessária para representar projetos, subportfólios, artefatos documentais, cronogramas, atualizações de status, riscos, mudanças, intenções e registros de auditoria.
 
 A decisão de modelagem adotada foi reduzir a complexidade para um MVP, evitando uma tabela para cada página, lista ou biblioteca do SharePoint. Em vez disso, documentos, links, listas, prompts, normativos e planilhas são representados pela tabela `project_artifacts`. Quando o artefato for uma planilha de cronograma vinculada em uma lista do SharePoint, seus metadados ficam registrados em `project_artifacts` e suas linhas relevantes são extraídas para `schedule_items`.
 
@@ -2339,7 +2338,9 @@ Essa abordagem contempla o funcionamento observado no ambiente do parceiro: algu
 
 O modelo também suporta a avaliação do núcleo de PLN implementado no notebook `src/notebooks/classificador_intencoes_metro.ipynb`. Esse notebook trabalha com um catálogo hierárquico de intenções em dois níveis: `macrointencao` (`CONSULTA`, `TRANSACAO`, `ALERTA` e `FORA_DE_ESCOPO`) e intenção específica, totalizando 31 classes na execução de referência. Por isso, a tabela `intent_catalog` registra tanto a macrointenção quanto a intenção específica, o fluxo associado, o handler previsto e os limiares de confiança usados para decidir entre roteamento, acionamento de handler específico ou resposta de limitação.
 
-A tabela `intent_test_cases` armazena exemplos rotulados derivados dos templates do notebook, preservando `template_id`, variação superficial, texto normalizado e split (`treino`, `validacao`, `teste`). Isso mantém a rastreabilidade do protocolo sem vazamento usado no classificador, em que a divisão é feita por template e não por frase. As interações reais ou simuladas são registradas em `ai_interactions`, incluindo macrointenção prevista, confiança da macro, intenção específica prevista, confiança da intenção, handler selecionado, alternativas top-k e eventual resposta de limitação. As respostas fundamentadas são rastreadas por `retrieved_sources`, permitindo verificar quais documentos, trechos, planilhas ou linhas foram usados na resposta.
+A tabela `intent_test_cases` armazena exemplos rotulados derivados dos templates do notebook, preservando `template_id`, variação superficial, texto normalizado e split (`treino`, `validacao`, `teste`). Isso mantém a rastreabilidade do protocolo sem vazamento usado no classificador, em que a divisão é feita por template e não por frase. As interações reais ou simuladas são registradas em `ai_interactions`, incluindo macrointenção prevista, confiança da macro, intenção específica prevista, confiança da intenção, handler selecionado, alternativas top-k e eventual resposta de limitação. As fontes consultadas são rastreadas por `consulted_sources`, permitindo verificar quais documentos, extratos, planilhas ou linhas foram usados para compor o retorno ao usuário.
+
+O modelo físico inicial está implementado em [`src/database/sql/01_create_database.sql`](../src/database/sql/01_create_database.sql). A documentação operacional dos artefatos de banco, incluindo o papel futuro dos scripts de inserção e rollback, está registrada em [`src/database/docs/README.md`](../src/database/docs/README.md).
 
 ## 4.2 Modelo Conceitual de Dados
 
@@ -2352,7 +2353,7 @@ As principais entidades conceituais do MVP são:
 | Subportfólio | Categoria estratégica que agrupa projetos do portfólio, como Turnaround, Expansão da Rede Metrô e Gestão e Finanças. |
 | Projeto | Iniciativa acompanhada pelo PMO, associada a um subportfólio e composta por documentos, cronograma, status, riscos e mudanças. |
 | Artefato do Projeto | Fonte de informação vinculada ao projeto, podendo ser TAP, cronograma, relatório, planilha, lista SharePoint, prompt ou normativo. |
-| Trecho de Conhecimento | Parte extraída de um artefato para consulta semântica e uso no RAG. |
+| Extrato de Fonte | Parte extraída de um documento, lista ou planilha para consulta, referência e montagem de contexto controlado no Copilot. |
 | Item de Cronograma | Linha estruturada extraída de um cronograma, inclusive quando a origem for uma planilha Excel vinculada no SharePoint. |
 | Atualização de Status | Registro de avanço, situação, impedimentos, próximos passos e resumo executivo de um projeto. |
 | Risco ou Problema | Evento de risco ou problema materializado que afeta um projeto. |
@@ -2363,7 +2364,7 @@ As principais entidades conceituais do MVP são:
 | Template de Prompt | Prompt padronizado utilizado para orientar fluxos de resposta, geração documental ou consultas recorrentes. |
 | Conversa | Agrupamento das interações realizadas por um usuário em um canal conversacional. |
 | Interação | Pergunta/resposta auditável, contendo solicitação, intenção classificada, rota de processamento e resposta. |
-| Fonte Recuperada | Documento, trecho, planilha, linha ou lista usada para fundamentar uma resposta. |
+| Fonte Consultada | Documento, extrato, planilha, linha ou lista usada para explicar a origem das informações devolvidas ao usuário. |
 | Evento de Auditoria | Registro técnico ou funcional gerado durante o processamento da interação. |
 | Solicitação Fora de Escopo | Pergunta que não pertence ao catálogo suportado pelo agente, mas deve ser registrada para análise futura. |
 | Caso de Teste de Intenção | Exemplo rotulado usado para avaliar o desempenho do classificador, preservando template, split e texto normalizado. |
@@ -2372,7 +2373,7 @@ As principais entidades conceituais do MVP são:
 erDiagram
     SUBPORTFOLIO ||--o{ PROJETO : agrupa
     PROJETO ||--o{ ARTEFATO_DO_PROJETO : possui
-    ARTEFATO_DO_PROJETO ||--o{ TRECHO_DE_CONHECIMENTO : gera
+    ARTEFATO_DO_PROJETO ||--o{ EXTRATO_DE_FONTE : gera
     ARTEFATO_DO_PROJETO ||--o{ ITEM_DE_CRONOGRAMA : origina
     PROJETO ||--o{ ATUALIZACAO_DE_STATUS : registra
     PROJETO ||--o{ RISCO_OU_PROBLEMA : monitora
@@ -2382,8 +2383,8 @@ erDiagram
     USUARIO ||--o{ CONVERSA : inicia
     CONVERSA ||--o{ INTERACAO : contem
     INTENCAO ||--o{ INTERACAO : classifica
-    INTERACAO ||--o{ FONTE_RECUPERADA : utiliza
-    TRECHO_DE_CONHECIMENTO ||--o{ FONTE_RECUPERADA : fundamenta
+    INTERACAO ||--o{ FONTE_CONSULTADA : utiliza
+    EXTRATO_DE_FONTE ||--o{ FONTE_CONSULTADA : referencia
     INTERACAO ||--o{ EVENTO_DE_AUDITORIA : gera
     INTERACAO ||--o| SOLICITACAO_FORA_DE_ESCOPO : pode_gerar
 
