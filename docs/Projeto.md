@@ -51,7 +51,7 @@
   - [3.7 Casos de Uso x Requisitos Funcionais](#37-casos-de-uso-x-requisitos-funcionais)
   - [3.8 Prototipação Exploratória](#38-prototipação-exploratória)
 - [4. Modelagem de Dados](#4-modelagem-de-dados)
-  - [4.1 Especificação da Base de Dados para Modelo de Recomendação](#41-especificação-da-base-de-dados-para-modelo-de-recomendação)
+  - [4.1 Especificação da Base de Dados](#41-especificação-da-base-de-dados)
   - [4.2 Modelo Conceitual de Dados](#42-modelo-conceitual-de-dados)
   - [4.3 Modelo Lógico de Dados](#43-modelo-lógico-de-dados)
   - [4.4 Modelo Físico de Dados](#44-modelo-físico-de-dados)
@@ -2324,22 +2324,51 @@ Esta seção declara o que os protótipos produzidos, nos formatos utilizados, n
 ---
 
 # 4. Modelagem de Dados
-_conteúdo_
 
-## 4.1 Especificação da Base de Dados para Modelo de Recomendação
-_conteúdo_
-Obs.: Insira aqui informações sobre a construção do artefato da Sprint 1. 
+Esta seção apresenta a modelagem de dados da solução em três níveis complementares: conceitual, lógico e físico. A modelagem foi definida para o MVP do agente inteligente de Gestão de Portfólio de Projetos do Metrô, considerando os requisitos funcionais e não funcionais descritos na Seção 3, a arquitetura de componentes apresentada na Seção 5.2 e a estrutura observada no SharePoint do parceiro.
+
+O objetivo da modelagem é representar, de forma simples e implementável, os dados necessários para que o agente consiga receber solicitações em linguagem natural, classificar intenções, consultar informações de projetos, acessar documentos e planilhas vinculadas no SharePoint, recuperar trechos relevantes para RAG, produzir respostas fundamentadas, respeitar permissões por perfil e registrar auditoria das interações.
+
+## 4.1 Especificação da Base de Dados 
+
+A base de dados do MVP foi desenhada para funcionar como uma camada intermediária entre o agente conversacional, o núcleo de PLN, o mecanismo de RAG e as fontes simuladas do SharePoint. Como o projeto utiliza dados sintéticos, a modelagem não replica dados reais do Metrô; ela replica a estrutura necessária para representar projetos, subportfólios, artefatos documentais, cronogramas, atualizações de status, riscos, mudanças, intenções e registros de auditoria.
+
+A decisão de modelagem adotada foi reduzir a complexidade para um MVP, evitando uma tabela para cada página, lista ou biblioteca do SharePoint. Em vez disso, documentos, links, listas, prompts, normativos e planilhas são representados pela tabela `project_artifacts`. Quando o artefato for uma planilha de cronograma vinculada em uma lista do SharePoint, seus metadados ficam registrados em `project_artifacts` e suas linhas relevantes são extraídas para `schedule_items`.
+
+Essa abordagem contempla o funcionamento observado no ambiente do parceiro: algumas listas do SharePoint apresentam linhas com links para arquivos Excel, especialmente cronogramas. No MVP, o link da planilha é armazenado em `project_artifacts.sharepoint_url`; a aba e o intervalo de leitura são indicados por `excel_sheet_name` e `excel_table_or_range`; e cada linha relevante do cronograma é normalizada em `schedule_items`, preservando a origem por meio de campos como `source_sheet_name`, `source_row_number` e `source_cell_range`.
+
+O modelo também suporta a avaliação do núcleo de PLN implementado no notebook `src/notebooks/classificador_intencoes_metro.ipynb`. Esse notebook trabalha com um catálogo hierárquico de intenções em dois níveis: `macrointencao` (`CONSULTA`, `TRANSACAO`, `ALERTA` e `FORA_DE_ESCOPO`) e intenção específica, totalizando 31 classes na execução de referência. Por isso, a tabela `intent_catalog` registra tanto a macrointenção quanto a intenção específica, o fluxo associado, o handler previsto e os limiares de confiança usados para decidir entre roteamento, acionamento de handler específico ou resposta de limitação.
+
+A tabela `intent_test_cases` armazena exemplos rotulados derivados dos templates do notebook, preservando `template_id`, variação superficial, texto normalizado e split (`treino`, `validacao`, `teste`). Isso mantém a rastreabilidade do protocolo sem vazamento usado no classificador, em que a divisão é feita por template e não por frase. As interações reais ou simuladas são registradas em `ai_interactions`, incluindo macrointenção prevista, confiança da macro, intenção específica prevista, confiança da intenção, handler selecionado, alternativas top-k e eventual resposta de limitação. As respostas fundamentadas são rastreadas por `retrieved_sources`, permitindo verificar quais documentos, trechos, planilhas ou linhas foram usados na resposta.
 
 ## 4.2 Modelo Conceitual de Dados
-_conteúdo_
 
-## 4.3 Modelo Lógico de Dados
-_conteúdo_
+O modelo conceitual é uma representação abstrata de alto nível, focada nas regras do negócio e no entendimento das entidades que precisam existir para a solução. Neste nível, não são definidos tipos de dados, chaves primárias, chaves estrangeiras ou detalhes de implementação.
 
-## 4.4 Modelo Físico de Dados
-_conteúdo_
+As principais entidades conceituais do MVP são:
 
-**Nota:** Insira uma explicação e direcionamento para o readme.md da pasta database.
+| Entidade | Descrição de negócio |
+|---|---|
+| Subportfólio | Categoria estratégica que agrupa projetos do portfólio, como Turnaround, Expansão da Rede Metrô e Gestão e Finanças. |
+| Projeto | Iniciativa acompanhada pelo PMO, associada a um subportfólio e composta por documentos, cronograma, status, riscos e mudanças. |
+| Artefato do Projeto | Fonte de informação vinculada ao projeto, podendo ser TAP, cronograma, relatório, planilha, lista SharePoint, prompt ou normativo. |
+| Trecho de Conhecimento | Parte extraída de um artefato para consulta semântica e uso no RAG. |
+| Item de Cronograma | Linha estruturada extraída de um cronograma, inclusive quando a origem for uma planilha Excel vinculada no SharePoint. |
+| Atualização de Status | Registro de avanço, situação, impedimentos, próximos passos e resumo executivo de um projeto. |
+| Risco ou Problema | Evento de risco ou problema materializado que afeta um projeto. |
+| Mudança | Registro de alteração de prazo, escopo, custo, prioridade ou outro aspecto relevante do projeto. |
+| Usuário | Pessoa que interage com o agente, vinculada a um perfil como Diretoria, PMO, Líder de Subportfólio ou Equipe de Projeto. |
+| Regra de Acesso | Definição conceitual de quais informações um usuário ou perfil pode consultar, alterar ou exportar. |
+| Intenção | Necessidade identificada pelo núcleo de PLN, organizada em macrointenção e intenção específica conforme o notebook do classificador. |
+| Template de Prompt | Prompt padronizado utilizado para orientar fluxos de resposta, geração documental ou consultas recorrentes. |
+| Conversa | Agrupamento das interações realizadas por um usuário em um canal conversacional. |
+| Interação | Pergunta/resposta auditável, contendo solicitação, intenção classificada, rota de processamento e resposta. |
+| Fonte Recuperada | Documento, trecho, planilha, linha ou lista usada para fundamentar uma resposta. |
+| Evento de Auditoria | Registro técnico ou funcional gerado durante o processamento da interação. |
+| Solicitação Fora de Escopo | Pergunta que não pertence ao catálogo suportado pelo agente, mas deve ser registrada para análise futura. |
+| Caso de Teste de Intenção | Exemplo rotulado usado para avaliar o desempenho do classificador, preservando template, split e texto normalizado. |
+
+
 
 # 5. Solução Técnica (Design)
 _conteúdo_
