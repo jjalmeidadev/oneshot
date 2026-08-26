@@ -2788,6 +2788,76 @@ Resposta esperada: `200 OK`, com o token no corpo como texto. O token é válido
 Authorization: Bearer <TOKEN>
 ```
 
+## 8.7 Escolha de algoritmo PLN
+
+Esta seção registra a escolha atual do pipeline de Processamento de Linguagem Natural responsável por classificar a solicitação do usuário. A implementação e o benchmark reproduzível estão no notebook [`classificador_intencoes_metro.ipynb`](../src/notebooks/classificador_intencoes_metro.ipynb).
+
+Embora seja referido de forma abreviada como “modelo híbrido W2V+BERT”, o componente é tecnicamente um pipeline: a representação híbrida gera os atributos de entrada, e classificadores lineares realizam a previsão em dois níveis — macrointenção e intenção específica.
+
+### 8.7.1 Objetivo e protocolo de avaliação
+
+O classificador organiza os pedidos em quatro macrointenções (`CONSULTA`, `TRANSACAO`, `ALERTA` e `FORA_DE_ESCOPO`) e 31 intenções específicas. A macrointenção determina o fluxo geral do agente, enquanto a intenção específica identifica o handler mais adequado.
+
+O conjunto possui 5.353 exemplos, separados em 3.062 para treino, 1.156 para validação e 1.135 para teste. A separação é agrupada por `template_id`: variações geradas a partir do mesmo template permanecem no mesmo conjunto. Esse cuidado reduz o vazamento que ocorreria se frases quase equivalentes fossem distribuídas aleatoriamente entre treino e teste. Os vetorizadores, escaladores, Word2Vec e demais transformadores são ajustados somente com os dados de treino.
+
+A seleção segue três etapas:
+
+1. escolha do pré-processamento por validação cruzada agrupada somente sobre o treino;
+2. comparação das representações e classificadores no conjunto de validação, usando como critério principal o F1-macro da intenção específica;
+3. avaliação do pipeline escolhido no teste, que não participa da seleção.
+
+### 8.7.2 Benchmark e decisão
+
+O notebook compara TF-IDF de palavras, TF-IDF de caracteres, Word2Vec, embeddings BERT congelados e combinações híbridas. Também compara regressão logística e LinearSVC, além das arquiteturas plana e hierárquica. A tabela produzida pelo próprio script é ordenada pelo F1-macro de intenção na validação, evitando que a escolha seja definida previamente por preferência tecnológica.
+
+Na execução completa de referência, a melhor alternativa foi a representação **Híbrido W2V+BERT**, seguida pela arquitetura **hierárquica**. O Word2Vec, treinado no corpus do projeto, captura relações distribucionais do vocabulário do portfólio. O BERT congelado acrescenta uma representação contextual pré-treinada, mais apta a aproximar formulações diferentes com significado semelhante. A concatenação combina esses sinais complementares e obteve o melhor resultado entre as alternativas avaliadas pelo script.
+
+A arquitetura hierárquica primeiro prevê a macrointenção e depois utiliza um especialista para distinguir apenas as intenções daquele grupo. Essa divisão reduz o número de classes concorrentes em cada segunda etapa e se alinha ao roteamento esperado pelo agente. A escolha atual, portanto, não decorre apenas do uso de modelos semanticamente mais sofisticados, mas do resultado observado sob o mesmo protocolo de comparação.
+
+### 8.7.3 Configuração e resultados atuais
+
+A configuração selecionada na execução de referência foi:
+
+| Elemento | Valor selecionado |
+|---|---|
+| Pré-processamento | `config_22` |
+| Caixa | conversão para minúsculas |
+| Tokenizador | expressão regular `[^\W_]+` |
+| Stopwords | preservadas |
+| Pontuação | removida |
+| Morfologia | stemming Snowball em português |
+| Representação | Híbrido W2V+BERT |
+| Arquitetura | hierárquica |
+| Classificador | regressão logística |
+| Hiperparâmetros | `C=5.0`; `class_weight=balanced` |
+| Limiar de macrointenção | 0,925 |
+| Limiar de intenção específica | 0,950 |
+
+A preservação de stopwords é relevante porque palavras como “qual”, “quando”, “quanto” e “quem” carregam informação útil para distinguir solicitações. Os limiares altos tornam o comportamento conservador: previsões pouco confiáveis não devem acionar diretamente um handler específico.
+
+| Conjunto | Acurácia da intenção | F1-macro da intenção | Acurácia da macro | F1-macro da macro |
+|---|---:|---:|---:|---:|
+| Validação | 0,5666 | 0,5665 | 0,9083 | 0,8885 |
+| Teste | **0,6740** | **0,6777** | **0,9383** | **0,9379** |
+
+Os resultados indicam que o primeiro nível está mais maduro: no teste, a macrointenção atingiu F1-macro de 0,9379, enquanto a intenção específica atingiu 0,6777. Assim, o pipeline já apresenta um sinal forte para roteamento geral, mas ainda possui desempenho moderado na escolha do handler específico.
+
+A execução de referência gerou o classificador serializado (aproximadamente 13.188 KB), o modelo Word2Vec (aproximadamente 925 KB), o catálogo de intenções, o conjunto de dados e o arquivo de métricas. O encoder BERT pré-treinado não está incorporado ao arquivo `joblib` e deve ser carregado separadamente pelo ambiente de inferência.
+
+### 8.7.4 Limitações e próximos passos
+
+Os números atuais devem ser interpretados com as seguintes ressalvas:
+
+- os prompts são majoritariamente sintéticos e derivados de templates; o agrupamento reduz vazamento entre variações, mas não substitui uma avaliação externa com solicitações reais;
+- o Word2Vec é treinado em apenas 3.062 exemplos, o que limita a cobertura do vocabulário e das relações semânticas do domínio;
+- o BERT é usado como extrator de embeddings congelado, sem ajuste supervisionado para as intenções do projeto;
+- a diferença entre validação e teste reflete conjuntos de templates distintos e não deve ser interpretada como garantia de melhora futura;
+- os limiares de 0,925 e 0,950 priorizam segurança, mas podem reduzir a cobertura e aumentar respostas de limitação;
+- o desempenho agregado pode ocultar intenções individuais com poucos acertos, exigindo acompanhamento por classe e análise das matrizes de confusão;
+- a inferência depende do carregamento coordenado do classificador, do Word2Vec e do encoder BERT, aspecto que deverá ser formalizado no serviço de produção.
+
+Como próximos passos, o grupo deve coletar solicitações reais com usuários do domínio, manter um conjunto externo de teste, medir cobertura e acurácia após a aplicação dos limiares, revisar as classes com maior confusão e comparar novamente as alternativas. Até essa validação, o híbrido W2V+BERT deve ser entendido como o **vencedor do benchmark atual** e a escolha do grupo para o MVP, não como um modelo definitivamente validado para produção.
+
 
 
 # 9. Planejamento e Execução de Testes
