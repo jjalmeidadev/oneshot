@@ -1,0 +1,62 @@
+{
+  "@odata.context": "https://mock.sharepoint.local/$metadata#lists/items",
+  "mock": true,
+  "site": {
+    "id": "metro-mvp-site",
+    "displayName": "Portal Operacional - Dados Ficticios"
+  },
+  "list": {
+    "id": "comunicados-servico",
+    "displayName": "Comunicados de Servico"
+  },
+  "value": [
+    {
+      "id": "201",
+      "createdDateTime": "2026-08-01T12:00:00Z",
+      "lastModifiedDateTime": "2026-08-01T12:00:00Z",
+      "webUrl": "https://mock.sharepoint.local/sites/metro-mvp/Lists/Comunicados/201",
+      "fields": {
+        "Title": "Operacao assistida na Linha Azul",
+        "Tipo": "Operacao",
+        "Linha": "Linha 1-Azul",
+        "ValidadeInicio": "2026-08-24",
+        "ValidadeFim": "2026-08-28",
+        "Status": "Programado",
+        "Conteudo": "Durante o periodo ficticio, o intervalo entre trens podera ser ampliado entre 22h e o encerramento da operacao para testes de sinalizacao. Recomenda-se comunicar o tempo adicional de viagem nos canais de atendimento.",
+        "PalavrasChave": "linha azul intervalo trens sinalizacao horario noite"
+      }
+    },
+    {
+      "id": "202",
+      "createdDateTime": "2026-08-05T15:10:00Z",
+      "lastModifiedDateTime": "2026-08-10T09:25:00Z",
+      "webUrl": "https://mock.sharepoint.local/sites/metro-mvp/Lists/Comunicados/202",
+      "fields": {
+        "Title": "Acesso alternativo na Estacao Republica",
+        "Tipo": "Acessibilidade",
+        "Linha": "Linhas 3-Vermelha e 4-Amarela",
+        "ValidadeInicio": "2026-08-20",
+        "ValidadeFim": "2026-09-05",
+        "Status": "Programado",
+        "Conteudo": "Um dos acessos ficticios da Estacao Republica estara fechado para manutencao. Passageiros devem utilizar o acesso da Rua do Arouche, conforme sinalizacao temporaria no local.",
+        "PalavrasChave": "republica acesso fechado manutencao rua arouche"
+      }
+    },
+    {
+      "id": "203",
+      "createdDateTime": "2026-07-15T13:00:00Z",
+      "lastModifiedDateTime": "2026-07-16T08:40:00Z",
+      "webUrl": "https://mock.sharepoint.local/sites/metro-mvp/Lists/Comunicados/203",
+      "fields": {
+        "Title": "Campanha educativa de embarque",
+        "Tipo": "Campanha",
+        "Linha": "Todas",
+        "ValidadeInicio": "2026-07-20",
+        "ValidadeFim": "2026-09-30",
+        "Status": "Ativo",
+        "Conteudo": "A campanha ficticia reforca que passageiros devem aguardar o desembarque antes de entrar no trem e manter livre a faixa proxima das portas.",
+        "PalavrasChave": "embarque desembarque portas campanha seguranca"
+      }
+    }
+  ]
+}
