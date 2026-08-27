@@ -2953,7 +2953,7 @@ O modelo físico corresponde à implementação real do banco de dados. Para o M
 
 O script físico está em:
 
-- [`src/database/01_create_database.sql`](../src/database/01_create_database.sql)
+- [`src/database/sql/01_create_database.sql`](../src/database/sql/01_create_database.sql)
 
 A documentação técnica dos scripts de banco está em:
 
