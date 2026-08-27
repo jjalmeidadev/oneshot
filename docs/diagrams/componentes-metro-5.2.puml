@@ -47,8 +47,8 @@ actor "Usuário do PMO" as Usuario
 ' 1. INTERFACE
 ' ============================================================
 package "1. Camada de Interface Humano-Computador" as Interface {
-  component "Interface Própria de Chat" as Chat <<Frontend>>
-  component "Entrada de Voz" as Voz <<opcional>>
+  component "Microsoft Teams" as Chat <<canal corporativo>>
+  component "Entrada de Voz" as Voz <<captura no canal>>
 }
 
 ' ============================================================

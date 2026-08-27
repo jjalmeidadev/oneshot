@@ -2473,9 +2473,9 @@ _conteúdo_
 
 ## 5.2 Diagrama de Componentes da UML
 
-O Diagrama de Componentes representa a **estrutura lógica e técnica dos principais módulos da solução e suas interações**, consolidando a arquitetura atualmente adotada para o agente inteligente do Metrô. A representação evidencia as fronteiras entre a interface própria de chat, o backend da aplicação, o núcleo autoral de Processamento de Linguagem Natural (PLN), a camada de recuperação aumentada por geração (RAG), o Microsoft Copilot Studio e os serviços corporativos e de Inteligência Artificial utilizados pela solução.
+O Diagrama de Componentes representa a **estrutura lógica e técnica dos principais módulos da solução e suas interações**, consolidando a arquitetura atualmente adotada para o agente inteligente do Metrô. A representação evidencia as fronteiras entre o Microsoft Teams como canal de interação, o backend da aplicação, o núcleo autoral de Processamento de Linguagem Natural (PLN), a camada de recuperação aumentada por geração (RAG), o Microsoft Copilot Studio e os serviços corporativos e de Inteligência Artificial utilizados pela solução.
 
-A arquitetura parte de uma **interface própria de chat**, responsável pela interação direta com o usuário, e de uma **API da aplicação**, que centraliza o recebimento das mensagens, o gerenciamento da conversa e a integração com os demais componentes. A entrada pode ocorrer por texto ou, quando habilitada, por voz, cuja transcrição é realizada pelo serviço de Speech-to-Text antes do processamento do núcleo da aplicação.
+A arquitetura parte do **Microsoft Teams**, canal corporativo por onde o usuário interage com o agente sem precisar de novo aplicativo ou novo login, e de uma **API da aplicação**, que centraliza o recebimento das mensagens, o gerenciamento da conversa e a integração com os demais componentes. A entrada pode ocorrer por texto ou, quando habilitada, por voz, cuja transcrição é realizada pelo serviço de Speech-to-Text antes do processamento do núcleo da aplicação.
 
 O processamento da solicitação é realizado pelo **Pilar 1 — Núcleo de PLN e Roteamento**, responsável pelo pré-processamento, identificação e classificação da intenção, validação de escopo e extração das entidades necessárias. A intenção identificada é associada ao **catálogo de intenções da solução**, que relaciona as solicitações às capacidades e funcionalidades previstas para o produto.
 
@@ -2501,7 +2501,7 @@ java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/componentes-
 
 | Componente | Responsabilidade |
 |---|---|
-| **Interface Própria de Chat** | Receber as solicitações do usuário e apresentar respostas, referências e resultados dos fluxos executados. |
+| **Microsoft Teams** | Canal de interação com o usuário: recebe as solicitações e apresenta respostas, referências e resultados dos fluxos executados, dentro do ambiente de trabalho já utilizado pelas equipes. |
 | **API da Aplicação** | Expor o ponto de entrada HTTP/JSON, centralizar a comunicação entre interface, processamento e retorno das respostas. |
 | **Gerenciador de Conversação** | Manter o contexto necessário da interação e consolidar os resultados produzidos pelas diferentes rotas de processamento. |
 | **Pré-processamento** | Normalizar e preparar o texto para as etapas posteriores do pipeline de PLN. |
@@ -2528,14 +2528,14 @@ java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/componentes-
 
 O fluxo de uma solicitação conversacional típica ocorre da seguinte forma:
 
-1. O **usuário** envia uma mensagem pela **interface própria de chat**. Quando a entrada é realizada por voz, o áudio pode ser encaminhado ao **Azure AI Speech**, que devolve a transcrição em texto.
+1. O **usuário** envia uma mensagem pelo **Microsoft Teams**. Quando a entrada é realizada por voz, o áudio pode ser encaminhado ao **Azure AI Speech**, que devolve a transcrição em texto.
 2. A **API da aplicação** recebe a solicitação por HTTP/JSON e a encaminha ao **gerenciador de conversação**.
 3. O **Pilar 1 — Núcleo de PLN e Roteamento** realiza o pré-processamento, identifica e classifica a intenção, valida se a solicitação está no escopo suportado, associa a intenção ao catálogo de capacidades e extrai as entidades relevantes para o fluxo selecionado.
 4. Após a validação de escopo, o **catálogo de intenções** associa a intenção reconhecida à capacidade responsável pelo processamento da solicitação.
 5. Quando a intenção corresponde a uma **consulta ou dúvida documental**, o **Recuperador RAG** busca os conteúdos relevantes no índice vetorial e, quando necessário, na integração com o **SharePoint**. Os resultados são organizados pelo componente de **Montagem de Contexto**.
 6. O contexto recuperado é enviado ao **LLM**, que produz a resposta em linguagem natural. O resultado retorna ao gerenciador de conversação.
 7. Quando a intenção corresponde a uma **funcionalidade estruturada**, a solicitação é encaminhada ao **Microsoft Copilot Studio**, que ativa o tópico ou fluxo correspondente. Quando necessário, o fluxo utiliza o **Power Automate** para executar operações sobre SharePoint, listas ou outros serviços corporativos.
-8. O resultado produzido pela rota escolhida é consolidado pelo **backend** e devolvido à **interface própria de chat**.
+8. O resultado produzido pela rota escolhida é consolidado pelo **backend** e devolvido ao **Microsoft Teams**.
 9. Durante o processamento, os componentes de **identidade e auditoria** registram os elementos necessários para controle de acesso e rastreabilidade da interação.
 
 ### 5.2.3 Relação entre o catálogo de intenções e os fluxos da solução
@@ -2553,10 +2553,10 @@ O catálogo pode, portanto, evoluir juntamente com as funcionalidades priorizada
 
 ### 5.2.4 Decisões arquiteturais refletidas no diagrama
 
-- **A interface própria de chat é desacoplada da lógica de negócio.** O usuário não depende diretamente do Copilot Studio para iniciar uma conversa; a aplicação controla o ponto de entrada e a apresentação dos resultados.
+- **O canal de interação é desacoplado da lógica de negócio.** O Teams entrega a mensagem à API da aplicação, que controla o roteamento e a consolidação da resposta. Trocar ou acrescentar um canal não exige reestruturar o núcleo de PLN nem as rotas de atendimento.
 - **O núcleo de PLN permanece independente dos modelos generativos.** A identificação da intenção, o controle de escopo e o roteamento são responsabilidades do Pilar 1.
 - **O catálogo de intenções funciona como mecanismo de roteamento.** A mesma entrada conversacional pode ser direcionada a diferentes capacidades conforme a intenção identificada.
-- **O Copilot Studio permanece como componente da arquitetura.** Seu papel é executar e orquestrar tópicos e fluxos específicos, não substituir a interface própria nem o núcleo de PLN.
+- **O Copilot Studio permanece como componente da arquitetura.** Seu papel é executar e orquestrar tópicos e fluxos específicos, não substituir o canal de interação nem o núcleo de PLN.
 - **RAG e geração são componentes distintos.** O SharePoint fornece o conhecimento documental, o mecanismo de recuperação seleciona o contexto relevante e o LLM produz a resposta a partir desse contexto.
 - **A credencial do LLM é protegida no backend.** A interface não acessa diretamente a API generativa nem recebe suas credenciais.
 - **A camada de conhecimento é desacoplada dos canais e da geração.** A fonte documental e o índice podem evoluir sem exigir mudanças estruturais na interface ou no mecanismo de roteamento.
