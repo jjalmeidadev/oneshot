@@ -1,0 +1,130 @@
+@startuml modelagem-estatica
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 45
+skinparam ranksep 60
+skinparam class {
+  BackgroundColor #EEF4FD
+  BorderColor #4A7EBB
+  ArrowColor #4A5560
+  FontSize 12
+  AttributeFontSize 11
+}
+left to right direction
+
+class Solicitacao {
+  +String id
+  +String texto
+  +DateTime dataHora
+  +String contexto
+}
+class Intencao {
+  +String nome
+  +CategoriaIntencao categoria
+  +Float confianca
+  +Boolean possuiFluxoAutomatizado
+}
+enum CategoriaIntencao {
+  CONSULTA
+  TRANSACAO
+  ALERTA
+}
+enum RotaProcessamento {
+  FLUXO_AUTOMATIZADO
+  LLM
+}
+class EntidadeExtraida {
+  +String tipo
+  +String valor
+  +Float confianca
+}
+class Projeto {
+  +String id
+  +String codigo
+  +String nome
+  +String status
+  +String subportfolio
+}
+class DocumentoProjeto {
+  +String id
+  +String titulo
+  +String tipo
+  +String conteudo
+  +String referencia
+}
+class TrechoRecuperado {
+  +String conteudo
+  +Float relevancia
+  +String referencia
+}
+class Resposta {
+  +String id
+  +String conteudo
+  +Boolean fundamentada
+  +String tipoResposta
+}
+class ConfiguracaoProatividade {
+  +Boolean ativa
+  +alterarEstado()
+}
+class SugestaoProativa {
+  +String intencaoSecundaria
+  +String conteudo
+  +Boolean aceita
+}
+class PipelinePLN {
+  +processarSolicitacao()
+  +estruturarResposta()
+}
+class ClassificadorIntencao {
+  +identificarIntencao()
+  +classificarIntencao()
+}
+class CatalogoIntencoes {
+  +consultarRota()
+  +buscarIntencaoSecundaria()
+}
+class RoteadorIntencao {
+  +selecionarRota()
+  +encaminharSolicitacao()
+}
+class ExecutorFluxoAutomatizado {
+  +executarSemLLM()
+}
+class GeradorLLM {
+  +gerarRespostaFundamentada()
+}
+class RecuperadorInformacao {
+  +buscarInformacoes()
+  +verificarDisponibilidade()
+}
+class AnalisadorComparativo {
+  +compararProjetos()
+  +estruturarComparacao()
+}
+Solicitacao "1" --> "1" Intencao : possui
+Intencao --> CategoriaIntencao : classificada como
+Intencao --> CatalogoIntencoes : associada a
+Solicitacao "1" --> "0..*" EntidadeExtraida : origina
+EntidadeExtraida --> Projeto : pode identificar
+Projeto "1" --> "0..*" DocumentoProjeto : possui
+DocumentoProjeto "1" --> "0..*" TrechoRecuperado : fornece
+PipelinePLN --> ClassificadorIntencao : utiliza
+PipelinePLN --> RoteadorIntencao : utiliza
+PipelinePLN --> RecuperadorInformacao : utiliza
+PipelinePLN --> AnalisadorComparativo : utiliza
+PipelinePLN --> ConfiguracaoProatividade : consulta
+ClassificadorIntencao --> Intencao : produz
+RoteadorIntencao --> CatalogoIntencoes : consulta
+CatalogoIntencoes --> RotaProcessamento : define
+RoteadorIntencao --> ExecutorFluxoAutomatizado : encaminha quando automatizada
+RoteadorIntencao --> GeradorLLM : encaminha quando não automatizada
+RecuperadorInformacao --> TrechoRecuperado : recupera
+AnalisadorComparativo --> Projeto : compara
+ExecutorFluxoAutomatizado --> Resposta : produz sem LLM
+GeradorLLM --> Resposta : produz com contexto validado
+Resposta "1" --> "0..*" TrechoRecuperado : fundamentada por
+CatalogoIntencoes --> SugestaoProativa : fornece intenção secundária
+ConfiguracaoProatividade --> SugestaoProativa : controla apresentação
+SugestaoProativa --> Intencao : vinculada à intenção primária
+@enduml

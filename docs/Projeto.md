@@ -1608,151 +1608,9 @@ A modelagem estática apresentada nesta subseção representa as principais clas
 
 A modelagem considera a `Solicitacao` como elemento de entrada do sistema. Cada solicitação possui uma `Intencao` primária, identificada pelo pipeline e associada ao `CatalogoIntencoes`. O catálogo informa ao `RoteadorIntencao` se existe um fluxo automatizado: quando existe, o `ExecutorFluxoAutomatizado` processa a solicitação sem acionar o LLM; caso contrário, o `GeradorLLM` recebe somente o contexto estruturado e validado. Quando a proatividade está ativa, uma `SugestaoProativa` pode associar à intenção primária uma intenção secundária cadastrada, que depende da confirmação do usuário para ser executada.
 
-```mermaid
-classDiagram
-    direction LR
-
-    class Solicitacao {
-        +String id
-        +String texto
-        +DateTime dataHora
-        +String contexto
-    }
-
-    class Intencao {
-        +String nome
-        +CategoriaIntencao categoria
-        +Float confianca
-        +Boolean possuiFluxoAutomatizado
-    }
-
-    class CategoriaIntencao {
-        <<enumeration>>
-        CONSULTA
-        TRANSACAO
-        ALERTA
-    }
-
-    class RotaProcessamento {
-        <<enumeration>>
-        FLUXO_AUTOMATIZADO
-        LLM
-    }
-
-    class EntidadeExtraida {
-        +String tipo
-        +String valor
-        +Float confianca
-    }
-
-    class Projeto {
-        +String id
-        +String codigo
-        +String nome
-        +String status
-        +String subportfolio
-    }
-
-    class DocumentoProjeto {
-        +String id
-        +String titulo
-        +String tipo
-        +String conteudo
-        +String referencia
-    }
-
-    class TrechoRecuperado {
-        +String conteudo
-        +Float relevancia
-        +String referencia
-    }
-
-    class Resposta {
-        +String id
-        +String conteudo
-        +Boolean fundamentada
-        +String tipoResposta
-    }
-
-    class ConfiguracaoProatividade {
-        +Boolean ativa
-        +alterarEstado()
-    }
-
-    class SugestaoProativa {
-        +String intencaoSecundaria
-        +String conteudo
-        +Boolean aceita
-    }
-
-    class PipelinePLN {
-        +processarSolicitacao()
-        +estruturarResposta()
-    }
-
-    class ClassificadorIntencao {
-        +identificarIntencao()
-        +classificarIntencao()
-    }
-
-    class CatalogoIntencoes {
-        +consultarRota()
-        +buscarIntencaoSecundaria()
-    }
-
-    class RoteadorIntencao {
-        +selecionarRota()
-        +encaminharSolicitacao()
-    }
-
-    class ExecutorFluxoAutomatizado {
-        +executarSemLLM()
-    }
-
-    class GeradorLLM {
-        +gerarRespostaFundamentada()
-    }
-
-    class RecuperadorInformacao {
-        +buscarInformacoes()
-        +verificarDisponibilidade()
-    }
-
-    class AnalisadorComparativo {
-        +compararProjetos()
-        +estruturarComparacao()
-    }
-
-    Solicitacao "1" --> "1" Intencao : possui
-    Intencao --> CategoriaIntencao : classificada como
-    Intencao --> CatalogoIntencoes : associada a
-    Solicitacao "1" --> "0..*" EntidadeExtraida : origina
-
-    EntidadeExtraida --> Projeto : pode identificar
-    Projeto "1" --> "0..*" DocumentoProjeto : possui
-    DocumentoProjeto "1" --> "0..*" TrechoRecuperado : fornece
-
-    PipelinePLN --> ClassificadorIntencao : utiliza
-    PipelinePLN --> RoteadorIntencao : utiliza
-    PipelinePLN --> RecuperadorInformacao : utiliza
-    PipelinePLN --> AnalisadorComparativo : utiliza
-    PipelinePLN --> ConfiguracaoProatividade : consulta
-
-    ClassificadorIntencao --> Intencao : produz
-    RoteadorIntencao --> CatalogoIntencoes : consulta
-    CatalogoIntencoes --> RotaProcessamento : define
-    RoteadorIntencao --> ExecutorFluxoAutomatizado : encaminha quando automatizada
-    RoteadorIntencao --> GeradorLLM : encaminha quando não automatizada
-    RecuperadorInformacao --> TrechoRecuperado : recupera
-    AnalisadorComparativo --> Projeto : compara
-
-    ExecutorFluxoAutomatizado --> Resposta : produz sem LLM
-    GeradorLLM --> Resposta : produz com contexto validado
-    Resposta "1" --> "0..*" TrechoRecuperado : fundamentada por
-    CatalogoIntencoes --> SugestaoProativa : fornece intenção secundária
-    ConfiguracaoProatividade --> SugestaoProativa : controla apresentação
-    SugestaoProativa --> Intencao : vinculada à intenção primária
-```
+<div align="center">
+  <img src="img/modelagem-estatica.png" alt="Modelagem estática inicial dos requisitos funcionais" width="100%">
+</div>
 
 <p align="center"><strong>Figura 13</strong> - Modelagem estática inicial dos requisitos funcionais.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
@@ -1785,46 +1643,9 @@ Os diagramas representam o comportamento esperado do sistema em nível funcional
 
 Este cenário representa uma solicitação como **"Qual o prazo do projeto XPTO?"**, classificada como pertencente ao escopo, mas sem fluxo automatizado cadastrado. O fluxo cobre principalmente os requisitos RF01, RF02, RF03, RF04, RF05, RF07 e RF08.
 
-```mermaid
-sequenceDiagram
-    autonumber
-
-    actor Usuario
-    participant Sistema as Interface do Sistema
-    participant PLN as Pipeline de PLN
-    participant Classificador as Classificador de Intenção
-    participant Catalogo as Catálogo de Intenções
-    participant Recuperador as Recuperador de Informação
-    participant Base as Base de Dados Sintéticos
-    participant LLM as LLM
-
-    Usuario->>Sistema: Envia solicitação em linguagem natural
-    Sistema->>PLN: Encaminha texto da solicitação
-
-    PLN->>Classificador: Identificar intenção semântica
-    Classificador-->>PLN: Intenção identificada
-
-    PLN->>Classificador: Classificar intenção
-    Classificador-->>PLN: Categoria = CONSULTA
-
-    PLN->>Catalogo: Consultar rota da intenção
-    Catalogo-->>PLN: Sem fluxo automatizado
-
-    PLN->>Recuperador: Solicitar informações do projeto e critério
-    Recuperador->>Base: Consultar documentos e dados sintéticos
-    Base-->>Recuperador: Retornar informações relevantes
-    Recuperador-->>PLN: Retornar trechos e referências
-
-    alt Informação encontrada
-        PLN->>LLM: Gerar resposta com contexto estruturado e validado
-        LLM-->>PLN: Resposta em linguagem natural
-        PLN-->>Sistema: Retornar resposta estruturada
-        Sistema-->>Usuario: Apresentar resposta
-    else Informação insuficiente
-        PLN-->>Sistema: Informar ausência de dados suficientes
-        Sistema-->>Usuario: Apresentar limitação da consulta
-    end
-```
+<div align="center">
+  <img src="img/sequencia-cenario-1.png" alt="Cenário 1 — Consulta de informação de um projeto" width="100%">
+</div>
 
 <p align="center"><strong>Figura 14</strong> - Cenário 1 — Consulta de informação de um projeto.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
@@ -1834,53 +1655,9 @@ O cenário começa com o RF01, quando o usuário envia uma solicitação em ling
 
 Este cenário representa uma solicitação como **"Compare os riscos e os prazos dos projetos XPTO e ABC"**, tratada como intenção analítica sem fluxo automatizado. O fluxo cobre principalmente os requisitos RF01, RF02, RF03, RF04, RF06, RF07 e RF08.
 
-```mermaid
-sequenceDiagram
-    autonumber
-
-    actor Gestor as Gestor do Portfólio
-    participant Sistema as Interface do Sistema
-    participant PLN as Pipeline de PLN
-    participant Classificador as Classificador de Intenção
-    participant Catalogo as Catálogo de Intenções
-    participant Recuperador as Recuperador de Informação
-    participant Base as Base de Dados Sintéticos
-    participant Analisador as Analisador Comparativo
-    participant LLM as LLM
-
-    Gestor->>Sistema: Solicita comparação em linguagem natural
-    Sistema->>PLN: Encaminha solicitação
-
-    PLN->>Classificador: Identificar e classificar intenção
-    Classificador-->>PLN: Intenção analítica / CONSULTA
-
-    PLN->>Catalogo: Consultar rota da intenção
-    Catalogo-->>PLN: Sem fluxo automatizado
-
-    PLN->>PLN: Identificar projetos e critérios da comparação
-
-    PLN->>Recuperador: Buscar dados do primeiro projeto
-    Recuperador->>Base: Consultar Projeto XPTO
-    Base-->>Recuperador: Dados e documentos relevantes
-    Recuperador-->>PLN: Informações do Projeto XPTO
-
-    PLN->>Recuperador: Buscar dados do segundo projeto
-    Recuperador->>Base: Consultar Projeto ABC
-    Base-->>Recuperador: Dados e documentos relevantes
-    Recuperador-->>PLN: Informações do Projeto ABC
-
-    alt Dados suficientes para comparação
-        PLN->>Analisador: Comparar riscos e prazos
-        Analisador-->>PLN: Resultado estruturado da comparação
-        PLN->>LLM: Gerar resposta com comparação e evidências validadas
-        LLM-->>PLN: Comparação em linguagem natural
-        PLN-->>Sistema: Retornar resultado
-        Sistema-->>Gestor: Apresentar comparação
-    else Dados insuficientes
-        PLN-->>Sistema: Indicar quais informações estão ausentes
-        Sistema-->>Gestor: Apresentar limitação da análise
-    end
-```
+<div align="center">
+  <img src="img/sequencia-cenario-2.png" alt="Cenário 2 — Análise e comparação entre projetos" width="100%">
+</div>
 
 <p align="center"><strong>Figura 15</strong> - Cenário 2 — Análise e comparação entre projetos.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
@@ -1890,77 +1667,9 @@ Nesse cenário, o RF06 diferencia o fluxo de uma consulta simples, pois exige re
 
 Este cenário representa o comportamento do pipeline após identificar a intenção primária. O catálogo diferencia uma intenção fora do escopo, uma intenção com fluxo automatizado e uma intenção válida sem automação. Somente o último ramo utiliza o LLM e pode apresentar uma intenção secundária quando a proatividade estiver habilitada. O cenário cobre principalmente RF01, RF02, RF03, RF07, RF08, RF09 e RF10.
 
-```mermaid
-sequenceDiagram
-    autonumber
-
-    actor Usuario
-    participant Sistema as Interface do Sistema
-    participant PLN as Pipeline de PLN
-    participant Classificador as Classificador de Intenção
-    participant Catalogo as Catálogo de Intenções
-    participant Automatizado as Fluxo Automatizado
-    participant LLM as LLM
-    participant Config as Configuração de Proatividade
-
-    Usuario->>Sistema: Envia solicitação em linguagem natural
-    Sistema->>PLN: Encaminha solicitação
-
-    PLN->>Classificador: Identificar intenção primária
-    Classificador-->>PLN: Intenção + confiança
-
-    PLN->>Catalogo: Associar intenção e consultar rota
-    Catalogo-->>PLN: Escopo + categoria + rota
-
-    alt Intenção fora do escopo
-        PLN-->>Sistema: Solicitação não suportada pelo MVP
-        Sistema-->>Usuario: Orientar reformulação ou informar limite
-
-    else Intenção com fluxo automatizado
-        PLN->>Automatizado: Encaminhar intenção + parâmetros estruturados
-        Note right of Automatizado: A LLM não é acionada nesta rota
-        Automatizado-->>PLN: Resultado ou estado da ação
-        PLN-->>Sistema: Retornar resultado estruturado
-        Sistema-->>Usuario: Apresentar resultado da automação
-
-    else Intenção válida sem fluxo automatizado
-        PLN->>LLM: Enviar intenção + contexto estruturado e validado
-        LLM-->>PLN: Resposta principal fundamentada
-        PLN->>Config: Consultar estado da proatividade
-
-        alt Proatividade desativada
-            Config-->>PLN: Desativada
-            PLN-->>Sistema: Retornar somente resposta principal
-            Sistema-->>Usuario: Apresentar resposta
-
-        else Proatividade ativada
-            Config-->>PLN: Ativada
-            PLN->>Catalogo: Buscar intenção secundária compatível
-
-            alt Intenção secundária disponível
-                Catalogo-->>PLN: Intenção secundária cadastrada
-                PLN-->>Sistema: Resposta principal + sugestão opcional
-                Sistema-->>Usuario: Apresentar resposta e próximo passo
-
-                alt Usuário confirma a sugestão
-                    Usuario->>Sistema: Aceitar intenção secundária
-                    Sistema->>PLN: Enviar intenção confirmada
-                    PLN->>Catalogo: Tratar como nova intenção primária
-                    Note over PLN,Catalogo: O novo ciclo utiliza novamente o roteamento do catálogo
-
-                else Usuário recusa a sugestão
-                    Usuario->>Sistema: Recusar sugestão
-                    Sistema-->>Usuario: Encerrar sugestão e preservar resposta
-                end
-
-            else Nenhuma intenção secundária compatível
-                Catalogo-->>PLN: Nenhuma sugestão cadastrada
-                PLN-->>Sistema: Retornar somente resposta principal
-                Sistema-->>Usuario: Apresentar resposta
-            end
-        end
-    end
-```
+<div align="center">
+  <img src="img/sequencia-cenario-3.png" alt="Cenário 3 — Roteamento híbrido e sugestão proativa" width="100%">
+</div>
 
 <p align="center"><strong>Figura 16</strong> - Cenário 3 — Roteamento híbrido e sugestão proativa.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
@@ -2753,30 +2462,9 @@ As principais entidades conceituais do MVP são:
 | Solicitação Fora de Escopo | Pergunta que não pertence ao catálogo suportado pelo agente, mas deve ser registrada para análise futura. |
 | Caso de Teste de Intenção | Exemplo rotulado usado para avaliar o desempenho do classificador, preservando template, split e texto normalizado. |
 
-```mermaid
-erDiagram
-    SUBPORTFOLIO ||--o{ PROJETO : agrupa
-    PROJETO ||--o{ ARTEFATO_DO_PROJETO : possui
-    ARTEFATO_DO_PROJETO ||--o{ EXTRATO_DE_FONTE : gera
-    ARTEFATO_DO_PROJETO ||--o{ ITEM_DE_CRONOGRAMA : origina
-    PROJETO ||--o{ ATUALIZACAO_DE_STATUS : registra
-    PROJETO ||--o{ RISCO_OU_PROBLEMA : monitora
-    PROJETO ||--o{ MUDANCA : controla
-
-
-    USUARIO ||--o{ CONVERSA : inicia
-    CONVERSA ||--o{ INTERACAO : contem
-    INTENCAO ||--o{ INTERACAO : classifica
-    INTERACAO ||--o{ FONTE_CONSULTADA : utiliza
-    EXTRATO_DE_FONTE ||--o{ FONTE_CONSULTADA : referencia
-    INTERACAO ||--o{ EVENTO_DE_AUDITORIA : gera
-    INTERACAO ||--o| SOLICITACAO_FORA_DE_ESCOPO : pode_gerar
-
-
-    USUARIO ||--o{ REGRA_DE_ACESSO : possui
-    INTENCAO ||--o{ TEMPLATE_DE_PROMPT : orienta
-    INTENCAO ||--o{ CASO_DE_TESTE_DE_INTENCAO : valida
-```
+<div align="center">
+  <img src="img/modelo-conceitual.png" alt="Modelo conceitual de dados" width="100%">
+</div>
 
 <p align="center"><strong>Figura 18</strong> - Modelo conceitual de dados.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
@@ -2807,239 +2495,9 @@ Para manter o escopo adequado ao MVP, a modelagem lógica foi consolidada em 18 
 | out_of_scope_requests | id | interaction_id → ai_interactions.id, reviewed_by → users.id | Armazena perguntas fora do escopo suportado. |
 | intent_test_cases | id | intent_id → intent_catalog.id | Armazena exemplos rotulados com template_id, variação, texto normalizado e split agrupado. |
 
-```mermaid
-erDiagram
-    subportfolios {
-        uuid id PK
-        string code
-        string name
-        text description
-        text strategic_objective
-    }
-
-    projects {
-        uuid id PK
-        uuid subportfolio_id FK
-        string code
-        string name
-        text description
-        string status
-        string current_phase
-        date planned_end_date
-        string sharepoint_site_url
-    }
-
-    project_artifacts {
-        uuid id PK
-        uuid project_id FK
-        string artifact_type
-        string title
-        string sharepoint_url
-        string excel_sheet_name
-        string excel_table_or_range
-        string confidentiality_level
-        json metadata
-    }
-
-    source_extracts {
-        uuid id PK
-        uuid artifact_id FK
-        uuid project_id FK
-        int extract_index
-        text content_text
-        string source_locator
-        string sharepoint_reference
-        string source_sheet_name
-        int source_row_number
-        string source_cell_range
-    }
-
-    schedule_items {
-        uuid id PK
-        uuid project_id FK
-        uuid artifact_id FK
-        uuid parent_item_id FK
-        string wbs_code
-        string activity_name
-        string responsible_name
-        date planned_end_date
-        date actual_end_date
-        decimal progress_percent
-        string status
-        int source_row_number
-    }
-
-    project_status_updates {
-        uuid id PK
-        uuid project_id FK
-        uuid artifact_id FK
-        date reference_date
-        string overall_status
-        decimal progress_percent
-        text executive_summary
-    }
-
-    risk_issue_items {
-        uuid id PK
-        uuid project_id FK
-        uuid source_artifact_id FK
-        string item_type
-        string title
-        string severity
-        string status
-    }
-
-    change_records {
-        uuid id PK
-        uuid project_id FK
-        uuid source_artifact_id FK
-        string change_type
-        string status
-    }
-
-    users {
-        uuid id PK
-        string entra_object_id
-        string display_name
-        string email
-        string role_name
-    }
-
-    access_rules {
-        uuid id PK
-        uuid user_id FK
-        uuid subportfolio_id FK
-        uuid project_id FK
-        string role_name
-        string permission_scope
-        boolean can_read
-        boolean can_write
-    }
-
-    intent_catalog {
-        uuid id PK
-        string macro_intent
-        string specific_intent
-        string flow_description
-        string target_component
-        string handler_name
-        decimal macro_confidence_threshold
-        decimal intent_confidence_threshold
-        boolean is_active
-    }
-
-    prompt_templates {
-        uuid id PK
-        uuid intent_id FK
-        string template_key
-        string title
-        text prompt_text
-        string channel
-        string purpose
-    }
-
-    ai_conversations {
-        uuid id PK
-        uuid user_id FK
-        string channel
-        string conversation_status
-    }
-
-    ai_interactions {
-        uuid id PK
-        uuid conversation_id FK
-        uuid user_id FK
-        uuid intent_id FK
-        uuid prompt_template_id FK
-        text user_prompt
-        text normalized_prompt
-        string macro_intent_predicted
-        decimal macro_intent_confidence
-        string specific_intent_predicted
-        decimal specific_intent_confidence
-        string handler_selected
-        string route_taken
-        json top_k_alternatives
-        text limitation_response
-        text response_text
-        string processing_status
-    }
-
-    consulted_sources {
-        uuid id PK
-        uuid interaction_id FK
-        uuid artifact_id FK
-        uuid extract_id FK
-        uuid project_id FK
-        string source_type
-        string source_title
-        string source_url
-        string source_locator
-        int citation_order
-    }
-
-    audit_events {
-        uuid id PK
-        uuid interaction_id FK
-        uuid user_id FK
-        string event_type
-        string component
-        string correlation_id
-    }
-
-    out_of_scope_requests {
-        uuid id PK
-        uuid interaction_id FK
-        uuid reviewed_by FK
-        text user_prompt
-        text reason
-        string review_status
-    }
-
-    intent_test_cases {
-        uuid id PK
-        uuid intent_id FK
-        text raw_text
-        text normalized_text
-        string template_id
-        string surface_variation
-        string dataset_split
-        string leakage_group
-    }
-
-    subportfolios ||--o{ projects : possui
-    projects ||--o{ project_artifacts : possui
-    projects ||--o{ source_extracts : contextualiza
-    project_artifacts ||--o{ source_extracts : gera
-    projects ||--o{ schedule_items : possui
-    project_artifacts ||--o{ schedule_items : origina
-    schedule_items ||--o{ schedule_items : detalha
-    projects ||--o{ project_status_updates : acompanha
-    project_artifacts ||--o{ project_status_updates : fundamenta
-    projects ||--o{ risk_issue_items : monitora
-    project_artifacts ||--o{ risk_issue_items : fundamenta
-    projects ||--o{ change_records : controla
-    project_artifacts ||--o{ change_records : fundamenta
-
-    users ||--o{ access_rules : possui
-    users ||--o{ ai_conversations : inicia
-    users ||--o{ ai_interactions : realiza
-    users ||--o{ audit_events : executa
-    users ||--o{ out_of_scope_requests : revisa
-
-    intent_catalog ||--o{ prompt_templates : orienta
-    intent_catalog ||--o{ ai_interactions : classifica
-    intent_catalog ||--o{ intent_test_cases : valida
-    prompt_templates ||--o{ ai_interactions : orienta
-
-    ai_conversations ||--o{ ai_interactions : contem
-    ai_interactions ||--o{ consulted_sources : usa
-    project_artifacts ||--o{ consulted_sources : referencia
-    source_extracts ||--o{ consulted_sources : referencia
-    projects ||--o{ consulted_sources : contextualiza
-    ai_interactions ||--o{ audit_events : registra
-    ai_interactions ||--o{ out_of_scope_requests : gera
-```
+<div align="center">
+  <img src="img/modelo-logico.png" alt="Modelo lógico de dados" width="100%">
+</div>
 
 <p align="center"><strong>Figura 19</strong> - Modelo lógico de dados.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
@@ -3248,6 +2706,13 @@ O diagrama de componentes concentra-se nas dependências, responsabilidades e in
 
 ## 5.3 Diagramas de Sequência da UML
 
+Os diagramas desta seção, como os demais do documento, são gerados a partir de arquivos-fonte em PlantUML versionados em `docs/diagrams/`. Para regerar qualquer um deles, com PlantUML e Graphviz instalados:
+
+```bash
+plantuml -charset UTF-8 -tpng -o ../img docs/diagrams/<arquivo>.puml
+```
+
+
 Os diagramas de sequência desta seção detalham a ordem das interações entre os principais componentes da solução nos cenários críticos definidos para a arquitetura atual. Enquanto a modelagem dinâmica inicial da Seção 3.1.3 apresenta os fluxos em nível funcional, os diagramas desta seção incorporam as decisões técnicas consolidadas na solução, especialmente a utilização do Microsoft Teams, o serviço de Speech-to-Text, o núcleo autoral de PLN, o catálogo de intenções, a arquitetura RAG, a geração de respostas pelo LLM e o acionamento de fluxos específicos por meio do Copilot Studio.
 
 A seleção dos cenários considera os caminhos centrais da solução: consultas documentais fundamentadas, análises comparativas, direcionamento para fluxos funcionais e entrada por voz. Em todos os casos, o PLN permanece responsável pela interpretação e classificação da solicitação, enquanto o catálogo de intenções determina a capacidade que deverá processá-la. A partir desse roteamento, a solicitação segue para a recuperação e geração de resposta ou para o tópico/fluxo correspondente no Copilot Studio.
@@ -3260,76 +2725,9 @@ Este cenário representa uma consulta textual sobre informações disponíveis n
 
 No contexto do MVP, a fonte utilizada para validação é a **base sintética associada ao índice vetorial**. A integração com SharePoint representa a evolução arquitetural prevista e não deve ser interpretada como dependência do conjunto de dados reais do Metrô.
 
-```mermaid
-sequenceDiagram
-    autonumber
-
-    actor Usuario as Usuário do PMO
-    participant Entra as Microsoft Entra ID
-    participant Chat as Microsoft Teams
-    participant API as API da Aplicação
-    participant PLN as Núcleo de PLN
-    participant Classificador as Classificador de Intenções
-    participant Escopo as Validador de Escopo
-    participant Catalogo as Catálogo de Intenções
-    participant Entidades as Extração de Entidades
-    participant Retriever as Recuperador RAG
-    participant Fontes as Base sintética / Índice Vetorial
-    participant Contexto as Montagem de Contexto
-    participant LLM as API de LLM
-    participant Auditoria as Trilha de Auditoria
-
-    Usuario->>Entra: Autenticar-se
-    Entra-->>Chat: Identidade autenticada
-    Usuario->>Chat: Envia pergunta em linguagem natural
-    Chat->>API: POST /chat com a mensagem + identidade
-    API->>Auditoria: Registrar início da interação
-
-    API->>PLN: Encaminhar solicitação
-    PLN->>PLN: Pré-processar texto
-    PLN->>Classificador: Identificar intenção
-    Classificador-->>PLN: Intenção + confiança
-    PLN->>Escopo: Validar solicitação
-
-    alt Solicitação fora do escopo
-        Escopo-->>PLN: Não suportada
-        PLN->>API: Orientação / limite da solução
-        API->>Auditoria: Registrar intenção e resultado
-        API-->>Chat: Resposta de reformulação
-        Chat-->>Usuario: Apresentar orientação
-
-    else Solicitação válida
-        Escopo-->>PLN: Solicitação válida
-        PLN->>Catalogo: Associar intenção a uma capacidade
-        Catalogo-->>PLN: Rota = Consulta documental
-
-        PLN->>Entidades: Extrair projeto, critérios e contexto
-        Entidades-->>PLN: Entidades identificadas
-
-        PLN->>Retriever: Recuperar contexto relevante
-        Retriever->>Fontes: Buscar trechos por relevância semântica
-        Fontes-->>Retriever: Trechos + metadados + referências
-        Retriever-->>PLN: Evidências recuperadas
-
-        alt Informação suficiente
-            PLN->>Contexto: Montar contexto fundamentado
-            Contexto-->>PLN: Contexto + referências
-            PLN->>LLM: Solicitar geração com contexto recuperado
-            LLM-->>PLN: Resposta em linguagem natural
-
-            PLN->>API: Resposta + referências
-            API->>Auditoria: Registrar consulta, fontes e resposta
-            API-->>Chat: Resultado estruturado
-            Chat-->>Usuario: Exibir resposta fundamentada
-
-        else Informação insuficiente
-            PLN->>API: Informar ausência de dados suficientes
-            API->>Auditoria: Registrar insuficiência e fontes consultadas
-            API-->>Chat: Limitação da consulta
-            Chat-->>Usuario: Informar que não há dados suficientes
-        end
-    end
-```
+<div align="center">
+  <img src="img/sequencia-rag-consulta.png" alt="Sequência: consulta documental via RAG" width="100%">
+</div>
 
 <p align="center"><strong>Figura 22</strong> - Sequência: consulta documental via RAG.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
@@ -3343,86 +2741,9 @@ Este cenário representa uma solicitação analítica, como **"Compare os riscos
 
 Assim como no cenário anterior, o MVP utiliza a **base sintética associada ao índice vetorial**. A eventual integração com SharePoint ocorre em uma etapa posterior, mediante os mecanismos homologados pelo parceiro.
 
-```mermaid
-sequenceDiagram
-    autonumber
-
-    actor Gestor as Gestor do Portfólio
-    participant Entra as Microsoft Entra ID
-    participant Chat as Microsoft Teams
-    participant API as API da Aplicação
-    participant PLN as Núcleo de PLN
-    participant Classificador as Classificador de Intenções
-    participant Escopo as Validador de Escopo
-    participant Catalogo as Catálogo de Intenções
-    participant Entidades as Extração de Entidades
-    participant Retriever as Recuperador RAG
-    participant Fontes as Base sintética / Índice Vetorial
-    participant Analise as Analisador Comparativo
-    participant Contexto as Montagem de Contexto
-    participant LLM as API de LLM
-    participant Auditoria as Trilha de Auditoria
-
-    Gestor->>Entra: Autenticar-se
-    Entra-->>Chat: Identidade autenticada
-    Gestor->>Chat: Solicita comparação em linguagem natural
-    Chat->>API: POST /chat com a solicitação + identidade
-    API->>Auditoria: Registrar início da interação
-
-    API->>PLN: Encaminhar solicitação
-    PLN->>PLN: Pré-processar texto
-    PLN->>Classificador: Identificar intenção
-    Classificador-->>PLN: Intenção analítica + confiança
-    PLN->>Escopo: Validar solicitação
-
-    alt Solicitação fora do escopo
-        Escopo-->>PLN: Não suportada
-        PLN->>API: Orientação / limite da solução
-        API->>Auditoria: Registrar intenção e resultado
-        API-->>Chat: Resposta de reformulação
-        Chat-->>Gestor: Apresentar orientação
-
-    else Solicitação válida
-        Escopo-->>PLN: Solicitação válida
-        PLN->>Catalogo: Associar intenção a uma capacidade
-        Catalogo-->>PLN: Rota = Análise comparativa
-
-        PLN->>Entidades: Extrair projetos e critérios
-        Entidades-->>PLN: Projetos + critérios
-
-        PLN->>Retriever: Recuperar evidências dos projetos
-        Retriever->>Fontes: Buscar evidências do Projeto XPTO
-        Fontes-->>Retriever: Trechos + metadados
-        Retriever-->>PLN: Evidências do Projeto XPTO
-
-        PLN->>Retriever: Buscar evidências do Projeto ABC
-        Retriever->>Fontes: Buscar evidências do Projeto ABC
-        Fontes-->>Retriever: Trechos + metadados
-        Retriever-->>PLN: Evidências do Projeto ABC
-
-        alt Dados suficientes
-            PLN->>Analise: Comparar riscos, prazos e critérios
-            Analise-->>PLN: Resultado comparativo estruturado
-
-            PLN->>Contexto: Consolidar evidências + resultado
-            Contexto-->>PLN: Contexto fundamentado
-
-            PLN->>LLM: Gerar resposta comparativa
-            LLM-->>PLN: Resposta em linguagem natural
-
-            PLN->>API: Resultado + referências
-            API->>Auditoria: Registrar consulta, fontes e resposta
-            API-->>Chat: Comparação estruturada
-            Chat-->>Gestor: Exibir análise
-
-        else Dados insuficientes
-            PLN->>API: Informar dados ausentes
-            API->>Auditoria: Registrar insuficiência e fontes consultadas
-            API-->>Chat: Limitação da análise
-            Chat-->>Gestor: Exibir insuficiência
-        end
-    end
-```
+<div align="center">
+  <img src="img/sequencia-rag-comparacao.png" alt="Sequência: análise e comparação entre projetos via RAG" width="100%">
+</div>
 
 <p align="center"><strong>Figura 23</strong> - Sequência: análise e comparação entre projetos via RAG.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
@@ -3434,73 +2755,9 @@ A validação de identidade antecede a recuperação e os eventos da interação
 
 Este cenário representa uma solicitação cuja intenção corresponde a uma capacidade funcional específica do produto. O PLN identifica a intenção e o catálogo a associa ao tópico ou fluxo correspondente. A partir desse ponto, o Copilot Studio assume a execução do tópico selecionado e pode acionar o Power Automate quando houver uma operação automatizada ou integração com serviço corporativo.
 
-```mermaid
-sequenceDiagram
-    autonumber
-
-    actor Usuario as Usuário
-    participant Entra as Microsoft Entra ID
-    participant Chat as Microsoft Teams
-    participant API as API da Aplicação
-    participant PLN as Núcleo de PLN
-    participant Classificador as Classificador de Intenções
-    participant Escopo as Validador de Escopo
-    participant Catalogo as Catálogo de Intenções
-    participant Copilot as Copilot Studio
-    participant Topico as Tópico / Fluxo Selecionado
-    participant Automacao as Power Automate
-    participant Servico as Serviço Corporativo
-    participant Auditoria as Trilha de Auditoria
-
-    Usuario->>Entra: Autenticar-se
-    Entra-->>Chat: Identidade autenticada
-    Usuario->>Chat: Solicita uma operação funcional
-    Chat->>API: POST /chat com a solicitação + identidade
-    API->>Auditoria: Registrar início da interação
-
-    API->>PLN: Encaminhar solicitação
-    PLN->>PLN: Pré-processar texto
-    PLN->>Classificador: Identificar intenção
-    Classificador-->>PLN: Intenção + confiança
-    PLN->>Escopo: Validar solicitação
-
-    alt Solicitação fora do escopo
-        Escopo-->>PLN: Não suportada
-        PLN->>API: Orientação / limite da solução
-        API->>Auditoria: Registrar intenção e resultado
-        API-->>Chat: Resposta de reformulação
-        Chat-->>Usuario: Apresentar orientação
-
-    else Solicitação válida
-        Escopo-->>PLN: Solicitação válida
-        PLN->>Catalogo: Consultar capacidade associada
-        Catalogo-->>PLN: Tópico / fluxo correspondente
-
-        PLN->>Copilot: Encaminhar intenção + parâmetros estruturados
-        Copilot->>Topico: Acionar tópico correspondente
-
-        alt Fluxo requer automação
-            Topico->>Automacao: Executar ação do fluxo
-
-            alt Fluxo requer serviço corporativo
-                Automacao->>Servico: Executar operação
-                Servico-->>Automacao: Resultado da operação
-            end
-
-            Automacao-->>Topico: Resultado da ação
-            Topico-->>Copilot: Resultado do fluxo
-
-        else Fluxo conversacional
-            Topico-->>Copilot: Resultado / próxima etapa
-        end
-
-        Copilot-->>PLN: Resultado estruturado
-        PLN->>API: Resposta final
-        API->>Auditoria: Registrar intenção, fluxo e resultado
-        API-->>Chat: Resultado da operação
-        Chat-->>Usuario: Apresentar retorno do fluxo
-    end
-```
+<div align="center">
+  <img src="img/sequencia-copilot-fluxo.png" alt="Sequência: direcionamento para fluxo funcional via Copilot Studio" width="100%">
+</div>
 
 <p align="center"><strong>Figura 24</strong> - Sequência: direcionamento para fluxo funcional via Copilot Studio.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
@@ -3514,61 +2771,9 @@ A identidade do usuário é validada antes da execução do fluxo e a auditoria 
 
 Este cenário demonstra a entrada por áudio utilizando a API de **Azure AI Speech** documentada no projeto. A responsabilidade do serviço de Speech-to-Text termina na produção de uma transcrição utilizável; depois disso, o conteúdo segue pelo mesmo pipeline utilizado para entradas textuais.
 
-```mermaid
-sequenceDiagram
-    autonumber
-
-    actor Usuario as Usuário
-    participant Entra as Microsoft Entra ID
-    participant Chat as Microsoft Teams
-    participant API as API da Aplicação
-    participant Speech as Azure AI Speech
-    participant PLN as Núcleo de PLN
-    participant Classificador as Classificador de Intenções
-    participant Escopo as Validador de Escopo
-    participant Catalogo as Catálogo de Intenções
-    participant Roteador as Roteamento da Capacidade
-    participant Auditoria as Trilha de Auditoria
-
-    Usuario->>Entra: Autenticar-se
-    Entra-->>Chat: Identidade autenticada
-    Usuario->>Chat: Grava pergunta em áudio
-    Chat->>API: Envia arquivo de áudio + identidade
-    API->>Auditoria: Registrar início da interação
-
-    API->>Speech: Requisição STT em pt-BR
-    Speech-->>API: Status + transcrição + confiança
-
-    alt Transcrição inválida, NoMatch ou confiança baixa
-        API->>Auditoria: Registrar falha de transcrição
-        API-->>Chat: Solicitar nova gravação / informar ausência de transcrição confiável
-        Chat-->>Usuario: Solicitar repetição do áudio
-
-    else Transcrição válida
-        API->>PLN: Encaminhar transcrição
-        PLN->>PLN: Pré-processar texto
-        PLN->>Classificador: Identificar intenção
-        Classificador-->>PLN: Intenção + confiança
-        PLN->>Escopo: Validar solicitação
-
-        alt Solicitação inválida ou fora do escopo
-            Escopo-->>PLN: Não suportada
-            PLN->>API: Orientação / limite da solução
-            API->>Auditoria: Registrar intenção e resultado
-            API-->>Chat: Resposta de reformulação
-            Chat-->>Usuario: Apresentar orientação
-
-        else Solicitação válida
-            Escopo-->>PLN: Solicitação válida
-            PLN->>Catalogo: Associar intenção à capacidade
-            Catalogo-->>Roteador: Capacidade selecionada
-            Roteador-->>API: Encaminhar para o fluxo correspondente
-            API->>Auditoria: Registrar transcrição, intenção e roteamento
-            API-->>Chat: Resultado
-            Chat-->>Usuario: Apresentar resposta
-        end
-    end
-```
+<div align="center">
+  <img src="img/sequencia-voz-stt.png" alt="Sequência: entrada por voz com Speech-to-Text" width="100%">
+</div>
 
 <p align="center"><strong>Figura 25</strong> - Sequência: entrada por voz com Speech-to-Text.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
@@ -3614,65 +2819,13 @@ Como o provedor de LLM externo ainda não está definido nem homologado, conform
 
 A Figura 26 apresenta a visão de implantação da PoC. O diagrama separa o ambiente atualmente viável para o MVP dos componentes que dependem de desenvolvimento posterior ou provisionamento pela GTI.
 
-```mermaid
-flowchart LR
-    usuario["Usuário do MVP"]
-    lideranca["Liderança<br/>aprova base sintética"]
-
-    subgraph navegador["Navegador"]
-        frontend["Frontend próprio<br/>React + Vite"]
-    end
-
-    subgraph ambiente["Ambiente acessível da PoC<br/>execução local ou publicação simples futura"]
-        api["API do MVP<br/>a ser consolidada"]
-        pln["Núcleo de PLN<br/>estratégia documentada"]
-        rag["Recuperação de dados<br/>base sintética"]
-        fallback["Fallback<br/>resposta estruturada"]
-    end
-
-    subgraph supabase["Supabase Cloud"]
-        db[("PostgreSQL<br/>dados, catálogo e auditoria")]
-        storage[("Storage<br/>documentos sintéticos<br/>e artefatos futuros")]
-    end
-
-    subgraph microsoft["Microsoft / Power Platform"]
-        entra["Entra ID<br/>OAuth/OIDC"]
-        copilot["Copilot Studio<br/>tópicos e orquestração"]
-        power["Power Automate<br/>fluxos funcionais"]
-    end
-
-    subgraph futuro["Evolução futura"]
-        docker["Docker<br/>empacotamento do serviço"]
-        cicd["Pipeline CI/CD<br/>build, teste e deploy"]
-        azure["Azure Container Apps<br/>ou App Service"]
-        aml["Azure Machine Learning"]
-        insights["Application Insights"]
-    end
-
-    usuario --> frontend
-    frontend --> entra
-    entra --> frontend
-    frontend -->|"requisição da aplicação"| api
-    api --> pln
-    pln --> rag
-    rag --> db
-    rag --> storage
-    api -->|"grava interação"| db
-    api -->|"quando disponível"| copilot
-    copilot --> power
-    api -->|"sem camada generativa"| fallback
-    lideranca -->|"aprova antes da carga"| db
-
-    api -. evolução .-> docker
-    docker -. automatização futura .-> cicd
-    cicd -. publicação futura .-> azure
-    storage -. artefatos futuros .-> aml
-    api -. telemetria futura .-> insights
-```
+<div align="center">
+  <img src="img/implantacao-poc.png" alt="Diagrama de implantação planejada da PoC" width="100%">
+</div>
 
 <p align="center"><strong>Figura 26</strong> - Diagrama de implantação planejada da PoC.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
-O código-fonte do diagrama renderizável está versionado em [`docs/diagrams/implantacao-poc.mmd`](diagrams/implantacao-poc.mmd).
+O código-fonte do diagrama está versionado em [`docs/diagrams/implantacao-poc.puml`](diagrams/implantacao-poc.puml).
 
 ## 6.2 Justificativa das escolhas de implantação
 
