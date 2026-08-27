@@ -2683,6 +2683,33 @@ As principais regras de integridade do modelo lógico são:
 - perguntas fora do catálogo devem gerar registros em out_of_scope_requests;
 - leituras, classificações, consultas a fontes, respostas do Copilot e acionamentos de fluxos devem gerar eventos em audit_events.
 
+## 4.4 Modelo Físico de Dados
+
+O modelo físico corresponde à implementação real do banco de dados. Para o MVP, ele foi materializado em um script SQL executável para PostgreSQL 14+, contendo tipos de dados exatos, tamanhos de campos, chaves primárias, chaves estrangeiras, restrições, índices e comentários.
+
+O script físico está em:
+
+- [`src/database/01_create_database.sql`](../src/database/01_create_database.sql)
+
+A documentação técnica dos scripts de banco está em:
+
+- [`src/database/docs/README.md`](../src/database/docs/README.md)
+
+Essa documentação serve como ponto de entrada para os scripts de banco da solução. Além do script de criação, ela foi preparada para contemplar futuramente o script de inserção de dados sintéticos e o script de rollback.
+
+O modelo físico adota as seguintes decisões:
+
+- uso de `UUID` como chave primária nas tabelas;
+- uso de `JSONB` para metadados flexíveis, como atributos vindos do SharePoint, entidades extraídas pelo PLN e payloads de auditoria;
+- armazenamento dos campos produzidos pelo classificador do notebook, incluindo `macro_intent`, `specific_intent`, confiança de macrointenção, confiança de intenção específica, handler, alternativas e resposta de limitação;
+- preservação de `template_id`, texto normalizado e split agrupado em `intent_test_cases`, em alinhamento com o protocolo de avaliação sem vazamento do notebook;
+- uso de `CHECK CONSTRAINTS` para domínios controlados, como status de projeto, tipo de artefato, tipo de fonte e perfil de usuário;
+- uso de `FOREIGN KEYS` para preservar integridade entre projetos, artefatos, cronogramas, interações, fontes consultadas e auditoria;
+- uso de índices para os principais caminhos de consulta do MVP, como projeto, subportfólio, status, artefato, cronograma, intenção, interação e eventos de auditoria;
+- compatibilidade com o ecossistema Microsoft, registrando o componente alvo da intenção, os prompts usados por Copilot/Power Automate/M365 Copilot e as fontes consultadas a partir do SharePoint.
+
+O tratamento das planilhas Excel vinculadas em listas do SharePoint também foi contemplado fisicamente. A tabela `project_artifacts` armazena o link da planilha, a aba e o intervalo de leitura; a tabela `schedule_items` armazena as linhas normalizadas do cronograma, incluindo a referência à aba, linha e intervalo de células de origem; a tabela `source_extracts` preserva extratos textuais ou estruturados quando a planilha também precisar ser usada como fonte consultável; e a tabela `consulted_sources` registra qual documento, extrato, planilha, linha ou intervalo foi utilizado para compor a resposta.
+
 # 5. Solução Técnica (Design)
 _conteúdo_
 
