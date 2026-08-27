@@ -2095,11 +2095,11 @@ Este é o componente autoral da equipe: recebe o texto transcrito, identifica a 
 | **Hugging Face Transformers** + **Sentence-Transformers** | Modelos de linguagem em português (ex.: BERTimbau, `multilingual-e5`) executados localmente para representar sentenças e apoiar a classificação de intenções, a comparação de similaridade e a avaliação do núcleo de PLN. | C2, C3 |
 | **Catálogo local de fontes e casos sintéticos** | Organização dos documentos, planilhas, listas simuladas e casos de teste usados pelo núcleo de PLN durante o MVP, sem depender de infraestrutura generativa externa. | C2, C3 |
 | **pandas** / **NumPy** | Manipulação dos dados sintéticos e consolidação das análises comparativas. | C3 |
-| **FastAPI** | Exposição do pipeline de PLN como API REST documentada em OpenAPI, consumida pelo Copilot Studio. | C1, C5 |
-| **Docker** | Empacotamento do serviço de PLN, garantindo reprodutibilidade entre as máquinas da equipe e o ambiente do parceiro. | C5 |
-| **Azure Container Apps** (ou **Azure App Service**) | Destino de execução do contêiner do serviço de PLN dentro do *tenant* do parceiro, mantendo o processamento em ambiente homologado. Enquanto o provisionamento não ocorrer, o serviço roda localmente para desenvolvimento e avaliação. | C1, C2 |
+| **FastAPI** | Opção de exposição do núcleo de PLN como API REST documentada em OpenAPI, a ser consolidada conforme o backend do MVP evoluir. | C1, C5 |
+| **Docker** | Evolução prevista para empacotamento do serviço de PLN quando houver backend consolidado. Não é requisito da etapa atual do MVP. | C5 |
+| **Azure Container Apps** (ou **Azure App Service**) | Destino futuro para execução do serviço de PLN dentro do *tenant* do parceiro, condicionado ao provisionamento da GTI. | C1, C2 |
 
-> **Dependência de provisionamento.** A hospedagem do serviço de PLN em ambiente Azure do Metrô depende da GTI e não estava confirmada na abertura do projeto. Por isso o pipeline foi desenhado para ser executável de três formas equivalentes (local, em contêiner e como serviço publicado), de modo que a ausência do ambiente atrase a integração, mas não bloqueie o desenvolvimento e a avaliação do núcleo (Pilar 1).
+> **Dependência de provisionamento.** A hospedagem do serviço de PLN em ambiente Azure do Metrô depende da GTI e não estava confirmada na abertura do projeto. Por isso, a implantação em Azure, o empacotamento Docker e a automação de deploy são tratados como evolução. A ausência desse ambiente não bloqueia o desenvolvimento e a avaliação conceitual do núcleo de PLN no MVP.
 
 > **Decisão registrada.** O grupo optou por construir o classificador de intenções com modelos executados localmente, e não delegar a identificação de intenção a um LLM externo. A justificativa é dupla: atende à exigência do Pilar 1 (núcleo autoral e avaliado pela equipe, critério C3) e mantém o texto do usuário fora de serviços não homologados (C2). O uso de LLM fica reservado ao Pilar 2, sobre conteúdo já filtrado.
 
@@ -2172,7 +2172,7 @@ O registro das opções descartadas é parte da decisão: ele documenta o que fo
 | **Power Apps** como interface principal | Interface visual rica para preenchimento de formulários de projeto. | O escopo do módulo pede interface primariamente em linguagem natural (texto e áudio). Somam-se as restrições de licenciamento (C4), sem conectores premium e com limite de 500 linhas por leitura de lista. |
 | **Aplicação web própria** (React/Next.js) fora do ecossistema Microsoft | Liberdade total de implementação e melhor experiência de voz. | Viola C1 e comprometeria a sustentação pela equipe interna do Metrô, que é um benefício esperado explícito do projeto. A interface React existente no repositório é bancada de teste do caminho de RAG, não interface do produto. |
 | **Elasticsearch / OpenSearch** para busca | Recurso maduro de busca textual e análise de documentos. | Exigiria infraestrutura adicional a ser provisionada e mantida. Para o MVP, o catálogo local de fontes e a consulta às listas e planilhas simuladas do SharePoint atendem à escala prevista com menor custo operacional. |
-| **Azure Machine Learning** como ambiente de treino e *endpoint* | Citado pelo parceiro como recurso disponível. Ofereceria *endpoints* gerenciados de inferência. | Mantido como **evolução prevista**, não como dependência do MVP. O provisionamento depende da GTI e não pode bloquear a Sprint 2. O empacotamento em Docker foi escolhido justamente para tornar essa migração de baixo atrito. |
+| **Azure Machine Learning** como ambiente de treino e *endpoint* | Citado pelo parceiro como recurso disponível. Ofereceria *endpoints* gerenciados de inferência. | Mantido como **evolução prevista**, não como dependência do MVP. O provisionamento depende da GTI e não pode bloquear a Sprint 2. |
 
 ### 3.4.4 Riscos e dependências tecnológicas
 
@@ -2182,7 +2182,7 @@ Os itens abaixo alimentam a seção *Matriz de risco do projeto* deste documento
 |---|---|---|
 | Disponibilidade de licença e ambiente de Copilot Studio para a equipe Inteli | Sem o ambiente, o Pilar 2 e a integração ficam apenas em especificação. | Confirmar com a GTI logo na Sprint 2 e manter o núcleo de PLN independente do Copilot Studio, testável via API. |
 | Recursos do Copilot Studio indisponíveis no ambiente pt-BR | Funcionalidades em *preview* citadas pelo parceiro (CUA, interpretador de Python) podem não existir no *tenant*. | Levantar com a GTI na Sprint 2 o que está habilitado e manter o MVP sem dependência desses recursos. |
-| Ausência de ambiente Azure provisionado para hospedar o serviço de PLN | A integração entre o Copilot Studio e a API da equipe fica apenas especificada. | Manter o pipeline executável localmente e em contêiner. Solicitar o provisionamento à GTI logo na Sprint 2, tratando a publicação como etapa de integração e não como pré-requisito do Pilar 1. |
+| Ausência de ambiente Azure provisionado para hospedar o serviço de PLN | A integração em ambiente corporativo fica apenas especificada. | Manter o desenvolvimento e a validação em ambiente acessível, com Supabase para persistência. Solicitar o provisionamento à GTI como evolução, tratando publicação, Docker e CI/CD como etapas posteriores. |
 | Conectores personalizados classificados como *premium* na Power Platform | Custo de licenciamento adicional inviabilizaria a adoção. | Verificar a cobertura pelo licenciamento do Copilot Studio e avaliar MCP como alternativa. |
 | Qualidade e representatividade dos dados sintéticos | Modelo com boa métrica em laboratório e desempenho ruim no cenário real. | Derivar a **estrutura** dos dados sintéticos dos anexos do parceiro, com os cinco subportfólios (Turnaround, Expansão da Rede, Desempenho/Eficiência/Segurança Operacional, Receitas Não Tarifárias, Pessoas e Patrimônio), identificadores no padrão `TUR-01` e os campos dos relatórios de partida, balanço e fechamento. As amostras devem ser validadas com o PMO. |
 | Modelo de permissões do portfólio mais granular do que o previsto | O agente pode expor a um perfil informação restrita a outro, violando item explícito do escopo macro. | Espelhar as permissões já existentes nas listas do SharePoint em vez de criar um modelo próprio. Validar com o PMO os perfis e o que cada um enxerga antes de implementar as consultas. |
@@ -2209,7 +2209,8 @@ Como possibilidades de evolução, poderão ser consideradas:
 
 - Integração com SharePoint e listas reais do portfólio
 - Integração com Power BI e demais serviços analíticos
-- Hospedagem do pipeline em infraestrutura Azure homologada
+- Hospedagem do serviço de PLN em infraestrutura Azure homologada
+- Empacotamento Docker e pipeline CI/CD após consolidação do backend
 - *Endpoints* de inferência gerenciados no Azure Machine Learning
 - Microsoft Planner Premium e Dynamics 365 Project Operations, caso a plataforma de portfólio seja substituída
 - Expansão da interação por voz, incluindo síntese de fala (*text-to-speech*)
@@ -3411,17 +3412,319 @@ Por fim, a utilização da **base sintética / índice vetorial** nos cenários 
 
 ---
 
-# 6. Mapeamento Técnico de Infraestrutura e Implantação
-_conteúdo_
+# 6. Mapeamento técnico de infraestrutura e implantação
 
-## 6.1 Diagrama de Implantação da UML
-_conteúdo_
+Esta seção documenta a estratégia de implantação prevista para a solução, considerando que o projeto ainda está em estágio de PoC acadêmica e que a equipe não possui garantia de acesso a uma assinatura Azure corporativa. Portanto, a implantação descrita aqui não representa um deploy produtivo nem uma pipeline de CI/CD já implementada. O objetivo é registrar uma estratégia reprodutível e simples, capaz de orientar a publicação futura do MVP sem bloquear o desenvolvimento atual.
 
-## 6.2 Justificativa das Escolhas de Implantação
-_conteúdo_
+A decisão principal é separar o que faz parte do MVP do que deve permanecer como evolução. Para o MVP, a nuvem comercial efetivamente assumida é o **Supabase Cloud**, utilizado como banco PostgreSQL gerenciado e ponto de persistência da trilha de auditoria. A aplicação, por sua vez, pode ser executada localmente durante o desenvolvimento e, quando houver código consolidado suficiente, publicada em uma hospedagem simples com domínio público temporário. O empacotamento em Docker, a criação de uma pipeline de deploy e a migração para Azure ficam documentados como evolução futura.
 
-## 6.3 Considerações sobre Desempenho e Segurança
-_conteúdo_
+O escopo atual de implantação contempla:
+
+| Componente | Situação no MVP | Papel na estratégia |
+|---|---|---|
+| Interface web | Em desenvolvimento pela equipe em `src/frontend` | Interface própria para interação com o agente durante a demonstração. |
+| API da aplicação | Planejada para expor os endpoints do MVP | Ponte entre frontend, classificação de intenção, recuperação de dados e integrações. |
+| Núcleo de PLN | Definido conceitualmente e avaliado no notebook do classificador | Responsável por classificar intenções e orientar o roteamento da solicitação. |
+| Banco de dados | Supabase Cloud | Persistência dos dados sintéticos, catálogo, interações e auditoria. |
+| Armazenamento | Supabase Storage | Área prevista para documentos sintéticos e, futuramente, artefatos do modelo. |
+| Autenticação | Microsoft Entra ID | Mecanismo previsto para autenticação do usuário no MVP. |
+| Orquestração | Copilot Studio | Integração prevista para tópicos e fluxos conversacionais. |
+| Automação | Power Automate | Evolução para execução de fluxos funcionais sobre dados sintéticos ou homologados. |
+| Docker e pipeline de deploy | Fora do escopo atual | Evolução futura, quando houver serviço suficientemente estável para empacotamento e publicação automatizada. |
+
+Como o provedor de LLM externo ainda não está definido nem homologado, conforme registrado na Seção 5.2, a implantação do MVP não deve depender de API generativa externa. Quando a camada do Copilot Studio não estiver disponível, o MVP deve retornar uma resposta estruturada com base nos dados sintéticos recuperados.
+
+## 6.1 Diagrama de implantação da UML
+
+A Figura 15 apresenta a visão de implantação da PoC. O diagrama separa o ambiente atualmente viável para o MVP dos componentes que dependem de desenvolvimento posterior ou provisionamento pela GTI.
+
+```mermaid
+flowchart LR
+    usuario["Usuário do MVP"]
+    lideranca["Liderança<br/>aprova base sintética"]
+
+    subgraph navegador["Navegador"]
+        frontend["Frontend próprio<br/>React + Vite"]
+    end
+
+    subgraph ambiente["Ambiente acessível da PoC<br/>execução local ou publicação simples futura"]
+        api["API do MVP<br/>a ser consolidada"]
+        pln["Núcleo de PLN<br/>estratégia documentada"]
+        rag["Recuperação de dados<br/>base sintética"]
+        fallback["Fallback<br/>resposta estruturada"]
+    end
+
+    subgraph supabase["Supabase Cloud"]
+        db[("PostgreSQL<br/>dados, catálogo e auditoria")]
+        storage[("Storage<br/>documentos sintéticos<br/>e artefatos futuros")]
+    end
+
+    subgraph microsoft["Microsoft / Power Platform"]
+        entra["Entra ID<br/>OAuth/OIDC"]
+        copilot["Copilot Studio<br/>tópicos e orquestração"]
+        power["Power Automate<br/>fluxos funcionais"]
+    end
+
+    subgraph futuro["Evolução futura"]
+        docker["Docker<br/>empacotamento do serviço"]
+        cicd["Pipeline CI/CD<br/>build, teste e deploy"]
+        azure["Azure Container Apps<br/>ou App Service"]
+        aml["Azure Machine Learning"]
+        insights["Application Insights"]
+    end
+
+    usuario --> frontend
+    frontend --> entra
+    entra --> frontend
+    frontend -->|"requisição da aplicação"| api
+    api --> pln
+    pln --> rag
+    rag --> db
+    rag --> storage
+    api -->|"grava interação"| db
+    api -->|"quando disponível"| copilot
+    copilot --> power
+    api -->|"sem camada generativa"| fallback
+    lideranca -->|"aprova antes da carga"| db
+
+    api -. evolução .-> docker
+    docker -. automatização futura .-> cicd
+    cicd -. publicação futura .-> azure
+    storage -. artefatos futuros .-> aml
+    api -. telemetria futura .-> insights
+```
+
+<p align="center"><strong>Figura 15</strong> - Diagrama de implantação planejada da PoC.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+
+O código-fonte do diagrama renderizável está versionado em [`docs/diagrams/implantacao-poc.mmd`](diagrams/implantacao-poc.mmd).
+
+## 6.2 Justificativa das escolhas de implantação
+
+As escolhas de implantação priorizam simplicidade, baixo custo e aderência ao estágio real do projeto. Como ainda não há um serviço final estabilizado para produção, esta seção evita tratar Docker, pipeline de CI/CD ou Azure como entregas já concluídas.
+
+### 6.2.1 Estratégia de hospedagem
+
+No estágio atual, a execução da aplicação deve permanecer simples: desenvolvimento local, banco em nuvem via Supabase e possibilidade de publicação manual em domínio temporário quando a equipe consolidar o código do MVP. Essa abordagem é adequada porque:
+
+- não exige acesso a uma conta Azure corporativa;
+- evita criar uma pipeline de build antes de haver serviço estável;
+- permite demonstrar a solução com dados sintéticos;
+- mantém o caminho aberto para empacotamento futuro;
+- reduz o risco de falhas de CI/CD não relacionadas ao objetivo acadêmico da entrega.
+
+O Docker permanece como evolução recomendada, mas não como requisito atual. Quando o backend estiver consolidado, a equipe poderá criar um `Dockerfile`, validar o build localmente e só então habilitar uma pipeline de build e publicação.
+
+### 6.2.2 Banco de dados e armazenamento
+
+O banco definido para o MVP é o **Supabase Cloud**, usando PostgreSQL gerenciado. Essa escolha permite manter o banco em nuvem sem configurar infraestrutura própria e aproveita o modelo físico já documentado na seção de modelagem de dados.
+
+O Supabase será utilizado em dois papéis:
+
+- **PostgreSQL:** armazenamento dos dados sintéticos, catálogo de intenções, conversas, interações, fontes consultadas, eventos de auditoria e demais tabelas previstas no modelo físico.
+- **Supabase Storage:** armazenamento de documentos sintéticos e, futuramente, artefatos auxiliares do modelo de PLN ou índice vetorial, caso esses arquivos sejam necessários para a demonstração.
+
+Os dados iniciais entram por script de inicialização, aproveitando a estrutura existente em `src/database`. A ingestão documental completa permanece como processo separado e não é tratada como etapa obrigatória deste deploy.
+
+**Aderência aos critérios de seleção.** O Supabase é uma dependência externa ao ecossistema Microsoft, priorizado pelo critério C1 da Seção 3.4.1, e por isso a escolha é declarada aqui de forma explícita. Ela atende ao critério C2, que exige o uso de dados sintéticos ou anonimizados durante o MVP e é o que esta seção estabelece: nenhum dado real do portfólio trafega pelo serviço. O destino de homologação continua sendo o ambiente Azure do Metrô, cujo provisionamento depende da GTI e está registrado como pendência na Seção 6.3.4. O modelo físico documentado na Seção 4.4 é PostgreSQL padrão, o que mantém a migração de baixo atrito quando o ambiente corporativo for disponibilizado.
+
+### 6.2.3 Modelo de PLN e artefatos
+
+Para o MVP, a documentação assume o caminho mais simples: o classificador e a lógica de PLN são tratados como componentes em desenvolvimento, com avaliação registrada no notebook do projeto. A publicação de um serviço de inferência separado, o armazenamento versionado de artefatos e o carregamento automatizado de modelos em ambiente remoto ficam como evolução.
+
+Quando essa evolução for implementada, a estratégia recomendada é:
+
+| Item futuro | Estratégia sugerida | Justificativa |
+|---|---|---|
+| Classificador serializado | Armazenar em Supabase Storage ou incluir no pacote do backend | Facilita reprodução e versionamento. |
+| Word2Vec e encoder BERT | Registrar versão usada pelo MVP | Mantém rastreabilidade entre avaliação e execução. |
+| Índice vetorial | Começar em arquivo controlado e migrar se o volume crescer | Evita adicionar infraestrutura antes da necessidade. |
+| Versionamento do modelo | Usar identificador simples, como `mvp-YYYYMMDD` | Suficiente para rastrear demonstrações acadêmicas. |
+| Endpoint gerenciado | Avaliar Azure Machine Learning após provisionamento da GTI | Caminho mais adequado para homologação futura. |
+
+### 6.2.4 Interface, autenticação e integração
+
+A interface principal do MVP é a aplicação própria desenvolvida pela equipe em `src/frontend`, construída com React, Vite, TypeScript e Tailwind CSS. Ela representa o canal de demonstração da solução enquanto a integração corporativa completa não estiver disponível.
+
+A autenticação prevista é o **Microsoft Entra ID**, pois essa decisão mantém alinhamento com o ambiente do Metrô e permite evoluir para controle de acesso por perfil. Como o MVP usa dados sintéticos, a autenticação tem papel principalmente demonstrativo e de rastreabilidade.
+
+O **Copilot Studio** deve ser integrado ao backend por API/OpenAPI quando o serviço estiver consolidado. O papel do Copilot Studio é executar tópicos e fluxos conversacionais associados às intenções identificadas, sem substituir o núcleo autoral de PLN.
+
+O **Power Automate** permanece como caminho para fluxos funcionais. No MVP, esses fluxos podem ser simulados ou executados apenas sobre dados sintéticos, evitando dependência de SharePoint real ou permissões corporativas.
+
+### 6.2.5 Estratégia de fallback
+
+Como não há provedor de LLM definido para o produto e a camada generativa do Copilot Studio pode depender do ambiente disponível, o MVP deve prever um fallback simples. Nesse cenário, a aplicação retorna uma resposta estruturada contendo:
+
+- intenção identificada;
+- nível de confiança;
+- entidades extraídas, quando houver;
+- fontes sintéticas consultadas;
+- resposta objetiva baseada nos dados disponíveis;
+- indicação de limitação quando não houver evidência suficiente.
+
+Esse fallback permite demonstrar o fluxo principal sem introduzir dependência de serviços generativos externos.
+
+### 6.2.6 Processo reprodutível proposto
+
+O processo recomendado para a PoC é:
+
+1. **Criar o projeto no Supabase Cloud.** Criar organização/projeto e obter URL, chave pública e chave de serviço para scripts administrativos.
+2. **Executar os scripts de banco.** Aplicar os scripts de criação e carga inicial presentes em `src/database`.
+3. **Cadastrar dados sintéticos.** Inserir somente dados aprovados pela liderança para uso na demonstração.
+4. **Configurar variáveis de ambiente.** Definir credenciais do Supabase, ambiente de execução e parâmetros de integração disponíveis.
+5. **Executar a aplicação localmente.** Rodar frontend e backend em ambiente de desenvolvimento, enquanto o serviço final não estiver estabilizado.
+6. **Validar a persistência.** Confirmar que interações, fontes consultadas e eventos de auditoria são gravados no Supabase.
+7. **Configurar autenticação Microsoft.** Registrar a aplicação no Entra ID quando houver URL de callback definida.
+8. **Preparar integração com Copilot Studio.** Documentar ou expor a especificação OpenAPI quando a API estiver estável.
+9. **Publicar em domínio temporário.** Realizar publicação manual em serviço simples somente quando houver versão demonstrável.
+10. **Registrar pendências de evolução.** Docker, pipeline CI/CD, Azure, Azure Machine Learning e Application Insights devem permanecer como próximos passos.
+
+### 6.2.7 Variáveis de ambiente previstas
+
+As variáveis mínimas planejadas para reprodução do MVP são:
+
+| Variável | Camada | Descrição |
+|---|---|---|
+| `SUPABASE_URL` | Backend/frontend | URL do projeto Supabase. |
+| `SUPABASE_ANON_KEY` | Frontend/backend | Chave pública para operações permitidas pelas políticas do Supabase. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Backend/scripts | Chave administrativa para carga inicial e rotinas internas. Não deve ser exposta no frontend. |
+| `MICROSOFT_CLIENT_ID` | Frontend/backend | Identificador da aplicação registrada no Entra ID. |
+| `MICROSOFT_TENANT_ID` | Frontend/backend | Tenant usado para autenticação. |
+| `MICROSOFT_REDIRECT_URI` | Frontend | URL de retorno após login. |
+| `COPILOT_STUDIO_ENABLED` | Backend | Indica se a integração com Copilot Studio está ativa. |
+| `COPILOT_STUDIO_ENDPOINT` | Backend | Endpoint usado quando a integração estiver disponível. |
+| `APP_ENV` | Backend/frontend | Ambiente de execução, como `local`, `dev`, `hmg` ou `main`. |
+
+Exemplo de arquivo `.env` planejado para o backend:
+
+```bash
+APP_ENV=local
+SUPABASE_URL=https://exemplo.supabase.co
+SUPABASE_ANON_KEY=ey...
+SUPABASE_SERVICE_ROLE_KEY=ey...
+MICROSOFT_CLIENT_ID=00000000-0000-0000-0000-000000000000
+MICROSOFT_TENANT_ID=00000000-0000-0000-0000-000000000000
+COPILOT_STUDIO_ENABLED=false
+COPILOT_STUDIO_ENDPOINT=
+```
+
+### 6.2.8 Comandos de execução local
+
+Enquanto não houver empacotamento Docker nem pipeline de deploy, a reprodução deve se limitar à execução local da aplicação e à conexão com o Supabase.
+
+Execução local do backend, quando disponível:
+
+```bash
+cd src/backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+No Windows PowerShell:
+
+```powershell
+cd src/backend
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+.venv\Scripts\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+Execução local do frontend:
+
+```bash
+cd src/frontend
+npm install
+npm run dev
+```
+
+Build local do frontend:
+
+```bash
+cd src/frontend
+npm install
+npm run build
+```
+
+## 6.3 Considerações sobre desempenho e segurança
+
+Como a implantação é uma PoC acadêmica com dados sintéticos, as decisões de segurança e desempenho são proporcionais ao risco do MVP. Ainda assim, a arquitetura preserva pontos importantes para futura homologação: autenticação via Microsoft Entra ID, separação entre frontend e backend, proteção de chaves no servidor e persistência de auditoria no Supabase.
+
+### 6.3.1 Desempenho
+
+As métricas obrigatórias para o MVP são:
+
+| Métrica | Objetivo | Onde medir |
+|---|---|---|
+| Latência média do endpoint `/api/chat` | Verificar se a interação permanece compatível com uso conversacional. | Backend FastAPI e painel do frontend. |
+| Taxa de sucesso das requisições | Identificar falhas de API, falhas de conexão com Supabase e erros de integração. | Backend e registros de auditoria. |
+| Tempo de resposta da recuperação de dados | Avaliar o impacto das consultas à base sintética. | Backend e registros de auditoria. |
+| Confiança da macrointenção e da intenção específica | Monitorar a qualidade do roteamento do PLN. | Tabela `ai_interactions`. |
+| Quantidade de respostas por fallback | Verificar indisponibilidade da camada generativa/Copilot ou ausência de evidência suficiente. | Tabela `ai_interactions` e logs. |
+| Quantidade de fontes recuperadas por consulta | Avaliar se o RAG está encontrando evidências suficientes. | Tabela `consulted_sources`. |
+
+Para a PoC, as métricas devem ser simples e associadas aos fluxos já implementados. Métricas mais avançadas de carregamento de modelo, consumo de memória, imagem Docker e telemetria de contêiner devem ser adicionadas somente quando o serviço de PLN estiver empacotado para publicação.
+
+### 6.3.2 Segurança
+
+O MVP utiliza dados sintéticos ou anonimizados, portanto não há tratamento de informações reais do portfólio produtivo. Mesmo assim, a implantação deve seguir as seguintes regras mínimas:
+
+- credenciais do Supabase e do Entra ID não devem ser versionadas no repositório;
+- a chave `SUPABASE_SERVICE_ROLE_KEY` deve existir apenas no backend e em scripts administrativos;
+- o frontend deve usar somente chaves públicas apropriadas;
+- o backend deve validar a identidade recebida antes de registrar a interação;
+- toda interação deve gerar registro de auditoria no Supabase;
+- documentos sintéticos devem ser aprovados pela liderança antes de entrarem na base da demonstração;
+- endpoints administrativos de carga, se existirem, não devem ficar expostos publicamente sem autenticação.
+
+Como a aplicação terá domínio público temporário e todos os dados são sintéticos, o acesso pode ser liberado para avaliadores, equipe e demais participantes do MVP. Para uma evolução com dados reais, essa regra deixa de valer: o acesso deverá ser restrito por Entra ID, grupos, permissões do SharePoint e políticas definidas pela GTI.
+
+### 6.3.3 Auditoria
+
+A trilha de auditoria deve ser persistida no Supabase. O registro mínimo de cada interação deve incluir:
+
+- usuário autenticado ou identificador de sessão;
+- data e hora da solicitação;
+- texto enviado pelo usuário;
+- macrointenção prevista;
+- intenção específica prevista;
+- confiança das classificações;
+- handler ou rota selecionada;
+- fontes sintéticas consultadas;
+- resposta devolvida;
+- indicação de fallback, erro ou informação insuficiente.
+
+Esses campos já se alinham ao modelo de dados documentado, especialmente às entidades `ai_conversations`, `ai_interactions`, `consulted_sources` e `audit_events`.
+
+### 6.3.4 Limitações e pendências de provisionamento
+
+A seção de implantação deve deixar explícito que alguns itens dependem de decisão ou provisionamento externo e não bloqueiam a PoC:
+
+| Item | Situação no MVP | Encaminhamento |
+|---|---|---|
+| Azure corporativo do Metrô | Pendente de provisionamento pela GTI. | Manter como evolução para homologação. |
+| Docker e pipeline CI/CD | Fora do MVP atual. | Criar apenas quando houver backend consolidado para empacotamento e publicação automatizada. |
+| Azure Machine Learning | Fora do MVP. | Usar futuramente para endpoint gerenciado ou governança de modelos. |
+| Application Insights/Azure Monitor | Não obrigatório na PoC sem Azure. | Substituir por logs e métricas persistidas no Supabase; ativar em Azure no futuro. |
+| SharePoint real | Fora do MVP. | Usar apenas base sintética/anonimizada. |
+| Fluxos reais de Power Automate | Podem ser simulados no MVP. | Ativar fluxos reais apenas com dados e permissões homologadas. |
+| Camada generativa do Copilot Studio | Integração prevista no MVP, sujeita ao ambiente disponível. | Usar fallback estruturado se indisponível. |
+
+### 6.3.5 Checklist de conclusão da implantação
+
+Para considerar a estratégia de deploy reprodutível, a equipe deve validar:
+
+- [ ] banco Supabase criado em nuvem;
+- [ ] scripts de criação e carga inicial executados;
+- [ ] backend FastAPI executando localmente;
+- [ ] endpoint `/health` respondendo;
+- [ ] frontend Vite consumindo o backend;
+- [ ] autenticação Microsoft Entra ID configurada ou documentada para o ambiente disponível;
+- [ ] interação gravada nas tabelas de auditoria;
+- [ ] fallback estruturado funcionando sem API generativa externa;
+- [ ] endpoint OpenAPI preparado para conexão com Copilot Studio;
+- [ ] Docker e pipeline registrados como evolução futura, sem arquivos de build ativando CI/CD nesta etapa;
 
 # 7. Projeto Visual da Solução
 _conteúdo_
