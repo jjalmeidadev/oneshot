@@ -33,4 +33,3 @@ def create_chat_response(request: GeminiChatRequest) -> GeminiChatResponse:
         raise HTTPException(status_code=503, detail=str(error)) from error
     except GeminiAPIError as error:
         raise HTTPException(status_code=error.status_code, detail=str(error)) from error
-
