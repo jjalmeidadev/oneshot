@@ -1754,6 +1754,8 @@ classDiagram
     SugestaoProativa --> Intencao : vinculada à intenção primária
 ```
 
+<p align="center"><strong>Figura 13</strong> - Modelagem estática inicial dos requisitos funcionais.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+
 O modelo estático mantém relação direta com os requisitos funcionais. `Solicitacao` e `PipelinePLN` representam a entrada em linguagem natural prevista no RF01; `Intencao`, `ClassificadorIntencao` e `CatalogoIntencoes` representam os RF02 e RF03; `DocumentoProjeto`, `TrechoRecuperado` e `RecuperadorInformacao` representam o RF04; `Projeto` e `Resposta` sustentam o RF05; e `AnalisadorComparativo` representa o RF06. O `RoteadorIntencao`, as duas rotas e seus executores tornam explícita a separação exigida pelo RF07. As respostas produzidas em ambas as rotas atendem ao RF08. Por fim, `SugestaoProativa` representa a intenção secundária do RF09 e `ConfiguracaoProatividade` representa o controle previsto no RF10.
 
 | Elemento da modelagem                                            | Requisitos relacionados |
@@ -1824,6 +1826,8 @@ sequenceDiagram
     end
 ```
 
+<p align="center"><strong>Figura 14</strong> - Cenário 1 — Consulta de informação de um projeto.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+
 O cenário começa com o RF01, quando o usuário envia uma solicitação em linguagem natural. O RF02 é representado pela identificação semântica da intenção e o RF03 por sua associação ao catálogo. Como não existe fluxo automatizado, o RF07 determina que somente o contexto estruturado e validado seja encaminhado ao LLM. O RF04 determina a recuperação dos dados relevantes, o RF05 corresponde à resposta sobre o projeto solicitado e o RF08 exige que as informações recuperadas fundamentem o retorno ou que a insuficiência seja declarada.
 
 ### 3.1.3.2 Cenário 2 — Análise e comparação entre projetos
@@ -1877,6 +1881,8 @@ sequenceDiagram
         Sistema-->>Gestor: Apresentar limitação da análise
     end
 ```
+
+<p align="center"><strong>Figura 15</strong> - Cenário 2 — Análise e comparação entre projetos.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 Nesse cenário, o RF06 diferencia o fluxo de uma consulta simples, pois exige recuperar informações referentes a dois ou mais projetos e aplicar uma etapa adicional de comparação. O RF07 encaminha ao LLM o resultado estruturado dessa análise porque o catálogo não possui automação correspondente. O resultado continua sujeito ao RF08: somente informações sustentadas pelos dados disponíveis devem ser apresentadas como fato.
 
@@ -1955,6 +1961,8 @@ sequenceDiagram
         end
     end
 ```
+
+<p align="center"><strong>Figura 16</strong> - Cenário 3 — Roteamento híbrido e sugestão proativa.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 A separação entre identificação, catalogação e roteamento é importante nesse fluxo. O RF02 corresponde à compreensão da intenção primária e o RF03 associa essa intenção à categoria e à rota controladas pelo catálogo. O RF07 garante que a rota automatizada não utilize o LLM e que apenas intenções válidas sem automação recebam tratamento generativo. O RF08 rege o resultado das duas rotas.
 
@@ -2056,11 +2064,11 @@ O esboço traduz a divisão em dois pilares definida pelo parceiro no Termo de A
 
 ### 3.3.2 Diagrama de Componentes (UML)
 
-A Figura 13 representa os componentes da solução e suas conexões. O diagrama mostra a **estrutura**, isto é, quais componentes se conectam a quais e em que sentido. A sequência de uma solicitação típica está descrita em 3.3.3.
+A Figura 17 representa os componentes da solução e suas conexões. O diagrama mostra a **estrutura**, isto é, quais componentes se conectam a quais e em que sentido. A sequência de uma solicitação típica está descrita em 3.3.3.
 
 ![Diagrama de componentes da solução, organizado nas camadas de interface humano-computador, lógica de negócio (Pilar 1 e Pilar 2), acesso a dados e serviços, e camada transversal](img/componentes-mvp.png)
 
-<p align="center"><strong>Figura 13</strong> - Visão inicial da solução técnica: diagrama de componentes do MVP sobre dados sintéticos.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 17</strong> - Visão inicial da solução técnica: diagrama de componentes do MVP sobre dados sintéticos.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/componentes-mvp.puml`](diagrams/componentes-mvp.puml). Para regerar a imagem é necessário ter o PlantUML e o Graphviz instalados:
 
@@ -2770,6 +2778,8 @@ erDiagram
     INTENCAO ||--o{ CASO_DE_TESTE_DE_INTENCAO : valida
 ```
 
+<p align="center"><strong>Figura 18</strong> - Modelo conceitual de dados.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+
 ## 4.3 Modelo Lógico de Dados
 
 O modelo lógico detalha o modelo conceitual em formato de tabelas, atributos principais, chaves primárias e chaves estrangeiras. Ele ainda não representa o código final do banco, mas define a estrutura lógica que deve ser implementada.
@@ -3031,6 +3041,8 @@ erDiagram
     ai_interactions ||--o{ out_of_scope_requests : gera
 ```
 
+<p align="center"><strong>Figura 19</strong> - Modelo lógico de dados.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+
 As principais regras de integridade do modelo lógico são:
 
 - todo projeto deve pertencer a um subportfólio;
@@ -3224,7 +3236,7 @@ classDiagram
     Projeto "1" o-- "0..*" RiscoProblema
 ```
 
-  <p align="center"><strong>Figura 16</strong> - Diagrama de classes consolidado, unindo o pipeline de processamento e o domínio persistido.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p align="center"><strong>Figura 20</strong> - Diagrama de classes consolidado, unindo o pipeline de processamento e o domínio persistido.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 </div>
 
@@ -3281,11 +3293,11 @@ A partir dessa classificação, a conversa é encaminhada para a capacidade corr
 
 Solicitações associadas a **funcionalidades ou fluxos específicos** são encaminhadas ao **Microsoft Copilot Studio**. Nesse caminho, o Copilot Studio atua como mecanismo de orquestração, selecionando o tópico correspondente à intenção identificada e acionando, quando necessário, fluxos do **Power Automate** para leitura, escrita, atualização ou execução de automações sobre os serviços corporativos.
 
-A Figura 14 apresenta a estrutura descrita. Dessa forma, os componentes mantêm responsabilidades distintas: o **PLN interpreta e roteia**, o **RAG recupera conhecimento**, o **LLM gera respostas fundamentadas a partir do contexto recuperado** e o **Copilot Studio executa e orquestra os fluxos funcionais associados às intenções**. O SharePoint permanece como fonte documental e de dados corporativos, enquanto identidade, configuração e rastreabilidade atravessam os demais componentes.
+A Figura 21 apresenta a estrutura descrita. Dessa forma, os componentes mantêm responsabilidades distintas: o **PLN interpreta e roteia**, o **RAG recupera conhecimento**, o **LLM gera respostas fundamentadas a partir do contexto recuperado** e o **Copilot Studio executa e orquestra os fluxos funcionais associados às intenções**. O SharePoint permanece como fonte documental e de dados corporativos, enquanto identidade, configuração e rastreabilidade atravessam os demais componentes.
 
 <div align="center">
   <img src="img/componentes-metro-5.2.png" alt="Diagrama de componentes da arquitetura atual da solução" width="100%">
-  <p><strong>Figura 14</strong> - Diagrama de componentes da arquitetura atual da solução.</p>
+  <p><strong>Figura 21</strong> - Diagrama de componentes da arquitetura atual da solução.</p>
   <sup>Fonte: Material produzido pelos autores, 2026.</sup>
 </div>
 
@@ -3452,6 +3464,8 @@ sequenceDiagram
     end
 ```
 
+<p align="center"><strong>Figura 22</strong> - Sequência: consulta documental via RAG.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+
 O fluxo evidencia que o LLM não acessa diretamente a fonte documental. A aplicação recupera previamente os conteúdos relevantes e utiliza esses trechos como contexto para a geração da resposta. No MVP, essa recuperação ocorre sobre a base sintética e o índice vetorial; a integração com SharePoint permanece como caminho de evolução para a utilização das fontes corporativas homologadas.
 
 O cenário também explicita o tratamento de informação insuficiente, evitando que a ausência de evidências seja convertida automaticamente em uma resposta generativa. A identidade é validada antes da consulta e os elementos necessários à rastreabilidade são registrados na trilha de auditoria.
@@ -3543,6 +3557,8 @@ sequenceDiagram
     end
 ```
 
+<p align="center"><strong>Figura 23</strong> - Sequência: análise e comparação entre projetos via RAG.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+
 A sequência preserva a diferenciação entre **fato recuperado** e **resultado interpretativo da comparação**. A análise é executada sobre as informações recuperadas e o LLM é responsável pela apresentação em linguagem natural, mantendo as referências associadas às evidências utilizadas.
 
 A validação de identidade antecede a recuperação e os eventos da interação são registrados na auditoria, mantendo o cenário alinhado aos requisitos transversais de controle de acesso e rastreabilidade.
@@ -3619,6 +3635,8 @@ sequenceDiagram
     end
 ```
 
+<p align="center"><strong>Figura 24</strong> - Sequência: direcionamento para fluxo funcional via Copilot Studio.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+
 Neste cenário, o **Copilot Studio não é responsável por descobrir a intenção do usuário**. A decisão já foi tomada pelo núcleo de PLN e pelo catálogo de intenções. O Copilot Studio atua como plataforma de execução do tópico ou fluxo selecionado.
 
 O retorno do **Power Automate** ocorre somente quando o tópico efetivamente o aciona. No ramo puramente conversacional, o tópico retorna diretamente ao Copilot Studio, evitando a associação de um resultado de automação a uma operação que não foi executada.
@@ -3685,6 +3703,8 @@ sequenceDiagram
     end
 ```
 
+<p align="center"><strong>Figura 25</strong> - Sequência: entrada por voz com Speech-to-Text.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+
 O diagrama evidencia que o áudio não cria um fluxo de negócio independente: após uma transcrição válida, a solicitação torna-se equivalente a uma entrada textual para o restante da arquitetura. O Azure AI Speech atua exclusivamente na etapa de Speech-to-Text, enquanto a interpretação, validação e definição da capacidade permanecem sob responsabilidade da aplicação.
 
 O ramo de falha contempla situações documentadas para o serviço de STT, como ausência de correspondência ou transcrição com confiança insuficiente. Nesses casos, a solicitação não deve avançar automaticamente para o PLN como se houvesse texto confiável.
@@ -3725,7 +3745,7 @@ Como o provedor de LLM externo ainda não está definido nem homologado, conform
 
 ## 6.1 Diagrama de implantação da UML
 
-A Figura 15 apresenta a visão de implantação da PoC. O diagrama separa o ambiente atualmente viável para o MVP dos componentes que dependem de desenvolvimento posterior ou provisionamento pela GTI.
+A Figura 26 apresenta a visão de implantação da PoC. O diagrama separa o ambiente atualmente viável para o MVP dos componentes que dependem de desenvolvimento posterior ou provisionamento pela GTI.
 
 ```mermaid
 flowchart LR
@@ -3783,7 +3803,7 @@ flowchart LR
     api -. telemetria futura .-> insights
 ```
 
-<p align="center"><strong>Figura 15</strong> - Diagrama de implantação planejada da PoC.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 26</strong> - Diagrama de implantação planejada da PoC.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama renderizável está versionado em [`docs/diagrams/implantacao-poc.mmd`](diagrams/implantacao-poc.mmd).
 
