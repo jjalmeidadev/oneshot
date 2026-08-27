@@ -2409,6 +2409,280 @@ erDiagram
     INTENCAO ||--o{ CASO_DE_TESTE_DE_INTENCAO : valida
 ```
 
+## 4.3 Modelo Lógico de Dados
+
+O modelo lógico detalha o modelo conceitual em formato de tabelas, atributos principais, chaves primárias e chaves estrangeiras. Ele ainda não representa o código final do banco, mas define a estrutura lógica que deve ser implementada.
+
+Para manter o escopo adequado ao MVP, a modelagem lógica foi consolidada em 18 tabelas:
+
+| Tabela | PK | FKs principais | Finalidade |
+|---|---|---|---|
+| subportfolios | id | - | Armazena os subportfólios estratégicos. |
+| projects | id | subportfolio_id → subportfolios.id | Armazena os projetos do portfólio. |
+| project_artifacts | id | project_id → projects.id | Representa documentos, listas, links, planilhas, prompts e normativos vindos do SharePoint ou da massa sintética. |
+| source_extracts | id | artifact_id → project_artifacts.id, project_id → projects.id | Armazena extratos consultáveis de documentos, listas e planilhas para composição de contexto no Copilot e rastreabilidade de fontes. |
+| schedule_items | id | project_id → projects.id, artifact_id → project_artifacts.id, parent_item_id → schedule_items.id | Armazena linhas estruturadas de cronograma, inclusive extraídas de Excel. |
+| project_status_updates | id | project_id → projects.id, artifact_id → project_artifacts.id | Armazena avanço, situação e resumo de status dos projetos. |
+| risk_issue_items | id | project_id → projects.id, source_artifact_id → project_artifacts.id | Armazena riscos e problemas em uma estrutura unificada. |
+| change_records | id | project_id → projects.id, source_artifact_id → project_artifacts.id | Armazena registros de mudanças. |
+| users | id | - | Armazena usuários simulados ou autenticados via Entra ID em evolução futura. |
+| access_rules | id | user_id → users.id, subportfolio_id → subportfolios.id, project_id → projects.id | Armazena regras de acesso por usuário, perfil e escopo. |
+| intent_catalog | id | - | Armazena macrointenção, intenção específica, fluxo, handler e limiares do classificador. |
+| prompt_templates | id | intent_id → intent_catalog.id | Armazena templates de prompts padronizados para Copilot, Power Automate, M365 Copilot e PLN local. |
+| ai_conversations | id | user_id → users.id | Armazena sessões conversacionais. |
+| ai_interactions | id | conversation_id → ai_conversations.id, user_id → users.id, intent_id → intent_catalog.id, prompt_template_id → prompt_templates.id | Armazena pergunta, macrointenção, intenção específica, confianças, handler, alternativas, rota, resposta e status da interação. |
+| consulted_sources | id | interaction_id → ai_interactions.id, artifact_id → project_artifacts.id, extract_id → source_extracts.id, project_id → projects.id | Armazena as fontes consultadas para compor uma resposta. |
+| audit_events | id | interaction_id → ai_interactions.id, user_id → users.id | Armazena eventos de auditoria técnica e funcional. |
+| out_of_scope_requests | id | interaction_id → ai_interactions.id, reviewed_by → users.id | Armazena perguntas fora do escopo suportado. |
+| intent_test_cases | id | intent_id → intent_catalog.id | Armazena exemplos rotulados com template_id, variação, texto normalizado e split agrupado. |
+
+```mermaid
+erDiagram
+    subportfolios {
+        uuid id PK
+        string code
+        string name
+        text description
+        text strategic_objective
+    }
+
+    projects {
+        uuid id PK
+        uuid subportfolio_id FK
+        string code
+        string name
+        text description
+        string status
+        string current_phase
+        date planned_end_date
+        string sharepoint_site_url
+    }
+
+    project_artifacts {
+        uuid id PK
+        uuid project_id FK
+        string artifact_type
+        string title
+        string sharepoint_url
+        string excel_sheet_name
+        string excel_table_or_range
+        string confidentiality_level
+        json metadata
+    }
+
+    source_extracts {
+        uuid id PK
+        uuid artifact_id FK
+        uuid project_id FK
+        int extract_index
+        text content_text
+        string source_locator
+        string sharepoint_reference
+        string source_sheet_name
+        int source_row_number
+        string source_cell_range
+    }
+
+    schedule_items {
+        uuid id PK
+        uuid project_id FK
+        uuid artifact_id FK
+        uuid parent_item_id FK
+        string wbs_code
+        string activity_name
+        string responsible_name
+        date planned_end_date
+        date actual_end_date
+        decimal progress_percent
+        string status
+        int source_row_number
+    }
+
+    project_status_updates {
+        uuid id PK
+        uuid project_id FK
+        uuid artifact_id FK
+        date reference_date
+        string overall_status
+        decimal progress_percent
+        text executive_summary
+    }
+
+    risk_issue_items {
+        uuid id PK
+        uuid project_id FK
+        uuid source_artifact_id FK
+        string item_type
+        string title
+        string severity
+        string status
+    }
+
+    change_records {
+        uuid id PK
+        uuid project_id FK
+        uuid source_artifact_id FK
+        string change_type
+        string status
+    }
+
+    users {
+        uuid id PK
+        string entra_object_id
+        string display_name
+        string email
+        string role_name
+    }
+
+    access_rules {
+        uuid id PK
+        uuid user_id FK
+        uuid subportfolio_id FK
+        uuid project_id FK
+        string role_name
+        string permission_scope
+        boolean can_read
+        boolean can_write
+    }
+
+    intent_catalog {
+        uuid id PK
+        string macro_intent
+        string specific_intent
+        string flow_description
+        string target_component
+        string handler_name
+        decimal macro_confidence_threshold
+        decimal intent_confidence_threshold
+        boolean is_active
+    }
+
+    prompt_templates {
+        uuid id PK
+        uuid intent_id FK
+        string template_key
+        string title
+        text prompt_text
+        string channel
+        string purpose
+    }
+
+    ai_conversations {
+        uuid id PK
+        uuid user_id FK
+        string channel
+        string conversation_status
+    }
+
+    ai_interactions {
+        uuid id PK
+        uuid conversation_id FK
+        uuid user_id FK
+        uuid intent_id FK
+        uuid prompt_template_id FK
+        text user_prompt
+        text normalized_prompt
+        string macro_intent_predicted
+        decimal macro_intent_confidence
+        string specific_intent_predicted
+        decimal specific_intent_confidence
+        string handler_selected
+        string route_taken
+        json top_k_alternatives
+        text limitation_response
+        text response_text
+        string processing_status
+    }
+
+    consulted_sources {
+        uuid id PK
+        uuid interaction_id FK
+        uuid artifact_id FK
+        uuid extract_id FK
+        uuid project_id FK
+        string source_type
+        string source_title
+        string source_url
+        string source_locator
+        int citation_order
+    }
+
+    audit_events {
+        uuid id PK
+        uuid interaction_id FK
+        uuid user_id FK
+        string event_type
+        string component
+        string correlation_id
+    }
+
+    out_of_scope_requests {
+        uuid id PK
+        uuid interaction_id FK
+        uuid reviewed_by FK
+        text user_prompt
+        text reason
+        string review_status
+    }
+
+    intent_test_cases {
+        uuid id PK
+        uuid intent_id FK
+        text raw_text
+        text normalized_text
+        string template_id
+        string surface_variation
+        string dataset_split
+        string leakage_group
+    }
+
+    subportfolios ||--o{ projects : possui
+    projects ||--o{ project_artifacts : possui
+    projects ||--o{ source_extracts : contextualiza
+    project_artifacts ||--o{ source_extracts : gera
+    projects ||--o{ schedule_items : possui
+    project_artifacts ||--o{ schedule_items : origina
+    schedule_items ||--o{ schedule_items : detalha
+    projects ||--o{ project_status_updates : acompanha
+    project_artifacts ||--o{ project_status_updates : fundamenta
+    projects ||--o{ risk_issue_items : monitora
+    project_artifacts ||--o{ risk_issue_items : fundamenta
+    projects ||--o{ change_records : controla
+    project_artifacts ||--o{ change_records : fundamenta
+
+    users ||--o{ access_rules : possui
+    users ||--o{ ai_conversations : inicia
+    users ||--o{ ai_interactions : realiza
+    users ||--o{ audit_events : executa
+    users ||--o{ out_of_scope_requests : revisa
+
+    intent_catalog ||--o{ prompt_templates : orienta
+    intent_catalog ||--o{ ai_interactions : classifica
+    intent_catalog ||--o{ intent_test_cases : valida
+    prompt_templates ||--o{ ai_interactions : orienta
+
+    ai_conversations ||--o{ ai_interactions : contem
+    ai_interactions ||--o{ consulted_sources : usa
+    project_artifacts ||--o{ consulted_sources : referencia
+    source_extracts ||--o{ consulted_sources : referencia
+    projects ||--o{ consulted_sources : contextualiza
+    ai_interactions ||--o{ audit_events : registra
+    ai_interactions ||--o{ out_of_scope_requests : gera
+```
+
+As principais regras de integridade do modelo lógico são:
+
+- todo projeto deve pertencer a um subportfólio;
+- todo cronograma extraído deve apontar para um projeto e, quando houver origem documental, para um artefato de origem;
+- todo extrato consultável deve apontar para um artefato e pode apontar para um projeto quando o conteúdo for específico de uma iniciativa;
+- toda resposta que utilizar informação documental, lista ou planilha deve possuir ao menos uma fonte em consulted_sources;
+- toda interação deve registrar a intenção classificada ou o motivo de falha/fora de escopo;
+- classificações abaixo dos limiares definidos pelo classificador devem preservar a macrointenção, a confiança, as alternativas e a resposta de limitação;
+- casos de teste de intenção devem preservar template_id e dataset_split para evitar vazamento entre treino, validação e teste;
+- o agente deve consultar access_rules antes de retornar informações restritas;
+- perguntas fora do catálogo devem gerar registros em out_of_scope_requests;
+- leituras, classificações, consultas a fontes, respostas do Copilot e acionamentos de fluxos devem gerar eventos em audit_events.
+
 # 5. Solução Técnica (Design)
 _conteúdo_
 
