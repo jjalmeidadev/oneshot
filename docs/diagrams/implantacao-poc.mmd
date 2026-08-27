@@ -1,0 +1,53 @@
+flowchart LR
+    usuario["Usuário do MVP"]
+    lideranca["Liderança<br/>aprova base sintética"]
+
+    subgraph navegador["Navegador"]
+        frontend["Frontend próprio<br/>React + Vite"]
+    end
+
+    subgraph ambiente["Ambiente acessível da PoC<br/>execução local ou publicação simples futura"]
+        api["API do MVP<br/>a ser consolidada"]
+        pln["Núcleo de PLN<br/>estratégia documentada"]
+        rag["Recuperação de dados<br/>base sintética"]
+        fallback["Fallback<br/>resposta estruturada"]
+    end
+
+    subgraph supabase["Supabase Cloud"]
+        db[("PostgreSQL<br/>dados, catálogo e auditoria")]
+        storage[("Storage<br/>documentos sintéticos<br/>e artefatos futuros")]
+    end
+
+    subgraph microsoft["Microsoft / Power Platform"]
+        entra["Entra ID<br/>OAuth/OIDC"]
+        copilot["Copilot Studio<br/>tópicos e orquestração"]
+        power["Power Automate<br/>fluxos funcionais"]
+    end
+
+    subgraph futuro["Evolução futura"]
+        docker["Docker<br/>empacotamento do serviço"]
+        cicd["Pipeline CI/CD<br/>build, teste e deploy"]
+        azure["Azure Container Apps<br/>ou App Service"]
+        aml["Azure Machine Learning"]
+        insights["Application Insights"]
+    end
+
+    usuario --> frontend
+    frontend --> entra
+    entra --> frontend
+    frontend -->|"requisição da aplicação"| api
+    api --> pln
+    pln --> rag
+    rag --> db
+    rag --> storage
+    api -->|"grava interação"| db
+    api -->|"quando disponível"| copilot
+    copilot --> power
+    api -->|"sem camada generativa"| fallback
+    lideranca -->|"aprova antes da carga"| db
+
+    api -. evolução .-> docker
+    docker -. automatização futura .-> cicd
+    cicd -. publicação futura .-> azure
+    storage -. artefatos futuros .-> aml
+    api -. telemetria futura .-> insights
