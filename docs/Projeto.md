@@ -254,7 +254,6 @@ Além de apoiar o desenvolvimento da solução ao longo das diferentes etapas do
 ---
 
 # 2. Entendimento do Projeto e do Negócio
-_conteúdo_
 
 ---
 
@@ -1402,7 +1401,6 @@ No contexto acadêmico do MVP, esses resultados serão avaliados por meio do pip
 ---
 
 # 3. Requisitos do Projeto
-_conteúdo_
 
 ## 3.1 Requisitos Funcionais
 
@@ -2542,7 +2540,6 @@ O modelo físico adota as seguintes decisões:
 O tratamento das planilhas Excel vinculadas em listas do SharePoint também foi contemplado fisicamente. A tabela `project_artifacts` armazena o link da planilha, a aba e o intervalo de leitura; a tabela `schedule_items` armazena as linhas normalizadas do cronograma, incluindo a referência à aba, linha e intervalo de células de origem; a tabela `source_extracts` preserva extratos textuais ou estruturados quando a planilha também precisar ser usada como fonte consultável; e a tabela `consulted_sources` registra qual documento, extrato, planilha, linha ou intervalo foi utilizado para compor a resposta.
 
 # 5. Solução Técnica (Design)
-_conteúdo_
 
 ## 5.1 Diagrama de Classes
 
@@ -3068,7 +3065,6 @@ _conteúdo_
 _conteúdo_
 
 # 8. Desenvolvimento do Projeto
-_conteúdo_
 
 ## 8.1 Arquitetura de Codificação e Estrutura de Diretórios
 _conteúdo_
