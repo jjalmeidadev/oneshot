@@ -1368,20 +1368,22 @@ _conteúdo_
 
 Os requisitos funcionais definem as funcionalidades que deverão ser contempladas pela prova de conceito desenvolvida no MVP. Sua definição considera o escopo estabelecido para o projeto e as oportunidades levantadas durante o processo de ideação, priorizando as funcionalidades diretamente relacionadas ao pipeline de Processamento de Linguagem Natural (PLN).
 
-O núcleo do MVP consiste em um pipeline de PLN capaz de receber comandos em linguagem natural, interpretar semanticamente as solicitações dos usuários, identificar suas intenções e classificá-las em categorias como consulta, transação e alerta. A partir dessa classificação, a solução deve processar informações de documentos de projetos e retornar respostas estruturadas que apoiem atividades operacionais, análises e a obtenção de informações para tomada de decisão.
+O núcleo do MVP consiste em um pipeline de PLN capaz de receber comandos em linguagem natural, interpretar semanticamente as solicitações dos usuários e identificar a intenção primária de cada interação. O catálogo de intenções determina então a rota de processamento: intenções com fluxo automatizado são executadas diretamente, sem passar por uma LLM; intenções pertencentes ao escopo, mas sem automação cadastrada, são encaminhadas à LLM com contexto estruturado e validado. Nesse segundo ramo, quando a proatividade estiver habilitada, o sistema associa à intenção primária uma intenção secundária compatível e a apresenta como sugestão opcional de próximo passo.
 
 Por se tratar de uma prova de conceito em contexto acadêmico, o funcionamento do MVP será validado sobre dados sintéticos. Integrações com dados reais do portfólio do Metrô de São Paulo e demais funcionalidades corporativas identificadas durante a ideação são consideradas possibilidades de evolução da solução e não constituem requisitos obrigatórios para a validação do núcleo funcional do MVP.
 
 |  ID  | Requisito Funcional                                                                                                                                                                           | Feature relacionada                  | Prioridade |    Status    |
 | :--: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ | :--------: | :----------: |
 | RF01 | O sistema deve receber comandos textuais em linguagem natural relacionados à gestão de projetos e portfólio.                                                                                  | Consulta de informações dos projetos | Muito Alta | Não iniciado |
-| RF02 | O sistema deve processar semanticamente os comandos recebidos e identificar a intenção expressa pelo usuário.                                                                                 | Consulta de informações dos projetos | Muito Alta | Não iniciado |
-| RF03 | O sistema deve classificar a intenção identificada de acordo com o catálogo de categorias previsto pelo MVP, incluindo consulta, transação e alerta.                                          | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF02 | O sistema deve processar semanticamente os comandos recebidos e identificar a intenção primária expressa pelo usuário.                                                                        | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF03 | O sistema deve associar a intenção primária ao catálogo do MVP, incluindo sua categoria e a existência ou não de um fluxo automatizado correspondente.                                           | Consulta de informações dos projetos | Muito Alta | Não iniciado |
 | RF04 | O sistema deve recuperar informações relevantes dos documentos e dados sintéticos disponibilizados ao pipeline de acordo com a solicitação realizada.                                         | Ingestão de informações dos projetos | Muito Alta | Não iniciado |
 | RF05 | O sistema deve responder a consultas sobre as informações disponíveis nos documentos de projetos utilizados na prova de conceito.                                                             | Consulta de informações dos projetos | Muito Alta | Não iniciado |
 | RF06 | O sistema deve realizar análises e comparações entre informações de diferentes projetos quando solicitado pelo usuário.                                                                       | Consulta de informações dos projetos | Muito Alta | Não iniciado |
-| RF07 | O sistema deve executar ou simular ações compatíveis com a intenção classificada, incluindo operações de consulta, transação e alerta previstas para validação do pipeline.                   | Ingestão de informações dos projetos | Muito Alta | Não iniciado |
-| RF08 | O sistema deve gerar respostas estruturadas e fundamentadas nas informações disponíveis nos dados sintéticos, indicando quando não houver informações suficientes para atender à solicitação. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF07 | O sistema deve encaminhar cada intenção pertencente ao escopo para a rota definida no catálogo: fluxo automatizado sem uso de LLM ou LLM com contexto estruturado e validado quando não houver automação correspondente. | Ingestão de informações dos projetos | Muito Alta | Não iniciado |
+| RF08 | O sistema deve retornar o resultado da rota executada de forma estruturada e fundamentada, preservando as referências disponíveis e indicando quando não houver informações suficientes.         | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF09 | Para intenções sem fluxo automatizado, o sistema deve, quando a proatividade estiver habilitada, associar uma intenção secundária compatível e apresentá-la como sugestão opcional de próximo passo, sem executá-la sem confirmação do usuário. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
+| RF10 | O sistema deve permitir ao usuário ativar ou desativar as sugestões proativas sem alterar o processamento da intenção primária.                                                                 | Edição das configurações do agente por menu | Alta | Não iniciado |
 
 ### 3.1.1 User Stories dos Requisitos Funcionais
 
@@ -1415,24 +1417,25 @@ Como usuário da solução, quero que o sistema compreenda semanticamente o que 
 **Critérios de aceitação:**
 
 * O sistema deve processar semanticamente a solicitação recebida.
-* O sistema deve identificar a intenção presente no comando do usuário.
+* O sistema deve identificar a intenção primária presente no comando do usuário.
 * A intenção identificada deve ser encaminhada para classificação nas categorias suportadas pelo MVP.
 
 **Feature relacionada:** Consulta de informações dos projetos.
 
 ---
 
-### RF03 — Classificação da intenção
+### RF03 — Classificação e associação da intenção ao catálogo
 
 **User Story — US03**
 
-Como usuário da solução, quero que a intenção identificada seja associada ao tipo de operação adequado, para que o sistema utilize o fluxo de processamento correspondente à minha solicitação.
+Como usuário da solução, quero que a intenção primária seja associada ao catálogo de capacidades, para que o sistema determine corretamente como processar minha solicitação.
 
 **Critérios de aceitação:**
 
-* O sistema deve classificar a intenção conforme as categorias previstas no MVP.
-* A classificação deve contemplar, no mínimo, consulta, transação e alerta.
-* A categoria identificada deve determinar o fluxo de processamento utilizado pelo sistema.
+* O sistema deve associar a intenção primária a uma entrada do catálogo do MVP.
+* O catálogo deve contemplar, no mínimo, as categorias consulta, transação e alerta.
+* A entrada do catálogo deve indicar se existe um fluxo automatizado correspondente.
+* Quando a intenção não pertencer ao escopo suportado, o sistema deve orientar a reformulação ou informar o limite da solução.
 
 **Feature relacionada:** Consulta de informações dos projetos.
 
@@ -1488,18 +1491,18 @@ Como gestor do portfólio, quero solicitar análises e comparações entre proje
 
 ---
 
-### RF07 — Tratamento das intenções classificadas
+### RF07 — Roteamento híbrido das intenções
 
 **User Story — US07**
 
-Como usuário da solução, quero que o sistema direcione minha solicitação para o fluxo correspondente à intenção identificada, para obter um comportamento adequado ao tipo de operação solicitada.
+Como usuário da solução, quero que minha solicitação siga a rota prevista para a intenção identificada, para que ações conhecidas sejam executadas diretamente e as demais solicitações válidas recebam tratamento pela LLM.
 
 **Critérios de aceitação:**
 
-* Solicitações classificadas como consulta devem ser encaminhadas ao fluxo de recuperação de informações.
-* Solicitações classificadas como transação devem ser encaminhadas ao fluxo correspondente previsto na prova de conceito.
-* Solicitações classificadas como alerta devem ser encaminhadas ao fluxo correspondente previsto na prova de conceito.
-* O comportamento de cada fluxo deve poder ser demonstrado utilizando dados sintéticos.
+* Quando o catálogo indicar um fluxo automatizado, o sistema deve encaminhar a ele a intenção e os parâmetros estruturados necessários.
+* Uma solicitação atendida por fluxo automatizado não deve ser enviada à LLM.
+* Quando a intenção pertencer ao escopo, mas não possuir fluxo automatizado, o sistema deve encaminhar à LLM somente a intenção e o contexto estruturado e validado necessário para produzir a resposta.
+* O comportamento das duas rotas deve poder ser demonstrado utilizando dados sintéticos ou simulações controladas.
 
 **Feature relacionada:** Ingestão de informações dos projetos.
 
@@ -1513,20 +1516,57 @@ Como usuário da solução, quero receber respostas estruturadas e fundamentadas
 
 **Critérios de aceitação:**
 
-* A resposta deve considerar as informações recuperadas dos dados sintéticos disponibilizados ao pipeline.
+* O resultado de um fluxo automatizado deve corresponder à ação executada ou simulada e informar seu estado de conclusão.
+* A resposta produzida pela LLM deve considerar apenas a intenção e as informações estruturadas e validadas disponibilizadas pelo pipeline.
 * O sistema não deve apresentar como fato informações que não estejam sustentadas pelos dados disponíveis.
 * Quando não houver informações suficientes, o sistema deve indicar a limitação ao usuário.
-* A resposta deve ser estruturada de forma coerente com a intenção identificada.
+* O retorno deve ser estruturado de forma coerente com a rota executada e preservar as referências disponíveis.
 * Em solicitações analíticas, o sistema deve diferenciar informações recuperadas de interpretações produzidas pelo agente.
 
 **Feature relacionada:** Consulta de informações dos projetos.
+
+---
+
+### RF09 — Sugestão proativa de intenção secundária
+
+**User Story — US09**
+
+Como usuário da solução, quero receber uma sugestão opcional relacionada à minha solicitação, para identificar um próximo passo útil sem perder o controle da interação.
+
+**Critérios de aceitação:**
+
+* A sugestão deve ser considerada somente quando a intenção primária pertencer ao escopo, não possuir fluxo automatizado e a proatividade estiver habilitada.
+* O sistema deve selecionar no catálogo uma intenção secundária compatível com a intenção primária e com as capacidades disponíveis.
+* A sugestão deve ser apresentada separadamente da resposta principal e identificada como opcional.
+* A intenção secundária não deve ser executada sem confirmação explícita do usuário.
+* Caso o usuário recuse a sugestão, o sistema deve encerrá-la sem alterar a resposta da intenção primária.
+* Quando não existir intenção secundária compatível, o sistema deve retornar somente a resposta principal, sem criar uma sugestão não cadastrada.
+
+**Feature relacionada:** Consulta de informações dos projetos.
+
+---
+
+### RF10 — Controle da proatividade
+
+**User Story — US10**
+
+Como usuário da solução, quero ativar ou desativar as sugestões proativas, para controlar se o agente deve oferecer próximos passos durante minhas consultas.
+
+**Critérios de aceitação:**
+
+* O sistema deve disponibilizar na interface um controle com os estados ativado e desativado.
+* O estado selecionado deve ser considerado nas interações iniciadas após a alteração.
+* Com a proatividade desativada, o sistema não deve apresentar as sugestões previstas no RF09.
+* A desativação da proatividade não deve impedir a identificação, o roteamento nem a resposta da intenção primária.
+
+**Feature relacionada:** Edição das configurações do agente por menu.
 
 
 ### 3.1.2 Modelagem Estática Inicial dos Requisitos Funcionais
 
 A modelagem estática apresentada nesta subseção representa as principais classes de domínio necessárias para descrever o comportamento previsto pelos requisitos funcionais do MVP. O objetivo nesta etapa não é definir integralmente a arquitetura ou a implementação do sistema, mas demonstrar a relação entre as histórias de usuário, os dados manipulados e as responsabilidades necessárias ao funcionamento do pipeline.
 
-A modelagem considera a `Solicitacao` como elemento de entrada do sistema. Cada solicitação possui uma `Intencao`, identificada e posteriormente classificada pelo pipeline. Quando necessário, entidades como projetos e critérios de comparação são extraídas do texto. A recuperação utiliza documentos associados aos projetos e produz trechos relevantes, que posteriormente fundamentam uma `Resposta`.
+A modelagem considera a `Solicitacao` como elemento de entrada do sistema. Cada solicitação possui uma `Intencao` primária, identificada pelo pipeline e associada ao `CatalogoIntencoes`. O catálogo informa ao `RoteadorIntencao` se existe um fluxo automatizado: quando existe, o `ExecutorFluxoAutomatizado` processa a solicitação sem acionar a LLM; caso contrário, o `GeradorLLM` recebe somente o contexto estruturado e validado. Quando a proatividade está ativa, uma `SugestaoProativa` pode associar à intenção primária uma intenção secundária cadastrada, que depende da confirmação do usuário para ser executada.
 
 ```mermaid
 classDiagram
@@ -1543,6 +1583,7 @@ classDiagram
         +String nome
         +CategoriaIntencao categoria
         +Float confianca
+        +Boolean possuiFluxoAutomatizado
     }
 
     class CategoriaIntencao {
@@ -1550,6 +1591,12 @@ classDiagram
         CONSULTA
         TRANSACAO
         ALERTA
+    }
+
+    class RotaProcessamento {
+        <<enumeration>>
+        FLUXO_AUTOMATIZADO
+        LLM
     }
 
     class EntidadeExtraida {
@@ -1587,6 +1634,17 @@ classDiagram
         +String tipoResposta
     }
 
+    class ConfiguracaoProatividade {
+        +Boolean ativa
+        +alterarEstado()
+    }
+
+    class SugestaoProativa {
+        +String intencaoSecundaria
+        +String conteudo
+        +Boolean aceita
+    }
+
     class PipelinePLN {
         +processarSolicitacao()
         +estruturarResposta()
@@ -1595,6 +1653,24 @@ classDiagram
     class ClassificadorIntencao {
         +identificarIntencao()
         +classificarIntencao()
+    }
+
+    class CatalogoIntencoes {
+        +consultarRota()
+        +buscarIntencaoSecundaria()
+    }
+
+    class RoteadorIntencao {
+        +selecionarRota()
+        +encaminharSolicitacao()
+    }
+
+    class ExecutorFluxoAutomatizado {
+        +executarSemLLM()
+    }
+
+    class GeradorLLM {
+        +gerarRespostaFundamentada()
     }
 
     class RecuperadorInformacao {
@@ -1609,6 +1685,7 @@ classDiagram
 
     Solicitacao "1" --> "1" Intencao : possui
     Intencao --> CategoriaIntencao : classificada como
+    Intencao --> CatalogoIntencoes : associada a
     Solicitacao "1" --> "0..*" EntidadeExtraida : origina
 
     EntidadeExtraida --> Projeto : pode identificar
@@ -1616,28 +1693,41 @@ classDiagram
     DocumentoProjeto "1" --> "0..*" TrechoRecuperado : fornece
 
     PipelinePLN --> ClassificadorIntencao : utiliza
+    PipelinePLN --> RoteadorIntencao : utiliza
     PipelinePLN --> RecuperadorInformacao : utiliza
     PipelinePLN --> AnalisadorComparativo : utiliza
+    PipelinePLN --> ConfiguracaoProatividade : consulta
 
     ClassificadorIntencao --> Intencao : produz
+    RoteadorIntencao --> CatalogoIntencoes : consulta
+    CatalogoIntencoes --> RotaProcessamento : define
+    RoteadorIntencao --> ExecutorFluxoAutomatizado : encaminha quando automatizada
+    RoteadorIntencao --> GeradorLLM : encaminha quando não automatizada
     RecuperadorInformacao --> TrechoRecuperado : recupera
     AnalisadorComparativo --> Projeto : compara
 
-    PipelinePLN --> Resposta : produz
+    ExecutorFluxoAutomatizado --> Resposta : produz sem LLM
+    GeradorLLM --> Resposta : produz com contexto validado
     Resposta "1" --> "0..*" TrechoRecuperado : fundamentada por
+    CatalogoIntencoes --> SugestaoProativa : fornece intenção secundária
+    ConfiguracaoProatividade --> SugestaoProativa : controla apresentação
+    SugestaoProativa --> Intencao : vinculada à intenção primária
 ```
 
-O modelo estático mantém relação direta com os requisitos funcionais. `Solicitacao` e `PipelinePLN` representam a entrada em linguagem natural prevista no RF01; `Intencao` e `ClassificadorIntencao` representam os RF02 e RF03; `DocumentoProjeto`, `TrechoRecuperado` e `RecuperadorInformacao` representam o RF04; `Projeto` e `Resposta` sustentam o RF05; `AnalisadorComparativo` representa o RF06; a categoria associada à intenção permite o direcionamento previsto no RF07; e a associação entre `Resposta` e `TrechoRecuperado` representa a fundamentação exigida pelo RF08.
+O modelo estático mantém relação direta com os requisitos funcionais. `Solicitacao` e `PipelinePLN` representam a entrada em linguagem natural prevista no RF01; `Intencao`, `ClassificadorIntencao` e `CatalogoIntencoes` representam os RF02 e RF03; `DocumentoProjeto`, `TrechoRecuperado` e `RecuperadorInformacao` representam o RF04; `Projeto` e `Resposta` sustentam o RF05; e `AnalisadorComparativo` representa o RF06. O `RoteadorIntencao`, as duas rotas e seus executores tornam explícita a separação exigida pelo RF07. As respostas produzidas em ambas as rotas atendem ao RF08. Por fim, `SugestaoProativa` representa a intenção secundária do RF09 e `ConfiguracaoProatividade` representa o controle previsto no RF10.
 
 | Elemento da modelagem                                            | Requisitos relacionados |
 | ---------------------------------------------------------------- | ----------------------- |
 | `Solicitacao`                                                    | RF01                    |
-| `ClassificadorIntencao` e `Intencao`                             | RF02, RF03              |
+| `ClassificadorIntencao`, `Intencao` e `CatalogoIntencoes`        | RF02, RF03              |
 | `RecuperadorInformacao`, `DocumentoProjeto` e `TrechoRecuperado` | RF04                    |
 | `Projeto` e `Resposta`                                           | RF05                    |
 | `AnalisadorComparativo`                                          | RF06                    |
-| `CategoriaIntencao`                                              | RF03, RF07              |
+| `CategoriaIntencao`, `RoteadorIntencao` e `RotaProcessamento`    | RF03, RF07              |
+| `ExecutorFluxoAutomatizado` e `GeradorLLM`                       | RF07, RF08              |
 | `Resposta` fundamentada por `TrechoRecuperado`                   | RF08                    |
+| `SugestaoProativa`                                               | RF09                    |
+| `ConfiguracaoProatividade`                                       | RF10                    |
 
 Essa modelagem representa uma visão inicial do domínio da solução. O modelo de classes definitivo, incluindo decisões de implementação, tipos de persistência, interfaces técnicas e demais entidades identificadas durante o desenvolvimento, será aprofundado na seção de Solução Técnica em uma etapa posterior do projeto.
 
@@ -1645,13 +1735,13 @@ Essa modelagem representa uma visão inicial do domínio da solução. O modelo 
 
 ### 3.1.3 Modelagem Dinâmica Inicial dos Requisitos Funcionais
 
-A modelagem dinâmica apresenta os principais cenários de interação derivados das histórias de usuário. Para esta etapa foram selecionados três fluxos que, em conjunto, representam o funcionamento central previsto para o MVP: consulta de informações de um projeto, análise comparativa entre projetos e direcionamento conforme a categoria da intenção.
+A modelagem dinâmica apresenta os principais cenários de interação derivados das histórias de usuário. Para esta etapa foram selecionados três fluxos que, em conjunto, representam o funcionamento central previsto para o MVP: consulta de informações de um projeto, análise comparativa entre projetos e roteamento híbrido com sugestão proativa configurável.
 
 Os diagramas representam o comportamento esperado do sistema em nível funcional. Componentes e integrações poderão ser refinados posteriormente conforme a arquitetura definitiva da solução for desenvolvida.
 
 ### 3.1.3.1 Cenário 1 — Consulta de informação de um projeto
 
-Este cenário representa uma solicitação como **"Qual o prazo do projeto XPTO?"**. O fluxo cobre principalmente os requisitos RF01, RF02, RF03, RF04, RF05 e RF08.
+Este cenário representa uma solicitação como **"Qual o prazo do projeto XPTO?"**, classificada como pertencente ao escopo, mas sem fluxo automatizado cadastrado. O fluxo cobre principalmente os requisitos RF01, RF02, RF03, RF04, RF05, RF07 e RF08.
 
 ```mermaid
 sequenceDiagram
@@ -1661,9 +1751,10 @@ sequenceDiagram
     participant Sistema as Interface do Sistema
     participant PLN as Pipeline de PLN
     participant Classificador as Classificador de Intenção
+    participant Catalogo as Catálogo de Intenções
     participant Recuperador as Recuperador de Informação
     participant Base as Base de Dados Sintéticos
-    participant Gerador as Estruturador de Resposta
+    participant LLM as LLM
 
     Usuario->>Sistema: Envia solicitação em linguagem natural
     Sistema->>PLN: Encaminha texto da solicitação
@@ -1674,14 +1765,17 @@ sequenceDiagram
     PLN->>Classificador: Classificar intenção
     Classificador-->>PLN: Categoria = CONSULTA
 
+    PLN->>Catalogo: Consultar rota da intenção
+    Catalogo-->>PLN: Sem fluxo automatizado
+
     PLN->>Recuperador: Solicitar informações do projeto e critério
     Recuperador->>Base: Consultar documentos e dados sintéticos
     Base-->>Recuperador: Retornar informações relevantes
     Recuperador-->>PLN: Retornar trechos e referências
 
     alt Informação encontrada
-        PLN->>Gerador: Estruturar resposta fundamentada
-        Gerador-->>PLN: Resposta + referências
+        PLN->>LLM: Gerar resposta com contexto estruturado e validado
+        LLM-->>PLN: Resposta em linguagem natural
         PLN-->>Sistema: Retornar resposta estruturada
         Sistema-->>Usuario: Apresentar resposta
     else Informação insuficiente
@@ -1690,11 +1784,11 @@ sequenceDiagram
     end
 ```
 
-O cenário começa com o RF01, quando o usuário envia uma solicitação em linguagem natural. O RF02 é representado pela identificação semântica da intenção e o RF03 pela classificação dessa intenção como consulta. Em seguida, o RF04 determina a recuperação dos dados relevantes. O RF05 corresponde à resposta sobre o projeto solicitado e o RF08 é representado pela necessidade de utilizar as informações recuperadas como fundamento ou declarar explicitamente quando os dados forem insuficientes.
+O cenário começa com o RF01, quando o usuário envia uma solicitação em linguagem natural. O RF02 é representado pela identificação semântica da intenção e o RF03 por sua associação ao catálogo. Como não existe fluxo automatizado, o RF07 determina que somente o contexto estruturado e validado seja encaminhado à LLM. O RF04 determina a recuperação dos dados relevantes, o RF05 corresponde à resposta sobre o projeto solicitado e o RF08 exige que as informações recuperadas fundamentem o retorno ou que a insuficiência seja declarada.
 
 ### 3.1.3.2 Cenário 2 — Análise e comparação entre projetos
 
-Este cenário representa uma solicitação como **"Compare os riscos e os prazos dos projetos XPTO e ABC"**. O fluxo cobre principalmente os requisitos RF01, RF02, RF03, RF04, RF06 e RF08.
+Este cenário representa uma solicitação como **"Compare os riscos e os prazos dos projetos XPTO e ABC"**, tratada como intenção analítica sem fluxo automatizado. O fluxo cobre principalmente os requisitos RF01, RF02, RF03, RF04, RF06, RF07 e RF08.
 
 ```mermaid
 sequenceDiagram
@@ -1704,16 +1798,20 @@ sequenceDiagram
     participant Sistema as Interface do Sistema
     participant PLN as Pipeline de PLN
     participant Classificador as Classificador de Intenção
+    participant Catalogo as Catálogo de Intenções
     participant Recuperador as Recuperador de Informação
     participant Base as Base de Dados Sintéticos
     participant Analisador as Analisador Comparativo
-    participant Gerador as Estruturador de Resposta
+    participant LLM as LLM
 
     Gestor->>Sistema: Solicita comparação em linguagem natural
     Sistema->>PLN: Encaminha solicitação
 
     PLN->>Classificador: Identificar e classificar intenção
     Classificador-->>PLN: Intenção analítica / CONSULTA
+
+    PLN->>Catalogo: Consultar rota da intenção
+    Catalogo-->>PLN: Sem fluxo automatizado
 
     PLN->>PLN: Identificar projetos e critérios da comparação
 
@@ -1730,8 +1828,8 @@ sequenceDiagram
     alt Dados suficientes para comparação
         PLN->>Analisador: Comparar riscos e prazos
         Analisador-->>PLN: Resultado estruturado da comparação
-        PLN->>Gerador: Gerar resposta fundamentada
-        Gerador-->>PLN: Comparação + referências
+        PLN->>LLM: Gerar resposta com comparação e evidências validadas
+        LLM-->>PLN: Comparação em linguagem natural
         PLN-->>Sistema: Retornar resultado
         Sistema-->>Gestor: Apresentar comparação
     else Dados insuficientes
@@ -1740,11 +1838,11 @@ sequenceDiagram
     end
 ```
 
-Nesse cenário, o RF06 diferencia o fluxo de uma consulta simples, pois exige recuperar informações referentes a dois ou mais projetos e aplicar uma etapa adicional de comparação. O resultado continua sujeito ao RF08: somente informações sustentadas pelos dados disponíveis devem ser apresentadas como fato.
+Nesse cenário, o RF06 diferencia o fluxo de uma consulta simples, pois exige recuperar informações referentes a dois ou mais projetos e aplicar uma etapa adicional de comparação. O RF07 encaminha à LLM o resultado estruturado dessa análise porque o catálogo não possui automação correspondente. O resultado continua sujeito ao RF08: somente informações sustentadas pelos dados disponíveis devem ser apresentadas como fato.
 
-### 3.1.3.3 Cenário 3 — Classificação e direcionamento da solicitação
+### 3.1.3.3 Cenário 3 — Roteamento híbrido e sugestão proativa
 
-Este cenário representa o comportamento do pipeline após compreender a intenção do usuário, demonstrando como a categoria classificada direciona a solicitação para um dos fluxos suportados pelo MVP. Ele cobre principalmente RF01, RF02, RF03, RF07 e RF08.
+Este cenário representa o comportamento do pipeline após identificar a intenção primária. O catálogo diferencia uma intenção fora do escopo, uma intenção com fluxo automatizado e uma intenção válida sem automação. Somente o último ramo utiliza a LLM e pode apresentar uma intenção secundária quando a proatividade estiver habilitada. O cenário cobre principalmente RF01, RF02, RF03, RF07, RF08, RF09 e RF10.
 
 ```mermaid
 sequenceDiagram
@@ -1754,43 +1852,73 @@ sequenceDiagram
     participant Sistema as Interface do Sistema
     participant PLN as Pipeline de PLN
     participant Classificador as Classificador de Intenção
-    participant Consulta as Fluxo de Consulta
-    participant Transacao as Fluxo de Transação
-    participant Alerta as Fluxo de Alerta
+    participant Catalogo as Catálogo de Intenções
+    participant Automatizado as Fluxo Automatizado
+    participant LLM as LLM
+    participant Config as Configuração de Proatividade
 
     Usuario->>Sistema: Envia solicitação em linguagem natural
     Sistema->>PLN: Encaminha solicitação
 
-    PLN->>Classificador: Identificar intenção semântica
-    Classificador-->>PLN: Intenção identificada
+    PLN->>Classificador: Identificar intenção primária
+    Classificador-->>PLN: Intenção + confiança
 
-    PLN->>Classificador: Associar intenção ao catálogo
-    Classificador-->>PLN: Categoria da solicitação
+    PLN->>Catalogo: Associar intenção e consultar rota
+    Catalogo-->>PLN: Escopo + categoria + rota
 
-    alt Categoria = CONSULTA
-        PLN->>Consulta: Encaminhar solicitação
-        Consulta-->>PLN: Resultado da consulta
-
-    else Categoria = TRANSACAO
-        PLN->>Transacao: Encaminhar operação
-        Transacao-->>PLN: Resultado ou simulação da transação
-
-    else Categoria = ALERTA
-        PLN->>Alerta: Encaminhar solicitação
-        Alerta-->>PLN: Resultado ou simulação do alerta
-
-    else Intenção fora do catálogo suportado
+    alt Intenção fora do escopo
         PLN-->>Sistema: Solicitação não suportada pelo MVP
         Sistema-->>Usuario: Orientar reformulação ou informar limite
-    end
 
-    PLN-->>Sistema: Retornar resposta estruturada
-    Sistema-->>Usuario: Apresentar resultado
+    else Intenção com fluxo automatizado
+        PLN->>Automatizado: Encaminhar intenção + parâmetros estruturados
+        Note right of Automatizado: A LLM não é acionada nesta rota
+        Automatizado-->>PLN: Resultado ou estado da ação
+        PLN-->>Sistema: Retornar resultado estruturado
+        Sistema-->>Usuario: Apresentar resultado da automação
+
+    else Intenção válida sem fluxo automatizado
+        PLN->>LLM: Enviar intenção + contexto estruturado e validado
+        LLM-->>PLN: Resposta principal fundamentada
+        PLN->>Config: Consultar estado da proatividade
+
+        alt Proatividade desativada
+            Config-->>PLN: Desativada
+            PLN-->>Sistema: Retornar somente resposta principal
+            Sistema-->>Usuario: Apresentar resposta
+
+        else Proatividade ativada
+            Config-->>PLN: Ativada
+            PLN->>Catalogo: Buscar intenção secundária compatível
+
+            alt Intenção secundária disponível
+                Catalogo-->>PLN: Intenção secundária cadastrada
+                PLN-->>Sistema: Resposta principal + sugestão opcional
+                Sistema-->>Usuario: Apresentar resposta e próximo passo
+
+                alt Usuário confirma a sugestão
+                    Usuario->>Sistema: Aceitar intenção secundária
+                    Sistema->>PLN: Enviar intenção confirmada
+                    PLN->>Catalogo: Tratar como nova intenção primária
+                    Note over PLN,Catalogo: O novo ciclo utiliza novamente o roteamento do catálogo
+
+                else Usuário recusa a sugestão
+                    Usuario->>Sistema: Recusar sugestão
+                    Sistema-->>Usuario: Encerrar sugestão e preservar resposta
+                end
+
+            else Nenhuma intenção secundária compatível
+                Catalogo-->>PLN: Nenhuma sugestão cadastrada
+                PLN-->>Sistema: Retornar somente resposta principal
+                Sistema-->>Usuario: Apresentar resposta
+            end
+        end
+    end
 ```
 
-A separação entre identificação e classificação da intenção é importante nesse fluxo. O RF02 corresponde à compreensão semântica da necessidade expressa pelo usuário, enquanto o RF03 associa essa necessidade a uma categoria controlada pelo sistema. O RF07 utiliza essa categoria para determinar qual fluxo deverá ser acionado.
+A separação entre identificação, catalogação e roteamento é importante nesse fluxo. O RF02 corresponde à compreensão da intenção primária e o RF03 associa essa intenção à categoria e à rota controladas pelo catálogo. O RF07 garante que a rota automatizada não utilize a LLM e que apenas intenções válidas sem automação recebam tratamento generativo. O RF08 rege o resultado das duas rotas.
 
-No contexto do MVP, operações de transação e alerta podem ser implementadas ou simuladas sobre dados sintéticos, preservando o objetivo principal da prova de conceito de demonstrar a capacidade do pipeline de interpretar e direcionar corretamente diferentes tipos de intenção.
+No ramo não automatizado, o RF09 permite apresentar uma intenção secundária cadastrada junto à resposta principal, mas exige confirmação antes de executá-la. O RF10 mantém essa iniciativa sob controle do usuário: quando a proatividade está desativada, o sistema continua identificando, roteando e respondendo à intenção primária, mas não oferece o próximo passo. Dessa forma, a proatividade documentada depende da consulta atual e não pressupõe observação contínua da atividade do usuário.
 
 
 ### 3.1.4 Rastreabilidade entre User Stories e Modelagem UML
@@ -1800,13 +1928,15 @@ A tabela a seguir consolida a relação entre os requisitos funcionais, suas his
 | RF   | User Story                                 | Elementos do diagrama de classes                                | Cenário de sequência |
 | ---- | ------------------------------------------ | --------------------------------------------------------------- | -------------------- |
 | RF01 | US01 — Entrada em linguagem natural        | `Solicitacao`, `PipelinePLN`                                    | Cenários 1, 2 e 3    |
-| RF02 | US02 — Identificação semântica da intenção | `ClassificadorIntencao`, `Intencao`                             | Cenários 1, 2 e 3    |
-| RF03 | US03 — Classificação da intenção           | `Intencao`, `CategoriaIntencao`                                 | Cenários 1, 2 e 3    |
+| RF02 | US02 — Identificação da intenção primária  | `ClassificadorIntencao`, `Intencao`                             | Cenários 1, 2 e 3    |
+| RF03 | US03 — Associação da intenção ao catálogo  | `Intencao`, `CategoriaIntencao`, `CatalogoIntencoes`             | Cenários 1, 2 e 3    |
 | RF04 | US04 — Recuperação de informações          | `RecuperadorInformacao`, `DocumentoProjeto`, `TrechoRecuperado` | Cenários 1 e 2       |
 | RF05 | US05 — Consulta de projetos                | `Projeto`, `Resposta`                                           | Cenário 1            |
 | RF06 | US06 — Análise e comparação                | `AnalisadorComparativo`, `Projeto`                              | Cenário 2            |
-| RF07 | US07 — Tratamento das intenções            | `CategoriaIntencao`, `PipelinePLN`                              | Cenário 3            |
-| RF08 | US08 — Resposta fundamentada               | `Resposta`, `TrechoRecuperado`                                  | Cenários 1 e 2       |
+| RF07 | US07 — Roteamento híbrido                  | `RoteadorIntencao`, `RotaProcessamento`, `ExecutorFluxoAutomatizado`, `GeradorLLM` | Cenários 1, 2 e 3 |
+| RF08 | US08 — Resposta fundamentada               | `Resposta`, `TrechoRecuperado`, `ExecutorFluxoAutomatizado`, `GeradorLLM` | Cenários 1, 2 e 3 |
+| RF09 | US09 — Sugestão de intenção secundária     | `SugestaoProativa`, `CatalogoIntencoes`                          | Cenário 3            |
+| RF10 | US10 — Controle da proatividade            | `ConfiguracaoProatividade`                                      | Cenário 3            |
 
 Essa rastreabilidade demonstra que os requisitos funcionais não estão isolados da modelagem: as classes representam os conceitos necessários para sua execução e os diagramas de sequência demonstram como esses elementos colaboram nos principais cenários previstos pelas histórias de usuário.
 
