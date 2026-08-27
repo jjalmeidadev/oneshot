@@ -3094,147 +3094,17 @@ O que a Sprint 2 acrescentou foi a camada que faltava: o **domínio persistido**
 
 ### 5.1.1 Modelo consolidado
 
-```mermaid
-classDiagram
-    direction LR
-
-    class Solicitacao {
-        +UUID id
-        +String texto
-        +DateTime dataHora
-        +String canal
-    }
-
-    class PipelinePLN {
-        +classificar(Solicitacao) Intencao
-        +extrairEntidades(Solicitacao) EntidadeExtraida[]
-    }
-
-    class Intencao {
-        +UUID id
-        +String macrointencao
-        +String intencaoEspecifica
-        +Float confiancaMacro
-        +Float confiancaEspecifica
-        +Boolean possuiFluxoAutomatizado
-        +acimaDoLimiar() Boolean
-    }
-
-    class RoteadorIntencao {
-        +rotear(Intencao) RotaProcessamento
-    }
-
-    class Resposta {
-        +String texto
-        +Boolean fundamentada
-        +declararLimitacao() String
-    }
-
-    class Interacao {
-        +UUID id
-        +UUID conversaId
-        +String rota
-        +DateTime registradaEm
-    }
-
-    class Conversa {
-        +UUID id
-        +UUID usuarioId
-        +DateTime iniciadaEm
-    }
-
-    class Usuario {
-        +UUID id
-        +String perfil
-        +podeAcessar(Projeto) Boolean
-    }
-
-    class RegraAcesso {
-        +UUID id
-        +String nivel
-    }
-
-    class Projeto {
-        +UUID id
-        +String nome
-        +Date prazoVigente
-        +avancoAtual() StatusProjeto
-    }
-
-    class Subportfolio {
-        +UUID id
-        +String nome
-    }
-
-    class Artefato {
-        +UUID id
-        +String tipo
-        +String origem
-    }
-
-    class TrechoRecuperado {
-        +UUID id
-        +String texto
-        +String secao
-        +Float relevancia
-    }
-
-    class FonteConsultada {
-        +UUID id
-        +Float score
-    }
-
-    class ItemCronograma {
-        +UUID id
-        +Float peso
-        +somaDosPesosFecha() Boolean
-    }
-
-    class RiscoProblema {
-        +UUID id
-        +Integer probabilidade
-        +Integer impacto
-        +severidade() Integer
-    }
-
-    class EventoAuditoria {
-        +UUID id
-        +String tipo
-        +DateTime ocorridoEm
-    }
-
-    class SolicitacaoForaDeEscopo {
-        +UUID id
-        +String motivo
-    }
-
-    Solicitacao --> PipelinePLN : processada por
-    PipelinePLN --> Intencao : produz
-    Intencao --> RoteadorIntencao : orienta
-    RoteadorIntencao --> Resposta : resulta em
-
-    Solicitacao "1" --> "1" Interacao : registrada como
-    Conversa "1" *-- "1..*" Interacao
-    Usuario "1" o-- "0..*" Conversa
-    Usuario "1" o-- "0..*" RegraAcesso
-    RegraAcesso ..> Projeto : delimita escopo
-
-    Interacao "1" --> "1" Intencao
-    Interacao "1" *-- "0..1" Resposta
-    Interacao "1" o-- "0..*" EventoAuditoria
-    Interacao "1" --> "0..1" SolicitacaoForaDeEscopo
-
-    Resposta "1" o-- "0..*" FonteConsultada
-    FonteConsultada "1" --> "1" TrechoRecuperado
-    Artefato "1" o-- "0..*" TrechoRecuperado
-
-    Subportfolio "1" o-- "0..*" Projeto
-    Projeto "1" o-- "0..*" Artefato
-    Projeto "1" o-- "0..*" ItemCronograma
-    Projeto "1" o-- "0..*" RiscoProblema
-```
+<div align="center">
+  <img src="img/classes-consolidado.png" alt="Diagrama de classes consolidado, com o pipeline de processamento, a interação e governança, o conhecimento consultável e o domínio do portfólio" width="100%">
+</div>
 
 <p align="center"><strong>Figura 20</strong> - Diagrama de classes consolidado, unindo o pipeline de processamento e o domínio persistido.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+
+O código-fonte do diagrama está versionado em [`docs/diagrams/classes-consolidado.puml`](diagrams/classes-consolidado.puml). Para regerar a imagem, com PlantUML e Graphviz instalados:
+
+```bash
+plantuml -charset UTF-8 -tpng -o ../img docs/diagrams/classes-consolidado.puml
+```
 
 
 ### 5.1.2 O que mudou em relação à Seção 3.1.2
