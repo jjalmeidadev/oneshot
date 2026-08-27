@@ -3094,8 +3094,6 @@ O que a Sprint 2 acrescentou foi a camada que faltava: o **domínio persistido**
 
 ### 5.1.1 Modelo consolidado
 
-<div align="center">
-
 ```mermaid
 classDiagram
     direction LR
@@ -3236,9 +3234,8 @@ classDiagram
     Projeto "1" o-- "0..*" RiscoProblema
 ```
 
-  <p align="center"><strong>Figura 20</strong> - Diagrama de classes consolidado, unindo o pipeline de processamento e o domínio persistido.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 20</strong> - Diagrama de classes consolidado, unindo o pipeline de processamento e o domínio persistido.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
-</div>
 
 ### 5.1.2 O que mudou em relação à Seção 3.1.2
 
