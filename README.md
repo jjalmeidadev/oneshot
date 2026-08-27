@@ -1,6 +1,6 @@
-# Agente Inteligente para Gestão de Portfólio de Projetos do Metrô
+# Agente de IA para o Portfólio de Projetos do Metrô
 
-## Oneshot
+## Nome do grupo: Oneshot
 
 ## Integrantes:
 
@@ -15,9 +15,9 @@
 
 ## 📝 Descrição
 
-O projeto consiste no desenvolvimento de um **Agente Inteligente para Gestão de Portfólio de Projetos do Metrô**, desenvolvido no contexto da parceria acadêmica entre o Inteli e a Companhia do Metropolitano de São Paulo (Metrô).
+O projeto consiste no desenvolvimento de um **Agente de IA para o Portfólio de Projetos do Metrô**, desenvolvido no contexto da parceria acadêmica entre o Inteli e a Companhia do Metropolitano de São Paulo (Metrô).
 
-A solução propõe uma camada inteligente de interação sobre as informações utilizadas pela área de Gestão de Portfólio de Projetos (PMO), permitindo que gestores e demais usuários consultem informações do portfólio por meio de linguagem natural.
+A solução é um agente conversacional que opera sobre a documentação e os dados de portfólio já mantidos pelo Metrô, permitindo que gestores e demais usuários consultem informações do portfólio por meio de linguagem natural, com indicação da fonte de cada resposta.
 
 O agente busca reduzir o esforço necessário para localizar e interpretar informações distribuídas entre diferentes fontes, apoiando atividades relacionadas ao acompanhamento dos projetos, consulta a Termos de Abertura do Projeto (TAP), cronogramas, documentos normativos e demais informações relevantes para a gestão do portfólio.
 
