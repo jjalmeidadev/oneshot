@@ -1,0 +1,59 @@
+{
+  "@odata.context": "https://mock.sharepoint.local/$metadata#lists/items",
+  "mock": true,
+  "site": {
+    "id": "metro-mvp-site",
+    "displayName": "Portal Operacional - Dados Ficticios"
+  },
+  "list": {
+    "id": "procedimentos-operacionais",
+    "displayName": "Procedimentos Operacionais"
+  },
+  "value": [
+    {
+      "id": "101",
+      "createdDateTime": "2026-01-12T09:00:00Z",
+      "lastModifiedDateTime": "2026-07-18T14:30:00Z",
+      "webUrl": "https://mock.sharepoint.local/sites/metro-mvp/Lists/Procedimentos/101",
+      "fields": {
+        "Title": "Atendimento a objeto perdido",
+        "Codigo": "POP-MVP-001",
+        "Categoria": "Atendimento ao passageiro",
+        "Linha": "Todas",
+        "Status": "Vigente",
+        "Conteudo": "Registrar a descricao do objeto, local e horario informados pelo passageiro. Consultar o registro local de achados e perdidos e fornecer o protocolo ficticio. Objetos nao localizados devem permanecer registrados para consulta posterior.",
+        "PalavrasChave": "objeto perdido achados perdidos protocolo passageiro"
+      }
+    },
+    {
+      "id": "102",
+      "createdDateTime": "2026-02-03T11:15:00Z",
+      "lastModifiedDateTime": "2026-06-21T10:00:00Z",
+      "webUrl": "https://mock.sharepoint.local/sites/metro-mvp/Lists/Procedimentos/102",
+      "fields": {
+        "Title": "Apoio a passageiro com mobilidade reduzida",
+        "Codigo": "POP-MVP-002",
+        "Categoria": "Acessibilidade",
+        "Linha": "Todas",
+        "Status": "Vigente",
+        "Conteudo": "Confirmar a estacao de destino e comunicar a equipe ficticia de recepcao. Priorizar elevadores e rotas acessiveis sinalizadas. Em indisponibilidade de equipamento, orientar uma rota alternativa cadastrada e registrar o atendimento.",
+        "PalavrasChave": "acessibilidade cadeira rodas mobilidade elevador apoio"
+      }
+    },
+    {
+      "id": "103",
+      "createdDateTime": "2026-03-08T08:20:00Z",
+      "lastModifiedDateTime": "2026-08-02T16:45:00Z",
+      "webUrl": "https://mock.sharepoint.local/sites/metro-mvp/Lists/Procedimentos/103",
+      "fields": {
+        "Title": "Comunicacao de indisponibilidade de escada rolante",
+        "Codigo": "POP-MVP-003",
+        "Categoria": "Equipamentos",
+        "Linha": "Todas",
+        "Status": "Vigente",
+        "Conteudo": "Sinalizar o equipamento como indisponivel, indicar a alternativa acessivel mais proxima e abrir um chamado de manutencao. Atualizar o comunicado ao passageiro quando o status do chamado mudar.",
+        "PalavrasChave": "escada rolante falha indisponivel manutencao equipamento"
+      }
+    }
+  ]
+}

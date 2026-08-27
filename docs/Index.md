@@ -42,11 +42,21 @@ Este arquivo reúne os documentos que compõem a documentação do projeto e ind
 | [Projeto.md](Projeto.md) | Entendimento do negócio e especificação de requisitos: problema e SWOT, contexto da indústria, visão e objetivo do produto, personas e jornada, fluxo do negócio, brainstorming de features, canvas do MVP, matriz de risco, business drivers, requisitos funcionais e não funcionais, visão técnica da solução e visão inicial sobre tecnologias e ferramentas. |
 | [Manual-instalacao.md](Manual-instalacao.md) | Instruções de instalação e execução da solução. |
 
+### Código-fonte
+
+| Pasta | Conteúdo |
+|---|---|
+| [../src/backend/](../src/backend/) | API FastAPI da solução, com o cliente de geração de resposta e a recuperação de contexto sobre listas simuladas do SharePoint. |
+| [../src/frontend/](../src/frontend/) | Interface própria de chat em React, Vite e Tailwind, usada para validar o MVP. |
+| [../src/notebooks/](../src/notebooks/) | Notebook do classificador de intenções, com o benchmark reproduzível do pipeline de PLN. |
+| [../src/database/](../src/database/) | Scripts de criação e carga inicial do banco de dados. |
+
 ### Recursos
 
 | Pasta | Conteúdo |
 |---|---|
 | [img/](img/) | Imagens utilizadas na documentação (logotipos, diagramas). |
-| [diagrams/](diagrams/) | Código-fonte dos diagramas em PlantUML, versionado para permitir revisão e regeração. |
+| [diagrams/](diagrams/) | Código-fonte dos diagramas em PlantUML e SVG, versionado para permitir revisão e regeração. |
+| [prototipo-1-roteiro.md](prototipo-1-roteiro.md) | Roteiro utilizado na prototipação exploratória do Protótipo 1. |
 
 <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">[nome do projeto]</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">INTELI, [aluno 1], [aluno 2], [aluno 3], [aluno 4], [aluno 5], [aluno 6], [aluno 7]</a> is licensed under <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">Attribution 4.0 International<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"></a></p>

@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #123f68;
+  --border: #d9e7f5;
+  --input: #d9e7f5;
+  --ring: #2864a4;
+  --primary: #2864a4;
+  --primary-foreground: #ffffff;
+  --secondary: #eff6fc;
+  --secondary-foreground: #123f68;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --accent: #eff6fc;
+  --accent-foreground: #123f68;
+  --muted: #f7fafc;
+  --muted-foreground: #64748b;
+  color: #123f68;
+  background: #f7fafc;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}

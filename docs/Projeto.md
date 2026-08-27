@@ -121,6 +121,11 @@
 - [5. Solução Técnica (Design)](#5-solução-técnica-design)
   - [5.1 Diagrama de Classes](#51-diagrama-de-classes)
   - [5.2 Diagrama de Componentes da UML](#52-diagrama-de-componentes-da-uml)
+    - [5.2.1 Componentes e responsabilidades](#521-componentes-e-responsabilidades)
+    - [5.2.2 Fluxo de interação entre os componentes](#522-fluxo-de-interação-entre-os-componentes)
+    - [5.2.3 Relação entre o catálogo de intenções e os fluxos da solução](#523-relação-entre-o-catálogo-de-intenções-e-os-fluxos-da-solução)
+    - [5.2.4 Decisões arquiteturais refletidas no diagrama](#524-decisões-arquiteturais-refletidas-no-diagrama)
+    - [5.2.5 Limite de representação](#525-limite-de-representação)
   - [5.3 Diagramas de Sequência da UML](#53-diagramas-de-sequência-da-uml)
 - [6. Mapeamento Técnico de Infraestrutura e Implantação](#6-mapeamento-técnico-de-infraestrutura-e-implantação)
   - [6.1 Diagrama de Implantação da UML](#61-diagrama-de-implantação-da-uml)
@@ -143,6 +148,11 @@
     - [8.6.1 Introdução](#861-introdução)
     - [8.6.2 Benchmark das APIs](#862-benchmark-das-apis)
     - [8.6.3 API escolhida: Azure AI Speech](#863-api-escolhida-azure-ai-speech)
+  - [8.7 Escolha de algoritmo PLN](#87-escolha-de-algoritmo-pln)
+    - [8.7.1 Objetivo e protocolo de avaliação](#871-objetivo-e-protocolo-de-avaliação)
+    - [8.7.2 Benchmark e decisão](#872-benchmark-e-decisão)
+    - [8.7.3 Configuração e resultados atuais](#873-configuração-e-resultados-atuais)
+    - [8.7.4 Limitações e próximos passos](#874-limitações-e-próximos-passos)
 - [9. Planejamento e Execução de Testes](#9-planejamento-e-execução-de-testes)
   - [9.1 Testes Funcionais](#91-testes-funcionais)
     - [9.1.1 Planejamento](#911-planejamento)
@@ -195,7 +205,7 @@ A Tabela 1 apresenta os principais termos e abreviações utilizados ao longo de
 ---
 
 ## 1.2 Objetivo do Documento
-Este documento tem como objetivo especificar a solução proposta para o desenvolvimento do Agente Inteligente para Gestão de Portfólio de Projetos do Metrô, consolidando os aspectos estratégicos, funcionais e técnicos necessários para sua compreensão e implementação.
+Este documento tem como objetivo especificar a solução proposta para o desenvolvimento do Agente de IA para o Portfólio de Projetos do Metrô, consolidando os aspectos estratégicos, funcionais e técnicos necessários para sua compreensão e implementação.
 
 Além de apoiar o desenvolvimento da solução ao longo das diferentes etapas do projeto, este documento também estabelece uma base de referência para validação junto aos representantes do Metrô, registro das decisões tomadas pela equipe e documentação das principais características da plataforma desenvolvida, favorecendo sua evolução e futura manutenção.
 
@@ -326,7 +336,7 @@ O detalhamento dessas capacidades, com a separação entre o que entra no MVP e 
 
 #### O que o Produto Faz
 
-O produto é um agente conversacional disponível no Microsoft Teams que opera sobre a documentação e os dados de portfólio já mantidos pelo Metrô. Ele não substitui as plataformas corporativas: lê o que elas armazenam, responde a partir desse conteúdo e devolve o resultado no canal onde as equipes já trabalham.
+O produto é um agente conversacional disponível no Microsoft Teams que opera sobre a documentação e os dados de portfólio já mantidos pelo Metrô. Ele não substitui as plataformas corporativas: lê o que elas armazenam, responde a partir desse conteúdo e devolve o resultado no canal onde as equipes já trabalham. A arquitetura que sustenta essas capacidades está detalhada na Seção 5.2.
 
 As capacidades estão organizadas em três blocos. Os dois primeiros compõem o MVP validado neste módulo; o terceiro está previsto para depois dele. A fronteira entre eles é a mesma declarada na matriz de priorização da Seção 2.8 e detalhada nos requisitos funcionais da Seção 3.1.
 
@@ -628,7 +638,7 @@ O código-fonte do diagrama está versionado em [`docs/diagrams/fluxo-to-be.svg`
 ## 2.7 Matriz de Risco do Projeto
 
 
-A matriz de risco do projeto tem como objetivo registrar, avaliar e acompanhar eventos que possam afetar positiva ou negativamente a execução do desenvolvimento do **Agente Inteligente para Gestão de Portfólio de Projetos do Metrô**.
+A matriz de risco do projeto tem como objetivo registrar, avaliar e acompanhar eventos que possam afetar positiva ou negativamente a execução do desenvolvimento do **Agente de IA para o Portfólio de Projetos do Metrô**.
 
 A identificação dos riscos foi realizada considerando o contexto atual do projeto, suas dependências técnicas e organizacionais, as características do produto proposto e o estágio de desenvolvimento da solução. Entre os principais fatores considerados estão a dependência de informações e documentos disponibilizados pelo parceiro, a utilização do ecossistema Microsoft, a necessidade de integração com diferentes fontes de conhecimento, o controle de acesso às informações e a necessidade de garantir respostas fundamentadas para os usuários.
 
@@ -1899,6 +1909,8 @@ Esta seção apresenta a seleção inicial de tecnologias e ferramentas consider
 
 As tecnologias apresentadas nesta seção são classificadas entre aquelas previstas para utilização no **MVP**, desenvolvido e validado sobre dados sintéticos, e aquelas consideradas como alternativas ou possibilidades de evolução. Essa distinção é necessária porque o TAPI estabelece que a integração com o portfólio real do Metrô constitui uma evolução do MVP, não sendo requisito para a validação inicial da solução.
 
+> **Leitura desta seção.** A Seção 3.4 registra a visão de tecnologias formulada na Sprint 1. As decisões de canal permanecem válidas: o agente é entregue no Microsoft Teams, com o Copilot Studio como orquestrador. A Sprint 2 acrescentou o detalhamento que aqui aparece apenas como direção — o benchmark da API de transcrição está na Seção 8.6, o do algoritmo de PLN na Seção 8.7 e a arquitetura consolidada, com o papel de cada componente, na Seção 5.2.
+
 ### 3.4.1 Critérios de seleção
 
 Toda decisão tecnológica desta seção foi avaliada contra os critérios abaixo, extraídos das restrições e premissas do projeto:
@@ -1926,7 +1938,9 @@ A pilha tecnológica é organizada por camadas, considerando a separação entre
 | **Captura de voz nativa do canal (Teams / Copilot Studio)** | Primeira opção para a conversão de áudio em texto prevista no escopo macro, por não exigir provisionamento adicional nem sair do canal já homologado. | C1, C4 |
 | **Azure AI Speech (Speech-to-Text, pt-BR)** | Alternativa para a conversão de áudio em texto, caso a captura nativa do canal não atenda ao português ou à qualidade necessária. **A disponibilidade precisa ser confirmada com a GTI.** O documento *Plataforma Tecnológica do Metrô* descreve o Azure AI de forma geral, mas destaca apenas o Azure Machine Learning Studio e o Azure OpenAI, sem citar o serviço de fala. | C1, C2 |
 
-No MVP, a solução utilizará os canais disponibilizados pelo ecossistema Microsoft. Não está previsto o desenvolvimento de uma aplicação web ou mobile independente; o acesso por navegador e por dispositivos móveis ocorrerá pelos canais do Copilot Studio e do Microsoft Teams.
+No MVP, a solução utilizará os canais disponibilizados pelo ecossistema Microsoft. Não está previsto o desenvolvimento de uma aplicação web ou mobile independente como interface do produto; o acesso por navegador e por dispositivos móveis ocorrerá pelos canais do Copilot Studio e do Microsoft Teams.
+
+> **Bancada de teste.** Existem no repositório uma interface web em React (`src/frontend`) e um backend FastAPI (`src/backend`) que **não compõem o produto**. Foram construídos como bancada para exercitar isoladamente o caminho de consulta do RAG sobre dados mockados, permitindo medir latência, taxa de sucesso e consumo de tokens sem depender do provisionamento do canal corporativo pela GTI. A bancada utiliza um provedor de LLM específico apenas para viabilizar esse teste; essa escolha não constitui decisão de produto. O provedor a ser adotado será definido por benchmark próprio e submetido à homologação, do mesmo modo que foi feito para a API de transcrição na Seção 8.6. A entrega ao usuário permanece pelo Teams.
 
 > **Base já existente.** O TAPI registra, entre as restrições, que a plataforma atual de portfólio já utiliza *"Copilot Studio para Bot de apoio na obtenção e atualização de status dos projetos e sub portfólios"*, e o documento *Arquitetura Portfólio Metrô* identifica a consulta de situação do portfólio e o suporte de FAQ como recursos "ainda em desenvolvimento". A solução deste projeto, portanto, **não parte de um cenário vazio**. Ela amplia esse agente com o núcleo de PLN autoral e com as transações do Pilar 2. A decisão entre estender o agente existente ou publicar um novo agente no mesmo ambiente será tomada com a GTI na Sprint 2.
 
@@ -2014,11 +2028,11 @@ O registro das opções descartadas é parte da decisão: ele documenta o que fo
 
 | Alternativa | Por que foi considerada | Por que não foi adotada |
 |---|---|---|
-| **API de LLM externo** (OpenAI, Anthropic, Google) para classificação de intenções | Menor esforço de implementação e boa acurácia sem treinamento. | Viola C2 (trânsito de dados por serviço não homologado) e C3 (o Pilar 1 exige núcleo autoral e avaliado pela equipe). |
+| **API de LLM externo** (OpenAI, Anthropic, Google) para **classificação de intenções** | Menor esforço de implementação e boa acurácia sem treinamento. | Viola C2 (trânsito de dados por serviço não homologado) e C3 (o Pilar 1 exige núcleo autoral e avaliado pela equipe). A classificação permanece no pipeline próprio descrito na Seção 8.7. A geração da resposta a partir do contexto recuperado pelo RAG usa um LLM, cujo provedor ainda será definido e homologado. |
 | **Azure OpenAI Service** provisionado à parte | Permaneceria dentro do *tenant* Azure do parceiro. | O próprio parceiro registra que o Copilot Studio já conta com os modelos mais recentes, *"não sendo necessário provisionar modelo adicional"*. Custo adicional sem ganho claro no MVP. |
 | ***Fine-tuning*** de um modelo de linguagem | Potencial ganho de acurácia no domínio de gestão de portfólio. | O parceiro declara explicitamente que não trabalha com *fine-tuning*, apenas com RAG. Além disso, o volume de dados sintéticos do MVP não sustentaria o treinamento. |
 | **Power Apps** como interface principal | Interface visual rica para preenchimento de formulários de projeto. | O escopo do módulo pede interface primariamente em linguagem natural (texto e áudio). Somam-se as restrições de licenciamento (C4), sem conectores premium e com limite de 500 linhas por leitura de lista. |
-| **Aplicação web própria** (React/Next.js) fora do ecossistema Microsoft | Liberdade total de implementação e melhor experiência de voz. | Viola C1 e comprometeria a sustentação pela equipe interna do Metrô, que é um benefício esperado explícito do projeto. |
+| **Aplicação web própria** (React/Next.js) fora do ecossistema Microsoft | Liberdade total de implementação e melhor experiência de voz. | Viola C1 e comprometeria a sustentação pela equipe interna do Metrô, que é um benefício esperado explícito do projeto. A interface React existente no repositório é bancada de teste do caminho de RAG, não interface do produto. |
 | **Elasticsearch / OpenSearch** para busca | Recurso maduro de busca textual e vetorial. | Exigiria infraestrutura adicional a ser provisionada e mantida. FAISS/ChromaDB atendem à escala do MVP com custo operacional próximo de zero. |
 | **Azure Machine Learning** como ambiente de treino e *endpoint* | Citado pelo parceiro como recurso disponível. Ofereceria *endpoints* gerenciados de inferência. | Mantido como **evolução prevista**, não como dependência do MVP. O provisionamento depende da GTI e não pode bloquear a Sprint 2. O empacotamento em Docker foi escolhido justamente para tornar essa migração de baixo atrito. |
 
@@ -2206,7 +2220,7 @@ O protótipo foi construído e executado a partir de situações em que o agente
 
 As situações foram representadas no mesmo ambiente corporativo considerado na solução. A diferença em relação ao Protótipo 2 está na origem da interação: não existem elementos sobrepostos à tela de trabalho, e o agente só aparece na tirinha depois que Carlos ou Mariana o aciona deliberadamente. Entre uma solicitação e outra, o agente retorna ao silêncio.
 
-O roteiro painel a painel das quatro tirinhas e as regras de representação estão em [`prototipo-1-roteiro.md`](prototipo-1-roteiro.md).
+O roteiro painel das quatro tirinhas e as regras de representação estão em [`prototipo-1-roteiro.md`](prototipo-1-roteiro.md).
 
 | Tirinha | Persona | Situação | O que a execução investiga |
 | :---: | --- | --- | --- |
@@ -2458,7 +2472,102 @@ _conteúdo_
 _conteúdo_
 
 ## 5.2 Diagrama de Componentes da UML
-_conteúdo_
+
+O Diagrama de Componentes representa a **estrutura lógica e técnica dos principais módulos da solução e suas interações**, consolidando a arquitetura atualmente adotada para o agente inteligente do Metrô. A representação evidencia as fronteiras entre a interface própria de chat, o backend da aplicação, o núcleo autoral de Processamento de Linguagem Natural (PLN), a camada de recuperação aumentada por geração (RAG), o Microsoft Copilot Studio e os serviços corporativos e de Inteligência Artificial utilizados pela solução.
+
+A arquitetura parte de uma **interface própria de chat**, responsável pela interação direta com o usuário, e de uma **API da aplicação**, que centraliza o recebimento das mensagens, o gerenciamento da conversa e a integração com os demais componentes. A entrada pode ocorrer por texto ou, quando habilitada, por voz, cuja transcrição é realizada pelo serviço de Speech-to-Text antes do processamento do núcleo da aplicação.
+
+O processamento da solicitação é realizado pelo **Pilar 1 — Núcleo de PLN e Roteamento**, responsável pelo pré-processamento, identificação e classificação da intenção, validação de escopo e extração das entidades necessárias. A intenção identificada é associada ao **catálogo de intenções da solução**, que relaciona as solicitações às capacidades e funcionalidades previstas para o produto.
+
+A partir dessa classificação, a conversa é encaminhada para a capacidade correspondente. Solicitações de **consulta ou dúvida documental** seguem pela rota de **RAG**, na qual o recuperador consulta o índice vetorial e as fontes documentais do SharePoint, reúne os trechos relevantes e monta o contexto utilizado na geração da resposta. O contexto recuperado é então encaminhado ao **LLM**, que produz a resposta em linguagem natural.
+
+Solicitações associadas a **funcionalidades ou fluxos específicos** são encaminhadas ao **Microsoft Copilot Studio**. Nesse caminho, o Copilot Studio atua como mecanismo de orquestração, selecionando o tópico correspondente à intenção identificada e acionando, quando necessário, fluxos do **Power Automate** para leitura, escrita, atualização ou execução de automações sobre os serviços corporativos.
+
+A Figura 14 apresenta a estrutura descrita. Dessa forma, os componentes mantêm responsabilidades distintas: o **PLN interpreta e roteia**, o **RAG recupera conhecimento**, o **LLM gera respostas fundamentadas a partir do contexto recuperado** e o **Copilot Studio executa e orquestra os fluxos funcionais associados às intenções**. O SharePoint permanece como fonte documental e de dados corporativos, enquanto identidade, configuração e rastreabilidade atravessam os demais componentes.
+
+<div align="center">
+  <img src="img/componentes-metro-5.2.png" alt="Diagrama de componentes da arquitetura atual da solução" width="100%">
+  <p><strong>Figura 14</strong> - Diagrama de componentes da arquitetura atual da solução.</p>
+  <sup>Fonte: Material produzido pelos autores, 2026.</sup>
+</div>
+
+O código-fonte do diagrama está versionado em [`docs/diagrams/componentes-metro-5.2.puml`](diagrams/componentes-metro-5.2.puml). Para regerar a imagem, utilizando PlantUML e Graphviz instalados no ambiente:
+
+```bash
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/componentes-metro-5.2.puml
+```
+
+### 5.2.1 Componentes e responsabilidades
+
+| Componente | Responsabilidade |
+|---|---|
+| **Interface Própria de Chat** | Receber as solicitações do usuário e apresentar respostas, referências e resultados dos fluxos executados. |
+| **API da Aplicação** | Expor o ponto de entrada HTTP/JSON, centralizar a comunicação entre interface, processamento e retorno das respostas. |
+| **Gerenciador de Conversação** | Manter o contexto necessário da interação e consolidar os resultados produzidos pelas diferentes rotas de processamento. |
+| **Pré-processamento** | Normalizar e preparar o texto para as etapas posteriores do pipeline de PLN. |
+| **Classificador de Intenções** | Identificar a intenção expressa pelo usuário e atribuir a categoria correspondente com sua confiança. |
+| **Catálogo de Intenções** | Associar as intenções reconhecidas às capacidades e funcionalidades disponíveis, determinando o próximo fluxo de processamento. |
+| **Validador de Escopo** | Verificar se a solicitação pertence ao conjunto de interações suportadas pela solução antes do acesso às fontes e aos fluxos. |
+| **Extração de Entidades** | Identificar entidades relevantes para a execução da intenção, como projeto, subportfólio, período e critérios de análise. |
+| **Recuperador RAG** | Buscar conteúdo relevante para consultas documentais a partir do índice vetorial e das fontes integradas. |
+| **Ingestão / Indexação Documental** | Preparar os documentos utilizados pela solução para posterior recuperação semântica. |
+| **Extração e Normalização** | Extrair e organizar o conteúdo proveniente dos documentos utilizados na base de conhecimento. |
+| **Geração de Embeddings** | Transformar os trechos normalizados em representações vetoriais utilizadas na busca semântica. |
+| **Índice Vetorial** | Armazenar embeddings e metadados para permitir a recuperação dos conteúdos mais relevantes. |
+| **Integração com SharePoint** | Intermediar o acesso aos documentos, listas e metadados disponibilizados pelo SharePoint. |
+| **Microsoft Copilot Studio** | Orquestrar os tópicos e fluxos associados às intenções funcionais identificadas pelo PLN. |
+| **Tópicos / Fluxos por Intenção** | Implementar os comportamentos específicos associados às funcionalidades previstas no catálogo de intenções. |
+| **Power Automate** | Executar automações e operações de integração necessárias aos fluxos funcionais. |
+| **API de LLM** | Gerar respostas em linguagem natural a partir do contexto recuperado pelo RAG. O provedor não está definido: a integração é feita por interface HTTP substituível, e a escolha será registrada quando o benchmark for realizado. |
+| **Azure AI Speech** | Consumir a API de Speech-to-Text documentada para converter entradas de voz em texto em português brasileiro antes do processamento pelo backend. |
+| **Microsoft Entra ID** | Fornecer a identidade do usuário e apoiar o controle de acesso às funcionalidades e informações. |
+| **Trilha de Auditoria** | Registrar eventos relevantes da interação, incluindo intenção, fontes consultadas e fluxos acionados. |
+| **Configuração / Secrets** | Armazenar configurações e credenciais necessárias aos serviços integrados sem expô-las à interface. |
+
+### 5.2.2 Fluxo de interação entre os componentes
+
+O fluxo de uma solicitação conversacional típica ocorre da seguinte forma:
+
+1. O **usuário** envia uma mensagem pela **interface própria de chat**. Quando a entrada é realizada por voz, o áudio pode ser encaminhado ao **Azure AI Speech**, que devolve a transcrição em texto.
+2. A **API da aplicação** recebe a solicitação por HTTP/JSON e a encaminha ao **gerenciador de conversação**.
+3. O **Pilar 1 — Núcleo de PLN e Roteamento** realiza o pré-processamento, identifica e classifica a intenção, valida se a solicitação está no escopo suportado, associa a intenção ao catálogo de capacidades e extrai as entidades relevantes para o fluxo selecionado.
+4. Após a validação de escopo, o **catálogo de intenções** associa a intenção reconhecida à capacidade responsável pelo processamento da solicitação.
+5. Quando a intenção corresponde a uma **consulta ou dúvida documental**, o **Recuperador RAG** busca os conteúdos relevantes no índice vetorial e, quando necessário, na integração com o **SharePoint**. Os resultados são organizados pelo componente de **Montagem de Contexto**.
+6. O contexto recuperado é enviado ao **LLM**, que produz a resposta em linguagem natural. O resultado retorna ao gerenciador de conversação.
+7. Quando a intenção corresponde a uma **funcionalidade estruturada**, a solicitação é encaminhada ao **Microsoft Copilot Studio**, que ativa o tópico ou fluxo correspondente. Quando necessário, o fluxo utiliza o **Power Automate** para executar operações sobre SharePoint, listas ou outros serviços corporativos.
+8. O resultado produzido pela rota escolhida é consolidado pelo **backend** e devolvido à **interface própria de chat**.
+9. Durante o processamento, os componentes de **identidade e auditoria** registram os elementos necessários para controle de acesso e rastreabilidade da interação.
+
+### 5.2.3 Relação entre o catálogo de intenções e os fluxos da solução
+
+O catálogo de intenções atua como elemento de ligação entre o **núcleo de PLN** e as capacidades funcionais do agente. Em vez de vincular a conversa diretamente a uma única tecnologia, a classificação identifica a necessidade do usuário e determina qual componente deve assumir o processamento.
+
+A arquitetura suporta dois grandes grupos de roteamento:
+
+| Tipo de intenção | Destino principal | Objetivo |
+|---|---|---|
+| **Consulta / dúvida documental** | RAG → LLM | Recuperar informações das fontes documentais e produzir uma resposta fundamentada em linguagem natural. |
+| **Fluxo funcional / transação / automação** | Copilot Studio → tópico/fluxo → Power Automate | Executar uma capacidade estruturada associada à intenção identificada. |
+
+O catálogo pode, portanto, evoluir juntamente com as funcionalidades priorizadas do produto, mantendo a mesma estrutura de interpretação e roteamento. A inclusão de uma nova capacidade exige principalmente o registro da nova intenção e a implementação do fluxo correspondente, sem necessidade de alterar a interface de chat ou o mecanismo central de classificação.
+
+### 5.2.4 Decisões arquiteturais refletidas no diagrama
+
+- **A interface própria de chat é desacoplada da lógica de negócio.** O usuário não depende diretamente do Copilot Studio para iniciar uma conversa; a aplicação controla o ponto de entrada e a apresentação dos resultados.
+- **O núcleo de PLN permanece independente dos modelos generativos.** A identificação da intenção, o controle de escopo e o roteamento são responsabilidades do Pilar 1.
+- **O catálogo de intenções funciona como mecanismo de roteamento.** A mesma entrada conversacional pode ser direcionada a diferentes capacidades conforme a intenção identificada.
+- **O Copilot Studio permanece como componente da arquitetura.** Seu papel é executar e orquestrar tópicos e fluxos específicos, não substituir a interface própria nem o núcleo de PLN.
+- **RAG e geração são componentes distintos.** O SharePoint fornece o conhecimento documental, o mecanismo de recuperação seleciona o contexto relevante e o LLM produz a resposta a partir desse contexto.
+- **A credencial do LLM é protegida no backend.** A interface não acessa diretamente a API generativa nem recebe suas credenciais.
+- **A camada de conhecimento é desacoplada dos canais e da geração.** A fonte documental e o índice podem evoluir sem exigir mudanças estruturais na interface ou no mecanismo de roteamento.
+- **Identidade e rastreabilidade são transversais.** O controle de acesso e os registros de auditoria devem acompanhar as interações independentemente da rota escolhida.
+- **A arquitetura permanece modular.** Novos tópicos, integrações ou capacidades de RAG podem ser adicionados ao catálogo de intenções sem reestruturar integralmente a solução.
+
+### 5.2.5 Limite de representação
+
+O diagrama de componentes concentra-se nas dependências, responsabilidades e interações entre os módulos da solução. A representação detalhada da infraestrutura física, dos containers, nós de execução e ambientes de implantação deve permanecer no **Diagrama de Implantação da UML**, apresentado na Seção 6.1.
+
+---
 
 ## 5.3 Diagramas de Sequência da UML
 _conteúdo_
@@ -2804,6 +2913,75 @@ Resposta esperada: `200 OK`, com o token no corpo como texto. O token é válido
 Authorization: Bearer <TOKEN>
 ```
 
+## 8.7 Escolha de algoritmo PLN
+
+Esta seção registra a escolha atual do pipeline de Processamento de Linguagem Natural responsável por classificar a solicitação do usuário. A implementação e o benchmark reproduzível estão no notebook [`classificador_intencoes_metro.ipynb`](../src/notebooks/classificador_intencoes_metro.ipynb).
+
+Embora seja referido de forma abreviada como “modelo híbrido W2V+BERT”, o componente é tecnicamente um pipeline: a representação híbrida gera os atributos de entrada, e classificadores lineares realizam a previsão em dois níveis — macrointenção e intenção específica.
+
+### 8.7.1 Objetivo e protocolo de avaliação
+
+O classificador organiza os pedidos em quatro macrointenções (`CONSULTA`, `TRANSACAO`, `ALERTA` e `FORA_DE_ESCOPO`) e 31 intenções específicas. A macrointenção determina o fluxo geral do agente, enquanto a intenção específica identifica o handler mais adequado.
+
+O conjunto possui 5.353 exemplos, separados em 3.062 para treino, 1.156 para validação e 1.135 para teste. A separação é agrupada por `template_id`: variações geradas a partir do mesmo template permanecem no mesmo conjunto. Esse cuidado reduz o vazamento que ocorreria se frases quase equivalentes fossem distribuídas aleatoriamente entre treino e teste. Os vetorizadores, escaladores, Word2Vec e demais transformadores são ajustados somente com os dados de treino.
+
+A seleção segue três etapas:
+
+1. escolha do pré-processamento por validação cruzada agrupada somente sobre o treino;
+2. comparação das representações e classificadores no conjunto de validação, usando como critério principal o F1-macro da intenção específica;
+3. avaliação do pipeline escolhido no teste, que não participa da seleção.
+
+### 8.7.2 Benchmark e decisão
+
+O notebook compara TF-IDF de palavras, TF-IDF de caracteres, Word2Vec, embeddings BERT congelados e combinações híbridas. Também compara regressão logística e LinearSVC, além das arquiteturas plana e hierárquica. A tabela produzida pelo próprio script é ordenada pelo F1-macro de intenção na validação, evitando que a escolha seja definida previamente por preferência tecnológica.
+
+Na execução completa de referência, a melhor alternativa foi a representação **Híbrido W2V+BERT**, seguida pela arquitetura **hierárquica**. O Word2Vec, treinado no corpus do projeto, captura relações distribucionais do vocabulário do portfólio. O BERT congelado acrescenta uma representação contextual pré-treinada, mais apta a aproximar formulações diferentes com significado semelhante. A concatenação combina esses sinais complementares e obteve o melhor resultado entre as alternativas avaliadas pelo script.
+
+A arquitetura hierárquica primeiro prevê a macrointenção e depois utiliza um especialista para distinguir apenas as intenções daquele grupo. Essa divisão reduz o número de classes concorrentes em cada segunda etapa e se alinha ao roteamento esperado pelo agente. A escolha atual, portanto, não decorre apenas do uso de modelos semanticamente mais sofisticados, mas do resultado observado sob o mesmo protocolo de comparação.
+
+### 8.7.3 Configuração e resultados atuais
+
+A configuração selecionada na execução de referência foi:
+
+| Elemento | Valor selecionado |
+|---|---|
+| Pré-processamento | `config_22` |
+| Caixa | conversão para minúsculas |
+| Tokenizador | expressão regular `[^\W_]+` |
+| Stopwords | preservadas |
+| Pontuação | removida |
+| Morfologia | stemming Snowball em português |
+| Representação | Híbrido W2V+BERT |
+| Arquitetura | hierárquica |
+| Classificador | regressão logística |
+| Hiperparâmetros | `C=5.0`; `class_weight=balanced` |
+| Limiar de macrointenção | 0,925 |
+| Limiar de intenção específica | 0,950 |
+
+A preservação de stopwords é relevante porque palavras como “qual”, “quando”, “quanto” e “quem” carregam informação útil para distinguir solicitações. Os limiares altos tornam o comportamento conservador: previsões pouco confiáveis não devem acionar diretamente um handler específico.
+
+| Conjunto | Acurácia da intenção | F1-macro da intenção | Acurácia da macro | F1-macro da macro |
+|---|---:|---:|---:|---:|
+| Validação | 0,5666 | 0,5665 | 0,9083 | 0,8885 |
+| Teste | **0,6740** | **0,6777** | **0,9383** | **0,9379** |
+
+Os resultados indicam que o primeiro nível está mais maduro: no teste, a macrointenção atingiu F1-macro de 0,9379, enquanto a intenção específica atingiu 0,6777. Assim, o pipeline já apresenta um sinal forte para roteamento geral, mas ainda possui desempenho moderado na escolha do handler específico.
+
+A execução de referência gerou o classificador serializado (aproximadamente 13.188 KB), o modelo Word2Vec (aproximadamente 925 KB), o catálogo de intenções, o conjunto de dados e o arquivo de métricas. O encoder BERT pré-treinado não está incorporado ao arquivo `joblib` e deve ser carregado separadamente pelo ambiente de inferência.
+
+### 8.7.4 Limitações e próximos passos
+
+Os números atuais devem ser interpretados com as seguintes ressalvas:
+
+- os prompts são majoritariamente sintéticos e derivados de templates; o agrupamento reduz vazamento entre variações, mas não substitui uma avaliação externa com solicitações reais;
+- o Word2Vec é treinado em apenas 3.062 exemplos, o que limita a cobertura do vocabulário e das relações semânticas do domínio;
+- o BERT é usado como extrator de embeddings congelado, sem ajuste supervisionado para as intenções do projeto;
+- a diferença entre validação e teste reflete conjuntos de templates distintos e não deve ser interpretada como garantia de melhora futura;
+- os limiares de 0,925 e 0,950 priorizam segurança, mas podem reduzir a cobertura e aumentar respostas de limitação;
+- o desempenho agregado pode ocultar intenções individuais com poucos acertos, exigindo acompanhamento por classe e análise das matrizes de confusão;
+- a inferência depende do carregamento coordenado do classificador, do Word2Vec e do encoder BERT, aspecto que deverá ser formalizado no serviço de produção.
+
+Como próximos passos, o grupo deve coletar solicitações reais com usuários do domínio, manter um conjunto externo de teste, medir cobertura e acurácia após a aplicação dos limiares, revisar as classes com maior confusão e comparar novamente as alternativas. Até essa validação, o híbrido W2V+BERT deve ser entendido como o **vencedor do benchmark atual** e a escolha do grupo para o MVP, não como um modelo definitivamente validado para produção.
 
 
 

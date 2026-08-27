@@ -1,2 +1,2 @@
-.src/frontend
 .DS_Store
+node_modules/
