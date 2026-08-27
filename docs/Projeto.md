@@ -77,6 +77,7 @@
     - [3.1.3.2 Cenário 2 — Análise e comparação entre projetos](#3132-cenário-2-análise-e-comparação-entre-projetos)
     - [3.1.3.3 Cenário 3 — Roteamento híbrido e sugestão proativa](#3133-cenário-3-roteamento-híbrido-e-sugestão-proativa)
     - [3.1.4 Rastreabilidade entre User Stories e Modelagem UML](#314-rastreabilidade-entre-user-stories-e-modelagem-uml)
+    - [3.1.5 Escopo dos requisitos funcionais](#315-escopo-dos-requisitos-funcionais)
   - [3.2 Requisitos Não Funcionais (RNFs)](#32-requisitos-não-funcionais-rnfs)
     - [3.2.1 RNFs descritos como histórias de usuário](#321-rnfs-descritos-como-histórias-de-usuário)
   - [3.3 Visão Inicial sobre a Solução Técnica de Engenharia](#33-visão-inicial-sobre-a-solução-técnica-de-engenharia)
@@ -121,8 +122,10 @@
   - [4.4 Modelo Físico de Dados](#44-modelo-físico-de-dados)
 - [5. Solução Técnica (Design)](#5-solução-técnica-design)
   - [5.1 Diagrama de Classes](#51-diagrama-de-classes)
-    - [5.1.1 Decisões refletidas no diagrama](#511-decisões-refletidas-no-diagrama)
-    - [5.1.2 Relação com o modelo de dados](#512-relação-com-o-modelo-de-dados)
+    - [5.1.1 Modelo consolidado](#511-modelo-consolidado)
+    - [5.1.2 O que mudou em relação à Seção 3.1.2](#512-o-que-mudou-em-relação-à-seção-312)
+    - [5.1.3 Decisões refletidas no diagrama](#513-decisões-refletidas-no-diagrama)
+    - [5.1.4 Correspondência com o modelo de dados](#514-correspondência-com-o-modelo-de-dados)
   - [5.2 Diagrama de Componentes da UML](#52-diagrama-de-componentes-da-uml)
     - [5.2.1 Componentes e responsabilidades](#521-componentes-e-responsabilidades)
     - [5.2.2 Fluxo de interação entre os componentes](#522-fluxo-de-interação-entre-os-componentes)
@@ -1981,6 +1984,20 @@ A modelagem apresentada nesta seção possui caráter inicial e está diretament
 
 
 
+### 3.1.5 Escopo dos requisitos funcionais
+
+Os dez requisitos funcionais não têm o mesmo horizonte de entrega, e a distinção precisa estar declarada para que a especificação não conflite com a matriz de priorização da Seção 2.8 nem com o recorte do MVP registrado na Seção 2.9.
+
+| Requisito | Escopo | Justificativa |
+|---|---|---|
+| RF01 a RF08 | **MVP** | Compõem o pipeline de consulta e resposta fundamentada, que é o recorte declarado na Seção 2.9 e sustentado pelas features da faixa Muito Alta da Seção 2.8 |
+| RF09 — Sugestão proativa de intenção secundária | **Previsto, pós-MVP** | Decorre da prototipação exploratória da Seção 3.8, cuja questão era o regime de iniciativa do agente. O comportamento proativo está no Bloco 3 da Seção 2.4.3, fora do MVP |
+| RF10 — Controle da proatividade | **Previsto, pós-MVP** | Depende da feature "Edição das configurações do agente por menu", classificada na faixa Evolução da Seção 2.8. Sem RF09 implementado, não há proatividade a controlar |
+
+A especificação de RF09 e RF10 nesta sprint é deliberada e não amplia o escopo do MVP. A prototipação exploratória produziu uma decisão de comportamento — o agente pode sugerir, mas nunca executar sem confirmação — e registrar essa decisão como requisito, com critérios de aceitação verificáveis, é o que impede que ela se perca entre sprints. A implementação segue condicionada à priorização da Seção 2.8.
+
+Registra-se também uma lacuna conhecida: nenhum requisito não funcional da Seção 3.2 governa a qualidade da proatividade. O RF09 estabelece que a sugestão aparece separada da resposta principal e exige confirmação, mas não há critério mensurável para intervenção inadequada — a falha que a Seção 3.8.4 identificou como característica do regime proativo. Esse RNF deve ser especificado antes da implementação de RF09.
+
 ## 3.2 Requisitos Não Funcionais (RNFs)
 
 Os requisitos não funcionais definem os atributos de qualidade que a solução deve atender durante o desenvolvimento e a validação do MVP. Diferentemente dos requisitos funcionais, que descrevem o que o sistema deve fazer, os RNFs estabelecem condições de segurança, desempenho, confiabilidade, rastreabilidade, manutenibilidade e aderência tecnológica necessárias para que o agente possa ser utilizado de forma adequada no contexto do PMO do Metrô.
@@ -3059,9 +3076,11 @@ _conteúdo_
 
 ## 5.1 Diagrama de Classes
 
-O diagrama abaixo representa as entidades de domínio da solução e seus relacionamentos. Ele deriva do modelo lógico da Seção 4.3, mas não o repete: enquanto aquele descreve tabelas, chaves e cardinalidades para implementação no banco, este descreve as classes que o backend manipula em memória e o comportamento associado a cada uma.
+Esta seção **evolui** a modelagem estática apresentada na Seção 3.1.2, e não a substitui. Aquela modelagem, produzida na Sprint 1, representa o pipeline de processamento: como uma `Solicitacao` percorre classificação, roteamento e geração de resposta. Ela permanece válida e continua sendo a referência da rastreabilidade da Seção 3.1.4.
 
-As entidades foram agrupadas em quatro conjuntos, correspondentes às camadas da arquitetura da Seção 5.2: **portfólio**, que representa o domínio do Metrô; **conhecimento**, que representa o material consultável; **interação**, que representa o ciclo de uma solicitação; e **governança**, que atravessa os demais.
+O que a Sprint 2 acrescentou foi a camada que faltava: o **domínio persistido**. A modelagem de dados das Seções 4.2 a 4.4 introduziu as entidades do portfólio, do conhecimento consultável e da auditoria, que a modelagem inicial não precisava representar porque ainda não havia banco. O diagrama abaixo une as duas camadas e explicita onde elas se tocam.
+
+### 5.1.1 Modelo consolidado
 
 <div align="center">
 
@@ -3069,181 +3088,178 @@ As entidades foram agrupadas em quatro conjuntos, correspondentes às camadas da
 classDiagram
     direction LR
 
-    class Subportfolio {
+    class Solicitacao {
         +UUID id
-        +String codigo
-        +String nome
-        +listarProjetos() Projeto[]
-    }
-
-    class Projeto {
-        +UUID id
-        +UUID subportfolioId
-        +String nome
-        +String situacao
-        +Date prazoVigente
-        +avancoAtual() StatusProjeto
-        +riscosAbertos() RiscoProblema[]
-    }
-
-    class Artefato {
-        +UUID id
-        +UUID projetoId
-        +String tipo
-        +String origem
-        +String caminho
-        +extrairTrechos() Extrato[]
-    }
-
-    class Extrato {
-        +UUID id
-        +UUID artefatoId
         +String texto
-        +String secao
-        +Float relevancia
+        +DateTime dataHora
+        +String canal
     }
 
-    class ItemCronograma {
-        +UUID id
-        +UUID projetoId
-        +String descricao
-        +Float peso
-        +Date inicio
-        +Date termino
-        +somaDosPesosFecha() Boolean
-    }
-
-    class StatusProjeto {
-        +UUID id
-        +UUID projetoId
-        +Float avancoFisico
-        +String resumo
-        +Date competencia
-    }
-
-    class RiscoProblema {
-        +UUID id
-        +UUID projetoId
-        +String tipo
-        +Integer probabilidade
-        +Integer impacto
-        +severidade() Integer
-    }
-
-    class Usuario {
-        +UUID id
-        +String nome
-        +String perfil
-        +podeAcessar(Projeto) Boolean
-    }
-
-    class RegraAcesso {
-        +UUID id
-        +UUID usuarioId
-        +UUID escopoId
-        +String nivel
+    class PipelinePLN {
+        +classificar(Solicitacao) Intencao
+        +extrairEntidades(Solicitacao) EntidadeExtraida[]
     }
 
     class Intencao {
         +UUID id
         +String macrointencao
         +String intencaoEspecifica
-        +String handler
-        +Float limiarMacro
-        +Float limiarEspecifica
-        +exigeConfirmacao() Boolean
+        +Float confiancaMacro
+        +Float confiancaEspecifica
+        +Boolean possuiFluxoAutomatizado
+        +acimaDoLimiar() Boolean
+    }
+
+    class RoteadorIntencao {
+        +rotear(Intencao) RotaProcessamento
+    }
+
+    class Resposta {
+        +String texto
+        +Boolean fundamentada
+        +declararLimitacao() String
+    }
+
+    class Interacao {
+        +UUID id
+        +UUID conversaId
+        +String rota
+        +DateTime registradaEm
     }
 
     class Conversa {
         +UUID id
         +UUID usuarioId
         +DateTime iniciadaEm
-        +Interacao[] interacoes
     }
 
-    class Interacao {
+    class Usuario {
         +UUID id
-        +UUID conversaId
-        +UUID intencaoId
-        +String pergunta
-        +Float confiancaMacro
-        +Float confiancaEspecifica
-        +String rota
-        +Resposta resposta
-        +acimaDoLimiar() Boolean
+        +String perfil
+        +podeAcessar(Projeto) Boolean
     }
 
-    class Resposta {
+    class RegraAcesso {
+        +UUID id
+        +String nivel
+    }
+
+    class Projeto {
+        +UUID id
+        +String nome
+        +Date prazoVigente
+        +avancoAtual() StatusProjeto
+    }
+
+    class Subportfolio {
+        +UUID id
+        +String nome
+    }
+
+    class Artefato {
+        +UUID id
+        +String tipo
+        +String origem
+    }
+
+    class TrechoRecuperado {
+        +UUID id
         +String texto
-        +Boolean fundamentada
-        +FonteConsultada[] fontes
-        +declararLimitacao() String
+        +String secao
+        +Float relevancia
     }
 
     class FonteConsultada {
         +UUID id
-        +UUID interacaoId
-        +UUID extratoId
         +Float score
+    }
+
+    class ItemCronograma {
+        +UUID id
+        +Float peso
+        +somaDosPesosFecha() Boolean
+    }
+
+    class RiscoProblema {
+        +UUID id
+        +Integer probabilidade
+        +Integer impacto
+        +severidade() Integer
     }
 
     class EventoAuditoria {
         +UUID id
-        +UUID interacaoId
         +String tipo
         +DateTime ocorridoEm
-        +String detalhe
     }
 
     class SolicitacaoForaDeEscopo {
         +UUID id
-        +UUID interacaoId
         +String motivo
-        +Boolean revisada
     }
+
+    Solicitacao --> PipelinePLN : processada por
+    PipelinePLN --> Intencao : produz
+    Intencao --> RoteadorIntencao : orienta
+    RoteadorIntencao --> Resposta : resulta em
+
+    Solicitacao "1" --> "1" Interacao : registrada como
+    Conversa "1" *-- "1..*" Interacao
+    Usuario "1" o-- "0..*" Conversa
+    Usuario "1" o-- "0..*" RegraAcesso
+    RegraAcesso ..> Projeto : delimita escopo
+
+    Interacao "1" --> "1" Intencao
+    Interacao "1" *-- "0..1" Resposta
+    Interacao "1" o-- "0..*" EventoAuditoria
+    Interacao "1" --> "0..1" SolicitacaoForaDeEscopo
+
+    Resposta "1" o-- "0..*" FonteConsultada
+    FonteConsultada "1" --> "1" TrechoRecuperado
+    Artefato "1" o-- "0..*" TrechoRecuperado
 
     Subportfolio "1" o-- "0..*" Projeto
     Projeto "1" o-- "0..*" Artefato
     Projeto "1" o-- "0..*" ItemCronograma
-    Projeto "1" o-- "0..*" StatusProjeto
     Projeto "1" o-- "0..*" RiscoProblema
-    Artefato "1" o-- "0..*" Extrato
-
-    Usuario "1" o-- "0..*" RegraAcesso
-    Usuario "1" o-- "0..*" Conversa
-    RegraAcesso ..> Projeto : delimita escopo
-
-    Conversa "1" *-- "1..*" Interacao
-    Interacao "1" --> "1" Intencao : classificada como
-    Interacao "1" *-- "0..1" Resposta
-    Resposta "1" o-- "0..*" FonteConsultada
-    FonteConsultada "1" --> "1" Extrato : referencia
-    Interacao "1" o-- "0..*" EventoAuditoria
-    Interacao "1" --> "0..1" SolicitacaoForaDeEscopo
 ```
 
-  <p align="center"><strong>Figura 16</strong> - Diagrama de classes das entidades de domínio.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p align="center"><strong>Figura 16</strong> - Diagrama de classes consolidado, unindo o pipeline de processamento e o domínio persistido.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 </div>
 
-### 5.1.1 Decisões refletidas no diagrama
+### 5.1.2 O que mudou em relação à Seção 3.1.2
 
-- **`Resposta` é composição de `Interacao`, e não entidade independente.** Uma resposta não existe fora da interação que a originou, e o método `declararLimitacao()` materializa o comportamento exigido pelo RF08: quando não há fonte suficiente, a resposta declara a limitação em vez de completar a lacuna.
-- **`FonteConsultada` liga a resposta ao `Extrato`, e não ao `Artefato`.** A rastreabilidade exigida pelo RNF03 precisa apontar o trecho utilizado, não apenas o documento de origem.
-- **`Intencao` carrega os limiares.** Os valores de 0,925 para a macrointenção e 0,950 para a intenção específica, definidos na Seção 8.10.3, pertencem ao catálogo e não ao código, de modo que possam ser ajustados sem nova implantação.
-- **`RegraAcesso` é uma classe, e não um atributo de `Usuario`.** O mesmo usuário pode ter níveis diferentes por subportfólio ou por projeto, o que o RNF02 exige e um atributo simples não representaria.
-- **`ItemCronograma.somaDosPesosFecha()` está no domínio.** A validação de que os pesos fecham em 100%, prevista na Seção 2.4.3, é regra de negócio e não de interface, e por isso vive na entidade.
-- **`SolicitacaoForaDeEscopo` é entidade própria.** Registrar o que o agente não soube responder é insumo para a evolução do catálogo, e não um estado descartável da interação.
+| Classe da Sprint 1 | Situação na Sprint 2 | Motivo |
+|---|---|---|
+| `Solicitacao`, `PipelinePLN`, `Intencao`, `RoteadorIntencao`, `Resposta` | Mantidas | Continuam descrevendo o caminho de processamento e sustentam a rastreabilidade da Seção 3.1.4 |
+| `ClassificadorIntencao`, `RecuperadorInformacao`, `AnalisadorComparativo`, `ExecutorFluxoAutomatizado`, `GeradorLLM` | Movidas para a Seção 5.2 | São componentes de arquitetura, não entidades de domínio. O diagrama de componentes é o lugar correto para elas |
+| `CategoriaIntencao`, `RotaProcessamento` | Absorvidas como atributos | `macrointencao` e `rota` passaram a ser valores de `Intencao` e `Interacao`, persistidos em `intent_catalog` e `ai_interactions` |
+| `DocumentoProjeto` | Renomeada para `Artefato` | O modelo lógico da Seção 4.3 usa `project_artifacts`, e a entidade cobre documentos, listas, planilhas e normativos, não apenas documentos |
+| `TrechoRecuperado` | Mantida | Corresponde a `source_extracts` e é o que a `FonteConsultada` referencia |
+| `EntidadeExtraida` | Mantida na Seção 3.1.2 | Existe no pipeline, mas não é persistida no MVP; não aparece no modelo de dados |
+| `SugestaoProativa`, `ConfiguracaoProatividade` | Mantidas na Seção 3.1.2 | Sustentam RF09 e RF10, cujo escopo está declarado na Seção 3.1.5 |
+| — | `Interacao`, `Conversa`, `Usuario`, `RegraAcesso`, `FonteConsultada`, `EventoAuditoria`, `SolicitacaoForaDeEscopo` | Novas. Vieram do modelo de dados: sem persistência, a Sprint 1 não precisava representá-las |
+| — | `Subportfolio`, `Projeto`, `ItemCronograma`, `RiscoProblema` | Novas. Domínio do portfólio, introduzido com o modelo conceitual da Seção 4.2 |
 
-### 5.1.2 Relação com o modelo de dados
+### 5.1.3 Decisões refletidas no diagrama
 
-Cada classe corresponde a uma ou mais tabelas do modelo lógico da Seção 4.3. A correspondência não é de um para um: `Resposta`, por exemplo, é persistida em colunas de `ai_interactions`, porque não tem ciclo de vida próprio no banco.
+- **`Resposta` é composição de `Interacao`, e não entidade independente.** Uma resposta não existe fora da interação que a originou, e `declararLimitacao()` materializa o comportamento exigido pelo RF08: sem fonte suficiente, a resposta declara a limitação em vez de completar a lacuna.
+- **`FonteConsultada` liga a resposta ao `TrechoRecuperado`, e não ao `Artefato`.** A rastreabilidade exigida pelo RNF03 precisa apontar o trecho utilizado, não apenas o documento de origem.
+- **`Intencao` carrega os limiares e as confianças.** Os valores de 0,925 e 0,950 definidos na Seção 8.10.3 pertencem ao catálogo, não ao código, de modo que possam ser ajustados sem nova implantação. `acimaDoLimiar()` é o que decide se um handler é acionado.
+- **`RegraAcesso` é classe, e não atributo de `Usuario`.** O mesmo usuário pode ter níveis diferentes por subportfólio ou por projeto, o que o RNF02 exige e um atributo simples não representaria.
+- **`ItemCronograma.somaDosPesosFecha()` está no domínio.** A validação de que os pesos fecham em 100%, prevista na Seção 2.4.3, é regra de negócio e não de interface.
+- **`SolicitacaoForaDeEscopo` é entidade própria.** Registrar o que o agente não soube responder é insumo para evoluir o catálogo, e não um estado descartável da interação.
+
+### 5.1.4 Correspondência com o modelo de dados
+
+A relação com as tabelas da Seção 4.3 não é de um para um. `Resposta`, por exemplo, é persistida em colunas de `ai_interactions`, porque não tem ciclo de vida próprio no banco.
 
 | Classe | Tabelas correspondentes |
 |---|---|
 | `Subportfolio`, `Projeto` | `subportfolios`, `projects` |
-| `Artefato`, `Extrato` | `project_artifacts`, `source_extracts` |
-| `ItemCronograma`, `StatusProjeto`, `RiscoProblema` | `schedule_items`, `project_status_updates`, `risk_issue_items` |
+| `Artefato`, `TrechoRecuperado` | `project_artifacts`, `source_extracts` |
+| `ItemCronograma`, `RiscoProblema` | `schedule_items`, `risk_issue_items` |
 | `Usuario`, `RegraAcesso` | `users`, `access_rules` |
 | `Intencao` | `intent_catalog`, `prompt_templates` |
 | `Conversa`, `Interacao`, `Resposta` | `ai_conversations`, `ai_interactions` |
@@ -3251,7 +3267,7 @@ Cada classe corresponde a uma ou mais tabelas do modelo lógico da Seção 4.3. 
 | `EventoAuditoria` | `audit_events` |
 | `SolicitacaoForaDeEscopo` | `out_of_scope_requests` |
 
-As tabelas `change_records` e `intent_test_cases` não aparecem como classes de domínio: a primeira é registro histórico consultado por relatório, e a segunda pertence ao ciclo de avaliação do classificador, descrito na Seção 8.10.1, e não ao runtime da aplicação.
+As tabelas `project_status_updates`, `change_records` e `intent_test_cases` não aparecem como classes: as duas primeiras são registro histórico consultado por relatório, e a terceira pertence ao ciclo de avaliação do classificador descrito na Seção 8.10.1, não ao runtime.
 
 ## 5.2 Diagrama de Componentes da UML
 
