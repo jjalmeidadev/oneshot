@@ -1,2 +1,33 @@
-.DS_Store
+# --- Python (backend) ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Segredos / configuracao local (chaves de API etc.)
+.env
+.env.*
+!.env.example
+
+# --- Node / frontend ---
 node_modules/
+dist/
+build/
+.vite/
+dev-server.log
+npm-debug.log*
+yarn-error.log*
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- Sistema operacional / editor ---
+.DS_Store
+Thumbs.db
+.idea/
+*.swp

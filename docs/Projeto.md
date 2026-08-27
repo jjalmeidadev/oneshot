@@ -75,7 +75,7 @@
     - [3.1.3 Modelagem Dinâmica Inicial dos Requisitos Funcionais](#313-modelagem-dinâmica-inicial-dos-requisitos-funcionais)
     - [3.1.3.1 Cenário 1 — Consulta de informação de um projeto](#3131-cenário-1-consulta-de-informação-de-um-projeto)
     - [3.1.3.2 Cenário 2 — Análise e comparação entre projetos](#3132-cenário-2-análise-e-comparação-entre-projetos)
-    - [3.1.3.3 Cenário 3 — Classificação e direcionamento da solicitação](#3133-cenário-3-classificação-e-direcionamento-da-solicitação)
+    - [3.1.3.3 Cenário 3 — Roteamento híbrido e sugestão proativa](#3133-cenário-3-roteamento-híbrido-e-sugestão-proativa)
     - [3.1.4 Rastreabilidade entre User Stories e Modelagem UML](#314-rastreabilidade-entre-user-stories-e-modelagem-uml)
   - [3.2 Requisitos Não Funcionais (RNFs)](#32-requisitos-não-funcionais-rnfs)
     - [3.2.1 RNFs descritos como histórias de usuário](#321-rnfs-descritos-como-histórias-de-usuário)
@@ -116,6 +116,7 @@
 - [4. Modelagem de Dados](#4-modelagem-de-dados)
   - [4.1 Especificação da Base de Dados](#41-especificação-da-base-de-dados)
   - [4.2 Modelo Conceitual de Dados](#42-modelo-conceitual-de-dados)
+  - [4.3 Modelo Lógico de Dados](#43-modelo-lógico-de-dados)
 - [5. Solução Técnica (Design)](#5-solução-técnica-design)
   - [5.1 Diagrama de Classes](#51-diagrama-de-classes)
   - [5.2 Diagrama de Componentes da UML](#52-diagrama-de-componentes-da-uml)
@@ -151,11 +152,16 @@
     - [8.6.1 Introdução](#861-introdução)
     - [8.6.2 Benchmark das APIs](#862-benchmark-das-apis)
     - [8.6.3 API escolhida: Azure AI Speech](#863-api-escolhida-azure-ai-speech)
-  - [8.7 Escolha de algoritmo PLN](#87-escolha-de-algoritmo-pln)
-    - [8.7.1 Objetivo e protocolo de avaliação](#871-objetivo-e-protocolo-de-avaliação)
-    - [8.7.2 Benchmark e decisão](#872-benchmark-e-decisão)
-    - [8.7.3 Configuração e resultados atuais](#873-configuração-e-resultados-atuais)
-    - [8.7.4 Limitações e próximos passos](#874-limitações-e-próximos-passos)
+  - [8.7 Text-to-Speech](#87-text-to-speech)
+    - [8.7.1 Introdução](#871-introdução)
+    - [8.7.2 Benchmark das APIs](#872-benchmark-das-apis)
+    - [8.7.3 API escolhida: Azure AI Speech](#873-api-escolhida-azure-ai-speech)
+    - [8.7.4 Referências](#874-referências)
+  - [8.8 Escolha de algoritmo PLN](#88-escolha-de-algoritmo-pln)
+    - [8.8.1 Objetivo e protocolo de avaliação](#881-objetivo-e-protocolo-de-avaliação)
+    - [8.8.2 Benchmark e decisão](#882-benchmark-e-decisão)
+    - [8.8.3 Configuração e resultados atuais](#883-configuração-e-resultados-atuais)
+    - [8.8.4 Limitações e próximos passos](#884-limitações-e-próximos-passos)
 - [9. Planejamento e Execução de Testes](#9-planejamento-e-execução-de-testes)
   - [9.1 Testes Funcionais](#91-testes-funcionais)
     - [9.1.1 Planejamento](#911-planejamento)
@@ -1368,7 +1374,7 @@ _conteúdo_
 
 Os requisitos funcionais definem as funcionalidades que deverão ser contempladas pela prova de conceito desenvolvida no MVP. Sua definição considera o escopo estabelecido para o projeto e as oportunidades levantadas durante o processo de ideação, priorizando as funcionalidades diretamente relacionadas ao pipeline de Processamento de Linguagem Natural (PLN).
 
-O núcleo do MVP consiste em um pipeline de PLN capaz de receber comandos em linguagem natural, interpretar semanticamente as solicitações dos usuários e identificar a intenção primária de cada interação. O catálogo de intenções determina então a rota de processamento: intenções com fluxo automatizado são executadas diretamente, sem passar por uma LLM; intenções pertencentes ao escopo, mas sem automação cadastrada, são encaminhadas à LLM com contexto estruturado e validado. Nesse segundo ramo, quando a proatividade estiver habilitada, o sistema associa à intenção primária uma intenção secundária compatível e a apresenta como sugestão opcional de próximo passo.
+O núcleo do MVP consiste em um pipeline de PLN capaz de receber comandos em linguagem natural, interpretar semanticamente as solicitações dos usuários e identificar a intenção primária de cada interação. O catálogo de intenções determina então a rota de processamento: intenções com fluxo automatizado são executadas diretamente, sem passar por um LLM; intenções pertencentes ao escopo, mas sem automação cadastrada, são encaminhadas ao LLM com contexto estruturado e validado. Nesse segundo ramo, quando a proatividade estiver habilitada, o sistema associa à intenção primária uma intenção secundária compatível e a apresenta como sugestão opcional de próximo passo.
 
 Por se tratar de uma prova de conceito em contexto acadêmico, o funcionamento do MVP será validado sobre dados sintéticos. Integrações com dados reais do portfólio do Metrô de São Paulo e demais funcionalidades corporativas identificadas durante a ideação são consideradas possibilidades de evolução da solução e não constituem requisitos obrigatórios para a validação do núcleo funcional do MVP.
 
@@ -1495,13 +1501,13 @@ Como gestor do portfólio, quero solicitar análises e comparações entre proje
 
 **User Story — US07**
 
-Como usuário da solução, quero que minha solicitação siga a rota prevista para a intenção identificada, para que ações conhecidas sejam executadas diretamente e as demais solicitações válidas recebam tratamento pela LLM.
+Como usuário da solução, quero que minha solicitação siga a rota prevista para a intenção identificada, para que ações conhecidas sejam executadas diretamente e as demais solicitações válidas recebam tratamento pelo LLM.
 
 **Critérios de aceitação:**
 
 * Quando o catálogo indicar um fluxo automatizado, o sistema deve encaminhar a ele a intenção e os parâmetros estruturados necessários.
-* Uma solicitação atendida por fluxo automatizado não deve ser enviada à LLM.
-* Quando a intenção pertencer ao escopo, mas não possuir fluxo automatizado, o sistema deve encaminhar à LLM somente a intenção e o contexto estruturado e validado necessário para produzir a resposta.
+* Uma solicitação atendida por fluxo automatizado não deve ser enviada ao LLM.
+* Quando a intenção pertencer ao escopo, mas não possuir fluxo automatizado, o sistema deve encaminhar ao LLM somente a intenção e o contexto estruturado e validado necessário para produzir a resposta.
 * O comportamento das duas rotas deve poder ser demonstrado utilizando dados sintéticos ou simulações controladas.
 
 **Feature relacionada:** Ingestão de informações dos projetos.
@@ -1517,7 +1523,7 @@ Como usuário da solução, quero receber respostas estruturadas e fundamentadas
 **Critérios de aceitação:**
 
 * O resultado de um fluxo automatizado deve corresponder à ação executada ou simulada e informar seu estado de conclusão.
-* A resposta produzida pela LLM deve considerar apenas a intenção e as informações estruturadas e validadas disponibilizadas pelo pipeline.
+* A resposta produzida pelo LLM deve considerar apenas a intenção e as informações estruturadas e validadas disponibilizadas pelo pipeline.
 * O sistema não deve apresentar como fato informações que não estejam sustentadas pelos dados disponíveis.
 * Quando não houver informações suficientes, o sistema deve indicar a limitação ao usuário.
 * O retorno deve ser estruturado de forma coerente com a rota executada e preservar as referências disponíveis.
@@ -1566,7 +1572,7 @@ Como usuário da solução, quero ativar ou desativar as sugestões proativas, p
 
 A modelagem estática apresentada nesta subseção representa as principais classes de domínio necessárias para descrever o comportamento previsto pelos requisitos funcionais do MVP. O objetivo nesta etapa não é definir integralmente a arquitetura ou a implementação do sistema, mas demonstrar a relação entre as histórias de usuário, os dados manipulados e as responsabilidades necessárias ao funcionamento do pipeline.
 
-A modelagem considera a `Solicitacao` como elemento de entrada do sistema. Cada solicitação possui uma `Intencao` primária, identificada pelo pipeline e associada ao `CatalogoIntencoes`. O catálogo informa ao `RoteadorIntencao` se existe um fluxo automatizado: quando existe, o `ExecutorFluxoAutomatizado` processa a solicitação sem acionar a LLM; caso contrário, o `GeradorLLM` recebe somente o contexto estruturado e validado. Quando a proatividade está ativa, uma `SugestaoProativa` pode associar à intenção primária uma intenção secundária cadastrada, que depende da confirmação do usuário para ser executada.
+A modelagem considera a `Solicitacao` como elemento de entrada do sistema. Cada solicitação possui uma `Intencao` primária, identificada pelo pipeline e associada ao `CatalogoIntencoes`. O catálogo informa ao `RoteadorIntencao` se existe um fluxo automatizado: quando existe, o `ExecutorFluxoAutomatizado` processa a solicitação sem acionar o LLM; caso contrário, o `GeradorLLM` recebe somente o contexto estruturado e validado. Quando a proatividade está ativa, uma `SugestaoProativa` pode associar à intenção primária uma intenção secundária cadastrada, que depende da confirmação do usuário para ser executada.
 
 ```mermaid
 classDiagram
@@ -1784,7 +1790,7 @@ sequenceDiagram
     end
 ```
 
-O cenário começa com o RF01, quando o usuário envia uma solicitação em linguagem natural. O RF02 é representado pela identificação semântica da intenção e o RF03 por sua associação ao catálogo. Como não existe fluxo automatizado, o RF07 determina que somente o contexto estruturado e validado seja encaminhado à LLM. O RF04 determina a recuperação dos dados relevantes, o RF05 corresponde à resposta sobre o projeto solicitado e o RF08 exige que as informações recuperadas fundamentem o retorno ou que a insuficiência seja declarada.
+O cenário começa com o RF01, quando o usuário envia uma solicitação em linguagem natural. O RF02 é representado pela identificação semântica da intenção e o RF03 por sua associação ao catálogo. Como não existe fluxo automatizado, o RF07 determina que somente o contexto estruturado e validado seja encaminhado ao LLM. O RF04 determina a recuperação dos dados relevantes, o RF05 corresponde à resposta sobre o projeto solicitado e o RF08 exige que as informações recuperadas fundamentem o retorno ou que a insuficiência seja declarada.
 
 ### 3.1.3.2 Cenário 2 — Análise e comparação entre projetos
 
@@ -1838,11 +1844,11 @@ sequenceDiagram
     end
 ```
 
-Nesse cenário, o RF06 diferencia o fluxo de uma consulta simples, pois exige recuperar informações referentes a dois ou mais projetos e aplicar uma etapa adicional de comparação. O RF07 encaminha à LLM o resultado estruturado dessa análise porque o catálogo não possui automação correspondente. O resultado continua sujeito ao RF08: somente informações sustentadas pelos dados disponíveis devem ser apresentadas como fato.
+Nesse cenário, o RF06 diferencia o fluxo de uma consulta simples, pois exige recuperar informações referentes a dois ou mais projetos e aplicar uma etapa adicional de comparação. O RF07 encaminha ao LLM o resultado estruturado dessa análise porque o catálogo não possui automação correspondente. O resultado continua sujeito ao RF08: somente informações sustentadas pelos dados disponíveis devem ser apresentadas como fato.
 
 ### 3.1.3.3 Cenário 3 — Roteamento híbrido e sugestão proativa
 
-Este cenário representa o comportamento do pipeline após identificar a intenção primária. O catálogo diferencia uma intenção fora do escopo, uma intenção com fluxo automatizado e uma intenção válida sem automação. Somente o último ramo utiliza a LLM e pode apresentar uma intenção secundária quando a proatividade estiver habilitada. O cenário cobre principalmente RF01, RF02, RF03, RF07, RF08, RF09 e RF10.
+Este cenário representa o comportamento do pipeline após identificar a intenção primária. O catálogo diferencia uma intenção fora do escopo, uma intenção com fluxo automatizado e uma intenção válida sem automação. Somente o último ramo utiliza o LLM e pode apresentar uma intenção secundária quando a proatividade estiver habilitada. O cenário cobre principalmente RF01, RF02, RF03, RF07, RF08, RF09 e RF10.
 
 ```mermaid
 sequenceDiagram
@@ -1916,7 +1922,7 @@ sequenceDiagram
     end
 ```
 
-A separação entre identificação, catalogação e roteamento é importante nesse fluxo. O RF02 corresponde à compreensão da intenção primária e o RF03 associa essa intenção à categoria e à rota controladas pelo catálogo. O RF07 garante que a rota automatizada não utilize a LLM e que apenas intenções válidas sem automação recebam tratamento generativo. O RF08 rege o resultado das duas rotas.
+A separação entre identificação, catalogação e roteamento é importante nesse fluxo. O RF02 corresponde à compreensão da intenção primária e o RF03 associa essa intenção à categoria e à rota controladas pelo catálogo. O RF07 garante que a rota automatizada não utilize o LLM e que apenas intenções válidas sem automação recebam tratamento generativo. O RF08 rege o resultado das duas rotas.
 
 No ramo não automatizado, o RF09 permite apresentar uma intenção secundária cadastrada junto à resposta principal, mas exige confirmação antes de executá-la. O RF10 mantém essa iniciativa sob controle do usuário: quando a proatividade está desativada, o sistema continua identificando, roteando e respondendo à intenção primária, mas não oferece o próximo passo. Dessa forma, a proatividade documentada depende da consulta atual e não pressupõe observação contínua da atividade do usuário.
 
@@ -2041,7 +2047,7 @@ Esta seção apresenta a seleção inicial de tecnologias e ferramentas consider
 
 As tecnologias apresentadas nesta seção são classificadas entre aquelas previstas para utilização no **MVP**, desenvolvido e validado sobre dados sintéticos, e aquelas consideradas como alternativas ou possibilidades de evolução. Essa distinção é necessária porque o TAPI estabelece que a integração com o portfólio real do Metrô constitui uma evolução do MVP, não sendo requisito para a validação inicial da solução.
 
-> **Leitura desta seção.** A Seção 3.4 registra a visão de tecnologias formulada na Sprint 1. As decisões de canal permanecem válidas: o agente é entregue no Microsoft Teams, com o Copilot Studio como orquestrador. A Sprint 2 acrescentou o detalhamento que aqui aparece apenas como direção — o benchmark da API de transcrição está na Seção 8.6, o do algoritmo de PLN na Seção 8.7 e a arquitetura consolidada, com o papel de cada componente, na Seção 5.2.
+> **Leitura desta seção.** A Seção 3.4 registra a visão de tecnologias formulada na Sprint 1. As decisões de canal permanecem válidas: o agente é entregue no Microsoft Teams, com o Copilot Studio como orquestrador. A Sprint 2 acrescentou o detalhamento que aqui aparece apenas como direção — o benchmark da API de transcrição está na Seção 8.6, o do algoritmo de PLN na Seção 8.8 e a arquitetura consolidada, com o papel de cada componente, na Seção 5.2.
 
 ### 3.4.1 Critérios de seleção
 
@@ -2160,7 +2166,7 @@ O registro das opções descartadas é parte da decisão: ele documenta o que fo
 
 | Alternativa | Por que foi considerada | Por que não foi adotada |
 |---|---|---|
-| **API de LLM externo** (OpenAI, Anthropic, Google) para **classificação de intenções** | Menor esforço de implementação e boa acurácia sem treinamento. | Viola C2 (trânsito de dados por serviço não homologado) e C3 (o Pilar 1 exige núcleo autoral e avaliado pela equipe). A classificação permanece no pipeline próprio descrito na Seção 8.7. A geração da resposta a partir do contexto recuperado pelo RAG usa um LLM, cujo provedor ainda será definido e homologado. |
+| **API de LLM externo** (OpenAI, Anthropic, Google) para **classificação de intenções** | Menor esforço de implementação e boa acurácia sem treinamento. | Viola C2 (trânsito de dados por serviço não homologado) e C3 (o Pilar 1 exige núcleo autoral e avaliado pela equipe). A classificação permanece no pipeline próprio descrito na Seção 8.8. A geração da resposta a partir do contexto recuperado pelo RAG usa um LLM, cujo provedor ainda será definido e homologado. |
 | **Azure OpenAI Service** provisionado à parte | Permaneceria dentro do *tenant* Azure do parceiro. | O próprio parceiro registra que o Copilot Studio já conta com os modelos mais recentes, *"não sendo necessário provisionar modelo adicional"*. Custo adicional sem ganho claro no MVP. |
 | ***Fine-tuning*** de um modelo de linguagem | Potencial ganho de acurácia no domínio de gestão de portfólio. | O parceiro prioriza recursos homologados do ecossistema Microsoft, especialmente Copilot e Power Platform. Além disso, o volume de dados sintéticos do MVP não sustentaria o treinamento. |
 | **Power Apps** como interface principal | Interface visual rica para preenchimento de formulários de projeto. | O escopo do módulo pede interface primariamente em linguagem natural (texto e áudio). Somam-se as restrições de licenciamento (C4), sem conectores premium e com limite de 500 linhas por leitura de lista. |
@@ -3719,13 +3725,186 @@ Resposta esperada: `200 OK`, com o token no corpo como texto. O token é válido
 Authorization: Bearer <TOKEN>
 ```
 
-## 8.7 Escolha de algoritmo PLN
+## 8.7 Text-to-Speech
+
+### 8.7.1 Introdução
+
+Text-to-Speech (TTS), ou síntese de fala, é a tecnologia responsável por converter um texto em um áudio falado. O serviço recebe um texto (eventualmente marcado com SSML — *Speech Synthesis Markup Language*) e devolve um arquivo ou fluxo de áudio com a fala sintetizada, podendo variar a voz, o idioma, a velocidade e a entonação.
+
+No projeto, o TTS é previsto como modalidade de saída do agente: depois que a resposta textual é gerada pelo pipeline de PLN, esse texto é convertido em áudio e devolvido ao usuário. A responsabilidade desta etapa é somente sintetizar a fala a partir de um texto já pronto, de forma simétrica ao papel do STT na entrada.
+
+**Delimitação de escopo.** Esta seção especifica a API a ser utilizada, com benchmark, decisão e contrato técnico, mas a implementação da síntese de fala permanece como evolução, conforme registrado na Seção 3.4.5. O texto continua sendo a resposta canônica do agente; o áudio acrescenta uma modalidade de apresentação, sem alterar o conteúdo fundamentado produzido pelo pipeline.
+
+Os requisitos considerados para a escolha da API foram:
+
+- suporte a português do Brasil (`pt-BR`) com vozes naturais;
+- resposta rápida para respostas curtas geradas pelo agente;
+- disponibilidade de uma faixa gratuita para o desenvolvimento inicial;
+- custo previsível após o término da faixa gratuita;
+- integração por uma interface HTTP que possa ser substituída por outro provedor;
+- controle básico de prosódia (velocidade, ênfase, pausas) quando necessário;
+- formato de áudio compatível com reprodução direta no frontend (ex.: MP3 ou WAV).
+
+### 8.7.2 Benchmark das APIs
+
+O benchmark a seguir é documental, baseado nas funcionalidades e nos preços publicados pelos fornecedores em 27 de agosto de 2026, mantendo os mesmos quatro provedores comparados no benchmark de STT (seção 8.6.2) para preservar a consistência entre as duas decisões. Não foram atribuídas métricas de naturalidade percebida ou latência porque ainda não existe um corpus padronizado de respostas do agente para um teste empírico.
+
+#### Comparação funcional e de custo
+
+| API | `pt-BR` | Modos disponíveis | Custo para desenvolvimento inicial | Custo após a gratuidade | Portabilidade e integração |
+|---|---|---|---|---|---|
+| **Azure AI Speech** | Sim, com múltiplas vozes neurais dedicadas (ex.: `pt-BR-FranciscaNeural`, `pt-BR-AntonioNeural`) | Síntese em tempo real via REST/WebSocket, além de lote (*batch*) | **0,5 milhão de caracteres por mês no nível Free (F0)**, no mesmo recurso já provisionado para o STT. | Nível Standard (S0): cobrado por caractere sintetizado; a documentação oficial estima a faixa de **US$ 15 por milhão de caracteres** para vozes neurais, mas o valor exato varia por região e deve ser consultado na calculadora Azure. | Disponibiliza API REST simples (corpo em SSML) e SDKs; usa cabeçalhos e autenticação específicos do provedor, iguais aos já usados no STT. |
+| **Google Cloud Text-to-Speech** | Sim, nas vozes Standard, WaveNet, Neural2, Studio e Chirp 3: HD | Síncrono via REST/gRPC | Franquia gratuita recorrente por tipo de voz: **4 milhões de caracteres/mês** (Standard e WaveNet) ou **1 milhão de caracteres/mês** (Neural2, Studio, Chirp 3: HD). | Standard/WaveNet: **US$ 4 por milhão de caracteres**; Neural2: **US$ 16 por milhão**; Chirp 3: HD: **US$ 30 por milhão**; Studio: **US$ 160 por milhão**. | Oferece REST e gRPC, com autenticação via conta de serviço (OAuth2), exigindo mais configuração inicial que uma chave simples. |
+| **Amazon Polly** | Sim, com vozes Standard e Neural (ex.: `Camila`, `Vitória`, `Ricardo`) | Síncrono (tempo real) e assíncrono (lote, para Long-Form e Generative) | Standard: **5 milhões de caracteres/mês** (faixa contínua do *Always Free*); Neural: **1 milhão de caracteres/mês nos primeiros 12 meses**. A franquia das vozes neurais não é permanente. | Standard: **US$ 4 por milhão de caracteres**; Neural: **US$ 16 por milhão**; Long-Form: **US$ 100 por milhão**; Generative: **US$ 30 por milhão**. | Oferece APIs e SDKs, mas as requisições usam assinatura AWS (SigV4), o que aumenta o acoplamento à infraestrutura AWS em comparação com uma chamada HTTP direta. |
+| **OpenAI Audio API** | Sim, o texto em `pt-BR` é sintetizado pelas vozes multilíngues do provedor (não há vozes dedicadas ao português) | Arquivo (síncrono), com streaming do áudio de saída | Não possui franquia recorrente gratuita para uso da API. | O modelo `gpt-4o-mini-tts` é cobrado por texto de entrada (**~US$ 0,60 por milhão de caracteres**) e áudio de saída (**~US$ 12 por milhão de tokens de áudio**), resultando em uma estimativa da comunidade de desenvolvedores de **~US$ 0,015 por minuto** de áudio gerado — valor não é uma cotação oficial de tabela. | Endpoint REST único (`POST /v1/audio/speech`) e autenticação simples por chave de API, o que reduz o acoplamento da integração a um provedor específico. |
+
+Os valores acima são referências públicas, não cotações. Impostos, câmbio, região, armazenamento, tráfego e condições contratuais podem alterar o custo efetivo.
+
+#### Matriz de decisão com prioridade ao custo inicial
+
+Cada opção recebeu uma nota de 1 (baixa aderência) a 5 (alta aderência), com os mesmos pesos usados no benchmark de STT, trocando o critério "recursos para vocabulário do domínio" por "controle de prosódia e customização", mais relevante para síntese de fala.
+
+| Critério | Peso |
+|---|---:|
+| Gratuidade e custo inicial | 35% |
+| Suporte funcional a `pt-BR` | 25% |
+| Modos de síntese e adequação a respostas curtas | 15% |
+| Controle de prosódia e customização (SSML, léxico) | 10% |
+| Portabilidade e facilidade de integração | 10% |
+| Qualidade da documentação | 5% |
+
+| API | Custo 35% | `pt-BR` 25% | Modos 15% | Controle 10% | Portabilidade 10% | Docs 5% | Nota ponderada |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **Google Cloud Text-to-Speech** | 5 | 5 | 5 | 5 | 4 | 5 | **4,90** |
+| **Azure AI Speech** | 4 | 5 | 5 | 5 | 5 | 5 | **4,65** |
+| **Amazon Polly** | 4 | 5 | 4 | 4 | 3 | 5 | **4,20** |
+| **OpenAI Audio API** | 1 | 3 | 4 | 3 | 5 | 4 | **2,70** |
+
+A nota ponderada é calculada por `Σ(nota × peso)`. Diferente do benchmark de STT, o Google Cloud Text-to-Speech obtém a maior nota ponderada, por oferecer a maior franquia gratuita recorrente entre as alternativas e suporte completo a `pt-BR` em várias camadas de qualidade de voz.
+
+#### Vencedor sem considerar a gratuidade
+
+Recalculando a matriz sem o critério de custo e normalizando os 65% restantes, como feito no benchmark de STT:
+
+| API | Nota sem o critério de custo |
+|---|---:|
+| **Azure AI Speech** | **5,00** |
+| **Google Cloud Text-to-Speech** | **4,85** |
+| **Amazon Polly** | **3,92** |
+| **OpenAI Audio API** | **3,54** |
+
+Sem o critério de custo, o **Azure AI Speech** se destaca por combinar controle fino de prosódia via SSML, portabilidade equivalente à das demais opções e a maior variedade de vozes neurais dedicadas ao `pt-BR` entre os provedores avaliados.
+
+#### Decisão
+
+Apesar de o Google Cloud Text-to-Speech obter a maior nota ponderada, a fase inicial do projeto adota o **Azure AI Speech** pelos mesmos motivos estratégicos que levaram à escolha do STT (seção 8.6.2): a franquia de 0,5 milhão de caracteres por mês é suficiente para o desenvolvimento e os testes do agente, e — mais importante — **o TTS pode reutilizar o mesmo recurso Azure (mesma chave `AZURE_SPEECH_KEY`, mesma região e o mesmo padrão de autenticação)** já provisionado para o STT, evitando manter credenciais, contas e integrações de dois provedores diferentes para voz de entrada e de saída. Assim como no STT, a aplicação deve acessar o serviço por uma interface interna genérica, de modo que o provedor possa ser substituído (por exemplo, pelo Google Cloud TTS) sem alterar o restante do pipeline, caso a franquia gratuita se torne insuficiente.
+
+### 8.7.3 API escolhida: Azure AI Speech
+
+Para o desenvolvimento inicial será utilizada a **API REST do Azure AI Speech para síntese de voz**, compatível com o nível Free (F0) e com o mesmo recurso Azure já usado no STT.
+
+#### Endpoints relevantes
+
+| Finalidade | Método HTTP | Endpoint | Uso no projeto |
+|---|---|---|---|
+| Sintetizar fala a partir de texto/SSML | `POST` | `https://<REGIAO>.tts.speech.microsoft.com/cognitiveservices/v1` | Endpoint principal do desenvolvimento inicial. |
+| Obter token temporário | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/sts/v1.0/issueToken` | Opcional; o mesmo endpoint de token já documentado para o STT (seção 8.6.3) também vale para o TTS. |
+
+O endpoint de síntese aceita até **10 minutos de áudio por requisição**, muito acima do necessário para respostas curtas do agente.
+
+#### Requisição de síntese
+
+```http
+POST /cognitiveservices/v1 HTTP/1.1
+Host: <REGIAO>.tts.speech.microsoft.com
+Ocp-Apim-Subscription-Key: <CHAVE-DO-RECURSO>
+Content-Type: application/ssml+xml
+X-Microsoft-OutputFormat: audio-24khz-48kbitrate-mono-mp3
+User-Agent: agente-metro-portfolio
+
+<speak version='1.0' xml:lang='pt-BR'>
+  <voice xml:lang='pt-BR' xml:gender='Female' name='pt-BR-FranciscaNeural'>
+    O projeto TUR-01 está com setenta e cinco por cento de avanço.
+  </voice>
+</speak>
+```
+
+##### Cabeçalhos
+
+| Cabeçalho | Obrigatório | Descrição |
+|---|---:|---|
+| `Ocp-Apim-Subscription-Key` | Condicional | Chave do recurso. Deve ser enviado este cabeçalho **ou** `Authorization`, nunca é necessário enviar ambos — igual ao STT. |
+| `Authorization` | Condicional | Token no formato `Bearer <TOKEN>`, obtido no endpoint `/sts/v1.0/issueToken`. |
+| `Content-Type` | Sim | Deve ser `application/ssml+xml`; o corpo é sempre SSML para vozes pré-construídas. |
+| `X-Microsoft-OutputFormat` | Sim | Formato do áudio de saída. O projeto adota `audio-24khz-48kbitrate-mono-mp3` por gerar um arquivo compacto, adequado para tocar diretamente no frontend; `riff-24khz-16bit-mono-pcm` (WAV) é a alternativa caso seja necessário processamento adicional do áudio sem perdas. |
+| `User-Agent` | Sim | Identificador da aplicação, com até 255 caracteres. |
+
+##### Corpo da requisição (SSML)
+
+O corpo contém um documento SSML válido: a tag `<voice>` define a voz utilizada (nome, idioma e gênero) e envolve o texto a ser sintetizado. Caracteres especiais de XML presentes na resposta do agente (`&`, `<`, `>`, `"`, `'`) precisam ser escapados antes de montar o SSML.
+
+##### Exemplo de requisição com cURL
+
+```bash
+curl --location --request POST \
+  "https://${AZURE_SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/v1" \
+  --header "Ocp-Apim-Subscription-Key: ${AZURE_SPEECH_KEY}" \
+  --header "Content-Type: application/ssml+xml" \
+  --header "X-Microsoft-OutputFormat: audio-24khz-48kbitrate-mono-mp3" \
+  --header "User-Agent: agente-metro-portfolio" \
+  --data "<speak version='1.0' xml:lang='pt-BR'><voice xml:lang='pt-BR' name='pt-BR-FranciscaNeural'>O projeto TUR-01 está com setenta e cinco por cento de avanço.</voice></speak>" \
+  --output resposta.mp3
+```
+
+As variáveis `AZURE_SPEECH_REGION` e `AZURE_SPEECH_KEY` devem ser configuradas no ambiente de execução, reaproveitando o mesmo recurso do STT. A chave não deve ser escrita no código-fonte nem versionada no repositório.
+
+#### Resposta de sucesso
+
+Status HTTP esperado: `200 OK`. O corpo da resposta não é JSON: são os **bytes brutos do áudio**, no formato indicado por `X-Microsoft-OutputFormat`, com o `Content-Type` correspondente (ex.: `audio/mpeg` para MP3 ou `audio/wav` para PCM/WAV). O áudio deve ser encaminhado como está para o frontend, que o reproduz diretamente (ex.: elemento `<audio>` ou Web Audio API).
+
+#### Estados e respostas HTTP esperadas
+
+| HTTP | Resposta esperada |
+|---:|---|
+| `200 OK` | Requisição processada; o corpo contém os bytes do áudio sintetizado. |
+| `400 Bad Request` | SSML malformado, parâmetro ausente/inválido ou cabeçalho malformado. |
+| `401 Unauthorized` | Chave, token ou região inválidos. |
+| `415 Unsupported Media Type` | `Content-Type` diferente de `application/ssml+xml`. |
+| `429 Too Many Requests` | Limite de taxa excedido — no nível Free (F0), o limite é de 20 requisições a cada 60 segundos. |
+| `502 Bad Gateway` / `503 Service Unavailable` | Erro de rede ou indisponibilidade momentânea do serviço. |
+
+#### Limites relevantes
+
+| Limite | Free (F0) | Standard (S0) |
+|---|---|---|
+| Requisições de síntese em tempo real | 20 a cada 60 segundos | 30 TPS por padrão (ajustável até 1.000 TPS) |
+| Duração máxima de áudio por requisição | 10 minutos | 10 minutos |
+| Tamanho máximo da mensagem SSML por conexão | 64 KB | 64 KB |
+| Tags `<voice>`/`<audio>` distintas por SSML | 50 | 50 |
+
+#### Requisição opcional de token
+
+Idêntica à já documentada para o STT (seção 8.6.3): trocar a chave por um token Bearer válido por 10 minutos, usando o mesmo endpoint `/sts/v1.0/issueToken` do mesmo recurso Azure.
+
+### 8.7.4 Referências
+
+- Microsoft. [Preços do Azure AI Speech](https://azure.microsoft.com/en-us/pricing/details/speech/). Acesso em: 27 ago. 2026.
+- Microsoft. [Quotas e limites do Azure AI Speech](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-services-quotas-and-limits). Acesso em: 27 ago. 2026.
+- Microsoft. [API REST de conversão de texto em fala](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/rest-text-to-speech). Acesso em: 27 ago. 2026.
+- Microsoft. [Lista de vozes e idiomas suportados (Speech)](https://learn.microsoft.com/pt-br/azure/ai-services/speech-service/language-support?tabs=tts). Acesso em: 27 ago. 2026.
+- Google. [Preços do Text-to-Speech](https://cloud.google.com/text-to-speech/pricing). Acesso em: 27 ago. 2026.
+- Amazon Web Services. [Preços do Amazon Polly](https://aws.amazon.com/polly/pricing/). Acesso em: 27 ago. 2026.
+- OpenAI. [Guia da API de Text-to-Speech](https://platform.openai.com/docs/guides/text-to-speech). Acesso em: 27 ago. 2026.
+- OpenAI. [Preços da API](https://platform.openai.com/docs/pricing). Acesso em: 27 ago. 2026.
+
+
+## 8.8 Escolha de algoritmo PLN
 
 Esta seção registra a escolha atual do pipeline de Processamento de Linguagem Natural responsável por classificar a solicitação do usuário. A implementação e o benchmark reproduzível estão no notebook [`classificador_intencoes_metro.ipynb`](../src/notebooks/classificador_intencoes_metro.ipynb).
 
 Embora seja referido de forma abreviada como “modelo híbrido W2V+BERT”, o componente é tecnicamente um pipeline: a representação híbrida gera os atributos de entrada, e classificadores lineares realizam a previsão em dois níveis — macrointenção e intenção específica.
 
-### 8.7.1 Objetivo e protocolo de avaliação
+### 8.8.1 Objetivo e protocolo de avaliação
 
 O classificador organiza os pedidos em quatro macrointenções (`CONSULTA`, `TRANSACAO`, `ALERTA` e `FORA_DE_ESCOPO`) e 31 intenções específicas. A macrointenção determina o fluxo geral do agente, enquanto a intenção específica identifica o handler mais adequado.
 
@@ -3737,7 +3916,7 @@ A seleção segue três etapas:
 2. comparação das representações e classificadores no conjunto de validação, usando como critério principal o F1-macro da intenção específica;
 3. avaliação do pipeline escolhido no teste, que não participa da seleção.
 
-### 8.7.2 Benchmark e decisão
+### 8.8.2 Benchmark e decisão
 
 O notebook compara TF-IDF de palavras, TF-IDF de caracteres, Word2Vec, embeddings BERT congelados e combinações híbridas. Também compara regressão logística e LinearSVC, além das arquiteturas plana e hierárquica. A tabela produzida pelo próprio script é ordenada pelo F1-macro de intenção na validação, evitando que a escolha seja definida previamente por preferência tecnológica.
 
@@ -3745,7 +3924,7 @@ Na execução completa de referência, a melhor alternativa foi a representaçã
 
 A arquitetura hierárquica primeiro prevê a macrointenção e depois utiliza um especialista para distinguir apenas as intenções daquele grupo. Essa divisão reduz o número de classes concorrentes em cada segunda etapa e se alinha ao roteamento esperado pelo agente. A escolha atual, portanto, não decorre apenas do uso de modelos semanticamente mais sofisticados, mas do resultado observado sob o mesmo protocolo de comparação.
 
-### 8.7.3 Configuração e resultados atuais
+### 8.8.3 Configuração e resultados atuais
 
 A configuração selecionada na execução de referência foi:
 
@@ -3775,7 +3954,7 @@ Os resultados indicam que o primeiro nível está mais maduro: no teste, a macro
 
 A execução de referência gerou o classificador serializado (aproximadamente 13.188 KB), o modelo Word2Vec (aproximadamente 925 KB), o catálogo de intenções, o conjunto de dados e o arquivo de métricas. O encoder BERT pré-treinado não está incorporado ao arquivo `joblib` e deve ser carregado separadamente pelo ambiente de inferência.
 
-### 8.7.4 Limitações e próximos passos
+### 8.8.4 Limitações e próximos passos
 
 Os números atuais devem ser interpretados com as seguintes ressalvas:
 
