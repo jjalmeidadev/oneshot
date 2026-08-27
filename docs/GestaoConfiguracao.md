@@ -45,15 +45,15 @@
   - [7.1 Como ativar, verificar e desativar](#71-como-ativar-verificar-e-desativar)
   - [7.2 Validações executadas](#72-validações-executadas)
   - [7.3 Auditoria do repositório](#73-auditoria-do-repositório)
-- [8. Exemplos práticos](#8-exemplos-práticos)
-  - [8.1 Atualização da gestão de projeto](#81-atualização-da-gestão-de-projeto)
-  - [8.2 Preparação de entrega](#82-preparação-de-entrega)
-  - [8.3 Integração de entrega documental com renumeração de seções](#83-integração-de-entrega-documental-com-renumeração-de-seções)
-- [1. Levantar quem toca o mesmo arquivo antes de abrir o merge](#1-levantar-quem-toca-o-mesmo-arquivo-antes-de-abrir-o-merge)
-- [2. Acordar a ordem: primeiro as que só acrescentam seções,](#2-acordar-a-ordem-primeiro-as-que-só-acrescentam-seções)
-- [3. Integrar na ordem acordada, atualizando a branch antes de cada merge](#3-integrar-na-ordem-acordada-atualizando-a-branch-antes-de-cada-merge)
-  - [8.4 Hotfix](#84-hotfix)
-- [9. Regras de governança do GitFlow](#9-regras-de-governança-do-gitflow)
+- [8. Versionamento de artefatos de modelo](#8-versionamento-de-artefatos-de-modelo)
+  - [8.1 O que é versionado e por quê](#81-o-que-é-versionado-e-por-quê)
+  - [8.2 A restrição que vem junto](#82-a-restrição-que-vem-junto)
+- [9. Exemplos práticos](#9-exemplos-práticos)
+  - [9.1 Atualização da gestão de projeto](#91-atualização-da-gestão-de-projeto)
+  - [9.2 Preparação de entrega](#92-preparação-de-entrega)
+  - [9.3 Integração de entrega documental com renumeração de seções](#93-integração-de-entrega-documental-com-renumeração-de-seções)
+  - [9.4 Hotfix](#94-hotfix)
+- [10. Regras de governança do GitFlow](#10-regras-de-governança-do-gitflow)
 
 # 1. Introdução
 
@@ -472,9 +472,38 @@ por pares.
 powershell -ExecutionPolicy Bypass -File scripts/audit-repo.ps1
 ```
 
-# 8. Exemplos práticos
+# 8. Versionamento de artefatos de modelo
 
-## 8.1 Atualização da gestão de projeto
+O repositório versiona os artefatos gerados pelo treinamento do classificador de intenções, em `src/notebooks/artefatos/`. A decisão foi tomada na Sprint 2, quando o notebook de classificação entrou no projeto, e é registrada aqui porque tem consequência permanente sobre o tamanho do repositório.
+
+## 8.1 O que é versionado e por quê
+
+| Artefato | Tamanho aproximado | Motivo |
+| --- | ---: | --- |
+| `classificador_intencoes.joblib` | 14,5 MB | Modelo serializado da execução de referência, mantido como evidência do resultado documentado na Seção 8.9 do `Projeto.md` |
+| `word2vec_portfolio.model` | 0,9 MB | Representação treinada no corpus do projeto, necessária para reproduzir a inferência sem novo treinamento |
+| `dataset_intencoes.csv` | 0,8 MB | Conjunto sintético que sustenta a separação por `template_id` descrita no protocolo de avaliação |
+| `catalogo_intencoes.csv` e `.json` | poucos KB | Catálogo das intenções reconhecidas, consultado pelo roteamento |
+| `metricas.json` | poucos KB | Métricas da execução de referência, citadas na documentação |
+
+A escolha é deliberada: manter os artefatos permite conferir os números publicados sem reexecutar o notebook, o que importa em um projeto avaliado por evidência.
+
+## 8.2 A restrição que vem junto
+
+O Git preserva todas as versões de um arquivo binário. Cada nova versão do `.joblib` acrescenta cerca de 14 MB **permanentes** ao repositório, que todo integrante baixa a cada clone e que não podem ser removidos sem reescrever o histórico.
+
+Por isso valem as regras abaixo.
+
+- **Não commitar artefatos a cada retreino.** Execuções exploratórias, ajustes de hiperparâmetro e testes de configuração permanecem locais. Só entra no repositório o artefato correspondente à **execução de referência** citada na documentação.
+- **Atualizar o artefato apenas quando o resultado documentado mudar.** Se a Seção 8.9 do `Projeto.md` continua reportando as mesmas métricas, não há motivo para substituir o binário.
+- **Declarar a substituição no merge request.** Quando um artefato for atualizado, o MR deve informar qual execução o gerou e quais métricas mudaram, para que a troca de 14 MB tenha justificativa registrada.
+- **Manter os arquivos leves sempre atualizados.** `catalogo_intencoes` e `metricas.json` são pequenos e devem acompanhar qualquer mudança, mesmo quando o modelo serializado não for substituído.
+
+Caso o volume se torne um problema, a alternativa prevista é migrar os binários para Git LFS, preservando a rastreabilidade sem carregar o histórico. A avaliação dessa migração fica condicionada ao crescimento observado do repositório.
+
+# 9. Exemplos práticos
+
+## 9.1 Atualização da gestão de projeto
 
 ```text
 Issue: Estruturar documento de gestão de projeto
@@ -493,7 +522,7 @@ git checkout -b docs/gestao-projeto
 git push -u origin docs/gestao-projeto
 ```
 
-## 8.2 Preparação de entrega
+## 9.2 Preparação de entrega
 
 ```text
 Branch de integração: develop
@@ -510,7 +539,7 @@ Fluxo:
 branches temporárias -> develop -> hmg -> main
 ```
 
-## 8.3 Integração de entrega documental com renumeração de seções
+## 9.3 Integração de entrega documental com renumeração de seções
 
 Situação real da Sprint 2. Quatro branches alteravam `docs/Projeto.md` ao mesmo tempo, e uma delas renumerava seções, deslocando `8.6` para `8.7` e `8.7` para `8.8`. Integrar fora de ordem produziria conflito em cada uma das seguintes.
 
@@ -531,7 +560,7 @@ git push origin docs/<minha-branch>
 
 A regra prática: **branch que renumera seção entra depois das que só acrescentam, e a que regenera o sumário entra por último.** Quando duas pessoas precisam mexer no mesmo arquivo na mesma sprint, a ordem de merge é combinada na planning, não descoberta no conflito.
 
-## 8.4 Hotfix
+## 9.4 Hotfix
 
 ```text
 Problema: arquivo de configuração impede execução da versão estável
@@ -540,7 +569,7 @@ Origem: main
 Destino: main e develop
 ```
 
-# 9. Regras de governança do GitFlow
+# 10. Regras de governança do GitFlow
 
 - Não é permitido commitar diretamente em `main`, `develop` ou `hmg`;
 - Os hooks também bloqueiam commits e pushes diretos em `develop` e `hmg`;

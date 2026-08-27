@@ -1,0 +1,39 @@
+{
+  "melhor_config_preprocessamento": {
+    "nome": "config_04",
+    "lowercase": "True",
+    "tokenizer": "word",
+    "remove_stopwords": "False",
+    "remove_punctuation": "True",
+    "morphology": "stemming",
+    "ngram_range": "None",
+    "language": "portuguese",
+    "stemmer_type": "snowball"
+  },
+  "melhor_representacao": "TF-IDF caracteres",
+  "arquitetura": "hierárquica",
+  "hiperparametros": {
+    "C": "10.0",
+    "class_weight": "balanced"
+  },
+  "limiar_macro": 0.6500000000000002,
+  "limiar_intencao": 0.5250000000000001,
+  "teste": {
+    "acc_intencao": 0.6546,
+    "f1_intencao": 0.6423,
+    "acc_macro": 0.926,
+    "f1_macro": 0.9419
+  },
+  "validacao": {
+    "acc_intencao": 0.5666,
+    "f1_intencao": 0.5438,
+    "acc_macro": 0.8884,
+    "f1_macro": 0.8814
+  },
+  "tamanhos": {
+    "treino": 3062,
+    "validacao": 1156,
+    "teste": 1135
+  },
+  "protocolo": "split agrupado por template_id; transformadores ajustados apenas no treino"
+}

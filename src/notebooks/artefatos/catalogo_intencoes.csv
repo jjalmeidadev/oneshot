@@ -1,0 +1,32 @@
+macrointencao,intencao,descricao,fluxo
+CONSULTA,consulta_status_projeto,Situação/andamento atual de um projeto ou programa.,RecuperadorInformacao -> Estruturador de Resposta
+CONSULTA,consulta_cronograma_prazo,"Datas, prazos, previsão de término, atraso em dias.",RecuperadorInformacao -> Estruturador de Resposta
+CONSULTA,consulta_marcos_entregas,"Marcos, entregas e etapas planejadas ou concluídas.",RecuperadorInformacao -> Estruturador de Resposta
+CONSULTA,consulta_orcamento_custo,"Orçamento aprovado, custo realizado, saldo, desvio financeiro.",RecuperadorInformacao -> Estruturador de Resposta
+CONSULTA,consulta_escopo_tap,"Escopo, objetivos, premissas e restrições registrados no TAP.",RecuperadorInformacao -> Estruturador de Resposta
+CONSULTA,consulta_responsavel_equipe,"Gerente responsável, equipe, área ou patrocinador do projeto.",RecuperadorInformacao -> Estruturador de Resposta
+CONSULTA,consulta_indicadores_kpi,"Indicadores de desempenho (SPI, CPI, % concluído, aderência).",RecuperadorInformacao -> Estruturador de Resposta
+CONSULTA,consulta_riscos_projeto,"Riscos registrados, probabilidade, impacto e tratamento.",RecuperadorInformacao -> Estruturador de Resposta
+CONSULTA,consulta_pendencias_projeto,"Pendências, ações em aberto e itens aguardando resposta.",RecuperadorInformacao -> Estruturador de Resposta
+CONSULTA,consulta_documentos_fonte,"Localização/origem de documentos e referências (SharePoint, anexos).",RecuperadorInformacao -> Estruturador de Resposta
+CONSULTA,consulta_visao_portfolio,Visão agregada do portfólio ou de um subportfólio.,RecuperadorInformacao -> Estruturador de Resposta
+CONSULTA,comparacao_entre_projetos,Comparação explícita entre dois ou mais projetos (RF06).,RecuperadorInformacao -> Estruturador de Resposta
+CONSULTA,analise_tendencia_desempenho,"Evolução temporal, tendência, projeção e causas de variação.",RecuperadorInformacao -> Estruturador de Resposta
+TRANSACAO,transacao_atualizar_status,Atualizar status/percentual de andamento de um projeto.,Executor de Transação -> Confirmação -> Registro
+TRANSACAO,transacao_atualizar_cronograma,"Repactuar datas, replanejar marcos, prorrogar prazo.",Executor de Transação -> Confirmação -> Registro
+TRANSACAO,transacao_registrar_risco,Registrar/atualizar risco na matriz do projeto.,Executor de Transação -> Confirmação -> Registro
+TRANSACAO,transacao_registrar_pendencia,"Abrir, atribuir ou encerrar pendência/ação.",Executor de Transação -> Confirmação -> Registro
+TRANSACAO,transacao_gerar_relatorio,"Gerar relatório (anual, de acompanhamento, balanço).",Executor de Transação -> Confirmação -> Registro
+TRANSACAO,transacao_gerar_apresentacao,Gerar apresentação executiva a partir de template.,Executor de Transação -> Confirmação -> Registro
+TRANSACAO,transacao_exportar_dados,Exportar dados/planilha do portfólio.,Executor de Transação -> Confirmação -> Registro
+TRANSACAO,transacao_agendar_compromisso,"Agendar reunião, checkpoint ou revisão de portfólio.",Executor de Transação -> Confirmação -> Registro
+TRANSACAO,transacao_solicitar_atualizacao,Solicitar/cobrar atualização de informação a um responsável.,Executor de Transação -> Confirmação -> Registro
+TRANSACAO,transacao_cadastrar_projeto,Cadastrar novo projeto/programa no portfólio.,Executor de Transação -> Confirmação -> Registro
+ALERTA,alerta_prazo_atraso,Avisar sobre atraso ou risco de estouro de prazo.,Motor de Regras -> Notificação
+ALERTA,alerta_estouro_orcamento,Avisar sobre desvio ou estouro orçamentário.,Motor de Regras -> Notificação
+ALERTA,alerta_risco_critico,Avisar quando risco crítico for identificado/escalado.,Motor de Regras -> Notificação
+ALERTA,alerta_desatualizacao_dados,Avisar quando informações do projeto ficarem desatualizadas.,Motor de Regras -> Notificação
+ALERTA,alerta_configurar_monitoramento,Criar/configurar regra de monitoramento e frequência.,Motor de Regras -> Notificação
+ALERTA,alerta_gerenciar_inscricao,"Ativar, pausar, silenciar ou cancelar alertas existentes.",Motor de Regras -> Notificação
+FORA_DE_ESCOPO,fora_escopo_social,"Saudações, agradecimentos, conversa social, testes do agente.",Resposta padrão de limitação (RF08)
+FORA_DE_ESCOPO,fora_escopo_externo,"Assuntos alheios ao portfólio (clima, esportes, receitas, RH pessoal).",Resposta padrão de limitação (RF08)

@@ -148,20 +148,25 @@
     - [8.3.3 Sprint 5](#833-sprint-5)
   - [8.4 Testes Unitários e de Integração](#84-testes-unitários-e-de-integração)
   - [8.5 Documentações automáticas](#85-documentações-automáticas)
-  - [8.6 Speech-to-Text](#86-speech-to-text)
-    - [8.6.1 Introdução](#861-introdução)
-    - [8.6.2 Benchmark das APIs](#862-benchmark-das-apis)
-    - [8.6.3 API escolhida: Azure AI Speech](#863-api-escolhida-azure-ai-speech)
-  - [8.7 Text-to-Speech](#87-text-to-speech)
+  - [8.6 Requisitos das APIs de voz (STT/TTS)](#86-requisitos-das-apis-de-voz-stttts)
+    - [8.6.1 Objetivo e delimitação](#861-objetivo-e-delimitação)
+    - [8.6.2 Entradas, saídas e formatos](#862-entradas-saídas-e-formatos)
+    - [8.6.3 O que é buscado nas APIs](#863-o-que-é-buscado-nas-apis)
+    - [8.6.4 Restrições e condições de validação](#864-restrições-e-condições-de-validação)
+  - [8.7 Speech-to-Text](#87-speech-to-text)
     - [8.7.1 Introdução](#871-introdução)
     - [8.7.2 Benchmark das APIs](#872-benchmark-das-apis)
     - [8.7.3 API escolhida: Azure AI Speech](#873-api-escolhida-azure-ai-speech)
-    - [8.7.4 Referências](#874-referências)
-  - [8.8 Escolha de algoritmo PLN](#88-escolha-de-algoritmo-pln)
-    - [8.8.1 Objetivo e protocolo de avaliação](#881-objetivo-e-protocolo-de-avaliação)
-    - [8.8.2 Benchmark e decisão](#882-benchmark-e-decisão)
-    - [8.8.3 Configuração e resultados atuais](#883-configuração-e-resultados-atuais)
-    - [8.8.4 Limitações e próximos passos](#884-limitações-e-próximos-passos)
+  - [8.8 Text-to-Speech](#88-text-to-speech)
+    - [8.8.1 Introdução](#881-introdução)
+    - [8.8.2 Benchmark das APIs](#882-benchmark-das-apis)
+    - [8.8.3 API escolhida: Azure AI Speech](#883-api-escolhida-azure-ai-speech)
+    - [8.8.4 Referências](#884-referências)
+  - [8.9 Escolha de algoritmo PLN](#89-escolha-de-algoritmo-pln)
+    - [8.9.1 Objetivo e protocolo de avaliação](#891-objetivo-e-protocolo-de-avaliação)
+    - [8.9.2 Benchmark e decisão](#892-benchmark-e-decisão)
+    - [8.9.3 Configuração e resultados atuais](#893-configuração-e-resultados-atuais)
+    - [8.9.4 Limitações e próximos passos](#894-limitações-e-próximos-passos)
 - [9. Planejamento e Execução de Testes](#9-planejamento-e-execução-de-testes)
   - [9.1 Testes Funcionais](#91-testes-funcionais)
     - [9.1.1 Planejamento](#911-planejamento)
@@ -1099,7 +1104,7 @@ A faixa de prioridade é o resultado do produto entre os dois critérios, confor
 **Regra de exceção — elevação por pré-requisito ou por escopo contratado.** Uma feature é elevada em uma faixa acima do resultado do produto, ainda que sua viabilidade seja baixa, quando se enquadra em um dos dois casos abaixo. A elevação é sinalizada na coluna de faixa e obrigatoriamente justificada; nenhuma outra feature da tabela foi movida de faixa.
 
 1. **Pré-requisito de uso** — a feature é condição de acesso ao produto ou de aderência ao canal corporativo esperado pelo Metrô. Sua ausência impede o uso das demais, e não apenas reduz o valor entregue. Aplicada à **integração com o Microsoft Teams**, cuja viabilidade é 3 por depender de homologação da GTI, mas que é o canal onde o agente será efetivamente utilizado — sem ela, o produto não tem superfície de entrega.
-2. **Escopo contratado** — a feature consta do escopo macro do Termo de Abertura do Projeto Inteli e, portanto, não é negociável por conveniência de implementação. Aplicada à **transcrição de áudio**, que o TAPI define como modalidade de entrada do agente e que, por isso, tem importância 5 mesmo com viabilidade 3. O benchmark de APIs e a escolha do provedor estão registrados na Seção 8.6.
+2. **Escopo contratado** — a feature consta do escopo macro do Termo de Abertura do Projeto Inteli e, portanto, não é negociável por conveniência de implementação. Aplicada à **transcrição de áudio**, que o TAPI define como modalidade de entrada do agente e que, por isso, tem importância 5 mesmo com viabilidade 3. O benchmark de APIs e a escolha do provedor estão registrados na Seção 8.7.
 
 #### Linha de corte do MVP
 
@@ -1115,7 +1120,7 @@ A faixa de prioridade é o resultado do produto entre os dois critérios, confor
 | Autenticação e definição de perfis | 5 | 4 | 20 | 🔴 Muito Alta | MVP | Condição para que a resposta respeite as permissões de cada usuário, exigência de confidencialidade do parceiro. |
 | Perfil de linguagem executivo | 4 | 4 | 16 | 🔴 Muito Alta | MVP | Adapta a profundidade da resposta ao cargo sem ampliar o núcleo funcional já construído. |
 | Integração com Microsoft Teams | 5 | 3 | 15 | 🔴 Muito Alta *(elevada)* | MVP | Produto 15 posiciona na faixa Alta; elevada pela regra de exceção por ser o canal corporativo em que o agente é utilizado. |
-| Transcrição de áudio | 5 | 3 | 15 | 🔴 Muito Alta *(elevada)* | MVP | Produto 15 posiciona na faixa Alta; elevada pela regra de exceção por ser modalidade de entrada prevista no escopo contratado. Viabilidade 3 reflete a dependência de API externa de transcrição, escolhida na Seção 8.6. |
+| Transcrição de áudio | 5 | 3 | 15 | 🔴 Muito Alta *(elevada)* | MVP | Produto 15 posiciona na faixa Alta; elevada pela regra de exceção por ser modalidade de entrada prevista no escopo contratado. Viabilidade 3 reflete a dependência de API externa de transcrição, escolhida na Seção 8.7. |
 | Diferença de profundidade de pesquisa | 4 | 3 | 12 | 🟠 Alta | Pós-MVP | Melhora a experiência de consulta, porém só faz sentido depois que a consulta básica estiver estável. |
 | Fluxo de avaliação das respostas | 3 | 3 | 9 | 🟡 Média | Pós-MVP | Alimenta a melhoria contínua do agente, mas não bloqueia a validação da prova de conceito. |
 | Interface personalizada e intuitiva | 3 | 3 | 9 | 🟡 Média | Pós-MVP | Relevante para a adoção por usuários sem perfil técnico; no MVP a interface é a do próprio Teams. |
@@ -1406,7 +1411,7 @@ Como usuário da solução, quero realizar solicitações utilizando linguagem n
 **Critérios de aceitação:**
 
 * O sistema deve aceitar solicitações textuais em linguagem natural.
-* O sistema deve aceitar solicitações em áudio, convertendo-as em texto antes do processamento, conforme a modalidade de entrada descrita na Seção 8.6.
+* O sistema deve aceitar solicitações em áudio, convertendo-as em texto antes do processamento, conforme a modalidade de entrada descrita na Seção 8.7.
 * O usuário não deve precisar utilizar uma sintaxe técnica específica.
 * A solicitação recebida deve ser encaminhada ao pipeline de PLN para processamento.
 
@@ -2047,7 +2052,7 @@ Esta seção apresenta a seleção inicial de tecnologias e ferramentas consider
 
 As tecnologias apresentadas nesta seção são classificadas entre aquelas previstas para utilização no **MVP**, desenvolvido e validado sobre dados sintéticos, e aquelas consideradas como alternativas ou possibilidades de evolução. Essa distinção é necessária porque o TAPI estabelece que a integração com o portfólio real do Metrô constitui uma evolução do MVP, não sendo requisito para a validação inicial da solução.
 
-> **Leitura desta seção.** A Seção 3.4 registra a visão de tecnologias formulada na Sprint 1. As decisões de canal permanecem válidas: o agente é entregue no Microsoft Teams, com o Copilot Studio como orquestrador. A Sprint 2 acrescentou o detalhamento que aqui aparece apenas como direção — o benchmark da API de transcrição está na Seção 8.6, o do algoritmo de PLN na Seção 8.8 e a arquitetura consolidada, com o papel de cada componente, na Seção 5.2.
+> **Leitura desta seção.** A Seção 3.4 registra a visão de tecnologias formulada na Sprint 1. As decisões de canal permanecem válidas: o agente é entregue no Microsoft Teams, com o Copilot Studio como orquestrador. A Sprint 2 acrescentou o detalhamento que aqui aparece apenas como direção — os requisitos comuns das APIs de voz estão na Seção 8.6, os benchmarks de STT e TTS estão nas Seções 8.7 e 8.8, o benchmark do algoritmo de PLN está na Seção 8.9 e a arquitetura consolidada, com o papel de cada componente, na Seção 5.2.
 
 ### 3.4.1 Critérios de seleção
 
@@ -2078,7 +2083,7 @@ A pilha tecnológica é organizada por camadas, considerando a separação entre
 
 No MVP, a solução utilizará os canais disponibilizados pelo ecossistema Microsoft. Não está previsto o desenvolvimento de uma aplicação web ou mobile independente como interface do produto; o acesso por navegador e por dispositivos móveis ocorrerá pelos canais do Copilot Studio e do Microsoft Teams.
 
-> **Bancada de teste.** Existem no repositório uma interface web em React (`src/frontend`) e um backend FastAPI (`src/backend`) que **não compõem o produto**. Foram construídos como bancada para exercitar isoladamente o caminho de consulta do RAG sobre dados mockados, permitindo medir latência, taxa de sucesso e consumo de tokens sem depender do provisionamento do canal corporativo pela GTI. A bancada utiliza um provedor de LLM específico apenas para viabilizar esse teste; essa escolha não constitui decisão de produto. O provedor a ser adotado será definido por benchmark próprio e submetido à homologação, do mesmo modo que foi feito para a API de transcrição na Seção 8.6. A entrega ao usuário permanece pelo Teams.
+> **Bancada de teste.** Existem no repositório uma interface web em React (`src/frontend`) e um backend FastAPI (`src/backend`) que **não compõem o produto**. Foram construídos como bancada para exercitar isoladamente o caminho de consulta do RAG sobre dados mockados, permitindo medir latência, taxa de sucesso e consumo de tokens sem depender do provisionamento do canal corporativo pela GTI. A bancada utiliza um provedor de LLM específico apenas para viabilizar esse teste; essa escolha não constitui decisão de produto. O provedor a ser adotado será definido por benchmark próprio e submetido à homologação, do mesmo modo que foi feito para a API de transcrição na Seção 8.7. A entrega ao usuário permanece pelo Teams.
 
 > **Base já existente.** O TAPI registra, entre as restrições, que a plataforma atual de portfólio já utiliza *"Copilot Studio para Bot de apoio na obtenção e atualização de status dos projetos e sub portfólios"*, e o documento *Arquitetura Portfólio Metrô* identifica a consulta de situação do portfólio e o suporte de FAQ como recursos "ainda em desenvolvimento". A solução deste projeto, portanto, **não parte de um cenário vazio**. Ela amplia esse agente com o núcleo de PLN autoral e com as transações do Pilar 2. A decisão entre estender o agente existente ou publicar um novo agente no mesmo ambiente será tomada com a GTI na Sprint 2.
 
@@ -2166,7 +2171,7 @@ O registro das opções descartadas é parte da decisão: ele documenta o que fo
 
 | Alternativa | Por que foi considerada | Por que não foi adotada |
 |---|---|---|
-| **API de LLM externo** (OpenAI, Anthropic, Google) para **classificação de intenções** | Menor esforço de implementação e boa acurácia sem treinamento. | Viola C2 (trânsito de dados por serviço não homologado) e C3 (o Pilar 1 exige núcleo autoral e avaliado pela equipe). A classificação permanece no pipeline próprio descrito na Seção 8.8. A geração da resposta a partir do contexto recuperado pelo RAG usa um LLM, cujo provedor ainda será definido e homologado. |
+| **API de LLM externo** (OpenAI, Anthropic, Google) para **classificação de intenções** | Menor esforço de implementação e boa acurácia sem treinamento. | Viola C2 (trânsito de dados por serviço não homologado) e C3 (o Pilar 1 exige núcleo autoral e avaliado pela equipe). A classificação permanece no pipeline próprio descrito na Seção 8.9. A geração da resposta a partir do contexto recuperado pelo RAG usa um LLM, cujo provedor ainda será definido e homologado. |
 | **Azure OpenAI Service** provisionado à parte | Permaneceria dentro do *tenant* Azure do parceiro. | O próprio parceiro registra que o Copilot Studio já conta com os modelos mais recentes, *"não sendo necessário provisionar modelo adicional"*. Custo adicional sem ganho claro no MVP. |
 | ***Fine-tuning*** de um modelo de linguagem | Potencial ganho de acurácia no domínio de gestão de portfólio. | O parceiro prioriza recursos homologados do ecossistema Microsoft, especialmente Copilot e Power Platform. Além disso, o volume de dados sintéticos do MVP não sustentaria o treinamento. |
 | **Power Apps** como interface principal | Interface visual rica para preenchimento de formulários de projeto. | O escopo do módulo pede interface primariamente em linguagem natural (texto e áudio). Somam-se as restrições de licenciamento (C4), sem conectores premium e com limite de 500 linhas por leitura de lista. |
@@ -3791,9 +3796,58 @@ Obs.: Insira informações sobre estratégias para realização dos testes
 _conteúdo_
 Obs.: Insira informações sobre quais frameworks foram usados e como acessar.
 
-## 8.6 Speech-to-Text
+## 8.6 Requisitos das APIs de voz (STT/TTS)
 
-### 8.6.1 Introdução
+### 8.6.1 Objetivo e delimitação
+
+Esta seção consolida os requisitos usados para avaliar interfaces de *Speech-to-Text* (STT) e *Text-to-Speech* (TTS), com base na especificação da Sprint 1. O levantamento define o que cada API deve receber e devolver, quais formatos e restrições precisam ser conhecidos e quais critérios orientam a comparação entre provedores. As decisões e os contratos específicos de STT e TTS são detalhados, respectivamente, nas Seções 8.7 e 8.8.
+
+Os dois serviços ocupam posições diferentes no fluxo de voz:
+
+1. o **STT** recebe o áudio enviado pelo usuário e produz a solicitação textual encaminhada ao pipeline de PLN;
+2. o **TTS** recebe a resposta textual final produzida pelo agente e sintetiza um áudio que poderá ser devolvido pelo canal de interação.
+
+Essa distinção preserva a delimitação da Sprint 1. A arquitetura inicial prevê solicitações por texto ou áudio e um componente de conversão de áudio em texto, enquanto os critérios de aceitação do RF01 exigem, no MVP, que o pipeline aceite solicitações textuais. A Seção 8.7 detalha o STT previsto na solução atual. A Seção 8.8 registra a avaliação e o contrato técnico de TTS, mas sua implementação continua classificada na Seção 3.4.5 como evolução; documentar a API não altera o escopo do MVP.
+
+### 8.6.2 Entradas, saídas e formatos
+
+| Serviço | Entrada esperada | Saída esperada | Formatos e metadados adotados ou exigidos | Destino no fluxo | Situação no escopo |
+|---|---|---|---|---|---|
+| **STT** | Fala em português do Brasil (`pt-BR`), capturada pelo canal como arquivo ou fluxo de áudio. O caso de uso atual é uma pergunta curta do usuário. | Transcrição textual estruturada. Quando disponível, a resposta deve expor o estado do reconhecimento, o texto normalizado e a confiança ou as alternativas retornadas pelo provedor. | A avaliação deve registrar contêiner, codec, taxa de amostragem, número de canais, duração e tamanho máximos, envio binário ou multipart e suporte a processamento síncrono ou streaming. No contrato adotado na Seção 8.7, usa-se preferencialmente WAV com PCM, 16 kHz e mono; OGG com OPUS, 16 kHz e mono também é aceito pelo endpoint documentado. | O texto final é encaminhado ao pipeline de PLN como uma solicitação textual; o STT não classifica a intenção nem gera a resposta do agente. | Componente previsto na arquitetura e detalhado na Seção 8.7. A disponibilidade no ambiente do parceiro ainda depende de confirmação com a GTI. |
+| **TTS** | Resposta textual final do agente em português do Brasil, codificada em um documento SSML válido após a aplicação das regras de acesso e fundamentação. | Bytes do áudio sintetizado, acompanhados do tipo de mídia correspondente ao formato solicitado. | O contrato da Seção 8.8 adota `application/ssml+xml` na entrada e `audio-24khz-48kbitrate-mono-mp3` na saída, adequado à reprodução direta. `riff-24khz-16bit-mono-pcm` (WAV) é a alternativa documentada para processamento sem perdas. Devem ser respeitados os limites de tamanho do SSML, duração e taxa de requisições do provedor. | O áudio é devolvido pela camada de interface sem alterar o conteúdo textual fundamentado, que permanece como resposta canônica do agente. | Contrato técnico documentado na Seção 8.8; a implementação permanece como evolução e não é requisito de entrega do MVP. |
+
+Para ambas as APIs, o contrato técnico deve documentar autenticação, parâmetros obrigatórios, exemplo de requisição e resposta, códigos de erro, limites de uso e comportamento quando não for possível processar a entrada. No caso de STT, uma transcrição utilizável é o dado de entrada do restante do pipeline. No caso de TTS, a síntese acrescenta uma modalidade de apresentação e não modifica o conteúdo produzido pelo pipeline.
+
+### 8.6.3 O que é buscado nas APIs
+
+Os critérios abaixo orientam a pesquisa e a comparação de serviços de voz. Eles consolidam as necessidades registradas na arquitetura, nos RNFs e nas documentações específicas de STT e TTS.
+
+| Critério | O que deve ser verificado |
+|---|---|
+| **Português do Brasil** | Reconhecimento de fala em `pt-BR` para STT e disponibilidade de vozes em `pt-BR` para TTS. |
+| **Adequação ao fluxo conversacional** | Modos de processamento compatíveis com perguntas e respostas curtas e com o envio ou a reprodução pelo Teams. A Sprint 1 não define uma meta isolada de latência para STT ou TTS; qualquer medição deve separar o tempo do serviço de voz do tempo do pipeline textual previsto no RNF05. |
+| **Entrada, saída e limites explícitos** | Formatos, codecs, taxas de amostragem, quantidade de canais, duração ou caracteres máximos, tamanho de requisição, simultaneidade, cotas e formas de entrega devem estar documentados pelo provedor. |
+| **Qualidade observável** | Para STT, retorno do texto normalizado e, quando suportado, confiança e alternativas de reconhecimento. Para TTS, possibilidade de validar inteligibilidade, naturalidade e adequação da voz em português. A Sprint 1 não estabelece limiar numérico de acurácia, confiança ou qualidade de síntese. |
+| **Integração e portabilidade** | Interface documentada, preferencialmente HTTP, que possa ser encapsulada por um contrato interno e substituída sem alterar o pipeline de PLN. Devem ser conhecidos os métodos de autenticação e os tipos de conteúdo enviados e recebidos. |
+| **Aderência tecnológica** | Compatibilidade com o ecossistema Microsoft já utilizado pelo Metrô e possibilidade de homologação no ambiente do parceiro, conforme o RNF08. |
+| **Segurança e confidencialidade** | Nenhum dado real ou sensível pode ser enviado a serviço externo não homologado. Credenciais devem ser mantidas fora do código-fonte e a integração não pode contornar permissões definidas para o usuário. |
+| **Tratamento de falhas** | Respostas controladas para entrada inválida, formato não suportado, ausência de fala, texto ou SSML inválido, falha de autenticação, limite excedido e indisponibilidade, em concordância com o RNF11. |
+| **Custo e sustentabilidade** | Existência de faixa gratuita ou crédito para o desenvolvimento, limites dessa gratuidade e modelo de cobrança previsível após a franquia, sem tratar valores públicos como cotação contratual. |
+| **Documentação e validação** | Documentação oficial suficiente para reproduzir chamadas e possibilidade de teste com amostras representativas antes de confirmar qualidade, latência e custo efetivos. |
+
+### 8.6.4 Restrições e condições de validação
+
+- A captura de voz nativa do Teams/Copilot Studio é a primeira opção indicada na Seção 3.4.2.1. A escolha do Azure AI Speech na Seção 8.7 é a recomendação técnica para a integração STT quando o recurso nativo não atender à qualidade ou ao português necessário; o uso no ambiente do parceiro depende de disponibilidade e homologação pela GTI.
+- Os benchmarks de STT e TTS das Seções 8.7 e 8.8 são documentais. Não devem ser apresentadas conclusões empíricas de acurácia, naturalidade ou latência antes da existência de amostras padronizadas e representativas do projeto.
+- Os limites de 60 segundos e os formatos WAV/PCM e OGG/OPUS descritos na Seção 8.7 pertencem ao endpoint de áudio curto selecionado para STT e não devem ser generalizados como limites de todos os provedores.
+- O SSML, o MP3 adotado e o WAV alternativo descritos na Seção 8.8 pertencem ao contrato do endpoint Azure selecionado para TTS e não constituem exigências universais para outros provedores.
+- As APIs de voz não devem receber dados reais ou sensíveis em serviço não homologado. Durante a prova de conceito, aplicam-se as exigências de dados sintéticos ou anonimizados do RNF01.
+- A trilha prevista no RNF03 continua baseada na solicitação textual, na intenção, nas fontes e na resposta produzida. Este levantamento não cria uma nova obrigação de armazenar gravações ou áudios sintetizados.
+- A escolha técnica do Azure AI Speech para TTS na Seção 8.8 permite reutilizar o recurso e a autenticação do STT, mas não antecipa sua implementação: a síntese de fala permanece fora do escopo do MVP, conforme a Seção 3.4.5.
+
+## 8.7 Speech-to-Text
+
+### 8.7.1 Introdução
 
 Speech-to-Text (STT), ou reconhecimento automático de fala, é a tecnologia responsável por converter a fala presente em um áudio para texto. O serviço recebe um arquivo ou fluxo de áudio, identifica os trechos falados e devolve a transcrição reconhecida. Dependendo da configuração, a resposta também pode incluir pontuação, normalização de números, alternativas de reconhecimento e um índice de confiança.
 
@@ -3808,7 +3862,7 @@ Os requisitos considerados para a escolha da API foram:
 - integração por uma interface HTTP que possa ser substituída por outro provedor;
 - retorno estruturado com texto e confiança do reconhecimento.
 
-### 8.6.2 Benchmark das APIs
+### 8.7.2 Benchmark das APIs
 
 O benchmark a seguir é documental, baseado nas funcionalidades e nos preços publicados pelos fornecedores em 19 de agosto de 2026. Não foram atribuídas métricas de acurácia ou latência porque ainda não existe um corpus padronizado de áudios do projeto para um teste empírico.
 
@@ -3860,7 +3914,7 @@ Sem o critério de custo, o **Google Cloud Speech-to-Text V2 é o vencedor do be
 
 Para a fase inicial, permanece selecionado o **Azure AI Speech**, pois a orientação do projeto prioriza uma alternativa gratuita e sua franquia recorrente de cinco horas mensais é suficiente para o desenvolvimento. A aplicação deve acessar o serviço por uma interface interna genérica, de modo que o provedor possa ser substituído sem alterar o restante do pipeline.
 
-### 8.6.3 API escolhida: Azure AI Speech
+### 8.7.3 API escolhida: Azure AI Speech
 
 Para o desenvolvimento inicial será utilizada a **API REST do Azure AI Speech para áudio curto**, compatível com o nível Free (F0). Esse endpoint recebe uma gravação de até 60 segundos e retorna o resultado final de forma síncrona, o que atende às perguntas curtas enviadas ao agente.
 
@@ -4055,9 +4109,9 @@ Resposta esperada: `200 OK`, com o token no corpo como texto. O token é válido
 Authorization: Bearer <TOKEN>
 ```
 
-## 8.7 Text-to-Speech
+## 8.8 Text-to-Speech
 
-### 8.7.1 Introdução
+### 8.8.1 Introdução
 
 Text-to-Speech (TTS), ou síntese de fala, é a tecnologia responsável por converter um texto em um áudio falado. O serviço recebe um texto (eventualmente marcado com SSML — *Speech Synthesis Markup Language*) e devolve um arquivo ou fluxo de áudio com a fala sintetizada, podendo variar a voz, o idioma, a velocidade e a entonação.
 
@@ -4075,9 +4129,9 @@ Os requisitos considerados para a escolha da API foram:
 - controle básico de prosódia (velocidade, ênfase, pausas) quando necessário;
 - formato de áudio compatível com reprodução direta no frontend (ex.: MP3 ou WAV).
 
-### 8.7.2 Benchmark das APIs
+### 8.8.2 Benchmark das APIs
 
-O benchmark a seguir é documental, baseado nas funcionalidades e nos preços publicados pelos fornecedores em 27 de agosto de 2026, mantendo os mesmos quatro provedores comparados no benchmark de STT (seção 8.6.2) para preservar a consistência entre as duas decisões. Não foram atribuídas métricas de naturalidade percebida ou latência porque ainda não existe um corpus padronizado de respostas do agente para um teste empírico.
+O benchmark a seguir é documental, baseado nas funcionalidades e nos preços publicados pelos fornecedores em 27 de agosto de 2026, mantendo os mesmos quatro provedores comparados no benchmark de STT (Seção 8.7.2) para preservar a consistência entre as duas decisões. Não foram atribuídas métricas de naturalidade percebida ou latência porque ainda não existe um corpus padronizado de respostas do agente para um teste empírico.
 
 #### Comparação funcional e de custo
 
@@ -4127,9 +4181,9 @@ Sem o critério de custo, o **Azure AI Speech** se destaca por combinar controle
 
 #### Decisão
 
-Apesar de o Google Cloud Text-to-Speech obter a maior nota ponderada, a fase inicial do projeto adota o **Azure AI Speech** pelos mesmos motivos estratégicos que levaram à escolha do STT (seção 8.6.2): a franquia de 0,5 milhão de caracteres por mês é suficiente para o desenvolvimento e os testes do agente, e — mais importante — **o TTS pode reutilizar o mesmo recurso Azure (mesma chave `AZURE_SPEECH_KEY`, mesma região e o mesmo padrão de autenticação)** já provisionado para o STT, evitando manter credenciais, contas e integrações de dois provedores diferentes para voz de entrada e de saída. Assim como no STT, a aplicação deve acessar o serviço por uma interface interna genérica, de modo que o provedor possa ser substituído (por exemplo, pelo Google Cloud TTS) sem alterar o restante do pipeline, caso a franquia gratuita se torne insuficiente.
+Apesar de o Google Cloud Text-to-Speech obter a maior nota ponderada, a fase inicial do projeto adota o **Azure AI Speech** pelos mesmos motivos estratégicos que levaram à escolha do STT (Seção 8.7.2): a franquia de 0,5 milhão de caracteres por mês é suficiente para o desenvolvimento e os testes do agente, e — mais importante — **o TTS pode reutilizar o mesmo recurso Azure (mesma chave `AZURE_SPEECH_KEY`, mesma região e o mesmo padrão de autenticação)** já provisionado para o STT, evitando manter credenciais, contas e integrações de dois provedores diferentes para voz de entrada e de saída. Assim como no STT, a aplicação deve acessar o serviço por uma interface interna genérica, de modo que o provedor possa ser substituído (por exemplo, pelo Google Cloud TTS) sem alterar o restante do pipeline, caso a franquia gratuita se torne insuficiente.
 
-### 8.7.3 API escolhida: Azure AI Speech
+### 8.8.3 API escolhida: Azure AI Speech
 
 Para o desenvolvimento inicial será utilizada a **API REST do Azure AI Speech para síntese de voz**, compatível com o nível Free (F0) e com o mesmo recurso Azure já usado no STT.
 
@@ -4138,7 +4192,7 @@ Para o desenvolvimento inicial será utilizada a **API REST do Azure AI Speech p
 | Finalidade | Método HTTP | Endpoint | Uso no projeto |
 |---|---|---|---|
 | Sintetizar fala a partir de texto/SSML | `POST` | `https://<REGIAO>.tts.speech.microsoft.com/cognitiveservices/v1` | Endpoint principal do desenvolvimento inicial. |
-| Obter token temporário | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/sts/v1.0/issueToken` | Opcional; o mesmo endpoint de token já documentado para o STT (seção 8.6.3) também vale para o TTS. |
+| Obter token temporário | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/sts/v1.0/issueToken` | Opcional; o mesmo endpoint de token já documentado para o STT (Seção 8.7.3) também vale para o TTS. |
 
 O endpoint de síntese aceita até **10 minutos de áudio por requisição**, muito acima do necessário para respostas curtas do agente.
 
@@ -4214,9 +4268,9 @@ Status HTTP esperado: `200 OK`. O corpo da resposta não é JSON: são os **byte
 
 #### Requisição opcional de token
 
-Idêntica à já documentada para o STT (seção 8.6.3): trocar a chave por um token Bearer válido por 10 minutos, usando o mesmo endpoint `/sts/v1.0/issueToken` do mesmo recurso Azure.
+Idêntica à já documentada para o STT (Seção 8.7.3): trocar a chave por um token Bearer válido por 10 minutos, usando o mesmo endpoint `/sts/v1.0/issueToken` do mesmo recurso Azure.
 
-### 8.7.4 Referências
+### 8.8.4 Referências
 
 - Microsoft. [Preços do Azure AI Speech](https://azure.microsoft.com/en-us/pricing/details/speech/). Acesso em: 27 ago. 2026.
 - Microsoft. [Quotas e limites do Azure AI Speech](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-services-quotas-and-limits). Acesso em: 27 ago. 2026.
@@ -4228,13 +4282,13 @@ Idêntica à já documentada para o STT (seção 8.6.3): trocar a chave por um t
 - OpenAI. [Preços da API](https://platform.openai.com/docs/pricing). Acesso em: 27 ago. 2026.
 
 
-## 8.8 Escolha de algoritmo PLN
+## 8.9 Escolha de algoritmo PLN
 
 Esta seção registra a escolha atual do pipeline de Processamento de Linguagem Natural responsável por classificar a solicitação do usuário. A implementação e o benchmark reproduzível estão no notebook [`classificador_intencoes_metro.ipynb`](../src/notebooks/classificador_intencoes_metro.ipynb).
 
 Embora seja referido de forma abreviada como “modelo híbrido W2V+BERT”, o componente é tecnicamente um pipeline: a representação híbrida gera os atributos de entrada, e classificadores lineares realizam a previsão em dois níveis — macrointenção e intenção específica.
 
-### 8.8.1 Objetivo e protocolo de avaliação
+### 8.9.1 Objetivo e protocolo de avaliação
 
 O classificador organiza os pedidos em quatro macrointenções (`CONSULTA`, `TRANSACAO`, `ALERTA` e `FORA_DE_ESCOPO`) e 31 intenções específicas. A macrointenção determina o fluxo geral do agente, enquanto a intenção específica identifica o handler mais adequado.
 
@@ -4246,7 +4300,7 @@ A seleção segue três etapas:
 2. comparação das representações e classificadores no conjunto de validação, usando como critério principal o F1-macro da intenção específica;
 3. avaliação do pipeline escolhido no teste, que não participa da seleção.
 
-### 8.8.2 Benchmark e decisão
+### 8.9.2 Benchmark e decisão
 
 O notebook compara TF-IDF de palavras, TF-IDF de caracteres, Word2Vec, embeddings BERT congelados e combinações híbridas. Também compara regressão logística e LinearSVC, além das arquiteturas plana e hierárquica. A tabela produzida pelo próprio script é ordenada pelo F1-macro de intenção na validação, evitando que a escolha seja definida previamente por preferência tecnológica.
 
@@ -4254,7 +4308,7 @@ Na execução completa de referência, a melhor alternativa foi a representaçã
 
 A arquitetura hierárquica primeiro prevê a macrointenção e depois utiliza um especialista para distinguir apenas as intenções daquele grupo. Essa divisão reduz o número de classes concorrentes em cada segunda etapa e se alinha ao roteamento esperado pelo agente. A escolha atual, portanto, não decorre apenas do uso de modelos semanticamente mais sofisticados, mas do resultado observado sob o mesmo protocolo de comparação.
 
-### 8.8.3 Configuração e resultados atuais
+### 8.9.3 Configuração e resultados atuais
 
 A configuração selecionada na execução de referência foi:
 
@@ -4284,7 +4338,7 @@ Os resultados indicam que o primeiro nível está mais maduro: no teste, a macro
 
 A execução de referência gerou o classificador serializado (aproximadamente 13.188 KB), o modelo Word2Vec (aproximadamente 925 KB), o catálogo de intenções, o conjunto de dados e o arquivo de métricas. O encoder BERT pré-treinado não está incorporado ao arquivo `joblib` e deve ser carregado separadamente pelo ambiente de inferência.
 
-### 8.8.4 Limitações e próximos passos
+### 8.9.4 Limitações e próximos passos
 
 Os números atuais devem ser interpretados com as seguintes ressalvas:
 
