@@ -5,9 +5,20 @@
   </tr>
 </table>
 
-# Gestão de configuração
+# Agente de IA para o Portfólio de Projetos do Metrô
 
-## Projeto G05
+## Nome do grupo: Oneshot
+
+## Integrantes:
+
+- <a href="https://www.linkedin.com/in/ntsfelipe/">Felipe Neves</a>
+- <a href="https://www.linkedin.com/in/henrique-rodrigues-diniz-b7b011319/">Henrique Diniz</a>
+- <a href="https://www.linkedin.com/in/jaimeandradedealmeida/">Jaime Almeida</a>
+- <a href="https://www.linkedin.com/in/leonardoramosvieira">Leonardo Ramos</a>
+- <a href="https://www.linkedin.com/in/pedro-uchoaa/">Pedro Uchoa</a>
+- <a href="https://www.linkedin.com/in/wendel-feitosa-975bb1346/">Wendel Feitosa</a>
+
+## Gestão de configuração
 
 # Sumário
 
@@ -23,6 +34,8 @@
   - [5.1 Criação de branch](#51-criação-de-branch)
   - [5.2 Atualização da branch](#52-atualização-da-branch)
   - [5.3 Mesclagem por merge request](#53-mesclagem-por-merge-request)
+    - [5.3.1 Padronização do título antes do merge](#531-padronização-do-título-antes-do-merge)
+    - [5.3.2 Marco de integração](#532-marco-de-integração)
   - [5.4 Exclusão de branch](#54-exclusão-de-branch)
 - [6. Fluxo de desenvolvimento](#6-fluxo-de-desenvolvimento)
   - [6.1 Fluxo de feature](#61-fluxo-de-feature)
@@ -32,11 +45,15 @@
   - [7.1 Como ativar, verificar e desativar](#71-como-ativar-verificar-e-desativar)
   - [7.2 Validações executadas](#72-validações-executadas)
   - [7.3 Auditoria do repositório](#73-auditoria-do-repositório)
-- [8. Exemplos práticos](#8-exemplos-práticos)
-  - [8.1 Atualização da gestão de projeto](#81-atualização-da-gestão-de-projeto)
-  - [8.2 Preparação de entrega](#82-preparação-de-entrega)
-  - [8.3 Hotfix](#83-hotfix)
-- [9. Regras de governança do GitFlow](#9-regras-de-governança-do-gitflow)
+- [8. Versionamento de artefatos de modelo](#8-versionamento-de-artefatos-de-modelo)
+  - [8.1 O que é versionado e por quê](#81-o-que-é-versionado-e-por-quê)
+  - [8.2 A restrição que vem junto](#82-a-restrição-que-vem-junto)
+- [9. Exemplos práticos](#9-exemplos-práticos)
+  - [9.1 Atualização da gestão de projeto](#91-atualização-da-gestão-de-projeto)
+  - [9.2 Preparação de entrega](#92-preparação-de-entrega)
+  - [9.3 Integração de entrega documental com renumeração de seções](#93-integração-de-entrega-documental-com-renumeração-de-seções)
+  - [9.4 Hotfix](#94-hotfix)
+- [10. Regras de governança do GitFlow](#10-regras-de-governança-do-gitflow)
 
 # 1. Introdução
 
@@ -188,7 +205,7 @@ Quando houver conflito, o responsável pela branch deve resolvê-lo localmente, 
 Toda integração deve acontecer por Merge Request no GitLab. O Merge Request deve conter:
 
 - Branch de origem e destino corretas;
-- Título descritivo com mais de três palavras, sem `WIP:` ou `Draft:`;
+- Título no formato `<tipo>: <descrição curta> (#<issue>)`, com mais de três palavras e sem `WIP:` ou `Draft:`;
 - Descrição substantiva do que foi alterado;
 - Issue ou tarefa relacionada;
 - Evidências da entrega;
@@ -204,6 +221,18 @@ Critérios mínimos para merge:
 - A branch está atualizada em relação ao destino;
 - A DoD da issue está atendida;
 - O responsável pelo merge confirma que a alteração não quebra a entrega da sprint.
+
+### 5.3.1 Padronização do título antes do merge
+
+O grupo utiliza merge com squash, e o commit resultante é criado pelo servidor: ele **não passa pelos hooks locais** e herda o título do merge request, que por padrão vem do nome da branch. O efeito é direto sobre a rastreabilidade — na Sprint 1, 6 de 19 commits de squash seguiram a convenção; na Sprint 2, 4 de 13, sem que ninguém tivesse desobedecido nenhuma regra.
+
+Por isso, **conferir o título do merge request é item obrigatório do checklist de revisão**, antes da aprovação. O revisor deve garantir que o título esteja no formato `<tipo>: <descrição curta> (#<issue>)`. Títulos como `feat/implementar-frontend-inicial-mockado` ou `Docs/comparacao das alternativas` indicam que o campo não foi editado.
+
+Há um segundo efeito do squash que vale conhecer: o commit gerado registra no campo de committer o nome de quem aprovou o merge, e não o de quem escreveu o código. A autoria original é preservada no campo de autor, mas não aparece em contagens que usam o committer.
+
+### 5.3.2 Marco de integração
+
+Todo merge request aberto até **quarta-feira** deve estar revisado e mergeado até o fim daquele dia, ou ter o bloqueio declarado na issue correspondente. A regra existe porque, no fechamento da Sprint 2, quatro merge requests com entregas concluídas permaneceram abertos — o trabalho existia, mas não estava em `develop`, que é onde o repositório é avaliado. O risco correspondente está registrado como R11 no `GestaoProjeto.md`.
 
 ## 5.4 Exclusão de branch
 
@@ -353,6 +382,8 @@ permitindo que commits fora do padrão sejam criados.
 | Hook | Momento de execução | Validações |
 | --- | --- | --- |
 | `.githooks/pre-commit` | Antes de criar um commit | Bloqueia commit direto em branch permanente, valida prefixo da branch, bloqueia arquivos sensíveis no stage e executa `git diff --cached --check`. |
+
+A validação de arquivos sensíveis bloqueia `.env`, `.env.*`, `*.pem`, `*.key` e nomes contendo `secret` ou `credential`. Desde a Sprint 2, arquivos terminados em `*.example`, `*.sample` e `*.template` são avaliados antes dessa regra e liberados: são templates de configuração sem segredo, feitos para serem versionados. A exceção foi acrescentada quando `src/backend/.env.example` — que já estava em `develop` — passou a bloquear qualquer commit local que tocasse a árvore. O arquivo entrou no repositório sem passar pela validação justamente porque foi integrado por squash no servidor.
 | `.githooks/commit-msg` | Ao validar a mensagem de commit | Exige Conventional Commits, primeira linha com no máximo 72 caracteres e referência a issue no formato `#N`. |
 | `.githooks/pre-push` | Antes do push | Bloqueia push direto para branches permanentes, valida prefixo da branch local e confere se commits novos seguem Conventional Commits e referenciam issue. |
 
@@ -441,9 +472,38 @@ por pares.
 powershell -ExecutionPolicy Bypass -File scripts/audit-repo.ps1
 ```
 
-# 8. Exemplos práticos
+# 8. Versionamento de artefatos de modelo
 
-## 8.1 Atualização da gestão de projeto
+O repositório versiona os artefatos gerados pelo treinamento do classificador de intenções, em `src/notebooks/artefatos/`. A decisão foi tomada na Sprint 2, quando o notebook de classificação entrou no projeto, e é registrada aqui porque tem consequência permanente sobre o tamanho do repositório.
+
+## 8.1 O que é versionado e por quê
+
+| Artefato | Tamanho aproximado | Motivo |
+| --- | ---: | --- |
+| `classificador_intencoes.joblib` | 14,5 MB | Modelo serializado da execução de referência, mantido como evidência do resultado documentado na Seção 8.9 do `Projeto.md` |
+| `word2vec_portfolio.model` | 0,9 MB | Representação treinada no corpus do projeto, necessária para reproduzir a inferência sem novo treinamento |
+| `dataset_intencoes.csv` | 0,8 MB | Conjunto sintético que sustenta a separação por `template_id` descrita no protocolo de avaliação |
+| `catalogo_intencoes.csv` e `.json` | poucos KB | Catálogo das intenções reconhecidas, consultado pelo roteamento |
+| `metricas.json` | poucos KB | Métricas da execução de referência, citadas na documentação |
+
+A escolha é deliberada: manter os artefatos permite conferir os números publicados sem reexecutar o notebook, o que importa em um projeto avaliado por evidência.
+
+## 8.2 A restrição que vem junto
+
+O Git preserva todas as versões de um arquivo binário. Cada nova versão do `.joblib` acrescenta cerca de 14 MB **permanentes** ao repositório, que todo integrante baixa a cada clone e que não podem ser removidos sem reescrever o histórico.
+
+Por isso valem as regras abaixo.
+
+- **Não commitar artefatos a cada retreino.** Execuções exploratórias, ajustes de hiperparâmetro e testes de configuração permanecem locais. Só entra no repositório o artefato correspondente à **execução de referência** citada na documentação.
+- **Atualizar o artefato apenas quando o resultado documentado mudar.** Se a Seção 8.9 do `Projeto.md` continua reportando as mesmas métricas, não há motivo para substituir o binário.
+- **Declarar a substituição no merge request.** Quando um artefato for atualizado, o MR deve informar qual execução o gerou e quais métricas mudaram, para que a troca de 14 MB tenha justificativa registrada.
+- **Manter os arquivos leves sempre atualizados.** `catalogo_intencoes` e `metricas.json` são pequenos e devem acompanhar qualquer mudança, mesmo quando o modelo serializado não for substituído.
+
+Caso o volume se torne um problema, a alternativa prevista é migrar os binários para Git LFS, preservando a rastreabilidade sem carregar o histórico. A avaliação dessa migração fica condicionada ao crescimento observado do repositório.
+
+# 9. Exemplos práticos
+
+## 9.1 Atualização da gestão de projeto
 
 ```text
 Issue: Estruturar documento de gestão de projeto
@@ -462,7 +522,7 @@ git checkout -b docs/gestao-projeto
 git push -u origin docs/gestao-projeto
 ```
 
-## 8.2 Preparação de entrega
+## 9.2 Preparação de entrega
 
 ```text
 Branch de integração: develop
@@ -479,7 +539,28 @@ Fluxo:
 branches temporárias -> develop -> hmg -> main
 ```
 
-## 8.3 Hotfix
+## 9.3 Integração de entrega documental com renumeração de seções
+
+Situação real da Sprint 2. Quatro branches alteravam `docs/Projeto.md` ao mesmo tempo, e uma delas renumerava seções, deslocando `8.6` para `8.7` e `8.7` para `8.8`. Integrar fora de ordem produziria conflito em cada uma das seguintes.
+
+```bash
+# 1. Levantar quem toca o mesmo arquivo antes de abrir o merge
+git fetch origin --prune
+git branch -r --no-merged origin/develop
+git diff --stat origin/develop...origin/docs/<branch>
+
+# 2. Acordar a ordem: primeiro as que só acrescentam seções,
+#    depois a que renumera, por último a que reescreve o sumário
+# 3. Integrar na ordem acordada, atualizando a branch antes de cada merge
+git checkout docs/<minha-branch>
+git merge origin/develop
+# resolver conflitos, regerar o sumário a partir dos títulos reais
+git push origin docs/<minha-branch>
+```
+
+A regra prática: **branch que renumera seção entra depois das que só acrescentam, e a que regenera o sumário entra por último.** Quando duas pessoas precisam mexer no mesmo arquivo na mesma sprint, a ordem de merge é combinada na planning, não descoberta no conflito.
+
+## 9.4 Hotfix
 
 ```text
 Problema: arquivo de configuração impede execução da versão estável
@@ -488,7 +569,7 @@ Origem: main
 Destino: main e develop
 ```
 
-# 9. Regras de governança do GitFlow
+# 10. Regras de governança do GitFlow
 
 - Não é permitido commitar diretamente em `main`, `develop` ou `hmg`;
 - Os hooks também bloqueiam commits e pushes diretos em `develop` e `hmg`;

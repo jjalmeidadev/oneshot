@@ -1,0 +1,33 @@
+@startuml modelo-conceitual
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 55
+skinparam class {
+  BackgroundColor #EEF4FD
+  BorderColor #4A7EBB
+  ArrowColor #4A5560
+  FontSize 12
+  AttributeFontSize 10
+}
+hide circle
+left to right direction
+
+SUBPORTFOLIO "1" -- "0..*" PROJETO : agrupa
+PROJETO "1" -- "0..*" ARTEFATO_DO_PROJETO : possui
+ARTEFATO_DO_PROJETO "1" -- "0..*" EXTRATO_DE_FONTE : gera
+ARTEFATO_DO_PROJETO "1" -- "0..*" ITEM_DE_CRONOGRAMA : origina
+PROJETO "1" -- "0..*" ATUALIZACAO_DE_STATUS : registra
+PROJETO "1" -- "0..*" RISCO_OU_PROBLEMA : monitora
+PROJETO "1" -- "0..*" MUDANCA : controla
+USUARIO "1" -- "0..*" CONVERSA : inicia
+CONVERSA "1" -- "0..*" INTERACAO : contem
+INTENCAO "1" -- "0..*" INTERACAO : classifica
+INTERACAO "1" -- "0..*" FONTE_CONSULTADA : utiliza
+EXTRATO_DE_FONTE "1" -- "0..*" FONTE_CONSULTADA : referencia
+INTERACAO "1" -- "0..*" EVENTO_DE_AUDITORIA : gera
+INTERACAO "1" -- "0..1" SOLICITACAO_FORA_DE_ESCOPO : pode_gerar
+USUARIO "1" -- "0..*" REGRA_DE_ACESSO : possui
+INTENCAO "1" -- "0..*" TEMPLATE_DE_PROMPT : orienta
+INTENCAO "1" -- "0..*" CASO_DE_TESTE_DE_INTENCAO : valida
+@enduml

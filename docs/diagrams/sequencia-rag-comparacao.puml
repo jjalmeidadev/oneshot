@@ -1,0 +1,84 @@
+@startuml sequencia-rag-comparacao
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam maxMessageSize 240
+skinparam participant {
+  BackgroundColor #EEF4FD
+  BorderColor #4A7EBB
+}
+skinparam actor {
+  BackgroundColor #E6F4E0
+  BorderColor #5A9E4A
+}
+skinparam sequence {
+  ArrowColor #4A5560
+  LifeLineBorderColor #8A949E
+  GroupBackgroundColor #FDF6D8
+  GroupBorderColor #B8A13A
+}
+
+autonumber
+actor "Gestor do Portfólio" as Gestor
+participant "Microsoft Entra ID" as Entra
+participant "Microsoft Teams" as Chat
+participant "API da Aplicação" as API
+participant "Núcleo de PLN" as PLN
+participant "Classificador de Intenções" as Classificador
+participant "Validador de Escopo" as Escopo
+participant "Catálogo de Intenções" as Catalogo
+participant "Extração de Entidades" as Entidades
+participant "Recuperador RAG" as Retriever
+participant "Base sintética / Índice Vetorial" as Fontes
+participant "Analisador Comparativo" as Analise
+participant "Montagem de Contexto" as Contexto
+participant "API de LLM" as LLM
+participant "Trilha de Auditoria" as Auditoria
+Gestor -> Entra : Autenticar-se
+Entra --> Chat : Identidade autenticada
+Gestor -> Chat : Solicita comparação em linguagem natural
+Chat -> API : POST /chat com a solicitação + identidade
+API -> Auditoria : Registrar início da interação
+API -> PLN : Encaminhar solicitação
+PLN -> PLN : Pré-processar texto
+PLN -> Classificador : Identificar intenção
+Classificador --> PLN : Intenção analítica + confiança
+PLN -> Escopo : Validar solicitação
+alt Solicitação fora do escopo
+Escopo --> PLN : Não suportada
+PLN -> API : Orientação / limite da solução
+API -> Auditoria : Registrar intenção e resultado
+API --> Chat : Resposta de reformulação
+Chat --> Gestor : Apresentar orientação
+else Solicitação válida
+Escopo --> PLN : Solicitação válida
+PLN -> Catalogo : Associar intenção a uma capacidade
+Catalogo --> PLN : Rota = Análise comparativa
+PLN -> Entidades : Extrair projetos e critérios
+Entidades --> PLN : Projetos + critérios
+PLN -> Retriever : Recuperar evidências dos projetos
+Retriever -> Fontes : Buscar evidências do Projeto XPTO
+Fontes --> Retriever : Trechos + metadados
+Retriever --> PLN : Evidências do Projeto XPTO
+PLN -> Retriever : Buscar evidências do Projeto ABC
+Retriever -> Fontes : Buscar evidências do Projeto ABC
+Fontes --> Retriever : Trechos + metadados
+Retriever --> PLN : Evidências do Projeto ABC
+alt Dados suficientes
+PLN -> Analise : Comparar riscos, prazos e critérios
+Analise --> PLN : Resultado comparativo estruturado
+PLN -> Contexto : Consolidar evidências + resultado
+Contexto --> PLN : Contexto fundamentado
+PLN -> LLM : Gerar resposta comparativa
+LLM --> PLN : Resposta em linguagem natural
+PLN -> API : Resultado + referências
+API -> Auditoria : Registrar consulta, fontes e resposta
+API --> Chat : Comparação estruturada
+Chat --> Gestor : Exibir análise
+else Dados insuficientes
+PLN -> API : Informar dados ausentes
+API -> Auditoria : Registrar insuficiência e fontes consultadas
+API --> Chat : Limitação da análise
+Chat --> Gestor : Exibir insuficiência
+end
+end
+@enduml
