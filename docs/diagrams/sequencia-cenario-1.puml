@@ -1,0 +1,50 @@
+@startuml sequencia-cenario-1
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam maxMessageSize 240
+skinparam participant {
+  BackgroundColor #EEF4FD
+  BorderColor #4A7EBB
+}
+skinparam actor {
+  BackgroundColor #E6F4E0
+  BorderColor #5A9E4A
+}
+skinparam sequence {
+  ArrowColor #4A5560
+  LifeLineBorderColor #8A949E
+  GroupBackgroundColor #FDF6D8
+  GroupBorderColor #B8A13A
+}
+
+autonumber
+actor Usuario
+participant "Interface do Sistema" as Sistema
+participant "Pipeline de PLN" as PLN
+participant "Classificador de Intenção" as Classificador
+participant "Catálogo de Intenções" as Catalogo
+participant "Recuperador de Informação" as Recuperador
+participant "Base de Dados Sintéticos" as Base
+participant "LLM" as LLM
+Usuario -> Sistema : Envia solicitação em linguagem natural
+Sistema -> PLN : Encaminha texto da solicitação
+PLN -> Classificador : Identificar intenção semântica
+Classificador --> PLN : Intenção identificada
+PLN -> Classificador : Classificar intenção
+Classificador --> PLN : Categoria = CONSULTA
+PLN -> Catalogo : Consultar rota da intenção
+Catalogo --> PLN : Sem fluxo automatizado
+PLN -> Recuperador : Solicitar informações do projeto e critério
+Recuperador -> Base : Consultar documentos e dados sintéticos
+Base --> Recuperador : Retornar informações relevantes
+Recuperador --> PLN : Retornar trechos e referências
+alt Informação encontrada
+PLN -> LLM : Gerar resposta com contexto estruturado e validado
+LLM --> PLN : Resposta em linguagem natural
+PLN --> Sistema : Retornar resposta estruturada
+Sistema --> Usuario : Apresentar resposta
+else Informação insuficiente
+PLN --> Sistema : Informar ausência de dados suficientes
+Sistema --> Usuario : Apresentar limitação da consulta
+end
+@enduml

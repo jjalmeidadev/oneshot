@@ -1,0 +1,75 @@
+@startuml sequencia-cenario-3
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam maxMessageSize 240
+skinparam participant {
+  BackgroundColor #EEF4FD
+  BorderColor #4A7EBB
+}
+skinparam actor {
+  BackgroundColor #E6F4E0
+  BorderColor #5A9E4A
+}
+skinparam sequence {
+  ArrowColor #4A5560
+  LifeLineBorderColor #8A949E
+  GroupBackgroundColor #FDF6D8
+  GroupBorderColor #B8A13A
+}
+
+autonumber
+actor Usuario
+participant "Interface do Sistema" as Sistema
+participant "Pipeline de PLN" as PLN
+participant "Classificador de Intenção" as Classificador
+participant "Catálogo de Intenções" as Catalogo
+participant "Fluxo Automatizado" as Automatizado
+participant "LLM" as LLM
+participant "Configuração de Proatividade" as Config
+Usuario -> Sistema : Envia solicitação em linguagem natural
+Sistema -> PLN : Encaminha solicitação
+PLN -> Classificador : Identificar intenção primária
+Classificador --> PLN : Intenção + confiança
+PLN -> Catalogo : Associar intenção e consultar rota
+Catalogo --> PLN : Escopo + categoria + rota
+alt Intenção fora do escopo
+PLN --> Sistema : Solicitação não suportada pelo MVP
+Sistema --> Usuario : Orientar reformulação ou informar limite
+else Intenção com fluxo automatizado
+PLN -> Automatizado : Encaminhar intenção + parâmetros estruturados
+note right of Automatizado: A LLM não é acionada nesta rota
+Automatizado --> PLN : Resultado ou estado da ação
+PLN --> Sistema : Retornar resultado estruturado
+Sistema --> Usuario : Apresentar resultado da automação
+else Intenção válida sem fluxo automatizado
+PLN -> LLM : Enviar intenção + contexto estruturado e validado
+LLM --> PLN : Resposta principal fundamentada
+PLN -> Config : Consultar estado da proatividade
+alt Proatividade desativada
+Config --> PLN : Desativada
+PLN --> Sistema : Retornar somente resposta principal
+Sistema --> Usuario : Apresentar resposta
+else Proatividade ativada
+Config --> PLN : Ativada
+PLN -> Catalogo : Buscar intenção secundária compatível
+alt Intenção secundária disponível
+Catalogo --> PLN : Intenção secundária cadastrada
+PLN --> Sistema : Resposta principal + sugestão opcional
+Sistema --> Usuario : Apresentar resposta e próximo passo
+alt Usuário confirma a sugestão
+Usuario -> Sistema : Aceitar intenção secundária
+Sistema -> PLN : Enviar intenção confirmada
+PLN -> Catalogo : Tratar como nova intenção primária
+note over PLN,Catalogo: O novo ciclo utiliza novamente o roteamento do catálogo
+else Usuário recusa a sugestão
+Usuario -> Sistema : Recusar sugestão
+Sistema --> Usuario : Encerrar sugestão e preservar resposta
+end
+else Nenhuma intenção secundária compatível
+Catalogo --> PLN : Nenhuma sugestão cadastrada
+PLN --> Sistema : Retornar somente resposta principal
+Sistema --> Usuario : Apresentar resposta
+end
+end
+end
+@enduml

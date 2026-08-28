@@ -1,0 +1,65 @@
+@startuml sequencia-voz-stt
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam maxMessageSize 240
+skinparam participant {
+  BackgroundColor #EEF4FD
+  BorderColor #4A7EBB
+}
+skinparam actor {
+  BackgroundColor #E6F4E0
+  BorderColor #5A9E4A
+}
+skinparam sequence {
+  ArrowColor #4A5560
+  LifeLineBorderColor #8A949E
+  GroupBackgroundColor #FDF6D8
+  GroupBorderColor #B8A13A
+}
+
+autonumber
+actor "Usuário" as Usuario
+participant "Microsoft Entra ID" as Entra
+participant "Microsoft Teams" as Chat
+participant "API da Aplicação" as API
+participant "Azure AI Speech" as Speech
+participant "Núcleo de PLN" as PLN
+participant "Classificador de Intenções" as Classificador
+participant "Validador de Escopo" as Escopo
+participant "Catálogo de Intenções" as Catalogo
+participant "Roteamento da Capacidade" as Roteador
+participant "Trilha de Auditoria" as Auditoria
+Usuario -> Entra : Autenticar-se
+Entra --> Chat : Identidade autenticada
+Usuario -> Chat : Grava pergunta em áudio
+Chat -> API : Envia arquivo de áudio + identidade
+API -> Auditoria : Registrar início da interação
+API -> Speech : Requisição STT em pt-BR
+Speech --> API : Status + transcrição + confiança
+alt Transcrição inválida, NoMatch ou confiança baixa
+API -> Auditoria : Registrar falha de transcrição
+API --> Chat : Solicitar nova gravação / informar ausência de transcrição confiável
+Chat --> Usuario : Solicitar repetição do áudio
+else Transcrição válida
+API -> PLN : Encaminhar transcrição
+PLN -> PLN : Pré-processar texto
+PLN -> Classificador : Identificar intenção
+Classificador --> PLN : Intenção + confiança
+PLN -> Escopo : Validar solicitação
+alt Solicitação inválida ou fora do escopo
+Escopo --> PLN : Não suportada
+PLN -> API : Orientação / limite da solução
+API -> Auditoria : Registrar intenção e resultado
+API --> Chat : Resposta de reformulação
+Chat --> Usuario : Apresentar orientação
+else Solicitação válida
+Escopo --> PLN : Solicitação válida
+PLN -> Catalogo : Associar intenção à capacidade
+Catalogo --> Roteador : Capacidade selecionada
+Roteador --> API : Encaminhar para o fluxo correspondente
+API -> Auditoria : Registrar transcrição, intenção e roteamento
+API --> Chat : Resultado
+Chat --> Usuario : Apresentar resposta
+end
+end
+@enduml

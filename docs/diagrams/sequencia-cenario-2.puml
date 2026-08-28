@@ -1,0 +1,56 @@
+@startuml sequencia-cenario-2
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam maxMessageSize 240
+skinparam participant {
+  BackgroundColor #EEF4FD
+  BorderColor #4A7EBB
+}
+skinparam actor {
+  BackgroundColor #E6F4E0
+  BorderColor #5A9E4A
+}
+skinparam sequence {
+  ArrowColor #4A5560
+  LifeLineBorderColor #8A949E
+  GroupBackgroundColor #FDF6D8
+  GroupBorderColor #B8A13A
+}
+
+autonumber
+actor "Gestor do Portfólio" as Gestor
+participant "Interface do Sistema" as Sistema
+participant "Pipeline de PLN" as PLN
+participant "Classificador de Intenção" as Classificador
+participant "Catálogo de Intenções" as Catalogo
+participant "Recuperador de Informação" as Recuperador
+participant "Base de Dados Sintéticos" as Base
+participant "Analisador Comparativo" as Analisador
+participant "LLM" as LLM
+Gestor -> Sistema : Solicita comparação em linguagem natural
+Sistema -> PLN : Encaminha solicitação
+PLN -> Classificador : Identificar e classificar intenção
+Classificador --> PLN : Intenção analítica / CONSULTA
+PLN -> Catalogo : Consultar rota da intenção
+Catalogo --> PLN : Sem fluxo automatizado
+PLN -> PLN : Identificar projetos e critérios da comparação
+PLN -> Recuperador : Buscar dados do primeiro projeto
+Recuperador -> Base : Consultar Projeto XPTO
+Base --> Recuperador : Dados e documentos relevantes
+Recuperador --> PLN : Informações do Projeto XPTO
+PLN -> Recuperador : Buscar dados do segundo projeto
+Recuperador -> Base : Consultar Projeto ABC
+Base --> Recuperador : Dados e documentos relevantes
+Recuperador --> PLN : Informações do Projeto ABC
+alt Dados suficientes para comparação
+PLN -> Analisador : Comparar riscos e prazos
+Analisador --> PLN : Resultado estruturado da comparação
+PLN -> LLM : Gerar resposta com comparação e evidências validadas
+LLM --> PLN : Comparação em linguagem natural
+PLN --> Sistema : Retornar resultado
+Sistema --> Gestor : Apresentar comparação
+else Dados insuficientes
+PLN --> Sistema : Indicar quais informações estão ausentes
+Sistema --> Gestor : Apresentar limitação da análise
+end
+@enduml

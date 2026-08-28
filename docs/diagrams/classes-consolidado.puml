@@ -1,0 +1,154 @@
+@startuml classes-consolidado
+' Diagrama de classes consolidado — Seção 5.1 do Projeto.md
+' Une o pipeline de processamento da Sprint 1 ao domínio persistido da Sprint 2.
+
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 55
+skinparam ranksep 70
+skinparam defaultTextAlignment left
+skinparam class {
+  BackgroundColor #EEF4FD
+  BorderColor #4A7EBB
+  ArrowColor #4A5560
+  FontSize 12
+  AttributeFontSize 11
+}
+skinparam package {
+  BackgroundColor #FAFBFC
+  BorderColor #8A949E
+  FontStyle bold
+  FontSize 13
+}
+left to right direction
+
+package "Pipeline de processamento — origem na Seção 3.1.2" as P1 {
+  class Solicitacao {
+    +UUID id
+    +String texto
+    +DateTime dataHora
+    +String canal
+  }
+  class PipelinePLN {
+    +classificar(Solicitacao) : Intencao
+    +extrairEntidades(Solicitacao) : EntidadeExtraida[]
+  }
+  class Intencao {
+    +UUID id
+    +String macrointencao
+    +String intencaoEspecifica
+    +Float confiancaMacro
+    +Float confiancaEspecifica
+    +Boolean possuiFluxoAutomatizado
+    +acimaDoLimiar() : Boolean
+  }
+  class RoteadorIntencao {
+    +rotear(Intencao) : RotaProcessamento
+  }
+  class Resposta {
+    +String texto
+    +Boolean fundamentada
+    +declararLimitacao() : String
+  }
+}
+
+package "Interação e governança — novas na Sprint 2" as P2 {
+  class Conversa {
+    +UUID id
+    +UUID usuarioId
+    +DateTime iniciadaEm
+  }
+  class Interacao {
+    +UUID id
+    +UUID conversaId
+    +String rota
+    +DateTime registradaEm
+  }
+  class Usuario {
+    +UUID id
+    +String perfil
+    +podeAcessar(Projeto) : Boolean
+  }
+  class RegraAcesso {
+    +UUID id
+    +String nivel
+  }
+  class EventoAuditoria {
+    +UUID id
+    +String tipo
+    +DateTime ocorridoEm
+  }
+  class SolicitacaoForaDeEscopo {
+    +UUID id
+    +String motivo
+  }
+}
+
+package "Conhecimento consultável" as P3 {
+  class Artefato {
+    +UUID id
+    +String tipo
+    +String origem
+  }
+  class TrechoRecuperado {
+    +UUID id
+    +String texto
+    +String secao
+    +Float relevancia
+  }
+  class FonteConsultada {
+    +UUID id
+    +Float score
+  }
+}
+
+package "Domínio do portfólio" as P4 {
+  class Subportfolio {
+    +UUID id
+    +String nome
+  }
+  class Projeto {
+    +UUID id
+    +String nome
+    +Date prazoVigente
+    +avancoAtual() : StatusProjeto
+  }
+  class ItemCronograma {
+    +UUID id
+    +Float peso
+    +somaDosPesosFecha() : Boolean
+  }
+  class RiscoProblema {
+    +UUID id
+    +Integer probabilidade
+    +Integer impacto
+    +severidade() : Integer
+  }
+}
+
+Solicitacao --> PipelinePLN : processada por
+PipelinePLN --> Intencao : produz
+Intencao --> RoteadorIntencao : orienta
+RoteadorIntencao --> Resposta : resulta em
+
+Solicitacao "1" --> "1" Interacao : registrada como
+Conversa "1" *-- "1..*" Interacao
+Usuario "1" o-- "0..*" Conversa
+Usuario "1" o-- "0..*" RegraAcesso
+RegraAcesso ..> Projeto : delimita escopo
+
+Interacao "1" --> "1" Intencao
+Interacao "1" *-- "0..1" Resposta
+Interacao "1" o-- "0..*" EventoAuditoria
+Interacao "1" --> "0..1" SolicitacaoForaDeEscopo
+
+Resposta "1" o-- "0..*" FonteConsultada
+FonteConsultada "1" --> "1" TrechoRecuperado
+Artefato "1" o-- "0..*" TrechoRecuperado
+
+Subportfolio "1" o-- "0..*" Projeto
+Projeto "1" o-- "0..*" Artefato
+Projeto "1" o-- "0..*" ItemCronograma
+Projeto "1" o-- "0..*" RiscoProblema
+
+@enduml
