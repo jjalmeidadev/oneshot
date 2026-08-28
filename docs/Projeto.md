@@ -77,6 +77,7 @@
     - [3.1.3.2 Cenário 2 — Análise e comparação entre projetos](#3132-cenário-2-análise-e-comparação-entre-projetos)
     - [3.1.3.3 Cenário 3 — Roteamento híbrido e sugestão proativa](#3133-cenário-3-roteamento-híbrido-e-sugestão-proativa)
     - [3.1.4 Rastreabilidade entre User Stories e Modelagem UML](#314-rastreabilidade-entre-user-stories-e-modelagem-uml)
+    - [3.1.5 Escopo dos requisitos funcionais](#315-escopo-dos-requisitos-funcionais)
   - [3.2 Requisitos Não Funcionais (RNFs)](#32-requisitos-não-funcionais-rnfs)
     - [3.2.1 RNFs descritos como histórias de usuário](#321-rnfs-descritos-como-histórias-de-usuário)
   - [3.3 Visão Inicial sobre a Solução Técnica de Engenharia](#33-visão-inicial-sobre-a-solução-técnica-de-engenharia)
@@ -96,7 +97,8 @@
     - [3.4.3 Alternativas avaliadas e não adotadas](#343-alternativas-avaliadas-e-não-adotadas)
     - [3.4.4 Riscos e dependências tecnológicas](#344-riscos-e-dependências-tecnológicas)
     - [3.4.5 Fora do escopo do MVP e evolução da solução](#345-fora-do-escopo-do-mvp-e-evolução-da-solução)
-    - [3.4.6 Referências](#346-referências)
+    - [3.4.6 Plataforma de execução, confiabilidade e escalabilidade](#346-plataforma-de-execução-confiabilidade-e-escalabilidade)
+    - [3.4.7 Referências](#347-referências)
   - [3.5 Correlação RFs e RNFs](#35-correlação-rfs-e-rnfs)
   - [3.6 Casos de Uso](#36-casos-de-uso)
   - [3.7 Casos de Uso x Requisitos Funcionais](#37-casos-de-uso-x-requisitos-funcionais)
@@ -117,8 +119,13 @@
   - [4.1 Especificação da Base de Dados](#41-especificação-da-base-de-dados)
   - [4.2 Modelo Conceitual de Dados](#42-modelo-conceitual-de-dados)
   - [4.3 Modelo Lógico de Dados](#43-modelo-lógico-de-dados)
+  - [4.4 Modelo Físico de Dados](#44-modelo-físico-de-dados)
 - [5. Solução Técnica (Design)](#5-solução-técnica-design)
   - [5.1 Diagrama de Classes](#51-diagrama-de-classes)
+    - [5.1.1 Modelo consolidado](#511-modelo-consolidado)
+    - [5.1.2 O que mudou em relação à Seção 3.1.2](#512-o-que-mudou-em-relação-à-seção-312)
+    - [5.1.3 Decisões refletidas no diagrama](#513-decisões-refletidas-no-diagrama)
+    - [5.1.4 Correspondência com o modelo de dados](#514-correspondência-com-o-modelo-de-dados)
   - [5.2 Diagrama de Componentes da UML](#52-diagrama-de-componentes-da-uml)
     - [5.2.1 Componentes e responsabilidades](#521-componentes-e-responsabilidades)
     - [5.2.2 Fluxo de interação entre os componentes](#522-fluxo-de-interação-entre-os-componentes)
@@ -131,10 +138,23 @@
     - [5.3.3 Direcionamento para fluxo funcional via Copilot Studio](#533-direcionamento-para-fluxo-funcional-via-copilot-studio)
     - [5.3.4 Entrada por voz com Speech-to-Text](#534-entrada-por-voz-com-speech-to-text)
     - [5.3.5 Considerações sobre os cenários](#535-considerações-sobre-os-cenários)
-- [6. Mapeamento Técnico de Infraestrutura e Implantação](#6-mapeamento-técnico-de-infraestrutura-e-implantação)
-  - [6.1 Diagrama de Implantação da UML](#61-diagrama-de-implantação-da-uml)
-  - [6.2 Justificativa das Escolhas de Implantação](#62-justificativa-das-escolhas-de-implantação)
-  - [6.3 Considerações sobre Desempenho e Segurança](#63-considerações-sobre-desempenho-e-segurança)
+- [6. Mapeamento técnico de infraestrutura e implantação](#6-mapeamento-técnico-de-infraestrutura-e-implantação)
+  - [6.1 Diagrama de implantação da UML](#61-diagrama-de-implantação-da-uml)
+  - [6.2 Justificativa das escolhas de implantação](#62-justificativa-das-escolhas-de-implantação)
+    - [6.2.1 Estratégia de hospedagem](#621-estratégia-de-hospedagem)
+    - [6.2.2 Banco de dados e armazenamento](#622-banco-de-dados-e-armazenamento)
+    - [6.2.3 Modelo de PLN e artefatos](#623-modelo-de-pln-e-artefatos)
+    - [6.2.4 Interface, autenticação e integração](#624-interface-autenticação-e-integração)
+    - [6.2.5 Estratégia de fallback](#625-estratégia-de-fallback)
+    - [6.2.6 Processo reprodutível proposto](#626-processo-reprodutível-proposto)
+    - [6.2.7 Variáveis de ambiente previstas](#627-variáveis-de-ambiente-previstas)
+    - [6.2.8 Comandos de execução local](#628-comandos-de-execução-local)
+  - [6.3 Considerações sobre desempenho e segurança](#63-considerações-sobre-desempenho-e-segurança)
+    - [6.3.1 Desempenho](#631-desempenho)
+    - [6.3.2 Segurança](#632-segurança)
+    - [6.3.3 Auditoria](#633-auditoria)
+    - [6.3.4 Limitações e pendências de provisionamento](#634-limitações-e-pendências-de-provisionamento)
+    - [6.3.5 Checklist de conclusão da implantação](#635-checklist-de-conclusão-da-implantação)
 - [7. Projeto Visual da Solução](#7-projeto-visual-da-solução)
   - [7.1 Desenvolvimento de Wireframes](#71-desenvolvimento-de-wireframes)
   - [7.2 Desenvolvimento de Mockups](#72-desenvolvimento-de-mockups)
@@ -153,20 +173,29 @@
     - [8.6.2 Entradas, saídas e formatos](#862-entradas-saídas-e-formatos)
     - [8.6.3 O que é buscado nas APIs](#863-o-que-é-buscado-nas-apis)
     - [8.6.4 Restrições e condições de validação](#864-restrições-e-condições-de-validação)
-  - [8.7 Speech-to-Text](#87-speech-to-text)
-    - [8.7.1 Introdução](#871-introdução)
-    - [8.7.2 Benchmark das APIs](#872-benchmark-das-apis)
-    - [8.7.3 API escolhida: Azure AI Speech](#873-api-escolhida-azure-ai-speech)
-  - [8.8 Text-to-Speech](#88-text-to-speech)
+  - [8.7 API de recebimento de áudio](#87-api-de-recebimento-de-áudio)
+    - [8.7.1 Posição no fluxo](#871-posição-no-fluxo)
+    - [8.7.2 Endpoint](#872-endpoint)
+    - [8.7.3 Formatos aceitos e limites](#873-formatos-aceitos-e-limites)
+    - [8.7.4 Requisição](#874-requisição)
+    - [8.7.5 Resposta de sucesso](#875-resposta-de-sucesso)
+    - [8.7.6 Códigos de resposta e tratamento de erro](#876-códigos-de-resposta-e-tratamento-de-erro)
+    - [8.7.7 Situação de implementação](#877-situação-de-implementação)
+  - [8.8 Speech-to-Text](#88-speech-to-text)
     - [8.8.1 Introdução](#881-introdução)
     - [8.8.2 Benchmark das APIs](#882-benchmark-das-apis)
     - [8.8.3 API escolhida: Azure AI Speech](#883-api-escolhida-azure-ai-speech)
-    - [8.8.4 Referências](#884-referências)
-  - [8.9 Escolha de algoritmo PLN](#89-escolha-de-algoritmo-pln)
-    - [8.9.1 Objetivo e protocolo de avaliação](#891-objetivo-e-protocolo-de-avaliação)
-    - [8.9.2 Benchmark e decisão](#892-benchmark-e-decisão)
-    - [8.9.3 Configuração e resultados atuais](#893-configuração-e-resultados-atuais)
-    - [8.9.4 Limitações e próximos passos](#894-limitações-e-próximos-passos)
+  - [8.9 Text-to-Speech](#89-text-to-speech)
+    - [8.9.1 Introdução](#891-introdução)
+    - [8.9.2 Benchmark das APIs](#892-benchmark-das-apis)
+    - [8.9.3 API escolhida: Azure AI Speech](#893-api-escolhida-azure-ai-speech)
+    - [8.9.4 Referências](#894-referências)
+  - [8.10 Escolha de algoritmo PLN](#810-escolha-de-algoritmo-pln)
+    - [8.10.1 Objetivo e protocolo de avaliação](#8101-objetivo-e-protocolo-de-avaliação)
+    - [8.10.2 Benchmark e decisão](#8102-benchmark-e-decisão)
+    - [8.10.3 Configuração e resultados atuais](#8103-configuração-e-resultados-atuais)
+    - [8.10.4 Bibliotecas, configuração e exemplos de código](#8104-bibliotecas-configuração-e-exemplos-de-código)
+    - [8.10.5 Limitações e próximos passos](#8105-limitações-e-próximos-passos)
 - [9. Planejamento e Execução de Testes](#9-planejamento-e-execução-de-testes)
   - [9.1 Testes Funcionais](#91-testes-funcionais)
     - [9.1.1 Planejamento](#911-planejamento)
@@ -225,7 +254,6 @@ Além de apoiar o desenvolvimento da solução ao longo das diferentes etapas do
 ---
 
 # 2. Entendimento do Projeto e do Negócio
-_conteúdo_
 
 ---
 
@@ -1104,7 +1132,7 @@ A faixa de prioridade é o resultado do produto entre os dois critérios, confor
 **Regra de exceção — elevação por pré-requisito ou por escopo contratado.** Uma feature é elevada em uma faixa acima do resultado do produto, ainda que sua viabilidade seja baixa, quando se enquadra em um dos dois casos abaixo. A elevação é sinalizada na coluna de faixa e obrigatoriamente justificada; nenhuma outra feature da tabela foi movida de faixa.
 
 1. **Pré-requisito de uso** — a feature é condição de acesso ao produto ou de aderência ao canal corporativo esperado pelo Metrô. Sua ausência impede o uso das demais, e não apenas reduz o valor entregue. Aplicada à **integração com o Microsoft Teams**, cuja viabilidade é 3 por depender de homologação da GTI, mas que é o canal onde o agente será efetivamente utilizado — sem ela, o produto não tem superfície de entrega.
-2. **Escopo contratado** — a feature consta do escopo macro do Termo de Abertura do Projeto Inteli e, portanto, não é negociável por conveniência de implementação. Aplicada à **transcrição de áudio**, que o TAPI define como modalidade de entrada do agente e que, por isso, tem importância 5 mesmo com viabilidade 3. O benchmark de APIs e a escolha do provedor estão registrados na Seção 8.7.
+2. **Escopo contratado** — a feature consta do escopo macro do Termo de Abertura do Projeto Inteli e, portanto, não é negociável por conveniência de implementação. Aplicada à **transcrição de áudio**, que o TAPI define como modalidade de entrada do agente e que, por isso, tem importância 5 mesmo com viabilidade 3. O benchmark de APIs e a escolha do provedor estão registrados na Seção 8.8.
 
 #### Linha de corte do MVP
 
@@ -1120,7 +1148,7 @@ A faixa de prioridade é o resultado do produto entre os dois critérios, confor
 | Autenticação e definição de perfis | 5 | 4 | 20 | 🔴 Muito Alta | MVP | Condição para que a resposta respeite as permissões de cada usuário, exigência de confidencialidade do parceiro. |
 | Perfil de linguagem executivo | 4 | 4 | 16 | 🔴 Muito Alta | MVP | Adapta a profundidade da resposta ao cargo sem ampliar o núcleo funcional já construído. |
 | Integração com Microsoft Teams | 5 | 3 | 15 | 🔴 Muito Alta *(elevada)* | MVP | Produto 15 posiciona na faixa Alta; elevada pela regra de exceção por ser o canal corporativo em que o agente é utilizado. |
-| Transcrição de áudio | 5 | 3 | 15 | 🔴 Muito Alta *(elevada)* | MVP | Produto 15 posiciona na faixa Alta; elevada pela regra de exceção por ser modalidade de entrada prevista no escopo contratado. Viabilidade 3 reflete a dependência de API externa de transcrição, escolhida na Seção 8.7. |
+| Transcrição de áudio | 5 | 3 | 15 | 🔴 Muito Alta *(elevada)* | MVP | Produto 15 posiciona na faixa Alta; elevada pela regra de exceção por ser modalidade de entrada prevista no escopo contratado. Viabilidade 3 reflete a dependência de API externa de transcrição, escolhida na Seção 8.8. |
 | Diferença de profundidade de pesquisa | 4 | 3 | 12 | 🟠 Alta | Pós-MVP | Melhora a experiência de consulta, porém só faz sentido depois que a consulta básica estiver estável. |
 | Fluxo de avaliação das respostas | 3 | 3 | 9 | 🟡 Média | Pós-MVP | Alimenta a melhoria contínua do agente, mas não bloqueia a validação da prova de conceito. |
 | Interface personalizada e intuitiva | 3 | 3 | 9 | 🟡 Média | Pós-MVP | Relevante para a adoção por usuários sem perfil técnico; no MVP a interface é a do próprio Teams. |
@@ -1373,7 +1401,6 @@ No contexto acadêmico do MVP, esses resultados serão avaliados por meio do pip
 ---
 
 # 3. Requisitos do Projeto
-_conteúdo_
 
 ## 3.1 Requisitos Funcionais
 
@@ -1411,7 +1438,7 @@ Como usuário da solução, quero realizar solicitações utilizando linguagem n
 **Critérios de aceitação:**
 
 * O sistema deve aceitar solicitações textuais em linguagem natural.
-* O sistema deve aceitar solicitações em áudio, convertendo-as em texto antes do processamento, conforme a modalidade de entrada descrita na Seção 8.7.
+* O sistema deve aceitar solicitações em áudio, convertendo-as em texto antes do processamento, conforme a modalidade de entrada descrita na Seção 8.8.
 * O usuário não deve precisar utilizar uma sintaxe técnica específica.
 * A solicitação recebida deve ser encaminhada ao pipeline de PLN para processamento.
 
@@ -1579,151 +1606,11 @@ A modelagem estática apresentada nesta subseção representa as principais clas
 
 A modelagem considera a `Solicitacao` como elemento de entrada do sistema. Cada solicitação possui uma `Intencao` primária, identificada pelo pipeline e associada ao `CatalogoIntencoes`. O catálogo informa ao `RoteadorIntencao` se existe um fluxo automatizado: quando existe, o `ExecutorFluxoAutomatizado` processa a solicitação sem acionar o LLM; caso contrário, o `GeradorLLM` recebe somente o contexto estruturado e validado. Quando a proatividade está ativa, uma `SugestaoProativa` pode associar à intenção primária uma intenção secundária cadastrada, que depende da confirmação do usuário para ser executada.
 
-```mermaid
-classDiagram
-    direction LR
+<div align="center">
+  <img src="img/modelagem-estatica.png" alt="Modelagem estática inicial dos requisitos funcionais" width="100%">
+</div>
 
-    class Solicitacao {
-        +String id
-        +String texto
-        +DateTime dataHora
-        +String contexto
-    }
-
-    class Intencao {
-        +String nome
-        +CategoriaIntencao categoria
-        +Float confianca
-        +Boolean possuiFluxoAutomatizado
-    }
-
-    class CategoriaIntencao {
-        <<enumeration>>
-        CONSULTA
-        TRANSACAO
-        ALERTA
-    }
-
-    class RotaProcessamento {
-        <<enumeration>>
-        FLUXO_AUTOMATIZADO
-        LLM
-    }
-
-    class EntidadeExtraida {
-        +String tipo
-        +String valor
-        +Float confianca
-    }
-
-    class Projeto {
-        +String id
-        +String codigo
-        +String nome
-        +String status
-        +String subportfolio
-    }
-
-    class DocumentoProjeto {
-        +String id
-        +String titulo
-        +String tipo
-        +String conteudo
-        +String referencia
-    }
-
-    class TrechoRecuperado {
-        +String conteudo
-        +Float relevancia
-        +String referencia
-    }
-
-    class Resposta {
-        +String id
-        +String conteudo
-        +Boolean fundamentada
-        +String tipoResposta
-    }
-
-    class ConfiguracaoProatividade {
-        +Boolean ativa
-        +alterarEstado()
-    }
-
-    class SugestaoProativa {
-        +String intencaoSecundaria
-        +String conteudo
-        +Boolean aceita
-    }
-
-    class PipelinePLN {
-        +processarSolicitacao()
-        +estruturarResposta()
-    }
-
-    class ClassificadorIntencao {
-        +identificarIntencao()
-        +classificarIntencao()
-    }
-
-    class CatalogoIntencoes {
-        +consultarRota()
-        +buscarIntencaoSecundaria()
-    }
-
-    class RoteadorIntencao {
-        +selecionarRota()
-        +encaminharSolicitacao()
-    }
-
-    class ExecutorFluxoAutomatizado {
-        +executarSemLLM()
-    }
-
-    class GeradorLLM {
-        +gerarRespostaFundamentada()
-    }
-
-    class RecuperadorInformacao {
-        +buscarInformacoes()
-        +verificarDisponibilidade()
-    }
-
-    class AnalisadorComparativo {
-        +compararProjetos()
-        +estruturarComparacao()
-    }
-
-    Solicitacao "1" --> "1" Intencao : possui
-    Intencao --> CategoriaIntencao : classificada como
-    Intencao --> CatalogoIntencoes : associada a
-    Solicitacao "1" --> "0..*" EntidadeExtraida : origina
-
-    EntidadeExtraida --> Projeto : pode identificar
-    Projeto "1" --> "0..*" DocumentoProjeto : possui
-    DocumentoProjeto "1" --> "0..*" TrechoRecuperado : fornece
-
-    PipelinePLN --> ClassificadorIntencao : utiliza
-    PipelinePLN --> RoteadorIntencao : utiliza
-    PipelinePLN --> RecuperadorInformacao : utiliza
-    PipelinePLN --> AnalisadorComparativo : utiliza
-    PipelinePLN --> ConfiguracaoProatividade : consulta
-
-    ClassificadorIntencao --> Intencao : produz
-    RoteadorIntencao --> CatalogoIntencoes : consulta
-    CatalogoIntencoes --> RotaProcessamento : define
-    RoteadorIntencao --> ExecutorFluxoAutomatizado : encaminha quando automatizada
-    RoteadorIntencao --> GeradorLLM : encaminha quando não automatizada
-    RecuperadorInformacao --> TrechoRecuperado : recupera
-    AnalisadorComparativo --> Projeto : compara
-
-    ExecutorFluxoAutomatizado --> Resposta : produz sem LLM
-    GeradorLLM --> Resposta : produz com contexto validado
-    Resposta "1" --> "0..*" TrechoRecuperado : fundamentada por
-    CatalogoIntencoes --> SugestaoProativa : fornece intenção secundária
-    ConfiguracaoProatividade --> SugestaoProativa : controla apresentação
-    SugestaoProativa --> Intencao : vinculada à intenção primária
-```
+<p align="center"><strong>Figura 13</strong> - Modelagem estática inicial dos requisitos funcionais.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O modelo estático mantém relação direta com os requisitos funcionais. `Solicitacao` e `PipelinePLN` representam a entrada em linguagem natural prevista no RF01; `Intencao`, `ClassificadorIntencao` e `CatalogoIntencoes` representam os RF02 e RF03; `DocumentoProjeto`, `TrechoRecuperado` e `RecuperadorInformacao` representam o RF04; `Projeto` e `Resposta` sustentam o RF05; e `AnalisadorComparativo` representa o RF06. O `RoteadorIntencao`, as duas rotas e seus executores tornam explícita a separação exigida pelo RF07. As respostas produzidas em ambas as rotas atendem ao RF08. Por fim, `SugestaoProativa` representa a intenção secundária do RF09 e `ConfiguracaoProatividade` representa o controle previsto no RF10.
 
@@ -1754,46 +1641,11 @@ Os diagramas representam o comportamento esperado do sistema em nível funcional
 
 Este cenário representa uma solicitação como **"Qual o prazo do projeto XPTO?"**, classificada como pertencente ao escopo, mas sem fluxo automatizado cadastrado. O fluxo cobre principalmente os requisitos RF01, RF02, RF03, RF04, RF05, RF07 e RF08.
 
-```mermaid
-sequenceDiagram
-    autonumber
+<div align="center">
+  <img src="img/sequencia-cenario-1.png" alt="Cenário 1 — Consulta de informação de um projeto" width="100%">
+</div>
 
-    actor Usuario
-    participant Sistema as Interface do Sistema
-    participant PLN as Pipeline de PLN
-    participant Classificador as Classificador de Intenção
-    participant Catalogo as Catálogo de Intenções
-    participant Recuperador as Recuperador de Informação
-    participant Base as Base de Dados Sintéticos
-    participant LLM as LLM
-
-    Usuario->>Sistema: Envia solicitação em linguagem natural
-    Sistema->>PLN: Encaminha texto da solicitação
-
-    PLN->>Classificador: Identificar intenção semântica
-    Classificador-->>PLN: Intenção identificada
-
-    PLN->>Classificador: Classificar intenção
-    Classificador-->>PLN: Categoria = CONSULTA
-
-    PLN->>Catalogo: Consultar rota da intenção
-    Catalogo-->>PLN: Sem fluxo automatizado
-
-    PLN->>Recuperador: Solicitar informações do projeto e critério
-    Recuperador->>Base: Consultar documentos e dados sintéticos
-    Base-->>Recuperador: Retornar informações relevantes
-    Recuperador-->>PLN: Retornar trechos e referências
-
-    alt Informação encontrada
-        PLN->>LLM: Gerar resposta com contexto estruturado e validado
-        LLM-->>PLN: Resposta em linguagem natural
-        PLN-->>Sistema: Retornar resposta estruturada
-        Sistema-->>Usuario: Apresentar resposta
-    else Informação insuficiente
-        PLN-->>Sistema: Informar ausência de dados suficientes
-        Sistema-->>Usuario: Apresentar limitação da consulta
-    end
-```
+<p align="center"><strong>Figura 14</strong> - Cenário 1 — Consulta de informação de um projeto.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O cenário começa com o RF01, quando o usuário envia uma solicitação em linguagem natural. O RF02 é representado pela identificação semântica da intenção e o RF03 por sua associação ao catálogo. Como não existe fluxo automatizado, o RF07 determina que somente o contexto estruturado e validado seja encaminhado ao LLM. O RF04 determina a recuperação dos dados relevantes, o RF05 corresponde à resposta sobre o projeto solicitado e o RF08 exige que as informações recuperadas fundamentem o retorno ou que a insuficiência seja declarada.
 
@@ -1801,53 +1653,11 @@ O cenário começa com o RF01, quando o usuário envia uma solicitação em ling
 
 Este cenário representa uma solicitação como **"Compare os riscos e os prazos dos projetos XPTO e ABC"**, tratada como intenção analítica sem fluxo automatizado. O fluxo cobre principalmente os requisitos RF01, RF02, RF03, RF04, RF06, RF07 e RF08.
 
-```mermaid
-sequenceDiagram
-    autonumber
+<div align="center">
+  <img src="img/sequencia-cenario-2.png" alt="Cenário 2 — Análise e comparação entre projetos" width="100%">
+</div>
 
-    actor Gestor as Gestor do Portfólio
-    participant Sistema as Interface do Sistema
-    participant PLN as Pipeline de PLN
-    participant Classificador as Classificador de Intenção
-    participant Catalogo as Catálogo de Intenções
-    participant Recuperador as Recuperador de Informação
-    participant Base as Base de Dados Sintéticos
-    participant Analisador as Analisador Comparativo
-    participant LLM as LLM
-
-    Gestor->>Sistema: Solicita comparação em linguagem natural
-    Sistema->>PLN: Encaminha solicitação
-
-    PLN->>Classificador: Identificar e classificar intenção
-    Classificador-->>PLN: Intenção analítica / CONSULTA
-
-    PLN->>Catalogo: Consultar rota da intenção
-    Catalogo-->>PLN: Sem fluxo automatizado
-
-    PLN->>PLN: Identificar projetos e critérios da comparação
-
-    PLN->>Recuperador: Buscar dados do primeiro projeto
-    Recuperador->>Base: Consultar Projeto XPTO
-    Base-->>Recuperador: Dados e documentos relevantes
-    Recuperador-->>PLN: Informações do Projeto XPTO
-
-    PLN->>Recuperador: Buscar dados do segundo projeto
-    Recuperador->>Base: Consultar Projeto ABC
-    Base-->>Recuperador: Dados e documentos relevantes
-    Recuperador-->>PLN: Informações do Projeto ABC
-
-    alt Dados suficientes para comparação
-        PLN->>Analisador: Comparar riscos e prazos
-        Analisador-->>PLN: Resultado estruturado da comparação
-        PLN->>LLM: Gerar resposta com comparação e evidências validadas
-        LLM-->>PLN: Comparação em linguagem natural
-        PLN-->>Sistema: Retornar resultado
-        Sistema-->>Gestor: Apresentar comparação
-    else Dados insuficientes
-        PLN-->>Sistema: Indicar quais informações estão ausentes
-        Sistema-->>Gestor: Apresentar limitação da análise
-    end
-```
+<p align="center"><strong>Figura 15</strong> - Cenário 2 — Análise e comparação entre projetos.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 Nesse cenário, o RF06 diferencia o fluxo de uma consulta simples, pois exige recuperar informações referentes a dois ou mais projetos e aplicar uma etapa adicional de comparação. O RF07 encaminha ao LLM o resultado estruturado dessa análise porque o catálogo não possui automação correspondente. O resultado continua sujeito ao RF08: somente informações sustentadas pelos dados disponíveis devem ser apresentadas como fato.
 
@@ -1855,77 +1665,11 @@ Nesse cenário, o RF06 diferencia o fluxo de uma consulta simples, pois exige re
 
 Este cenário representa o comportamento do pipeline após identificar a intenção primária. O catálogo diferencia uma intenção fora do escopo, uma intenção com fluxo automatizado e uma intenção válida sem automação. Somente o último ramo utiliza o LLM e pode apresentar uma intenção secundária quando a proatividade estiver habilitada. O cenário cobre principalmente RF01, RF02, RF03, RF07, RF08, RF09 e RF10.
 
-```mermaid
-sequenceDiagram
-    autonumber
+<div align="center">
+  <img src="img/sequencia-cenario-3.png" alt="Cenário 3 — Roteamento híbrido e sugestão proativa" width="100%">
+</div>
 
-    actor Usuario
-    participant Sistema as Interface do Sistema
-    participant PLN as Pipeline de PLN
-    participant Classificador as Classificador de Intenção
-    participant Catalogo as Catálogo de Intenções
-    participant Automatizado as Fluxo Automatizado
-    participant LLM as LLM
-    participant Config as Configuração de Proatividade
-
-    Usuario->>Sistema: Envia solicitação em linguagem natural
-    Sistema->>PLN: Encaminha solicitação
-
-    PLN->>Classificador: Identificar intenção primária
-    Classificador-->>PLN: Intenção + confiança
-
-    PLN->>Catalogo: Associar intenção e consultar rota
-    Catalogo-->>PLN: Escopo + categoria + rota
-
-    alt Intenção fora do escopo
-        PLN-->>Sistema: Solicitação não suportada pelo MVP
-        Sistema-->>Usuario: Orientar reformulação ou informar limite
-
-    else Intenção com fluxo automatizado
-        PLN->>Automatizado: Encaminhar intenção + parâmetros estruturados
-        Note right of Automatizado: A LLM não é acionada nesta rota
-        Automatizado-->>PLN: Resultado ou estado da ação
-        PLN-->>Sistema: Retornar resultado estruturado
-        Sistema-->>Usuario: Apresentar resultado da automação
-
-    else Intenção válida sem fluxo automatizado
-        PLN->>LLM: Enviar intenção + contexto estruturado e validado
-        LLM-->>PLN: Resposta principal fundamentada
-        PLN->>Config: Consultar estado da proatividade
-
-        alt Proatividade desativada
-            Config-->>PLN: Desativada
-            PLN-->>Sistema: Retornar somente resposta principal
-            Sistema-->>Usuario: Apresentar resposta
-
-        else Proatividade ativada
-            Config-->>PLN: Ativada
-            PLN->>Catalogo: Buscar intenção secundária compatível
-
-            alt Intenção secundária disponível
-                Catalogo-->>PLN: Intenção secundária cadastrada
-                PLN-->>Sistema: Resposta principal + sugestão opcional
-                Sistema-->>Usuario: Apresentar resposta e próximo passo
-
-                alt Usuário confirma a sugestão
-                    Usuario->>Sistema: Aceitar intenção secundária
-                    Sistema->>PLN: Enviar intenção confirmada
-                    PLN->>Catalogo: Tratar como nova intenção primária
-                    Note over PLN,Catalogo: O novo ciclo utiliza novamente o roteamento do catálogo
-
-                else Usuário recusa a sugestão
-                    Usuario->>Sistema: Recusar sugestão
-                    Sistema-->>Usuario: Encerrar sugestão e preservar resposta
-                end
-
-            else Nenhuma intenção secundária compatível
-                Catalogo-->>PLN: Nenhuma sugestão cadastrada
-                PLN-->>Sistema: Retornar somente resposta principal
-                Sistema-->>Usuario: Apresentar resposta
-            end
-        end
-    end
-```
+<p align="center"><strong>Figura 16</strong> - Cenário 3 — Roteamento híbrido e sugestão proativa.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 A separação entre identificação, catalogação e roteamento é importante nesse fluxo. O RF02 corresponde à compreensão da intenção primária e o RF03 associa essa intenção à categoria e à rota controladas pelo catálogo. O RF07 garante que a rota automatizada não utilize o LLM e que apenas intenções válidas sem automação recebam tratamento generativo. O RF08 rege o resultado das duas rotas.
 
@@ -1954,6 +1698,20 @@ Essa rastreabilidade demonstra que os requisitos funcionais não estão isolados
 A modelagem apresentada nesta seção possui caráter inicial e está diretamente associada à Especificação de Requisitos da Sprint 1. Nas etapas posteriores do projeto, os diagramas poderão ser refinados na seção de Solução Técnica, incorporando as decisões definitivas de arquitetura, interfaces, componentes, persistência e implementação.
 
 
+
+### 3.1.5 Escopo dos requisitos funcionais
+
+Os dez requisitos funcionais não têm o mesmo horizonte de entrega, e a distinção precisa estar declarada para que a especificação não conflite com a matriz de priorização da Seção 2.8 nem com o recorte do MVP registrado na Seção 2.9.
+
+| Requisito | Escopo | Justificativa |
+|---|---|---|
+| RF01 a RF08 | **MVP** | Compõem o pipeline de consulta e resposta fundamentada, que é o recorte declarado na Seção 2.9 e sustentado pelas features da faixa Muito Alta da Seção 2.8 |
+| RF09 — Sugestão proativa de intenção secundária | **Previsto, pós-MVP** | Decorre da prototipação exploratória da Seção 3.8, cuja questão era o regime de iniciativa do agente. O comportamento proativo está no Bloco 3 da Seção 2.4.3, fora do MVP |
+| RF10 — Controle da proatividade | **Previsto, pós-MVP** | Depende da feature "Edição das configurações do agente por menu", classificada na faixa Evolução da Seção 2.8. Sem RF09 implementado, não há proatividade a controlar |
+
+A especificação de RF09 e RF10 nesta sprint é deliberada e não amplia o escopo do MVP. A prototipação exploratória produziu uma decisão de comportamento — o agente pode sugerir, mas nunca executar sem confirmação — e registrar essa decisão como requisito, com critérios de aceitação verificáveis, é o que impede que ela se perca entre sprints. A implementação segue condicionada à priorização da Seção 2.8.
+
+Registra-se também uma lacuna conhecida: nenhum requisito não funcional da Seção 3.2 governa a qualidade da proatividade. O RF09 estabelece que a sugestão aparece separada da resposta principal e exige confirmação, mas não há critério mensurável para intervenção inadequada — a falha que a Seção 3.8.4 identificou como característica do regime proativo. Esse RNF deve ser especificado antes da implementação de RF09.
 
 ## 3.2 Requisitos Não Funcionais (RNFs)
 
@@ -2013,11 +1771,11 @@ O esboço traduz a divisão em dois pilares definida pelo parceiro no Termo de A
 
 ### 3.3.2 Diagrama de Componentes (UML)
 
-A Figura 13 representa os componentes da solução e suas conexões. O diagrama mostra a **estrutura**, isto é, quais componentes se conectam a quais e em que sentido. A sequência de uma solicitação típica está descrita em 3.3.3.
+A Figura 17 representa os componentes da solução e suas conexões. O diagrama mostra a **estrutura**, isto é, quais componentes se conectam a quais e em que sentido. A sequência de uma solicitação típica está descrita em 3.3.3.
 
 ![Diagrama de componentes da solução, organizado nas camadas de interface humano-computador, lógica de negócio (Pilar 1 e Pilar 2), acesso a dados e serviços, e camada transversal](img/componentes-mvp.png)
 
-<p align="center"><strong>Figura 13</strong> - Visão inicial da solução técnica: diagrama de componentes do MVP sobre dados sintéticos.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 17</strong> - Visão inicial da solução técnica: diagrama de componentes do MVP sobre dados sintéticos.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/componentes-mvp.puml`](diagrams/componentes-mvp.puml). Para regerar a imagem é necessário ter o PlantUML e o Graphviz instalados:
 
@@ -2052,7 +1810,7 @@ Esta seção apresenta a seleção inicial de tecnologias e ferramentas consider
 
 As tecnologias apresentadas nesta seção são classificadas entre aquelas previstas para utilização no **MVP**, desenvolvido e validado sobre dados sintéticos, e aquelas consideradas como alternativas ou possibilidades de evolução. Essa distinção é necessária porque o TAPI estabelece que a integração com o portfólio real do Metrô constitui uma evolução do MVP, não sendo requisito para a validação inicial da solução.
 
-> **Leitura desta seção.** A Seção 3.4 registra a visão de tecnologias formulada na Sprint 1. As decisões de canal permanecem válidas: o agente é entregue no Microsoft Teams, com o Copilot Studio como orquestrador. A Sprint 2 acrescentou o detalhamento que aqui aparece apenas como direção — os requisitos comuns das APIs de voz estão na Seção 8.6, os benchmarks de STT e TTS estão nas Seções 8.7 e 8.8, o benchmark do algoritmo de PLN está na Seção 8.9 e a arquitetura consolidada, com o papel de cada componente, na Seção 5.2.
+> **Leitura desta seção.** A Seção 3.4 registra a visão de tecnologias formulada na Sprint 1. As decisões de canal permanecem válidas: o agente é entregue no Microsoft Teams, com o Copilot Studio como orquestrador. A Sprint 2 acrescentou o detalhamento que aqui aparece apenas como direção — os requisitos comuns das APIs de voz estão na Seção 8.6, os benchmarks de STT e TTS estão nas Seções 8.7 e 8.8, o benchmark do algoritmo de PLN está na Seção 8.10 e a arquitetura consolidada, com o papel de cada componente, na Seção 5.2.
 
 ### 3.4.1 Critérios de seleção
 
@@ -2083,7 +1841,7 @@ A pilha tecnológica é organizada por camadas, considerando a separação entre
 
 No MVP, a solução utilizará os canais disponibilizados pelo ecossistema Microsoft. Não está previsto o desenvolvimento de uma aplicação web ou mobile independente como interface do produto; o acesso por navegador e por dispositivos móveis ocorrerá pelos canais do Copilot Studio e do Microsoft Teams.
 
-> **Bancada de teste.** Existem no repositório uma interface web em React (`src/frontend`) e um backend FastAPI (`src/backend`) que **não compõem o produto**. Foram construídos como bancada para exercitar isoladamente o caminho de consulta do RAG sobre dados mockados, permitindo medir latência, taxa de sucesso e consumo de tokens sem depender do provisionamento do canal corporativo pela GTI. A bancada utiliza um provedor de LLM específico apenas para viabilizar esse teste; essa escolha não constitui decisão de produto. O provedor a ser adotado será definido por benchmark próprio e submetido à homologação, do mesmo modo que foi feito para a API de transcrição na Seção 8.7. A entrega ao usuário permanece pelo Teams.
+> **Bancada de teste.** Existem no repositório uma interface web em React (`src/frontend`) e um backend FastAPI (`src/backend`) que **não compõem o produto**. Foram construídos como bancada para exercitar isoladamente o caminho de consulta do RAG sobre dados mockados, permitindo medir latência, taxa de sucesso e consumo de tokens sem depender do provisionamento do canal corporativo pela GTI. A bancada utiliza um provedor de LLM específico apenas para viabilizar esse teste; essa escolha não constitui decisão de produto. O provedor a ser adotado será definido por benchmark próprio e submetido à homologação, do mesmo modo que foi feito para a API de transcrição na Seção 8.8. A entrega ao usuário permanece pelo Teams.
 
 > **Base já existente.** O TAPI registra, entre as restrições, que a plataforma atual de portfólio já utiliza *"Copilot Studio para Bot de apoio na obtenção e atualização de status dos projetos e sub portfólios"*, e o documento *Arquitetura Portfólio Metrô* identifica a consulta de situação do portfólio e o suporte de FAQ como recursos "ainda em desenvolvimento". A solução deste projeto, portanto, **não parte de um cenário vazio**. Ela amplia esse agente com o núcleo de PLN autoral e com as transações do Pilar 2. A decisão entre estender o agente existente ou publicar um novo agente no mesmo ambiente será tomada com a GTI na Sprint 2.
 
@@ -2171,7 +1929,7 @@ O registro das opções descartadas é parte da decisão: ele documenta o que fo
 
 | Alternativa | Por que foi considerada | Por que não foi adotada |
 |---|---|---|
-| **API de LLM externo** (OpenAI, Anthropic, Google) para **classificação de intenções** | Menor esforço de implementação e boa acurácia sem treinamento. | Viola C2 (trânsito de dados por serviço não homologado) e C3 (o Pilar 1 exige núcleo autoral e avaliado pela equipe). A classificação permanece no pipeline próprio descrito na Seção 8.9. A geração da resposta a partir do contexto recuperado pelo RAG usa um LLM, cujo provedor ainda será definido e homologado. |
+| **API de LLM externo** (OpenAI, Anthropic, Google) para **classificação de intenções** | Menor esforço de implementação e boa acurácia sem treinamento. | Viola C2 (trânsito de dados por serviço não homologado) e C3 (o Pilar 1 exige núcleo autoral e avaliado pela equipe). A classificação permanece no pipeline próprio descrito na Seção 8.10. A geração da resposta a partir do contexto recuperado pelo RAG usa um LLM, cujo provedor ainda será definido e homologado. |
 | **Azure OpenAI Service** provisionado à parte | Permaneceria dentro do *tenant* Azure do parceiro. | O próprio parceiro registra que o Copilot Studio já conta com os modelos mais recentes, *"não sendo necessário provisionar modelo adicional"*. Custo adicional sem ganho claro no MVP. |
 | ***Fine-tuning*** de um modelo de linguagem | Potencial ganho de acurácia no domínio de gestão de portfólio. | O parceiro prioriza recursos homologados do ecossistema Microsoft, especialmente Copilot e Power Platform. Além disso, o volume de dados sintéticos do MVP não sustentaria o treinamento. |
 | **Power Apps** como interface principal | Interface visual rica para preenchimento de formulários de projeto. | O escopo do módulo pede interface primariamente em linguagem natural (texto e áudio). Somam-se as restrições de licenciamento (C4), sem conectores premium e com limite de 500 linhas por leitura de lista. |
@@ -2224,7 +1982,56 @@ Como possibilidades de evolução, poderão ser consideradas:
 - Integração com sistemas externos utilizados pelo portfólio
 - Adoção de serviços de IA generativa homologados sobre dados reais e sensíveis
 
-### 3.4.6 Referências
+### 3.4.6 Plataforma de execução, confiabilidade e escalabilidade
+
+> Esta subseção consolida a pilha na Sprint 2, incorporando o que foi decidido nas Seções 5.2, 6.2, 8.7 a 8.10. As subseções anteriores permanecem como registro da visão inicial.
+
+**Plataforma de execução**
+
+| Plataforma | Situação | Decisão |
+|---|---|---|
+| **Web, navegador desktop** | Suportada | O agente é entregue pelo Microsoft Teams em navegador, sem instalação. A bancada de teste em React descrita na Seção 3.4.2.1 roda no mesmo ambiente |
+| **Mobile** | Suportada por herança, sem aplicativo próprio | O acesso ocorre pelo aplicativo do Microsoft Teams em iOS e Android, que já está homologado no parceiro. O agente publicado no Teams fica disponível nos três canais sem código específico |
+| **Aplicativo mobile próprio** | Fora do escopo | Registrado na Seção 3.4.5. Construir um aplicativo exigiria distribuição, atualização e sustentação próprias, o que contraria o benefício de manutenção pela equipe interna do Metrô |
+
+A decisão de não construir cliente próprio é o que torna o suporte a mobile barato: a entrada por voz descrita na Seção 8.7 usa a captura nativa do canal, e o mesmo endpoint atende navegador e celular sem ramificação de código.
+
+**Linguagens, frameworks e bibliotecas por camada**
+
+| Camada | Tecnologias | Papel |
+|---|---|---|
+| Canal | Microsoft Teams, Copilot Studio | Interface conversacional e orquestração de tópicos |
+| API da aplicação | Python 3.11, FastAPI, Uvicorn | Endpoint HTTP/JSON, validação de entrada e roteamento |
+| Núcleo de PLN | scikit-learn, gensim, sentence-transformers, nltk, joblib | Classificação de intenção em dois níveis, conforme a Seção 8.10 |
+| Recuperação | Índice vetorial e catálogo local de fontes | Seleção dos trechos que compõem o contexto |
+| Voz | Azure AI Speech | Transcrição de entrada e síntese prevista, Seções 8.8 e 8.9 |
+| Dados | PostgreSQL gerenciado, Supabase Storage | Persistência do modelo físico da Seção 4.4 |
+| Identidade | Microsoft Entra ID | Autenticação e associação de perfil |
+| Automação | Power Automate | Execução dos fluxos funcionais |
+
+**Confiabilidade**
+
+| Mecanismo | Onde está documentado |
+|---|---|
+| Fallback estruturado quando a camada generativa está indisponível | Seção 6.2.5 |
+| Validação local de formato, duração e tamanho antes da chamada externa | Seção 8.7.3 |
+| Limiares de confiança que impedem acionamento de handler com previsão incerta | Seção 8.10.3 |
+| Repetição com espera progressiva nas chamadas ao provedor de transcrição | Seção 6.2.7 |
+| Trilha de auditoria persistida, separando falha do usuário de falha do provedor | Seções 6.3.3 e 8.7.6 |
+
+**Escalabilidade**
+
+A escala prevista para o MVP é modesta — dezenas de usuários do PMO, com perguntas curtas — e a arquitetura foi desenhada para crescer sem reestruturação, e não para suportar carga alta desde o início. Três decisões sustentam isso.
+
+A **API é sem estado**. O contexto da conversa vive no banco, em `ai_conversations` e `ai_interactions`, e não em memória do processo. Aumentar a capacidade é acrescentar instâncias atrás de um balanceador, sem sessão fixa.
+
+O **núcleo de PLN é um serviço separado do canal**. O classificador é carregado uma vez e serve as requisições; se a inferência se tornar o gargalo, ela pode ser movida para um endpoint gerenciado sem alterar a API da aplicação, como registrado na Seção 6.3.4.
+
+A **camada de dados é substituível**. O modelo físico é PostgreSQL padrão, sem recurso proprietário, o que mantém a migração para o ambiente Azure do parceiro de baixo atrito quando a GTI provisionar.
+
+O limite conhecido é a franquia gratuita do provedor de transcrição, de cinco horas de áudio por mês, discutida na Seção 8.8.2. Ela é suficiente para a validação do MVP e insuficiente para uso corrente, e por isso a Seção 6.3.4 registra a contratação do nível pago como pendência de evolução, e não como problema em aberto.
+
+### 3.4.7 Referências
 
 **Documentos do parceiro**
 
@@ -2258,7 +2065,7 @@ _conteúdo_
 
 **Questão:** De quem parte a iniciativa da interação — o agente age somente quando é explicitamente solicitado, ou age a partir do que observa da atividade que a pessoa está realizando?
 
-**Justificativa.** A documentação produzida até aqui sustenta os dois regimes sem decidir entre eles. Todos os requisitos funcionais partem de um comando formulado pelo usuário (RF01), mas o catálogo de intenções previsto no RF03 e no RF07 inclui a categoria *alerta*, que pressupõe um agente capaz de se manifestar sem ter sido consultado. A jornada de Carlos (2.5.2.2) atribui valor explícito a "alertas relevantes" e à "identificação proativa de desvios", enquanto a visão do produto (2.4.1) descreve o agente como uma interface conversacional acionada por linguagem natural. A resposta altera o comportamento do sistema diante das pessoas em dois pontos: define se o silêncio é o estado padrão do agente ou uma decisão que ele precisa justificar a cada momento, e determina se o sistema precisa observar continuamente a atividade do usuário — o que incide diretamente sobre as restrições de confidencialidade e de controle de acesso estabelecidas no RNF01 e no RNF02.
+**Justificativa.** A documentação produzida até aqui sustenta os dois regimes sem decidir entre eles. Todos os requisitos funcionais partem de um comando formulado pelo usuário (RF01), mas o catálogo de intenções previsto no RF03 e no RF07 inclui a categoria *alerta*, que pressupõe um agente capaz de se manifestar sem ter sido consultado. A jornada de Carlos (2.5.2.3) atribui valor explícito a "alertas relevantes" e à "identificação proativa de desvios", enquanto a visão do produto (2.4.1) descreve o agente como uma interface conversacional acionada por linguagem natural. A resposta altera o comportamento do sistema diante das pessoas em dois pontos: define se o silêncio é o estado padrão do agente ou uma decisão que ele precisa justificar a cada momento, e determina se o sistema precisa observar continuamente a atividade do usuário — o que incide diretamente sobre as restrições de confidencialidade e de controle de acesso estabelecidas no RNF01 e no RNF02.
 
 ### 3.8.2 Alternativas e Formatos de Prototipação
 
@@ -2653,30 +2460,11 @@ As principais entidades conceituais do MVP são:
 | Solicitação Fora de Escopo | Pergunta que não pertence ao catálogo suportado pelo agente, mas deve ser registrada para análise futura. |
 | Caso de Teste de Intenção | Exemplo rotulado usado para avaliar o desempenho do classificador, preservando template, split e texto normalizado. |
 
-```mermaid
-erDiagram
-    SUBPORTFOLIO ||--o{ PROJETO : agrupa
-    PROJETO ||--o{ ARTEFATO_DO_PROJETO : possui
-    ARTEFATO_DO_PROJETO ||--o{ EXTRATO_DE_FONTE : gera
-    ARTEFATO_DO_PROJETO ||--o{ ITEM_DE_CRONOGRAMA : origina
-    PROJETO ||--o{ ATUALIZACAO_DE_STATUS : registra
-    PROJETO ||--o{ RISCO_OU_PROBLEMA : monitora
-    PROJETO ||--o{ MUDANCA : controla
+<div align="center">
+  <img src="img/modelo-conceitual.png" alt="Modelo conceitual de dados" width="100%">
+</div>
 
-
-    USUARIO ||--o{ CONVERSA : inicia
-    CONVERSA ||--o{ INTERACAO : contem
-    INTENCAO ||--o{ INTERACAO : classifica
-    INTERACAO ||--o{ FONTE_CONSULTADA : utiliza
-    EXTRATO_DE_FONTE ||--o{ FONTE_CONSULTADA : referencia
-    INTERACAO ||--o{ EVENTO_DE_AUDITORIA : gera
-    INTERACAO ||--o| SOLICITACAO_FORA_DE_ESCOPO : pode_gerar
-
-
-    USUARIO ||--o{ REGRA_DE_ACESSO : possui
-    INTENCAO ||--o{ TEMPLATE_DE_PROMPT : orienta
-    INTENCAO ||--o{ CASO_DE_TESTE_DE_INTENCAO : valida
-```
+<p align="center"><strong>Figura 18</strong> - Modelo conceitual de dados.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 ## 4.3 Modelo Lógico de Dados
 
@@ -2705,239 +2493,11 @@ Para manter o escopo adequado ao MVP, a modelagem lógica foi consolidada em 18 
 | out_of_scope_requests | id | interaction_id → ai_interactions.id, reviewed_by → users.id | Armazena perguntas fora do escopo suportado. |
 | intent_test_cases | id | intent_id → intent_catalog.id | Armazena exemplos rotulados com template_id, variação, texto normalizado e split agrupado. |
 
-```mermaid
-erDiagram
-    subportfolios {
-        uuid id PK
-        string code
-        string name
-        text description
-        text strategic_objective
-    }
+<div align="center">
+  <img src="img/modelo-logico.png" alt="Modelo lógico de dados" width="100%">
+</div>
 
-    projects {
-        uuid id PK
-        uuid subportfolio_id FK
-        string code
-        string name
-        text description
-        string status
-        string current_phase
-        date planned_end_date
-        string sharepoint_site_url
-    }
-
-    project_artifacts {
-        uuid id PK
-        uuid project_id FK
-        string artifact_type
-        string title
-        string sharepoint_url
-        string excel_sheet_name
-        string excel_table_or_range
-        string confidentiality_level
-        json metadata
-    }
-
-    source_extracts {
-        uuid id PK
-        uuid artifact_id FK
-        uuid project_id FK
-        int extract_index
-        text content_text
-        string source_locator
-        string sharepoint_reference
-        string source_sheet_name
-        int source_row_number
-        string source_cell_range
-    }
-
-    schedule_items {
-        uuid id PK
-        uuid project_id FK
-        uuid artifact_id FK
-        uuid parent_item_id FK
-        string wbs_code
-        string activity_name
-        string responsible_name
-        date planned_end_date
-        date actual_end_date
-        decimal progress_percent
-        string status
-        int source_row_number
-    }
-
-    project_status_updates {
-        uuid id PK
-        uuid project_id FK
-        uuid artifact_id FK
-        date reference_date
-        string overall_status
-        decimal progress_percent
-        text executive_summary
-    }
-
-    risk_issue_items {
-        uuid id PK
-        uuid project_id FK
-        uuid source_artifact_id FK
-        string item_type
-        string title
-        string severity
-        string status
-    }
-
-    change_records {
-        uuid id PK
-        uuid project_id FK
-        uuid source_artifact_id FK
-        string change_type
-        string status
-    }
-
-    users {
-        uuid id PK
-        string entra_object_id
-        string display_name
-        string email
-        string role_name
-    }
-
-    access_rules {
-        uuid id PK
-        uuid user_id FK
-        uuid subportfolio_id FK
-        uuid project_id FK
-        string role_name
-        string permission_scope
-        boolean can_read
-        boolean can_write
-    }
-
-    intent_catalog {
-        uuid id PK
-        string macro_intent
-        string specific_intent
-        string flow_description
-        string target_component
-        string handler_name
-        decimal macro_confidence_threshold
-        decimal intent_confidence_threshold
-        boolean is_active
-    }
-
-    prompt_templates {
-        uuid id PK
-        uuid intent_id FK
-        string template_key
-        string title
-        text prompt_text
-        string channel
-        string purpose
-    }
-
-    ai_conversations {
-        uuid id PK
-        uuid user_id FK
-        string channel
-        string conversation_status
-    }
-
-    ai_interactions {
-        uuid id PK
-        uuid conversation_id FK
-        uuid user_id FK
-        uuid intent_id FK
-        uuid prompt_template_id FK
-        text user_prompt
-        text normalized_prompt
-        string macro_intent_predicted
-        decimal macro_intent_confidence
-        string specific_intent_predicted
-        decimal specific_intent_confidence
-        string handler_selected
-        string route_taken
-        json top_k_alternatives
-        text limitation_response
-        text response_text
-        string processing_status
-    }
-
-    consulted_sources {
-        uuid id PK
-        uuid interaction_id FK
-        uuid artifact_id FK
-        uuid extract_id FK
-        uuid project_id FK
-        string source_type
-        string source_title
-        string source_url
-        string source_locator
-        int citation_order
-    }
-
-    audit_events {
-        uuid id PK
-        uuid interaction_id FK
-        uuid user_id FK
-        string event_type
-        string component
-        string correlation_id
-    }
-
-    out_of_scope_requests {
-        uuid id PK
-        uuid interaction_id FK
-        uuid reviewed_by FK
-        text user_prompt
-        text reason
-        string review_status
-    }
-
-    intent_test_cases {
-        uuid id PK
-        uuid intent_id FK
-        text raw_text
-        text normalized_text
-        string template_id
-        string surface_variation
-        string dataset_split
-        string leakage_group
-    }
-
-    subportfolios ||--o{ projects : possui
-    projects ||--o{ project_artifacts : possui
-    projects ||--o{ source_extracts : contextualiza
-    project_artifacts ||--o{ source_extracts : gera
-    projects ||--o{ schedule_items : possui
-    project_artifacts ||--o{ schedule_items : origina
-    schedule_items ||--o{ schedule_items : detalha
-    projects ||--o{ project_status_updates : acompanha
-    project_artifacts ||--o{ project_status_updates : fundamenta
-    projects ||--o{ risk_issue_items : monitora
-    project_artifacts ||--o{ risk_issue_items : fundamenta
-    projects ||--o{ change_records : controla
-    project_artifacts ||--o{ change_records : fundamenta
-
-    users ||--o{ access_rules : possui
-    users ||--o{ ai_conversations : inicia
-    users ||--o{ ai_interactions : realiza
-    users ||--o{ audit_events : executa
-    users ||--o{ out_of_scope_requests : revisa
-
-    intent_catalog ||--o{ prompt_templates : orienta
-    intent_catalog ||--o{ ai_interactions : classifica
-    intent_catalog ||--o{ intent_test_cases : valida
-    prompt_templates ||--o{ ai_interactions : orienta
-
-    ai_conversations ||--o{ ai_interactions : contem
-    ai_interactions ||--o{ consulted_sources : usa
-    project_artifacts ||--o{ consulted_sources : referencia
-    source_extracts ||--o{ consulted_sources : referencia
-    projects ||--o{ consulted_sources : contextualiza
-    ai_interactions ||--o{ audit_events : registra
-    ai_interactions ||--o{ out_of_scope_requests : gera
-```
+<p align="center"><strong>Figura 19</strong> - Modelo lógico de dados.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 As principais regras de integridade do modelo lógico são:
 
@@ -2958,7 +2518,7 @@ O modelo físico corresponde à implementação real do banco de dados. Para o M
 
 O script físico está em:
 
-- [`src/database/01_create_database.sql`](../src/database/01_create_database.sql)
+- [`src/database/sql/01_create_database.sql`](../src/database/sql/01_create_database.sql)
 
 A documentação técnica dos scripts de banco está em:
 
@@ -2980,10 +2540,68 @@ O modelo físico adota as seguintes decisões:
 O tratamento das planilhas Excel vinculadas em listas do SharePoint também foi contemplado fisicamente. A tabela `project_artifacts` armazena o link da planilha, a aba e o intervalo de leitura; a tabela `schedule_items` armazena as linhas normalizadas do cronograma, incluindo a referência à aba, linha e intervalo de células de origem; a tabela `source_extracts` preserva extratos textuais ou estruturados quando a planilha também precisar ser usada como fonte consultável; e a tabela `consulted_sources` registra qual documento, extrato, planilha, linha ou intervalo foi utilizado para compor a resposta.
 
 # 5. Solução Técnica (Design)
-_conteúdo_
 
 ## 5.1 Diagrama de Classes
-_conteúdo_
+
+Esta seção **evolui** a modelagem estática apresentada na Seção 3.1.2, e não a substitui. Aquela modelagem, produzida na Sprint 1, representa o pipeline de processamento: como uma `Solicitacao` percorre classificação, roteamento e geração de resposta. Ela permanece válida e continua sendo a referência da rastreabilidade da Seção 3.1.4.
+
+O que a Sprint 2 acrescentou foi a camada que faltava: o **domínio persistido**. A modelagem de dados das Seções 4.2 a 4.4 introduziu as entidades do portfólio, do conhecimento consultável e da auditoria, que a modelagem inicial não precisava representar porque ainda não havia banco. O diagrama abaixo une as duas camadas e explicita onde elas se tocam.
+
+### 5.1.1 Modelo consolidado
+
+<div align="center">
+  <img src="img/classes-consolidado.png" alt="Diagrama de classes consolidado, com o pipeline de processamento, a interação e governança, o conhecimento consultável e o domínio do portfólio" width="100%">
+</div>
+
+<p align="center"><strong>Figura 20</strong> - Diagrama de classes consolidado, unindo o pipeline de processamento e o domínio persistido.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+
+O código-fonte do diagrama está versionado em [`docs/diagrams/classes-consolidado.puml`](diagrams/classes-consolidado.puml). Para regerar a imagem, com PlantUML e Graphviz instalados:
+
+```bash
+plantuml -charset UTF-8 -tpng -o ../img docs/diagrams/classes-consolidado.puml
+```
+
+
+### 5.1.2 O que mudou em relação à Seção 3.1.2
+
+| Classe da Sprint 1 | Situação na Sprint 2 | Motivo |
+|---|---|---|
+| `Solicitacao`, `PipelinePLN`, `Intencao`, `RoteadorIntencao`, `Resposta` | Mantidas | Continuam descrevendo o caminho de processamento e sustentam a rastreabilidade da Seção 3.1.4 |
+| `ClassificadorIntencao`, `RecuperadorInformacao`, `AnalisadorComparativo`, `ExecutorFluxoAutomatizado`, `GeradorLLM` | Movidas para a Seção 5.2 | São componentes de arquitetura, não entidades de domínio. O diagrama de componentes é o lugar correto para elas |
+| `CategoriaIntencao`, `RotaProcessamento` | Absorvidas como atributos | `macrointencao` e `rota` passaram a ser valores de `Intencao` e `Interacao`, persistidos em `intent_catalog` e `ai_interactions` |
+| `DocumentoProjeto` | Renomeada para `Artefato` | O modelo lógico da Seção 4.3 usa `project_artifacts`, e a entidade cobre documentos, listas, planilhas e normativos, não apenas documentos |
+| `TrechoRecuperado` | Mantida | Corresponde a `source_extracts` e é o que a `FonteConsultada` referencia |
+| `EntidadeExtraida` | Mantida na Seção 3.1.2 | Existe no pipeline, mas não é persistida no MVP; não aparece no modelo de dados |
+| `SugestaoProativa`, `ConfiguracaoProatividade` | Mantidas na Seção 3.1.2 | Sustentam RF09 e RF10, cujo escopo está declarado na Seção 3.1.5 |
+| — | `Interacao`, `Conversa`, `Usuario`, `RegraAcesso`, `FonteConsultada`, `EventoAuditoria`, `SolicitacaoForaDeEscopo` | Novas. Vieram do modelo de dados: sem persistência, a Sprint 1 não precisava representá-las |
+| — | `Subportfolio`, `Projeto`, `ItemCronograma`, `RiscoProblema` | Novas. Domínio do portfólio, introduzido com o modelo conceitual da Seção 4.2 |
+
+### 5.1.3 Decisões refletidas no diagrama
+
+- **`Resposta` é composição de `Interacao`, e não entidade independente.** Uma resposta não existe fora da interação que a originou, e `declararLimitacao()` materializa o comportamento exigido pelo RF08: sem fonte suficiente, a resposta declara a limitação em vez de completar a lacuna.
+- **`FonteConsultada` liga a resposta ao `TrechoRecuperado`, e não ao `Artefato`.** A rastreabilidade exigida pelo RNF03 precisa apontar o trecho utilizado, não apenas o documento de origem.
+- **`Intencao` carrega os limiares e as confianças.** Os valores de 0,925 e 0,950 definidos na Seção 8.10.3 pertencem ao catálogo, não ao código, de modo que possam ser ajustados sem nova implantação. `acimaDoLimiar()` é o que decide se um handler é acionado.
+- **`RegraAcesso` é classe, e não atributo de `Usuario`.** O mesmo usuário pode ter níveis diferentes por subportfólio ou por projeto, o que o RNF02 exige e um atributo simples não representaria.
+- **`ItemCronograma.somaDosPesosFecha()` está no domínio.** A validação de que os pesos fecham em 100%, prevista na Seção 2.4.3, é regra de negócio e não de interface.
+- **`SolicitacaoForaDeEscopo` é entidade própria.** Registrar o que o agente não soube responder é insumo para evoluir o catálogo, e não um estado descartável da interação.
+
+### 5.1.4 Correspondência com o modelo de dados
+
+A relação com as tabelas da Seção 4.3 não é de um para um. `Resposta`, por exemplo, é persistida em colunas de `ai_interactions`, porque não tem ciclo de vida próprio no banco.
+
+| Classe | Tabelas correspondentes |
+|---|---|
+| `Subportfolio`, `Projeto` | `subportfolios`, `projects` |
+| `Artefato`, `TrechoRecuperado` | `project_artifacts`, `source_extracts` |
+| `ItemCronograma`, `RiscoProblema` | `schedule_items`, `risk_issue_items` |
+| `Usuario`, `RegraAcesso` | `users`, `access_rules` |
+| `Intencao` | `intent_catalog`, `prompt_templates` |
+| `Conversa`, `Interacao`, `Resposta` | `ai_conversations`, `ai_interactions` |
+| `FonteConsultada` | `consulted_sources` |
+| `EventoAuditoria` | `audit_events` |
+| `SolicitacaoForaDeEscopo` | `out_of_scope_requests` |
+
+As tabelas `project_status_updates`, `change_records` e `intent_test_cases` não aparecem como classes: as duas primeiras são registro histórico consultado por relatório, e a terceira pertence ao ciclo de avaliação do classificador descrito na Seção 8.10.1, não ao runtime.
 
 ## 5.2 Diagrama de Componentes da UML
 
@@ -2997,11 +2615,11 @@ A partir dessa classificação, a conversa é encaminhada para a capacidade corr
 
 Solicitações associadas a **funcionalidades ou fluxos específicos** são encaminhadas ao **Microsoft Copilot Studio**. Nesse caminho, o Copilot Studio atua como mecanismo de orquestração, selecionando o tópico correspondente à intenção identificada e acionando, quando necessário, fluxos do **Power Automate** para leitura, escrita, atualização ou execução de automações sobre os serviços corporativos.
 
-A Figura 14 apresenta a estrutura descrita. Dessa forma, os componentes mantêm responsabilidades distintas: o **PLN interpreta e roteia**, o **RAG recupera conhecimento**, o **LLM gera respostas fundamentadas a partir do contexto recuperado** e o **Copilot Studio executa e orquestra os fluxos funcionais associados às intenções**. O SharePoint permanece como fonte documental e de dados corporativos, enquanto identidade, configuração e rastreabilidade atravessam os demais componentes.
+A Figura 21 apresenta a estrutura descrita. Dessa forma, os componentes mantêm responsabilidades distintas: o **PLN interpreta e roteia**, o **RAG recupera conhecimento**, o **LLM gera respostas fundamentadas a partir do contexto recuperado** e o **Copilot Studio executa e orquestra os fluxos funcionais associados às intenções**. O SharePoint permanece como fonte documental e de dados corporativos, enquanto identidade, configuração e rastreabilidade atravessam os demais componentes.
 
 <div align="center">
   <img src="img/componentes-metro-5.2.png" alt="Diagrama de componentes da arquitetura atual da solução" width="100%">
-  <p><strong>Figura 14</strong> - Diagrama de componentes da arquitetura atual da solução.</p>
+  <p><strong>Figura 21</strong> - Diagrama de componentes da arquitetura atual da solução.</p>
   <sup>Fonte: Material produzido pelos autores, 2026.</sup>
 </div>
 
@@ -3085,6 +2703,13 @@ O diagrama de componentes concentra-se nas dependências, responsabilidades e in
 
 ## 5.3 Diagramas de Sequência da UML
 
+Os diagramas desta seção, como os demais do documento, são gerados a partir de arquivos-fonte em PlantUML versionados em `docs/diagrams/`. Para regerar qualquer um deles, com PlantUML e Graphviz instalados:
+
+```bash
+plantuml -charset UTF-8 -tpng -o ../img docs/diagrams/<arquivo>.puml
+```
+
+
 Os diagramas de sequência desta seção detalham a ordem das interações entre os principais componentes da solução nos cenários críticos definidos para a arquitetura atual. Enquanto a modelagem dinâmica inicial da Seção 3.1.3 apresenta os fluxos em nível funcional, os diagramas desta seção incorporam as decisões técnicas consolidadas na solução, especialmente a utilização do Microsoft Teams, o serviço de Speech-to-Text, o núcleo autoral de PLN, o catálogo de intenções, a arquitetura RAG, a geração de respostas pelo LLM e o acionamento de fluxos específicos por meio do Copilot Studio.
 
 A seleção dos cenários considera os caminhos centrais da solução: consultas documentais fundamentadas, análises comparativas, direcionamento para fluxos funcionais e entrada por voz. Em todos os casos, o PLN permanece responsável pela interpretação e classificação da solicitação, enquanto o catálogo de intenções determina a capacidade que deverá processá-la. A partir desse roteamento, a solicitação segue para a recuperação e geração de resposta ou para o tópico/fluxo correspondente no Copilot Studio.
@@ -3097,76 +2722,11 @@ Este cenário representa uma consulta textual sobre informações disponíveis n
 
 No contexto do MVP, a fonte utilizada para validação é a **base sintética associada ao índice vetorial**. A integração com SharePoint representa a evolução arquitetural prevista e não deve ser interpretada como dependência do conjunto de dados reais do Metrô.
 
-```mermaid
-sequenceDiagram
-    autonumber
+<div align="center">
+  <img src="img/sequencia-rag-consulta.png" alt="Sequência: consulta documental via RAG" width="100%">
+</div>
 
-    actor Usuario as Usuário do PMO
-    participant Entra as Microsoft Entra ID
-    participant Chat as Microsoft Teams
-    participant API as API da Aplicação
-    participant PLN as Núcleo de PLN
-    participant Classificador as Classificador de Intenções
-    participant Escopo as Validador de Escopo
-    participant Catalogo as Catálogo de Intenções
-    participant Entidades as Extração de Entidades
-    participant Retriever as Recuperador RAG
-    participant Fontes as Base sintética / Índice Vetorial
-    participant Contexto as Montagem de Contexto
-    participant LLM as API de LLM
-    participant Auditoria as Trilha de Auditoria
-
-    Usuario->>Entra: Autenticar-se
-    Entra-->>Chat: Identidade autenticada
-    Usuario->>Chat: Envia pergunta em linguagem natural
-    Chat->>API: POST /chat com a mensagem + identidade
-    API->>Auditoria: Registrar início da interação
-
-    API->>PLN: Encaminhar solicitação
-    PLN->>PLN: Pré-processar texto
-    PLN->>Classificador: Identificar intenção
-    Classificador-->>PLN: Intenção + confiança
-    PLN->>Escopo: Validar solicitação
-
-    alt Solicitação fora do escopo
-        Escopo-->>PLN: Não suportada
-        PLN->>API: Orientação / limite da solução
-        API->>Auditoria: Registrar intenção e resultado
-        API-->>Chat: Resposta de reformulação
-        Chat-->>Usuario: Apresentar orientação
-
-    else Solicitação válida
-        Escopo-->>PLN: Solicitação válida
-        PLN->>Catalogo: Associar intenção a uma capacidade
-        Catalogo-->>PLN: Rota = Consulta documental
-
-        PLN->>Entidades: Extrair projeto, critérios e contexto
-        Entidades-->>PLN: Entidades identificadas
-
-        PLN->>Retriever: Recuperar contexto relevante
-        Retriever->>Fontes: Buscar trechos por relevância semântica
-        Fontes-->>Retriever: Trechos + metadados + referências
-        Retriever-->>PLN: Evidências recuperadas
-
-        alt Informação suficiente
-            PLN->>Contexto: Montar contexto fundamentado
-            Contexto-->>PLN: Contexto + referências
-            PLN->>LLM: Solicitar geração com contexto recuperado
-            LLM-->>PLN: Resposta em linguagem natural
-
-            PLN->>API: Resposta + referências
-            API->>Auditoria: Registrar consulta, fontes e resposta
-            API-->>Chat: Resultado estruturado
-            Chat-->>Usuario: Exibir resposta fundamentada
-
-        else Informação insuficiente
-            PLN->>API: Informar ausência de dados suficientes
-            API->>Auditoria: Registrar insuficiência e fontes consultadas
-            API-->>Chat: Limitação da consulta
-            Chat-->>Usuario: Informar que não há dados suficientes
-        end
-    end
-```
+<p align="center"><strong>Figura 22</strong> - Sequência: consulta documental via RAG.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O fluxo evidencia que o LLM não acessa diretamente a fonte documental. A aplicação recupera previamente os conteúdos relevantes e utiliza esses trechos como contexto para a geração da resposta. No MVP, essa recuperação ocorre sobre a base sintética e o índice vetorial; a integração com SharePoint permanece como caminho de evolução para a utilização das fontes corporativas homologadas.
 
@@ -3178,86 +2738,11 @@ Este cenário representa uma solicitação analítica, como **"Compare os riscos
 
 Assim como no cenário anterior, o MVP utiliza a **base sintética associada ao índice vetorial**. A eventual integração com SharePoint ocorre em uma etapa posterior, mediante os mecanismos homologados pelo parceiro.
 
-```mermaid
-sequenceDiagram
-    autonumber
+<div align="center">
+  <img src="img/sequencia-rag-comparacao.png" alt="Sequência: análise e comparação entre projetos via RAG" width="100%">
+</div>
 
-    actor Gestor as Gestor do Portfólio
-    participant Entra as Microsoft Entra ID
-    participant Chat as Microsoft Teams
-    participant API as API da Aplicação
-    participant PLN as Núcleo de PLN
-    participant Classificador as Classificador de Intenções
-    participant Escopo as Validador de Escopo
-    participant Catalogo as Catálogo de Intenções
-    participant Entidades as Extração de Entidades
-    participant Retriever as Recuperador RAG
-    participant Fontes as Base sintética / Índice Vetorial
-    participant Analise as Analisador Comparativo
-    participant Contexto as Montagem de Contexto
-    participant LLM as API de LLM
-    participant Auditoria as Trilha de Auditoria
-
-    Gestor->>Entra: Autenticar-se
-    Entra-->>Chat: Identidade autenticada
-    Gestor->>Chat: Solicita comparação em linguagem natural
-    Chat->>API: POST /chat com a solicitação + identidade
-    API->>Auditoria: Registrar início da interação
-
-    API->>PLN: Encaminhar solicitação
-    PLN->>PLN: Pré-processar texto
-    PLN->>Classificador: Identificar intenção
-    Classificador-->>PLN: Intenção analítica + confiança
-    PLN->>Escopo: Validar solicitação
-
-    alt Solicitação fora do escopo
-        Escopo-->>PLN: Não suportada
-        PLN->>API: Orientação / limite da solução
-        API->>Auditoria: Registrar intenção e resultado
-        API-->>Chat: Resposta de reformulação
-        Chat-->>Gestor: Apresentar orientação
-
-    else Solicitação válida
-        Escopo-->>PLN: Solicitação válida
-        PLN->>Catalogo: Associar intenção a uma capacidade
-        Catalogo-->>PLN: Rota = Análise comparativa
-
-        PLN->>Entidades: Extrair projetos e critérios
-        Entidades-->>PLN: Projetos + critérios
-
-        PLN->>Retriever: Recuperar evidências dos projetos
-        Retriever->>Fontes: Buscar evidências do Projeto XPTO
-        Fontes-->>Retriever: Trechos + metadados
-        Retriever-->>PLN: Evidências do Projeto XPTO
-
-        PLN->>Retriever: Buscar evidências do Projeto ABC
-        Retriever->>Fontes: Buscar evidências do Projeto ABC
-        Fontes-->>Retriever: Trechos + metadados
-        Retriever-->>PLN: Evidências do Projeto ABC
-
-        alt Dados suficientes
-            PLN->>Analise: Comparar riscos, prazos e critérios
-            Analise-->>PLN: Resultado comparativo estruturado
-
-            PLN->>Contexto: Consolidar evidências + resultado
-            Contexto-->>PLN: Contexto fundamentado
-
-            PLN->>LLM: Gerar resposta comparativa
-            LLM-->>PLN: Resposta em linguagem natural
-
-            PLN->>API: Resultado + referências
-            API->>Auditoria: Registrar consulta, fontes e resposta
-            API-->>Chat: Comparação estruturada
-            Chat-->>Gestor: Exibir análise
-
-        else Dados insuficientes
-            PLN->>API: Informar dados ausentes
-            API->>Auditoria: Registrar insuficiência e fontes consultadas
-            API-->>Chat: Limitação da análise
-            Chat-->>Gestor: Exibir insuficiência
-        end
-    end
-```
+<p align="center"><strong>Figura 23</strong> - Sequência: análise e comparação entre projetos via RAG.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 A sequência preserva a diferenciação entre **fato recuperado** e **resultado interpretativo da comparação**. A análise é executada sobre as informações recuperadas e o LLM é responsável pela apresentação em linguagem natural, mantendo as referências associadas às evidências utilizadas.
 
@@ -3267,73 +2752,11 @@ A validação de identidade antecede a recuperação e os eventos da interação
 
 Este cenário representa uma solicitação cuja intenção corresponde a uma capacidade funcional específica do produto. O PLN identifica a intenção e o catálogo a associa ao tópico ou fluxo correspondente. A partir desse ponto, o Copilot Studio assume a execução do tópico selecionado e pode acionar o Power Automate quando houver uma operação automatizada ou integração com serviço corporativo.
 
-```mermaid
-sequenceDiagram
-    autonumber
+<div align="center">
+  <img src="img/sequencia-copilot-fluxo.png" alt="Sequência: direcionamento para fluxo funcional via Copilot Studio" width="100%">
+</div>
 
-    actor Usuario as Usuário
-    participant Entra as Microsoft Entra ID
-    participant Chat as Microsoft Teams
-    participant API as API da Aplicação
-    participant PLN as Núcleo de PLN
-    participant Classificador as Classificador de Intenções
-    participant Escopo as Validador de Escopo
-    participant Catalogo as Catálogo de Intenções
-    participant Copilot as Copilot Studio
-    participant Topico as Tópico / Fluxo Selecionado
-    participant Automacao as Power Automate
-    participant Servico as Serviço Corporativo
-    participant Auditoria as Trilha de Auditoria
-
-    Usuario->>Entra: Autenticar-se
-    Entra-->>Chat: Identidade autenticada
-    Usuario->>Chat: Solicita uma operação funcional
-    Chat->>API: POST /chat com a solicitação + identidade
-    API->>Auditoria: Registrar início da interação
-
-    API->>PLN: Encaminhar solicitação
-    PLN->>PLN: Pré-processar texto
-    PLN->>Classificador: Identificar intenção
-    Classificador-->>PLN: Intenção + confiança
-    PLN->>Escopo: Validar solicitação
-
-    alt Solicitação fora do escopo
-        Escopo-->>PLN: Não suportada
-        PLN->>API: Orientação / limite da solução
-        API->>Auditoria: Registrar intenção e resultado
-        API-->>Chat: Resposta de reformulação
-        Chat-->>Usuario: Apresentar orientação
-
-    else Solicitação válida
-        Escopo-->>PLN: Solicitação válida
-        PLN->>Catalogo: Consultar capacidade associada
-        Catalogo-->>PLN: Tópico / fluxo correspondente
-
-        PLN->>Copilot: Encaminhar intenção + parâmetros estruturados
-        Copilot->>Topico: Acionar tópico correspondente
-
-        alt Fluxo requer automação
-            Topico->>Automacao: Executar ação do fluxo
-
-            alt Fluxo requer serviço corporativo
-                Automacao->>Servico: Executar operação
-                Servico-->>Automacao: Resultado da operação
-            end
-
-            Automacao-->>Topico: Resultado da ação
-            Topico-->>Copilot: Resultado do fluxo
-
-        else Fluxo conversacional
-            Topico-->>Copilot: Resultado / próxima etapa
-        end
-
-        Copilot-->>PLN: Resultado estruturado
-        PLN->>API: Resposta final
-        API->>Auditoria: Registrar intenção, fluxo e resultado
-        API-->>Chat: Resultado da operação
-        Chat-->>Usuario: Apresentar retorno do fluxo
-    end
-```
+<p align="center"><strong>Figura 24</strong> - Sequência: direcionamento para fluxo funcional via Copilot Studio.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 Neste cenário, o **Copilot Studio não é responsável por descobrir a intenção do usuário**. A decisão já foi tomada pelo núcleo de PLN e pelo catálogo de intenções. O Copilot Studio atua como plataforma de execução do tópico ou fluxo selecionado.
 
@@ -3345,61 +2768,11 @@ A identidade do usuário é validada antes da execução do fluxo e a auditoria 
 
 Este cenário demonstra a entrada por áudio utilizando a API de **Azure AI Speech** documentada no projeto. A responsabilidade do serviço de Speech-to-Text termina na produção de uma transcrição utilizável; depois disso, o conteúdo segue pelo mesmo pipeline utilizado para entradas textuais.
 
-```mermaid
-sequenceDiagram
-    autonumber
+<div align="center">
+  <img src="img/sequencia-voz-stt.png" alt="Sequência: entrada por voz com Speech-to-Text" width="100%">
+</div>
 
-    actor Usuario as Usuário
-    participant Entra as Microsoft Entra ID
-    participant Chat as Microsoft Teams
-    participant API as API da Aplicação
-    participant Speech as Azure AI Speech
-    participant PLN as Núcleo de PLN
-    participant Classificador as Classificador de Intenções
-    participant Escopo as Validador de Escopo
-    participant Catalogo as Catálogo de Intenções
-    participant Roteador as Roteamento da Capacidade
-    participant Auditoria as Trilha de Auditoria
-
-    Usuario->>Entra: Autenticar-se
-    Entra-->>Chat: Identidade autenticada
-    Usuario->>Chat: Grava pergunta em áudio
-    Chat->>API: Envia arquivo de áudio + identidade
-    API->>Auditoria: Registrar início da interação
-
-    API->>Speech: Requisição STT em pt-BR
-    Speech-->>API: Status + transcrição + confiança
-
-    alt Transcrição inválida, NoMatch ou confiança baixa
-        API->>Auditoria: Registrar falha de transcrição
-        API-->>Chat: Solicitar nova gravação / informar ausência de transcrição confiável
-        Chat-->>Usuario: Solicitar repetição do áudio
-
-    else Transcrição válida
-        API->>PLN: Encaminhar transcrição
-        PLN->>PLN: Pré-processar texto
-        PLN->>Classificador: Identificar intenção
-        Classificador-->>PLN: Intenção + confiança
-        PLN->>Escopo: Validar solicitação
-
-        alt Solicitação inválida ou fora do escopo
-            Escopo-->>PLN: Não suportada
-            PLN->>API: Orientação / limite da solução
-            API->>Auditoria: Registrar intenção e resultado
-            API-->>Chat: Resposta de reformulação
-            Chat-->>Usuario: Apresentar orientação
-
-        else Solicitação válida
-            Escopo-->>PLN: Solicitação válida
-            PLN->>Catalogo: Associar intenção à capacidade
-            Catalogo-->>Roteador: Capacidade selecionada
-            Roteador-->>API: Encaminhar para o fluxo correspondente
-            API->>Auditoria: Registrar transcrição, intenção e roteamento
-            API-->>Chat: Resultado
-            Chat-->>Usuario: Apresentar resposta
-        end
-    end
-```
+<p align="center"><strong>Figura 25</strong> - Sequência: entrada por voz com Speech-to-Text.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O diagrama evidencia que o áudio não cria um fluxo de negócio independente: após uma transcrição válida, a solicitação torna-se equivalente a uma entrada textual para o restante da arquitetura. O Azure AI Speech atua exclusivamente na etapa de Speech-to-Text, enquanto a interpretação, validação e definição da capacidade permanecem sob responsabilidade da aplicação.
 
@@ -3441,67 +2814,15 @@ Como o provedor de LLM externo ainda não está definido nem homologado, conform
 
 ## 6.1 Diagrama de implantação da UML
 
-A Figura 15 apresenta a visão de implantação da PoC. O diagrama separa o ambiente atualmente viável para o MVP dos componentes que dependem de desenvolvimento posterior ou provisionamento pela GTI.
+A Figura 26 apresenta a visão de implantação da PoC. O diagrama separa o ambiente atualmente viável para o MVP dos componentes que dependem de desenvolvimento posterior ou provisionamento pela GTI.
 
-```mermaid
-flowchart LR
-    usuario["Usuário do MVP"]
-    lideranca["Liderança<br/>aprova base sintética"]
+<div align="center">
+  <img src="img/implantacao-poc.png" alt="Diagrama de implantação planejada da PoC" width="100%">
+</div>
 
-    subgraph navegador["Navegador"]
-        frontend["Frontend próprio<br/>React + Vite"]
-    end
+<p align="center"><strong>Figura 26</strong> - Diagrama de implantação planejada da PoC.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
-    subgraph ambiente["Ambiente acessível da PoC<br/>execução local ou publicação simples futura"]
-        api["API do MVP<br/>a ser consolidada"]
-        pln["Núcleo de PLN<br/>estratégia documentada"]
-        rag["Recuperação de dados<br/>base sintética"]
-        fallback["Fallback<br/>resposta estruturada"]
-    end
-
-    subgraph supabase["Supabase Cloud"]
-        db[("PostgreSQL<br/>dados, catálogo e auditoria")]
-        storage[("Storage<br/>documentos sintéticos<br/>e artefatos futuros")]
-    end
-
-    subgraph microsoft["Microsoft / Power Platform"]
-        entra["Entra ID<br/>OAuth/OIDC"]
-        copilot["Copilot Studio<br/>tópicos e orquestração"]
-        power["Power Automate<br/>fluxos funcionais"]
-    end
-
-    subgraph futuro["Evolução futura"]
-        docker["Docker<br/>empacotamento do serviço"]
-        cicd["Pipeline CI/CD<br/>build, teste e deploy"]
-        azure["Azure Container Apps<br/>ou App Service"]
-        aml["Azure Machine Learning"]
-        insights["Application Insights"]
-    end
-
-    usuario --> frontend
-    frontend --> entra
-    entra --> frontend
-    frontend -->|"requisição da aplicação"| api
-    api --> pln
-    pln --> rag
-    rag --> db
-    rag --> storage
-    api -->|"grava interação"| db
-    api -->|"quando disponível"| copilot
-    copilot --> power
-    api -->|"sem camada generativa"| fallback
-    lideranca -->|"aprova antes da carga"| db
-
-    api -. evolução .-> docker
-    docker -. automatização futura .-> cicd
-    cicd -. publicação futura .-> azure
-    storage -. artefatos futuros .-> aml
-    api -. telemetria futura .-> insights
-```
-
-<p align="center"><strong>Figura 15</strong> - Diagrama de implantação planejada da PoC.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
-
-O código-fonte do diagrama renderizável está versionado em [`docs/diagrams/implantacao-poc.mmd`](diagrams/implantacao-poc.mmd).
+O código-fonte do diagrama está versionado em [`docs/diagrams/implantacao-poc.puml`](diagrams/implantacao-poc.puml).
 
 ## 6.2 Justificativa das escolhas de implantação
 
@@ -3744,7 +3065,6 @@ _conteúdo_
 _conteúdo_
 
 # 8. Desenvolvimento do Projeto
-_conteúdo_
 
 ## 8.1 Arquitetura de Codificação e Estrutura de Diretórios
 _conteúdo_
@@ -3807,14 +3127,14 @@ Os dois serviços ocupam posições diferentes no fluxo de voz:
 1. o **STT** recebe o áudio enviado pelo usuário e produz a solicitação textual encaminhada ao pipeline de PLN;
 2. o **TTS** recebe a resposta textual final produzida pelo agente e sintetiza um áudio que poderá ser devolvido pelo canal de interação.
 
-Essa distinção preserva a delimitação da Sprint 1. A arquitetura inicial prevê solicitações por texto ou áudio e um componente de conversão de áudio em texto, enquanto os critérios de aceitação do RF01 exigem, no MVP, que o pipeline aceite solicitações textuais. A Seção 8.7 detalha o STT previsto na solução atual. A Seção 8.8 registra a avaliação e o contrato técnico de TTS, mas sua implementação continua classificada na Seção 3.4.5 como evolução; documentar a API não altera o escopo do MVP.
+Essa distinção preserva a delimitação da Sprint 1. A arquitetura inicial prevê solicitações por texto ou áudio e um componente de conversão de áudio em texto, enquanto os critérios de aceitação do RF01 exigem, no MVP, que o pipeline aceite solicitações textuais. A Seção 8.8 detalha o STT previsto na solução atual. A Seção 8.9 registra a avaliação e o contrato técnico de TTS, mas sua implementação continua classificada na Seção 3.4.5 como evolução; documentar a API não altera o escopo do MVP.
 
 ### 8.6.2 Entradas, saídas e formatos
 
 | Serviço | Entrada esperada | Saída esperada | Formatos e metadados adotados ou exigidos | Destino no fluxo | Situação no escopo |
 |---|---|---|---|---|---|
-| **STT** | Fala em português do Brasil (`pt-BR`), capturada pelo canal como arquivo ou fluxo de áudio. O caso de uso atual é uma pergunta curta do usuário. | Transcrição textual estruturada. Quando disponível, a resposta deve expor o estado do reconhecimento, o texto normalizado e a confiança ou as alternativas retornadas pelo provedor. | A avaliação deve registrar contêiner, codec, taxa de amostragem, número de canais, duração e tamanho máximos, envio binário ou multipart e suporte a processamento síncrono ou streaming. No contrato adotado na Seção 8.7, usa-se preferencialmente WAV com PCM, 16 kHz e mono; OGG com OPUS, 16 kHz e mono também é aceito pelo endpoint documentado. | O texto final é encaminhado ao pipeline de PLN como uma solicitação textual; o STT não classifica a intenção nem gera a resposta do agente. | Componente previsto na arquitetura e detalhado na Seção 8.7. A disponibilidade no ambiente do parceiro ainda depende de confirmação com a GTI. |
-| **TTS** | Resposta textual final do agente em português do Brasil, codificada em um documento SSML válido após a aplicação das regras de acesso e fundamentação. | Bytes do áudio sintetizado, acompanhados do tipo de mídia correspondente ao formato solicitado. | O contrato da Seção 8.8 adota `application/ssml+xml` na entrada e `audio-24khz-48kbitrate-mono-mp3` na saída, adequado à reprodução direta. `riff-24khz-16bit-mono-pcm` (WAV) é a alternativa documentada para processamento sem perdas. Devem ser respeitados os limites de tamanho do SSML, duração e taxa de requisições do provedor. | O áudio é devolvido pela camada de interface sem alterar o conteúdo textual fundamentado, que permanece como resposta canônica do agente. | Contrato técnico documentado na Seção 8.8; a implementação permanece como evolução e não é requisito de entrega do MVP. |
+| **STT** | Fala em português do Brasil (`pt-BR`), capturada pelo canal como arquivo ou fluxo de áudio. O caso de uso atual é uma pergunta curta do usuário. | Transcrição textual estruturada. Quando disponível, a resposta deve expor o estado do reconhecimento, o texto normalizado e a confiança ou as alternativas retornadas pelo provedor. | A avaliação deve registrar contêiner, codec, taxa de amostragem, número de canais, duração e tamanho máximos, envio binário ou multipart e suporte a processamento síncrono ou streaming. No contrato adotado na Seção 8.8, usa-se preferencialmente WAV com PCM, 16 kHz e mono; OGG com OPUS, 16 kHz e mono também é aceito pelo endpoint documentado. | O texto final é encaminhado ao pipeline de PLN como uma solicitação textual; o STT não classifica a intenção nem gera a resposta do agente. | Componente previsto na arquitetura e detalhado na Seção 8.8. A disponibilidade no ambiente do parceiro ainda depende de confirmação com a GTI. |
+| **TTS** | Resposta textual final do agente em português do Brasil, codificada em um documento SSML válido após a aplicação das regras de acesso e fundamentação. | Bytes do áudio sintetizado, acompanhados do tipo de mídia correspondente ao formato solicitado. | O contrato da Seção 8.9 adota `application/ssml+xml` na entrada e `audio-24khz-48kbitrate-mono-mp3` na saída, adequado à reprodução direta. `riff-24khz-16bit-mono-pcm` (WAV) é a alternativa documentada para processamento sem perdas. Devem ser respeitados os limites de tamanho do SSML, duração e taxa de requisições do provedor. | O áudio é devolvido pela camada de interface sem alterar o conteúdo textual fundamentado, que permanece como resposta canônica do agente. | Contrato técnico documentado na Seção 8.9; a implementação permanece como evolução e não é requisito de entrega do MVP. |
 
 Para ambas as APIs, o contrato técnico deve documentar autenticação, parâmetros obrigatórios, exemplo de requisição e resposta, códigos de erro, limites de uso e comportamento quando não for possível processar a entrada. No caso de STT, uma transcrição utilizável é o dado de entrada do restante do pipeline. No caso de TTS, a síntese acrescenta uma modalidade de apresentação e não modifica o conteúdo produzido pelo pipeline.
 
@@ -3837,17 +3157,154 @@ Os critérios abaixo orientam a pesquisa e a comparação de serviços de voz. E
 
 ### 8.6.4 Restrições e condições de validação
 
-- A captura de voz nativa do Teams/Copilot Studio é a primeira opção indicada na Seção 3.4.2.1. A escolha do Azure AI Speech na Seção 8.7 é a recomendação técnica para a integração STT quando o recurso nativo não atender à qualidade ou ao português necessário; o uso no ambiente do parceiro depende de disponibilidade e homologação pela GTI.
+- A captura de voz nativa do Teams/Copilot Studio é a primeira opção indicada na Seção 3.4.2.1. A escolha do Azure AI Speech na Seção 8.8 é a recomendação técnica para a integração STT quando o recurso nativo não atender à qualidade ou ao português necessário; o uso no ambiente do parceiro depende de disponibilidade e homologação pela GTI.
 - Os benchmarks de STT e TTS das Seções 8.7 e 8.8 são documentais. Não devem ser apresentadas conclusões empíricas de acurácia, naturalidade ou latência antes da existência de amostras padronizadas e representativas do projeto.
-- Os limites de 60 segundos e os formatos WAV/PCM e OGG/OPUS descritos na Seção 8.7 pertencem ao endpoint de áudio curto selecionado para STT e não devem ser generalizados como limites de todos os provedores.
-- O SSML, o MP3 adotado e o WAV alternativo descritos na Seção 8.8 pertencem ao contrato do endpoint Azure selecionado para TTS e não constituem exigências universais para outros provedores.
+- Os limites de 60 segundos e os formatos WAV/PCM e OGG/OPUS descritos na Seção 8.8 pertencem ao endpoint de áudio curto selecionado para STT e não devem ser generalizados como limites de todos os provedores.
+- O SSML, o MP3 adotado e o WAV alternativo descritos na Seção 8.9 pertencem ao contrato do endpoint Azure selecionado para TTS e não constituem exigências universais para outros provedores.
 - As APIs de voz não devem receber dados reais ou sensíveis em serviço não homologado. Durante a prova de conceito, aplicam-se as exigências de dados sintéticos ou anonimizados do RNF01.
 - A trilha prevista no RNF03 continua baseada na solicitação textual, na intenção, nas fontes e na resposta produzida. Este levantamento não cria uma nova obrigação de armazenar gravações ou áudios sintetizados.
-- A escolha técnica do Azure AI Speech para TTS na Seção 8.8 permite reutilizar o recurso e a autenticação do STT, mas não antecipa sua implementação: a síntese de fala permanece fora do escopo do MVP, conforme a Seção 3.4.5.
+- A escolha técnica do Azure AI Speech para TTS na Seção 8.9 permite reutilizar o recurso e a autenticação do STT, mas não antecipa sua implementação: a síntese de fala permanece fora do escopo do MVP, conforme a Seção 3.4.5.
 
-## 8.7 Speech-to-Text
+## 8.7 API de recebimento de áudio
 
-### 8.7.1 Introdução
+Esta seção documenta a API **da própria solução**, que recebe o áudio enviado pelo usuário. Ela não se confunde com a API de transcrição da Seção 8.8: aquela é um serviço de terceiro consumido pelo backend, enquanto esta é o ponto de entrada da aplicação, responsável por validar o arquivo, encaminhá-lo à transcrição e devolver o texto ao pipeline de PLN.
+
+### 8.7.1 Posição no fluxo
+
+O caminho de uma solicitação por voz é o seguinte:
+
+1. o canal envia o áudio à API da aplicação;
+2. a API valida formato, duração e tamanho antes de qualquer chamada externa;
+3. o áudio aprovado é encaminhado ao serviço de Speech-to-Text descrito na Seção 8.8;
+4. a transcrição retorna à API, que a submete ao pipeline de PLN da Seção 8.10;
+5. a resposta segue o mesmo formato das solicitações textuais, conforme o RF08.
+
+A validação anteceder a chamada externa é decisão de projeto, e não detalhe de implementação: cada requisição rejeitada localmente é uma requisição que não consome a franquia gratuita do provedor nem expõe conteúdo a serviço externo.
+
+### 8.7.2 Endpoint
+
+| Operação | Método | Rota | Autenticação |
+|---|---|---|---|
+| Enviar áudio para transcrição e processamento | `POST` | `/api/audio` | Token do usuário autenticado, conforme o RNF02 |
+| Consultar o estado do serviço | `GET` | `/health` | Não requer |
+
+### 8.7.3 Formatos aceitos e limites
+
+Os limites derivam do endpoint de áudio curto do provedor selecionado na Seção 8.8. A API da aplicação rejeita localmente o que o provedor rejeitaria, evitando uma ida à rede para receber erro.
+
+| Restrição | Valor | Origem |
+|---|---|---|
+| Contêiner e codec | `WAV` com `PCM` ou `OGG` com `OPUS` | Formatos aceitos pelo endpoint de áudio curto |
+| Taxa de amostragem | 16 kHz | Configuração adotada na Seção 8.8 |
+| Canais | 1, mono | Configuração adotada na Seção 8.8 |
+| Duração máxima | 60 segundos | Limite do endpoint de áudio curto |
+| Tamanho máximo do arquivo | 2 MB | Decorrente de 60 s a 16 kHz, 16 bits, mono, com margem para cabeçalho |
+| Idioma | `pt-BR` | RNF exige atendimento em português do Brasil |
+| Requisições simultâneas por usuário | 1 | Evita consumo concorrente da franquia gratuita |
+
+### 8.7.4 Requisição
+
+O envio é `multipart/form-data`, com o arquivo no campo `audio`.
+
+```http
+POST /api/audio HTTP/1.1
+Host: <HOST-DA-APLICACAO>
+Authorization: Bearer <TOKEN>
+Content-Type: multipart/form-data; boundary=----limite
+Content-Length: <TAMANHO>
+```
+
+| Campo | Obrigatório | Descrição |
+|---|:---:|---|
+| `audio` | Sim | Arquivo de áudio no formato aceito. |
+| `conversation_id` | Não | Identificador da conversa, quando a solicitação continuar uma interação existente. |
+| `language` | Não | Idioma da gravação. Assume `pt-BR` quando ausente. |
+
+Exemplo com cURL:
+
+```bash
+curl --request POST \
+  --url https://<HOST-DA-APLICACAO>/api/audio \
+  --header 'Authorization: Bearer <TOKEN>' \
+  --form 'audio=@pergunta.wav;type=audio/wav' \
+  --form 'conversation_id=1f5c9a24-1c2e-4a8f-9a3e-2b6d8c0f1a77'
+```
+
+### 8.7.5 Resposta de sucesso
+
+`200 OK`, com a transcrição e o resultado do pipeline no mesmo formato das solicitações textuais.
+
+```json
+{
+  "conversation_id": "1f5c9a24-1c2e-4a8f-9a3e-2b6d8c0f1a77",
+  "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
+  "transcription": {
+    "text": "qual o prazo do projeto de modernização da linha 1",
+    "confidence": 0.94,
+    "duration_seconds": 4.8
+  },
+  "intent": {
+    "macro": "CONSULTA",
+    "specific": "consulta_prazo_projeto",
+    "confidence_macro": 0.97,
+    "confidence_specific": 0.89
+  },
+  "answer": {
+    "text": "O prazo vigente do projeto é 30/06/2027.",
+    "sources": [
+      { "artifact": "TAP-Linha1-Modernizacao.docx", "section": "4. Cronograma" }
+    ]
+  }
+}
+```
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `conversation_id` | `uuid` | Sessão conversacional, registrada em `ai_conversations`. |
+| `interaction_id` | `uuid` | Interação registrada em `ai_interactions`, para rastreabilidade. |
+| `transcription.text` | `string` | Texto reconhecido pelo serviço de Speech-to-Text. |
+| `transcription.confidence` | `float` | Confiança do reconhecimento, de 0 a 1. |
+| `intent.macro` | `string` | `CONSULTA`, `TRANSACAO`, `ALERTA` ou `FORA_DE_ESCOPO`. |
+| `intent.confidence_macro` | `float` | Confiança da macrointenção, comparada ao limiar de 0,925. |
+| `answer.sources` | `array` | Fontes consultadas, registradas em `consulted_sources`. |
+
+### 8.7.6 Códigos de resposta e tratamento de erro
+
+O corpo de erro segue estrutura única, para que o canal possa exibir a mensagem sem interpretar cada caso.
+
+```json
+{
+  "error": {
+    "code": "AUDIO_FORMAT_UNSUPPORTED",
+    "message": "Formato de áudio não suportado. Envie WAV/PCM ou OGG/OPUS a 16 kHz, mono.",
+    "detail": { "received": "audio/mpeg" }
+  }
+}
+```
+
+| Código HTTP | `code` | Situação |
+|---|---|---|
+| `200 OK` | — | Áudio transcrito e solicitação processada. |
+| `400 Bad Request` | `AUDIO_MISSING` | Campo `audio` ausente na requisição. |
+| `400 Bad Request` | `AUDIO_FORMAT_UNSUPPORTED` | Contêiner, codec, taxa de amostragem ou número de canais fora do previsto. |
+| `400 Bad Request` | `AUDIO_TOO_LONG` | Gravação acima de 60 segundos. |
+| `401 Unauthorized` | `UNAUTHENTICATED` | Token ausente, inválido ou expirado. |
+| `403 Forbidden` | `OUT_OF_SCOPE_FOR_PROFILE` | Usuário sem permissão para o escopo solicitado, conforme `access_rules`. |
+| `413 Payload Too Large` | `AUDIO_TOO_LARGE` | Arquivo acima de 2 MB. |
+| `422 Unprocessable Entity` | `NO_SPEECH_DETECTED` | Áudio válido, mas sem fala reconhecível. |
+| `429 Too Many Requests` | `RATE_LIMITED` | Requisição simultânea ou franquia do provedor excedida. |
+| `502 Bad Gateway` | `STT_PROVIDER_ERROR` | Falha na chamada ao serviço de transcrição. |
+| `503 Service Unavailable` | `STT_PROVIDER_UNAVAILABLE` | Serviço de transcrição indisponível; aplica-se o fallback da Seção 6.2.5. |
+
+As respostas `422` e `502` são registradas em `audit_events`, porque distinguem falha do usuário de falha do provedor e essa diferença orienta o tratamento na Sprint 3.
+
+### 8.7.7 Situação de implementação
+
+A especificação acima é o contrato acordado para a Sprint 3, quando o barema exige a implementação do endpoint. Na Sprint 2 o backend expõe apenas `/health` e a rota textual; nenhum endpoint recebe áudio ainda. Os limites declarados aqui são os que a implementação deve validar.
+
+## 8.8 Speech-to-Text
+
+### 8.8.1 Introdução
 
 Speech-to-Text (STT), ou reconhecimento automático de fala, é a tecnologia responsável por converter a fala presente em um áudio para texto. O serviço recebe um arquivo ou fluxo de áudio, identifica os trechos falados e devolve a transcrição reconhecida. Dependendo da configuração, a resposta também pode incluir pontuação, normalização de números, alternativas de reconhecimento e um índice de confiança.
 
@@ -3862,7 +3319,7 @@ Os requisitos considerados para a escolha da API foram:
 - integração por uma interface HTTP que possa ser substituída por outro provedor;
 - retorno estruturado com texto e confiança do reconhecimento.
 
-### 8.7.2 Benchmark das APIs
+### 8.8.2 Benchmark das APIs
 
 O benchmark a seguir é documental, baseado nas funcionalidades e nos preços publicados pelos fornecedores em 19 de agosto de 2026. Não foram atribuídas métricas de acurácia ou latência porque ainda não existe um corpus padronizado de áudios do projeto para um teste empírico.
 
@@ -3914,7 +3371,7 @@ Sem o critério de custo, o **Google Cloud Speech-to-Text V2 é o vencedor do be
 
 Para a fase inicial, permanece selecionado o **Azure AI Speech**, pois a orientação do projeto prioriza uma alternativa gratuita e sua franquia recorrente de cinco horas mensais é suficiente para o desenvolvimento. A aplicação deve acessar o serviço por uma interface interna genérica, de modo que o provedor possa ser substituído sem alterar o restante do pipeline.
 
-### 8.7.3 API escolhida: Azure AI Speech
+### 8.8.3 API escolhida: Azure AI Speech
 
 Para o desenvolvimento inicial será utilizada a **API REST do Azure AI Speech para áudio curto**, compatível com o nível Free (F0). Esse endpoint recebe uma gravação de até 60 segundos e retorna o resultado final de forma síncrona, o que atende às perguntas curtas enviadas ao agente.
 
@@ -4109,9 +3566,9 @@ Resposta esperada: `200 OK`, com o token no corpo como texto. O token é válido
 Authorization: Bearer <TOKEN>
 ```
 
-## 8.8 Text-to-Speech
+## 8.9 Text-to-Speech
 
-### 8.8.1 Introdução
+### 8.9.1 Introdução
 
 Text-to-Speech (TTS), ou síntese de fala, é a tecnologia responsável por converter um texto em um áudio falado. O serviço recebe um texto (eventualmente marcado com SSML — *Speech Synthesis Markup Language*) e devolve um arquivo ou fluxo de áudio com a fala sintetizada, podendo variar a voz, o idioma, a velocidade e a entonação.
 
@@ -4129,9 +3586,9 @@ Os requisitos considerados para a escolha da API foram:
 - controle básico de prosódia (velocidade, ênfase, pausas) quando necessário;
 - formato de áudio compatível com reprodução direta no frontend (ex.: MP3 ou WAV).
 
-### 8.8.2 Benchmark das APIs
+### 8.9.2 Benchmark das APIs
 
-O benchmark a seguir é documental, baseado nas funcionalidades e nos preços publicados pelos fornecedores em 27 de agosto de 2026, mantendo os mesmos quatro provedores comparados no benchmark de STT (Seção 8.7.2) para preservar a consistência entre as duas decisões. Não foram atribuídas métricas de naturalidade percebida ou latência porque ainda não existe um corpus padronizado de respostas do agente para um teste empírico.
+O benchmark a seguir é documental, baseado nas funcionalidades e nos preços publicados pelos fornecedores em 27 de agosto de 2026, mantendo os mesmos quatro provedores comparados no benchmark de STT (Seção 8.8.2) para preservar a consistência entre as duas decisões. Não foram atribuídas métricas de naturalidade percebida ou latência porque ainda não existe um corpus padronizado de respostas do agente para um teste empírico.
 
 #### Comparação funcional e de custo
 
@@ -4181,9 +3638,9 @@ Sem o critério de custo, o **Azure AI Speech** se destaca por combinar controle
 
 #### Decisão
 
-Apesar de o Google Cloud Text-to-Speech obter a maior nota ponderada, a fase inicial do projeto adota o **Azure AI Speech** pelos mesmos motivos estratégicos que levaram à escolha do STT (Seção 8.7.2): a franquia de 0,5 milhão de caracteres por mês é suficiente para o desenvolvimento e os testes do agente, e — mais importante — **o TTS pode reutilizar o mesmo recurso Azure (mesma chave `AZURE_SPEECH_KEY`, mesma região e o mesmo padrão de autenticação)** já provisionado para o STT, evitando manter credenciais, contas e integrações de dois provedores diferentes para voz de entrada e de saída. Assim como no STT, a aplicação deve acessar o serviço por uma interface interna genérica, de modo que o provedor possa ser substituído (por exemplo, pelo Google Cloud TTS) sem alterar o restante do pipeline, caso a franquia gratuita se torne insuficiente.
+Apesar de o Google Cloud Text-to-Speech obter a maior nota ponderada, a fase inicial do projeto adota o **Azure AI Speech** pelos mesmos motivos estratégicos que levaram à escolha do STT (Seção 8.8.2): a franquia de 0,5 milhão de caracteres por mês é suficiente para o desenvolvimento e os testes do agente, e — mais importante — **o TTS pode reutilizar o mesmo recurso Azure (mesma chave `AZURE_SPEECH_KEY`, mesma região e o mesmo padrão de autenticação)** já provisionado para o STT, evitando manter credenciais, contas e integrações de dois provedores diferentes para voz de entrada e de saída. Assim como no STT, a aplicação deve acessar o serviço por uma interface interna genérica, de modo que o provedor possa ser substituído (por exemplo, pelo Google Cloud TTS) sem alterar o restante do pipeline, caso a franquia gratuita se torne insuficiente.
 
-### 8.8.3 API escolhida: Azure AI Speech
+### 8.9.3 API escolhida: Azure AI Speech
 
 Para o desenvolvimento inicial será utilizada a **API REST do Azure AI Speech para síntese de voz**, compatível com o nível Free (F0) e com o mesmo recurso Azure já usado no STT.
 
@@ -4192,7 +3649,7 @@ Para o desenvolvimento inicial será utilizada a **API REST do Azure AI Speech p
 | Finalidade | Método HTTP | Endpoint | Uso no projeto |
 |---|---|---|---|
 | Sintetizar fala a partir de texto/SSML | `POST` | `https://<REGIAO>.tts.speech.microsoft.com/cognitiveservices/v1` | Endpoint principal do desenvolvimento inicial. |
-| Obter token temporário | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/sts/v1.0/issueToken` | Opcional; o mesmo endpoint de token já documentado para o STT (Seção 8.7.3) também vale para o TTS. |
+| Obter token temporário | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/sts/v1.0/issueToken` | Opcional; o mesmo endpoint de token já documentado para o STT (Seção 8.8.3) também vale para o TTS. |
 
 O endpoint de síntese aceita até **10 minutos de áudio por requisição**, muito acima do necessário para respostas curtas do agente.
 
@@ -4268,9 +3725,9 @@ Status HTTP esperado: `200 OK`. O corpo da resposta não é JSON: são os **byte
 
 #### Requisição opcional de token
 
-Idêntica à já documentada para o STT (Seção 8.7.3): trocar a chave por um token Bearer válido por 10 minutos, usando o mesmo endpoint `/sts/v1.0/issueToken` do mesmo recurso Azure.
+Idêntica à já documentada para o STT (Seção 8.8.3): trocar a chave por um token Bearer válido por 10 minutos, usando o mesmo endpoint `/sts/v1.0/issueToken` do mesmo recurso Azure.
 
-### 8.8.4 Referências
+### 8.9.4 Referências
 
 - Microsoft. [Preços do Azure AI Speech](https://azure.microsoft.com/en-us/pricing/details/speech/). Acesso em: 27 ago. 2026.
 - Microsoft. [Quotas e limites do Azure AI Speech](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-services-quotas-and-limits). Acesso em: 27 ago. 2026.
@@ -4282,13 +3739,13 @@ Idêntica à já documentada para o STT (Seção 8.7.3): trocar a chave por um t
 - OpenAI. [Preços da API](https://platform.openai.com/docs/pricing). Acesso em: 27 ago. 2026.
 
 
-## 8.9 Escolha de algoritmo PLN
+## 8.10 Escolha de algoritmo PLN
 
 Esta seção registra a escolha atual do pipeline de Processamento de Linguagem Natural responsável por classificar a solicitação do usuário. A implementação e o benchmark reproduzível estão no notebook [`classificador_intencoes_metro.ipynb`](../src/notebooks/classificador_intencoes_metro.ipynb).
 
 Embora seja referido de forma abreviada como “modelo híbrido W2V+BERT”, o componente é tecnicamente um pipeline: a representação híbrida gera os atributos de entrada, e classificadores lineares realizam a previsão em dois níveis — macrointenção e intenção específica.
 
-### 8.9.1 Objetivo e protocolo de avaliação
+### 8.10.1 Objetivo e protocolo de avaliação
 
 O classificador organiza os pedidos em quatro macrointenções (`CONSULTA`, `TRANSACAO`, `ALERTA` e `FORA_DE_ESCOPO`) e 31 intenções específicas. A macrointenção determina o fluxo geral do agente, enquanto a intenção específica identifica o handler mais adequado.
 
@@ -4300,7 +3757,7 @@ A seleção segue três etapas:
 2. comparação das representações e classificadores no conjunto de validação, usando como critério principal o F1-macro da intenção específica;
 3. avaliação do pipeline escolhido no teste, que não participa da seleção.
 
-### 8.9.2 Benchmark e decisão
+### 8.10.2 Benchmark e decisão
 
 O notebook compara TF-IDF de palavras, TF-IDF de caracteres, Word2Vec, embeddings BERT congelados e combinações híbridas. Também compara regressão logística e LinearSVC, além das arquiteturas plana e hierárquica. A tabela produzida pelo próprio script é ordenada pelo F1-macro de intenção na validação, evitando que a escolha seja definida previamente por preferência tecnológica.
 
@@ -4308,7 +3765,7 @@ Na execução completa de referência, a melhor alternativa foi a representaçã
 
 A arquitetura hierárquica primeiro prevê a macrointenção e depois utiliza um especialista para distinguir apenas as intenções daquele grupo. Essa divisão reduz o número de classes concorrentes em cada segunda etapa e se alinha ao roteamento esperado pelo agente. A escolha atual, portanto, não decorre apenas do uso de modelos semanticamente mais sofisticados, mas do resultado observado sob o mesmo protocolo de comparação.
 
-### 8.9.3 Configuração e resultados atuais
+### 8.10.3 Configuração e resultados atuais
 
 A configuração selecionada na execução de referência foi:
 
@@ -4338,7 +3795,138 @@ Os resultados indicam que o primeiro nível está mais maduro: no teste, a macro
 
 A execução de referência gerou o classificador serializado (aproximadamente 13.188 KB), o modelo Word2Vec (aproximadamente 925 KB), o catálogo de intenções, o conjunto de dados e o arquivo de métricas. O encoder BERT pré-treinado não está incorporado ao arquivo `joblib` e deve ser carregado separadamente pelo ambiente de inferência.
 
-### 8.9.4 Limitações e próximos passos
+### 8.10.4 Bibliotecas, configuração e exemplos de código
+
+O pipeline é implementado em Python no notebook [`src/notebooks/classificador_intencoes_metro.ipynb`](../src/notebooks/classificador_intencoes_metro.ipynb), e os artefatos da execução de referência estão em `src/notebooks/artefatos/`.
+
+**Bibliotecas utilizadas**
+
+| Biblioteca | Papel no pipeline |
+|---|---|
+| `scikit-learn` | Vetorização TF-IDF, redução por SVD, normalização, regressão logística, LinearSVC, busca de hiperparâmetros com `PredefinedSplit` e métricas |
+| `gensim` | Treinamento do Word2Vec sobre o corpus do projeto |
+| `sentence-transformers` | Extração dos embeddings BERT congelados |
+| `transformers` e `torch` | Alternativa de extração de embeddings quando o `sentence-transformers` não está disponível |
+| `nltk` | Stemming Snowball em português e listas de stopwords |
+| `pandas` e `numpy` | Manipulação do conjunto de dados e das matrizes de atributos |
+| `scipy` | Empilhamento de matrizes esparsas na composição das representações híbridas |
+| `joblib` | Serialização do classificador e dos transformadores ajustados |
+
+**Passos de configuração**
+
+```bash
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install scikit-learn gensim sentence-transformers torch nltk pandas numpy scipy joblib
+python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
+jupyter notebook src/notebooks/classificador_intencoes_metro.ipynb
+```
+
+A semente é fixada em todas as etapas que envolvem aleatoriedade, de modo que a execução seja reproduzível.
+
+**Treinamento do Word2Vec sobre o corpus do projeto**
+
+O modelo é treinado **somente com o conjunto de treino**, para que nenhuma informação de validação ou teste vaze para a representação.
+
+```python
+W2V_DIM = 200
+
+w2v = Word2Vec(
+    sentences=tokens_treino,   # apenas o split de treino
+    vector_size=W2V_DIM,
+    window=5,
+    min_count=1,
+    sg=1,                      # skip-gram
+    negative=10,
+    epochs=60,
+    workers=2,
+    seed=SEED,
+)
+```
+
+**Embeddings BERT congelados**
+
+O encoder é utilizado como extrator, sem ajuste supervisionado, e recebe o texto cru — o stemming aplicado às demais representações não é usado aqui, porque o BERT tem tokenizador próprio.
+
+```python
+MODELO_BERT = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+
+def embeddings_sentence_transformers(textos, modelo):
+    return modelo.encode(
+        list(textos),
+        batch_size=64,
+        convert_to_numpy=True,
+        normalize_embeddings=True,
+    )
+```
+
+**Arquitetura hierárquica**
+
+A primeira etapa prevê a macrointenção; a segunda usa um especialista treinado apenas com as intenções daquele grupo, reduzindo o número de classes concorrentes.
+
+```python
+class ClassificadorHierarquico:
+    """Etapa 1: macrointenção. Etapa 2: especialista da macro predita."""
+
+    def __init__(self, fabrica=novo_clf):
+        self.fabrica = fabrica
+        self.macro_clf = None
+        self.especialistas = {}
+
+    def fit(self, X, y_macro, y_int):
+        self.macro_clf = self.fabrica()
+        self.macro_clf.fit(X, y_macro)
+        for macro in np.unique(y_macro):
+            mask = y_macro == macro
+            self.especialistas[macro] = self.fabrica().fit(X[mask], y_int[mask])
+        return self
+```
+
+**Seleção de hiperparâmetros sem vazamento**
+
+A busca usa `PredefinedSplit`, que força o ajuste no treino e a avaliação na validação, em vez de embaralhar os dois.
+
+```python
+test_fold = np.concatenate([
+    -np.ones(len(y_treino_int), dtype=int),   # treino: nunca avaliado
+    np.zeros(len(y_val_int), dtype=int),      # validação: sempre avaliada
+])
+
+busca = GridSearchCV(
+    LogisticRegression(max_iter=4000, random_state=SEED),
+    {"C": [0.5, 1.0, 2.0, 5.0, 10.0, 20.0], "class_weight": [None, "balanced"]},
+    scoring="f1_macro", cv=PredefinedSplit(test_fold), n_jobs=-1, refit=False,
+)
+```
+
+**Exemplo de entrada e saída da inferência**
+
+A vetorização de inferência reaplica exatamente as transformações ajustadas no treino, o que evita divergência entre o que o modelo viu e o que recebe em produção.
+
+```python
+def vetorizar(textos):
+    """Aplica exatamente as mesmas transformações ajustadas no treino."""
+    toks = [preprocess_text(t, **MELHOR_CONFIG) for t in textos]
+    partes = [SCALERS[n].transform(bloco(n, textos, toks)) for n in REP_BLOCOS[MELHOR_REP]]
+    return np.hstack(partes)
+
+modelo = joblib.load("artefatos/classificador_intencoes.joblib")
+X = vetorizar(["qual o prazo do projeto de modernização da linha 1"])
+print(modelo.predict_proba(X).max(), modelo.predict(X))
+```
+
+Entrada e saída esperadas:
+
+| Entrada | Macrointenção | Intenção específica | Confiança | Encaminhamento |
+|---|---|---|---:|---|
+| "qual o prazo do projeto de modernização da linha 1" | `CONSULTA` | `consulta_prazo_projeto` | 0,94 | Rota de consulta com RAG |
+| "cadastra o mapa de benefícios do programa de expansão" | `TRANSACAO` | `transacao_mapa_beneficios` | 0,91 | Fluxo funcional no Copilot Studio |
+| "qual a previsão do tempo amanhã" | `FORA_DE_ESCOPO` | — | 0,88 | Resposta de limitação, registrada em `out_of_scope_requests` |
+| "me fala sobre a linha 1" | `CONSULTA` | abaixo do limiar de 0,950 | 0,62 | Pedido de reformulação, sem acionar handler |
+
+O último caso é o comportamento conservador descrito na Seção 8.10.3: quando a confiança da intenção específica fica abaixo do limiar, o pipeline não escolhe um handler, e sim devolve o pedido de reformulação.
+
+### 8.10.5 Limitações e próximos passos
 
 Os números atuais devem ser interpretados com as seguintes ressalvas:
 

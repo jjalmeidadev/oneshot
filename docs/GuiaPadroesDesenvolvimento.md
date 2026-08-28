@@ -39,7 +39,7 @@ _conteúdo_
 - Variáveis e Funções: Utilize camelCase
   - Exemplos:
     - ```let userName = "John";``` 
-    - ```function calculateTotal() { ... } 
+    - ```function calculateTotal() { ... }```
 
 - Classes e Interfaces: Utilize PascalCase
   - Exemplos:

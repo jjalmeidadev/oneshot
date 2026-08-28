@@ -178,31 +178,29 @@ A sprint também absorveu uma frente não planejada. O feedback da Sprint 1 cheg
 
 A Sprint 1 fechou com nove indicadores medidos e uma meta para cada um. Esta é a apuração contra aquelas metas, no período de 15/08/2026 a 27/08/2026, sobre o histórico de `origin/develop`.
 
-**A apuração foi feita com a sprint ainda em curso.** Os números descrevem o estado na data de corte, não o resultado final: entregas em andamento e merge requests ainda não integrados não estão contabilizados. Os valores definitivos serão reapurados na análise da Sprint 3, conforme a última ação da Seção 2.2.5.
+**Apuração final, com a sprint encerrada e todos os merge requests integrados.** Os números abaixo substituem a apuração parcial feita em 27/08, que considerava a sprint ainda aberta e superestimava o resultado de dois indicadores.
 
 | Indicador | Sprint 1 | Meta da Sprint 2 | Sprint 2 | Resultado |
 | --- | :---: | :---: | :---: | :---: |
-| Commits no período | 69 | — | 35 | — |
-| Merge requests integrados | 27 | — | 16 | — |
-| Commits nos dois últimos dias | 45 de 69 (65%) | ≤ 40% | 12 de 35 (34%) | ✅ atingida |
-| Commits no dia de maior concentração | 29 de 69 (42%) | ≤ 25% | 11 de 35 (31%) | ❌ não atingida |
+| Commits no período | 69 | — | 49 | — |
+| Merge requests integrados | 27 | — | 23 | — |
+| Commits nos dois últimos dias | 45 de 69 (65%) | ≤ 40% | 26 de 49 (53%) | ❌ não atingida |
+| Commits no dia de maior concentração | 29 de 69 (42%) | ≤ 25% | 15 de 49 (30%) | ❌ não atingida |
 | Commits locais dentro da convenção | 22 de 23 (96%) | 100% | 6 de 6 (100%) | ✅ atingida |
-| Commits de squash dentro da convenção | 6 de 19 (32%) | 100% | 4 de 13 (31%) | ❌ não atingida |
-| Amplitude de commits entre integrantes | 23 contra 5 (4,6×) | ≤ 2,5× | 8 contra 3 (2,7×) | ⚠️ próxima |
-| Integrantes que tocaram mais de um arquivo | 3 de 6 | ≥ 5 de 6 | 5 de 6 | ✅ atingida |
-| Merge requests abertos no fechamento | não medido | — | 4 | novo indicador |
+| Commits de squash dentro da convenção | 6 de 19 (32%) | 100% | 7 de 20 (35%) | ❌ não atingida |
+| Amplitude de commits entre integrantes | 23 contra 5 (4,6×) | ≤ 2,5× | 11 contra 5 (2,2×) | ✅ atingida |
+| Integrantes que tocaram mais de um arquivo | 3 de 6 | ≥ 5 de 6 | 6 de 6 | ✅ atingida |
+| Merge requests abertos no fechamento | não medido | — | 0 | novo indicador |
 
 Duas ressalvas de método, para que a comparação não afirme mais do que os dados sustentam.
 
 A primeira é que o indicador de dispersão mudou de definição. Na Sprint 1 ele contava arquivos `.md` distintos por integrante, porque a sprint era só documentação. Na Sprint 2 existe código, e contar apenas `.md` distorceria o resultado — o Felipe, por exemplo, tocou 44 arquivos, todos em `src/`, e apareceria como zero. O indicador passou a contar arquivos distintos em `docs/` e `src/`, e é assim que deve ser lido daqui em diante.
 
-A segunda é que o período de apuração termina em 27/08 com a sprint ainda aberta e quatro merge requests não integrados. Os dois indicadores de concentração podem piorar até o fechamento, e serão reapurados na análise da Sprint 3.
+A segunda diz respeito à revisão desta própria seção. Uma apuração parcial, feita antes do fechamento, indicava 34% dos commits nos dois últimos dias e concluía que a meta de 40% havia sido atingida. Com a sprint encerrada e os quatro merge requests pendentes integrados, o número subiu para 53%. O registro do erro fica aqui porque ele ensina algo sobre o método: apurar indicador de concentração antes do fim do período mede o meio da sprint, não a sprint.
 
 ### 2.2.3 Pontos fortes
 
-**A antecipação de entregas funcionou.** A concentração nos dois últimos dias caiu de 65% para 34%, cumprindo a meta de 40%. É o resultado direto da ação de adotar quinta-feira como marco interno de revisão, definida na Seção 2.1.5. Foi a mudança de processo com efeito mais claro entre as seis ações planejadas.
-
-**A dispersão do trabalho aumentou.** Cinco dos seis integrantes tocaram mais de um arquivo, contra três na Sprint 1, e a amplitude entre quem mais e quem menos commitou caiu de 4,6× para 2,7×. O trabalho deixou de se concentrar em duas ou três pessoas.
+**A dispersão do trabalho aumentou e a meta foi superada.** Os seis integrantes tocaram mais de um arquivo, contra três na Sprint 1, e a amplitude entre quem mais e quem menos commitou caiu de 4,6× para 2,2×, abaixo da meta de 2,5×. O trabalho deixou de se concentrar em duas ou três pessoas, e foi a única meta de processo efetivamente cumprida na sprint.
 
 **A convenção de commits locais chegou a 100%.** Os seis commits criados nas máquinas do grupo seguem o padrão, contra 96% na sprint anterior. O hook `commit-msg` continua sendo o que sustenta esse número.
 
@@ -218,7 +216,7 @@ A segunda é que o período de apuração termina em 27/08 com a sprint ainda ab
 
 **A carga por integrante ficou desigual, e os indicadores de commit não capturam isso.** Os números da Seção 2.2.2 mostram distribuição melhor que a Sprint 1, mas medem volume de commit, não carga de entrega. A divisão por task da Seção 4.2 mostra outra coisa: dois integrantes absorveram a prototipação inteira além de suas frentes técnicas, enquanto quatro itens da Estratégia Técnica seguiam em andamento na data desta apuração, três deles sob o mesmo responsável. Independente de fecharem até o prazo, a concentração já indica que a carga não foi conferida durante a sprint. A planning da Sprint 3 precisa ter um ponto de verificação de carga no meio do período, e não só no fechamento.
 
-**A concentração em um único dia ainda é alta.** 31% dos commits em 26/08, contra a meta de 25%. Melhorou em relação aos 42% da Sprint 1, mas não o suficiente, e a causa é a mesma: tarefas que só começam depois que a anterior fecha, em vez de avançarem em paralelo.
+**A antecipação de entregas não se sustentou até o fim.** A concentração nos dois últimos dias caiu de 65% para 53%, melhor que a Sprint 1 mas longe da meta de 40%. O dia de maior concentração ficou em 30%, contra a meta de 25%. A ação de adotar quinta-feira como marco de revisão produziu efeito na primeira metade da sprint, mas os quatro merge requests que ficaram abertos até o último dia concentraram 26 dos 49 commits em 48 horas. A causa é a mesma da Sprint 1: tarefas que só começam depois que a anterior fecha, em vez de avançarem em paralelo, agora somadas à revisão que se acumulou no fim.
 
 ### 2.2.5 Ações de melhoria para a Sprint 3
 
@@ -228,7 +226,7 @@ A segunda é que o período de apuração termina em 27/08 com a sprint ainda ab
 | Definir quarta-feira como marco de integração: todo MR aberto até lá deve ser revisado e mergeado ou ter bloqueio declarado na issue. | Quatro MRs abertos no fechamento da Sprint 2. | Nenhum MR com mais de 48h sem revisão no fechamento da sprint. |
 | Revisão cruzada obrigatória entre artefatos que se referenciam: quem revisa uma seção técnica confere a coerência com as seções de escopo que ela cita. | Divergência entre a Seção 5.2 e as Seções 2.4.3, 2.8 e RNF08. | Comentário de revisão citando explicitamente as seções conferidas, registrado no MR. |
 | Quebrar tasks em unidades de até 60 minutos (faixa M) e permitir que frentes independentes avancem em paralelo. | 31% dos commits concentrados em um único dia. | Distribuição diária de commits, com no máximo 25% em um único dia. |
-| Reapurar os nove indicadores da Seção 2.2.2 no fechamento da Sprint 3, com a sprint efetivamente encerrada. | Apuração da Sprint 2 feita com a sprint ainda aberta e MRs pendentes. | Tabela comparativa das três sprints na análise da Sprint 3. |
+| Apurar os indicadores somente após o fechamento da sprint e a integração de todos os merge requests. | A apuração parcial da Sprint 2 indicou meta atingida em um indicador que, no fechamento, não foi. | Tabela comparativa das três sprints na análise da Sprint 3, com data de apuração declarada. |
 
 # 3. Matriz de risco
 
@@ -296,14 +294,14 @@ A Sprint 1 definiu seis ações de melhoria. Esta é a apuração de cada uma.
 
 | Ação definida na Sprint 1 | Efetividade | Evidência |
 | --- | :---: | --- |
-| Antecipar entregas para quinta-feira e reservar tempo para revisão | ✅ Efetiva | Concentração nos dois últimos dias caiu de 65% para 34% |
-| Promover maior integração entre frentes | ✅ Efetiva | Integrantes tocando mais de um arquivo subiu de 3 para 5 de 6; amplitude caiu de 4,6× para 2,7× |
+| Antecipar entregas para quinta-feira e reservar tempo para revisão | ⚠️ Parcial | Concentração nos dois últimos dias caiu de 65% para 53%, sem atingir a meta de 40%. Reduziu, mas não resolveu |
+| Promover maior integração entre frentes | ✅ Efetiva | Integrantes tocando mais de um arquivo subiu de 3 para 6 de 6; amplitude caiu de 4,6× para 2,2×, abaixo da meta |
 | Reforçar DoR, DoD, labels, milestones e assignee nas issues | ✅ Efetiva | Os merge requests da sprint trazem checklist e milestone `Sprint 02` preenchidos |
-| Padronizar o título do merge request antes do merge | ❌ Não efetiva | 4 de 13 commits de squash na convenção, contra 6 de 19 na Sprint 1. Ação reformulada na Seção 2.2.5 |
+| Padronizar o título do merge request antes do merge | ❌ Não efetiva | 7 de 20 commits de squash na convenção (35%), contra 6 de 19 (32%) na Sprint 1. Ação reformulada na Seção 2.2.5 |
 | Usar as dailies para registrar feito, evidências, próximos passos e impedimentos | ✅ Efetiva | Registro mantido no Slack, canal oficial definido na Seção 5.7 |
 | Registrar decisões relevantes em canal oficial ou issue | ⚠️ Parcial | Decisões técnicas ficaram registradas nas seções 8.6 e 8.7 com benchmark, mas a mudança de provedor de LLM e de canal não teve registro até ser detectada em revisão cruzada |
 
-Das seis ações, quatro foram efetivas, uma foi parcial e uma não produziu efeito. A que falhou — padronizar o título do merge request — e a que ficou parcial têm a mesma causa: dependiam de alguém lembrar no momento certo, sem ponto de verificação no fluxo. As ações da Seção 2.2.5 foram reescritas para ter gatilho — item de checklist antes da aprovação, marco de integração na quarta-feira — em vez de intenção.
+Das seis ações, três foram efetivas, duas foram parciais e uma não produziu efeito. A que falhou — padronizar o título do merge request — e as duas parciais têm a mesma causa: dependiam de alguém lembrar no momento certo, sem ponto de verificação no fluxo. As ações da Seção 2.2.5 foram reescritas para ter gatilho — item de checklist antes da aprovação, marco de integração na quarta-feira — em vez de intenção.
 
 O contraste com o registro da daily é útil: essa ação funcionou porque o Slack já era o canal onde o grupo trabalha, e o registro não dependeu de disciplina adicional. Ações que se apoiam no fluxo existente sobrevivem; as que exigem um passo novo, não.
 
@@ -373,14 +371,14 @@ Artefatos da Sprint 2: Prototipação Exploratória, Estratégia Técnica da Sol
 
 | Integrante | Frente principal | Tasks sob sua responsabilidade | Situação da entrega |
 | --- | --- | --- | --- |
-| Felipe Neves | APIs de voz e planejamento | API de Text-to-Speech; API de recebimento de áudios; planejamento da Sprint 3 | 🔄 Em andamento na data desta apuração. Parte do esforço da sprint foi para a bancada de teste em React, que não constava da divisão inicial |
+| Felipe Neves | APIs de voz e planejamento | API de Text-to-Speech; API de recebimento de áudios; planejamento da Sprint 3 | ⚠️ API de Text-to-Speech entregue e mergeada na Seção 8.8. A especificação da API de recebimento de áudios não entrou nesta sprint e passa para a Sprint 3, onde o barema exige sua implementação. Parte do esforço foi para a bancada de teste em React, que não constava da divisão inicial |
 | Henrique Diniz | Prototipação exploratória e gestão evolutiva | Questão de projeto (#97); construção do Protótipo 1 e diário (#99); comparação das alternativas (#104, com Wendel); análise da Sprint 2; matriz de papéis; contrato de convivência; gestão do processo; gestão de configuração | ✅ Entregues. Assumiu também a atualização da documentação da Sprint 1, originalmente do Pedro |
 | Jaime Almeida | Prototipação e projeto arquitetural | Definição das duas alternativas e formatos (#98); construção do Protótipo 2 e diário (#100); execução do Protótipo 2 (#102); registro visual do Protótipo 2 (#103); projeto técnico e arquitetural | ✅ Entregues. Diagrama de componentes e cinco diagramas de sequência mergeados |
-| Leonardo Ramos | Modelagem de dados e planejamento das sprints | Modelagem conceitual e lógica dos dados (com Wendel); processo de deploy em nuvem comercial; estratégia de entrega das Sprints 3, 4 e 5 | 🔄 Modelo conceitual e estratégia de entrega mergeados. Deploy em nuvem em andamento na data desta apuração |
+| Leonardo Ramos | Modelagem de dados e planejamento das sprints | Modelagem conceitual e lógica dos dados (com Wendel); processo de deploy em nuvem comercial; estratégia de entrega das Sprints 3, 4 e 5 | ✅ Todos entregues. Modelo conceitual, estratégia de entrega e a Seção 6 completa, com 17 subseções cobrindo hospedagem, banco, artefatos, fallback, desempenho, segurança e pendências de provisionamento |
 | Pedro Uchoa | APIs de transcrição e algoritmo de PLN | API de Speech-to-Text; algoritmo de NLP e sua implementação; atualização da documentação da Sprint 1 | ✅ STT e algoritmo mergeados. A atualização da documentação da Sprint 1 foi redistribuída para o Henrique durante a sprint |
-| Wendel Feitosa | Prototipação e dados | Execução do Protótipo 1 (#101); registro visual do Protótipo 1; comparação das alternativas (#104, com Henrique); inventário de decisões em aberto (#105); repertório de situações (#106); pilha de tecnologias; modelagem lógica dos dados | ✅ Prototipação e pilha mergeadas. Modelo lógico concluído, aguardando integração no MR !47 |
+| Wendel Feitosa | Prototipação e dados | Execução do Protótipo 1 (#101); registro visual do Protótipo 1; comparação das alternativas (#104, com Henrique); inventário de decisões em aberto (#105); repertório de situações (#106); pilha de tecnologias; modelagem lógica dos dados | ✅ Todos entregues e mergeados, incluindo o modelo lógico na Seção 4.3 |
 
-Esta matriz é um retrato da data de apuração, com a sprint ainda em curso: os itens marcados como em andamento estão previstos para entrega até o fechamento. O que a distribuição já mostra, e que independe do desfecho, é a concentração da prototipação em Wendel e Jaime, que a acumularam além de suas frentes técnicas. É isso que sustenta a reavaliação do risco R09 na Seção 3.2 e orienta a redistribuição da Sprint 3.
+Com a sprint encerrada, dos dez itens da Estratégia Técnica um não entrou: a especificação da API de recebimento de áudios, que passa para a Sprint 3. O que a distribuição mostra é a concentração da prototipação em Wendel e Jaime, que a acumularam além de suas frentes técnicas. É isso que sustenta a reavaliação do risco R09 na Seção 3.2 e orienta a redistribuição da Sprint 3.
 
 ## 4.3 Rotação de papéis entre as sprints
 
