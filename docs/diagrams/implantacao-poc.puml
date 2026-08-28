@@ -1,0 +1,68 @@
+@startuml implantacao-poc
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 55
+skinparam rectangle {
+  BackgroundColor #EEF4FD
+  BorderColor #4A7EBB
+  FontSize 12
+}
+skinparam package {
+  BackgroundColor #FAFBFC
+  BorderColor #8A949E
+  FontStyle bold
+}
+skinparam database {
+  BackgroundColor #F2F2F2
+  BorderColor #7A828A
+}
+skinparam ArrowColor #4A5560
+left to right direction
+
+rectangle "Usuário do MVP" as usuario
+rectangle "Liderança\naprova base sintética" as lideranca
+package "Navegador" as navegador {
+rectangle "Frontend próprio\nReact + Vite" as frontend
+}
+package "Ambiente acessível da PoC\nexecução local ou publicação simples futura" as ambiente {
+rectangle "API do MVP\na ser consolidada" as api
+rectangle "Núcleo de PLN\nestratégia documentada" as pln
+rectangle "Recuperação de dados\nbase sintética" as rag
+rectangle "Fallback\nresposta estruturada" as fallback
+}
+package "Supabase Cloud" as supabase {
+database "PostgreSQL\ndados, catálogo e auditoria" as db
+database "Storage\ndocumentos sintéticos\ne artefatos futuros" as storage
+}
+package "Microsoft / Power Platform" as microsoft {
+rectangle "Entra ID\nOAuth/OIDC" as entra
+rectangle "Copilot Studio\ntópicos e orquestração" as copilot
+rectangle "Power Automate\nfluxos funcionais" as power
+}
+package "Evolução futura" as futuro {
+rectangle "Docker\nempacotamento do serviço" as docker
+rectangle "Pipeline CI/CD\nbuild, teste e deploy" as cicd
+rectangle "Azure Container Apps\nou App Service" as azure
+rectangle "Azure Machine Learning" as aml
+rectangle "Application Insights" as insights
+}
+usuario --> frontend
+frontend --> entra
+entra --> frontend
+frontend --> api : requisição da aplicação
+api --> pln
+pln --> rag
+rag --> db
+rag --> storage
+api --> db : grava interação
+api --> copilot : quando disponível
+copilot --> power
+api --> fallback : sem camada generativa
+lideranca --> db : aprova antes da carga
+api ..> docker : evolução
+docker ..> cicd : automatização futura
+cicd ..> azure : publicação futura
+storage ..> aml : artefatos futuros
+api ..> insights : telemetria futura
+@enduml
