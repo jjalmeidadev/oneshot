@@ -1,34 +1,35 @@
 {
   "melhor_config_preprocessamento": {
-    "nome": "config_04",
+    "nome": "config_22",
     "lowercase": "True",
-    "tokenizer": "word",
+    "tokenizer": "regex",
     "remove_stopwords": "False",
     "remove_punctuation": "True",
     "morphology": "stemming",
     "ngram_range": "None",
     "language": "portuguese",
-    "stemmer_type": "snowball"
+    "stemmer_type": "snowball",
+    "regex_pattern": "[^\\W_]+"
   },
-  "melhor_representacao": "TF-IDF caracteres",
+  "melhor_representacao": "Híbrido completo",
   "arquitetura": "hierárquica",
   "hiperparametros": {
-    "C": "10.0",
+    "C": "0.5",
     "class_weight": "balanced"
   },
-  "limiar_macro": 0.6500000000000002,
-  "limiar_intencao": 0.5250000000000001,
+  "limiar_macro": 0.5500000000000003,
+  "limiar_intencao": 0.7000000000000003,
   "teste": {
-    "acc_intencao": 0.6546,
-    "f1_intencao": 0.6423,
-    "acc_macro": 0.926,
-    "f1_macro": 0.9419
+    "acc_intencao": 0.7383,
+    "f1_intencao": 0.7401,
+    "acc_macro": 0.9551,
+    "f1_macro": 0.9477
   },
   "validacao": {
-    "acc_intencao": 0.5666,
-    "f1_intencao": 0.5438,
-    "acc_macro": 0.8884,
-    "f1_macro": 0.8814
+    "acc_intencao": 0.6332,
+    "f1_intencao": 0.627,
+    "acc_macro": 0.9135,
+    "f1_macro": 0.9115
   },
   "tamanhos": {
     "treino": 3062,
