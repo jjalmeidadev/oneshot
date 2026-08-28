@@ -60,11 +60,11 @@
 - [6. Planejamento da Sprint 3](#6-planejamento-da-sprint-3)
   - [6.1 Visão geral da planning](#61-visão-geral-da-planning)
   - [6.2 Backlog planejado no Kanban](#62-backlog-planejado-no-kanban)
-    - [Pendentes da Sprint 2 — prioridade máxima](#pendentes-da-sprint-2-prioridade-máxima)
-    - [Artefato 1 — Desenvolvimento e Documentação Técnica](#artefato-1-desenvolvimento-e-documentação-técnica)
+    - [Artefato 1 — Desenvolvimento e Documentação Técnica do Projeto](#artefato-1-desenvolvimento-e-documentação-técnica-do-projeto)
     - [Artefato 2 — Planejamento de Testes Sistêmicos](#artefato-2-planejamento-de-testes-sistêmicos)
     - [Artefato 3 — Gestão de Projetos Evolutiva](#artefato-3-gestão-de-projetos-evolutiva)
     - [Sequenciamento](#sequenciamento)
+    - [Distribuição das estimativas](#distribuição-das-estimativas)
   - [6.3 Escala de estimativa](#63-escala-de-estimativa)
 - [7. Gestão do processo de desenvolvimento do grupo](#7-gestão-do-processo-de-desenvolvimento-do-grupo)
   - [7.1 Fluxo de trabalho no Kanban](#71-fluxo-de-trabalho-no-kanban)
@@ -204,11 +204,11 @@ A segunda diz respeito à revisão desta própria seção. Uma apuração parcia
 
 **A convenção de commits locais chegou a 100%.** Os seis commits criados nas máquinas do grupo seguem o padrão, contra 96% na sprint anterior. O hook `commit-msg` continua sendo o que sustenta esse número.
 
-**A sprint produziu decisão técnica com evidência, e não com preferência.** Tanto a escolha da API de transcrição quanto a do algoritmo de PLN foram registradas com benchmark, critério de comparação e limitações declaradas. A seção de PLN, em particular, declara que o resultado de 0,6777 de F1-macro na intenção específica é moderado e nomeia sete ressalvas antes de tratar a escolha como definitiva.
+**A sprint produziu decisão técnica com evidência, e não com preferência.** Tanto a escolha da API de transcrição quanto a do algoritmo de PLN foram registradas com benchmark, critério de comparação e limitações declaradas. A seção de PLN, em particular, publica a tabela completa das quatorze combinações avaliadas, declara que o resultado de 0,7401 de F1-macro na intenção específica fica abaixo do mínimo de 0,80 exigido pelo RNF06 e nomeia nove ressalvas antes de tratar a escolha como definitiva.
 
 ### 2.2.4 Pontos de melhoria
 
-**O squash continua quebrando a rastreabilidade, e a ação definida não resolveu.** Apenas 4 dos 13 commits de squash seguem a convenção — 31%, praticamente o mesmo 32% da Sprint 1. A ação registrada na Sprint 1 foi "padronizar o título do merge request antes de aprovar o merge", e ela não foi cumprida. Dos títulos gerados, aparecem casos como `feat/implementar-frontend-inicial-mockado` e `Docs/comparacao das alternativas e documentação`, que são nomes de branch e não mensagens de commit. A ação precisa deixar de depender de lembrança e virar verificação no fluxo.
+**O squash continua quebrando a rastreabilidade, e a ação definida não resolveu.** Apenas 7 dos 20 commits de squash seguem a convenção — 35%, praticamente o mesmo 32% da Sprint 1. E o número é generoso: ele considera apenas o prefixo `<tipo>:`. Aplicando a regra completa que o hook `commit-msg` exige, que inclui a referência `#N` à issue, restam 5 dos 20 — 25%. A ação registrada na Sprint 1 foi "padronizar o título do merge request antes de aprovar o merge", e ela não foi cumprida. Dos títulos gerados, aparecem casos como `feat/implementar-frontend-inicial-mockado` e `Docs/comparacao das alternativas e documentação`, que são nomes de branch e não mensagens de commit. A ação precisa deixar de depender de lembrança e virar verificação no fluxo.
 
 **Quatro merge requests seguem abertos no fechamento da sprint.** São entregas prontas que não estão em `develop`: o modelo lógico de dados, a atualização dos requisitos funcionais, os requisitos das APIs de voz e a correção do feedback da Sprint 1. O trabalho existe, mas quem avalia o repositório em `develop` não o encontra. Este é um risco novo, registrado como R11 na Seção 3.4.
 
@@ -261,7 +261,7 @@ As colunas P, I e Sev. trazem a avaliação vigente. A coluna de variação indi
 | **R08** | 🔴 | Tempo insuficiente para implementar, validar e documentar o previsto | 4 | 4 | **16** | = | 🟠 Alta | Felipe Neves | Em Monitoramento |
 | **R09** | 🔴 | Sobrecarga ou indisponibilidade de integrantes | 3 | 4 | **12** | = | 🟠 Alta | Henrique Diniz | Em Monitoramento |
 | **R10** | 🔴 | Divergência de entendimento sobre requisitos e comportamento esperado | 4 | 3 | **12** | ↑ de 9 | 🟠 Alta | Pedro Uchoa | **Materializado** |
-| **R11** | 🔴 | Entregas concluídas que permanecem em merge requests não integrados ao `develop` | 4 | 4 | **16** | novo | 🟠 Alta | Leonardo Ramos | Aberto |
+| **R11** | 🔴 | Entregas concluídas que permanecem em merge requests não integrados ao `develop` | 4 | 4 | **16** | novo | 🟠 Alta | Leonardo Ramos | **Materializado** |
 | **R12** | 🔴 | Provedor de LLM ainda não definido nem homologado, com integração exigida na Sprint 3 | 4 | 4 | **16** | novo | 🟠 Alta | Henrique Diniz | Aberto |
 | **O1** | 🟢 | Aproveitamento do ecossistema Microsoft já utilizado pelo parceiro | 4 | 4 | **16** | = | 🟢 Alta | Wendel Feitosa | Em Monitoramento |
 | **O2** | 🟢 | Disponibilização de fontes oficiais e conhecimento do PMO | 3 | 5 | **15** | = | 🟢 Alta | Leonardo Ramos | Em Monitoramento |
@@ -278,15 +278,15 @@ Cada linha abaixo registra o que foi observado na sprint e o que sustentou a mud
 | ID | Sprint | O que foi observado | Decisão |
 | :---: | :---: | --- | --- |
 | R01 | 2 | O MVP passou a operar sobre dados sintéticos e mockados por decisão de escopo, e não por indisponibilidade. O classificador foi treinado com 5.353 exemplos gerados pela equipe. A dependência de dados reais deslocou-se para a fase de integração. | Probabilidade de 4 para 3. Severidade de 20 para 15 |
-| R03 | 2 | O caminho de RAG passou a citar a fonte de cada resposta, e o classificador adotou limiares conservadores de 0,925 e 0,950 justamente para não acionar um handler com baixa confiança. A mitigação foi implementada, não apenas planejada. | Probabilidade de 4 para 3. Severidade de 20 para 15 |
+| R03 | 2 | O caminho de RAG passou a citar a fonte de cada resposta, e o classificador adotou limiares calibrados de 0,550 e 0,700 justamente para não acionar um handler com baixa confiança: no conjunto de teste, 26,9% dos pedidos são desviados para o fluxo genérico e a acurácia entre os aceitos sobe de 0,7383 para 0,8775. A mitigação foi implementada e medida, não apenas planejada. | Probabilidade de 4 para 3. Severidade de 20 para 15 |
 | R05 | 2 | Não exercido na sprint, uma vez que a base utilizada é sintética e controlada pela própria equipe. | Probabilidade de 4 para 3. Severidade de 16 para 12 |
 | R07 | 2 | Dois requisitos funcionais novos entraram no escopo, RF09 e RF10, tratando de sugestão proativa e controle da proatividade. A ampliação decorreu do artefato de prototipação exploratória, cuja questão era exatamente o regime de iniciativa do agente, e portanto foi deliberada. | Avaliação mantida. Registrado que a ampliação foi controlada |
-| R08 | 2 | Na data desta apuração, com a sprint ainda em curso, quatro itens da Estratégia Técnica seguiam em andamento: deploy em nuvem, diagrama de classes, API de recebimento de áudio e detalhamento da API de Text-to-Speech. Todos estão previstos para o fechamento, mas a concentração de itens abertos próxima ao prazo é o sinal que o risco descreve. | Avaliação mantida em 16. Acompanhamento elevado para verificação diária até o fechamento |
+| R08 | 2 | Quatro itens da Estratégia Técnica — deploy em nuvem, diagrama de classes, API de recebimento de áudio e detalhamento da API de Text-to-Speech — só fecharam nas últimas 48 horas da sprint. Todos entraram, mas a concentração no fim do prazo é exatamente o sinal que o risco descreve, e ela se confirmou nos indicadores: 26 dos 49 commits nos dois últimos dias. | Avaliação mantida em 16. Acompanhamento elevado para verificação diária até o fechamento |
 | R10 | 2 | A Seção 5.2 do `Projeto.md` foi entregue descrevendo uma interface própria de chat como ponto de entrada da arquitetura, sem citar o Teams, enquanto as Seções 2.4.3 e 2.8 e o RNF08 mantinham o Teams como canal do produto. A mesma seção tratava o provedor de LLM da bancada de teste como decisão de produto. Nenhum dos dois foi detectado na revisão do merge request. | **Materializado.** Probabilidade de 3 para 4. Severidade de 9 para 12 |
-| R11 | 2 | Quatro merge requests permaneceram abertos no fechamento, contendo entregas prontas: modelo lógico de dados, atualização dos requisitos funcionais, requisitos das APIs de voz e correção do feedback da Sprint 1. | Risco novo, registrado com severidade 16 |
+| R11 | 2 | Quatro merge requests com entregas prontas — modelo lógico de dados, atualização dos requisitos funcionais, requisitos das APIs de voz e correção do feedback da Sprint 1 — permaneceram abertos até o último dia. O risco se concretizou: durante a maior parte da sprint esse trabalho existia e não era visível em `develop`. Os quatro foram integrados na revisão de fechamento. | **Materializado**, com contingência aplicada. Registrado com severidade 16. A mitigação estrutural é o marco de integração de quarta-feira definido na Seção 2.2.5 |
 | R12 | 2 | A documentação passou a referir-se ao componente de geração como LLM genérico, sem provedor definido, após a constatação de que o provedor usado na bancada não constituía decisão de produto. A Sprint 3 exige integração funcional do STT com o algoritmo de PLN. | Risco novo, registrado com severidade 16 |
 | O3 | 2 | A separação entre canal, núcleo de PLN, RAG e orquestração permitiu trocar o provedor de LLM na documentação sem alterar nenhum outro componente, e permitiu construir a bancada de teste sem depender da homologação do canal corporativo. A modularidade deixou de ser projeto e passou a ter demonstração. | Impacto de 4 para 5. Severidade de 15 para 20 |
-| O7 | 2 | O pipeline autoral atingiu F1-macro de 0,9379 na macrointenção no conjunto de teste, suficiente para sustentar o roteamento entre consulta, transação e alerta, ainda que a intenção específica permaneça em 0,6777. | Oportunidade nova, registrada com severidade 16 |
+| O7 | 2 | O pipeline autoral atingiu F1-macro de 0,9477 na macrointenção no conjunto de teste, suficiente para sustentar o roteamento entre consulta, transação e alerta, ainda que a intenção específica permaneça em 0,7401 — abaixo do mínimo de 0,80 do RNF06. | Oportunidade nova, registrada com severidade 16 |
 
 ## 3.4 Efetividade das ações aplicadas
 
@@ -323,9 +323,11 @@ Aplicando severidade = probabilidade × impacto, o único risco em 20 é **R02**
 
 **R02 — Integrações com o ecossistema Microsoft.** Permanece em 20 e torna-se determinante na Sprint 3, que exige a API de recebimento de áudio integrada ao Speech-to-Text. A disponibilidade do Azure AI Speech no ambiente do parceiro continua dependendo de confirmação com a GTI, conforme registrado na Seção 3.4.2.1 do `Projeto.md`. A bancada de teste construída na Sprint 2 reduziu a exposição, por permitir validar o pipeline sem o canal homologado, mas não elimina a dependência: a entrega final precisa do ambiente.
 
-**R08 — Tempo insuficiente.** A avaliação permanece em 16, mas o acompanhamento subiu. Na data desta apuração, com a sprint ainda aberta, quatro itens da Estratégia Técnica seguiam em andamento, e o mais pesado deles — o deploy em nuvem com registro reproduzível e capturas de tela — é também o que menos se comprime em cima da hora. A Sprint 3 acrescenta a implementação do backend de áudio e a integração do Speech-to-Text com o PLN. O tratamento não é trabalhar mais rápido: é dimensionar o que entra na sprint pela capacidade real e declarar cedo o que ficar fora, em vez de descobrir no fechamento.
+**R08 — Tempo insuficiente.** A avaliação permanece em 16, mas o acompanhamento subiu. Quatro itens da Estratégia Técnica só fecharam nas últimas 48 horas, e o mais pesado deles — o deploy em nuvem com registro reproduzível e capturas de tela — é também o que menos se comprime em cima da hora. Tudo entrou, mas entrou no limite: 26 dos 49 commits da sprint estão nesses dois dias. A Sprint 3 acrescenta a implementação do backend de áudio e a integração do Speech-to-Text com o PLN. O tratamento não é trabalhar mais rápido: é dimensionar o que entra na sprint pela capacidade real e declarar cedo o que ficar fora, em vez de descobrir no fechamento.
 
-**R11 — Entregas retidas em merge requests abertos.** É novo e já se manifestou. O efeito é específico: o trabalho existe e não é contabilizado, porque quem avalia o repositório olha `develop`. Na data desta apuração havia quatro merge requests abertos com entregas concluídas — modelo lógico de dados, atualização dos requisitos funcionais, requisitos das APIs de voz e correção do feedback da Sprint 1. Nenhum deles é trabalho pendente; todos são trabalho pronto e invisível. O tratamento é o marco de integração de quarta-feira definido na Seção 2.2.5, com bloqueio declarado na issue quando a revisão não puder acontecer no prazo.
+**R11 — Entregas retidas em merge requests abertos.** É novo e materializou-se dentro da própria sprint em que foi identificado. O efeito é específico: o trabalho existe e não é contabilizado, porque quem avalia o repositório olha `develop`. Quatro merge requests com entregas concluídas — modelo lógico de dados, atualização dos requisitos funcionais, requisitos das APIs de voz e correção do feedback da Sprint 1 — ficaram retidos até o último dia. Nenhum deles era trabalho pendente; todos eram trabalho pronto e invisível.
+
+A contingência funcionou: os quatro foram integrados na revisão de fechamento, e nenhum item da Estratégia Técnica ficou fora de `develop`. Mas a contingência é uma correção de última hora, não um controle — ela dependeu de alguém varrer os MRs abertos no dia do fechamento. A mitigação estrutural é o marco de integração de quarta-feira definido na Seção 2.2.5, com bloqueio declarado na issue quando a revisão não puder acontecer no prazo. O item segue em acompanhamento na Sprint 3 justamente porque o que resolveu na Sprint 2 não foi o processo, e sim a varredura manual.
 
 ## 3.7 Mecanismo contínuo de acompanhamento
 
@@ -371,14 +373,14 @@ Artefatos da Sprint 2: Prototipação Exploratória, Estratégia Técnica da Sol
 
 | Integrante | Frente principal | Tasks sob sua responsabilidade | Situação da entrega |
 | --- | --- | --- | --- |
-| Felipe Neves | APIs de voz e planejamento | API de Text-to-Speech; API de recebimento de áudios; planejamento da Sprint 3 | ⚠️ API de Text-to-Speech entregue e mergeada na Seção 8.8. A especificação da API de recebimento de áudios não entrou nesta sprint e passa para a Sprint 3, onde o barema exige sua implementação. Parte do esforço foi para a bancada de teste em React, que não constava da divisão inicial |
+| Felipe Neves | APIs de voz e planejamento | API de Text-to-Speech; API de recebimento de áudios; planejamento da Sprint 3 | ✅ Entregues. API de Text-to-Speech na Seção 8.9 e especificação da API de recebimento de áudios na Seção 8.7, ambas mergeadas. A implementação do endpoint de áudio permanece na Sprint 3, conforme o barema. Parte do esforço foi para a bancada de teste em React, que não constava da divisão inicial |
 | Henrique Diniz | Prototipação exploratória e gestão evolutiva | Questão de projeto (#97); construção do Protótipo 1 e diário (#99); comparação das alternativas (#104, com Wendel); análise da Sprint 2; matriz de papéis; contrato de convivência; gestão do processo; gestão de configuração | ✅ Entregues. Assumiu também a atualização da documentação da Sprint 1, originalmente do Pedro |
 | Jaime Almeida | Prototipação e projeto arquitetural | Definição das duas alternativas e formatos (#98); construção do Protótipo 2 e diário (#100); execução do Protótipo 2 (#102); registro visual do Protótipo 2 (#103); projeto técnico e arquitetural | ✅ Entregues. Diagrama de componentes e cinco diagramas de sequência mergeados |
 | Leonardo Ramos | Modelagem de dados e planejamento das sprints | Modelagem conceitual e lógica dos dados (com Wendel); processo de deploy em nuvem comercial; estratégia de entrega das Sprints 3, 4 e 5 | ✅ Todos entregues. Modelo conceitual, estratégia de entrega e a Seção 6 completa, com 17 subseções cobrindo hospedagem, banco, artefatos, fallback, desempenho, segurança e pendências de provisionamento |
 | Pedro Uchoa | APIs de transcrição e algoritmo de PLN | API de Speech-to-Text; algoritmo de NLP e sua implementação; atualização da documentação da Sprint 1 | ✅ STT e algoritmo mergeados. A atualização da documentação da Sprint 1 foi redistribuída para o Henrique durante a sprint |
 | Wendel Feitosa | Prototipação e dados | Execução do Protótipo 1 (#101); registro visual do Protótipo 1; comparação das alternativas (#104, com Henrique); inventário de decisões em aberto (#105); repertório de situações (#106); pilha de tecnologias; modelagem lógica dos dados | ✅ Todos entregues e mergeados, incluindo o modelo lógico na Seção 4.3 |
 
-Com a sprint encerrada, dos dez itens da Estratégia Técnica um não entrou: a especificação da API de recebimento de áudios, que passa para a Sprint 3. O que a distribuição mostra é a concentração da prototipação em Wendel e Jaime, que a acumularam além de suas frentes técnicas. É isso que sustenta a reavaliação do risco R09 na Seção 3.2 e orienta a redistribuição da Sprint 3.
+Com a sprint encerrada e os merge requests integrados, os dez itens da Estratégia Técnica entraram em `develop`, incluindo a especificação da API de recebimento de áudios, que fechou na revisão final. O que a distribuição mostra é a concentração da prototipação em Wendel e Jaime, que a acumularam além de suas frentes técnicas. É isso que sustenta a reavaliação do risco R09 na Seção 3.2 e orienta a redistribuição da Sprint 3.
 
 ## 4.3 Rotação de papéis entre as sprints
 
@@ -532,65 +534,81 @@ A Sprint 3 tem três artefatos:
 - Planejamento de Testes Sistêmicos, com testes funcionais, de requisitos não funcionais, de integração com módulo de cache e roteiro de usabilidade;
 - Gestão de Projetos Evolutiva, com a análise da Sprint 3 e o planejamento da Sprint 4.
 
-A capacidade considera 6 integrantes com 16 horas cada, totalizando 96 horas. Diferente da Sprint 2, o backlog carrega também os pendentes da sprint anterior, que entram com prioridade máxima por serem pré-requisito dos itens novos.
+A capacidade considera 6 integrantes com 16 horas cada, totalizando 96 horas. A Sprint 2 fechou sem pendências: os dez itens da Estratégia Técnica entraram em `develop` e os quatro merge requests retidos foram integrados na revisão de fechamento. O backlog abaixo é, portanto, inteiramente novo, e a capacidade não precisa ser reservada para dívida da sprint anterior.
 
-**Mudança na estimativa.** Na Sprint 2 todas as 48 tasks foram estimadas como `G`, o que torna a escala inútil para sequenciar trabalho. Nesta sprint as tasks foram quebradas até caberem majoritariamente nas faixas `P` e `M`, conforme a ação de melhoria registrada na Seção 2.2.5.
+**Estimativa.** Na Sprint 2 todas as 48 tasks foram estimadas como `G`, o que torna a escala inútil para sequenciar trabalho. A ação de melhoria da Seção 2.2.5 previa quebrar as tasks até a faixa `M`. O board da Sprint 3 avança pouco nesse ponto — 16 tasks em `G` contra 10 em `M` —, e a apuração está registrada na Seção 6.2.
 
 ## 6.2 Backlog planejado no Kanban
 
-Toda task abaixo deve ser criada como issue no GitLab, vinculada à milestone `Sprint 03`, com descrição, tipo, prioridade, estimativa, DoR e DoD preenchidos antes de sair de `Open`.
+As 26 tasks abaixo estão criadas como issue no GitLab, vinculadas à milestone `Sprint 03`, com tipo, prioridade, estimativa, DoR e DoD preenchidos. A numeração desta seção é a numeração real do board: cada linha aponta para a issue correspondente, de modo que o documento e o Kanban possam ser conferidos um contra o outro sem tradução.
 
-### Pendentes da Sprint 2 — prioridade máxima
+### Artefato 1 — Desenvolvimento e Documentação Técnica do Projeto
 
-| # | Task | Tipo | Est. | Prioridade | DoR | DoD |
+| Issue | Task | Tipo | Est. | Prioridade | DoR | DoD |
 | :---: | --- | :---: | :---: | :---: | --- | --- |
-| 1 | Especificar a API de Text-to-Speech: endpoints, métodos, parâmetros, respostas e exemplos | Documentação | M | 🔴 Crítica | Provedor de síntese definido e requisitos da Seção 8.6 revisados | Seção com exemplos de requisição e resposta, códigos de erro e limites, revisada por par |
-| 2 | Elaborar o diagrama de classes da solução | Documentação | G | 🔴 Crítica | Modelo lógico de dados mergeado em `develop` | Diagrama com arquivo-fonte versionado em `docs/diagrams`, seção 5.1 preenchida e referenciada no sumário |
-| 3 | Documentar o processo de deploy do algoritmo em nuvem comercial | Documentação | G | 🔴 Crítica | Provedor de nuvem escolhido e conta criada | Passo a passo reproduzível com capturas de tela, seções 6.1 a 6.3 e 10.1 a 10.2 preenchidas |
-| 4 | Acrescentar exemplos de código e bibliotecas à seção do algoritmo de PLN | Documentação | P | 🟠 Alta | Notebook do classificador mergeado | Seção 8.7 com bibliotecas nomeadas, passos de configuração e exemplos executáveis de entrada e saída |
-| 5 | Complementar a pilha de tecnologias com plataforma de execução e escalabilidade | Documentação | P | 🟠 Alta | Arquitetura da Seção 5.2 estável | Pilha cobrindo web e mobile, com tratamento de confiabilidade e escalabilidade |
-| 6 | Definir e documentar o modelo físico de dados | Documentação | M | 🟠 Alta | Modelo lógico aprovado | Seção 4.4 com tabelas, tipos, índices e script de criação em `src/database` |
-| 7 | Integrar os quatro merge requests abertos da Sprint 2 em `develop` | Chore | M | 🔴 Crítica | Conflitos mapeados e ordem de merge acordada | Os quatro MRs mergeados, sumário do `Projeto.md` regenerado e sem âncora quebrada |
-
-### Artefato 1 — Desenvolvimento e Documentação Técnica
-
-| # | Task | Tipo | Est. | Prioridade | DoR | DoD |
-| :---: | --- | :---: | :---: | :---: | --- | --- |
-| 8 | Implementar o endpoint de upload de áudio no backend | Desenvolvimento | G | 🔴 Crítica | Formatos e limites definidos na task 1 da Sprint 2 | Endpoint funcional aceitando os formatos especificados, com validação e retorno de erro tratado |
-| 9 | Implementar o tratamento de erros do endpoint de áudio | Desenvolvimento | M | 🔴 Crítica | Endpoint de upload existente | Respostas 400 e 413 para formato inválido e arquivo acima do limite, com corpo estruturado |
-| 10 | Documentar a API de recebimento de áudio | Documentação | M | 🟠 Alta | Endpoint implementado | Endpoints, headers, payloads, códigos de resposta e estrutura de retorno, com exemplos |
-| 11 | Integrar a API de Speech-to-Text ao endpoint de upload | Desenvolvimento | G | 🔴 Crítica | Credencial do Azure AI Speech disponível | Áudio enviado retorna transcrição em `pt-BR` pela API da aplicação |
-| 12 | Integrar a transcrição ao pipeline de classificação de intenções | Desenvolvimento | G | 🔴 Crítica | Classificador serializado carregável no serviço | Transcrição classificada em macrointenção e intenção, com confiança retornada |
-| 13 | Escrever testes de sucesso e falha da integração áudio → PLN | Teste | M | 🟠 Alta | Integração funcional | Casos cobrindo áudio válido, formato inválido, áudio sem fala e falha do provedor |
-| 14 | Integrar o frontend às APIs do backend, com validação e feedback | Desenvolvimento | G | 🟠 Alta | Endpoints estáveis | Envio de texto e áudio pela interface, com exibição de resultado, erro e estado de carregamento |
-| 15 | Documentar estrutura, componentes e instruções de uso do frontend | Documentação | M | 🟡 Média | Frontend integrado | Seção descrevendo componentes, integração com as APIs e passo a passo de execução |
+| [#119](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/119) | Implementar o endpoint de upload de áudio na API | Backend | G | Alta | Contrato da Seção 8.7 do `Projeto.md` mergeado em `develop` | Endpoint `POST /api/audio` recebendo `multipart/form-data` e devolvendo resposta estruturada |
+| [#120](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/120) | Implementar a validação de formatos e o tratamento de erros do upload | Backend | M | Alta | Endpoint da #119 funcional | Formato, duração e tamanho validados antes da chamada externa, com os códigos 400, 413, 422 e 429 da Seção 8.7.6 |
+| [#121](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/121) | Documentar a API de upload de áudio no Projeto.md | Documentação | M | Alta | Endpoint implementado e validações definidas | Seção 8.7 atualizada com o comportamento real, incluindo exemplos de requisição e resposta conferidos contra a implementação |
+| [#122](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/122) | Integrar a API de Speech-to-Text ao fluxo de upload de áudio | Backend | G | Alta | Credencial do Azure AI Speech disponível e endpoint da #119 funcional | Áudio enviado retorna transcrição em `pt-BR` pela API da aplicação, com tratamento de falha do provedor |
+| [#123](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/123) | Implementar o pré-processamento textual do pipeline de PLN | Código | G | Alta | `config_22` da Seção 8.10.3 confirmada como configuração vigente | `preprocess_text` reproduzindo no serviço exatamente a transformação ajustada no treino |
+| [#124](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/124) | Implementar o classificador de intenções do núcleo de PLN | Código | G | Alta | Artefatos de `src/notebooks/artefatos` carregáveis fora do notebook | Classificador hierárquico carregado no serviço, com `joblib`, Word2Vec e encoder BERT resolvidos no boot |
+| [#125](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/125) | Medir a acurácia do classificador de intenções com dados sintéticos | Teste | M | Alta | Classificador da #124 respondendo no serviço | Métricas do serviço comparadas às da Seção 8.10.3, com divergência explicada |
+| [#126](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/126) | Integrar o pipeline de PLN à API de entrada | Backend | G | Alta | Classificador da #124 e endpoint da #119 funcionais | Solicitação textual ou transcrita retorna macrointenção, intenção e confiança, aplicando os limiares de 0,550 e 0,700 |
+| [#127](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/127) | Integrar o pipeline de PLN ao banco de dados | Backend | G | Alta | Scripts de `src/database/sql` aplicados no ambiente | Cada interação grava em `ai_interactions`, `consulted_sources` e `audit_events`, atendendo ao RNF03 |
+| [#128](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/128) | Atualizar a discussão sobre a escolha do algoritmo de PLN | Documentação | M | Alta | Medição da #125 concluída | Seção 8.10 revisada com características, vantagens e limitações observadas na implementação |
+| [#129](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/129) | Documentar a implementação do PLN e a integração com exemplos e testes | Documentação | G | Alta | Integrações das #126 e #127 funcionais | Bibliotecas, processo de integração e exemplos de entrada e saída, com casos de sucesso e de falha |
+| [#130](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/130) | Implementar a interface básica de interação com o sistema | Frontend | G | Alta | Endpoints estáveis | Envio de texto e áudio pela interface, com exibição de resultado, erro e estado de carregamento |
+| [#131](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/131) | Integrar o frontend às APIs do backend com validações e feedback | Frontend | G | Alta | Interface da #130 navegável | Fluxo completo da interface ao PLN, com validação de entrada e mensagem de erro tratada |
+| [#132](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/132) | Documentar a estrutura do frontend e as instruções de uso e teste | Documentação | M | Média | Frontend integrado | Componentes, integração com as APIs e passo a passo de execução e teste |
 
 ### Artefato 2 — Planejamento de Testes Sistêmicos
 
-| # | Task | Tipo | Est. | Prioridade | DoR | DoD |
+| Issue | Task | Tipo | Est. | Prioridade | DoR | DoD |
 | :---: | --- | :---: | :---: | :---: | --- | --- |
-| 16 | Derivar os testes funcionais a partir de RF01 a RF10 | Documentação | G | 🔴 Crítica | Requisitos funcionais atualizados mergeados | Cada RF com ao menos um cenário positivo e um negativo, propósito e instrução de execução |
-| 17 | Planejar os testes de desempenho dos requisitos não funcionais | Documentação | M | 🔴 Crítica | Métricas de aceitação dos RNFs revisadas | Testes de latência e carga com meta, ferramenta e critério de aprovação declarados |
-| 18 | Planejar os demais testes de RNFs | Documentação | M | 🟠 Alta | RNFs revisados | Cenários positivos e negativos por RNF, com justificativa de abrangência |
-| 19 | Planejar os testes de integração com serviços externos | Documentação | M | 🟠 Alta | Integrações da Sprint 3 definidas | Cenários de comunicação e de falha, com ferramentas e validação de resultado |
-| 20 | Implementar o módulo de cache VHS para as respostas da API externa | Desenvolvimento | G | 🔴 Crítica | Integração com o provedor de transcrição funcionando | Requisições repetidas atendidas pelo cache, com teste comprovando a ausência de nova chamada externa |
-| 21 | Elaborar o roteiro de testes de usabilidade com escala SUS | Documentação | M | 🟠 Alta | Frontend integrado e navegável | Roteiro com cenários, perfis dos cinco participantes externos e questionário SUS |
-| 22 | Registrar as ferramentas e bibliotecas de teste adotadas | Documentação | P | 🟡 Média | Testes planejados | Lista com finalidade de cada ferramenta e onde é utilizada |
+| [#133](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/133) | Definir as ferramentas e bibliotecas de teste do projeto | Teste | M | Alta | Escopo de testes da sprint acordado | Lista com finalidade de cada ferramenta e onde é utilizada |
+| [#134](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/134) | Planejar os testes de funcionalidade dos requisitos funcionais | Teste | G | Alta | Requisitos funcionais atualizados em `develop` | Cada RF de RF01 a RF10 com ao menos um cenário positivo e um negativo, propósito e instrução de execução |
+| [#135](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/135) | Planejar os testes de requisitos não funcionais, incluindo desempenho | Teste | G | Alta | Critérios de aceitação dos RNFs revisados | Testes de desempenho com meta, ferramenta e critério de aprovação declarados, além dos demais RNFs |
+| [#136](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/136) | Planejar os testes de integração com o módulo de VHS | Teste | G | Alta | Integração com o provedor de transcrição funcionando | Cenários de comunicação e de falha, com o cache comprovando ausência de nova chamada externa em requisição repetida |
+| [#137](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/137) | Elaborar o roteiro de testes de usabilidade com usuários externos | Teste | G | Alta | Frontend integrado e navegável | Roteiro com cenários, perfis dos cinco participantes externos e questionário SUS |
 
 ### Artefato 3 — Gestão de Projetos Evolutiva
 
-| # | Task | Tipo | Est. | Prioridade | DoR | DoD |
+| Issue | Task | Tipo | Est. | Prioridade | DoR | DoD |
 | :---: | --- | :---: | :---: | :---: | --- | --- |
-| 23 | Apurar os indicadores da Sprint 3 e comparar com as metas da Sprint 2 | Documentação | M | 🟠 Alta | Sprint encerrada e MRs integrados | Tabela comparativa das três sprints, com resultado de cada meta |
-| 24 | Atualizar a matriz de risco com status, reavaliação e novos itens | Documentação | M | 🟠 Alta | Retrospectiva realizada | Status revisado item a item, histórico acrescido e efetividade das ações apurada |
-| 25 | Montar a matriz de papéis da Sprint 3 com rotação evidenciada | Documentação | P | 🟠 Alta | Frentes da sprint definidas | Matriz com rotação conferida contra as Sprints 1 e 2 |
-| 26 | Revisar o contrato de convivência e registrar alterações | Documentação | P | 🟡 Média | Retrospectiva realizada | Registro de revisões atualizado, com motivo de cada mudança |
-| 27 | Planejar a Sprint 4 no Kanban | Documentação | M | 🟠 Alta | Barema da Sprint 4 lido | Tasks estimadas, priorizadas e detalhadas com DoR e DoD |
-| 28 | Atualizar o fluxo de gitflow e as políticas de branch | Documentação | P | 🟡 Média | Práticas da Sprint 3 observadas | `GestaoConfiguracao.md` atualizado com exemplos praticados na sprint |
+| [#138](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/138) | Registrar a análise da Sprint 3 com ações de melhoria para a Sprint 4 | Documentação | M | Alta | Sprint encerrada e merge requests integrados | Pontos fortes, pontos de melhoria e ações verificáveis, com indicadores apurados após o fechamento |
+| [#139](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/139) | Atualizar a matriz de risco com status, reavaliação e novos itens | Documentação | G | Alta | Retrospectiva realizada | Status revisado item a item, histórico acrescido e efetividade das ações apurada |
+| [#140](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/140) | Montar a matriz de papéis e responsabilidades da Sprint 3 | Documentação | M | Alta | Frentes da sprint definidas | Matriz com rotação conferida contra as Sprints 1 e 2 |
+| [#141](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/141) | Revisar o contrato de convivência, o SLA e os rituais da equipe | Documentação | M | Média | Retrospectiva realizada | Registro de revisões atualizado, com motivo de cada mudança |
+| [#142](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/142) | Planejar o backlog da Sprint 4 no Kanban | Documentação | G | Alta | Barema da Sprint 4 lido | Tasks criadas como issue, estimadas, priorizadas e detalhadas com DoR e DoD |
+| [#143](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/143) | Atualizar as políticas de dailies, uso do GitLab e commits | Documentação | M | Média | Práticas da sprint observadas | Políticas revisadas em coerência com o contrato de convivência |
+| [#144](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/144) | Atualizar o fluxo de GitFlow e as políticas de branch | Documentação | G | Alta | Práticas da Sprint 3 observadas | `GestaoConfiguracao.md` atualizado com exemplos praticados na sprint |
 
 ### Sequenciamento
 
-As tasks 1 a 7 são pré-requisito e devem fechar na primeira metade da sprint. A cadeia crítica é **8 → 9 → 11 → 12 → 13**, porque cada elo depende do anterior estar funcional; ela deve começar imediatamente após a task 7. As tasks 16 a 22 dependem dos requisitos atualizados estarem em `develop`, o que a task 7 resolve. As tasks 23 a 28 só podem fechar com a sprint encerrada.
+A cadeia crítica é **#119 → #120 → #122 → #126 → #127**, porque cada elo depende do anterior estar funcional: sem endpoint não há o que integrar ao Speech-to-Text, sem transcrição não há o que classificar e sem classificação não há o que persistir. Ela deve começar no primeiro dia e é o que define se a entrega existe.
+
+Em paralelo à cadeia, e sem depender dela, correm três frentes:
+
+- **Núcleo de PLN** (#123, #124): o pré-processamento e o carregamento do classificador podem ser construídos antes de existir entrada de áudio, usando as solicitações textuais já suportadas. É pré-requisito de #126, e por isso não pode esperar.
+- **Frontend** (#130, #131): a interface pode ser construída contra o endpoint textual existente e só depois apontar para o de áudio.
+- **Planejamento de testes** (#133 a #137): depende apenas dos requisitos já integrados em `develop`, que a Sprint 2 deixou prontos. Pode começar no dia 1 e é a folga que absorve atraso da implementação.
+
+As tasks de documentação técnica (#121, #128, #129, #132) fecham depois da implementação que descrevem, porque documentam comportamento observado e não previsto — é a correção da divergência entre documentação e implementação registrada na Seção 2.2.4.
+
+As tasks de gestão (#138 a #144) só podem fechar com a sprint encerrada e os merge requests integrados, conforme a ação de melhoria sobre apuração de indicadores. A exceção é #142, que pode ser adiantada porque o barema da Sprint 4 já está disponível.
+
+### Distribuição das estimativas
+
+| Faixa | Quantidade | Participação |
+| :---: | :---: | :---: |
+| G (60 a 120 min) | 16 | 62% |
+| M (30 a 60 min) | 10 | 38% |
+| P (até 30 min) | 0 | 0% |
+| PP (até 15 min) | 0 | 0% |
+
+A ação de melhoria da Seção 2.2.5 previa quebrar as tasks até caberem majoritariamente na faixa M. O board mostra que isso **não foi cumprido**: 62% das tasks continuam em G, e nenhuma foi estimada em P ou PP. O registro fica aqui porque a ação é verificável e o resultado é conferível no próprio Kanban — a quebra precisa acontecer no refinamento, antes de a task sair de `Open`, e será reapurada na análise da Sprint 3.
+
+O mesmo vale para a priorização: 23 das 26 tasks estão como Alta e apenas 3 como Média. Uma distribuição em que quase tudo é prioritário não ordena trabalho, e o sequenciamento acima existe justamente para suprir o que a coluna de prioridade não está diferenciando.
 
 ## 6.3 Escala de estimativa
 

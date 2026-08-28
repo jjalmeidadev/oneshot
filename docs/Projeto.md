@@ -1612,6 +1612,12 @@ A modelagem considera a `Solicitacao` como elemento de entrada do sistema. Cada 
 
 <p align="center"><strong>Figura 13</strong> - Modelagem estática inicial dos requisitos funcionais.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
+O código-fonte do diagrama está versionado em [`docs/diagrams/modelagem-estatica.puml`](diagrams/modelagem-estatica.puml) e pode ser regerado com PlantUML e Graphviz instalados:
+
+```bash
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/modelagem-estatica.puml
+```
+
 O modelo estático mantém relação direta com os requisitos funcionais. `Solicitacao` e `PipelinePLN` representam a entrada em linguagem natural prevista no RF01; `Intencao`, `ClassificadorIntencao` e `CatalogoIntencoes` representam os RF02 e RF03; `DocumentoProjeto`, `TrechoRecuperado` e `RecuperadorInformacao` representam o RF04; `Projeto` e `Resposta` sustentam o RF05; e `AnalisadorComparativo` representa o RF06. O `RoteadorIntencao`, as duas rotas e seus executores tornam explícita a separação exigida pelo RF07. As respostas produzidas em ambas as rotas atendem ao RF08. Por fim, `SugestaoProativa` representa a intenção secundária do RF09 e `ConfiguracaoProatividade` representa o controle previsto no RF10.
 
 | Elemento da modelagem                                            | Requisitos relacionados |
@@ -1647,6 +1653,12 @@ Este cenário representa uma solicitação como **"Qual o prazo do projeto XPTO?
 
 <p align="center"><strong>Figura 14</strong> - Cenário 1 — Consulta de informação de um projeto.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
+O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-cenario-1.puml`](diagrams/sequencia-cenario-1.puml) e pode ser regerado com PlantUML e Graphviz instalados:
+
+```bash
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/sequencia-cenario-1.puml
+```
+
 O cenário começa com o RF01, quando o usuário envia uma solicitação em linguagem natural. O RF02 é representado pela identificação semântica da intenção e o RF03 por sua associação ao catálogo. Como não existe fluxo automatizado, o RF07 determina que somente o contexto estruturado e validado seja encaminhado ao LLM. O RF04 determina a recuperação dos dados relevantes, o RF05 corresponde à resposta sobre o projeto solicitado e o RF08 exige que as informações recuperadas fundamentem o retorno ou que a insuficiência seja declarada.
 
 ### 3.1.3.2 Cenário 2 — Análise e comparação entre projetos
@@ -1659,6 +1671,12 @@ Este cenário representa uma solicitação como **"Compare os riscos e os prazos
 
 <p align="center"><strong>Figura 15</strong> - Cenário 2 — Análise e comparação entre projetos.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
+O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-cenario-2.puml`](diagrams/sequencia-cenario-2.puml) e pode ser regerado com PlantUML e Graphviz instalados:
+
+```bash
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/sequencia-cenario-2.puml
+```
+
 Nesse cenário, o RF06 diferencia o fluxo de uma consulta simples, pois exige recuperar informações referentes a dois ou mais projetos e aplicar uma etapa adicional de comparação. O RF07 encaminha ao LLM o resultado estruturado dessa análise porque o catálogo não possui automação correspondente. O resultado continua sujeito ao RF08: somente informações sustentadas pelos dados disponíveis devem ser apresentadas como fato.
 
 ### 3.1.3.3 Cenário 3 — Roteamento híbrido e sugestão proativa
@@ -1670,6 +1688,12 @@ Este cenário representa o comportamento do pipeline após identificar a intenç
 </div>
 
 <p align="center"><strong>Figura 16</strong> - Cenário 3 — Roteamento híbrido e sugestão proativa.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+
+O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-cenario-3.puml`](diagrams/sequencia-cenario-3.puml) e pode ser regerado com PlantUML e Graphviz instalados:
+
+```bash
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/sequencia-cenario-3.puml
+```
 
 A separação entre identificação, catalogação e roteamento é importante nesse fluxo. O RF02 corresponde à compreensão da intenção primária e o RF03 associa essa intenção à categoria e à rota controladas pelo catálogo. O RF07 garante que a rota automatizada não utilize o LLM e que apenas intenções válidas sem automação recebam tratamento generativo. O RF08 rege o resultado das duas rotas.
 
@@ -2051,13 +2075,46 @@ O limite conhecido é a franquia gratuita do provedor de transcrição, de cinco
 - DataCamp. *Power BI Copilot*. Disponível em: https://www.datacamp.com/pt/tutorial/power-bi-copilot
 
 ## 3.5 Correlação RFs e RNFs
-_conteúdo_
+
+A matriz cruza os dez requisitos funcionais (Seção 3.1) com os doze requisitos não funcionais (Seção 3.2). O objetivo é tornar explícito onde um atributo de qualidade precisa ser verificado: um RNF sem RF associado não tem onde ser testado, e um RF sem RNF crítico associado tende a ser implementado sem critério de aceitação além do comportamento nominal.
+
+Legenda: **●** correlação forte — o RNF é condição de aceitação do RF; **○** correlação parcial — o RNF incide sobre o RF, mas não o determina.
+
+| | RNF01<br>Confid. | RNF02<br>Acesso | RNF03<br>Rastr. | RNF04<br>Confiab. | RNF05<br>Desemp. | RNF06<br>PLN | RNF07<br>Usab. | RNF08<br>Aderên. | RNF09<br>Portab. | RNF10<br>Manut. | RNF11<br>Falhas | RNF12<br>Dados |
+| --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
+| **RF01** Entrada em linguagem natural | ○ | ○ | ● | | ○ | | ● | ● | | | ○ | |
+| **RF02** Identificação da intenção | | | ● | | ○ | ● | ● | | ● | | ○ | ○ |
+| **RF03** Classificação no catálogo | | | ● | | | ● | ○ | | ● | ○ | ○ | ○ |
+| **RF04** Recuperação de informações | ● | ● | ● | ● | ○ | ● | | ○ | ○ | | ● | ● |
+| **RF05** Consulta de projetos | ● | ● | ● | ● | ● | | ○ | ○ | | | ● | ● |
+| **RF06** Análise e comparação | ● | ● | ● | ● | ● | | ○ | | | | ● | ● |
+| **RF07** Roteamento híbrido | | ○ | ● | ○ | ○ | ● | | ● | ● | ○ | ● | |
+| **RF08** Respostas fundamentadas | ○ | ● | ● | ● | ○ | | ● | | | | ● | ○ |
+| **RF09** Sugestão proativa | ● | ● | ● | ● | | ○ | ● | | | | ○ | ○ |
+| **RF10** Controle da proatividade | ● | ● | ● | | | | ● | | | | | |
+
+Três leituras orientam o trabalho das próximas sprints.
+
+**RNF03 é transversal.** A rastreabilidade incide sobre os dez requisitos funcionais, sem exceção. Isso significa que o registro de auditoria não é uma funcionalidade a ser implementada ao final, e sim uma obrigação de cada rota: qualquer caminho que produza resposta precisa gravar solicitação, intenção, fontes e retorno. É a razão de `ai_interactions`, `consulted_sources` e `audit_events` aparecerem no modelo de dados desde a Seção 4.2.
+
+**RF04, RF05 e RF06 concentram as correlações fortes.** São os requisitos que tocam a informação do portfólio, e por isso acumulam confidencialidade, controle de acesso, confiabilidade e qualidade dos dados simultaneamente. São também os que exigem o maior número de cenários negativos no plano de testes da Sprint 3 — não basta verificar que a resposta certa aparece; é preciso verificar que a resposta indevida não aparece para o perfil errado.
+
+**RF09 e RF10 herdam a carga de confidencialidade.** Os dois requisitos de proatividade correlacionam-se fortemente com RNF01 e RNF02, e é exatamente o achado da prototipação exploratória (Seção 3.8.4): um agente que age a partir do que observa precisa observar, e a observação é a superfície que os dois RNFs restringem. A decisão sobre o regime de iniciativa, registrada como aberta no inventário da Seção 3.8.6.1, é portanto também uma decisão sobre o alcance desses dois RNFs.
 
 ## 3.6 Casos de Uso
-_conteúdo_
+
+Os casos de uso serão modelados na Sprint 3, junto com a derivação dos testes funcionais, conforme a Seção 8.3.1. A decisão de tratá-los nesse momento é deliberada: o barema da Sprint 3 exige que cada requisito funcional gere ao menos um cenário positivo e um negativo, e o caso de uso é a forma natural de organizar esses cenários antes de convertê-los em teste.
+
+O material de partida já está produzido e versionado:
+
+- as **user stories** de RF01 a RF10, com critérios de aceitação, na Seção 3.1.1;
+- a **modelagem estática** das entidades envolvidas, na Seção 3.1.2;
+- os **três cenários dinâmicos** iniciais, na Seção 3.1.3, e os **quatro cenários críticos** detalhados em diagramas de sequência na Seção 5.3;
+- o **repertório de oito situações** registradas na prototipação exploratória, na Seção 3.8.6.2, incluindo as cinco que o protótipo não conseguiu atender — que são candidatas diretas a casos de uso de exceção.
 
 ## 3.7 Casos de Uso x Requisitos Funcionais
-_conteúdo_
+
+Será desenvolvido na Sprint 3, junto com a Seção 3.6. A rastreabilidade entre requisitos funcionais e modelagem UML já existente está registrada na Seção 3.1.4 e será estendida para incluir os casos de uso e, na sequência, os casos de teste.
 
 ## 3.8 Prototipação Exploratória
 
@@ -2148,9 +2205,15 @@ Sem intervenção             Agente apresenta sugestão
 
 Nesse modelo, a interação pode ocorrer diretamente no ambiente em que o usuário já está trabalhando, sem depender necessariamente de uma interface conversacional centralizada. Essa possibilidade é exploratória e não constitui compromisso do MVP, que permanece restrito a dados sintéticos e não pressupõe integração produtiva nem observação contínua da atividade. Em uma evolução futura, o agente poderia apresentar informações, sugestões, perguntas de confirmação ou conteúdos relacionados à atividade observada, buscando reduzir a distância entre a necessidade do usuário e a informação ou ação que pode auxiliá-lo.
 
-No contexto do projeto, essa abordagem pode ser explorada a partir de situações em que o usuário esteja navegando por informações do portfólio, consultando documentos ou realizando atividades relacionadas a um projeto. A partir do contexto identificado, o agente poderá hipoteticamente sugerir recursos relacionados ao que está sendo realizado, como documentos, conceitos, indicadores, cronogramas, riscos ou próximos passos.
+No contexto do projeto, a abordagem foi explorada a partir de situações em que a pessoa navega por informações do portfólio, consulta documentos ou realiza atividades relacionadas a um projeto. A partir do contexto identificado, o agente sugere recursos relacionados ao que está sendo feito — documentos, conceitos, indicadores, cronogramas, riscos ou próximos passos.
 
-Entre os comportamentos que serão explorados estão:
+**Formato de prototipação:** tirinhas ilustradas, o mesmo formato utilizado no Protótipo 1.
+
+A justificativa é a mesma registrada na Seção 3.8.2.1 e vale nos dois sentidos. A tirinha não é uma tela navegável nem um protótipo clicável, o que atende à exigência de um formato não baseado em interface digital e impede que a exploração escorregue para refinamento de interface — risco maior justamente aqui, já que a intervenção proativa é visual por natureza e seria tentador desenhá-la em vez de investigá-la. E, por ser o mesmo meio das mesmas personas nas duas alternativas, permite atribuir as diferenças observadas ao regime de iniciativa, e não ao formato de representação.
+
+A pergunta que o formato permite investigar nesta alternativa é específica: *em que momento a intervenção é bem-vinda e em que momento ela é interrupção*. Isso só aparece quando existe um antes e um depois — a atividade que a pessoa estava fazendo, o agente falando, e o que acontece com a atividade em seguida. É a sequência de painéis que torna esse intervalo visível.
+
+Entre os comportamentos explorados por esta alternativa estão:
 
 - identificar situações relevantes durante a atividade do usuário;
 - reconhecer quando o contexto disponível é suficiente para justificar uma intervenção;
@@ -2258,33 +2321,46 @@ O protótipo foi construído e executado a partir de situações em que o agente
 
 As situações foram representadas considerando o ambiente tecnológico já utilizado no contexto da solução, especialmente o ecossistema corporativo baseado em SharePoint. A proatividade do agente foi representada por intervenções dinâmicas na própria interface utilizada pela pessoa, por meio de elementos sobrepostos à tela, sem exigir que o usuário abandone a atividade em andamento para iniciar uma conversa independente.
 
+Todas as quatro tirinhas usam o mesmo projeto — **Modernização do Sistema de Sinalização** — para que a variação entre os cenários fique restrita ao comportamento do agente, e não ao conteúdo consultado.
+
+| Tirinha | Persona | Situação | O que a execução investiga |
+| :---: | --- | --- | --- |
+| 1A | Carlos | Elaboração do Mapa de Benefícios, com o campo "Benefícios" ainda vazio | A intervenção proativa quando o contexto na tela é inequívoco |
+| 1B | Carlos | Mesma elaboração, ainda na etapa de levantamento das entregas | O que acontece quando o agente confunde etapa intermediária com pendência |
+| 2A | Mariana | Consulta à aba de Riscos do projeto, com um risco de alta criticidade aberto | O ganho da proatividade quando a informação é crítica e pertinente ao que está na tela |
+| 2B | Mariana | Consulta a documentos de entrega, com o agente supondo análise de riscos | O custo de uma interpretação incorreta da intenção |
+
+Um traço comum às quatro tirinhas merece registro, porque não foi planejado: em todas elas o agente **anuncia que está observando** — "Estou acompanhando sua atividade", seguido de um bloco "Contexto identificado". A equipe representou assim porque, sem esse anúncio, o leitor da tirinha não teria como saber de onde veio a intervenção. A consequência apareceu depois: tornar a observação visível é o que expõe, para a pessoa, que o sistema lê continuamente sua tela — exatamente a superfície que o RNF01 e o RNF02 restringem. A decisão de representação acabou revelando uma decisão de produto.
+
 #### Execução dos cenários de sucesso
 
 ##### Cenário 1 — Pendência identificada durante a elaboração do Mapa de Benefícios
 
 ![Tirinha 1A — Execução de sucesso](img/tirinha-1A-2.png)
 
-A primeira execução explora a atuação proativa do agente durante uma atividade realizada por Carlos no ambiente corporativo. Enquanto acompanha informações relacionadas ao portfólio, o agente identifica, a partir do contexto disponível na tela, uma situação que pode demandar atenção ou representar uma oportunidade de assistência.
+Carlos está preenchendo o Mapa de Benefícios do projeto Modernização do Sistema de Sinalização no Portal Estratégico. Já registrou o projeto, as entregas e os resultados esperados; o campo "Benefícios" permanece vazio na tela.
 
-Em vez de aguardar que Carlos formule uma solicitação explícita, o agente apresenta uma intervenção contextual diretamente no ambiente em que ele já está trabalhando. A sugestão é apresentada como uma possibilidade de assistência, permitindo que Carlos decida se deseja consultar as informações disponibilizadas.
+O agente observa a atividade e identifica dois elementos concretos: o documento aberto e a seção não preenchida. Com base neles, anuncia o contexto identificado e informa que há informação disponível que pode ajudar na definição dos benefícios daquele projeto. Antes de apresentar qualquer conteúdo, faz uma pergunta de confirmação — "Posso sugerir opções com base nos documentos disponíveis?" — com as alternativas *Sim, mostrar sugestões* e *Não, talvez depois*.
 
-Ao aceitar a intervenção, Carlos recebe informações relacionadas ao contexto da atividade, permitindo que identifique aspectos relevantes para sua análise, como informações do portfólio, riscos, pendências ou possíveis próximos passos. A interação ocorre sem exigir que ele abandone a atividade principal ou procure manualmente essas informações em diferentes fontes.
+Carlos aceita. O agente devolve três benefícios candidatos, cada um com a fonte documental correspondente: redução de falhas operacionais até 30% (DOC-1287, Estudo Técnico de Viabilidade), melhoria da segurança para os usuários (DOC-0932, Relatório de Impacto Operacional) e aumento da confiabilidade do sistema (DOC-1765, Benchmark Sistemas de Sinalização). Carlos ajusta o conteúdo conforme sua necessidade e segue preenchendo o mapa. O agente encerra a intervenção e permanece disponível.
 
-O cenário foi considerado bem-sucedido porque a intervenção está relacionada à atividade realizada por Carlos e ocorre em um momento em que o contexto disponível é suficiente para justificar a assistência. O agente atua como uma camada de apoio à decisão, sem substituir a avaliação do usuário ou assumir automaticamente uma ação.
+O cenário foi considerado bem-sucedido por três razões observáveis na tirinha. A intervenção se ancora em um elemento visível e inequívoco — um campo obrigatório vazio no documento aberto —, e não em inferência sobre a jornada. A confirmação antecede o conteúdo, de modo que a decisão de receber a sugestão permanece com Carlos. E cada item apresentado carrega a fonte, o que mantém a rastreabilidade exigida pelo RNF03 mesmo quando o agente fala primeiro.
+
+O que o cenário **não** resolve, e ficou registrado como decisão em aberto: um campo vazio é evidência suficiente para intervir, mas nem todo campo vazio é uma pendência — é exatamente essa a hipótese que o Cenário 1B coloca à prova.
 
 ##### Cenário 2 — Informação relevante identificada durante uma atividade de acompanhamento
 
 ![Tirinha 2A — Execução de sucesso](img/tirinha-2A-2.png)
 
-A segunda execução explora uma situação em que o agente identifica uma informação potencialmente relevante enquanto Mariana realiza uma atividade de acompanhamento e análise do portfólio.
+Mariana parte da Visão Geral do Portfólio no SharePoint — 48 projetos ativos, 7 em risco, 5 atrasados — para preparar análises de desempenho e qualidade. Abre o projeto Modernização do Sistema de Sinalização e navega até a aba de Riscos.
 
-Durante a navegação pelo ambiente corporativo, Mariana consulta informações relacionadas aos projetos e ao desempenho do portfólio. O agente interpreta o contexto da atividade e identifica uma informação que pode contribuir para a análise que está sendo realizada.
+O agente identifica o projeto em análise e a aba consultada, e localiza ali um risco de alta criticidade em aberto: "Atraso no fornecimento de equipamentos", com impacto Alto e probabilidade Alta, ligado diretamente ao prazo do projeto. Apresenta a observação e pergunta se Mariana deseja ver os detalhes, o impacto e as ações recomendadas.
 
-Em vez de exigir que Mariana interrompa sua atividade para formular uma nova consulta, o agente apresenta uma sugestão diretamente na interface utilizada. A intervenção funciona como uma camada dinâmica sobre o ambiente de trabalho, permitindo que Mariana consulte a informação apresentada e decida se deseja utilizá-la.
+Mariana aceita. O agente devolve o detalhamento — atraso estimado de até 45 dias, afetando a conclusão da via e os testes operacionais — com três ações recomendadas: acompanhar a entrega com o fornecedor, avaliar o plano de contingência e revisar os marcos críticos. A fonte é declarada: DOC-1287, Relatório de Riscos do Projeto (v3.2). Mariana usa o conteúdo para atualizar sua análise e seguir para a preparação da reunião com os gestores.
 
-A execução demonstra o potencial de uma atuação proativa orientada à jornada, na qual o agente acompanha o contexto da atividade e apresenta informações que podem reduzir o esforço necessário para localizar dados, indicadores ou conteúdos relacionados.
+O cenário foi considerado bem-sucedido porque a informação apresentada não é apenas pertinente ao domínio: ela é o item de maior criticidade dentro exatamente da aba que Mariana abriu. A proatividade, aqui, não adivinha a necessidade — ela hierarquiza o que já está na tela. É a condição mais favorável possível para o regime proativo, e serve de contraste para o Cenário 2B, em que o agente erra a atividade que Mariana está realizando.
 
-O cenário foi considerado bem-sucedido porque a informação apresentada possui relação direta com a atividade realizada e porque a decisão de utilizá-la permanece sob controle de Mariana. A interação demonstra, portanto, uma situação em que a proatividade pode complementar uma atividade já em andamento sem substituir a intenção original da usuária.
+O cenário também mostra o limite do que a tirinha consegue afirmar: ela representa uma intervenção. Se o mesmo agente repetisse essa oferta a cada aba aberta ao longo de uma manhã de trabalho, o julgamento seria outro, e o formato não distingue os dois casos.
 
 #### Execução dos cenários de falha
 
@@ -2292,45 +2368,51 @@ O cenário foi considerado bem-sucedido porque a informação apresentada possui
 
 ![Tirinha 1B — Execução de falha](img/tirinha-1B-2.png)
 
-A primeira execução de falha apresenta uma situação semelhante à explorada no cenário 1A, tendo Carlos como usuário, porém em uma condição na qual o contexto disponível ainda não é suficiente para determinar se uma intervenção proativa é realmente necessária.
+A situação é deliberadamente quase idêntica à do Cenário 1A: Carlos, o mesmo Mapa de Benefícios, o mesmo campo "Benefícios" vazio. A diferença é o momento. Aqui ele acabou de iniciar a elaboração e informou apenas o projeto e algumas entregas — está na etapa de levantamento, não na de preenchimento dos benefícios.
 
-Carlos está realizando uma atividade relacionada ao acompanhamento do portfólio e ainda está reunindo, analisando ou organizando informações para compreender a situação em andamento. O agente identifica uma possível lacuna ou oportunidade de assistência e interpreta essa condição como justificativa para iniciar uma intervenção.
+O agente observa a mesma tela e chega a registrar, no painel 2, que os sinais são insuficientes: "Informações ainda parciais", "Não há confirmação da intenção de receber sugestões", e declara que aguardará novos sinais. No painel seguinte, porém, interpreta a ausência de benefícios como pendência que exige intervenção imediata, e apresenta a sugestão mesmo assim — antes que Carlos conclua a etapa anterior, interrompendo o fluxo da atividade.
 
-A partir dessa interpretação, o agente apresenta uma sugestão diretamente na interface utilizada por Carlos. Entretanto, a intervenção ocorre antes que sua necessidade esteja suficientemente caracterizada. Carlos demonstra que, naquele momento, sua intenção era continuar a atividade que já estava realizando, sem a necessidade da assistência apresentada.
+Carlos recusa: "Ainda não. Estou pesquisando as informações das entregas." O agente responde que vai aguardar novos sinais e oferece duas alternativas — *Acompanhar atividade* e *Resumir o que foi preenchido*.
 
-A execução revela que a identificação de uma possível pendência ou lacuna não é suficiente, por si só, para determinar que uma intervenção deve ocorrer. A mesma condição observada pelo sistema pode representar uma necessidade efetiva de assistência ou apenas uma etapa intermediária de uma atividade ainda em andamento.
+É no painel 6 que a execução falha de fato. O agente precisa decidir como se comportar depois da recusa, e o protótipo não define esse comportamento. O painel foi desenhado explicitamente como **"Situação não definida no protótipo"**, listando as quatro opções que a equipe não soube escolher — encerrar a intervenção, aguardar e observar, perguntar novamente mais tarde ou sugerir outra forma de apoio — e marcando a lacuna identificada: *estratégia de resposta após recusa inicial*.
 
-A falha, portanto, está principalmente na decisão de quando intervir. O protótipo torna visível a necessidade de estabelecer critérios capazes de diferenciar uma oportunidade legítima de assistência de uma situação em que a intervenção poderia apenas interromper ou distrair Carlos.
+A execução revela que a mesma evidência observada no Cenário 1A — um campo obrigatório vazio — sustenta tanto uma intervenção bem-sucedida quanto uma inadequada. O que separa os dois casos não está na tela: está na etapa do trabalho em que a pessoa se encontra, e essa etapa o agente não observa. É a decisão de **quando** intervir, e não a de **o que** oferecer, que a alternativa proativa deixa sem resposta.
+
+Vale registrar o improviso: nos painéis 2 e 3 o agente primeiro reconhece que não tem sinais suficientes e em seguida intervém assim mesmo. A equipe manteve a contradição no desenho em vez de corrigi-la, porque ela é o próprio achado — não havia critério disponível para decidir entre "aguardar" e "intervir", e o protótipo teve de escolher um dos dois para que o painel seguinte existisse.
 
 ##### Cenário 2 — Intervenção baseada em interpretação incorreta do contexto
 
 ![Tirinha 2B — Execução de falha](img/tirinha-2B-2.png)
 
-A segunda execução de falha explora uma situação em que o agente interpreta incorretamente a atividade realizada por Mariana.
+Mariana está no mesmo projeto do Cenário 2A, com a aba de Riscos aberta na tela. O agente identifica o contexto e conclui que ela está analisando os riscos do projeto — a leitura mais óbvia possível do que está visível.
 
-Mariana está navegando pelo ambiente corporativo e alternando entre diferentes informações relacionadas ao portfólio. A partir dos elementos disponíveis na interface, o agente interpreta que ela está realizando uma determinada análise e identifica uma informação que considera relevante para aquele contexto.
+A conclusão está errada. Mariana abriu aquela aba de passagem: sua atividade naquele momento são os documentos de entrega. O agente, sem evidência clara da intenção, decide intervir mesmo assim e oferece uma análise comparativa dos riscos com projetos similares. Mariana recusa e corrige a interpretação.
 
-O sistema apresenta então uma intervenção proativa diretamente na tela, oferecendo a informação ou consulta correspondente. Entretanto, Mariana indica que sua atividade naquele momento possui outro objetivo e que a sugestão apresentada não corresponde à sua intenção atual.
+O agente ajusta o contexto — "Entendido! Você está consultando documentos de entrega" — e completa o ciclo de atualização. Mas o painel 5 registra que ele não possui regra sobre o que fazer em seguida: oferece uma nova busca sem saber se deveria estar oferecendo algo. O painel 6 formaliza a lacuna, marcado como **"Comportamento não definido"**, com as quatro opções em aberto — aguardar passivamente, perguntar o objetivo atual, sugerir apoio de forma proativa ou encerrar e aguardar nova interação — e a lacuna nomeada: *estratégia de recuperação após avaliação incorreta do contexto*.
 
-A execução demonstra que uma informação pode ser correta e possuir relação com o domínio do projeto, mas ainda assim ser inadequada para o momento específico da jornada da usuária. O problema, nesse caso, não está necessariamente na informação recuperada, mas na interpretação realizada pelo agente sobre o que Mariana está tentando fazer naquele momento.
+A execução demonstra que uma informação pode ser correta, crítica e pertencente ao projeto certo e ainda assim ser inadequada, porque o critério que falhou não é o de relevância, e sim o de intenção. É a mesma informação do Cenário 2A, na mesma tela, para a mesma pessoa — e o resultado se inverte apenas porque a atividade real era outra.
 
-A falha também evidencia a necessidade de definir o comportamento do sistema após uma correção ou recusa. Uma vez que Mariana demonstra que a interpretação estava incorreta, permanece em aberto se o agente deve simplesmente encerrar a intervenção, solicitar esclarecimento, atualizar o contexto identificado ou aguardar novos sinais antes de realizar outra intervenção.
+Isso expõe o limite estrutural da alternativa proativa: a tela mostra **onde** a pessoa está, não **o que** ela está tentando fazer. O agente só tem acesso ao primeiro, e as duas coisas coincidem com frequência suficiente para que a proatividade pareça funcionar — e divergem com frequência suficiente para que ela erre sem aviso.
 
-O cenário, portanto, torna visível uma decisão importante para a solução: a proatividade precisa estar associada não apenas à disponibilidade de informações relevantes, mas também à capacidade de interpretar continuamente a intenção e o contexto da pessoa durante sua jornada.
+A comparação entre 2A e 2B foi o achado mais direto da execução, e ele não estava previsto: a equipe esperava que os cenários de falha revelassem problemas de recuperação de informação, e o que apareceu foi um problema de leitura de intenção, que nenhuma melhoria no RAG resolveria.
 
 #### Diário de construção e execução
 
-A construção das tirinhas evidenciou que a principal dificuldade do Protótipo 2 não está na representação da intervenção proativa em si, mas na definição das condições que devem permitir ao agente decidir **quando**, **como** e **com que intensidade** iniciar uma interação.
+A construção das tirinhas evidenciou que a principal dificuldade do Protótipo 2 não está em representar a intervenção proativa em si, mas em definir as condições que autorizam o agente a decidir **quando**, **como** e **com que intensidade** iniciar uma interação. Nenhuma dessas três condições estava determinada quando a alternativa foi enunciada, e todas precisaram ser resolvidas painel a painel para que a tirinha pudesse ser desenhada.
 
-Durante a construção dos cenários de sucesso, foi necessário definir quais elementos da atividade realizada pela pessoa seriam suficientes para justificar uma intervenção. A exploração mostrou que a proatividade possui maior potencial de valor quando está diretamente relacionada ao contexto visível da atividade e quando a intervenção pode ser aceita ou recusada sem interromper o fluxo principal.
+**Decisão forçada: qual evidência de contexto autoriza o agente a falar.** Ao construir os cenários de sucesso, não bastou dizer que o agente "identifica o contexto": foi preciso decidir o que exatamente ele estaria vendo no painel anterior para que a intervenção seguinte parecesse justificada. A equipe optou por ancorar cada intervenção em um elemento visível na tela da pessoa — o documento aberto, o campo em preenchimento — e não em histórico ou inferência sobre a jornada. A decisão não foi planejada: ela apareceu porque, sem um elemento visível no painel, o leitor da tirinha não tem como saber por que o agente falou. Ficou registrada como aberta, porque restringe o agente a um contexto raso.
 
-Na construção dos cenários de falha, a equipe precisou representar situações nas quais o agente possui informações potencialmente úteis, mas não dispõe de contexto suficiente para determinar se aquela informação deve ser apresentada naquele momento ou interpreta incorretamente a atividade realizada pela pessoa. Essa diferença revelou que a qualidade da proatividade depende não apenas da capacidade de recuperar informações, mas também da capacidade de interpretar corretamente a intenção e o momento da pessoa.
+**Decisão forçada: onde a intervenção aparece na tela.** A alternativa foi enunciada sem definir a forma da intervenção. Ao desenhar, foi necessário escolher entre um elemento sobreposto ao ambiente de trabalho e uma interface conversacional separada. A equipe escolheu a sobreposição, porque é o que representa um agente que acompanha a jornada sem exigir que a pessoa abandone a atividade. A escolha, porém, é a que torna a intervenção interruptiva — as duas propriedades vêm juntas, e isso não estava claro antes de desenhar.
 
-Outro ponto identificado durante a execução foi a necessidade de tratar explicitamente a recusa de uma intervenção. A recusa não representa necessariamente uma rejeição permanente da assistência do agente: ela pode significar que a sugestão é inadequada apenas para aquele momento. Dessa forma, permanece em aberto como o agente deve atualizar seu contexto após uma recusa e em que condições uma nova intervenção pode ocorrer.
+**Ambiguidade: informação correta não é o mesmo que momento adequado.** Ao construir os cenários de falha, a equipe percebeu que não sabia dizer o que diferencia uma oportunidade legítima de assistência de uma etapa intermediária de uma atividade em andamento. Nos dois casos o agente dispõe de informação pertinente ao domínio; a diferença está apenas no instante. Não houve critério que a equipe pudesse enunciar para separar os dois, e a tirinha 1B existe justamente porque essa distinção não foi encontrada.
 
-As tirinhas também permitiram explorar a forma da intervenção. A utilização de elementos dinâmicos sobre a interface existente mostrou-se adequada para representar um agente que acompanha a jornada sem exigir que a pessoa abandone o ambiente de trabalho para acessar uma interface conversacional independente. Ao mesmo tempo, a exploração revelou a necessidade de controlar a frequência e a intensidade dessas intervenções para evitar que a proatividade se transforme em interrupção ou sobrecarga.
+**Ambiguidade: o que o agente faz depois de uma recusa.** A recusa foi representada, mas o painel seguinte não pôde ser desenhado com convicção. Recusar não significa rejeitar a assistência em definitivo: pode significar apenas que aquela sugestão não servia naquele momento. Permaneceu indefinido se o agente deve encerrar a intervenção, pedir esclarecimento, atualizar o contexto ou aguardar novos sinais — e, sem isso, não há como saber quando ele pode voltar a falar.
 
-Como resultado, a execução dos cenários não foi utilizada para validar uma implementação final, mas para tornar visíveis decisões comportamentais que ainda permanecem em aberto, especialmente relacionadas ao nível mínimo de contexto necessário para uma intervenção, ao tratamento de recusas, à atualização da interpretação sobre a intenção do usuário e aos limites de frequência da atuação proativa.
+**Impossibilidade do formato: a tirinha não representa frequência nem intensidade.** É o limite mais consequente desta alternativa. Cada tirinha mostra uma intervenção isolada, e uma intervenção isolada quase sempre parece razoável. O que determina se a proatividade é aceitável ou insuportável é quantas vezes ela ocorre ao longo de um dia de trabalho, e isso o meio não representa. A mesma sugestão do Cenário 1A, repetida seis vezes em uma hora, seria outro sistema — e a tirinha desenha os dois de forma idêntica.
+
+**Impossibilidade do formato: a tirinha não mostra a intenção da pessoa.** O Cenário 2B depende de Mariana estar fazendo uma coisa enquanto o agente supõe outra. Só que a intenção dela não é observável: foi preciso escrevê-la em uma fala explícita para que a falha ficasse legível. Na situação real, essa fala não existiria — o agente erraria sem que ninguém dissesse por quê. O formato obrigou a tornar visível exatamente aquilo que, no sistema real, é invisível, e é por isso que o critério de intervenção não pôde ser derivado da tirinha.
+
+Como resultado, a execução dos cenários não validou uma implementação: tornou visíveis decisões comportamentais em aberto — o nível mínimo de contexto para intervir, a forma e o lugar da intervenção, o tratamento da recusa e os limites de frequência —, todas registradas no inventário da Seção 3.8.6.1.
 
 
 ### 3.8.4 Comparação das Alternativas
@@ -2404,12 +2486,22 @@ Esta seção declara o que os protótipos produzidos, nos formatos utilizados, n
 
 #### 3.8.6.2 Repertório de Situações
 
-| Situação | Persona | Caso que revelou uma decisão ou lacuna |
-| --- | --- | --- |
-| Preparação de reunião de acompanhamento | Carlos | A dependência entre projetos não é apresentada porque não foi perguntada. |
-| Consulta de marco e riscos do projeto | Carlos | A referência posterior a “os riscos” exige decidir quanto contexto o agente mantém. |
-| Consolidação do balanço mensal | Mariana | A expressão “projetos atrasados” não encontra o vocabulário da base, exigindo reformulações. |
-| Atividade de acompanhamento no ambiente corporativo | Mariana | Uma sugestão pode ser correta, mas inadequada à intenção da usuária naquele momento. |
+O repertório reúne as oito situações efetivamente rodadas nas Seções 3.8.3.1 e 3.8.3.2. A última coluna registra o que o protótipo **não** conseguiu atender — que é o material de trabalho para a equipe. A coluna "Improviso" indica as situações em que alguém precisou decidir na hora algo que o protótipo não definia.
+
+| # | Situação e pedido registrado | Protótipo / Persona | Improviso | O que o protótipo não conseguiu atender |
+| :---: | --- | --- | :---: | --- |
+| S1 | Preparação de reunião: consulta ao marco vigente de um projeto, seguida de “e os riscos?” | P1 · Carlos | Sim | Não define se “os riscos” se referem ao projeto citado antes ou exigem nova explicitação. Contexto mantido por improviso, sem regra de duração de sessão. |
+| S2 | Mesma preparação, com uma dependência de contrato atrasado existente na base e não consultada | P1 · Carlos | Não | Não apresenta a informação, porque ninguém perguntou. A falha não é detectável pelo sistema: do ponto de vista dele, a interação foi bem-sucedida. |
+| S3 | Consolidação do balanço mensal: comparação do avanço físico entre dois meses, com o vocabulário dos documentos | P1 · Mariana | Não | Nada a registrar — é o caso em que o regime reativo funciona plenamente. Serve de contraste para S4. |
+| S4 | Mesma consolidação, formulada como “quais projetos estão atrasados” | P1 · Mariana | Sim | Responde apenas que não localizou, sem indicar o termo equivalente da base. Foram necessárias três reformulações. O painel de sugestão de termo ficou hachurado como comportamento não definido. |
+| S5 | Elaboração do Mapa de Benefícios, com pendência identificada pelo agente a partir da tela | P2 · Carlos | Sim | Não define qual evidência de contexto é suficiente para autorizar a intervenção. Funcionou porque a equipe escolheu, por improviso, ancorar em um elemento visível na tela. |
+| S6 | Atividade de acompanhamento do portfólio, com informação relacionada oferecida durante a navegação | P2 · Mariana | Não | Não define limite de frequência. Uma intervenção isolada parece adequada; o protótipo não representa a repetição. |
+| S7 | Acompanhamento ainda em curso, com o agente intervindo antes de a necessidade estar caracterizada | P2 · Carlos | Sim | Não há critério que separe uma oportunidade legítima de assistência de uma etapa intermediária da atividade. A distinção foi decidida caso a caso ao desenhar. |
+| S8 | Navegação alternando entre informações, com o agente interpretando incorretamente a atividade | P2 · Mariana | Não | Não define o comportamento após a recusa ou correção: encerrar, pedir esclarecimento, atualizar o contexto ou aguardar novos sinais. O painel seguinte ficou sem definição. |
+
+Sete das oito situações terminam em algo que o protótipo não resolve. A única exceção é S3, em que o vocabulário da solicitação coincide com o dos documentos e o regime reativo funciona sem lacuna — e é por isso que ela serve de contraste para S4, sua situação gêmea com vocabulário divergente.
+
+Quatro situações exigiram improviso, ou seja, alguém precisou decidir na hora algo que o protótipo não definia: S1, S4, S5 e S7. Nas demais, a lacuna apareceu sem que fosse necessário contorná-la para seguir — em S8, inclusive, a equipe optou por registrar o comportamento como não definido no próprio painel, em vez de escolher um. A concentração das lacunas fora das condições favoráveis é o principal insumo que a exploração entrega para a Sprint 3.
 
 ---
 
@@ -2466,6 +2558,12 @@ As principais entidades conceituais do MVP são:
 
 <p align="center"><strong>Figura 18</strong> - Modelo conceitual de dados.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
+O código-fonte do diagrama está versionado em [`docs/diagrams/modelo-conceitual.puml`](diagrams/modelo-conceitual.puml) e pode ser regerado com PlantUML e Graphviz instalados:
+
+```bash
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/modelo-conceitual.puml
+```
+
 ## 4.3 Modelo Lógico de Dados
 
 O modelo lógico detalha o modelo conceitual em formato de tabelas, atributos principais, chaves primárias e chaves estrangeiras. Ele ainda não representa o código final do banco, mas define a estrutura lógica que deve ser implementada.
@@ -2498,6 +2596,12 @@ Para manter o escopo adequado ao MVP, a modelagem lógica foi consolidada em 18 
 </div>
 
 <p align="center"><strong>Figura 19</strong> - Modelo lógico de dados.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+
+O código-fonte do diagrama está versionado em [`docs/diagrams/modelo-logico.puml`](diagrams/modelo-logico.puml) e pode ser regerado com PlantUML e Graphviz instalados:
+
+```bash
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/modelo-logico.puml
+```
 
 As principais regras de integridade do modelo lógico são:
 
@@ -2580,7 +2684,7 @@ plantuml -charset UTF-8 -tpng -o ../img docs/diagrams/classes-consolidado.puml
 
 - **`Resposta` é composição de `Interacao`, e não entidade independente.** Uma resposta não existe fora da interação que a originou, e `declararLimitacao()` materializa o comportamento exigido pelo RF08: sem fonte suficiente, a resposta declara a limitação em vez de completar a lacuna.
 - **`FonteConsultada` liga a resposta ao `TrechoRecuperado`, e não ao `Artefato`.** A rastreabilidade exigida pelo RNF03 precisa apontar o trecho utilizado, não apenas o documento de origem.
-- **`Intencao` carrega os limiares e as confianças.** Os valores de 0,925 e 0,950 definidos na Seção 8.10.3 pertencem ao catálogo, não ao código, de modo que possam ser ajustados sem nova implantação. `acimaDoLimiar()` é o que decide se um handler é acionado.
+- **`Intencao` carrega os limiares e as confianças.** Os valores de 0,550 e 0,700 definidos na Seção 8.10.3 pertencem ao catálogo, não ao código, de modo que possam ser ajustados sem nova implantação, à medida que novas execuções do benchmark recalibrem os limiares. `acimaDoLimiar()` é o que decide se um handler é acionado.
 - **`RegraAcesso` é classe, e não atributo de `Usuario`.** O mesmo usuário pode ter níveis diferentes por subportfólio ou por projeto, o que o RNF02 exige e um atributo simples não representaria.
 - **`ItemCronograma.somaDosPesosFecha()` está no domínio.** A validação de que os pesos fecham em 100%, prevista na Seção 2.4.3, é regra de negócio e não de interface.
 - **`SolicitacaoForaDeEscopo` é entidade própria.** Registrar o que o agente não soube responder é insumo para evoluir o catálogo, e não um estado descartável da interação.
@@ -2728,6 +2832,12 @@ No contexto do MVP, a fonte utilizada para validação é a **base sintética as
 
 <p align="center"><strong>Figura 22</strong> - Sequência: consulta documental via RAG.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
+O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-rag-consulta.puml`](diagrams/sequencia-rag-consulta.puml) e pode ser regerado com PlantUML e Graphviz instalados:
+
+```bash
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/sequencia-rag-consulta.puml
+```
+
 O fluxo evidencia que o LLM não acessa diretamente a fonte documental. A aplicação recupera previamente os conteúdos relevantes e utiliza esses trechos como contexto para a geração da resposta. No MVP, essa recuperação ocorre sobre a base sintética e o índice vetorial; a integração com SharePoint permanece como caminho de evolução para a utilização das fontes corporativas homologadas.
 
 O cenário também explicita o tratamento de informação insuficiente, evitando que a ausência de evidências seja convertida automaticamente em uma resposta generativa. A identidade é validada antes da consulta e os elementos necessários à rastreabilidade são registrados na trilha de auditoria.
@@ -2744,6 +2854,12 @@ Assim como no cenário anterior, o MVP utiliza a **base sintética associada ao 
 
 <p align="center"><strong>Figura 23</strong> - Sequência: análise e comparação entre projetos via RAG.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
+O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-rag-comparacao.puml`](diagrams/sequencia-rag-comparacao.puml) e pode ser regerado com PlantUML e Graphviz instalados:
+
+```bash
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/sequencia-rag-comparacao.puml
+```
+
 A sequência preserva a diferenciação entre **fato recuperado** e **resultado interpretativo da comparação**. A análise é executada sobre as informações recuperadas e o LLM é responsável pela apresentação em linguagem natural, mantendo as referências associadas às evidências utilizadas.
 
 A validação de identidade antecede a recuperação e os eventos da interação são registrados na auditoria, mantendo o cenário alinhado aos requisitos transversais de controle de acesso e rastreabilidade.
@@ -2757,6 +2873,12 @@ Este cenário representa uma solicitação cuja intenção corresponde a uma cap
 </div>
 
 <p align="center"><strong>Figura 24</strong> - Sequência: direcionamento para fluxo funcional via Copilot Studio.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+
+O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-copilot-fluxo.puml`](diagrams/sequencia-copilot-fluxo.puml) e pode ser regerado com PlantUML e Graphviz instalados:
+
+```bash
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/sequencia-copilot-fluxo.puml
+```
 
 Neste cenário, o **Copilot Studio não é responsável por descobrir a intenção do usuário**. A decisão já foi tomada pelo núcleo de PLN e pelo catálogo de intenções. O Copilot Studio atua como plataforma de execução do tópico ou fluxo selecionado.
 
@@ -2773,6 +2895,12 @@ Este cenário demonstra a entrada por áudio utilizando a API de **Azure AI Spee
 </div>
 
 <p align="center"><strong>Figura 25</strong> - Sequência: entrada por voz com Speech-to-Text.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+
+O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-voz-stt.puml`](diagrams/sequencia-voz-stt.puml) e pode ser regerado com PlantUML e Graphviz instalados:
+
+```bash
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/sequencia-voz-stt.puml
+```
 
 O diagrama evidencia que o áudio não cria um fluxo de negócio independente: após uma transcrição válida, a solicitação torna-se equivalente a uma entrada textual para o restante da arquitetura. O Azure AI Speech atua exclusivamente na etapa de Speech-to-Text, enquanto a interpretação, validação e definição da capacidade permanecem sob responsabilidade da aplicação.
 
@@ -3053,24 +3181,73 @@ Para considerar a estratégia de deploy reprodutível, a equipe deve validar:
 - [ ] Docker e pipeline registrados como evolução futura, sem arquivos de build ativando CI/CD nesta etapa;
 
 # 7. Projeto Visual da Solução
-_conteúdo_
+
+O projeto visual será desenvolvido na Sprint 5, junto com o frontend completo, conforme a estratégia de entrega da Seção 8.3.3. A Sprint 3 entrega apenas a interface básica de teste descrita na Seção 8.3.1, cuja finalidade é validar o fluxo de integração e não definir a identidade visual do produto.
 
 ## 7.1 Desenvolvimento de Wireframes
-_conteúdo_
+
+Será desenvolvido na Sprint 5.
 
 ## 7.2 Desenvolvimento de Mockups
-_conteúdo_
+
+Será desenvolvido na Sprint 5.
 
 ## 7.3 Guia Visual
-_conteúdo_
+
+Será desenvolvido na Sprint 5.
 
 # 8. Desenvolvimento do Projeto
 
 ## 8.1 Arquitetura de Codificação e Estrutura de Diretórios
-_conteúdo_
+
+O código-fonte fica em `src/`, separado por responsabilidade. A divisão segue as camadas do diagrama de componentes da Seção 5.2: o canal e a interface ficam no `frontend`, a orquestração e as integrações no `backend`, o núcleo de PLN em `notebooks` e o esquema de dados em `database`.
+
+```text
+src/
+├── backend/                    API FastAPI — orquestração e integrações
+│   ├── app/
+│   │   ├── main.py             rotas /health e /api/chat
+│   │   ├── gemini/             cliente do provedor de LLM
+│   │   │   ├── client.py       chamada, retry com backoff e mapeamento de erro
+│   │   │   └── schemas.py      contratos de entrada e saída (Pydantic)
+│   │   ├── rag/                recuperação de contexto
+│   │   │   ├── sharepoint.py   carga, busca e montagem do prompt com fontes
+│   │   │   └── data/sharepoint/ exports JSON simulados de listas do SharePoint
+│   │   └── tests/              testes automatizados (Seção 8.4)
+│   ├── requirements.txt
+│   └── .env.example            variáveis esperadas, sem segredos
+├── frontend/                   interface React + TypeScript (Vite)
+│   ├── src/
+│   │   ├── components/         componentes de tela e biblioteca de UI
+│   │   ├── hooks/              hooks reutilizáveis
+│   │   ├── lib/                cliente HTTP do backend e utilitários
+│   │   └── App.tsx
+│   └── vite.config.ts          proxy de /api para o backend em desenvolvimento
+├── database/
+│   ├── sql/                    criação, carga inicial e rollback
+│   └── docs/                   documentação dos scripts
+└── notebooks/                  núcleo de PLN
+    ├── classificador_intencoes_metro.ipynb
+    └── artefatos/              dataset, catálogo, modelo e métricas da execução
+```
+
+Três convenções sustentam essa organização.
+
+**Segredo não entra no repositório.** O backend lê credenciais de `.env`, versionado apenas como `.env.example`. A chave do provedor de LLM existe somente no servidor: o frontend chama `/api/chat` e nunca o provedor diretamente.
+
+**O contrato é declarado uma vez e replicado.** Os tipos de `app/gemini/schemas.py` têm correspondência direta em `frontend/src/lib/gemini-api.ts`. Quando um campo muda no backend, o `tsc --noEmit` do frontend acusa a divergência no build.
+
+**Dado sintético fica junto do código que o consome.** Os exports simulados de listas do SharePoint ficam em `app/rag/data/sharepoint/`, e não em uma base externa, para que a bancada de teste rode sem provisionamento. O diretório é substituível por variável de ambiente (`SHAREPOINT_MOCK_DATA_DIR`) quando houver fonte real.
 
 ## 8.2 Modelo de Recomendação
-_conteúdo_
+
+A solução não emprega um modelo de recomendação no sentido clássico — não há ranqueamento de itens por afinidade de usuário nem filtragem colaborativa, porque o produto não recomenda conteúdo: ele responde a solicitações sobre um portfólio de projetos.
+
+O componente de aprendizado de máquina do projeto é o **classificador de intenções**, documentado em detalhe na Seção 8.10. Ele cumpre a função que, na arquitetura, antecede qualquer recomendação: identifica o que a pessoa pediu, em dois níveis — macrointenção e intenção específica —, e decide para qual rota a solicitação segue (RF07).
+
+Existe um segundo mecanismo com característica de ranqueamento, descrito na Seção 5.3.1: a recuperação de contexto do RAG, implementada em `src/backend/app/rag/sharepoint.py`. Ela pontua os documentos disponíveis por sobreposição de termos com a pergunta, com peso adicional para correspondência no título, e devolve os mais bem pontuados como fontes da resposta. É recuperação de informação, não recomendação: o objetivo é fundamentar a resposta com origem declarada, e não sugerir conteúdo que a pessoa não pediu.
+
+A sugestão proativa de conteúdo — que seria, essa sim, uma recomendação — é o objeto do RF09 e do RF10, e permanece como decisão em aberto após a prototipação exploratória, conforme o inventário da Seção 3.8.6.1.
 
 ## 8.3 Planejamento estratégico de desenvolvimento
 
@@ -3109,12 +3286,78 @@ Também será a sprint de fechamento técnico e documental. A documentação do 
 Ao final da Sprint 5, a entrega esperada é uma solução integrada, demonstrável e documentada, acompanhada das evidências de teste, instruções de implantação e apresentação final para stakeholders. O objetivo principal será encerrar o projeto com qualidade, deixando claro o que foi implementado, quais limitações permanecem, quais aprendizados foram obtidos e quais caminhos de evolução podem ser seguidos após a prova de conceito.
 
 ## 8.4 Testes Unitários e de Integração
-_conteúdo_
-Obs.: Insira informações sobre estratégias para realização dos testes
+
+A Sprint 2 entregou a primeira bateria de testes automatizados do projeto, cobrindo a bancada de teste do caminho de consulta: recuperação de contexto e chamada ao provedor de LLM. O plano completo de testes sistêmicos — funcionais, de RNFs, de integração e de usabilidade — é entrega da Sprint 3 e será registrado na Seção 9.
+
+**Estratégia adotada.** Os testes isolam a fronteira de rede. A chamada HTTP ao provedor é substituída por um duplo de teste que injeta a resposta ou o erro desejado, de modo que a suíte roda sem chave de API, sem acesso à internet e de forma determinística. O que está sob teste é o código do projeto — mapeamento de contrato, política de retry, tratamento de erro e regra de recuperação —, e não a disponibilidade do serviço externo.
+
+**Ferramentas.** `pytest` como executor, `monkeypatch` para substituir `urlopen` e variáveis de ambiente, e os próprios modelos Pydantic para validar os contratos de entrada e saída.
+
+| Módulo | Teste | O que verifica |
+| --- | --- | --- |
+| `rag/sharepoint.py` | `test_loads_mock_sharepoint_list_exports` | Carrega os 9 itens das três listas simuladas, com identificador e URL preenchidos. |
+| | `test_retrieves_relevant_sharepoint_items` | Uma pergunta sobre objeto perdido recupera o procedimento correspondente como primeiro resultado. |
+| | `test_does_not_inject_context_for_unrelated_question` | Pergunta fora do domínio não recupera nada e o prompt segue sem contexto injetado — é a proteção contra fundamentar resposta em fonte irrelevante. |
+| | `test_builds_prompt_with_source_labels_and_disclaimer` | O prompt carrega o rótulo `[Fonte N]`, o aviso de dado fictício e a pergunta original, atendendo ao RNF04. |
+| `gemini/client.py` | `test_generate_chat_response_maps_text_context_and_usage` | Texto, identificador da interação e contagem de tokens são mapeados corretamente da resposta da API. |
+| | `test_generate_chat_response_requires_api_key` | Ausência de credencial falha de forma explícita, sem chamada de rede. |
+| | `test_generate_chat_response_injects_retrieved_sharepoint_context` | O contexto recuperado chega ao provedor dentro do prompt enviado. |
+| | `test_generate_chat_response_retries_with_exponential_backoff` | Falha transitória é repetida com espera crescente. |
+| | `test_generate_chat_response_stops_after_configured_retries` | O número de tentativas respeita o limite configurado, sem laço infinito. |
+| | `test_generate_chat_response_does_not_retry_permanent_http_error` | Erro permanente falha na primeira tentativa, sem consumir franquia do provedor. |
+
+**Execução.**
+
+```bash
+cd src/backend
+python -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m pytest app/tests -v
+```
+
+**Resultado da última execução:** 10 testes, 10 aprovados, em 0,21 s.
+
+```text
+app/tests/test_gemini_client.py::test_generate_chat_response_maps_text_context_and_usage PASSED
+app/tests/test_gemini_client.py::test_generate_chat_response_requires_api_key PASSED
+app/tests/test_gemini_client.py::test_generate_chat_response_injects_retrieved_sharepoint_context PASSED
+app/tests/test_gemini_client.py::test_generate_chat_response_retries_with_exponential_backoff PASSED
+app/tests/test_gemini_client.py::test_generate_chat_response_stops_after_configured_retries PASSED
+app/tests/test_gemini_client.py::test_generate_chat_response_does_not_retry_permanent_http_error PASSED
+app/tests/test_sharepoint_rag.py::test_loads_mock_sharepoint_list_exports PASSED
+app/tests/test_sharepoint_rag.py::test_retrieves_relevant_sharepoint_items PASSED
+app/tests/test_sharepoint_rag.py::test_does_not_inject_context_for_unrelated_question PASSED
+app/tests/test_sharepoint_rag.py::test_builds_prompt_with_source_labels_and_disclaimer PASSED
+
+============================== 10 passed in 0.21s ==============================
+```
+
+**Verificação do frontend.** O build executa `tsc --noEmit` antes do empacotamento, o que valida a aderência ao contrato do backend, e o lint roda com `--max-warnings=0`. Ambos passam sem erro nem aviso. Testes unitários por componente e automação de testes de interface são entrega da Sprint 5, conforme a Seção 8.3.3.
+
+**Cobertura ainda não atingida.** Não há teste do endpoint HTTP de ponta a ponta, nem teste de integração com serviço externo real, nem teste do pipeline de PLN dentro do serviço. Os três dependem de itens da Sprint 3 — endpoint de áudio, credencial do Azure AI Speech e carregamento do classificador no backend — e estão registrados no backlog da Seção 6.2 do `GestaoProjeto.md`.
 
 ## 8.5 Documentações automáticas
-_conteúdo_
-Obs.: Insira informações sobre quais frameworks foram usados e como acessar.
+
+O backend é implementado em FastAPI, que gera a especificação OpenAPI a partir dos modelos Pydantic declarados em `app/gemini/schemas.py`. Nenhuma anotação adicional é necessária: os contratos usados em tempo de execução são a mesma fonte que produz a documentação, o que impede que ela divirja do código.
+
+Com o servidor em execução, ficam disponíveis:
+
+| Recurso | Endereço local | Conteúdo |
+| --- | --- | --- |
+| Swagger UI | `http://127.0.0.1:8000/docs` | Documentação navegável, com formulário para executar as rotas. |
+| ReDoc | `http://127.0.0.1:8000/redoc` | Referência em formato de leitura, adequada para consulta. |
+| Especificação OpenAPI | `http://127.0.0.1:8000/openapi.json` | Contrato em JSON, utilizável para gerar clientes ou testes de contrato. |
+
+Para subir o servidor:
+
+```bash
+cd src/backend
+.venv/bin/python -m uvicorn app.main:app --reload
+```
+
+O título, a descrição e a versão exibidos são os declarados na instância `FastAPI` em `app/main.py`. Quando o endpoint de áudio da Seção 8.7 for implementado na Sprint 3, ele passará a aparecer automaticamente nas três interfaces, sem edição manual de documentação.
+
+No frontend não há geração automática de documentação: a descrição de estrutura, componentes e instruções de uso é entrega da Sprint 3, registrada no backlog da Seção 6.2 do `GestaoProjeto.md`.
 
 ## 8.6 Requisitos das APIs de voz (STT/TTS)
 
@@ -3265,7 +3508,7 @@ curl --request POST \
 | `transcription.text` | `string` | Texto reconhecido pelo serviço de Speech-to-Text. |
 | `transcription.confidence` | `float` | Confiança do reconhecimento, de 0 a 1. |
 | `intent.macro` | `string` | `CONSULTA`, `TRANSACAO`, `ALERTA` ou `FORA_DE_ESCOPO`. |
-| `intent.confidence_macro` | `float` | Confiança da macrointenção, comparada ao limiar de 0,925. |
+| `intent.confidence_macro` | `float` | Confiança da macrointenção, comparada ao limiar vigente no catálogo (0,550 na execução de referência da Seção 8.10.3). |
 | `answer.sources` | `array` | Fontes consultadas, registradas em `consulted_sources`. |
 
 ### 8.7.6 Códigos de resposta e tratamento de erro
@@ -3743,7 +3986,7 @@ Idêntica à já documentada para o STT (Seção 8.8.3): trocar a chave por um t
 
 Esta seção registra a escolha atual do pipeline de Processamento de Linguagem Natural responsável por classificar a solicitação do usuário. A implementação e o benchmark reproduzível estão no notebook [`classificador_intencoes_metro.ipynb`](../src/notebooks/classificador_intencoes_metro.ipynb).
 
-Embora seja referido de forma abreviada como “modelo híbrido W2V+BERT”, o componente é tecnicamente um pipeline: a representação híbrida gera os atributos de entrada, e classificadores lineares realizam a previsão em dois níveis — macrointenção e intenção específica.
+Embora seja referido de forma abreviada como “modelo híbrido”, o componente é tecnicamente um pipeline: a representação híbrida — TF-IDF de palavras e de caracteres reduzidos por SVD, Word2Vec treinado no corpus do projeto e embeddings BERT congelados — gera os atributos de entrada, e classificadores lineares realizam a previsão em dois níveis, macrointenção e intenção específica.
 
 ### 8.10.1 Objetivo e protocolo de avaliação
 
@@ -3759,11 +4002,45 @@ A seleção segue três etapas:
 
 ### 8.10.2 Benchmark e decisão
 
-O notebook compara TF-IDF de palavras, TF-IDF de caracteres, Word2Vec, embeddings BERT congelados e combinações híbridas. Também compara regressão logística e LinearSVC, além das arquiteturas plana e hierárquica. A tabela produzida pelo próprio script é ordenada pelo F1-macro de intenção na validação, evitando que a escolha seja definida previamente por preferência tecnológica.
+O notebook compara TF-IDF de palavras, TF-IDF de caracteres, Word2Vec, embeddings BERT congelados e três combinações híbridas, cada uma com regressão logística e LinearSVC — quatorze combinações no total. A tabela é produzida pelo próprio script e ordenada pelo F1-macro de intenção na validação, de modo que a escolha não é definida previamente por preferência tecnológica.
 
-Na execução completa de referência, a melhor alternativa foi a representação **Híbrido W2V+BERT**, seguida pela arquitetura **hierárquica**. O Word2Vec, treinado no corpus do projeto, captura relações distribucionais do vocabulário do portfólio. O BERT congelado acrescenta uma representação contextual pré-treinada, mais apta a aproximar formulações diferentes com significado semelhante. A concatenação combina esses sinais complementares e obteve o melhor resultado entre as alternativas avaliadas pelo script.
+Esta é a tabela da execução de referência, na íntegra:
 
-A arquitetura hierárquica primeiro prevê a macrointenção e depois utiliza um especialista para distinguir apenas as intenções daquele grupo. Essa divisão reduz o número de classes concorrentes em cada segunda etapa e se alinha ao roteamento esperado pelo agente. A escolha atual, portanto, não decorre apenas do uso de modelos semanticamente mais sofisticados, mas do resultado observado sob o mesmo protocolo de comparação.
+| # | Representação | Classificador | Acc. intenção | **F1-macro intenção** | Acc. macro | F1-macro macro |
+| :-: | --- | --- | ---: | ---: | ---: | ---: |
+| 1 | **Híbrido completo** | **LogReg** | 0,5415 | **0,5425** | 0,8036 | 0,8280 |
+| 2 | Híbrido W2V+BERT | LogReg | 0,5355 | 0,5332 | 0,8529 | 0,8486 |
+| 3 | BERT congelado | LogReg | 0,4905 | 0,4966 | 0,8391 | 0,8543 |
+| 4 | TF-IDF caracteres | LinearSVC | 0,4801 | 0,4878 | 0,7370 | 0,7543 |
+| 5 | TF-IDF caracteres | LogReg | 0,4784 | 0,4792 | 0,7517 | 0,7703 |
+| 6 | Híbrido completo | LinearSVC | 0,4645 | 0,4745 | 0,6964 | 0,6887 |
+| 7 | Híbrido W2V+BERT | LinearSVC | 0,4749 | 0,4670 | 0,7353 | 0,7396 |
+| 8 | TF-IDF palavras | LinearSVC | 0,4628 | 0,4652 | 0,7673 | 0,7721 |
+| 9 | BERT congelado | LinearSVC | 0,4567 | 0,4576 | 0,7656 | 0,7122 |
+| 10 | TF-IDF palavras | LogReg | 0,4394 | 0,4535 | 0,7292 | 0,7373 |
+| 11 | Híbrido lexical (palavras+chars) | LinearSVC | 0,4325 | 0,4421 | 0,6678 | 0,6786 |
+| 12 | Híbrido lexical (palavras+chars) | LogReg | 0,4291 | 0,4348 | 0,6877 | 0,6883 |
+| 13 | Word2Vec | LogReg | 0,4040 | 0,4052 | 0,7154 | 0,7087 |
+| 14 | Word2Vec | LinearSVC | 0,3469 | 0,3613 | 0,6462 | 0,6534 |
+
+A alternativa vencedora foi o **Híbrido completo** com regressão logística, que concatena quatro blocos de atributos: TF-IDF de palavras e de caracteres reduzidos por SVD, o Word2Vec treinado no corpus do projeto e os embeddings BERT congelados.
+
+A tabela sustenta três leituras que não eram evidentes antes de medir.
+
+**Nenhum bloco isolado vence.** O Word2Vec sozinho é a pior alternativa da tabela (0,4052), e ainda assim sua presença separa o primeiro colocado do segundo. O BERT congelado sozinho fica em terceiro (0,4966), acima de qualquer representação puramente lexical. A combinação supera cada parte porque os sinais são complementares: o lexical captura a forma escrita, incluindo abreviação e erro de digitação; o BERT aproxima formulações diferentes com significado semelhante.
+
+**A margem sobre o segundo colocado é estreita.** O Híbrido completo supera o Híbrido W2V+BERT por 0,0093 de F1-macro — diferença pequena o bastante para não sustentar afirmação de superioridade robusta. O que a tabela autoriza dizer é que o vencedor é uma combinação híbrida, e não qual delas em definitivo. Vale notar que o segundo colocado tem F1-macro de macrointenção superior ao do primeiro (0,8486 contra 0,8280), o que reforça a leitura de empate técnico no nível macro.
+
+**A regressão logística supera o LinearSVC em quase toda a tabela.** A exceção é o TF-IDF de caracteres, onde o LinearSVC fica marginalmente à frente. Como o roteamento depende de confiança calibrada para aplicar limiares — e não apenas do rótulo previsto —, a saída probabilística da regressão logística é também a que serve ao RF07.
+
+Em seguida, o script compara as duas arquiteturas usando a representação vencedora:
+
+| Arquitetura | Acc. intenção | F1-macro intenção | Acc. macro | F1-macro macro |
+| --- | ---: | ---: | ---: | ---: |
+| Plana (31 classes) | 0,5415 | 0,5425 | 0,8036 | 0,8280 |
+| **Hierárquica (macro → específica)** | **0,6306** | **0,6282** | **0,9196** | **0,9037** |
+
+O ganho da arquitetura hierárquica é substancial e maior que qualquer diferença entre representações: 0,0857 de F1-macro na intenção específica. A explicação é estrutural — prever primeiro a macrointenção e depois acionar um especialista treinado apenas com as intenções daquele grupo reduz o número de classes concorrentes na segunda etapa, e alinha o modelo ao roteamento que o agente de fato executa.
 
 ### 8.10.3 Configuração e resultados atuais
 
@@ -3777,23 +4054,44 @@ A configuração selecionada na execução de referência foi:
 | Stopwords | preservadas |
 | Pontuação | removida |
 | Morfologia | stemming Snowball em português |
-| Representação | Híbrido W2V+BERT |
+| Representação | Híbrido completo (TF-IDF palavras + TF-IDF caracteres + Word2Vec + BERT congelado) |
 | Arquitetura | hierárquica |
 | Classificador | regressão logística |
-| Hiperparâmetros | `C=5.0`; `class_weight=balanced` |
-| Limiar de macrointenção | 0,925 |
-| Limiar de intenção específica | 0,950 |
+| Hiperparâmetros | `C=0.5`; `class_weight=balanced` |
+| Limiar de macrointenção | 0,550 |
+| Limiar de intenção específica | 0,700 |
 
-A preservação de stopwords é relevante porque palavras como “qual”, “quando”, “quanto” e “quem” carregam informação útil para distinguir solicitações. Os limiares altos tornam o comportamento conservador: previsões pouco confiáveis não devem acionar diretamente um handler específico.
+A `config_22` foi escolhida por validação cruzada agrupada sobre o treino, entre 72 combinações avaliadas, com F1-macro de 0,3532. A preservação de stopwords é relevante porque palavras como "qual", "quando", "quanto" e "quem" carregam informação útil para distinguir solicitações — e a grade confirma o efeito: as quatro melhores médias por família de configuração mantêm stopwords, e as quatro piores as removem.
+
+Os limiares não foram arbitrados: são calibrados na validação por um procedimento que busca a maior cobertura compatível com uma acurácia-alvo entre os pedidos aceitos. O de macrointenção mirava 97% de acerto e chegou a 93,2% com 97,4% de cobertura — a meta **não** foi atingida, e isso está registrado na saída do notebook. O de intenção específica mirava 80% e atingiu 80,7%, com cobertura de 57,7%.
 
 | Conjunto | Acurácia da intenção | F1-macro da intenção | Acurácia da macro | F1-macro da macro |
 |---|---:|---:|---:|---:|
-| Validação | 0,5666 | 0,5665 | 0,9083 | 0,8885 |
-| Teste | **0,6740** | **0,6777** | **0,9383** | **0,9379** |
+| Validação | 0,6332 | 0,6270 | 0,9135 | 0,9115 |
+| Teste | **0,7383** | **0,7401** | **0,9551** | **0,9477** |
 
-Os resultados indicam que o primeiro nível está mais maduro: no teste, a macrointenção atingiu F1-macro de 0,9379, enquanto a intenção específica atingiu 0,6777. Assim, o pipeline já apresenta um sinal forte para roteamento geral, mas ainda possui desempenho moderado na escolha do handler específico.
+Os resultados indicam que o primeiro nível está mais maduro: no teste, a macrointenção atingiu F1-macro de 0,9477, enquanto a intenção específica atingiu 0,7401. O pipeline já apresenta sinal forte para o roteamento geral, mas desempenho moderado na escolha do handler específico.
 
-A execução de referência gerou o classificador serializado (aproximadamente 13.188 KB), o modelo Word2Vec (aproximadamente 925 KB), o catálogo de intenções, o conjunto de dados e o arquivo de métricas. O encoder BERT pré-treinado não está incorporado ao arquivo `joblib` e deve ser carregado separadamente pelo ambiente de inferência.
+O desempenho por macrointenção no teste é homogêneo, com precisão entre 0,932 e 1,000:
+
+| Macrointenção | Precisão | Recall | F1 | Suporte |
+|---|---:|---:|---:|---:|
+| ALERTA | 1,000 | 0,946 | 0,972 | 202 |
+| CONSULTA | 0,940 | 0,963 | 0,952 | 492 |
+| FORA_DE_ESCOPO | 0,932 | 0,891 | 0,911 | 46 |
+| TRANSACAO | 0,955 | 0,957 | 0,956 | 395 |
+
+**Aderência ao RNF06.** O requisito exige F1-macro igual ou superior a 0,80 na classificação de intenções. No nível de macrointenção o critério é atendido com folga (0,9477). No nível de intenção específica, **não é**: 0,7401 está abaixo do limiar exigido. É por isso que o limiar de confiança existe — ele converte a incerteza em fluxo genérico em vez de handler errado. Fechar essa lacuna é trabalho da Sprint 3.
+
+**Efeito prático dos limiares no teste.** Aplicando 0,550 e 0,700 aos 1.135 pedidos do conjunto de teste:
+
+- 14 pedidos (1,2%) ficam abaixo do limiar de macrointenção e recebem a resposta de limitação;
+- 305 pedidos (26,9%) são roteados pela macrointenção mas tratados pelo fluxo genérico, sem acionar um handler específico de baixa confiança;
+- entre os aceitos, a acurácia sobe de 0,7383 para 0,8775 na intenção específica e para 0,9634 na macrointenção.
+
+Esse é o comportamento conservador exigido pelo RNF04 e pelo RNF11: o custo de 26,9% de cobertura reduzida no handler específico compra um ganho de quase 14 pontos de acurácia entre as decisões efetivamente tomadas.
+
+A execução de referência gerou o classificador serializado (13.472 KB), o modelo Word2Vec (922 KB), o catálogo de intenções, o conjunto de dados e o arquivo de métricas. Dois componentes **não** estão embutidos no arquivo `joblib` e devem ser carregados separadamente pelo ambiente de inferência: o encoder BERT pré-treinado e o modelo Word2Vec. O `joblib` guarda os vetorizadores TF-IDF, as reduções SVD, os escaladores ajustados, o classificador hierárquico, os limiares e o mapa de intenção para macrointenção.
 
 ### 8.10.4 Bibliotecas, configuração e exemplos de código
 
@@ -3915,71 +4213,106 @@ X = vetorizar(["qual o prazo do projeto de modernização da linha 1"])
 print(modelo.predict_proba(X).max(), modelo.predict(X))
 ```
 
-Entrada e saída esperadas:
+Saída real da execução de referência, reproduzida do notebook:
+
+```text
+[CONSULTA       1.00] quanto já foi gasto na obra da Linha 6?
+    -> handler:consulta_orcamento_custo (conf. intenção = 1.00)
+       alternativas: [('consulta_orcamento_custo', 0.9978), ('consulta_visao_portfolio', 0.0006), ...]
+
+[ALERTA         1.00] me avisa se o projeto de sinalização atrasar mais de uma semana
+    -> handler:alerta_prazo_atraso (conf. intenção = 1.00)
+       alternativas: [('alerta_prazo_atraso', 0.9999), ('alerta_gerenciar_inscricao', 0.0001), ...]
+
+[CONSULTA       0.74] prorroga o prazo do PRJ-0442 até março
+    -> handler:consulta_cronograma_prazo (conf. intenção = 0.73)
+       alternativas: [('consulta_cronograma_prazo', 0.7321), ('transacao_atualizar_cronograma', 0.1417), ...]
+
+[TRANSACAO      1.00] gera um relatório executivo do subportfólio de modernização
+    -> handler:transacao_gerar_relatorio (conf. intenção = 1.00)
+
+[FORA_DE_ESCOPO 1.00] bom dia, tudo certo?
+    -> fluxo genérico
+```
 
 | Entrada | Macrointenção | Intenção específica | Confiança | Encaminhamento |
 |---|---|---|---:|---|
-| "qual o prazo do projeto de modernização da linha 1" | `CONSULTA` | `consulta_prazo_projeto` | 0,94 | Rota de consulta com RAG |
-| "cadastra o mapa de benefícios do programa de expansão" | `TRANSACAO` | `transacao_mapa_beneficios` | 0,91 | Fluxo funcional no Copilot Studio |
-| "qual a previsão do tempo amanhã" | `FORA_DE_ESCOPO` | — | 0,88 | Resposta de limitação, registrada em `out_of_scope_requests` |
-| "me fala sobre a linha 1" | `CONSULTA` | abaixo do limiar de 0,950 | 0,62 | Pedido de reformulação, sem acionar handler |
+| "quanto já foi gasto na obra da Linha 6?" | `CONSULTA` | `consulta_orcamento_custo` | 1,00 | Rota de consulta com RAG |
+| "me avisa se o projeto de sinalização atrasar mais de uma semana" | `ALERTA` | `alerta_prazo_atraso` | 1,00 | Fluxo de alerta |
+| "gera um relatório executivo do subportfólio de modernização" | `TRANSACAO` | `transacao_gerar_relatorio` | 1,00 | Fluxo funcional no Copilot Studio |
+| "compare a execução orçamentária da Linha 2 com a da Linha 15" | `CONSULTA` | `comparacao_entre_projetos` | 0,98 | Rota de comparação com RAG |
+| "bom dia, tudo certo?" | `FORA_DE_ESCOPO` | — | 1,00 | Resposta de limitação, registrada em `out_of_scope_requests` |
+| "prorroga o prazo do PRJ-0442 até março" | `CONSULTA` | `consulta_cronograma_prazo` | 0,73 | Acima do limiar de 0,700, mas é um **erro de classificação** |
 
-O último caso é o comportamento conservador descrito na Seção 8.10.3: quando a confiança da intenção específica fica abaixo do limiar, o pipeline não escolhe um handler, e sim devolve o pedido de reformulação.
+O último caso merece registro porque é um erro real, e não um exemplo escolhido para ilustrar sucesso. "Prorroga o prazo" é um pedido de alteração — deveria ser `TRANSACAO` / `transacao_atualizar_cronograma`, que aparece como segunda alternativa com 0,1417. O modelo classificou como consulta de cronograma com 0,73 de confiança, acima do limiar de 0,700, de modo que o handler **seria acionado**. É exatamente o tipo de confusão que o F1-macro de 0,7401 na intenção específica resume, e a razão pela qual a Seção 8.10.5 trata a validação com solicitações reais como pré-requisito, e não como refinamento.
 
 ### 8.10.5 Limitações e próximos passos
 
 Os números atuais devem ser interpretados com as seguintes ressalvas:
 
-- os prompts são majoritariamente sintéticos e derivados de templates; o agrupamento reduz vazamento entre variações, mas não substitui uma avaliação externa com solicitações reais;
-- o Word2Vec é treinado em apenas 3.062 exemplos, o que limita a cobertura do vocabulário e das relações semânticas do domínio;
-- o BERT é usado como extrator de embeddings congelado, sem ajuste supervisionado para as intenções do projeto;
-- a diferença entre validação e teste reflete conjuntos de templates distintos e não deve ser interpretada como garantia de melhora futura;
-- os limiares de 0,925 e 0,950 priorizam segurança, mas podem reduzir a cobertura e aumentar respostas de limitação;
-- o desempenho agregado pode ocultar intenções individuais com poucos acertos, exigindo acompanhamento por classe e análise das matrizes de confusão;
-- a inferência depende do carregamento coordenado do classificador, do Word2Vec e do encoder BERT, aspecto que deverá ser formalizado no serviço de produção.
+- os prompts são majoritariamente sintéticos e derivados de templates; o agrupamento por `template_id` reduz o vazamento entre variações, mas não substitui uma avaliação externa com solicitações reais;
+- o vocabulário do corpus é pequeno — 577 termos no TF-IDF ajustado só com o treino —, e o Word2Vec treinado sobre 3.062 exemplos herda esse limite, com 6,2% de tokens fora do vocabulário no teste;
+- o BERT é usado como extrator de embeddings congelado, sem ajuste supervisionado para as intenções do projeto; o notebook prevê o fine-tuning do BERTimbau, mas a célula permanece desativada por exigir GPU;
+- a vantagem do Híbrido completo sobre o Híbrido W2V+BERT é de 0,0093 de F1-macro, insuficiente para afirmar superioridade robusta entre as duas combinações;
+- o F1-macro de 0,7401 na intenção específica **não atende** ao mínimo de 0,80 exigido pelo RNF06; apenas o nível de macrointenção atende;
+- o limiar de macrointenção não alcançou o alvo de 97% de acurácia entre os aceitos, ficando em 93,2%;
+- os limiares priorizam segurança e custam cobertura: 26,9% dos pedidos do teste são tratados pelo fluxo genérico em vez de um handler específico;
+- o desempenho agregado oculta intenções individuais fracas — `analise_tendencia_desempenho`, por exemplo, tem F1 de 0,299 no teste, e `alerta_estouro_orcamento` tem recall de 0,548 apesar de precisão 1,000;
+- a inferência depende do carregamento coordenado de três artefatos — o `joblib`, o Word2Vec e o encoder BERT —, aspecto que deverá ser formalizado no serviço de produção.
 
-Como próximos passos, o grupo deve coletar solicitações reais com usuários do domínio, manter um conjunto externo de teste, medir cobertura e acurácia após a aplicação dos limiares, revisar as classes com maior confusão e comparar novamente as alternativas. Até essa validação, o híbrido W2V+BERT deve ser entendido como o **vencedor do benchmark atual** e a escolha do grupo para o MVP, não como um modelo definitivamente validado para produção.
+Como próximos passos, o grupo deve coletar solicitações reais com usuários do domínio, manter um conjunto externo de teste, revisar as classes com maior confusão — em especial a fronteira entre consulta e transação evidenciada no exemplo de erro da Seção 8.10.4 —, avaliar o fine-tuning do BERTimbau e medir cobertura e acurácia após a aplicação dos limiares. Até essa validação, o híbrido completo deve ser entendido como o **vencedor do benchmark atual** e a escolha do grupo para o MVP, não como um modelo validado para produção.
 
+**Reprodutibilidade.** Os resultados desta seção vêm de uma execução completa do notebook, cujas saídas estão versionadas nas células do próprio arquivo. A semente é fixada em todas as etapas com aleatoriedade. O ambiente da execução de referência usou Python 3.9, scikit-learn 1.6.1, gensim 4.4.0, torch 2.8.0 e sentence-transformers 5.1.2. Quando `gensim` ou `torch` não estão disponíveis, o notebook degrada silenciosamente: as representações que dependem deles são removidas da comparação e o benchmark elege um vencedor entre as restantes. Uma execução nessas condições produz números diferentes dos registrados aqui, e a tabela da Seção 8.10.2 deixa de conter as linhas de Word2Vec, BERT e híbridos.
 
+A célula do Word2Vec emite em `stderr` a linha `Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'`. É um aviso conhecido da rotina compilada do `gensim` em combinação com a versão do NumPy do ambiente, e não interrompe o treinamento: o vocabulário é construído com os 577 termos do treino e os vetores são gerados nas dimensões esperadas, conforme a saída da própria célula. O aviso está preservado na execução versionada em vez de suprimido, para que o registro corresponda ao que a execução produziu.
 
 # 9. Planejamento e Execução de Testes
-_conteúdo_
+
+O planejamento dos testes sistêmicos é entrega da Sprint 3, e a execução ocorre na Sprint 4, conforme as Seções 8.3.1 e 8.3.2. As tasks correspondentes já estão detalhadas, estimadas e sequenciadas no backlog da Seção 6.2 do `GestaoProjeto.md`.
+
+Os testes automatizados já existentes nesta sprint — da bancada de teste do caminho de consulta — estão documentados na Seção 8.4.
 
 ## 9.1 Testes Funcionais
-_conteúdo_
 
 ### 9.1.1 Planejamento
-_conteúdo_
+
+Será desenvolvido na Sprint 3, derivado de RF01 a RF10, com cenários positivos e negativos por requisito.
 
 ### 9.1.2 Resultados
-_conteúdo_
+
+Será executado na Sprint 4.
 
 ## 9.2 Testes de RNFs
-_conteúdo_
 
 ### 9.2.1 Planejamento
-_conteúdo_
+
+Será desenvolvido na Sprint 3, incluindo obrigatoriamente os testes de desempenho, com meta, ferramenta e critério de aprovação declarados.
 
 ### 9.2.2 Resultados
-_conteúdo_
+
+Será executado na Sprint 4.
 
 ## 9.3 Testes de Usabilidade
-_conteúdo_
 
 ### 9.3.1 Planejamento
-_conteúdo_
+
+Será desenvolvido na Sprint 3: roteiro com cenários, perfis dos cinco participantes externos e questionário SUS.
 
 ### 9.3.2 Resultados
-_conteúdo_
+
+Será executado na Sprint 4.
 
 # 10. Procedimentos de Implantação
-_conteúdo_
+
+O processo de implantação proposto, as variáveis de ambiente previstas, os comandos de execução local e as pendências de provisionamento estão registrados na Seção 6.2. Esta seção recebe os procedimentos efetivamente executados, com capturas de tela e evidências, quando o deploy for realizado na Sprint 4, conforme a Seção 8.3.2.
 
 ## 10.1 Implantação e Configuração do Banco de Dados
-_conteúdo_
+
+Os scripts de criação, carga inicial e rollback já estão versionados em [`src/database/sql`](../src/database/sql) e descritos na Seção 4.4. O registro da execução em ambiente de nuvem será feito na Sprint 4.
 
 ## 10.2 Implantação do Protótipo para uso por equipe de desenvolvimento
-_conteúdo_
+
+As instruções de execução local do backend e do frontend estão na Seção 6.2.8. O manual de implantação da PoC será consolidado na Sprint 4.
 
 # Referências
 - Microsoft. [Preços do Azure AI Speech](https://azure.microsoft.com/en-us/pricing/details/speech/). Acesso em: 19 ago. 2026.
