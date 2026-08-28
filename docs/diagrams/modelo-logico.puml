@@ -1,0 +1,225 @@
+@startuml modelo-logico
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 55
+skinparam class {
+  BackgroundColor #EEF4FD
+  BorderColor #4A7EBB
+  ArrowColor #4A5560
+  FontSize 12
+  AttributeFontSize 10
+}
+hide circle
+left to right direction
+
+entity subportfolios {
+  **id** : uuid <<PK>>
+  code : string
+  name : string
+  description : text
+  strategic_objective : text
+}
+entity projects {
+  **id** : uuid <<PK>>
+  subportfolio_id : uuid <<FK>>
+  code : string
+  name : string
+  description : text
+  status : string
+  current_phase : string
+  planned_end_date : date
+  sharepoint_site_url : string
+}
+entity project_artifacts {
+  **id** : uuid <<PK>>
+  project_id : uuid <<FK>>
+  artifact_type : string
+  title : string
+  sharepoint_url : string
+  excel_sheet_name : string
+  excel_table_or_range : string
+  confidentiality_level : string
+  metadata : json
+}
+entity source_extracts {
+  **id** : uuid <<PK>>
+  artifact_id : uuid <<FK>>
+  project_id : uuid <<FK>>
+  extract_index : int
+  content_text : text
+  source_locator : string
+  sharepoint_reference : string
+  source_sheet_name : string
+  source_row_number : int
+  source_cell_range : string
+}
+entity schedule_items {
+  **id** : uuid <<PK>>
+  project_id : uuid <<FK>>
+  artifact_id : uuid <<FK>>
+  parent_item_id : uuid <<FK>>
+  wbs_code : string
+  activity_name : string
+  responsible_name : string
+  planned_end_date : date
+  actual_end_date : date
+  progress_percent : decimal
+  status : string
+  source_row_number : int
+}
+entity project_status_updates {
+  **id** : uuid <<PK>>
+  project_id : uuid <<FK>>
+  artifact_id : uuid <<FK>>
+  reference_date : date
+  overall_status : string
+  progress_percent : decimal
+  executive_summary : text
+}
+entity risk_issue_items {
+  **id** : uuid <<PK>>
+  project_id : uuid <<FK>>
+  source_artifact_id : uuid <<FK>>
+  item_type : string
+  title : string
+  severity : string
+  status : string
+}
+entity change_records {
+  **id** : uuid <<PK>>
+  project_id : uuid <<FK>>
+  source_artifact_id : uuid <<FK>>
+  change_type : string
+  status : string
+}
+entity users {
+  **id** : uuid <<PK>>
+  entra_object_id : string
+  display_name : string
+  email : string
+  role_name : string
+}
+entity access_rules {
+  **id** : uuid <<PK>>
+  user_id : uuid <<FK>>
+  subportfolio_id : uuid <<FK>>
+  project_id : uuid <<FK>>
+  role_name : string
+  permission_scope : string
+  can_read : boolean
+  can_write : boolean
+}
+entity intent_catalog {
+  **id** : uuid <<PK>>
+  macro_intent : string
+  specific_intent : string
+  flow_description : string
+  target_component : string
+  handler_name : string
+  macro_confidence_threshold : decimal
+  intent_confidence_threshold : decimal
+  is_active : boolean
+}
+entity prompt_templates {
+  **id** : uuid <<PK>>
+  intent_id : uuid <<FK>>
+  template_key : string
+  title : string
+  prompt_text : text
+  channel : string
+  purpose : string
+}
+entity ai_conversations {
+  **id** : uuid <<PK>>
+  user_id : uuid <<FK>>
+  channel : string
+  conversation_status : string
+}
+entity ai_interactions {
+  **id** : uuid <<PK>>
+  conversation_id : uuid <<FK>>
+  user_id : uuid <<FK>>
+  intent_id : uuid <<FK>>
+  prompt_template_id : uuid <<FK>>
+  user_prompt : text
+  normalized_prompt : text
+  macro_intent_predicted : string
+  macro_intent_confidence : decimal
+  specific_intent_predicted : string
+  specific_intent_confidence : decimal
+  handler_selected : string
+  route_taken : string
+  top_k_alternatives : json
+  limitation_response : text
+  response_text : text
+  processing_status : string
+}
+entity consulted_sources {
+  **id** : uuid <<PK>>
+  interaction_id : uuid <<FK>>
+  artifact_id : uuid <<FK>>
+  extract_id : uuid <<FK>>
+  project_id : uuid <<FK>>
+  source_type : string
+  source_title : string
+  source_url : string
+  source_locator : string
+  citation_order : int
+}
+entity audit_events {
+  **id** : uuid <<PK>>
+  interaction_id : uuid <<FK>>
+  user_id : uuid <<FK>>
+  event_type : string
+  component : string
+  correlation_id : string
+}
+entity out_of_scope_requests {
+  **id** : uuid <<PK>>
+  interaction_id : uuid <<FK>>
+  reviewed_by : uuid <<FK>>
+  user_prompt : text
+  reason : text
+  review_status : string
+}
+entity intent_test_cases {
+  **id** : uuid <<PK>>
+  intent_id : uuid <<FK>>
+  raw_text : text
+  normalized_text : text
+  template_id : string
+  surface_variation : string
+  dataset_split : string
+  leakage_group : string
+}
+subportfolios "1" -- "0..*" projects : possui
+projects "1" -- "0..*" project_artifacts : possui
+projects "1" -- "0..*" source_extracts : contextualiza
+project_artifacts "1" -- "0..*" source_extracts : gera
+projects "1" -- "0..*" schedule_items : possui
+project_artifacts "1" -- "0..*" schedule_items : origina
+schedule_items "1" -- "0..*" schedule_items : detalha
+projects "1" -- "0..*" project_status_updates : acompanha
+project_artifacts "1" -- "0..*" project_status_updates : fundamenta
+projects "1" -- "0..*" risk_issue_items : monitora
+project_artifacts "1" -- "0..*" risk_issue_items : fundamenta
+projects "1" -- "0..*" change_records : controla
+project_artifacts "1" -- "0..*" change_records : fundamenta
+users "1" -- "0..*" access_rules : possui
+users "1" -- "0..*" ai_conversations : inicia
+users "1" -- "0..*" ai_interactions : realiza
+users "1" -- "0..*" audit_events : executa
+users "1" -- "0..*" out_of_scope_requests : revisa
+intent_catalog "1" -- "0..*" prompt_templates : orienta
+intent_catalog "1" -- "0..*" ai_interactions : classifica
+intent_catalog "1" -- "0..*" intent_test_cases : valida
+prompt_templates "1" -- "0..*" ai_interactions : orienta
+ai_conversations "1" -- "0..*" ai_interactions : contem
+ai_interactions "1" -- "0..*" consulted_sources : usa
+project_artifacts "1" -- "0..*" consulted_sources : referencia
+source_extracts "1" -- "0..*" consulted_sources : referencia
+projects "1" -- "0..*" consulted_sources : contextualiza
+ai_interactions "1" -- "0..*" audit_events : registra
+ai_interactions "1" -- "0..*" out_of_scope_requests : gera
+@enduml

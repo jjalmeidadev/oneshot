@@ -1,0 +1,40 @@
+{
+  "melhor_config_preprocessamento": {
+    "nome": "config_22",
+    "lowercase": "True",
+    "tokenizer": "regex",
+    "remove_stopwords": "False",
+    "remove_punctuation": "True",
+    "morphology": "stemming",
+    "ngram_range": "None",
+    "language": "portuguese",
+    "stemmer_type": "snowball",
+    "regex_pattern": "[^\\W_]+"
+  },
+  "melhor_representacao": "Híbrido completo",
+  "arquitetura": "hierárquica",
+  "hiperparametros": {
+    "C": "0.5",
+    "class_weight": "balanced"
+  },
+  "limiar_macro": 0.5500000000000003,
+  "limiar_intencao": 0.7000000000000003,
+  "teste": {
+    "acc_intencao": 0.7383,
+    "f1_intencao": 0.7401,
+    "acc_macro": 0.9551,
+    "f1_macro": 0.9477
+  },
+  "validacao": {
+    "acc_intencao": 0.6332,
+    "f1_intencao": 0.627,
+    "acc_macro": 0.9135,
+    "f1_macro": 0.9115
+  },
+  "tamanhos": {
+    "treino": 3062,
+    "validacao": 1156,
+    "teste": 1135
+  },
+  "protocolo": "split agrupado por template_id; transformadores ajustados apenas no treino"
+}
