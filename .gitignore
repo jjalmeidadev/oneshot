@@ -31,3 +31,33 @@ yarn-error.log*
 Thumbs.db
 .idea/
 *.swp
+
+# Environment & Secrets (AIOX)
+.env.local
+.env.*.local
+*.key
+*.pem
+.env.example
+
+
+# Dependencies (AIOX)
+node_modules
+
+# Build & Logs (AIOX)
+*.log
+logs/
+
+# AIOX Local (AIOX)
+.aiox-core/local/
+.claude/settings.local.json
+.aiox/install-log.txt
+.aiox-core
+.claude
+.codex
+.gemini
+.antigravity
+.cursor
+.github
+.kimi
+.agent
+AGENTS.md
