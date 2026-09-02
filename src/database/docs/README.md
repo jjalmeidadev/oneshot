@@ -6,12 +6,12 @@ Este arquivo centraliza a documentação técnica dos scripts de banco de dados 
 
 O primeiro script disponível:
 
-- `../01_create_database.sql`: cria o modelo físico inicial com tabelas, chaves primárias, chaves estrangeiras, restrições, índices e comentários.
+- `../sql/01_create_database.sql`: cria o modelo físico inicial com tabelas, chaves primárias, chaves estrangeiras, restrições, índices e comentários.
 
 Scripts previstos para evolução:
 
-- `../02_initial_data.sql`: carga inicial de dados sintéticos;
-- `../03_rollback_data.sql`: desfaz a criação ou alterações de estrutura quando houver necessidade de retorno controlado;
+- `../sql/02_initial_data.sql`: carga inicial de dados sintéticos;
+- `../sql/03_rollback_data.sql`: desfaz a criação ou alterações de estrutura quando houver necessidade de retorno controlado;
 - scripts incrementais de migração, caso o modelo evolua nas próximas sprints.
 
 ## Banco-alvo
@@ -56,6 +56,6 @@ A Seção 4 de `docs/Projeto.md` descreve:
 
 - Modelo conceitual: entidades e relacionamentos de negócio;
 - Modelo lógico: tabelas, atributos, PKs, FKs e regras de integridade;
-- Modelo físico: referência ao script `src/database/01_create_database.sql`.
+- Modelo físico: referência ao script `src/database/sql/01_create_database.sql`.
 
 Esta pasta complementa essa seção com instruções técnicas dos scripts executáveis.
