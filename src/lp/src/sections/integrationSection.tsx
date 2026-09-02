@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { GLASS, GLASS_INTERACTIVE } from "@/lib/styles";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -92,6 +93,14 @@ export default function IntegrationSection() {
                 },
             });
 
+            gsap.from("[data-integration-cta]", {
+                y: 24,
+                opacity: 0,
+                duration: 0.8,
+                ease: "power3.out",
+                scrollTrigger: { trigger: "[data-integration-cta]", start: "top 92%" },
+            });
+
             gsap.from("[data-integration-card]", {
                 y: 40,
                 opacity: 0,
@@ -108,6 +117,18 @@ export default function IntegrationSection() {
     const focusCard = (id: string) => {
         setExpanded(id);
         cardsRef.current[id]?.scrollIntoView({ behavior: "smooth", block: "center" });
+    };
+
+    // Volta para o chat em tela cheia. O alvo é o topo da seção alta que
+    // segura o chat: nesse ponto a expansão já terminou e a janela está
+    // presa na tela, pronta para conversar.
+    const goToChat = () => {
+        const stage = document.querySelector<HTMLElement>("[data-try-section]")?.parentElement;
+        if (!stage) return;
+        window.scrollTo({
+            top: window.scrollY + stage.getBoundingClientRect().top + 40,
+            behavior: "smooth",
+        });
     };
 
     return (
@@ -211,6 +232,28 @@ export default function IntegrationSection() {
                         </div>
                     );
                 })}
+            </div>
+
+            {/* Fechamento da página: a única ação que de fato já existe hoje é
+                conversar com o assistente, então é para lá que o CTA leva. */}
+            <div
+                data-integration-cta
+                className="mx-auto flex w-full max-w-6xl flex-col items-center gap-4 px-6 text-center md:px-16"
+            >
+                <p className="text-lg font-medium text-indigo-300 lg:text-xl">
+                    Quer ver o OneShot respondendo sobre o seu portfólio?
+                </p>
+                <button
+                    type="button"
+                    onClick={goToChat}
+                    className={cn(
+                        "group flex cursor-pointer items-center gap-3 px-8 py-4 text-base font-medium text-white",
+                        GLASS,
+                        GLASS_INTERACTIVE,
+                    )}
+                >
+                    Experimente o agente
+                </button>
             </div>
         </section>
     );

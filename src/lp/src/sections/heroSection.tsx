@@ -59,7 +59,7 @@ function HeroSection() {
             </h1>
             <p
                 data-hero-subtitle
-                className="max-w-2xl text-lg text-gray-200 sm:text-2xl"
+                className="max-w-2xl text-lg text-indigo-300 font-medium sm:text-xl"
             >
                 Descubra como o OneShot pode transformar sua experiência de trabalho
             </p>

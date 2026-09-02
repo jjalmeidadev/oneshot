@@ -19,7 +19,7 @@ export default function TrySection() {
                     data-try-heading
                     className="flex max-w-2xl shrink-0 flex-col items-center gap-2 text-center opacity-0"
                 >
-                           <h2 className="text-3xl font-thin text-white lg:text-4xl">
+                           <h2 className="text-3xl font-medium text-white lg:text-4xl">
                         Converse com o OneShot
                     </h2>
                 </div>

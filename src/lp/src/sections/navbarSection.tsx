@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import AnimatedNavLink from "@/components/navbar/navbar";
 import { cn } from "@/lib/utils";
+import { GLASS } from "@/lib/styles";
 
 /** `target: null` = topo da página; senão, o seletor da seção de destino. */
 const LINKS = [
@@ -73,15 +74,18 @@ function NavbarSection() {
     );
 
     const hidden = overTakeover || !visible;
-    const shell =
-        "flex items-center rounded-2xl border border-white/10 bg-white/5 shadow-lg backdrop-blur-xl";
+    const shell = cn("flex items-center", GLASS);
 
     return (
         <div
             className={cn(
-                "fixed inset-x-0 top-4 z-50 grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 transition-[opacity,transform] duration-500 ease-out md:px-8",
-                hidden && "pointer-events-none -translate-y-24 opacity-0",
+                "fixed inset-x-0 top-4 z-50 grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 md:px-8",
+                hidden && "pointer-events-none  opacity-0",
             )}
+            // Fade puro: opacidade e o mínimo de deslocamento correm juntos e
+            // na mesma curva. Sequenciar os dois fazia a barra saltar para
+            // cima no fim do fade, que era justamente o que se queria evitar.
+            style={{ transition: "opacity 450ms ease-out, transform 450ms ease-out" }}
             aria-hidden={hidden}
         >
             {/* Logo do Inteli e wordmark do OneShot ficam soltos nas pontas,
