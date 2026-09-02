@@ -4308,7 +4308,7 @@ O processo de implantação proposto, as variáveis de ambiente previstas, os co
 
 ## 10.1 Implantação e Configuração do Banco de Dados
 
-Os scripts de criação, carga inicial e rollback já estão versionados em [`src/database/sql`](../src/database/sql) e descritos na Seção 4.4. O registro da execução em ambiente de nuvem será feito na Sprint 4.
+O script de criação do modelo físico está versionado em [`src/database/sql/01_create_database.sql`](../src/database/sql/01_create_database.sql) e descrito na Seção 4.4. Os scripts de carga inicial e de rollback estão previstos no mesmo diretório e serão preenchidos junto com a massa sintética, conforme registrado em [`src/database/docs/README.md`](../src/database/docs/README.md). O registro da execução em ambiente de nuvem será feito na Sprint 4.
 
 ## 10.2 Implantação do Protótipo para uso por equipe de desenvolvimento
 
