@@ -231,6 +231,26 @@ class TestValidateAudioUpload:
         with pytest.raises(NoSpeechDetectedError):
             validate_audio_upload(_build_wav(duration_seconds=2.0, amplitude=0))
 
+    def test_data_lookup_follows_the_riff_chunk_structure(self) -> None:
+        """Um chunk LIST/INFO com a palavra 'data' nao pode confundir a busca."""
+
+        sample_rate, frames_count = 16_000, 32_000
+        frames = b"".join(
+            struct.pack("<h", 8_000 if (index // 40) % 2 == 0 else -8_000)
+            for index in range(frames_count)
+        )
+        fmt_chunk = struct.pack("<HHIIHH", 1, 1, sample_rate, sample_rate * 2, 2, 16)
+        info = b"data do arquivo aqui........"
+        chunks = (
+            b"fmt " + struct.pack("<I", len(fmt_chunk)) + fmt_chunk
+            + b"LIST" + struct.pack("<I", len(info)) + info
+            + b"data" + struct.pack("<I", len(frames)) + frames
+        )
+        wav = b"RIFF" + struct.pack("<I", 4 + len(chunks)) + b"WAVE" + chunks
+
+        probe = validate_audio_upload(wav)
+        assert probe.duration_seconds == pytest.approx(2.0, abs=0.05)
+
     def test_wav_without_audio_data_is_rejected(self) -> None:
         with pytest.raises(NoSpeechDetectedError):
             validate_audio_upload(_build_wav(duration_seconds=0.0))

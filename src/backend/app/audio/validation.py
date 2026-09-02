@@ -305,14 +305,34 @@ def _reject_silence(data: bytes, probe: AudioProbe) -> None:
         raise NoSpeechDetectedError()
 
 
+def _find_data_chunk(data: bytes) -> tuple[int, int] | None:
+    """Localiza o chunk 'data' percorrendo os chunks RIFF.
+
+    Procurar a sequencia b"data" com `find` acharia tambem uma ocorrencia
+    dentro do texto de um chunk LIST/INFO; por isso a busca acompanha a
+    estrutura do arquivo, como em ``_probe_wav``.
+    """
+
+    offset = 12
+    while offset + 8 <= len(data):
+        chunk_id = data[offset : offset + 4]
+        (chunk_size,) = struct.unpack_from("<I", data, offset + 4)
+        chunk_start = offset + 8
+
+        if chunk_id == b"data":
+            return chunk_start, min(chunk_size, len(data) - chunk_start)
+
+        offset = chunk_start + chunk_size + (chunk_size % 2)
+
+    return None
+
+
 def _pcm_samples(data: bytes) -> tuple[int, ...] | None:
-    marker = data.find(b"data", 12)
-    if marker == -1:
+    chunk = _find_data_chunk(data)
+    if chunk is None:
         return None
 
-    (declared_size,) = struct.unpack_from("<I", data, marker + 4)
-    body_start = marker + 8
-    size = min(declared_size, len(data) - body_start)
+    body_start, size = chunk
     usable = size - (size % 2)
     if usable <= 0:
         return ()
