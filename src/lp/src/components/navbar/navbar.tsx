@@ -1,12 +1,15 @@
 interface AnimatedNavLinkProps {
     label: string;
+    href: string;
+    onSelect?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
-function AnimatedNavLink({ label }: AnimatedNavLinkProps) {
+function AnimatedNavLink({ label, href, onSelect }: AnimatedNavLinkProps) {
     return (
         <a
-            href="#"
-            className="group relative cursor-pointer text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            href={href}
+            onClick={onSelect}
+            className="group relative cursor-pointer text-sm font-medium text-white/60 transition-colors hover:text-white"
         >
             {label}
 

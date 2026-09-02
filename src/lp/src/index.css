@@ -1,5 +1,12 @@
 @import 'tailwindcss';
 
+/* Inter é variável (100–900), então tem um Thin real — sem Thin disponível o
+   navegador apenas sintetizaria um peso mais fino. */
+@theme {
+  --font-sans:
+    'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
 :root {
   color-scheme: light dark;
 }
@@ -10,9 +17,8 @@
 
 body {
   margin: 0;
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    sans-serif;
+  font-family: var(--font-sans);
+  /* Thin como peso padrão de toda a página; utilitários font-medium /
+     font-bold nos títulos continuam sobrescrevendo onde foram aplicados. */
+  font-weight: 100;
 }
