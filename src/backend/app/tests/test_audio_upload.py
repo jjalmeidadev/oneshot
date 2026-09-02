@@ -12,6 +12,8 @@ from app.audio.errors import (
     AudioTooLargeError,
     AudioTooLongError,
     NoSpeechDetectedError,
+    RateLimitedError,
+    UnauthenticatedError,
 )
 from app.audio.validation import (
     DEFAULT_MAX_DURATION_SECONDS,
@@ -26,7 +28,7 @@ AUTH_HEADER = {"Authorization": f"Bearer {TOKEN}"}
 
 @pytest.fixture(autouse=True)
 def reset_concurrency_control() -> None:
-    security._active_users.clear()
+    security._active_identities.clear()
 
 
 def _build_wav(
@@ -289,10 +291,13 @@ class TestAudioUploadEndpoint:
         )
         assert_error(response, 401, "UNAUTHENTICATED")
 
-    def test_token_outside_the_allowed_list_returns_401(
+    def test_token_outside_the_simulated_identities_returns_401(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        monkeypatch.setenv("AUDIO_API_TOKENS", "token-valido")
+        monkeypatch.setenv(
+            security.SIMULATED_IDENTITIES_ENV,
+            "token-mariana=REDACTED_FOR_PUBLIC_RELEASE",
+        )
         response = self.client.post(
             "/api/audio",
             files={"audio": ("p.wav", _build_wav(), "audio/wav")},
@@ -347,7 +352,7 @@ class TestAudioUploadEndpoint:
         )
 
     def test_concurrent_request_for_the_same_user_returns_429(self) -> None:
-        security._active_users.add(sha256(TOKEN.encode("utf-8")).hexdigest())
+        security._active_identities.add(sha256(TOKEN.encode("utf-8")).hexdigest())
         assert_error(
             post_audio(self.client, _build_wav(), "p.wav", "audio/wav"),
             429,
@@ -356,7 +361,7 @@ class TestAudioUploadEndpoint:
 
     def test_concurrency_slot_is_released_after_a_rejected_request(self) -> None:
         post_audio(self.client, b"\xff\xfb\x90\x00", "p.mp3", "audio/mpeg")
-        assert security._active_users == set()
+        assert security._active_identities == set()
 
     def test_provider_failure_returns_502(self, monkeypatch: pytest.MonkeyPatch) -> None:
         def fail(*_args: object, **_kwargs: object):
@@ -459,3 +464,73 @@ class TestControlledErrorMessages:
             **request_kwargs,
         )
         assert not any(term in response.text for term in forbidden)
+
+
+class TestCorporateIdentity:
+    """Identidade vinda do canal, conforme a Secao 6.2.4 do Projeto.md."""
+
+    def test_simulated_map_yields_the_declared_entra_object_id(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        object_id = "REDACTED_FOR_PUBLIC_RELEASE"
+        monkeypatch.setenv(
+            security.SIMULATED_IDENTITIES_ENV, f"token-mariana={object_id}"
+        )
+
+        identity = security.resolve_identity("Bearer token-mariana")
+
+        assert identity.object_id == object_id
+
+    def test_identity_is_derived_and_stable_without_the_simulated_map(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.delenv(security.SIMULATED_IDENTITIES_ENV, raising=False)
+
+        first = security.resolve_identity("Bearer token-qualquer")
+        second = security.resolve_identity("Bearer token-qualquer")
+
+        assert first.object_id == second.object_id
+        assert "token-qualquer" not in first.object_id
+
+    def test_different_tokens_yield_different_identities(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.delenv(security.SIMULATED_IDENTITIES_ENV, raising=False)
+
+        assert (
+            security.resolve_identity("Bearer token-a").object_id
+            != security.resolve_identity("Bearer token-b").object_id
+        )
+
+    @pytest.mark.parametrize(
+        "header",
+        [
+            pytest.param(None, id="ausente"),
+            pytest.param("", id="vazio"),
+            pytest.param("Bearer ", id="bearer-sem-token"),
+            pytest.param("Basic dXNlcjpzZW5oYQ==", id="esquema-errado"),
+        ],
+    )
+    def test_invalid_authorization_header_is_rejected(self, header: str | None) -> None:
+        with pytest.raises(UnauthenticatedError):
+            security.resolve_identity(header)
+
+    def test_concurrency_is_keyed_by_identity_not_by_token(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Dois tokens da mesma pessoa disputam a mesma vaga de processamento."""
+
+        object_id = "REDACTED_FOR_PUBLIC_RELEASE"
+        monkeypatch.setenv(
+            security.SIMULATED_IDENTITIES_ENV,
+            f"token-web={object_id},token-teams={object_id}",
+        )
+
+        with security.single_request_per_identity(
+            security.resolve_identity("Bearer token-web")
+        ):
+            with pytest.raises(RateLimitedError):
+                with security.single_request_per_identity(
+                    security.resolve_identity("Bearer token-teams")
+                ):
+                    pass

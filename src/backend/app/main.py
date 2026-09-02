@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 
 from app.audio.errors import AudioError, AudioMissingError, AudioTooLargeError
 from app.audio.schemas import AudioErrorResponse, AudioUploadResponse
-from app.audio.security import authenticate, single_request_per_user
+from app.audio.security import resolve_identity, single_request_per_identity
 from app.audio.service import process_audio_upload
 from app.audio.validation import DEFAULT_MAX_SIZE_BYTES
 from app.gemini.client import (
@@ -99,12 +99,12 @@ async def create_audio_upload(
     language: str | None = Form(default=None),
     authorization: str | None = Header(default=None),
 ) -> AudioUploadResponse:
-    user_key = authenticate(authorization)
+    identity = resolve_identity(authorization)
 
     if audio is None:
         raise AudioMissingError()
 
-    with single_request_per_user(user_key):
+    with single_request_per_identity(identity):
         data = await _read_upload(audio)
         if not data:
             raise AudioMissingError()

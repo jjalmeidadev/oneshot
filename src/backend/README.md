@@ -68,9 +68,22 @@ O campo `detail` so aparece quando ha algo a informar:
 O `403 OUT_OF_SCOPE_FOR_PROFILE` da Secao 8.7.6 depende das regras de perfil em
 `access_rules` e entra junto com a persistencia, em task separada.
 
-A autenticacao corporativa e simulada na prova de conceito: o cabecalho
-`Authorization: Bearer <TOKEN>` e sempre obrigatorio e, quando `AUDIO_API_TOKENS`
-esta definida no `.env`, apenas os tokens listados sao aceitos.
+### Identidade do usuario
+
+A autenticacao **nao e feita por este backend**. Conforme a Secao 6.2.4 do
+`docs/Projeto.md`, a identidade vem do **Microsoft Entra ID**: o agente vive
+dentro do Teams e o canal entrega quem e a pessoa junto com a mensagem. A API
+apenas valida o token recebido em `Authorization: Bearer <TOKEN>` e extrai o
+identificador do usuario, no formato da coluna `users.entra_object_id`.
+
+Enquanto o ambiente corporativo nao esta provisionado, o token do Entra e
+substituido pelo mapa simulado `AUDIO_SIMULATED_IDENTITIES`, no formato
+`<token>=<entra_object_id>` separado por virgula. Com a variavel vazia, o
+cabecalho continua obrigatorio e o identificador e derivado do proprio token.
+
+A autorizacao de dominio — qual subportfolio ou projeto cada perfil alcanca —
+continua sendo da solucao, via `access_rules`: o Entra informa quem e a pessoa,
+nao o que ela pode ver do portfolio. E o risco R04 da Secao 3.6.
 
 **Taxa de amostragem no ramo Opus.** O Opus sempre decodifica a 48 kHz e o campo
 `input_sample_rate` do `OpusHead` e informativo (RFC 7845). O `MediaRecorder` dos
