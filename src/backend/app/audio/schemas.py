@@ -46,8 +46,12 @@ class AudioUploadResponse(BaseModel):
 class AudioErrorDetail(BaseModel):
     code: str
     message: str
-    detail: dict[str, object] = Field(default_factory=dict)
+    # `detail` so aparece quando ha conteudo, como no exemplo da Secao 8.7.6.
+    detail: dict[str, object] | None = None
 
 
 class AudioErrorResponse(BaseModel):
+    """Envelope unico de erro, para que o canal exiba a mensagem sem
+    interpretar cada caso."""
+
     error: AudioErrorDetail

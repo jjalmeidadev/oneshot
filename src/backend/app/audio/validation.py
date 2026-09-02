@@ -5,6 +5,7 @@ Implementa os limites da Secao 8.7.3 de docs/Projeto.md:
 * Continer/codec: WAV com PCM ou OGG com OPUS;
 * Taxa de amostragem: 16 kHz;
 * Canais: 1 (mono);
+* Profundidade: 16 bits;
 * Duracao maxima: 60 segundos;
 * Tamanho maximo do arquivo: 2 MB.
 
@@ -23,14 +24,29 @@ from app.audio.errors import (
     AudioFormatUnsupportedError,
     AudioTooLargeError,
     AudioTooLongError,
+    NoSpeechDetectedError,
 )
 
 DEFAULT_MAX_SIZE_BYTES = 2 * 1024 * 1024
 DEFAULT_MAX_DURATION_SECONDS = 60.0
 REQUIRED_SAMPLE_RATE_HZ = 16_000
 REQUIRED_CHANNELS = 1
+REQUIRED_BITS_PER_SAMPLE = 16
 WAV_PCM_FORMAT_CODE = 1
+WAV_EXTENSIBLE_FORMAT_CODE = 0xFFFE
 OPUS_DECODE_RATE_HZ = 48_000
+
+# Amplitude abaixo da qual o trecho e tratado como silencio (-60 dBFS em 16 bits).
+SILENCE_AMPLITUDE_THRESHOLD = 32
+
+# O Opus sempre decodifica a 48 kHz. O campo `input_sample_rate` do OpusHead e
+# informativo (RFC 7845) e registra a taxa de captura: o MediaRecorder dos
+# navegadores grava a 48 kHz e o valor 0 significa "nao declarada". Recusar
+# esses casos rejeitaria toda gravacao vinda do frontend, entao o ramo Opus
+# aceita as tres formas de declarar uma captura valida.
+ACCEPTED_OPUS_INPUT_SAMPLE_RATES = frozenset(
+    {0, REQUIRED_SAMPLE_RATE_HZ, OPUS_DECODE_RATE_HZ}
+)
 
 
 @dataclass(frozen=True)
@@ -51,46 +67,90 @@ def validate_audio_upload(
     max_size_bytes: int = DEFAULT_MAX_SIZE_BYTES,
     max_duration_seconds: float = DEFAULT_MAX_DURATION_SECONDS,
 ) -> AudioProbe:
-    """Valida tamanho, continer/codec, taxa de amostragem, canais e duracao.
+    """Valida tamanho, continer/codec, taxa, canais, profundidade e duracao.
 
+    A ordem acompanha a tabela de codigos da Secao 8.7.6: tamanho (413),
+    formato (400), duracao (400) e, por ultimo, ausencia de fala (422).
     Levanta uma subclasse de ``AudioValidationError`` no primeiro problema
-    encontrado. Retorna um ``AudioProbe`` quando o arquivo esta dentro de
-    todos os limites do endpoint de audio curto (Secao 8.7.3).
+    encontrado e retorna um ``AudioProbe`` quando o arquivo esta dentro de
+    todos os limites do endpoint de audio curto.
     """
 
-    size_bytes = len(data)
-    if size_bytes > max_size_bytes:
-        raise AudioTooLargeError(size_bytes, max_size_bytes)
+    if len(data) > max_size_bytes:
+        raise AudioTooLargeError(max_size_bytes)
 
     if data[:4] == b"RIFF" and data[8:12] == b"WAVE":
         probe = _probe_wav(data)
     elif data[:4] == b"OggS":
         probe = _probe_ogg(data)
     else:
-        raise AudioFormatUnsupportedError(received=_guess_received_label(data))
-
-    if probe.sample_rate_hz != REQUIRED_SAMPLE_RATE_HZ or probe.channels != REQUIRED_CHANNELS:
-        raise AudioFormatUnsupportedError(
-            received=(
-                f"{probe.container}/{probe.codec} "
-                f"{probe.sample_rate_hz}Hz {probe.channels}ch"
-            )
-        )
+        raise AudioFormatUnsupportedError(detail=_received_detail(data))
 
     if probe.duration_seconds > max_duration_seconds:
         raise AudioTooLongError(probe.duration_seconds, max_duration_seconds)
 
+    _reject_silence(data, probe)
+
     return probe
 
 
-def _guess_received_label(data: bytes) -> str:
+def _received_detail(data: bytes) -> dict[str, object]:
+    """Descreve o que chegou usando apenas tipos de midia conhecidos do usuario.
+
+    O RNF11 nao admite vocabulario interno de formato na resposta, entao o
+    `detail` se limita ao tipo de midia identificado pela assinatura do
+    arquivo, ou a `desconhecido` quando ela nao corresponde a nada previsto.
+    """
+
     if data[:3] == b"ID3" or data[:2] == b"\xff\xfb":
-        return "audio/mpeg"
+        return {"received": "audio/mpeg"}
     if data[:4] == b"fLaC":
-        return "audio/flac"
-    if not data:
-        return "empty"
-    return "unknown"
+        return {"received": "audio/flac"}
+    if data[:4] == b"RIFF":
+        return {"received": "audio/wav"}
+    if data[:4] == b"OggS":
+        return {"received": "audio/ogg"}
+    return {"received": "desconhecido"}
+
+
+def _reject_unsupported_encoding(
+    *,
+    container_media_type: str,
+    is_expected_codec: bool,
+    sample_rate_accepted: bool,
+    sample_rate_hz: int,
+    channels: int,
+    bits_per_sample: int,
+) -> None:
+    """Recusa o arquivo cuja codificacao esta fora do contrato da Secao 8.7.3.
+
+    Quando o codec em si nao e o previsto, o `detail` se limita ao tipo de
+    midia: a codificacao interna do contenor nao diz nada a quem gravou o
+    audio. Quando o codec esta certo e o problema e a captura, o `detail`
+    informa taxa e canais recebidos ao lado dos esperados, que e o que permite
+    regravar corretamente.
+    """
+
+    if not is_expected_codec:
+        raise AudioFormatUnsupportedError(detail={"received": container_media_type})
+
+    if (
+        sample_rate_accepted
+        and channels == REQUIRED_CHANNELS
+        and bits_per_sample == REQUIRED_BITS_PER_SAMPLE
+    ):
+        return
+
+    raise AudioFormatUnsupportedError(
+        detail={
+            "sample_rate_hz": sample_rate_hz,
+            "channels": channels,
+            "bits_per_sample": bits_per_sample,
+            "expected_sample_rate_hz": REQUIRED_SAMPLE_RATE_HZ,
+            "expected_channels": REQUIRED_CHANNELS,
+            "expected_bits_per_sample": REQUIRED_BITS_PER_SAMPLE,
+        }
+    )
 
 
 def _probe_wav(data: bytes) -> AudioProbe:
@@ -117,16 +177,31 @@ def _probe_wav(data: bytes) -> AudioProbe:
                 _block_align,
                 bits_per_sample,
             ) = struct.unpack_from("<HHIIHH", data, chunk_start)
+
+            # WAVE_FORMAT_EXTENSIBLE e como o Windows e boa parte dos gravadores
+            # escrevem PCM; o formato real fica no sub-formato do chunk estendido.
+            if (
+                audio_format == WAV_EXTENSIBLE_FORMAT_CODE
+                and chunk_size >= 40
+                and chunk_start + 26 <= len(data)
+            ):
+                (audio_format,) = struct.unpack_from("<H", data, chunk_start + 24)
         elif chunk_id == b"data":
             data_size = min(chunk_size, len(data) - chunk_start)
 
         offset = chunk_start + chunk_size + (chunk_size % 2)
 
     if None in (audio_format, channels, sample_rate, bits_per_sample, data_size):
-        raise AudioFormatUnsupportedError(received="audio/wav (cabecalho incompleto)")
+        raise AudioFormatUnsupportedError(detail={"received": "audio/wav"})
 
-    if audio_format != WAV_PCM_FORMAT_CODE:
-        raise AudioFormatUnsupportedError(received=f"wav format-code={audio_format}")
+    _reject_unsupported_encoding(
+        container_media_type="audio/wav",
+        is_expected_codec=audio_format == WAV_PCM_FORMAT_CODE,
+        sample_rate_accepted=sample_rate == REQUIRED_SAMPLE_RATE_HZ,
+        sample_rate_hz=sample_rate,
+        channels=channels,
+        bits_per_sample=bits_per_sample,
+    )
 
     bytes_per_second = sample_rate * channels * (bits_per_sample / 8)
     duration_seconds = (data_size / bytes_per_second) if bytes_per_second else 0.0
@@ -146,14 +221,13 @@ def _probe_ogg(data: bytes) -> AudioProbe:
 
     channels: int | None = None
     input_sample_rate: int | None = None
+    pre_skip = 0
     last_granule_position = 0
 
     offset = 0
     while True:
         page_start = data.find(b"OggS", offset)
-        if page_start == -1:
-            break
-        if page_start + 27 > len(data):
+        if page_start == -1 or page_start + 27 > len(data):
             break
 
         (granule_position,) = struct.unpack_from("<q", data, page_start + 6)
@@ -163,8 +237,7 @@ def _probe_ogg(data: bytes) -> AudioProbe:
         if segment_table_end > len(data):
             break
 
-        segment_table = data[segment_table_start:segment_table_end]
-        payload_size = sum(segment_table)
+        payload_size = sum(data[segment_table_start:segment_table_end])
         payload_start = segment_table_end
         payload = data[payload_start : payload_start + payload_size]
 
@@ -173,6 +246,7 @@ def _probe_ogg(data: bytes) -> AudioProbe:
             # + input_sample_rate(4) + ...
             if len(payload) >= 16:
                 channels = payload[9]
+                (pre_skip,) = struct.unpack_from("<H", payload, 10)
                 (input_sample_rate,) = struct.unpack_from("<I", payload, 12)
 
         if granule_position >= 0:
@@ -181,15 +255,66 @@ def _probe_ogg(data: bytes) -> AudioProbe:
         offset = payload_start + payload_size
 
     if channels is None or input_sample_rate is None:
-        raise AudioFormatUnsupportedError(received="ogg (sem fluxo OpusHead)")
+        raise AudioFormatUnsupportedError(detail={"received": "audio/ogg"})
 
-    duration_seconds = last_granule_position / OPUS_DECODE_RATE_HZ
+    _reject_unsupported_encoding(
+        container_media_type="audio/ogg",
+        is_expected_codec=True,
+        sample_rate_accepted=input_sample_rate in ACCEPTED_OPUS_INPUT_SAMPLE_RATES,
+        sample_rate_hz=input_sample_rate,
+        channels=channels,
+        # O Opus nao expoe profundidade de bits: e um codec com perdas cuja
+        # saida e reconstruida na profundidade pedida pelo decodificador.
+        bits_per_sample=REQUIRED_BITS_PER_SAMPLE,
+    )
+
+    # O `pre_skip` conta amostras que o decodificador descarta no inicio do
+    # fluxo; elas nao fazem parte da gravacao (RFC 7845).
+    samples = max(last_granule_position - pre_skip, 0)
 
     return AudioProbe(
         container="ogg",
         codec="opus",
         sample_rate_hz=input_sample_rate,
         channels=channels,
-        duration_seconds=duration_seconds,
+        duration_seconds=samples / OPUS_DECODE_RATE_HZ,
         size_bytes=len(data),
     )
+
+
+def _reject_silence(data: bytes, probe: AudioProbe) -> None:
+    """Recusa gravacoes vazias ou sem sinal audivel.
+
+    A ausencia de fala tambem e identificada pelo provedor de transcricao, mas
+    o arquivo sem sinal algum pode ser recusado aqui, evitando a chamada
+    externa. Para Opus a verificacao se limita a duracao, porque medir
+    amplitude exigiria decodificar o fluxo.
+    """
+
+    if probe.duration_seconds <= 0:
+        raise NoSpeechDetectedError()
+
+    if probe.codec != "pcm":
+        return
+
+    samples = _pcm_samples(data)
+    if samples is None:
+        return
+
+    if max((abs(sample) for sample in samples), default=0) < SILENCE_AMPLITUDE_THRESHOLD:
+        raise NoSpeechDetectedError()
+
+
+def _pcm_samples(data: bytes) -> tuple[int, ...] | None:
+    marker = data.find(b"data", 12)
+    if marker == -1:
+        return None
+
+    (declared_size,) = struct.unpack_from("<I", data, marker + 4)
+    body_start = marker + 8
+    size = min(declared_size, len(data) - body_start)
+    usable = size - (size % 2)
+    if usable <= 0:
+        return ()
+
+    return struct.unpack_from(f"<{usable // 2}h", data, body_start)
