@@ -1943,7 +1943,10 @@ Dois requisitos do TAPI atravessam todas as camadas anteriores e por isso são t
 | **Visual Studio Code** | Ambiente de desenvolvimento, com extensões de Python, Jupyter e Markdown. |
 | **Draw.io / Mermaid / PlantUML** | Diagramas UML (componentes e pacotes), BPMN e diagramas de sequência da documentação. |
 | **Figma** | Prototipação das interfaces conversacionais e dos fluxos de interação. |
-| **pytest** | Testes automatizados do pipeline de PLN e da API. |
+| **pytest** | Biblioteca principal para testes automatizados do pipeline de PLN, das regras de recuperação de contexto e da API FastAPI. |
+| **FastAPI TestClient / httpx** | Execução de testes funcionais e de integração contra os endpoints HTTP da API sem necessidade de subir um servidor externo, preservando o contrato OpenAPI gerado pelo próprio FastAPI. |
+| **Locust** | Testes de desempenho e carga sobre endpoints HTTP da prova de conceito, com cenários escritos em Python e coleta de latência, vazão e taxa de erro. |
+| **Microsoft Forms** | Coleta estruturada do questionário SUS e dos comentários qualitativos dos participantes dos testes de usabilidade, mantendo aderência ao ecossistema Microsoft priorizado pelo parceiro. |
 | **scikit-learn (metrics)** | Avaliação do desempenho do núcleo de PLN: acurácia, precisão, revocação e F1 macro para a classificação de intenções, matriz de confusão e métricas de acerto para a consulta de fontes. |
 | **Markdown** | Formato de toda a documentação do repositório. |
 
@@ -4272,11 +4275,24 @@ O planejamento dos testes sistêmicos é entrega da Sprint 3, e a execução oco
 
 Os testes automatizados já existentes nesta sprint — da bancada de teste do caminho de consulta — estão documentados na Seção 8.4.
 
+Antes da escrita dos planos específicos, o projeto fixa o ferramental de teste a ser utilizado. Essa definição evita que os planos descrevam formas de execução incompatíveis com a stack registrada na Seção 3.4 e com a estrutura atual do repositório, composta por backend em Python/FastAPI, bancada web em React para validação do fluxo de consulta, scripts SQL PostgreSQL e notebook de avaliação do classificador de intenções.
+
+| Tipo de teste | Ferramenta ou biblioteca adotada | Aplicação no projeto | Justificativa |
+|---|---|---|---|
+| Testes funcionais | `pytest` com `fastapi.testclient.TestClient` | Validar endpoints da API, respostas HTTP, contratos de entrada e saída, tratamento de erros e comportamento esperado dos fluxos principais do MVP. | O backend já utiliza Python e FastAPI, e a suíte existente usa `pytest`. O `TestClient` permite exercitar a aplicação FastAPI diretamente, com chamadas equivalentes a requisições HTTP, mantendo os testes automatizados, rápidos e reprodutíveis. |
+| Testes de integração | `pytest`, `TestClient` e duplos de teste para fronteiras externas | Verificar a integração entre API, camada Gemini, recuperação de contexto em dados simulados do SharePoint e regras de composição da resposta, sem depender de chave externa ou internet durante a execução padrão. | A estratégia já adotada na Seção 8.4 isola chamadas de rede e testa o código do projeto. Isso protege a reprodutibilidade, respeita o uso de dados sintéticos e evita que falhas de serviços externos sejam confundidas com falhas da aplicação. |
+| Testes de desempenho | `Locust` | Simular usuários concorrentes acessando os endpoints HTTP da prova de conceito, especialmente o fluxo de chat/consulta, registrando tempo de resposta, taxa de erro e comportamento sob carga controlada. | O Locust é compatível com a stack Python, descreve cenários em código e é adequado para APIs HTTP. A escolha permite reaproveitar conhecimento da equipe, versionar cenários no repositório e comparar execuções entre sprints. |
+| Testes de usabilidade | Microsoft Forms | Coletar respostas do questionário SUS, percepção dos participantes e comentários qualitativos após a execução dos roteiros de teste. | A solução prioriza o ecossistema Microsoft do parceiro. O Forms permite distribuição por link ou Teams, controle de respondentes quando necessário e consolidação simples das respostas para análise posterior. |
+
+As ferramentas escolhidas também respeitam os requisitos não funcionais já definidos: os testes automatizados devem usar dados sintéticos ou anonimizados, a validação funcional deve preservar rastreabilidade entre cenário e requisito, e os testes de desempenho devem registrar evidências objetivas de latência e falha. Chamadas a provedores externos, quando indispensáveis para uma validação específica, devem ser tratadas como execução controlada, separada da suíte determinística padrão.
+
 ## 9.1 Testes Funcionais
 
 ### 9.1.1 Planejamento
 
-Será desenvolvido na Sprint 3, derivado de RF01 a RF10, com cenários positivos e negativos por requisito.
+O plano de testes funcionais será desenvolvido na Sprint 3 a partir dos requisitos funcionais RF01 a RF10, contemplando cenários positivos, negativos e de limitação de escopo. A execução automatizada deverá utilizar `pytest` e `TestClient` para acionar os endpoints FastAPI, validando códigos de status, estrutura das respostas, mensagens de erro, fontes retornadas e aderência aos contratos definidos pelos modelos Pydantic.
+
+Os cenários funcionais devem cobrir, no mínimo, consultas textuais ao agente, recuperação de contexto em dados sintéticos, ausência de informação suficiente, propagação de erros controlados e preservação do formato de resposta esperado pelo frontend de bancada. Quando o comportamento depender de serviços externos, o plano deve prever duplos de teste para manter a execução padrão independente de credenciais, disponibilidade de rede ou consumo de serviços pagos.
 
 ### 9.1.2 Resultados
 
@@ -4286,7 +4302,11 @@ Será executado na Sprint 4.
 
 ### 9.2.1 Planejamento
 
-Será desenvolvido na Sprint 3, incluindo obrigatoriamente os testes de desempenho, com meta, ferramenta e critério de aprovação declarados.
+O plano de RNFs será desenvolvido na Sprint 3 com foco nos requisitos de confidencialidade, confiabilidade, desempenho, qualidade do PLN, usabilidade conversacional, rastreabilidade e manutenibilidade. A parte automatizável continuará apoiada em `pytest`, especialmente para validar regras de erro, isolamento de dados sintéticos, comportamento sem credenciais externas e preservação dos limites de entrada.
+
+Os testes de desempenho serão planejados e executados com `Locust`. Os cenários deverão simular requisições HTTP aos endpoints críticos da prova de conceito, com massa de prompts sintéticos representativa dos fluxos de consulta e comparação. As evidências mínimas esperadas são tempo médio de resposta, percentis de latência, taxa de erro, número de usuários simulados, duração da execução e configuração do ambiente. O critério de aprovação deverá ser declarado no próprio plano antes da Sprint 4, para evitar avaliação retrospectiva sem meta objetiva.
+
+Para o RNF06, a avaliação do classificador de intenções continuará usando as métricas do `scikit-learn`, conforme Seção 8.10, com atenção especial ao F1 macro. Essa avaliação não substitui os testes da API: ela valida o desempenho do núcleo de PLN, enquanto os testes funcionais e de integração validam o comportamento do serviço exposto.
 
 ### 9.2.2 Resultados
 
@@ -4296,7 +4316,9 @@ Será executado na Sprint 4.
 
 ### 9.3.1 Planejamento
 
-Será desenvolvido na Sprint 3: roteiro com cenários, perfis dos cinco participantes externos e questionário SUS.
+O plano de usabilidade será desenvolvido na Sprint 3 com roteiro de tarefas, perfis dos cinco participantes externos e questionário SUS. A coleta será feita por Microsoft Forms, preferencialmente distribuído por link ou Teams, para manter alinhamento com o ambiente de trabalho previsto para os usuários do Metrô.
+
+O formulário deverá registrar as respostas do SUS, comentários qualitativos, dificuldades percebidas e observações sobre clareza das respostas, confiança nas fontes apresentadas e facilidade de formular perguntas em linguagem natural. Os dados coletados devem ser consolidados de forma agregada na Sprint 4, evitando exposição de informações pessoais desnecessárias e preservando o uso de cenários sintéticos ou anonimizados durante a avaliação.
 
 ### 9.3.2 Resultados
 
