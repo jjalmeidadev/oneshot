@@ -202,7 +202,9 @@
     - [9.1.2 Resultados](#912-resultados)
   - [9.2 Testes de RNFs](#92-testes-de-rnfs)
     - [9.2.1 Planejamento](#921-planejamento)
-    - [9.2.2 Resultados](#922-resultados)
+    - [9.2.2 Instruções de execução e evidências](#922-instruções-de-execução-e-evidências)
+    - [9.2.3 Abrangência e limitações](#923-abrangência-e-limitações)
+    - [9.2.4 Resultados](#924-resultados)
   - [9.3 Testes de Usabilidade](#93-testes-de-usabilidade)
     - [9.3.1 Planejamento](#931-planejamento)
     - [9.3.2 Resultados](#932-resultados)
@@ -4302,13 +4304,44 @@ Será executado na Sprint 4.
 
 ### 9.2.1 Planejamento
 
-O plano de RNFs será desenvolvido na Sprint 3 com foco nos requisitos de confidencialidade, confiabilidade, desempenho, qualidade do PLN, usabilidade conversacional, rastreabilidade e manutenibilidade. A parte automatizável continuará apoiada em `pytest`, especialmente para validar regras de erro, isolamento de dados sintéticos, comportamento sem credenciais externas e preservação dos limites de entrada.
+Este plano transforma os critérios da Seção 3.2.2 em casos rastreáveis. A execução padrão usa `pytest` e `TestClient`/`httpx`, com duplos nas fronteiras externas; o desempenho é medido com `Locust`, conforme a definição de ferramentas da Seção 9. Os dados, prompts, perfis e fontes de teste são sintéticos ou anonimizados. Cada caso deve registrar ID, versão, data, responsável, ambiente, massa, resultado e evidência, sem incluir chaves, tokens ou conteúdo sensível. Para o RNF06, `scikit-learn` mede F1 macro e recall do núcleo de PLN; essa avaliação complementa, sem substituir, os testes da API.
 
-Os testes de desempenho serão planejados e executados com `Locust`. Os cenários deverão simular requisições HTTP aos endpoints críticos da prova de conceito, com massa de prompts sintéticos representativa dos fluxos de consulta e comparação. As evidências mínimas esperadas são tempo médio de resposta, percentis de latência, taxa de erro, número de usuários simulados, duração da execução e configuração do ambiente. O critério de aprovação deverá ser declarado no próprio plano antes da Sprint 4, para evitar avaliação retrospectiva sem meta objetiva.
+| RNF | Propósito e critério de aprovação | Cenário positivo | Cenário negativo | Ferramenta e evidência |
+|---|---|---|---|---|
+| RNF01 | Garantir que 100% da massa seja sintética/anonimizada e não siga a serviços externos não homologados. | Auditar JSONs, prompts e logs de teste; confirmar rótulo de dado fictício e origem controlada. | Inserir marcador de dado sensível na massa de validação; o lint/auditoria deve reprovar antes da chamada externa. | Revisão versionada, `pytest` e inspeção de payload com duplo de rede. |
+| RNF02 | Verificar que 100% das respostas por perfil simulado respeitam a permissão. | Perfil autorizado consulta fonte permitida e recebe somente seu escopo. | Perfil sem permissão tenta a mesma consulta; deve receber negação controlada, sem conteúdo ou metadados protegidos. | `pytest` + `TestClient`; matriz perfil x recurso. |
+| RNF03 | Verificar registro estruturado de 100% das interações: perfil, horário, intenção, fontes e resposta. | Executar consulta e conferir todos os campos no registro. | Forçar erro de recuperação/geração e conferir registro com falha e sem omissão dos campos disponíveis. | `pytest`, capturador de logs/repositório de auditoria simulado. |
+| RNF04 | Atingir >=90% de respostas fundamentadas e <=5% de alucinação na amostra sintética. | Perguntas com fonte conhecida retornam resposta vinculada à fonte. | Pergunta sem fonte recebe declaração de limitação, não fato inventado. | `pytest` e planilha de avaliação cega da amostra. |
+| RNF05 | Medir o intervalo API recebida -> resposta estruturada: simples <=10 s; comparativa <=20 s. | Cada cenário atende ao respectivo teto sob carga definida abaixo. | Induzir atraso acima do teto ou resposta inválida; Locust deve marcar falha e preservar o valor observado. | `Locust`, relatório HTML/CSV com percentis, taxa de erro, RPS e configuração. |
+| RNF06 | Confirmar F1 macro >=0,80 e recall de recuperação >=0,80 na massa sintética. | Executar notebook/script com conjunto rotulado e comparar métricas ao limiar. | Usar conjunto com intenção/termo ausente; métrica abaixo do limiar reprova a execução e abre ajuste de dados/modelo. | `scikit-learn` e artefato de métricas versionado. |
+| RNF07 | Confirmar que >=80% das formulações em português são compreendidas ou orientadas para reformulação. | Usuário formula consulta natural e recebe resposta/roteamento adequado. | Formulação ambígua ou desconhecida recebe orientação clara, sem exigir sintaxe técnica. | `pytest` para roteiro e Microsoft Forms para teste com usuários. |
+| RNF08 | Confirmar Teams como canal previsto, OpenAPI documentado e integração homologável no ecossistema Microsoft. | Revisão arquitetural encontra os contratos e componentes previstos. | Remover/alterar contrato OpenAPI ou usar conector incompatível; checklist reprova a entrega. | Revisão documental, `/openapi.json` via `TestClient` e checklist. |
+| RNF09 | Confirmar pipeline com dados estruturados e execução independente da plataforma final. | Carregar a mesma massa por diretório configurável e executar localmente. | Fornecer formato inválido/ausente; falha deve ser explícita, sem acoplamento a UI ou fonte concreta. | `pytest` de RAG e execução local documentada. |
+| RNF10 | Confirmar separação interface/lógica/dados, API documentada, testes e instruções. | Revisão encontra módulos, OpenAPI, suíte e README atualizados. | Mover acesso externo para rota/UI ou remover instrução; checklist e teste de importação devem reprovar. | Revisão de estrutura, `pytest` e `git diff --check`. |
+| RNF11 | Garantir resposta controlada em 100% dos erros previstos, sem detalhes técnicos ao usuário. | Simular indisponibilidade externa e ausência de resultado; API retorna erro/mensagem segura. | Provedor retorna erro inesperado ou payload inválido; API não expõe stack trace, chave ou corpo do provedor. | `pytest`, `TestClient` e duplos de rede. |
+| RNF12 | Confirmar que a massa inclui projetos, subportfólios, marcos, riscos, indicadores e documentos dos fluxos. | Validador encontra todos os tipos e exemplos consultáveis. | Remover uma categoria obrigatória; validação reprova a massa antes dos cenários. | `pytest` de esquema e checklist de massa. |
 
-Para o RNF06, a avaliação do classificador de intenções continuará usando as métricas do `scikit-learn`, conforme Seção 8.10, com atenção especial ao F1 macro. Essa avaliação não substitui os testes da API: ela valida o desempenho do núcleo de PLN, enquanto os testes funcionais e de integração validam o comportamento do serviço exposto.
+#### Carga e cenário de medição do RNF05
 
-### 9.2.2 Resultados
+O relógio começa quando o `POST /api/chat` é recebido pela API e termina ao devolver o JSON estruturado; inclui recuperação, cache e chamada ao provedor quando houver *cache miss*, mas exclui renderização do frontend, digitação do usuário e STT/TTS. A massa contém perguntas sintéticas curtas de consulta e perguntas comparativas sobre ao menos duas fontes. Antes da coleta, reiniciar a API, aquecer uma vez cada prompt e anotar se a rodada mede cache frio ou quente; não misturar as duas modalidades no mesmo resultado.
+
+Executar duas rodadas de 5 minutos: (a) 1 usuário para estabelecer a linha de base e (b) 5 usuários simultâneos, com espera de 1 a 3 segundos. O cenário Locust versionado para a Sprint 4 deve pesar 75% de consultas simples e 25% de comparativas. A rodada é aprovada somente se não houver erro HTTP/contrato e o percentil 95 de cada tipo ficar no teto do RNF05 (10 s e 20 s respectivamente). Média não substitui percentil; qualquer amostra acima do teto deve ser registrada e investigada. Para evitar custo e não determinismo, a CI executa apenas os testes com duplos; a rodada com provedor real é controlada e depende de ambiente autorizado.
+
+### 9.2.2 Instruções de execução e evidências
+
+1. Em `src/backend`, criar o ambiente virtual, instalar `requirements.txt` e executar `.venv\\Scripts\\python.exe -m pytest app/tests`.
+2. Para validar o contrato HTTP, iniciar `.venv\\Scripts\\python.exe -m uvicorn app.main:app` e conferir `http://127.0.0.1:8000/openapi.json`; não inserir credenciais em evidências.
+3. Para desempenho, instalar o `Locust` no ambiente de teste, iniciar a API em ambiente autorizado e executar `locust -f <cenario-locust-versionado> --host http://127.0.0.1:8000`. Configurar as duas rodadas descritas no RNF05, exportar relatório e registrar P95 separado por tipo de cenário.
+4. Para RNF06, executar o notebook de classificação com a massa sintética e registrar F1 macro e recall. Para RNF07, aplicar o roteiro no Microsoft Forms e calcular a proporção de compreensão/orientação.
+5. Anexar ao registro da sprint os relatórios, versões, parâmetros de carga, massa, resultados e falhas. Não declarar RNF aprovado por plano: aprovação ocorre somente após a evidência da execução.
+
+### 9.2.3 Abrangência e limitações
+
+A abrangência cobre os doze RNFs porque eles atravessam a mesma cadeia de consulta: dados e permissões antes da chamada, rastreabilidade e fundamentação durante o processamento, desempenho e falhas na resposta, e qualidade/manutenção da base que sustenta a evolução. Os positivos demonstram atendimento; os negativos cobrem as falhas que poderiam expor dados, inventar informação, degradar a conversa ou repetir chamadas externas. A separação entre testes determinísticos e rodada real do provedor mantém a validação reprodutível e ainda mede o comportamento ponta a ponta exigido pelo RNF05.
+
+Limitações conhecidas: permissões corporativas, Teams, SharePoint real, Azure e transcrição não estão disponíveis nesta bancada e, portanto, são simulados; sua homologação depende do ambiente do parceiro. Os resultados permanecem pendentes da Sprint 4 e devem ser preenchidos com evidências, não estimativas.
+
+### 9.2.4 Resultados
 
 Será executado na Sprint 4.
 
