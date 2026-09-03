@@ -42,13 +42,6 @@ Este arquivo reúne os documentos que compõem a documentação do projeto e ind
 | [Projeto.md](Projeto.md) | Entendimento do negócio e especificação de requisitos: problema e SWOT, contexto da indústria, visão e objetivo do produto, personas e jornada, fluxo do negócio, brainstorming de features, canvas do MVP, matriz de risco, business drivers, requisitos funcionais e não funcionais, visão técnica da solução e visão inicial sobre tecnologias e ferramentas. |
 | [Manual-instalacao.md](Manual-instalacao.md) | Instruções de instalação e execução da solução. |
 
-### Planejamento e execução de testes
-
-| Seção | Conteúdo |
-|---|---|
-| [Testes de requisitos funcionais](Projeto.md#91-testes-funcionais) | Plano de cenários funcionais do MVP. |
-| [Testes de requisitos não funcionais](Projeto.md#92-testes-de-rnfs) | Plano dos RNFs, incluindo desempenho com limites de 10 e 20 segundos. |
-
 ### Código-fonte
 
 | Pasta | Conteúdo |
