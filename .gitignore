@@ -23,6 +23,9 @@ dev-server.log
 npm-debug.log*
 yarn-error.log*
 
+# Copia de seguranca gerada pela migracao do artefato do classificador
+*.joblib.notebook
+
 # --- Jupyter ---
 .ipynb_checkpoints/
 
