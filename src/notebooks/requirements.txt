@@ -1,0 +1,14 @@
+# Dependencias do nucleo de PLN (Secao 8.10.4 do Projeto.md).
+# O backend precisa apenas do nltk, ja declarado em src/backend/requirements.txt;
+# este arquivo cobre a experimentacao e o treino nos notebooks.
+gensim
+joblib
+jupyter
+matplotlib
+nltk==3.10.3
+numpy
+pandas
+scikit-learn
+scipy
+sentence-transformers
+torch

@@ -102,6 +102,55 @@ curl --request POST \
   --form 'audio=@pergunta.wav;type=audio/wav'
 ```
 
+## Nucleo de PLN
+
+O modulo `app/nlp/` cobre a etapa que antecede a classificacao de intencoes.
+O classificador decide **o que** foi pedido; a extracao de entidades decide
+**sobre o que**.
+
+| Modulo | Papel |
+| --- | --- |
+| `preprocessing.py` | Normaliza, tokeniza e reduz a radical, na `config_22` da Secao 8.10.3 |
+| `entities.py` | Identifica projeto, subportfolio, periodo, indicador e demais elementos do dominio |
+| `data/lexico_dominio.json` | Vocabulario do portfolio, substituivel quando a base real existir |
+
+**A `config_22` e um contrato, nao uma preferencia.** Os vetorizadores TF-IDF
+serializados em `src/notebooks/artefatos/classificador_intencoes.joblib` foram
+ajustados sobre os tokens que `preprocess_text` produz. Alterar tokenizacao,
+caixa ou stemming invalida o modelo treinado, e o benchmark precisa ser
+reexecutado. O notebook `src/notebooks/preprocessamento_entidades.ipynb`
+compara as duas implementacoes sobre as 5.353 frases do conjunto sintetico e
+falha se houver uma divergencia.
+
+A configuracao selecionada nao exige corpus baixado do NLTK: o tokenizador e
+uma expressao regular e o Snowball e algoritmico. As demais opcoes da grade,
+mantidas para o benchmark continuar reproduzivel, podem pedir
+`nltk.download('punkt')` e `nltk.download('stopwords')`.
+
+```python
+from app.nlp.preprocessing import tokenize
+from app.nlp.entities import extract_entities
+
+tokenize("Qual é o status da extensão da Linha 5-Lilás?")
+# ['qual', 'é', 'o', 'status', 'da', 'extensã', 'da', 'linh', '5', 'lilás']
+
+[(e.tipo, e.valor) for e in extract_entities("compare o Linha 2-Verde por custo em 2026")]
+# [('projeto', 'Linha 2-Verde'), ('criterio', 'custo'), ('periodo', 'em 2026')]
+```
+
+A extracao roda sobre o **texto cru**, nao sobre os tokens: o tokenizador quebra
+em `[^\W_]+` e separaria `PRJ-2031` em `PRJ` e `2031`. O casamento ignora caixa
+e acento e devolve sempre o valor canonico do catalogo, porque o canal recebe
+texto digitado.
+
+Termos que pertencem a mais de um tipo — `aderencia ao cronograma` e criterio e
+indicador — nao sao arbitrados aqui: a entidade expoe `tipos` com os candidatos
+e `ambigua`, e quem ja conhece a intencao escolhe.
+
+Medido contra o gabarito reconstruido da geracao do conjunto sintetico:
+**precisao 0,996, revocacao 0,999, F1 0,998** sobre 7.000 entidades em 5.353
+frases. O notebook reproduz a medicao e registra as limitacoes.
+
 ## Testes
 
 ```powershell
