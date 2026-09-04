@@ -109,7 +109,7 @@ async def create_audio_upload(
         if not data:
             raise AudioMissingError()
 
-        return process_audio_upload(
+        return await process_audio_upload(
             data,
             conversation_id=conversation_id,
             language=language or DEFAULT_LANGUAGE,

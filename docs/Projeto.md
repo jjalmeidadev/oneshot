@@ -3628,10 +3628,13 @@ Para o desenvolvimento inicial será utilizada a **API REST do Azure AI Speech p
 | Finalidade | Método HTTP | Endpoint | Uso no projeto |
 |---|---|---|---|
 | Converter áudio curto em texto | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/stt/speech/recognition/conversation/cognitiveservices/v1` | Endpoint principal do desenvolvimento inicial. |
+| Converter áudio curto por host regional | `POST` | `https://<REGIAO>.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1` | Alternativa equivalente quando o ambiente informa a região do recurso. |
 | Obter token temporário | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/sts/v1.0/issueToken` | Opcional; troca a chave do recurso por um token válido por 10 minutos. |
 | Transcrever arquivo com a API rápida | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/speechtotext/transcriptions:transcribe?api-version=2025-10-15` | Disponível no nível Standard (S0) para uma futura ampliação dos limites. |
 
 O endpoint de áudio curto é o único necessário para a funcionalidade atual. O endpoint de token é utilizado somente quando a aplicação opta por não enviar a chave diretamente em cada requisição. A transcrição rápida não está disponível no nível Free (F0), por isso não é adotada no desenvolvimento inicial.
+
+No ambiente de desenvolvimento, a configuração fica em `src/backend/.env`. `AZURE_SPEECH_RESOURCE` guarda o nome do recurso Speech e `AZURE_SPEECH_KEY` guarda a chave usada no cabeçalho `Ocp-Apim-Subscription-Key`. `AZURE_SPEECH_ENDPOINT` é opcional e registra o endpoint exibido no portal Azure; quando ele vier no formato regional `https://<REGIAO>.api.cognitive.microsoft.com/`, a aplicação converte internamente para o host `https://<REGIAO>.stt.speech.microsoft.com`, que é o formato usado pela API de reconhecimento de fala. `AZURE_SPEECH_TIMEOUT_SECONDS` define o limite de espera da chamada ao provedor, com padrão de 6 segundos, e `AZURE_SPEECH_MAX_ATTEMPTS` define quantas tentativas são feitas diante de falha transitória, com padrão de duas. Os dois valores acompanham o orçamento do RNF05, que concede 10 segundos para uma consulta simples ponta a ponta e do qual a transcrição é apenas a primeira etapa.
 
 #### Requisição de transcrição
 
@@ -3686,7 +3689,7 @@ curl --location --request POST \
   --data-binary "@pergunta.wav"
 ```
 
-As variáveis `AZURE_SPEECH_RESOURCE` e `AZURE_SPEECH_KEY` devem ser configuradas no ambiente de execução. A chave não deve ser escrita no código-fonte nem versionada no repositório.
+As variáveis `AZURE_SPEECH_RESOURCE` e `AZURE_SPEECH_KEY` devem ser configuradas no ambiente de execução. A chave não deve ser escrita no código-fonte nem versionada no repositório. Quando `AZURE_SPEECH_ENDPOINT` estiver preenchida com o endpoint regional do portal, o exemplo acima continua equivalente: a aplicação deriva a URL final antes de chamar o provedor.
 
 #### Resposta de sucesso
 
@@ -4294,7 +4297,11 @@ As ferramentas escolhidas também respeitam os requisitos não funcionais já de
 
 O plano de testes funcionais será desenvolvido na Sprint 3 a partir dos requisitos funcionais RF01 a RF10, contemplando cenários positivos, negativos e de limitação de escopo. A execução automatizada deverá utilizar `pytest` e `TestClient` para acionar os endpoints FastAPI, validando códigos de status, estrutura das respostas, mensagens de erro, fontes retornadas e aderência aos contratos definidos pelos modelos Pydantic.
 
-Os cenários funcionais devem cobrir, no mínimo, consultas textuais ao agente, recuperação de contexto em dados sintéticos, ausência de informação suficiente, propagação de erros controlados e preservação do formato de resposta esperado pelo frontend de bancada. Quando o comportamento depender de serviços externos, o plano deve prever duplos de teste para manter a execução padrão independente de credenciais, disponibilidade de rede ou consumo de serviços pagos.
+Os cenários funcionais devem cobrir, no mínimo, consultas textuais ao agente, recuperação de contexto em dados sintéticos, ausência de informação suficiente, upload de áudio, transcrição em `pt-BR`, propagação de erros controlados e preservação do formato de resposta esperado pelo frontend de bancada. Quando o comportamento depender de serviços externos, o plano deve prever duplos de teste para manter a execução padrão independente de credenciais, disponibilidade de rede ou consumo de serviços pagos.
+
+Para o fluxo de áudio, a suíte automatizada deve validar o contrato local antes da chamada externa: campo `audio` obrigatório, formatos WAV/PCM e OGG/OPUS, limite de 60 segundos, teto de 2 MB, áudio sem fala, autenticação simulada, bloqueio de requisições simultâneas por usuário, resposta `200` com transcrição e envelopes de erro `400`, `401`, `413`, `422`, `429`, `502` e `503`. A fronteira com o Azure AI Speech deve ser testada com duplos de HTTP, cobrindo montagem de URL, cabeçalhos, endpoint regional, resposta detalhada, timeout, estados sem reconhecimento e códigos transitórios do provedor. Essa estratégia preserva a reprodutibilidade dos testes e evita consumo acidental da franquia do serviço durante a execução padrão.
+
+A execução detalhada dos testes automatizados e das validações E2E controladas do backend fica registrada em `src/backend/README.md`, mantendo o `Projeto.md` como referência de escopo, contrato e estratégia de testes.
 
 ### 9.1.2 Resultados
 

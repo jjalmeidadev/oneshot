@@ -40,7 +40,8 @@ Thumbs.db
 .env.*.local
 *.key
 *.pem
-.env.example
+!.env.example
+!**/.env.example
 
 
 # Dependencies (AIOX)
@@ -49,6 +50,7 @@ node_modules
 # Build & Logs (AIOX)
 *.log
 logs/
+tmp/
 
 # AIOX Local (AIOX)
 .aiox-core/local/

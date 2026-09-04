@@ -13,6 +13,20 @@ de 2, 4 e 8 segundos. Esses valores podem ser ajustados em `.env` por meio de
 `GEMINI_THINKING_LEVEL`, `GEMINI_MAX_OUTPUT_TOKENS`, `GEMINI_MAX_RETRIES`,
 `GEMINI_RETRY_BASE_DELAY_SECONDS` e `GEMINI_REQUEST_TIMEOUT_SECONDS`.
 
+Para transcrever audio, configure tambem o recurso Azure AI Speech homologado
+para o ambiente. O portal Azure exibe o nome do recurso e, em alguns casos, um
+endpoint regional no formato `https://<regiao>.api.cognitive.microsoft.com/`; a
+aplicacao aceita esse valor em `AZURE_SPEECH_ENDPOINT` e o normaliza para o host
+de STT usado pela API de audio curto.
+
+| Variavel | Uso |
+| --- | --- |
+| `AZURE_SPEECH_RESOURCE` | Nome do recurso Speech, usado para montar `https://<recurso>.cognitiveservices.azure.com` quando nao ha endpoint explicito. |
+| `AZURE_SPEECH_ENDPOINT` | Endpoint opcional exibido no portal; aceita `*.api.cognitive.microsoft.com`, `*.stt.speech.microsoft.com` ou `*.cognitiveservices.azure.com`. |
+| `AZURE_SPEECH_KEY` | Chave do recurso Azure AI Speech, mantida somente no `.env` local. |
+| `AZURE_SPEECH_TIMEOUT_SECONDS` | Tempo maximo da chamada ao provedor, padrao 6 s; o backend limita o valor entre 1 e 120 segundos. |
+| `AZURE_SPEECH_MAX_ATTEMPTS` | Tentativas totais em falha transitoria, padrao 2; o backend limita entre 1 e 5. |
+
 ```powershell
 cd src/backend
 python -m venv .venv
@@ -91,9 +105,36 @@ navegadores grava declarando 48 kHz, entao exigir 16 kHz ali recusaria toda grav
 vinda do frontend. O ramo Opus aceita `0`, `16000` e `48000`; o ramo WAV mantem a
 exigencia estrita de 16 kHz da Secao 8.7.3.
 
-Enquanto a integracao de Speech-to-Text nao existir, um audio aprovado na validacao
-recebe `200` com `pipeline_status` igual a `"stubbed"` e transcricao vazia. A troca
-acontece em `app/audio/transcription.py`, sem alterar o endpoint.
+O Speech-to-Text usa o Azure AI Speech para audio curto, em `pt-BR`, via
+`app/audio/transcription.py`. Um audio aprovado na validacao recebe `200` com a
+transcricao retornada pelo provedor. O campo `pipeline_status` permanece
+`"stubbed"` ate a integracao do classificador de intencoes e da resposta
+fundamentada, que sao tasks separadas.
+
+**A chamada ao provedor e assincrona.** A rota de audio e `async def`, e um
+cliente HTTP sincrono dentro dela bloquearia o laco de eventos: enquanto o
+Azure nao respondesse, nenhuma outra requisicao seria atendida — nem `/health`,
+nem `/api/chat`, nem outro upload.
+
+Os limites acompanham o orcamento do RNF05, que da 10 segundos para uma
+consulta simples ponta a ponta e do qual a transcricao e apenas a primeira
+etapa: 6 segundos de espera e ate duas tentativas, com meio segundo entre elas.
+
+O cliente HTTP e criado uma vez por requisicao, de modo que a retentativa
+reaproveite a conexao ja estabelecida. Compartilha-lo entre requisicoes
+diferentes daria mais um ganho, mas exige fecha-lo no encerramento da
+aplicacao, e por isso cabe ao ciclo de vida do FastAPI, junto da integracao do
+pipeline com a API.
+
+As falhas do provedor sao traduzidas para os codigos da Secao 8.7.6:
+
+| Situacao no Azure | Resposta |
+| --- | --- |
+| `429`, franquia ou concorrencia excedida | `429 RATE_LIMITED`, sem repetir a chamada |
+| `408`, `500`, `502`, `503`, `504` | `503 STT_PROVIDER_UNAVAILABLE`, apos as tentativas |
+| Demais respostas `4xx` | `502 STT_PROVIDER_ERROR`, sem repetir |
+| `RecognitionStatus` `NoMatch` ou tempos de silencio | `422 NO_SPEECH_DETECTED` |
+| `RecognitionStatus` `Error` | `502 STT_PROVIDER_ERROR` |
 
 ```bash
 curl --request POST \
@@ -283,3 +324,25 @@ divergirem.
 cd src/backend
 .venv\Scripts\python.exe -m pytest app/tests
 ```
+
+A suite automatizada cobre validacao de formato, duracao, tamanho, silencio,
+autenticacao simulada, limite de uma requisicao por usuario, contrato de resposta
+do upload, mensagens de erro controladas e a fronteira HTTP com o Azure AI
+Speech. As chamadas ao provedor externo usam duplos de teste por padrao, mesmo
+com `.env` preenchido, para manter a execucao reproduzivel e sem consumo de
+franquia.
+
+As opcoes de pre-processamento mantidas para reproduzir o benchmark de PLN podem
+exigir dados do NLTK. Quando o ambiente ainda nao tiver esses corpora:
+
+```powershell
+.venv\Scripts\python.exe -c "import nltk; nltk.download('stopwords', download_dir='.venv/nltk_data'); nltk.download('punkt_tab', download_dir='.venv/nltk_data')"
+```
+
+Validacoes E2E contra o Azure devem ser executadas separadamente da suite
+deterministica. Um arquivo publico usado como amostra foi
+`tiririca_campanha.wav`, referenciado em
+`https://bookdown.org/davi_moreira/txt4cs/scrape.html` e disponivel no GitHub do
+material. Como a amostra original esta em WAV estereo a 44,1 kHz, a copia de
+teste deve ser convertida para WAV PCM mono a 16 kHz antes do envio ao
+`POST /api/audio`.
