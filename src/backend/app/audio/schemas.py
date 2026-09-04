@@ -36,9 +36,9 @@ class AudioUploadResponse(BaseModel):
     answer: AudioAnswer
     pipeline_status: str = Field(
         description=(
-            "'stubbed' enquanto a integracao real com o Speech-to-Text e o "
-            "pipeline de PLN (task 11) nao esta implementada; 'completed' "
-            "quando a resposta vem do provedor real."
+            "'stubbed' enquanto o pipeline de PLN nao esta implementado; "
+            "'completed' quando a classificacao e a resposta fundamentada "
+            "forem geradas pela API."
         ),
     )
 

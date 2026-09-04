@@ -1,8 +1,10 @@
 """Cenarios de validacao e de erro do POST /api/audio (Secao 8.7 de Projeto.md)."""
 
+import asyncio
 import struct
 from hashlib import sha256
 
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 
@@ -26,9 +28,74 @@ TOKEN = "token-de-teste"
 AUTH_HEADER = {"Authorization": f"Bearer {TOKEN}"}
 
 
+class FakeAzureResponse:
+    def __init__(self, status_code: int, payload: dict | None = None) -> None:
+        self.status_code = status_code
+        self._payload = payload or {}
+
+    def json(self) -> dict:
+        return self._payload
+
+
+class FakeAzureClient:
+    """Duplo do `httpx.AsyncClient`, com o mesmo protocolo assincrono."""
+
+    def __init__(self, response: FakeAzureResponse, captured: dict) -> None:
+        self.response = response
+        self.captured = captured
+
+    async def __aenter__(self) -> "FakeAzureClient":
+        return self
+
+    async def __aexit__(self, *_args: object) -> None:
+        return None
+
+    async def post(self, url: str, *, content: bytes, headers: dict[str, str]):
+        self.captured["url"] = url
+        self.captured["content"] = content
+        self.captured["headers"] = headers
+        self.captured["tentativas"] = self.captured.get("tentativas", 0) + 1
+        return self.response
+
+
+def fake_azure_client_factory(response: FakeAzureResponse, captured: dict):
+    def factory(*, timeout: float):
+        captured["timeout"] = timeout
+        return FakeAzureClient(response, captured)
+
+    return factory
+
+
+def transcrever(*args, **kwargs):
+    """Executa a corrotina de transcricao a partir de um teste sincrono."""
+
+    return asyncio.run(transcription.transcribe(*args, **kwargs))
+
+
+def transcricao_fixa(**campos):
+    """Substitui o provedor por uma corrotina que devolve sempre o mesmo texto."""
+
+    async def _transcrever(*_args: object, **_kwargs: object):
+        return transcription.Transcription(**campos)
+
+    return _transcrever
+
+
+def falha_do_provedor(excecao: Exception):
+    """Substitui o provedor por uma corrotina que sempre levanta `excecao`."""
+
+    async def _falhar(*_args: object, **_kwargs: object):
+        raise excecao
+
+    return _falhar
+
+
 @pytest.fixture(autouse=True)
-def reset_concurrency_control() -> None:
+def reset_concurrency_control(monkeypatch: pytest.MonkeyPatch) -> None:
     security._active_identities.clear()
+    monkeypatch.delenv(transcription.AZURE_SPEECH_RESOURCE_ENV, raising=False)
+    monkeypatch.delenv(transcription.AZURE_SPEECH_ENDPOINT_ENV, raising=False)
+    monkeypatch.delenv(transcription.AZURE_SPEECH_KEY_ENV, raising=False)
 
 
 def _build_wav(
@@ -359,15 +426,37 @@ class TestAudioUploadEndpoint:
             "RATE_LIMITED",
         )
 
+    def test_provider_quota_exceeded_returns_429(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A franquia do provedor e o outro caminho para o 429 da Secao 8.7.6."""
+
+        monkeypatch.setattr(
+            transcription,
+            "transcribe",
+            falha_do_provedor(
+                transcription.SttProviderRateLimited("franquia excedida")
+            ),
+        )
+        error = assert_error(
+            post_audio(self.client, _build_wav(), "p.wav", "audio/wav"),
+            429,
+            "RATE_LIMITED",
+        )
+        assert "franquia excedida" not in error["message"]
+
     def test_concurrency_slot_is_released_after_a_rejected_request(self) -> None:
         post_audio(self.client, b"\xff\xfb\x90\x00", "p.mp3", "audio/mpeg")
         assert security._active_identities == set()
 
     def test_provider_failure_returns_502(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        def fail(*_args: object, **_kwargs: object):
-            raise transcription.SttProviderError("connection reset by peer")
-
-        monkeypatch.setattr(transcription, "transcribe", fail)
+        monkeypatch.setattr(
+            transcription,
+            "transcribe",
+            falha_do_provedor(
+                transcription.SttProviderError("connection reset by peer")
+            ),
+        )
         error = assert_error(
             post_audio(self.client, _build_wav(), "p.wav", "audio/wav"),
             502,
@@ -378,17 +467,27 @@ class TestAudioUploadEndpoint:
     def test_provider_unavailable_returns_503(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        def unavailable(*_args: object, **_kwargs: object):
-            raise transcription.SttProviderUnavailable("fora do ar")
-
-        monkeypatch.setattr(transcription, "transcribe", unavailable)
+        monkeypatch.setattr(
+            transcription,
+            "transcribe",
+            falha_do_provedor(transcription.SttProviderUnavailable("fora do ar")),
+        )
         assert_error(
             post_audio(self.client, _build_wav(), "p.wav", "audio/wav"),
             503,
             "STT_PROVIDER_UNAVAILABLE",
         )
 
-    def test_valid_wav_upload_returns_200_with_stub_pipeline(self) -> None:
+    def test_valid_wav_upload_returns_200_with_transcription(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            transcription,
+            "transcribe",
+            transcricao_fixa(
+                text="qual o prazo do projeto", confidence=0.94, duration_seconds=3.0
+            ),
+        )
         response = self.client.post(
             "/api/audio",
             data={"conversation_id": "1f5c9a24-1c2e-4a8f-9a3e-2b6d8c0f1a77"},
@@ -399,15 +498,35 @@ class TestAudioUploadEndpoint:
         body = response.json()
         assert body["conversation_id"] == "1f5c9a24-1c2e-4a8f-9a3e-2b6d8c0f1a77"
         assert body["pipeline_status"] == "stubbed"
+        assert body["transcription"]["text"] == "qual o prazo do projeto"
+        assert body["transcription"]["confidence"] == 0.94
         assert body["transcription"]["duration_seconds"] == pytest.approx(3.0, abs=0.05)
 
-    def test_valid_ogg_upload_returns_200(self) -> None:
+    def test_valid_ogg_upload_returns_200(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            transcription,
+            "transcribe",
+            transcricao_fixa(
+                text="consulta por voz", confidence=0.9, duration_seconds=0.67
+            ),
+        )
         content = _build_ogg_opus(granule_position=32_000)
         response = post_audio(self.client, content, "p.ogg", "audio/ogg")
         assert response.status_code == 200
         assert response.json()["pipeline_status"] == "stubbed"
 
-    def test_generates_conversation_id_when_absent(self) -> None:
+    def test_generates_conversation_id_when_absent(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            transcription,
+            "transcribe",
+            transcricao_fixa(
+                text="consulta por voz", confidence=0.9, duration_seconds=1.0
+            ),
+        )
         response = post_audio(self.client, _build_wav(), "p.wav", "audio/wav")
         assert response.status_code == 200
         assert response.json()["conversation_id"]
@@ -418,13 +537,307 @@ class TestAudioUploadEndpoint:
         monkeypatch.setattr(
             transcription,
             "transcribe",
-            lambda *_args, **_kwargs: transcription.Transcription(
+            transcricao_fixa(
                 text="qual o prazo do projeto", confidence=0.94, duration_seconds=2.0
             ),
         )
         response = post_audio(self.client, _build_wav(), "p.wav", "audio/wav")
         assert response.status_code == 200
         assert response.json()["transcription"]["text"] == "qual o prazo do projeto"
+
+
+class TestAzureSpeechTranscription:
+    """Integracao HTTP com Azure AI Speech sem chamada real de rede."""
+
+    def test_transcribes_valid_wav_with_azure_detailed_response(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        audio = _build_wav(duration_seconds=2.0)
+        probe = validate_audio_upload(audio)
+        captured: dict = {}
+
+        monkeypatch.setenv(transcription.AZURE_SPEECH_RESOURCE_ENV, "metro-speech")
+        monkeypatch.setenv(transcription.AZURE_SPEECH_KEY_ENV, "secret-key")
+        monkeypatch.setenv(transcription.AZURE_SPEECH_TIMEOUT_ENV, "12")
+        monkeypatch.setattr(
+            transcription.httpx,
+            "AsyncClient",
+            fake_azure_client_factory(
+                FakeAzureResponse(
+                    200,
+                    {
+                        "RecognitionStatus": "Success",
+                        "NBest": [
+                            {
+                                "Confidence": 0.45,
+                                "MaskedITN": "alternativa pior",
+                            },
+                            {
+                                "Confidence": 0.94,
+                                "MaskedITN": "qual o prazo do projeto",
+                                "Lexical": "qual o prazo do projeto",
+                            },
+                        ],
+                    },
+                ),
+                captured,
+            ),
+        )
+
+        result = transcrever(audio, probe, "pt-BR")
+
+        assert result == transcription.Transcription(
+            text="qual o prazo do projeto",
+            confidence=0.94,
+            duration_seconds=2.0,
+        )
+        assert captured["timeout"] == 12
+        assert "language=pt-BR" in captured["url"]
+        assert "format=detailed" in captured["url"]
+        assert captured["content"] == audio
+        assert captured["headers"] == {
+            "Accept": "application/json",
+            "Content-Type": "audio/wav; codecs=audio/pcm; samplerate=16000",
+            "Ocp-Apim-Subscription-Key": "secret-key",
+        }
+
+    def test_transcribes_ogg_with_opus_content_type(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        audio = _build_ogg_opus(granule_position=48_000)
+        probe = validate_audio_upload(audio)
+        captured: dict = {}
+
+        monkeypatch.setenv(transcription.AZURE_SPEECH_RESOURCE_ENV, "metro-speech")
+        monkeypatch.setenv(transcription.AZURE_SPEECH_KEY_ENV, "secret-key")
+        monkeypatch.setattr(
+            transcription.httpx,
+            "AsyncClient",
+            fake_azure_client_factory(
+                FakeAzureResponse(
+                    200,
+                    {
+                        "RecognitionStatus": "Success",
+                        "NBest": [{"Confidence": 0.88, "ITN": "texto do ogg"}],
+                    },
+                ),
+                captured,
+            ),
+        )
+
+        result = transcrever(audio, probe)
+
+        assert result.text == "texto do ogg"
+        assert captured["headers"]["Content-Type"] == "audio/ogg; codecs=opus"
+
+    def test_prefers_configured_regional_endpoint(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        audio = _build_wav()
+        probe = validate_audio_upload(audio)
+        captured: dict = {}
+
+        monkeypatch.setenv(transcription.AZURE_SPEECH_RESOURCE_ENV, "oneshot-stt")
+        monkeypatch.setenv(
+            transcription.AZURE_SPEECH_ENDPOINT_ENV,
+            "https://eastus.api.cognitive.microsoft.com/",
+        )
+        monkeypatch.setenv(transcription.AZURE_SPEECH_KEY_ENV, "secret-key")
+        monkeypatch.setattr(
+            transcription.httpx,
+            "AsyncClient",
+            fake_azure_client_factory(
+                FakeAzureResponse(
+                    200,
+                    {
+                        "RecognitionStatus": "Success",
+                        "NBest": [{"Confidence": 0.8, "Display": "texto regional"}],
+                    },
+                ),
+                captured,
+            ),
+        )
+
+        result = transcrever(audio, probe)
+
+        assert result.text == "texto regional"
+        assert captured["url"].startswith(
+            "https://eastus.stt.speech.microsoft.com/speech/recognition/"
+        )
+
+    def test_missing_azure_configuration_is_unavailable(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.delenv(transcription.AZURE_SPEECH_RESOURCE_ENV, raising=False)
+        monkeypatch.delenv(transcription.AZURE_SPEECH_ENDPOINT_ENV, raising=False)
+        monkeypatch.delenv(transcription.AZURE_SPEECH_KEY_ENV, raising=False)
+
+        with pytest.raises(transcription.SttProviderUnavailable):
+            transcrever(
+                _build_wav(), validate_audio_upload(_build_wav())
+            )
+
+    def test_quota_exceeded_is_rate_limited(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A Secao 8.7.6 reserva o 429 para a franquia do provedor estourada.
+
+        O projeto usa o nivel gratuito do Azure, entao o caso e provavel; dizer
+        "servico indisponivel" mandaria o usuario para o texto quando bastava
+        aguardar.
+        """
+
+        capturado: dict = {}
+        monkeypatch.setenv(transcription.AZURE_SPEECH_RESOURCE_ENV, "metro-speech")
+        monkeypatch.setenv(transcription.AZURE_SPEECH_KEY_ENV, "secret-key")
+        monkeypatch.setattr(
+            transcription.httpx,
+            "AsyncClient",
+            fake_azure_client_factory(FakeAzureResponse(429), capturado),
+        )
+
+        with pytest.raises(transcription.SttProviderRateLimited):
+            transcrever(_build_wav(), validate_audio_upload(_build_wav()))
+
+        # Repetir uma requisicao barrada por franquia so agravaria o limite.
+        assert capturado["tentativas"] == 1
+
+    def test_transient_status_is_unavailable(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        capturado: dict = {}
+        monkeypatch.setenv(transcription.AZURE_SPEECH_RESOURCE_ENV, "metro-speech")
+        monkeypatch.setenv(transcription.AZURE_SPEECH_KEY_ENV, "secret-key")
+        monkeypatch.setattr(
+            transcription.httpx,
+            "AsyncClient",
+            fake_azure_client_factory(FakeAzureResponse(503), capturado),
+        )
+
+        with pytest.raises(transcription.SttProviderUnavailable):
+            transcrever(_build_wav(), validate_audio_upload(_build_wav()))
+
+        assert capturado["tentativas"] == transcription.DEFAULT_MAX_ATTEMPTS
+
+    def test_permanent_error_is_not_retried(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        capturado: dict = {}
+        monkeypatch.setenv(transcription.AZURE_SPEECH_RESOURCE_ENV, "metro-speech")
+        monkeypatch.setenv(transcription.AZURE_SPEECH_KEY_ENV, "secret-key")
+        monkeypatch.setattr(
+            transcription.httpx,
+            "AsyncClient",
+            fake_azure_client_factory(FakeAzureResponse(400), capturado),
+        )
+
+        with pytest.raises(transcription.SttProviderError):
+            transcrever(_build_wav(), validate_audio_upload(_build_wav()))
+
+        assert capturado["tentativas"] == 1
+
+    def test_retry_reuses_the_same_http_client(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Repetir a chamada nao deve repetir o handshake TLS."""
+
+        capturado: dict = {}
+        criados = []
+
+        def fabrica(*, timeout: float):
+            capturado["timeout"] = timeout
+            cliente = FakeAzureClient(FakeAzureResponse(503), capturado)
+            criados.append(cliente)
+            return cliente
+
+        monkeypatch.setenv(transcription.AZURE_SPEECH_RESOURCE_ENV, "metro-speech")
+        monkeypatch.setenv(transcription.AZURE_SPEECH_KEY_ENV, "secret-key")
+        monkeypatch.setattr(transcription.httpx, "AsyncClient", fabrica)
+
+        with pytest.raises(transcription.SttProviderUnavailable):
+            transcrever(_build_wav(), validate_audio_upload(_build_wav()))
+
+        assert capturado["tentativas"] == transcription.DEFAULT_MAX_ATTEMPTS
+        assert len(criados) == 1
+
+    def test_recognition_error_is_a_provider_failure(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """`Error` e falha do provedor, nao ausencia de fala.
+
+        Devolver 422 mandaria o usuario regravar um audio que estava correto.
+        """
+
+        monkeypatch.setenv(transcription.AZURE_SPEECH_RESOURCE_ENV, "metro-speech")
+        monkeypatch.setenv(transcription.AZURE_SPEECH_KEY_ENV, "secret-key")
+        monkeypatch.setattr(
+            transcription.httpx,
+            "AsyncClient",
+            fake_azure_client_factory(
+                FakeAzureResponse(200, {"RecognitionStatus": "Error"}), {}
+            ),
+        )
+
+        with pytest.raises(transcription.SttProviderError):
+            transcrever(_build_wav(), validate_audio_upload(_build_wav()))
+
+    def test_permanent_provider_error_is_failed(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setenv(transcription.AZURE_SPEECH_RESOURCE_ENV, "metro-speech")
+        monkeypatch.setenv(transcription.AZURE_SPEECH_KEY_ENV, "secret-key")
+        monkeypatch.setattr(
+            transcription.httpx,
+            "AsyncClient",
+            fake_azure_client_factory(FakeAzureResponse(400), {}),
+        )
+
+        with pytest.raises(transcription.SttProviderError):
+            transcrever(
+                _build_wav(), validate_audio_upload(_build_wav())
+            )
+
+    def test_no_match_from_provider_is_no_speech(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setenv(transcription.AZURE_SPEECH_RESOURCE_ENV, "metro-speech")
+        monkeypatch.setenv(transcription.AZURE_SPEECH_KEY_ENV, "secret-key")
+        monkeypatch.setattr(
+            transcription.httpx,
+            "AsyncClient",
+            fake_azure_client_factory(
+                FakeAzureResponse(200, {"RecognitionStatus": "NoMatch"}), {}
+            ),
+        )
+
+        with pytest.raises(NoSpeechDetectedError):
+            transcrever(
+                _build_wav(), validate_audio_upload(_build_wav())
+            )
+
+    def test_timeout_is_unavailable(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        class TimeoutClient:
+            async def __aenter__(self) -> "TimeoutClient":
+                return self
+
+            async def __aexit__(self, *_args: object) -> None:
+                return None
+
+            async def post(self, *_args: object, **_kwargs: object):
+                raise httpx.TimeoutException("timeout")
+
+        monkeypatch.setenv(transcription.AZURE_SPEECH_RESOURCE_ENV, "metro-speech")
+        monkeypatch.setenv(transcription.AZURE_SPEECH_KEY_ENV, "secret-key")
+        monkeypatch.setattr(
+            transcription.httpx,
+            "AsyncClient",
+            lambda *, timeout: TimeoutClient(),
+        )
+
+        with pytest.raises(transcription.SttProviderUnavailable):
+            transcrever(
+                _build_wav(), validate_audio_upload(_build_wav())
+            )
 
 
 class TestControlledErrorMessages:
