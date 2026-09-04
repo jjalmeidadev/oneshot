@@ -7,15 +7,25 @@ import TrySection from './sections/trySection'
 import IntegrationSection from './sections/integrationSection'
 import FooterSection from './sections/footer'
 import FloatingChat from './components/chat/floating-chat'
+import LoadingScreen from './components/ui/loading-screen'
+import GhostDocuments from './components/ui/ghost-documents'
+import DocumentCarousel from './components/ui/document-carousel'
+import DocumentDispatch from './components/ui/document-dispatch'
+import ChatFragments from './components/ui/chat-fragments'
 import { useChatSectionsTransition } from './lib/chatTransition'
 import { useScrollTriggerRefresh } from './lib/useScrollTriggerRefresh'
+import { useScrollSpeedLimit } from './lib/useScrollSpeedLimit'
 
 function App() {
   useChatSectionsTransition()
   useScrollTriggerRefresh()
+  useScrollSpeedLimit('[data-choreography-zone]')
 
   return (
     <div className="App relative min-h-screen">
+      {/* Cortina de abertura: cobre a montagem do shader, das fontes e do
+          handwriting, e só entrega a página quando tudo está pronto. */}
+      <LoadingScreen />
       {/* Background global: MeshGradient do @paper-design/shaders-react
           (pacote open-source original do componente do 21st.dev). */}
       <MeshGradient
@@ -30,7 +40,12 @@ function App() {
 
       {/* Área do chat: fundo cinza opaco que cobre o background enquanto as
           seções de conversa estão em tela, com borda limpa (sem gradiente). */}
-      <div className="relative isolate bg-neutral-800">
+      <div data-choreography-zone className="relative isolate bg-neutral-800">
+        {/* Silhuetas dos documentos do portfólio, ao fundo das conversas. */}
+        <GhostDocuments />
+        {/* Os documentos giram e atravessam a tela na virada do chat 1 para
+            o chat 2, indo parar atrás da janela que chega pela direita. */}
+        <DocumentCarousel />
         <ChatSection />
         <ChatSwapSection />
         <TrySection />
@@ -38,6 +53,14 @@ function App() {
             ela acompanha o slot de cada uma e cresce entre eles. */}
         <FloatingChat />
       </div>
+
+      {/* Fecha o arco dos documentos: eles saem do chat e voam para os
+          cards das integrações. Montado antes da seção para passar por trás
+          dos cards, não por cima. */}
+      <DocumentDispatch />
+      {/* Logo depois dos documentos: a própria janela se parte e os cacos
+          viram os blocos das integrações. */}
+      <ChatFragments />
 
       <IntegrationSection />
       <FooterSection />

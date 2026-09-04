@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, FileText } from "lucide-react";
 import { Folder } from "@/components/ui/folder";
+import { SOURCE_FOCUS_EVENT } from "@/components/ui/ghost-documents";
 import { cn } from "@/lib/utils";
 
 export interface SourceFolderProps {
@@ -16,6 +17,12 @@ export interface SourceFolderProps {
 export default function SourceFolder({ label, documents }: SourceFolderProps) {
     const [open, setOpen] = useState(false);
     const [selected, setSelected] = useState<string | null>(null);
+
+    // Avisa o fundo da seção: o documento fantasma correspondente acende
+    // quando a pasta entra em cena e a cada vez que ela é aberta.
+    useEffect(() => {
+        window.dispatchEvent(new CustomEvent(SOURCE_FOCUS_EVENT));
+    }, [open]);
 
     return (
         // `pointer-events-auto`: enquanto o chat 2 ainda está preso na seção

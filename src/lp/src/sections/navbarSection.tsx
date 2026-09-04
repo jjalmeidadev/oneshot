@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import AnimatedNavLink from "@/components/navbar/navbar";
 import { cn } from "@/lib/utils";
+import { beginProgrammaticScroll } from "@/lib/scrollHold";
 import { GLASS } from "@/lib/styles";
 
 /** `target: null` = topo da página; senão, o seletor da seção de destino. */
@@ -59,6 +60,7 @@ function NavbarSection() {
     const goTo = useCallback(
         (selector: string | null) => (event: React.MouseEvent<HTMLAnchorElement>) => {
             event.preventDefault();
+            beginProgrammaticScroll(1600);
             if (!selector) {
                 window.scrollTo({ top: 0, behavior: "smooth" });
                 return;
@@ -117,6 +119,7 @@ function NavbarSection() {
             <a
                 href="#topo"
                 onClick={goTo(null)}
+                data-brand-wordmark
                 className="justify-self-end text-2xl leading-7 font-medium tracking-tight text-white transition-opacity duration-300 hover:opacity-70"
             >
                 OneShot

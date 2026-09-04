@@ -1,11 +1,13 @@
 import ChatMessages from "@/components/chat/chat-messages";
+import SkipRevealButton from "@/components/ui/skip-reveal-button";
 import { INTRO_MESSAGES } from "@/components/chat/messages";
 import { useScrollReveal } from "@/lib/useScrollReveal";
 
 export default function ChatSection() {
     // Chat 1: conversa de apresentação, revelada a cada passo de scroll com a
     // página travada até a última mensagem.
-    const { active, step, onBusyChange, onComplete } = useScrollReveal("[data-chat-section]");
+    const { active, step, holding, skip, onBusyChange, onComplete } =
+        useScrollReveal("[data-chat-section]");
 
     // The panel and text don't animate on their own here: once every message
     // has been scrolled in and the page unlocks, the fluid cross-section
@@ -52,6 +54,8 @@ export default function ChatSection() {
                     entre planilhas e pastas espalhadas.
                 </p>
             </div>
+
+            {holding && <SkipRevealButton onSkip={skip} />}
         </section>
     );
 }

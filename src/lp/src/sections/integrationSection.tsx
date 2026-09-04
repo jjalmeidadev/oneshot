@@ -4,6 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { GLASS, GLASS_INTERACTIVE } from "@/lib/styles";
+import { beginProgrammaticScroll } from "@/lib/scrollHold";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -107,7 +108,9 @@ export default function IntegrationSection() {
                 duration: 0.8,
                 ease: "power3.out",
                 stagger: 0.12,
-                scrollTrigger: { trigger: "[data-integration-cards]", start: "top 85%" },
+                // Os cards se materializam na chegada dos cacos da janela,
+                // não antes — é o que faz a fragmentação parecer virar eles.
+                scrollTrigger: { trigger: "[data-integration-cards]", start: "top 80%" },
             });
         }, section);
 
@@ -115,6 +118,7 @@ export default function IntegrationSection() {
     }, []);
 
     const focusCard = (id: string) => {
+        beginProgrammaticScroll(1600);
         setExpanded(id);
         cardsRef.current[id]?.scrollIntoView({ behavior: "smooth", block: "center" });
     };
@@ -125,6 +129,7 @@ export default function IntegrationSection() {
     const goToChat = () => {
         const stage = document.querySelector<HTMLElement>("[data-try-section]")?.parentElement;
         if (!stage) return;
+        beginProgrammaticScroll(1600);
         window.scrollTo({
             top: window.scrollY + stage.getBoundingClientRect().top + 40,
             behavior: "smooth",

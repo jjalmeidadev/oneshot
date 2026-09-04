@@ -4,6 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ChatMessages from "@/components/chat/chat-messages";
 import { SOURCE_MESSAGES } from "@/components/chat/messages";
 import { useScrollReveal } from "@/lib/useScrollReveal";
+import SkipRevealButton from "@/components/ui/skip-reveal-button";
 import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -12,6 +13,8 @@ gsap.registerPlugin(ScrollTrigger);
 const SMOOTHING = 0.12;
 /** Progress past which the window counts as filling the screen. */
 const EXPANDED_AT = 0.995;
+
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 /**
  * The single chat window shared by the swap section and the "try it"
@@ -34,7 +37,7 @@ export default function FloatingChat() {
     const expandedRef = useRef(false);
     // Chat 2 has its own conversation — about where each answer came from —
     // and reveals it step by step while the swap section holds the page.
-    const { active, step, onBusyChange, onComplete } = useScrollReveal(
+    const { active, step, holding, skip, onBusyChange, onComplete } = useScrollReveal(
         "[data-chat-swap-section]",
     );
 
@@ -82,10 +85,10 @@ export default function FloatingChat() {
             const p = progress;
 
             gsap.set(wrap, {
-                left: a.left + (b.left - a.left) * p,
-                top: a.top + (b.top - a.top) * p,
-                width: a.width + (b.width - a.width) * p,
-                height: a.height + (b.height - a.height) * p,
+                left: lerp(a.left, b.left, p),
+                top: lerp(a.top, b.top, p),
+                width: lerp(a.width, b.width, p),
+                height: lerp(a.height, b.height, p),
             });
 
             const isExpanded = p >= EXPANDED_AT;
@@ -120,6 +123,7 @@ export default function FloatingChat() {
     }, []);
 
     return (
+        <>
         <div
             ref={wrapRef}
             data-chat-panel="to"
@@ -143,5 +147,8 @@ export default function FloatingChat() {
                 onSendMessage={handleSendMessage}
             />
         </div>
+
+        {holding && <SkipRevealButton onSkip={skip} />}
+        </>
     );
 }

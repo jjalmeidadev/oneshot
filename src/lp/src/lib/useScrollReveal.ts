@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { claimHold, releaseHold } from "@/lib/scrollHold";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -40,6 +41,8 @@ const STEP_COOLDOWN = 500;
 export function useScrollReveal(sectionSelector: string) {
     const [active, setActive] = useState(false);
     const [step, setStep] = useState(0);
+    /** Verdadeiro enquanto a seção está segurando a página. */
+    const [holding, setHolding] = useState(false);
     const startedRef = useRef(false);
     // Refs (not state) so the scroll handlers can read them without being
     // re-registered on every message.
@@ -112,6 +115,8 @@ export function useScrollReveal(sectionSelector: string) {
         const release = () => {
             if (!held) return;
             held = false;
+            releaseHold(sectionSelector);
+            setHolding(false);
             window.removeEventListener("wheel", onWheel);
             window.removeEventListener("touchstart", onTouchStart);
             window.removeEventListener("touchmove", onTouchMove);
@@ -121,6 +126,10 @@ export function useScrollReveal(sectionSelector: string) {
 
         const engage = () => {
             if (startedRef.current) return;
+            // Num scroll muito rápido, duas seções cruzam o próprio gatilho no
+            // mesmo voo. Só uma pode assumir a página: a outra desiste e tenta
+            // de novo na próxima passagem, já que o gatilho não é de uso único.
+            if (!claimHold(sectionSelector)) return;
             startedRef.current = true;
 
             lockY = Math.round(window.scrollY + section.getBoundingClientRect().top);
@@ -136,6 +145,7 @@ export function useScrollReveal(sectionSelector: string) {
             window.addEventListener("scroll", onScroll, { passive: true });
 
             setActive(true);
+            setHolding(true);
         };
 
         releaseRef.current = release;
@@ -144,7 +154,6 @@ export function useScrollReveal(sectionSelector: string) {
             ScrollTrigger.create({
                 trigger: section,
                 start: "top top",
-                once: true,
                 onEnter: engage,
             });
         }, section);
@@ -166,5 +175,15 @@ export function useScrollReveal(sectionSelector: string) {
         releaseRef.current?.();
     }, []);
 
-    return { active, step, onBusyChange, onComplete };
+    /**
+     * Conclui a conversa na hora: o alvo salta para o fim (o ChatMessages
+     * detecta o salto e mostra tudo de uma vez, sem os tempos de digitação) e
+     * a página é liberada no mesmo instante.
+     */
+    const skip = useCallback(() => {
+        setStep(Number.MAX_SAFE_INTEGER);
+        releaseRef.current?.();
+    }, []);
+
+    return { active, step, holding, skip, onBusyChange, onComplete };
 }

@@ -26,34 +26,103 @@ export function useChatSectionsTransition() {
         const fromText = document.querySelector<HTMLElement>('[data-chat-text="from"]');
         const toText = document.querySelector<HTMLElement>('[data-chat-text="to"]');
         const trigger = document.querySelector<HTMLElement>('[data-chat-swap-section]');
+        const fromSection = document.querySelector<HTMLElement>("[data-chat-section]");
         if (!fromPanel || !toPanel || !trigger) return;
 
         const ctx = gsap.context(() => {
-            gsap.set(toPanel, { xPercent: 60, opacity: 0 });
+            // A janela não desliza mais de um lado para o outro: ela se
+            // dissolve (desfoca, encolhe e apaga) enquanto o carrossel de
+            // documentos gira por cima, e se recompõe do outro lado quando o
+            // carrossel já passou.
+            gsap.set(toPanel, { opacity: 0, scale: 0.92, filter: "blur(14px)" });
             if (toText) gsap.set(toText, { opacity: 0 });
 
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger,
-                    start: "top 90%",
-                    end: "top 20%",
+                    // Mesma faixa do carrossel de documentos, para a
+                    // dissolução e o giro andarem juntos. A faixa vive dentro
+                    // da virada entre as duas seções, com folga nas duas
+                    // pontas: descendo, a troca termina antes do chat 2
+                    // enquadrar; subindo, ela se desfaz por completo antes do
+                    // chat 1 voltar a ocupar a tela.
+                    start: "top 85%",
+                    end: "top 25%",
                     scrub: 0.8,
                 },
             });
 
-            // Fluid, continuous panel swap: both tweens share the same
-            // timeline position and duration, so they play as one motion.
-            tl.to(fromPanel, { xPercent: -60, opacity: 0, ease: "none", duration: 1 }, 0);
-            tl.to(toPanel, { xPercent: 0, opacity: 1, ease: "none", duration: 1 }, 0);
+            // Primeiro terço: a janela do chat 1 se dissolve. Último terço:
+            // a do chat 2 se materializa. No meio fica só o carrossel.
+            tl.to(
+                fromPanel,
+                {
+                    opacity: 0,
+                    scale: 0.92,
+                    filter: "blur(14px)",
+                    ease: "power1.in",
+                    duration: 0.35,
+                },
+                0,
+            );
+            tl.to(
+                toPanel,
+                {
+                    opacity: 1,
+                    scale: 1,
+                    filter: "blur(0px)",
+                    ease: "power2.out",
+                    duration: 0.4,
+                },
+                0.6,
+            );
 
             // Sequential text fade: outgoing text fades out over the first
             // half of the scroll range, incoming text only starts fading in
             // once that's complete.
             if (fromText) {
-                tl.to(fromText, { opacity: 0, ease: "none", duration: 0.5 }, 0);
+                tl.to(fromText, { opacity: 0, ease: "none", duration: 0.35 }, 0);
             }
             if (toText) {
-                tl.to(toText, { opacity: 1, ease: "none", duration: 0.5 }, 0.5);
+                tl.to(toText, { opacity: 1, ease: "none", duration: 0.4 }, 0.6);
+            }
+
+            // Parallax de entrada dos textos: o da seção 1 chega pela direita,
+            // o da seção 2 pela esquerda — cada um preso à entrada da sua
+            // própria seção. Mexem só em `x`, então não disputam com as
+            // opacidades da timeline acima.
+            if (fromText && fromSection) {
+                gsap.fromTo(
+                    fromText,
+                    { x: 140 },
+                    {
+                        x: 0,
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger: fromSection,
+                            start: "top bottom",
+                            end: "top 25%",
+                            scrub: 0.8,
+                        },
+                    },
+                );
+            }
+
+            if (toText) {
+                gsap.fromTo(
+                    toText,
+                    { x: -140 },
+                    {
+                        x: 0,
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger,
+                            start: "top bottom",
+                            end: "top 25%",
+                            scrub: 0.8,
+                        },
+                    },
+                );
             }
         });
 

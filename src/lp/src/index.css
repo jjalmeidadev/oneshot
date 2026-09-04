@@ -15,6 +15,18 @@
   box-sizing: border-box;
 }
 
+/* Esconde a barra de rolagem da página (a rolagem continua funcionando por
+   roda, teclado e toque). Só o documento é afetado: containers internos com
+   scroll próprio, como a lista de mensagens do chat, seguem com a sua. */
+html {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Edge legado */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans);

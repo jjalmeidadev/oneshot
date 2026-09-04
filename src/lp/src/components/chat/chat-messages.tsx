@@ -291,6 +291,11 @@ export function ChatMessages({
       if (visibleCountRef.current >= target) return;
       onBusyChange?.(true);
 
+      // Um salto de mais de uma mensagem só acontece quando alguém pula a
+      // animação (ou quando a página carrega já depois da seção): nesses
+      // casos a conversa aparece inteira, sem os tempos de digitação.
+      const instant = target - visibleCountRef.current > 1;
+
       while (!cancelled && visibleCountRef.current < target) {
         const index = visibleCountRef.current;
         const message = chatMessages[index];
@@ -298,7 +303,7 @@ export function ChatMessages({
 
         // The greeting lands whole, the moment the section is reached; every
         // later model reply gets the typing indicator first.
-        if (message.sender === "assistant" && index > 0) {
+        if (!instant && message.sender === "assistant" && index > 0) {
           setIsTyping(true);
           await wait(typingDuration);
           if (cancelled) return;
@@ -307,8 +312,14 @@ export function ChatMessages({
 
         visibleCountRef.current = index + 1;
         setVisibleCount(index + 1);
+        if (instant) continue;
         await wait(120);
         if (cancelled) return;
+        scrollToBottom();
+      }
+
+      if (instant) {
+        setIsTyping(false);
         scrollToBottom();
       }
 
