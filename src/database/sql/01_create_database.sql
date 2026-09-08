@@ -1,6 +1,8 @@
 -- Modelo fisico de dados - MVP Agente de IA para Portfolio Metro
 -- Banco alvo: PostgreSQL 14+
--- Arquitetura alinhada ao ecossistema Microsoft: Copilot Studio, Power Automate e SharePoint.
+-- Baseline consolidado com o inventario de listas do parceiro de 26/08/2026.
+
+BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
@@ -14,11 +16,17 @@ $$ LANGUAGE plpgsql;
 
 CREATE TABLE public.subportfolios (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    partner_source_id VARCHAR(120) UNIQUE,
     code VARCHAR(30) NOT NULL UNIQUE,
-    name VARCHAR(160) NOT NULL,
+    title VARCHAR(180) NOT NULL,
+    responsible_name VARCHAR(160),
+    gpm_member_name VARCHAR(160),
+    approver_name VARCHAR(160),
+    support_name VARCHAR(160),
     description TEXT,
     strategic_objective TEXT,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -26,12 +34,14 @@ CREATE TABLE public.subportfolios (
 CREATE TABLE public.projects (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     subportfolio_id UUID NOT NULL REFERENCES public.subportfolios(id) ON DELETE RESTRICT,
+    partner_source_id VARCHAR(120) UNIQUE,
     code VARCHAR(40) NOT NULL UNIQUE,
-    name VARCHAR(220) NOT NULL,
+    title VARCHAR(220) NOT NULL,
     description TEXT,
     sponsor_name VARCHAR(160),
     project_manager_name VARCHAR(160),
     current_phase VARCHAR(80),
+    program_project_status VARCHAR(120),
     status VARCHAR(40) NOT NULL DEFAULT 'planejado',
     priority VARCHAR(30),
     start_date DATE,
@@ -45,9 +55,24 @@ CREATE TABLE public.projects (
     CONSTRAINT projects_status_ck CHECK (status IN ('planejado', 'em_andamento', 'atencao', 'critico', 'concluido', 'suspenso', 'descontinuado'))
 );
 
+CREATE TABLE public.subportfolio_status_updates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    subportfolio_id UUID NOT NULL REFERENCES public.subportfolios(id) ON DELETE CASCADE,
+    partner_source_id VARCHAR(120),
+    item VARCHAR(220),
+    reference_date DATE NOT NULL,
+    situation VARCHAR(120) NOT NULL,
+    year_label VARCHAR(20),
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT subportfolio_status_updates_unique_ref UNIQUE (subportfolio_id, reference_date, item)
+);
+
 CREATE TABLE public.project_artifacts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id UUID REFERENCES public.projects(id) ON DELETE CASCADE,
+    partner_source_id VARCHAR(120),
     artifact_type VARCHAR(60) NOT NULL,
     title VARCHAR(240) NOT NULL,
     description TEXT,
@@ -56,15 +81,18 @@ CREATE TABLE public.project_artifacts (
     sharepoint_item_id VARCHAR(120),
     file_name VARCHAR(260),
     file_extension VARCHAR(20),
+    attachment_name VARCHAR(260),
+    attachment_url TEXT,
     excel_sheet_name VARCHAR(120),
     excel_table_or_range VARCHAR(120),
+    source_status_label VARCHAR(120),
     source_system VARCHAR(40) NOT NULL DEFAULT 'sharepoint',
     confidentiality_level VARCHAR(40) NOT NULL DEFAULT 'interno',
     extracted_at TIMESTAMPTZ,
     metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT project_artifacts_type_ck CHECK (artifact_type IN ('tap', 'cronograma_excel', 'relatorio', 'balanco', 'fechamento', 'lista_sharepoint', 'prompt', 'normativo', 'apresentacao', 'outro')),
+    CONSTRAINT project_artifacts_type_ck CHECK (artifact_type IN ('tap', 'cronograma_excel', 'relatorio', 'balanco', 'fechamento', 'lista_sharepoint', 'prompt', 'normativo', 'apresentacao', 'termo_encerramento', 'outro')),
     CONSTRAINT project_artifacts_confidentiality_ck CHECK (confidentiality_level IN ('publico', 'interno', 'restrito', 'confidencial'))
 );
 
@@ -113,6 +141,29 @@ CREATE TABLE public.schedule_items (
     CONSTRAINT schedule_items_status_ck CHECK (status IN ('planejado', 'em_andamento', 'atrasado', 'concluido', 'cancelado', 'bloqueado'))
 );
 
+CREATE TABLE public.project_progress_updates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
+    partner_source_id VARCHAR(120),
+    reference_date DATE NOT NULL,
+    planned_physical NUMERIC(7,2),
+    actual_physical NUMERIC(7,2),
+    planned_economic NUMERIC(7,2),
+    actual_economic NUMERIC(7,2),
+    situation VARCHAR(120),
+    year_label VARCHAR(20),
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT project_progress_updates_values_ck CHECK (
+        (planned_physical IS NULL OR planned_physical >= 0)
+        AND (actual_physical IS NULL OR actual_physical >= 0)
+        AND (planned_economic IS NULL OR planned_economic >= 0)
+        AND (actual_economic IS NULL OR actual_economic >= 0)
+    ),
+    CONSTRAINT project_progress_updates_unique_ref UNIQUE (project_id, reference_date)
+);
+
 CREATE TABLE public.project_status_updates (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
@@ -132,35 +183,154 @@ CREATE TABLE public.project_status_updates (
     CONSTRAINT project_status_updates_progress_ck CHECK (progress_percent IS NULL OR (progress_percent >= 0 AND progress_percent <= 100))
 );
 
-CREATE TABLE public.risk_issue_items (
+CREATE TABLE public.project_deliverables_milestones (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
+    description TEXT NOT NULL,
+    planned_date DATE,
+    completed_date DATE,
+    status VARCHAR(80),
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE public.project_charters (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
+    subportfolio_id UUID REFERENCES public.subportfolios(id) ON DELETE SET NULL,
+    artifact_id UUID REFERENCES public.project_artifacts(id) ON DELETE SET NULL,
+    partner_source_id VARCHAR(120),
+    status VARCHAR(120),
+    item VARCHAR(220),
+    leader_name VARCHAR(160),
+    team_text TEXT,
+    objective TEXT,
+    justification TEXT,
+    non_scope_text TEXT,
+    threat_risks TEXT,
+    opportunity_risks TEXT,
+    expected_benefits TEXT,
+    assumptions TEXT,
+    constraints_text TEXT,
+    strategic_alignment TEXT,
+    stakeholders TEXT,
+    start_date DATE,
+    end_date DATE,
+    cost_brl NUMERIC(16,2),
+    funding_source VARCHAR(180),
+    sponsor_name VARCHAR(160),
+    scope_text TEXT,
+    submit_approval VARCHAR(120),
+    revision_number INTEGER NOT NULL DEFAULT 1,
+    revision_date DATE,
+    revision_reason TEXT,
+    tap_situation VARCHAR(120),
+    release_status VARCHAR(120),
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT project_charters_revision_ck CHECK (revision_number > 0),
+    CONSTRAINT project_charters_cost_ck CHECK (cost_brl IS NULL OR cost_brl >= 0),
+    CONSTRAINT project_charters_unique_revision UNIQUE (project_id, revision_number)
+);
+
+CREATE TABLE public.project_closure_terms (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
+    artifact_id UUID REFERENCES public.project_artifacts(id) ON DELETE SET NULL,
+    partner_source_id VARCHAR(120),
+    closure_status VARCHAR(120),
+    closure_reason TEXT,
+    remaining_scope_or_pending_items TEXT,
+    actual_cost_brl NUMERIC(16,2),
+    closure_date DATE,
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT project_closure_terms_cost_ck CHECK (actual_cost_brl IS NULL OR actual_cost_brl >= 0)
+);
+
+CREATE TABLE public.project_benefits (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
+    charter_id UUID REFERENCES public.project_charters(id) ON DELETE SET NULL,
+    description TEXT NOT NULL,
+    benefit_type VARCHAR(80),
+    expected_value VARCHAR(120),
+    measurement_indicator VARCHAR(180),
+    source_artifact_id UUID REFERENCES public.project_artifacts(id) ON DELETE SET NULL,
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE public.risk_issue_items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    scope_type VARCHAR(20) NOT NULL,
+    project_id UUID REFERENCES public.projects(id) ON DELETE CASCADE,
+    subportfolio_id UUID REFERENCES public.subportfolios(id) ON DELETE CASCADE,
+    partner_source_id VARCHAR(120),
+    item VARCHAR(220),
+    updated_on DATE,
     item_type VARCHAR(20) NOT NULL,
-    title VARCHAR(240) NOT NULL,
+    criticality VARCHAR(80),
+    risk_or_issue_text TEXT NOT NULL,
+    title VARCHAR(240),
     description TEXT,
     probability VARCHAR(30),
     impact VARCHAR(30),
     severity VARCHAR(30),
     status VARCHAR(40) NOT NULL DEFAULT 'aberto',
     owner_name VARCHAR(160),
+    action_plan TEXT,
     mitigation_plan TEXT,
+    planned_resolution_date DATE,
     due_date DATE,
+    should_escalate BOOLEAN,
     closed_at TIMESTAMPTZ,
     source_artifact_id UUID REFERENCES public.project_artifacts(id) ON DELETE SET NULL,
     metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT risk_issue_items_scope_ck CHECK (scope_type IN ('projeto', 'subportfolio')),
+    CONSTRAINT risk_issue_items_scope_target_ck CHECK (
+        (scope_type = 'projeto' AND project_id IS NOT NULL AND subportfolio_id IS NULL)
+        OR (scope_type = 'subportfolio' AND subportfolio_id IS NOT NULL AND project_id IS NULL)
+    ),
     CONSTRAINT risk_issue_items_type_ck CHECK (item_type IN ('risco', 'problema')),
     CONSTRAINT risk_issue_items_status_ck CHECK (status IN ('aberto', 'em_tratamento', 'mitigado', 'resolvido', 'aceito', 'cancelado'))
 );
 
+CREATE TABLE public.risk_issue_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    risk_issue_id UUID NOT NULL REFERENCES public.risk_issue_items(id) ON DELETE CASCADE,
+    reference_date DATE NOT NULL,
+    previous_status VARCHAR(40),
+    new_status VARCHAR(40),
+    previous_criticality VARCHAR(80),
+    new_criticality VARCHAR(80),
+    comment_text TEXT,
+    source_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE public.change_records (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
-    change_type VARCHAR(50) NOT NULL,
+    scope_type VARCHAR(20) NOT NULL,
+    project_id UUID REFERENCES public.projects(id) ON DELETE CASCADE,
+    subportfolio_id UUID REFERENCES public.subportfolios(id) ON DELETE CASCADE,
+    partner_source_id VARCHAR(120),
+    applies_to_subportfolio BOOLEAN,
+    change_type VARCHAR(50) NOT NULL DEFAULT 'outro',
     title VARCHAR(240) NOT NULL,
-    description TEXT,
+    registration_date DATE,
+    approval_date DATE,
+    source_label VARCHAR(180),
     reason TEXT,
+    non_approval_impact TEXT,
+    approval_impact TEXT,
     impact_summary TEXT,
     requested_by VARCHAR(160),
     approved_by VARCHAR(160),
@@ -171,6 +341,11 @@ CREATE TABLE public.change_records (
     metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT change_records_scope_ck CHECK (scope_type IN ('projeto', 'subportfolio')),
+    CONSTRAINT change_records_scope_target_ck CHECK (
+        (scope_type = 'projeto' AND project_id IS NOT NULL AND subportfolio_id IS NULL)
+        OR (scope_type = 'subportfolio' AND subportfolio_id IS NOT NULL AND project_id IS NULL)
+    ),
     CONSTRAINT change_records_type_ck CHECK (change_type IN ('prazo', 'escopo', 'custo', 'prioridade', 'responsavel', 'outro')),
     CONSTRAINT change_records_status_ck CHECK (status IN ('solicitada', 'em_analise', 'aprovada', 'rejeitada', 'implementada', 'cancelada'))
 );
@@ -366,6 +541,7 @@ CREATE TABLE public.intent_test_cases (
 
 CREATE INDEX idx_projects_subportfolio_id ON public.projects(subportfolio_id);
 CREATE INDEX idx_projects_status ON public.projects(status);
+CREATE INDEX idx_subportfolio_status_updates_ref ON public.subportfolio_status_updates(subportfolio_id, reference_date DESC);
 CREATE INDEX idx_project_artifacts_project_id ON public.project_artifacts(project_id);
 CREATE INDEX idx_project_artifacts_type ON public.project_artifacts(artifact_type);
 CREATE INDEX idx_source_extracts_artifact_id ON public.source_extracts(artifact_id);
@@ -373,9 +549,17 @@ CREATE INDEX idx_source_extracts_project_id ON public.source_extracts(project_id
 CREATE INDEX idx_schedule_items_project_id ON public.schedule_items(project_id);
 CREATE INDEX idx_schedule_items_artifact_id ON public.schedule_items(artifact_id);
 CREATE INDEX idx_schedule_items_dates ON public.schedule_items(planned_start_date, planned_end_date);
+CREATE INDEX idx_project_progress_updates_project_date ON public.project_progress_updates(project_id, reference_date DESC);
 CREATE INDEX idx_project_status_updates_project_date ON public.project_status_updates(project_id, reference_date DESC);
-CREATE INDEX idx_risk_issue_items_project_status ON public.risk_issue_items(project_id, status);
-CREATE INDEX idx_change_records_project_status ON public.change_records(project_id, status);
+CREATE INDEX idx_project_deliverables_project_status ON public.project_deliverables_milestones(project_id, status);
+CREATE INDEX idx_project_charters_project_revision ON public.project_charters(project_id, revision_number DESC);
+CREATE INDEX idx_project_closure_terms_project_date ON public.project_closure_terms(project_id, closure_date DESC);
+CREATE INDEX idx_project_benefits_project_id ON public.project_benefits(project_id);
+CREATE INDEX idx_risk_issue_items_project_status ON public.risk_issue_items(project_id, status) WHERE scope_type = 'projeto';
+CREATE INDEX idx_risk_issue_items_subportfolio_status ON public.risk_issue_items(subportfolio_id, status) WHERE scope_type = 'subportfolio';
+CREATE INDEX idx_risk_issue_history_item_date ON public.risk_issue_history(risk_issue_id, reference_date DESC);
+CREATE INDEX idx_change_records_project_status ON public.change_records(project_id, status) WHERE scope_type = 'projeto';
+CREATE INDEX idx_change_records_subportfolio_status ON public.change_records(subportfolio_id, status) WHERE scope_type = 'subportfolio';
 CREATE INDEX idx_users_email ON public.users(email);
 CREATE INDEX idx_access_rules_user_id ON public.access_rules(user_id);
 CREATE INDEX idx_access_rules_role_name ON public.access_rules(role_name);
@@ -392,13 +576,28 @@ CREATE INDEX idx_audit_events_occurred_at ON public.audit_events(occurred_at DES
 CREATE INDEX idx_out_of_scope_requests_review_status ON public.out_of_scope_requests(review_status);
 CREATE INDEX idx_intent_test_cases_intent_split ON public.intent_test_cases(intent_id, dataset_split);
 
+CREATE UNIQUE INDEX uq_subportfolio_status_partner_source ON public.subportfolio_status_updates(partner_source_id) WHERE partner_source_id IS NOT NULL;
+CREATE UNIQUE INDEX uq_project_artifacts_partner_source ON public.project_artifacts(partner_source_id) WHERE partner_source_id IS NOT NULL;
+CREATE UNIQUE INDEX uq_project_progress_partner_source ON public.project_progress_updates(partner_source_id) WHERE partner_source_id IS NOT NULL;
+CREATE UNIQUE INDEX uq_project_charters_partner_source ON public.project_charters(partner_source_id) WHERE partner_source_id IS NOT NULL;
+CREATE UNIQUE INDEX uq_project_closure_partner_source ON public.project_closure_terms(partner_source_id) WHERE partner_source_id IS NOT NULL;
+CREATE UNIQUE INDEX uq_risk_issue_items_partner_source ON public.risk_issue_items(partner_source_id) WHERE partner_source_id IS NOT NULL;
+CREATE UNIQUE INDEX uq_change_records_partner_source ON public.change_records(partner_source_id) WHERE partner_source_id IS NOT NULL;
+
 CREATE TRIGGER trg_subportfolios_updated_at BEFORE UPDATE ON public.subportfolios FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_projects_updated_at BEFORE UPDATE ON public.projects FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TRIGGER trg_subportfolio_status_updates_updated_at BEFORE UPDATE ON public.subportfolio_status_updates FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_project_artifacts_updated_at BEFORE UPDATE ON public.project_artifacts FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_source_extracts_updated_at BEFORE UPDATE ON public.source_extracts FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_schedule_items_updated_at BEFORE UPDATE ON public.schedule_items FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TRIGGER trg_project_progress_updates_updated_at BEFORE UPDATE ON public.project_progress_updates FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_project_status_updates_updated_at BEFORE UPDATE ON public.project_status_updates FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TRIGGER trg_project_deliverables_milestones_updated_at BEFORE UPDATE ON public.project_deliverables_milestones FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TRIGGER trg_project_charters_updated_at BEFORE UPDATE ON public.project_charters FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TRIGGER trg_project_closure_terms_updated_at BEFORE UPDATE ON public.project_closure_terms FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TRIGGER trg_project_benefits_updated_at BEFORE UPDATE ON public.project_benefits FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_risk_issue_items_updated_at BEFORE UPDATE ON public.risk_issue_items FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TRIGGER trg_risk_issue_history_updated_at BEFORE UPDATE ON public.risk_issue_history FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_change_records_updated_at BEFORE UPDATE ON public.change_records FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_users_updated_at BEFORE UPDATE ON public.users FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_access_rules_updated_at BEFORE UPDATE ON public.access_rules FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
@@ -411,14 +610,21 @@ CREATE TRIGGER trg_audit_events_updated_at BEFORE UPDATE ON public.audit_events 
 CREATE TRIGGER trg_out_of_scope_requests_updated_at BEFORE UPDATE ON public.out_of_scope_requests FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_intent_test_cases_updated_at BEFORE UPDATE ON public.intent_test_cases FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
-COMMENT ON TABLE public.subportfolios IS 'Subportfolios estrategicos que agrupam projetos do portfolio.';
+COMMENT ON TABLE public.subportfolios IS 'Subportfolios estrategicos do portfolio, alinhados a lista Subportfolio do parceiro.';
 COMMENT ON TABLE public.projects IS 'Projetos acompanhados pelo PMO, vinculados a subportfolio e fontes do SharePoint.';
-COMMENT ON TABLE public.project_artifacts IS 'Artefatos do projeto, incluindo documentos, listas, prompts, normativos e planilhas vinculadas no SharePoint.';
+COMMENT ON TABLE public.subportfolio_status_updates IS 'Situacoes historicas de subportfolio por data de referencia.';
+COMMENT ON TABLE public.project_artifacts IS 'Artefatos do projeto, incluindo documentos, anexos, listas, prompts, normativos e planilhas vinculadas no SharePoint.';
 COMMENT ON TABLE public.source_extracts IS 'Extratos consultaveis derivados de documentos, listas ou planilhas para composicao de contexto e rastreabilidade.';
 COMMENT ON TABLE public.schedule_items IS 'Linhas estruturadas de cronograma, inclusive extraidas de planilhas Excel vinculadas no SharePoint.';
-COMMENT ON TABLE public.project_status_updates IS 'Atualizacoes periodicas de avanco, situacao e resumo executivo dos projetos.';
-COMMENT ON TABLE public.risk_issue_items IS 'Riscos e problemas acompanhados de forma unificada por projeto.';
-COMMENT ON TABLE public.change_records IS 'Registros de mudancas de prazo, escopo, custo, prioridade, responsavel ou outro aspecto do projeto.';
+COMMENT ON TABLE public.project_progress_updates IS 'Medicoes historicas de avanco fisico e economico por projeto.';
+COMMENT ON TABLE public.project_status_updates IS 'Atualizacoes narrativas de avanco, situacao e resumo executivo dos projetos.';
+COMMENT ON TABLE public.project_deliverables_milestones IS 'Entregas e marcos dos projetos com datas previstas, realizadas e status.';
+COMMENT ON TABLE public.project_charters IS 'Termos de abertura de projeto estruturados a partir da lista TAP do parceiro.';
+COMMENT ON TABLE public.project_closure_terms IS 'Termos de encerramento de projeto com justificativa, pendencias e custo realizado.';
+COMMENT ON TABLE public.project_benefits IS 'Beneficios esperados ou detalhados associados ao projeto e ao TAP.';
+COMMENT ON TABLE public.risk_issue_items IS 'Riscos e problemas de projeto ou subportfolio, com escopo exclusivo controlado por constraint.';
+COMMENT ON TABLE public.risk_issue_history IS 'Historico de mudancas de status e criticidade de riscos e problemas.';
+COMMENT ON TABLE public.change_records IS 'Registros de mudancas de projeto ou subportfolio, com impactos e status de aprovacao.';
 COMMENT ON TABLE public.users IS 'Usuarios simulados ou autenticados via Microsoft Entra ID em evolucao futura.';
 COMMENT ON TABLE public.access_rules IS 'Regras de acesso por usuario, perfil, projeto, subportfolio ou escopo de permissao.';
 COMMENT ON TABLE public.intent_catalog IS 'Catalogo hierarquico de macrointencoes, intencoes especificas, handlers e limiares do classificador.';
@@ -429,3 +635,5 @@ COMMENT ON TABLE public.consulted_sources IS 'Fontes consultadas para compor uma
 COMMENT ON TABLE public.audit_events IS 'Eventos de auditoria tecnica e funcional gerados durante o processamento.';
 COMMENT ON TABLE public.out_of_scope_requests IS 'Solicitacoes fora do escopo suportado, registradas para revisao e evolucao do catalogo.';
 COMMENT ON TABLE public.intent_test_cases IS 'Casos de teste rotulados para avaliacao do classificador de intencoes.';
+
+COMMIT;
