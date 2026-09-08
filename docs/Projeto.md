@@ -3423,7 +3423,7 @@ O caminho de uma solicitação por voz é o seguinte:
 
 1. o canal envia o áudio à API da aplicação;
 2. a API valida formato, duração e tamanho antes de qualquer chamada externa;
-3. o áudio aprovado é encaminhado ao serviço de Speech-to-Text descrito na Seção 8.8;
+3. quando a integração estiver habilitada, o áudio aprovado é encaminhado ao serviço de Speech-to-Text descrito na Seção 8.8;
 4. a transcrição retorna à API, que a submete ao pipeline de PLN da Seção 8.10;
 5. a resposta segue o mesmo formato das solicitações textuais, conforme o RF08.
 
@@ -3452,7 +3452,10 @@ Os limites derivam do endpoint de áudio curto do provedor selecionado na Seçã
 
 ### 8.7.4 Requisição
 
-O envio é `multipart/form-data`, com o arquivo no campo `audio`.
+O envio é `multipart/form-data`, com o arquivo no campo `audio`. O cabeçalho
+`Authorization` deve usar o esquema `Bearer`; a ausência do token, um esquema
+distinto ou token não reconhecido no mapa de identidades simulado resulta em
+`401 Unauthorized`.
 
 ```http
 POST /api/audio HTTP/1.1
@@ -3464,9 +3467,9 @@ Content-Length: <TAMANHO>
 
 | Campo | Obrigatório | Descrição |
 |---|:---:|---|
-| `audio` | Sim | Arquivo de áudio no formato aceito. |
-| `conversation_id` | Não | Identificador da conversa, quando a solicitação continuar uma interação existente. |
-| `language` | Não | Idioma da gravação. Assume `pt-BR` quando ausente. |
+| `audio` | Sim | Arquivo binário de áudio. A extensão e o `Content-Type` informado no formulário não substituem a validação do conteúdo do arquivo. |
+| `conversation_id` | Não | Texto que identifica uma conversa existente. É devolvido sem alteração; se ausente, a API gera um UUID. |
+| `language` | Não | Idioma a ser enviado à futura integração STT. O padrão é `pt-BR`. |
 
 Exemplo com cURL:
 
@@ -3480,41 +3483,47 @@ curl --request POST \
 
 ### 8.7.5 Resposta de sucesso
 
-`200 OK`, com a transcrição e o resultado do pipeline no mesmo formato das solicitações textuais.
+`200 OK`. Nesta entrega, o endpoint confirma o recebimento e a validação local
+do arquivo. A integração com Speech-to-Text e com o pipeline de PLN ainda é
+uma etapa separada; por isso, a resposta traz `pipeline_status: "stubbed"`, a
+transcrição permanece vazia e os campos de intenção são valores temporários.
+O cliente deve usar esse status para não apresentar o conteúdo como uma
+transcrição real.
 
 ```json
 {
   "conversation_id": "1f5c9a24-1c2e-4a8f-9a3e-2b6d8c0f1a77",
   "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
   "transcription": {
-    "text": "qual o prazo do projeto de modernização da linha 1",
-    "confidence": 0.94,
+    "text": "",
+    "confidence": 0.0,
     "duration_seconds": 4.8
   },
   "intent": {
-    "macro": "CONSULTA",
-    "specific": "consulta_prazo_projeto",
-    "confidence_macro": 0.97,
-    "confidence_specific": 0.89
+    "macro": "FORA_DE_ESCOPO",
+    "specific": "pipeline_nao_implementado",
+    "confidence_macro": 0.0,
+    "confidence_specific": 0.0
   },
   "answer": {
-    "text": "O prazo vigente do projeto é 30/06/2027.",
-    "sources": [
-      { "artifact": "TAP-Linha1-Modernizacao.docx", "section": "4. Cronograma" }
-    ]
-  }
+    "text": "Audio recebido e validado. A transcricao e a resposta do agente ainda nao estao disponiveis: a integracao com o Speech-to-Text (Secao 8.8) e o pipeline de PLN sao implementados em uma task separada.",
+    "sources": []
+  },
+  "pipeline_status": "stubbed"
 }
 ```
 
 | Campo | Tipo | Descrição |
 |---|---|---|
-| `conversation_id` | `uuid` | Sessão conversacional, registrada em `ai_conversations`. |
-| `interaction_id` | `uuid` | Interação registrada em `ai_interactions`, para rastreabilidade. |
-| `transcription.text` | `string` | Texto reconhecido pelo serviço de Speech-to-Text. |
-| `transcription.confidence` | `float` | Confiança do reconhecimento, de 0 a 1. |
-| `intent.macro` | `string` | `CONSULTA`, `TRANSACAO`, `ALERTA` ou `FORA_DE_ESCOPO`. |
-| `intent.confidence_macro` | `float` | Confiança da macrointenção, comparada ao limiar vigente no catálogo (0,550 na execução de referência da Seção 8.10.3). |
-| `answer.sources` | `array` | Fontes consultadas, registradas em `consulted_sources`. |
+| `conversation_id` | `string` | Valor recebido no formulário ou UUID gerado pela API se o campo não foi enviado. |
+| `interaction_id` | `string` | UUID gerado para a interação. |
+| `transcription.text` | `string` | Vazio enquanto a transcrição real não estiver integrada. |
+| `transcription.confidence` | `float` | `0.0` enquanto a transcrição real não estiver integrada. |
+| `transcription.duration_seconds` | `float` | Duração extraída do arquivo e arredondada para duas casas decimais. |
+| `intent` | `object` | Placeholder do pipeline de PLN; `macro` é `FORA_DE_ESCOPO` e `specific` é `pipeline_nao_implementado` nesta entrega. |
+| `answer.text` | `string` | Mensagem que informa que o áudio foi validado e que STT/PLN ainda não foram integrados. |
+| `answer.sources` | `array` | Vazio nesta entrega. |
+| `pipeline_status` | `string` | `stubbed` enquanto o resultado for temporário; será `completed` após a integração completa. |
 
 ### 8.7.6 Códigos de resposta e tratamento de erro
 
@@ -3537,18 +3546,33 @@ O corpo de erro segue estrutura única, para que o canal possa exibir a mensagem
 | `400 Bad Request` | `AUDIO_FORMAT_UNSUPPORTED` | Contêiner, codec, taxa de amostragem ou número de canais fora do previsto. |
 | `400 Bad Request` | `AUDIO_TOO_LONG` | Gravação acima de 60 segundos. |
 | `401 Unauthorized` | `UNAUTHENTICATED` | Token ausente, inválido ou expirado. |
-| `403 Forbidden` | `OUT_OF_SCOPE_FOR_PROFILE` | Usuário sem permissão para o escopo solicitado, conforme `access_rules`. |
 | `413 Payload Too Large` | `AUDIO_TOO_LARGE` | Arquivo acima de 2 MB. |
 | `422 Unprocessable Entity` | `NO_SPEECH_DETECTED` | Áudio válido, mas sem fala reconhecível. |
-| `429 Too Many Requests` | `RATE_LIMITED` | Requisição simultânea ou franquia do provedor excedida. |
+| `429 Too Many Requests` | `RATE_LIMITED` | Já existe uma requisição de áudio em processamento para o mesmo usuário. |
 | `502 Bad Gateway` | `STT_PROVIDER_ERROR` | Falha na chamada ao serviço de transcrição. |
 | `503 Service Unavailable` | `STT_PROVIDER_UNAVAILABLE` | Serviço de transcrição indisponível; aplica-se o fallback da Seção 6.2.5. |
 
-As respostas `422` e `502` são registradas em `audit_events`, porque distinguem falha do usuário de falha do provedor e essa diferença orienta o tratamento na Sprint 3.
+O código `403 OUT_OF_SCOPE_FOR_PROFILE`, previsto para a autorização por
+`access_rules`, ainda não é retornado por esta rota: essa verificação depende
+da persistência e será acrescentada em tarefa própria. Os erros do endpoint
+usam sempre o envelope acima; o campo opcional `detail` contém somente dados
+seguros da própria requisição, como tipo de mídia recebido, duração ou limite
+de tamanho, e nunca detalhes internos do servidor.
 
 ### 8.7.7 Situação de implementação
 
-A especificação acima é o contrato acordado para a Sprint 3, quando o barema exige a implementação do endpoint. Na Sprint 2 o backend expõe apenas `/health` e a rota textual; nenhum endpoint recebe áudio ainda. Os limites declarados aqui são os que a implementação deve validar.
+O endpoint está implementado em `src/backend/app/main.py` e pode ser consultado
+também pela documentação interativa do FastAPI (`/docs`). Ele valida o
+`Authorization: Bearer <TOKEN>`, aceita uma solicitação em processamento por
+usuário e realiza todas as validações locais antes de qualquer integração
+externa. Na prova de conceito, quando a variável `AUDIO_SIMULATED_IDENTITIES`
+não é configurada, qualquer token Bearer não vazio identifica o usuário de
+forma estável; quando ela é configurada, apenas os tokens mapeados são aceitos.
+
+O upload, a validação e os retornos de erro desta seção estão concluídos. A
+transcrição real, a autorização de escopo e o processamento de PLN continuam
+fora desta entrega; até essas integrações existirem, respostas aprovadas terão
+`pipeline_status` igual a `stubbed`.
 
 ## 8.8 Speech-to-Text
 
