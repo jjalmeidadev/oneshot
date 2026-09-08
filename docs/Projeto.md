@@ -196,6 +196,7 @@
     - [8.10.3 Configuração e resultados atuais](#8103-configuração-e-resultados-atuais)
     - [8.10.4 Bibliotecas, configuração e exemplos de código](#8104-bibliotecas-configuração-e-exemplos-de-código)
     - [8.10.5 Limitações e próximos passos](#8105-limitações-e-próximos-passos)
+    - [8.10.6 Revisão da decisão após a implementação](#8106-revisão-da-decisão-após-a-implementação)
 - [9. Planejamento e Execução de Testes](#9-planejamento-e-execução-de-testes)
   - [9.1 Testes Funcionais](#91-testes-funcionais)
     - [9.1.1 Planejamento](#911-planejamento)
@@ -4020,6 +4021,8 @@ Esta seção registra a escolha atual do pipeline de Processamento de Linguagem 
 
 Embora seja referido de forma abreviada como “modelo híbrido”, o componente é tecnicamente um pipeline: a representação híbrida — TF-IDF de palavras e de caracteres reduzidos por SVD, Word2Vec treinado no corpus do projeto e embeddings BERT congelados — gera os atributos de entrada, e classificadores lineares realizam a previsão em dois níveis, macrointenção e intenção específica.
 
+Esta seção trata da **escolha**: como as alternativas foram comparadas, qual venceu e o que a medição sustenta. A **implementação** dessa escolha no serviço — módulos, dependências de execução, exemplos de entrada e saída e testes automatizados — está na Seção 8.11. A Seção 8.10.6 registra o que a implementação confirmou e o que ela mudou na decisão original.
+
 ### 8.10.1 Objetivo e protocolo de avaliação
 
 O classificador organiza os pedidos em quatro macrointenções (`CONSULTA`, `TRANSACAO`, `ALERTA` e `FORA_DE_ESCOPO`) e 31 intenções específicas. A macrointenção determina o fluxo geral do agente, enquanto a intenção específica identifica o handler mais adequado.
@@ -4129,7 +4132,7 @@ A execução de referência gerou o classificador serializado (13.472 KB), o mod
 
 O pipeline é implementado em Python no notebook [`src/notebooks/classificador_intencoes_metro.ipynb`](../src/notebooks/classificador_intencoes_metro.ipynb), e os artefatos da execução de referência estão em `src/notebooks/artefatos/`.
 
-**Bibliotecas utilizadas**
+**Bibliotecas utilizadas no treinamento e no benchmark**
 
 | Biblioteca | Papel no pipeline |
 |---|---|
@@ -4141,6 +4144,8 @@ O pipeline é implementado em Python no notebook [`src/notebooks/classificador_i
 | `pandas` e `numpy` | Manipulação do conjunto de dados e das matrizes de atributos |
 | `scipy` | Empilhamento de matrizes esparsas na composição das representações híbridas |
 | `joblib` | Serialização do classificador e dos transformadores ajustados |
+
+O ambiente de **inferência** não repete essa lista. Ele dispensa `torch`, `transformers` e `sentence-transformers`, substituídos pelo ONNX Runtime na execução do encoder, conforme a revisão registrada na Seção 8.10.6. As dependências efetivamente instaladas no backend estão na Seção 8.11.2.
 
 **Passos de configuração**
 
@@ -4290,13 +4295,44 @@ Os números atuais devem ser interpretados com as seguintes ressalvas:
 - o limiar de macrointenção não alcançou o alvo de 97% de acurácia entre os aceitos, ficando em 93,2%;
 - os limiares priorizam segurança e custam cobertura: 26,9% dos pedidos do teste são tratados pelo fluxo genérico em vez de um handler específico;
 - o desempenho agregado oculta intenções individuais fracas — `analise_tendencia_desempenho`, por exemplo, tem F1 de 0,299 no teste, e `alerta_estouro_orcamento` tem recall de 0,548 apesar de precisão 1,000;
-- a inferência depende do carregamento coordenado de três artefatos — o `joblib`, o Word2Vec e o encoder BERT —, aspecto que deverá ser formalizado no serviço de produção.
+- a inferência depende do carregamento coordenado de três artefatos — o `joblib`, o Word2Vec e o encoder BERT —, aspecto formalizado na Sprint 3 em `src/backend/app/nlp/inference.py` e descrito na Seção 8.11.4.
 
 Como próximos passos, o grupo deve coletar solicitações reais com usuários do domínio, manter um conjunto externo de teste, revisar as classes com maior confusão — em especial a fronteira entre consulta e transação evidenciada no exemplo de erro da Seção 8.10.4 —, avaliar o fine-tuning do BERTimbau e medir cobertura e acurácia após a aplicação dos limiares. Até essa validação, o híbrido completo deve ser entendido como o **vencedor do benchmark atual** e a escolha do grupo para o MVP, não como um modelo validado para produção.
 
 **Reprodutibilidade.** Os resultados desta seção vêm de uma execução completa do notebook, cujas saídas estão versionadas nas células do próprio arquivo. A semente é fixada em todas as etapas com aleatoriedade. O ambiente da execução de referência usou Python 3.9, scikit-learn 1.6.1, gensim 4.4.0, torch 2.8.0 e sentence-transformers 5.1.2. Quando `gensim` ou `torch` não estão disponíveis, o notebook degrada silenciosamente: as representações que dependem deles são removidas da comparação e o benchmark elege um vencedor entre as restantes. Uma execução nessas condições produz números diferentes dos registrados aqui, e a tabela da Seção 8.10.2 deixa de conter as linhas de Word2Vec, BERT e híbridos.
 
 A célula do Word2Vec emite em `stderr` a linha `Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'`. É um aviso conhecido da rotina compilada do `gensim` em combinação com a versão do NumPy do ambiente, e não interrompe o treinamento: o vocabulário é construído com os 577 termos do treino e os vetores são gerados nas dimensões esperadas, conforme a saída da própria célula. O aviso está preservado na execução versionada em vez de suprimido, para que o registro corresponda ao que a execução produziu.
+
+### 8.10.6 Revisão da decisão após a implementação
+
+A Sprint 2 escolheu o algoritmo dentro do notebook. A Sprint 3 levou essa escolha para um serviço importável, com testes automatizados, e essa foi a primeira ocasião em que a decisão foi exercida fora do ambiente que a produziu. A revisão abaixo registra o que se manteve, o que mudou e o que o artefato treinado exigiu para funcionar fora do notebook.
+
+**O que se manteve.** Nada da decisão registrada nas Seções 8.10.2 e 8.10.3 foi revertido. O serviço usa a mesma `config_22` de pré-processamento, a mesma representação híbrida de quatro blocos, a mesma arquitetura hierárquica, o mesmo classificador de regressão logística e os mesmos limiares de 0,550 e 0,700. Não houve retreinamento: os pesos em produção são os que produziram as métricas da Seção 8.10.3.
+
+A conservação é verificável, e não declarada. A suíte de testes recalcula as métricas sobre o conjunto de teste a cada execução e reprova se a acurácia da intenção específica sair de 0,7383 ou o F1-macro sair de 0,7401, com tolerância de 0,0002. O mesmo vale para o efeito dos limiares: 14 solicitações abaixo do limiar de macrointenção, 305 no fluxo genérico e 0,8775 de acurácia entre as aceitas. A verificação está descrita na Seção 8.11.7.
+
+**O que mudou: o motor de execução do encoder BERT.** O benchmark extraiu os embeddings com `sentence-transformers`, que carrega o modelo em PyTorch. O serviço executa o mesmo modelo em **ONNX Runtime**, a partir do grafo publicado no próprio repositório do modelo no Hugging Face. A troca não altera o algoritmo, a representação nem os pesos: os embeddings coincidem com os do `sentence-transformers` até uma diferença máxima de 2,4 × 10⁻⁷, e as métricas do conjunto de teste ficam inalteradas.
+
+O que muda é o custo de operar a escolha, medido durante a implementação:
+
+| | PyTorch (`sentence-transformers`) | ONNX Runtime |
+| --- | ---: | ---: |
+| Tamanho do ambiente instalado | 1,1 GB | **427 MB** |
+| Carga do encoder | 6,10 s | **0,33 s** |
+| Latência por requisição | 6 ms | **2 ms** |
+| Pico de memória | **1.118 MB** | 1.355 MB |
+
+O ganho em disco e em tempo de carga vem de dispensar `torch` e `transformers`, que somavam 780 MB do ambiente. O custo é memória: o grafo em ponto flutuante de 32 bits ocupa cerca de 240 MB a mais em tempo de execução. No deploy em Linux a troca evita ainda uma armadilha conhecida, já que o `pip install torch` padrão baixa a variante com CUDA, de cerca de 2,5 GB, irrelevante para uma inferência em CPU.
+
+A variante quantizada em int8 reduziria o grafo de 449 MB para 113 MB, mas custa 0,35 ponto de acurácia e desloca o efeito dos limiares calibrados na validação. Como isso quebraria a reprodução exata dos números da Seção 8.10.3, a versão em ponto flutuante foi mantida — a compressão é uma otimização legítima, mas exigiria recalibrar os limiares e reescrever esta seção.
+
+**O que o artefato exigiu.** O `joblib` produzido pelo notebook não carregava fora dele. A função *analyzer* do TF-IDF e a classe do classificador hierárquico eram definidas no topo do notebook, e a serialização gravou referências a `__main__.identidade` e `__main__.ClassificadorHierarquico`; de qualquer módulo importável, `joblib.load` falhava com `AttributeError`. As duas definições passaram a viver em `src/backend/app/nlp/classifier.py`, e um script reaponta o artefato para lá sem retreinar. O procedimento está na Seção 8.11.4.
+
+A implementação também tornou explícita uma dependência que o notebook não precisava declarar: o artefato foi serializado com **scikit-learn 1.6.1**, e carregá-lo com outra versão faz a própria biblioteca advertir que o resultado pode ser inválido. A versão está fixada no `requirements.txt` do backend e o script de migração recusa executar fora dela.
+
+Há ainda uma divergência de ambiente entre treino e serviço que convém registrar: a execução de referência do notebook usou Python 3.9, enquanto o serviço exige **Python 3.13 ou anterior**, porque o `gensim` ainda não publica wheel para o 3.14 e a compilação a partir do fonte falha. As duas faixas são compatíveis com os artefatos versionados, mas a restrição superior é real e vale para qualquer ambiente que execute a inferência.
+
+**O que a revisão não muda.** A conclusão do benchmark continua a mesma, com as mesmas ressalvas: a margem sobre o Híbrido W2V+BERT permanece estreita, o conjunto continua sintético e o F1-macro de 0,7401 na intenção específica continua **abaixo** do mínimo de 0,80 exigido pelo RNF06. A implementação não fecha essa lacuna — ela apenas a torna operacional, ao converter a incerteza em fluxo genérico em vez de handler errado. Fechar a lacuna depende dos próximos passos já listados na Seção 8.10.5, e permanece em aberto.
 
 # 9. Planejamento e Execução de Testes
 
