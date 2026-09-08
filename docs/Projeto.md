@@ -197,6 +197,16 @@
     - [8.10.4 Bibliotecas, configuração e exemplos de código](#8104-bibliotecas-configuração-e-exemplos-de-código)
     - [8.10.5 Limitações e próximos passos](#8105-limitações-e-próximos-passos)
     - [8.10.6 Revisão da decisão após a implementação](#8106-revisão-da-decisão-após-a-implementação)
+  - [8.11 Implementação do núcleo de PLN](#811-implementação-do-núcleo-de-pln)
+    - [8.11.1 Estrutura do módulo e responsabilidades](#8111-estrutura-do-módulo-e-responsabilidades)
+    - [8.11.2 Bibliotecas, frameworks e dependências de execução](#8112-bibliotecas-frameworks-e-dependências-de-execução)
+    - [8.11.3 Pré-processamento e extração de entidades](#8113-pré-processamento-e-extração-de-entidades)
+    - [8.11.4 Carregamento do artefato treinado](#8114-carregamento-do-artefato-treinado)
+    - [8.11.5 Inferência e roteamento por limiares](#8115-inferência-e-roteamento-por-limiares)
+    - [8.11.6 Exemplos de execução: casos de sucesso e de falha](#8116-exemplos-de-execução-casos-de-sucesso-e-de-falha)
+    - [8.11.7 Testes automatizados](#8117-testes-automatizados)
+    - [8.11.8 Desempenho medido](#8118-desempenho-medido)
+    - [8.11.9 Situação da integração](#8119-situação-da-integração)
 - [9. Planejamento e Execução de Testes](#9-planejamento-e-execução-de-testes)
   - [9.1 Testes Funcionais](#91-testes-funcionais)
     - [9.1.1 Planejamento](#911-planejamento)
@@ -2032,7 +2042,7 @@ A decisão de não construir cliente próprio é o que torna o suporte a mobile 
 |---|---|---|
 | Canal | Microsoft Teams, Copilot Studio | Interface conversacional e orquestração de tópicos |
 | API da aplicação | Python 3.11, FastAPI, Uvicorn | Endpoint HTTP/JSON, validação de entrada e roteamento |
-| Núcleo de PLN | scikit-learn, gensim, sentence-transformers, nltk, joblib | Classificação de intenção em dois níveis, conforme a Seção 8.10 |
+| Núcleo de PLN | scikit-learn, gensim, ONNX Runtime, nltk, joblib | Classificação de intenção em dois níveis, conforme as Seções 8.10 e 8.11 |
 | Recuperação | Índice vetorial e catálogo local de fontes | Seleção dos trechos que compõem o contexto |
 | Voz | Azure AI Speech | Transcrição de entrada e síntese prevista, Seções 8.8 e 8.9 |
 | Dados | PostgreSQL gerenciado, Supabase Storage | Persistência do modelo físico da Seção 4.4 |
@@ -3206,13 +3216,20 @@ Será desenvolvido na Sprint 5.
 
 ## 8.1 Arquitetura de Codificação e Estrutura de Diretórios
 
-O código-fonte fica em `src/`, separado por responsabilidade. A divisão segue as camadas do diagrama de componentes da Seção 5.2: o canal e a interface ficam no `frontend`, a orquestração e as integrações no `backend`, o núcleo de PLN em `notebooks` e o esquema de dados em `database`.
+O código-fonte fica em `src/`, separado por responsabilidade. A divisão segue as camadas do diagrama de componentes da Seção 5.2: o canal e a interface ficam no `frontend`, a orquestração, as integrações e o núcleo de PLN no `backend`, o esquema de dados em `database` e os experimentos que produziram os artefatos treinados em `notebooks`.
 
 ```text
 src/
 ├── backend/                    API FastAPI — orquestração e integrações
 │   ├── app/
-│   │   ├── main.py             rotas /health e /api/chat
+│   │   ├── main.py             rotas /health, /api/chat e /api/audio
+│   │   ├── audio/              recebimento, validação e transcrição (Seção 8.7)
+│   │   ├── nlp/                núcleo de PLN (Seção 8.11)
+│   │   │   ├── preprocessing.py  normalização, tokenização e stemming
+│   │   │   ├── entities.py       extração das entidades do domínio
+│   │   │   ├── classifier.py     classificador hierárquico e carga do artefato
+│   │   │   ├── inference.py      vetorização, limiares e roteamento
+│   │   │   └── data/             léxico do portfólio, substituível
 │   │   ├── gemini/             cliente do provedor de LLM
 │   │   │   ├── client.py       chamada, retry com backoff e mapeamento de erro
 │   │   │   └── schemas.py      contratos de entrada e saída (Pydantic)
@@ -3221,6 +3238,7 @@ src/
 │   │   │   └── data/sharepoint/ exports JSON simulados de listas do SharePoint
 │   │   └── tests/              testes automatizados (Seção 8.4)
 │   ├── requirements.txt
+│   ├── requirements-pln.txt    dependências só da inferência (Seção 8.11.2)
 │   └── .env.example            variáveis esperadas, sem segredos
 ├── frontend/                   interface React + TypeScript (Vite)
 │   ├── src/
@@ -3232,8 +3250,10 @@ src/
 ├── database/
 │   ├── sql/                    criação, carga inicial e rollback
 │   └── docs/                   documentação dos scripts
-└── notebooks/                  núcleo de PLN
-    ├── classificador_intencoes_metro.ipynb
+└── notebooks/                  experimentos e artefatos treinados
+    ├── classificador_intencoes_metro.ipynb   benchmark do algoritmo (Seção 8.10)
+    ├── preprocessamento_entidades.ipynb      medição do pré-processamento e das entidades
+    ├── migrar_artefato_classificador.py      reaponta o artefato para o pacote (Seção 8.11.4)
     └── artefatos/              dataset, catálogo, modelo e métricas da execução
 ```
 
@@ -3243,7 +3263,9 @@ Três convenções sustentam essa organização.
 
 **O contrato é declarado uma vez e replicado.** Os tipos de `app/gemini/schemas.py` têm correspondência direta em `frontend/src/lib/gemini-api.ts`. Quando um campo muda no backend, o `tsc --noEmit` do frontend acusa a divergência no build.
 
-**Dado sintético fica junto do código que o consome.** Os exports simulados de listas do SharePoint ficam em `app/rag/data/sharepoint/`, e não em uma base externa, para que a bancada de teste rode sem provisionamento. O diretório é substituível por variável de ambiente (`SHAREPOINT_MOCK_DATA_DIR`) quando houver fonte real.
+**Dado sintético fica junto do código que o consome.** Os exports simulados de listas do SharePoint ficam em `app/rag/data/sharepoint/`, e não em uma base externa, para que a bancada de teste rode sem provisionamento. O diretório é substituível por variável de ambiente (`SHAREPOINT_MOCK_DATA_DIR`) quando houver fonte real. O léxico do domínio em `app/nlp/data/` segue a mesma regra e será gerado a partir da base real do portfólio quando ela existir, sem alteração de código.
+
+**Modelo treinado não é código.** Os artefatos do classificador permanecem em `src/notebooks/artefatos/` e são referenciados pelo pacote `app/nlp/`, em vez de copiados para dentro dele. Uma segunda cópia abriria a possibilidade de o serviço rodar com um artefato diferente do que o benchmark da Seção 8.10 mediu.
 
 ## 8.2 Modelo de Recomendação
 
@@ -3293,7 +3315,9 @@ Ao final da Sprint 5, a entrega esperada é uma solução integrada, demonstráv
 
 ## 8.4 Testes Unitários e de Integração
 
-A Sprint 2 entregou a primeira bateria de testes automatizados do projeto, cobrindo a bancada de teste do caminho de consulta: recuperação de contexto e chamada ao provedor de LLM. O plano completo de testes sistêmicos — funcionais, de RNFs, de integração e de usabilidade — é entrega da Sprint 3 e será registrado na Seção 9.
+A Sprint 2 entregou a primeira bateria de testes automatizados do projeto, cobrindo a bancada de teste do caminho de consulta: recuperação de contexto e chamada ao provedor de LLM. A Sprint 3 ampliou a suíte com os testes da API de áudio da Seção 8.7 e os do núcleo de PLN da Seção 8.11, que somam 87 dos 158 testes atuais e estão detalhados na Seção 8.11.7. O plano completo de testes sistêmicos — funcionais, de RNFs, de integração e de usabilidade — é entrega da Sprint 3 e será registrado na Seção 9.
+
+A tabela abaixo registra a bateria original da Sprint 2, mantida como referência do que cobria o caminho de consulta.
 
 **Estratégia adotada.** Os testes isolam a fronteira de rede. A chamada HTTP ao provedor é substituída por um duplo de teste que injeta a resposta ou o erro desejado, de modo que a suíte roda sem chave de API, sem acesso à internet e de forma determinística. O que está sob teste é o código do projeto — mapeamento de contrato, política de retry, tratamento de erro e regra de recuperação —, e não a disponibilidade do serviço externo.
 
@@ -3321,7 +3345,7 @@ python -m venv .venv
 .venv/bin/python -m pytest app/tests -v
 ```
 
-**Resultado da última execução:** 10 testes, 10 aprovados, em 0,21 s.
+**Resultado da execução dessa bateria:** 10 testes, 10 aprovados, em 0,21 s.
 
 ```text
 app/tests/test_gemini_client.py::test_generate_chat_response_maps_text_context_and_usage PASSED
@@ -3338,9 +3362,15 @@ app/tests/test_sharepoint_rag.py::test_builds_prompt_with_source_labels_and_disc
 ============================== 10 passed in 0.21s ==============================
 ```
 
+**Resultado da suíte completa após a Sprint 3:** 158 testes, 158 aprovados, em 15,69 s. Os 148 acrescentados desde a bateria acima cobrem a API de recebimento de áudio (61), o pré-processamento (20), a extração de entidades (30), o carregamento do artefato treinado (19) e a inferência do classificador (18).
+
+```text
+158 passed, 11 warnings in 15.69s
+```
+
 **Verificação do frontend.** O build executa `tsc --noEmit` antes do empacotamento, o que valida a aderência ao contrato do backend, e o lint roda com `--max-warnings=0`. Ambos passam sem erro nem aviso. Testes unitários por componente e automação de testes de interface são entrega da Sprint 5, conforme a Seção 8.3.3.
 
-**Cobertura ainda não atingida.** Não há teste do endpoint HTTP de ponta a ponta, nem teste de integração com serviço externo real, nem teste do pipeline de PLN dentro do serviço. Os três dependem de itens da Sprint 3 — endpoint de áudio, credencial do Azure AI Speech e carregamento do classificador no backend — e estão registrados no backlog da Seção 6.2 do `GestaoProjeto.md`.
+**Cobertura ainda não atingida.** O pipeline de PLN passou a ser testado dentro do serviço, conforme a Seção 8.11.7, e a fronteira HTTP do endpoint de áudio é exercitada com duplos de rede. Continuam descobertos o teste de integração contra o serviço externo real, executado à parte da suíte determinística, e o teste de ponta a ponta que atravessa áudio, transcrição, classificação e resposta — este último depende da exposição do núcleo de PLN em rota HTTP, ainda não implementada, conforme a Seção 8.11.9. Os itens estão registrados no backlog da Seção 6.2 do `GestaoProjeto.md`.
 
 ## 8.5 Documentações automáticas
 
@@ -4333,6 +4363,324 @@ A implementação também tornou explícita uma dependência que o notebook não
 Há ainda uma divergência de ambiente entre treino e serviço que convém registrar: a execução de referência do notebook usou Python 3.9, enquanto o serviço exige **Python 3.13 ou anterior**, porque o `gensim` ainda não publica wheel para o 3.14 e a compilação a partir do fonte falha. As duas faixas são compatíveis com os artefatos versionados, mas a restrição superior é real e vale para qualquer ambiente que execute a inferência.
 
 **O que a revisão não muda.** A conclusão do benchmark continua a mesma, com as mesmas ressalvas: a margem sobre o Híbrido W2V+BERT permanece estreita, o conjunto continua sintético e o F1-macro de 0,7401 na intenção específica continua **abaixo** do mínimo de 0,80 exigido pelo RNF06. A implementação não fecha essa lacuna — ela apenas a torna operacional, ao converter a incerteza em fluxo genérico em vez de handler errado. Fechar a lacuna depende dos próximos passos já listados na Seção 8.10.5, e permanece em aberto.
+
+## 8.11 Implementação do núcleo de PLN
+
+A Seção 8.10 registra **qual** algoritmo foi escolhido e por quê. Esta registra o **código que o executa**: onde ele vive, de que bibliotecas depende, o que entra, o que sai e quais testes impedem que o comportamento se afaste do benchmark.
+
+A diferença entre as duas seções é a diferença entre o notebook e o serviço. O benchmark da Sprint 2 rodava dentro de `classificador_intencoes_metro.ipynb`, e o modelo treinado só era utilizável de dentro dele. Na Sprint 3 o núcleo virou um pacote Python importável pela API, em `src/backend/app/nlp/`, com uma suíte automatizada que reprova quando as métricas divergem das registradas na Seção 8.10.3. Essa separação entre interface, lógica e dados é o que o RNF10 exige, e é o que permite que a mesma decisão seja exercida em uma requisição HTTP e em uma célula de notebook sem duplicar código.
+
+### 8.11.1 Estrutura do módulo e responsabilidades
+
+O núcleo é composto por quatro módulos, encadeados na ordem em que a solicitação atravessa o pipeline:
+
+```text
+solicitação em texto
+      │
+      ├─▶ preprocessing.tokenize ......... normaliza, tokeniza e reduz a radical
+      ├─▶ entities.extract_entities ...... projeto, período, indicador, documento…
+      └─▶ inference.classify ............. macrointenção + intenção + confianças
+                     │
+                     ├─▶ handler específico            (intenção acima do limiar)
+                     ├─▶ fluxo genérico da macro       (intenção abaixo do limiar)
+                     └─▶ resposta de limitação (RF08)  (macro abaixo do limiar)
+```
+
+| Arquivo | Linhas | Responsabilidade |
+| --- | ---: | --- |
+| `app/nlp/preprocessing.py` | 179 | Caixa, tokenização, remoção de pontuação e stemming, na `config_22` da Seção 8.10.3 |
+| `app/nlp/entities.py` | 207 | Identificação dos elementos do domínio no texto cru, por léxico e por padrão |
+| `app/nlp/classifier.py` | 171 | Definição do classificador hierárquico e carregamento validado do artefato treinado |
+| `app/nlp/inference.py` | 339 | Vetorização de inferência, aplicação dos limiares e decisão de roteamento |
+| `app/nlp/data/lexico_dominio.json` | — | Vocabulário do portfólio: 108 termos em 12 tipos, substituível quando houver base real |
+
+**A divisão de responsabilidade entre os dois analisadores é deliberada.** O classificador decide **o que** foi pedido; a extração de entidades decide **sobre o que**. "Qual o status da Linha 2-Verde?" e "Qual o status da Linha 15-Prata?" têm a mesma intenção e entidades diferentes; "Qual o status da Linha 2-Verde?" e "Qual o orçamento da Linha 2-Verde?" têm a mesma entidade e intenções diferentes. Separar as duas evita que o catálogo de intenções cresça por combinação.
+
+**Os artefatos treinados não são duplicados no backend.** Eles continuam em `src/notebooks/artefatos/`, e `app/nlp/classifier.py` os referencia por caminho relativo. O modelo tem 13,2 MB e o Word2Vec 922 KB; manter uma segunda cópia dentro do pacote criaria a possibilidade de o serviço rodar com um artefato diferente do que o notebook mediu.
+
+### 8.11.2 Bibliotecas, frameworks e dependências de execução
+
+As dependências do backend estão separadas em dois arquivos, e a separação tem uma razão operacional: quem trabalha apenas na API de áudio da Seção 8.7 não precisa baixar o encoder BERT nem o Word2Vec.
+
+| Arquivo | Conteúdo | Quando é necessário |
+| --- | --- | --- |
+| `requirements.txt` | FastAPI, Uvicorn, Pydantic, `httpx`, `scikit-learn`, `nltk`, `numpy`, `joblib`, `pytest` | Sempre — inclui o pré-processamento e a extração de entidades |
+| `requirements-pln.txt` | `gensim`, `onnxruntime`, `tokenizers`, `huggingface_hub` | Somente para a inferência do classificador |
+
+| Biblioteca | Versão fixada | Papel na inferência |
+| --- | --- | --- |
+| `scikit-learn` | 1.6.1 | Vetorizadores TF-IDF, reduções SVD, escaladores e o classificador serializados no artefato |
+| `nltk` | 3.10.3 | Stemming Snowball em português, algorítmico e sem corpus baixado |
+| `numpy` | 2.5.2 | Composição da matriz de atributos e agregação dos vetores |
+| `joblib` | 1.6.0 | Desserialização do artefato treinado |
+| `gensim` | 4.4.0 | Carregamento do Word2Vec treinado no corpus do projeto |
+| `onnxruntime` | 1.29.0 | Execução do grafo do encoder BERT em CPU |
+| `tokenizers` | 0.23.2 | Tokenização do encoder, independente de `transformers` |
+| `huggingface_hub` | 1.30.0 | Download do grafo ONNX e do tokenizador na primeira execução, com cache local |
+
+**Nem `torch` nem `transformers` são instalados.** O encoder roda em ONNX Runtime, pelo motivo e com as medições registradas na Seção 8.10.6. Um teste automatizado verifica que os dois módulos permanecem ausentes de `sys.modules` depois de uma classificação completa, de modo que uma dependência reintroduzida por engano seja detectada pela suíte e não pelo tamanho da imagem em produção.
+
+**O ambiente exige Python 3.13 ou anterior.** O `gensim` ainda não publica *wheel* para o 3.14 e a compilação a partir do fonte falha. A restrição vale para qualquer ambiente que execute a inferência, inclusive o de implantação previsto na Seção 6.2.
+
+```bash
+cd src/backend
+python3.13 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m pip install -r requirements-pln.txt
+```
+
+Sem o segundo arquivo, o módulo continua importável e os testes de inferência são **pulados com a razão declarada**, em vez de falharem — a suíte distingue "não instalado" de "quebrado".
+
+### 8.11.3 Pré-processamento e extração de entidades
+
+**A `config_22` é um contrato, não uma preferência.** Os vetorizadores TF-IDF serializados no artefato foram ajustados sobre os tokens que `preprocess_text` produz. Alterar tokenização, caixa ou stemming não degrada o modelo aos poucos: invalida-o, porque os atributos deixam de ser os que ele viu no treino. A função é a mesma do benchmark, portada para módulo importável, e o notebook `preprocessamento_entidades.ipynb` compara as duas implementações sobre as 5.353 frases do conjunto sintético e falha se houver divergência.
+
+```python
+from app.nlp.preprocessing import tokenize
+
+tokenize("qual é o status da extensão da Linha 5-Lilás?")
+# ['qual', 'é', 'o', 'status', 'da', 'extensã', 'da', 'linh', '5', 'lilás']
+```
+
+As stopwords são preservadas de propósito: "qual", "quando", "quanto" e "quem" distinguem tipos de solicitação, e a grade de configurações confirmou o efeito — as quatro melhores médias por família mantêm stopwords e as quatro piores as removem.
+
+**A extração de entidades roda sobre o texto cru, não sobre os tokens.** O tokenizador da `config_22` quebra em `[^\W_]+`, o que separaria `PRJ-2031` em `PRJ` e `2031` e destruiria justamente a forma que identifica o projeto. Duas fontes se combinam: um léxico com o vocabulário conhecido do portfólio e expressões regulares para valores que não cabem em lista fechada — código de projeto, percentual, prazo em dias e data. Quando dois termos se sobrepõem, vence o mais longo, de modo que em "extensão da Linha 5-Lilás" a entidade é o projeto inteiro e não a linha isolada.
+
+```python
+from app.nlp.entities import extract_entities
+
+[(e.tipo, e.valor) for e in
+ extract_entities("compare o Linha 2-Verde e o Linha 15-Prata por aderência ao cronograma")]
+# [('projeto', 'Linha 2-Verde'), ('projeto', 'Linha 15-Prata'),
+#  ('indicador', 'aderência ao cronograma')]
+```
+
+O casamento ignora caixa e acento, porque o canal recebe texto digitado, e devolve sempre o valor canônico do catálogo: `QUAL O ORCAMENTO DA LINHA 4-AMARELA` produz a entidade `Linha 4-Amarela`, com a grafia do léxico.
+
+**Termos ambíguos não são arbitrados pelo extrator.** "Aderência ao cronograma" é ao mesmo tempo critério de comparação e indicador de desempenho, e qual dos dois vale depende da intenção — que o extrator não conhece. A entidade expõe `tipos` com todos os candidatos e a propriedade `ambigua`, e quem já conhece a intenção escolhe. O campo `tipo` guarda o mais provável por precedência, para o consumidor que não quer tratar a ambiguidade.
+
+Medida contra o gabarito reconstruído da geração do conjunto sintético, a extração obteve **precisão 0,996, revocação 0,999 e F1 0,998** sobre 7.000 entidades em 5.353 frases, com 25 falsos positivos e 5 falsos negativos remanescentes. O número é alto porque o conjunto é sintético e o léxico foi derivado do mesmo dicionário que gerou as frases; a Seção 8.11.6 mostra o que acontece quando o termo está fora dele.
+
+### 8.11.4 Carregamento do artefato treinado
+
+A inferência depende de três artefatos, e apenas o primeiro está no `joblib`:
+
+| Artefato | Origem | Tamanho | O que contém |
+| --- | --- | ---: | --- |
+| `classificador_intencoes.joblib` | Notebook do benchmark | 13,2 MB | Vetorizadores TF-IDF, reduções SVD, escaladores, classificador hierárquico, limiares e mapa de intenção para macrointenção |
+| `word2vec_portfolio.model` | Notebook do benchmark | 922 KB | Word2Vec treinado apenas com o conjunto de treino, 577 termos em 200 dimensões |
+| Grafo ONNX do encoder | Hugging Face, baixado na primeira execução | 449 MB | `paraphrase-multilingual-MiniLM-L12-v2` exportado para ONNX, com o tokenizador |
+
+**O artefato precisou ser migrado para carregar fora do notebook.** Pelo motivo descrito na Seção 8.10.6, o `joblib` gravado pelo notebook referenciava `__main__.identidade` e `__main__.ClassificadorHierarquico`. As duas definições passaram a viver em `app/nlp/classifier.py`, e um script reaponta o artefato para lá:
+
+```bash
+cd src/backend
+.venv/bin/python ../notebooks/migrar_artefato_classificador.py            # reescreve
+.venv/bin/python ../notebooks/migrar_artefato_classificador.py --verificar # só confere
+```
+
+O script **não retreina**: os pesos, os vetorizadores e os limiares continuam sendo os que produziram as métricas da Seção 8.10.3. O artefato versionado no repositório já está migrado; o script serve para qualquer artefato novo que saia do notebook.
+
+**O carregamento valida o artefato antes de usá-lo.** `load_artifact` confere que as doze chaves esperadas estão presentes e levanta `ValueError` nomeando as ausentes, em vez de deixar a falta aparecer como `KeyError` no meio de uma inferência. Um artefato inexistente levanta `FileNotFoundError` com a instrução de executar o script de migração.
+
+```python
+from app.nlp.classifier import load_artifact
+
+artefato = load_artifact()
+artefato.limiar_macro, artefato.limiar_intencao
+# (0.5500000000000003, 0.7000000000000003)
+len(artefato.intencoes)        # 31
+len(artefato.macrointencoes)   # 4
+```
+
+O resíduo nas casas decimais dos limiares é o rastro da varredura que os calibrou na validação: eles são o resultado de uma soma incremental, e não valores digitados. As comparações do roteamento usam o número armazenado, de modo que o resíduo não altera decisão alguma; a Seção 8.10.3 os arredonda para 0,550 e 0,700 por legibilidade.
+
+### 8.11.5 Inferência e roteamento por limiares
+
+`app.nlp.inference` recebe a solicitação em texto e devolve uma `Classificacao`. O contrato de saída é o seguinte:
+
+| Campo | Tipo | Conteúdo |
+| --- | --- | --- |
+| `macrointencao` | `str` | `CONSULTA`, `TRANSACAO`, `ALERTA`, `FORA_DE_ESCOPO` ou `INDEFINIDA` |
+| `confianca_macro` | `float` | Probabilidade da macrointenção prevista |
+| `intencao` | `str \| None` | Intenção específica, ou `None` quando abaixo do limiar |
+| `confianca_intencao` | `float` | Probabilidade conjunta P(macro) × P(intenção \| macro) |
+| `fluxo` | `str` | Rota do catálogo correspondente à macrointenção |
+| `handler` | `str` | `handler:<intenção>`, `fluxo genérico de <macro>` ou `limitacao` |
+| `alternativas` | `list[tuple]` | As `top_k` intenções mais prováveis com suas confianças |
+| `resposta_sugerida` | `str \| None` | Texto de limitação, preenchido apenas quando a macrointenção fica abaixo do limiar |
+
+Duas propriedades derivadas resumem a decisão para quem consome: `roteada` indica que a solicitação segue no pipeline, e `handler_especifico` indica que um handler dedicado pode ser acionado.
+
+**A vetorização de inferência reaplica exatamente as transformações ajustadas no treino, na ordem em que foram compostas.** Qualquer divergência — outra tokenização, outra ordem de blocos, normalização ausente — produziria atributos que o modelo nunca viu, e o erro seria silencioso: o modelo devolveria um rótulo, apenas o rótulo errado. O TF-IDF de caracteres e o encoder BERT recebem o texto cru; os demais blocos recebem os tokens da `config_22`.
+
+**Os dois limiares definem três rotas**, conforme os valores calibrados na validação e registrados na Seção 8.10.3:
+
+| Condição | Rota | `handler` |
+| --- | --- | --- |
+| Confiança da macro < 0,550 | Resposta controlada de limitação (RF08/RNF11) | `limitacao` |
+| Macro ≥ 0,550 e confiança da intenção < 0,700 | Fluxo genérico da macrointenção | `fluxo genérico de <macro>` |
+| Macro ≥ 0,550 e intenção ≥ 0,700 | Handler específico do catálogo | `handler:<intenção>` |
+
+A macrointenção `FORA_DE_ESCOPO` nunca aciona handler específico, ainda que a confiança seja alta: o catálogo a associa à rota "Resposta padrão de limitação (RF08)", e o campo `fluxo` da saída carrega essa rota. O campo `resposta_sugerida`, porém, só é preenchido quando a **macrointenção** fica abaixo do limiar — isto é, quando o pipeline não sabe sequer a categoria do pedido. Quem consome a classificação precisa tratar os dois casos: o texto pronto de limitação e a rota de limitação anunciada em `fluxo`.
+
+**A saída nunca anuncia uma macrointenção e um handler de outra.** O limiar de 0,700 já garante isso por construção, porque a probabilidade da intenção é conjunta e acima de 0,5 as duas coincidem; mesmo assim a verificação é explícita no código, para que recalibrar o limiar para baixo não quebre o contrato em silêncio. Um teste percorre todo o conjunto de teste confirmando a coerência.
+
+**O carregamento é preguiçoso e a API deve forçá-lo na subida.** Adiar a carga serve aos testes, mas em produção faria a primeira pessoa a usar o agente pagar o carregamento inteiro dentro da própria requisição.
+
+```python
+from app.nlp.inference import get_classifier, classify
+
+get_classifier().warmup()          # chamada na subida da aplicação
+
+resultado = classify("qual é o status da extensão da Linha 5-Lilás?")
+resultado.macrointencao            # 'CONSULTA'
+resultado.intencao                 # 'consulta_status_projeto'
+resultado.handler                  # 'handler:consulta_status_projeto'
+```
+
+`get_classifier` devolve uma instância compartilhada, para que os três artefatos sejam carregados uma única vez no processo.
+
+### 8.11.6 Exemplos de execução: casos de sucesso e de falha
+
+Os resultados abaixo vêm de uma execução real do módulo sobre o artefato versionado, em 8 de setembro de 2026. As confianças são as devolvidas pelo próprio pipeline e não foram arredondadas para favorecer a leitura.
+
+**Casos em que o pipeline aciona um handler específico.**
+
+| Entrada | Entidades extraídas | Macrointenção | Intenção | Conf. | Encaminhamento |
+| --- | --- | --- | --- | ---: | --- |
+| "qual é o status da extensão da Linha 5-Lilás?" | `projeto: extensão da Linha 5-Lilás` | `CONSULTA` (0,9998) | `consulta_status_projeto` | 0,9944 | `handler:consulta_status_projeto` |
+| "compare o Linha 2-Verde e o Linha 15-Prata por aderência ao cronograma" | `projeto: Linha 2-Verde`, `projeto: Linha 15-Prata`, `indicador: aderência ao cronograma` | `CONSULTA` (0,9992) | `comparacao_entre_projetos` | 0,9981 | `handler:comparacao_entre_projetos` |
+| "me avisa se o projeto de sinalização atrasar mais de 7 dias" | `prazo_dias: 7 dias` | `ALERTA` (1,0000) | `alerta_prazo_atraso` | 1,0000 | `handler:alerta_prazo_atraso` |
+| "gera um relatório executivo do subportfólio de modernização" | `subportfolio: subportfólio de Modernização` | `TRANSACAO` (1,0000) | `transacao_gerar_relatorio` | 0,9999 | `handler:transacao_gerar_relatorio` |
+| "qual o statuss do projeto de bilhetgem eletronica?" | — | `CONSULTA` (0,9999) | `consulta_status_projeto` | 0,9960 | `handler:consulta_status_projeto` |
+
+O último caso é o argumento empírico a favor da representação híbrida da Seção 8.10.2. "Statuss" e "bilhetgem" não existem no vocabulário do Word2Vec nem no TF-IDF de palavras, e ainda assim a classificação é correta com 0,996 de confiança: o TF-IDF de caracteres modela a grafia e sobrevive ao erro de digitação. Nenhum bloco isolado daria esse resultado.
+
+**Casos em que os limiares contêm a decisão.** Aqui o pipeline reconhece que não sabe o suficiente e recusa acionar um handler:
+
+| Entrada | Macrointenção | Conf. macro | Melhor intenção | Conf. | Encaminhamento |
+| --- | --- | ---: | --- | ---: | --- |
+| "atualiza o mapa de benefícios do PRJ-2031 com o novo indicador" | `TRANSACAO` | 0,9744 | `transacao_atualizar_status` | 0,6700 | fluxo genérico de `TRANSACAO` |
+| "há bloqueios registrados no Linha 15-Prata?" | `CONSULTA` | 0,5888 | `transacao_registrar_pendencia` | 0,3817 | fluxo genérico de `CONSULTA` |
+| "qual a previsão do tempo para amanhã?" | `FORA_DE_ESCOPO` | 1,0000 | `fora_escopo_externo` | 0,9993 | Resposta padrão de limitação (RF08) |
+| "bom dia, tudo certo?" | `FORA_DE_ESCOPO` | 1,0000 | `fora_escopo_social` | 0,9999 | Resposta padrão de limitação (RF08) |
+
+A primeira linha mostra o limiar operando com margem estreita e a favor da segurança: 0,67 contra o limiar de 0,70. A intenção mais provável era plausível, mas o pipeline preferiu o fluxo genérico da macrointenção a acionar uma transação de atualização com um terço de dúvida — comportamento exigido pelo RNF04 e pelo RNF11, já que uma transação errada altera dados.
+
+A saída completa do pipeline para dois desses casos, com as entidades reduzidas ao par `(tipo, valor)` e a lista de alternativas quebrada em duas linhas por largura:
+
+```text
+ENTRADA   : atualiza o mapa de benefícios do PRJ-2031 com o novo indicador
+TOKENS    : ['atualiz', 'o', 'map', 'de', 'benefíci', 'do', 'prj', '2031', 'com', 'o', 'nov', 'indic']
+ENTIDADES : [('documento', 'mapa de benefícios'), ('projeto', 'PRJ-2031')]
+MACRO     : TRANSACAO (0.9744)
+INTENCAO  : None (0.67)
+HANDLER   : fluxo genérico de TRANSACAO
+FLUXO     : Executor de Transação -> Confirmação -> Registro
+ALTERNAT. : [('transacao_atualizar_status', 0.67), ('transacao_cadastrar_projeto', 0.1448),
+             ('transacao_solicitar_atualizacao', 0.0568)]
+
+ENTRADA   : há bloqueios registrados no Linha 15-Prata?
+TOKENS    : ['há', 'bloquei', 'registr', 'no', 'linh', '15', 'prat']
+ENTIDADES : [('projeto', 'Linha 15-Prata')]
+MACRO     : CONSULTA (0.5888)
+INTENCAO  : None (0.3817)
+HANDLER   : fluxo genérico de CONSULTA
+FLUXO     : RecuperadorInformacao -> Estruturador de Resposta
+ALTERNAT. : [('transacao_registrar_pendencia', 0.3817), ('consulta_status_projeto', 0.2968),
+             ('consulta_escopo_tap', 0.2441)]
+```
+
+**Casos de falha.** Os três abaixo são erros reais do pipeline, registrados porque delimitam o que a implementação atual não resolve.
+
+| Entrada | O que o pipeline devolveu | Por que é falha |
+| --- | --- | --- |
+| "quanto já foi gasto na obra da Linha 6-Laranja?" | Intenção `consulta_orcamento_custo` correta, com 0,9981 — mas **nenhuma entidade extraída** | "Linha 6-Laranja" não está no léxico. O pipeline sabe *o que* foi pedido e não sabe *sobre o que*; a recuperação de informação não teria como filtrar o projeto |
+| "prorroga o prazo do PRJ-0442 até março" | `CONSULTA` / `consulta_cronograma_prazo` com 0,7321, **acima** do limiar de 0,700 | É um pedido de alteração, e deveria ser `TRANSACAO` / `transacao_atualizar_cronograma`, que aparece como segunda alternativa com 0,1417. O handler **seria acionado**: o limiar não protege este caso |
+| "e ai?" | `CONSULTA` com 0,9815 de confiança de macrointenção | Deveria ser `FORA_DE_ESCOPO`. O erro é contido pelo limiar de intenção (0,425 leva ao fluxo genérico), mas o **limiar de macrointenção não o detecta** — a categoria errada foi prevista com alta confiança |
+
+O primeiro caso é a limitação do léxico fechado, já registrada na Seção 8.11.3: um projeto fora de `lexico_dominio.json` só é reconhecido se tiver forma de código, como `PRJ-2031`. Quando a base real do portfólio estiver disponível, o arquivo passa a ser gerado a partir dela e o código não muda.
+
+O segundo é a fronteira entre consulta e transação, que o F1-macro de 0,7401 na intenção específica resume e que a Seção 8.10.5 aponta como classe a revisar. É também a demonstração de que os limiares reduzem o dano, mas não o eliminam.
+
+O terceiro delimita o alcance do mecanismo de contenção: **os dois limiares não são equivalentes em proteção**. O de intenção específica cobre a escolha do handler; o de macrointenção só age quando o modelo está incerto sobre a categoria, e não quando ele está confiante e errado. Uma saudação curta classificada como consulta com 0,98 atravessa o primeiro filtro. O impacto prático é limitado — a solicitação cai no fluxo genérico de `CONSULTA` em vez de receber a resposta de limitação —, mas a resposta ao usuário fica menos adequada do que deveria, e o caso é candidato natural ao conjunto de solicitações reais previsto na Seção 8.10.5.
+
+### 8.11.7 Testes automatizados
+
+A suíte do núcleo de PLN tem **87 testes**, dos 158 do backend. A suíte inteira roda em 15,7 segundos, dos quais 13,4 são dos testes de inferência: eles carregam os três artefatos reais, inclusive o encoder, e classificam o conjunto de teste completo. Os outros 69 testes de PLN rodam em 1,7 segundo.
+
+| Arquivo | Testes | O que verifica |
+| --- | ---: | --- |
+| `test_nlp_preprocessing.py` | 20 | Cada opção da grade de pré-processamento, a `config_22` selecionada, a preservação de stopwords e a estabilidade dos tokens que o artefato espera |
+| `test_nlp_entities.py` | 30 | Casamento por léxico e por padrão, insensibilidade a caixa e acento, resolução de sobreposição pelo termo mais longo, tipos ambíguos e posições no texto original |
+| `test_nlp_classifier.py` | 19 | Carregamento e validação do artefato, recusa de artefato incompleto, comportamento do classificador hierárquico e a exigência de que ele carregue **fora** do notebook |
+| `test_nlp_inference.py` | 18 | Classificação ponta a ponta, os três caminhos de roteamento, a coerência entre macrointenção e handler, a fidelidade às métricas do benchmark e a ausência de `torch` |
+
+**Quatro testes fazem a documentação e o código responderem um pelo outro.** Eles recalculam sobre o conjunto de teste os números registrados na Seção 8.10.3 e reprovam se houver divergência maior que 0,0002:
+
+| Teste | Valor exigido |
+| --- | --- |
+| `test_acuracia_da_intencao_no_teste` | 0,7383 |
+| `test_f1_macro_da_intencao_no_teste` | 0,7401 |
+| `test_efeito_dos_limiares_reproduz_a_documentacao` | 14 solicitações abaixo do limiar de macro, 305 no fluxo genérico, 0,8775 de acurácia entre as aceitas |
+| `test_limiares_sao_os_calibrados_na_validacao` | 0,550 e 0,700 |
+
+Sem eles, uma troca de artefato, uma alteração no pré-processamento ou uma atualização de biblioteca poderia mudar o comportamento do serviço sem que nada na suíte acusasse — e a Seção 8.10 passaria a descrever um modelo que não é mais o que roda.
+
+Três testes protegem decisões de implementação que não aparecem em métrica: `test_o_encoder_roda_sem_pytorch` verifica que `torch` e `transformers` continuam ausentes de `sys.modules` depois de uma classificação; `test_macro_e_intencao_nunca_saem_incoerentes` percorre todo o conjunto de teste confirmando que a saída jamais anuncia uma macrointenção e um handler de outra; e `test_bloco_desconhecido_e_recusado` garante que um bloco de representação não previsto falhe de forma explícita, em vez de produzir uma matriz de atributos silenciosamente errada.
+
+**Execução.**
+
+```bash
+cd src/backend
+.venv/bin/python -m pytest app/tests -q
+```
+
+```text
+158 passed, 11 warnings in 15.69s
+```
+
+Quando `requirements-pln.txt` não está instalado, os 18 testes de inferência são pulados com a razão declarada (`instale requirements-pln.txt`) e os outros 69 continuam rodando: o pré-processamento, a extração de entidades e o carregamento do artefato não dependem do encoder nem do Word2Vec.
+
+### 8.11.8 Desempenho medido
+
+Medição na execução de referência, em macOS 26.6 sobre Apple Silicon, com Python 3.13.15, mediana de 200 repetições:
+
+| Etapa | Mediana | Pior caso |
+| --- | ---: | ---: |
+| Pré-processamento (`tokenize`) | 0,04 ms | 0,12 ms |
+| Extração de entidades | 0,01 ms | 1,10 ms |
+| Classificação completa (`classify`) | 4,34 ms | 7,22 ms |
+| Vetorização em lote de 64 textos | 0,76 ms por texto | — |
+| Carga dos três artefatos (`warmup`) | 0,8 s | — |
+
+As duas últimas linhas são execução única, e não mediana de 200. O pior caso da extração de entidades é a primeira chamada, que carrega o léxico do disco; a partir da segunda o custo é o da mediana.
+
+O tempo é dominado pelo encoder BERT: o pré-processamento e a extração de entidades juntos custam cerca de 1% da classificação. O ganho da vetorização em lote — de 4,34 ms para 0,76 ms por texto — indica que a avaliação do conjunto de teste inteiro deve usar `vectorize` com a lista completa, e não um laço de `classify`, como a suíte já faz.
+
+**A folga em relação ao RNF05 é ampla, mas o requisito não é sobre esta etapa.** O RNF05 dá 10 segundos para uma consulta simples ponta a ponta, medidos entre o recebimento pela API e o retorno da resposta estruturada. A classificação consome cerca de 4 ms desse orçamento, contra 6 segundos reservados à transcrição na Seção 8.7 e o tempo ainda não medido da recuperação e da geração da resposta. A conclusão que a medição autoriza é estreita: o classificador **não** é o gargalo do pipeline. A verificação do RNF05 depende do fluxo completo e é entrega da Seção 9.2.
+
+A carga de 0,8 segundo acontece uma vez por processo e deve ser paga na subida da aplicação, por `warmup()`, e não dentro da primeira requisição.
+
+### 8.11.9 Situação da integração
+
+| Etapa | Situação | Onde está |
+| --- | --- | --- |
+| Pré-processamento textual | Implementado e testado | `app/nlp/preprocessing.py` |
+| Extração de entidades do domínio | Implementado e testado | `app/nlp/entities.py` |
+| Carregamento do artefato treinado | Implementado e testado | `app/nlp/classifier.py` |
+| Classificação e roteamento por limiares | Implementado e testado | `app/nlp/inference.py` |
+| Exposição do pipeline em rota HTTP | **Não implementada** | Prevista para o fluxo de entrada da Seção 8.7 |
+| Persistência da intenção e das entidades | **Não implementada** | Depende do esquema da Seção 4 e das tabelas de rastreabilidade do RNF03 |
+
+O núcleo é importável e exercitável hoje — a Seção 8.11.6 é uma execução dele —, mas ainda não é alcançado por uma requisição HTTP. O endpoint `POST /api/audio` da Seção 8.7 valida e transcreve o áudio e devolve `pipeline_status` igual a `stubbed`, sem chamar `classify`. As duas lacunas são as tasks de integração da Sprint 3 que ainda não foram entregues, e enquanto elas não existirem três consequências permanecem:
+
+- não há medição ponta a ponta do RNF05, apenas do trecho de classificação;
+- a trilha exigida pelo RNF03 — solicitação, intenção, fontes e resposta — não é gravada, porque nada persiste a saída da classificação;
+- o `warmup()` descrito na Seção 8.11.5 ainda não é chamado por ninguém, já que o ciclo de vida da aplicação FastAPI é o lugar previsto para essa chamada.
+
+A Seção 8.4 registra a cobertura de teste correspondente e o que continua descoberto.
 
 # 9. Planejamento e Execução de Testes
 
