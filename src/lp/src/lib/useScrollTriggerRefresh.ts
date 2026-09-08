@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { APP_READY_EVENT } from "@/lib/appReady";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -20,9 +21,21 @@ export function useScrollTriggerRefresh() {
         window.addEventListener("load", refresh);
         document.fonts?.ready.then(refresh).catch(() => undefined);
 
+        // O mais importante deles: enquanto a cortina de abertura está em
+        // cena o `body` fica com `overflow: hidden`, e os gatilhos medidos aí
+        // saem errados — era o que fazia animações dispararem em posições que
+        // não correspondiam à página. Aqui refazemos a conta depois que ela
+        // sai, no quadro seguinte e mais uma vez logo em seguida.
+        const onReady = () => {
+            requestAnimationFrame(refresh);
+            timers.push(window.setTimeout(refresh, 600));
+        };
+        window.addEventListener(APP_READY_EVENT, onReady);
+
         return () => {
             timers.forEach((timer) => window.clearTimeout(timer));
             window.removeEventListener("load", refresh);
+            window.removeEventListener(APP_READY_EVENT, onReady);
         };
     }, []);
 }

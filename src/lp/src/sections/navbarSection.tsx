@@ -9,6 +9,7 @@ const LINKS = [
     { label: "Home", href: "#topo", target: null },
     { label: "Modelo", href: "#modelo", target: "#modelo" },
     { label: "Integração", href: "#integracao", target: "#integracao" },
+    { label: "Time", href: "#time", target: "#time" },
 ];
 
 /** Ignore scroll jitter below this many pixels. */

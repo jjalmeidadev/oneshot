@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { HandwritingText } from '../components/ui/handwriting-text'
+import { useAppReady } from '../lib/appReady'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -19,6 +20,10 @@ const WORD_LAG = [0.5, 1.1, 0.75, 1.5, 0.9, 1.25, 0.65]
 
 function HeroSection() {
     const sectionRef = useRef<HTMLElement>(null)
+    // A escrita à mão anima na montagem: montada por trás da cortina, ela
+    // terminaria antes de a página aparecer. Só entra quando há alguém para
+    // ver — o espaço dela fica reservado para o layout não pular.
+    const ready = useAppReady()
 
     useEffect(() => {
         const section = sectionRef.current
@@ -71,14 +76,15 @@ function HeroSection() {
         >
             <h1
                 data-hero-title
-                className="text-4xl font-bold text-white sm:text-5xl lg:text-6xl"
+                className="flex min-h-[2.9em] items-center text-4xl font-bold text-white sm:text-5xl lg:text-6xl"
             >
-                <HandwritingText
-                    text="Bem vindo ao Oneshot"
-                    className="text-diamond-300 dark:text-diamond-400"
-                    height="2.9em"
+                {ready && (
+                    <HandwritingText
+                        text="Bem vindo ao Oneshot"
+                        className="text-diamond-300 dark:text-diamond-400"
+                        height="2.9em"
                     />
-                    {' '} 
+                )}
             </h1>
             <p
                 data-hero-subtitle

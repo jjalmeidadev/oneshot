@@ -4,6 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ChatMessages from "@/components/chat/chat-messages";
 import { SOURCE_MESSAGES } from "@/components/chat/messages";
 import { useScrollReveal } from "@/lib/useScrollReveal";
+import { LIVE_FOLLOW_EVENT } from "@/lib/useLivePresence";
 import SkipRevealButton from "@/components/ui/skip-reveal-button";
 import { cn } from "@/lib/utils";
 
@@ -113,6 +114,27 @@ export default function FloatingChat() {
             gsap.ticker.remove(render);
             trigger.kill();
         };
+    }, []);
+
+    // Enquanto alguém está sendo acompanhado ao vivo, a janela sai de cena:
+    // o painel de acompanhamento cobre a tela e o chat atrás dele só
+    // atrapalharia a leitura.
+    useEffect(() => {
+        const wrap = wrapRef.current;
+        if (!wrap) return;
+
+        const onFollow = (event: Event) => {
+            const active = (event as CustomEvent<{ active?: boolean }>).detail?.active;
+            gsap.to(wrap, {
+                opacity: active ? 0 : 1,
+                duration: 0.3,
+                ease: "power2.out",
+                overwrite: "auto",
+            });
+        };
+
+        window.addEventListener(LIVE_FOLLOW_EVENT, onFollow);
+        return () => window.removeEventListener(LIVE_FOLLOW_EVENT, onFollow);
     }, []);
 
     // Seam for the RAG backend: this is the single place that has to change

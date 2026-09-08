@@ -163,9 +163,7 @@ export default function ChatFragments() {
                 <div
                     key={`${row}-${col}`}
                     data-fragment
-                    // Mesmo material da janela de chat, para a troca entre ela
-                    // e o mosaico não aparecer.
-                    className="absolute border border-white/10 bg-gradient-to-b from-zinc-900 to-zinc-950 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.6)] backdrop-blur-sm"
+                    className="absolute border border-indigo-200/50 bg-indigo-300 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.6)]"
                 />
             ))}
         </div>

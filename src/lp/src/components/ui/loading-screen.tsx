@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { markAppReady } from "@/lib/appReady";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -114,6 +115,9 @@ export default function LoadingScreen() {
                 window.scrollTo(0, 0);
                 ScrollTrigger.refresh();
                 setGone(true);
+                // Libera as animações que precisam ser vistas para valer —
+                // a escrita à mão do hero, por exemplo.
+                markAppReady();
             },
         });
 

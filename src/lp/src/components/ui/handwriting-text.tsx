@@ -185,9 +185,29 @@ export function HandwritingText({
     return () => cancelAnimationFrame(id);
   }, [geom]);
 
-  // Before the font resolves — and if it never does — the text is still readable.
+  const [showFallback, setShowFallback] = useState(false);
+  useEffect(() => {
+    if (geom) return;
+    const timer = setTimeout(() => setShowFallback(true), 4000);
+    return () => clearTimeout(timer);
+  }, [geom]);
+
+  // Enquanto a fonte não resolve, o texto fica no DOM — leitores de tela
+  // continuam anunciando — mas invisível: antes ele piscava na fonte padrão
+  // até os glifos virarem traçado. Se a fonte não vier mesmo (CDN fora do
+  // ar), ele aparece depois de alguns segundos, para o hero não ficar mudo.
   if (!geom) {
-    return <span className={className}>{current}</span>;
+    return (
+      <span
+        className={className}
+        style={{
+          opacity: showFallback ? 1 : 0,
+          transition: "opacity 0.4s ease-out",
+        }}
+      >
+        {current}
+      </span>
+    );
   }
 
   const count = Math.max(1, geom.contours.length);

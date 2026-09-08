@@ -1,3 +1,6 @@
+import LivePresenceCard from "@/components/live/live-presence-card";
+import { useLivePresence } from "@/lib/useLivePresence";
+
 // Last section: the shared chat window (FloatingChat) morphs from the swap
 // section's slot into the slot below, ending up taking most of the screen.
 // The heading is held at opacity 0 and only fades in once that expansion has
@@ -9,6 +12,9 @@
 // gives the visitor time to actually talk to the model before the footer
 // comes into view.
 export default function TrySection() {
+    const { sessions } = useLivePresence();
+    const live = sessions.length > 0;
+
     return (
         <section className="relative min-h-[240vh] w-full">
             <div
@@ -19,12 +25,27 @@ export default function TrySection() {
                     data-try-heading
                     className="flex max-w-2xl shrink-0 flex-col items-center gap-2 text-center opacity-0"
                 >
-                           <h2 className="text-3xl font-medium text-white lg:text-4xl">
+                    <span className="text-sm font-medium uppercase tracking-widest text-indigo-300">
+                        Experimente
+                    </span>
+                    <h2 className="text-3xl font-bold text-white lg:text-4xl">
                         Converse com o OneShot
                     </h2>
                 </div>
 
-                <div data-chat-slot="try" aria-hidden className="min-h-0 w-full max-w-6xl flex-1" />
+                {/* Quando há gente testando ao vivo, o slot do chat cede um
+                    terço da largura para o painel de presença. A janela é
+                    fixa e persegue o retângulo do slot a cada quadro, então
+                    ela se reacomoda sozinha, animada, sem coreografia nova. */}
+                <div className="flex min-h-0 w-full max-w-6xl flex-1 gap-4">
+                    <div data-chat-slot="try" aria-hidden className="min-h-0 flex-1" />
+
+                    {live && (
+                        <div className="hidden min-h-0 w-1/3 shrink-0 md:block">
+                            <LivePresenceCard sessions={sessions} />
+                        </div>
+                    )}
+                </div>
             </div>
         </section>
     );

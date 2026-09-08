@@ -94,6 +94,14 @@ export default function IntegrationSection() {
                 },
             });
 
+            gsap.from("[data-integration-heading]", {
+                x: -60,
+                opacity: 0,
+                duration: 0.9,
+                ease: "power3.out",
+                scrollTrigger: { trigger: "[data-integration-heading]", start: "top 88%" },
+            });
+
             gsap.from("[data-integration-cta]", {
                 y: 24,
                 opacity: 0,
@@ -102,8 +110,11 @@ export default function IntegrationSection() {
                 scrollTrigger: { trigger: "[data-integration-cta]", start: "top 92%" },
             });
 
+            // Direções alternadas ao longo da página: aqui os cards entram
+            // pela direita, no time eles sobem — a variedade quebra a
+            // monotonia do "tudo aparece de baixo".
             gsap.from("[data-integration-card]", {
-                y: 40,
+                x: 80,
                 opacity: 0,
                 duration: 0.8,
                 ease: "power3.out",
@@ -142,7 +153,10 @@ export default function IntegrationSection() {
             id="integracao"
             className="relative flex w-full flex-col gap-16 overflow-hidden py-24"
         >
-            <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-6 md:px-16">
+            <div
+                data-integration-heading
+                className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-6 md:px-16"
+            >
 
                 <h2 className="max-w-2xl text-3xl font-medium text-indigo-300 lg:text-4.5xl">
                     Onde o OneShot vai viver

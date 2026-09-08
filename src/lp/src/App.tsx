@@ -5,6 +5,9 @@ import ChatSection from './sections/chatSection'
 import ChatSwapSection from './sections/chatSwapSection'
 import TrySection from './sections/trySection'
 import IntegrationSection from './sections/integrationSection'
+import TeamSection from './sections/teamSection'
+import AvatarHandoff from './components/team/avatar-handoff'
+import ProgressBar from './components/ui/progress-bar'
 import FooterSection from './sections/footer'
 import FloatingChat from './components/chat/floating-chat'
 import LoadingScreen from './components/ui/loading-screen'
@@ -26,6 +29,7 @@ function App() {
       {/* Cortina de abertura: cobre a montagem do shader, das fontes e do
           handwriting, e só entrega a página quando tudo está pronto. */}
       <LoadingScreen />
+      <ProgressBar />
       {/* Background global: MeshGradient do @paper-design/shaders-react
           (pacote open-source original do componente do 21st.dev). */}
       <MeshGradient
@@ -63,6 +67,9 @@ function App() {
       <ChatFragments />
 
       <IntegrationSection />
+      <TeamSection />
+      {/* Os avatares do time viajam até virar as bolinhas do rodapé. */}
+      <AvatarHandoff />
       <FooterSection />
     </div>
   )

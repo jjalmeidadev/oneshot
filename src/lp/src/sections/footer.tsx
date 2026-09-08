@@ -2,6 +2,9 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Mail } from "lucide-react";
+import { AvatarGroup, AvatarGroupTooltip } from "@/components/ui/avatar-group";
+import TeamAvatar from "@/components/team/team-avatar";
+import { TEAM } from "@/lib/team";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -101,7 +104,7 @@ export default function FooterSection() {
                 {/* Wordmark: cada letra sobe de dentro de uma máscara. */}
                 <h2
                     aria-label={WORDMARK}
-                    className="flex overflow-hidden text-6xl font-bold leading-none text-white lg:text-8xl"
+                    className="flex shrink-0 overflow-hidden pr-2 text-6xl font-bold leading-none whitespace-nowrap text-white lg:text-7xl"
                 >
                     {WORDMARK.split("").map((letter, index) => (
                         <span
@@ -115,7 +118,7 @@ export default function FooterSection() {
                     ))}
                 </h2>
 
-                <div className="flex flex-wrap gap-12">
+                <div className="flex min-w-0 flex-wrap gap-12">
                     {LINK_GROUPS.map((group) => (
                         <nav key={group.title} data-footer-col className="flex flex-col gap-3">
                             <span className="text-xs uppercase tracking-widest text-indigo-300">
@@ -158,6 +161,22 @@ export default function FooterSection() {
                                 </a>
                             ))}
                         </div>
+                    </div>
+
+                    <div data-footer-col className="flex flex-col gap-3">
+                        <span className="text-xs uppercase tracking-widest text-indigo-300">
+                            Time
+                        </span>
+                        {/* Passe o mouse para ver quem é quem. */}
+                        <AvatarGroup>
+                            {TEAM.map((member) => (
+                                <span key={member.name} data-footer-avatar={member.name}>
+                                    <TeamAvatar member={member} muted>
+                                        <AvatarGroupTooltip>{member.name}</AvatarGroupTooltip>
+                                    </TeamAvatar>
+                                </span>
+                            ))}
+                        </AvatarGroup>
                     </div>
                 </div>
             </div>
