@@ -1,0 +1,57 @@
+{
+  "CONSULTA": {
+    "descricao": "Recuperação e análise de informações do portfólio (RF04/RF05/RF06).",
+    "fluxo": "RecuperadorInformacao -> Estruturador de Resposta",
+    "intencoes": {
+      "consulta_status_projeto": "Situação/andamento atual de um projeto ou programa.",
+      "consulta_cronograma_prazo": "Datas, prazos, previsão de término, atraso em dias.",
+      "consulta_marcos_entregas": "Marcos, entregas e etapas planejadas ou concluídas.",
+      "consulta_orcamento_custo": "Orçamento aprovado, custo realizado, saldo, desvio financeiro.",
+      "consulta_escopo_tap": "Escopo, objetivos, premissas e restrições registrados no TAP.",
+      "consulta_responsavel_equipe": "Gerente responsável, equipe, área ou patrocinador do projeto.",
+      "consulta_indicadores_kpi": "Indicadores de desempenho (SPI, CPI, % concluído, aderência).",
+      "consulta_riscos_projeto": "Riscos registrados, probabilidade, impacto e tratamento.",
+      "consulta_pendencias_projeto": "Pendências, ações em aberto e itens aguardando resposta.",
+      "consulta_documentos_fonte": "Localização/origem de documentos e referências (SharePoint, anexos).",
+      "consulta_visao_portfolio": "Visão agregada do portfólio ou de um subportfólio.",
+      "comparacao_entre_projetos": "Comparação explícita entre dois ou mais projetos (RF06).",
+      "analise_tendencia_desempenho": "Evolução temporal, tendência, projeção e causas de variação."
+    }
+  },
+  "TRANSACAO": {
+    "descricao": "Execução ou simulação de ações sobre os artefatos de gestão (RF07).",
+    "fluxo": "Executor de Transação -> Confirmação -> Registro",
+    "intencoes": {
+      "transacao_atualizar_status": "Atualizar status/percentual de andamento de um projeto.",
+      "transacao_atualizar_cronograma": "Repactuar datas, replanejar marcos, prorrogar prazo.",
+      "transacao_registrar_risco": "Registrar/atualizar risco na matriz do projeto.",
+      "transacao_registrar_pendencia": "Abrir, atribuir ou encerrar pendência/ação.",
+      "transacao_gerar_relatorio": "Gerar relatório (anual, de acompanhamento, balanço).",
+      "transacao_gerar_apresentacao": "Gerar apresentação executiva a partir de template.",
+      "transacao_exportar_dados": "Exportar dados/planilha do portfólio.",
+      "transacao_agendar_compromisso": "Agendar reunião, checkpoint ou revisão de portfólio.",
+      "transacao_solicitar_atualizacao": "Solicitar/cobrar atualização de informação a um responsável.",
+      "transacao_cadastrar_projeto": "Cadastrar novo projeto/programa no portfólio."
+    }
+  },
+  "ALERTA": {
+    "descricao": "Monitoramento proativo e notificações (RF07).",
+    "fluxo": "Motor de Regras -> Notificação",
+    "intencoes": {
+      "alerta_prazo_atraso": "Avisar sobre atraso ou risco de estouro de prazo.",
+      "alerta_estouro_orcamento": "Avisar sobre desvio ou estouro orçamentário.",
+      "alerta_risco_critico": "Avisar quando risco crítico for identificado/escalado.",
+      "alerta_desatualizacao_dados": "Avisar quando informações do projeto ficarem desatualizadas.",
+      "alerta_configurar_monitoramento": "Criar/configurar regra de monitoramento e frequência.",
+      "alerta_gerenciar_inscricao": "Ativar, pausar, silenciar ou cancelar alertas existentes."
+    }
+  },
+  "FORA_DE_ESCOPO": {
+    "descricao": "Rejeição: fora do domínio do portfólio (extensão operacional ao enum).",
+    "fluxo": "Resposta padrão de limitação (RF08)",
+    "intencoes": {
+      "fora_escopo_social": "Saudações, agradecimentos, conversa social, testes do agente.",
+      "fora_escopo_externo": "Assuntos alheios ao portfólio (clima, esportes, receitas, RH pessoal)."
+    }
+  }
+}

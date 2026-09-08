@@ -1,0 +1,53 @@
+{
+  "@odata.context": "https://mock.sharepoint.local/$metadata#lists/items",
+  "mock": true,
+  "site": {
+    "id": "metro-mvp-site",
+    "displayName": "Portal Operacional - Dados Ficticios"
+  },
+  "list": {
+    "id": "base-atendimento",
+    "displayName": "Base de Atendimento"
+  },
+  "value": [
+    {
+      "id": "301",
+      "createdDateTime": "2026-01-10T10:00:00Z",
+      "lastModifiedDateTime": "2026-05-11T17:30:00Z",
+      "webUrl": "https://mock.sharepoint.local/sites/metro-mvp/Lists/Atendimento/301",
+      "fields": {
+        "Title": "Uso do bilhete digital no MVP",
+        "Categoria": "Bilhetes",
+        "Status": "Publicado",
+        "Conteudo": "No cenario ficticio do MVP, o bilhete digital pode ser apresentado na catraca pelo celular. Se a leitura falhar, aumentar o brilho da tela, confirmar que o codigo esta inteiramente visivel e procurar um agente de atendimento.",
+        "PalavrasChave": "bilhete digital celular codigo catraca leitura"
+      }
+    },
+    {
+      "id": "302",
+      "createdDateTime": "2026-02-18T14:00:00Z",
+      "lastModifiedDateTime": "2026-06-09T12:15:00Z",
+      "webUrl": "https://mock.sharepoint.local/sites/metro-mvp/Lists/Atendimento/302",
+      "fields": {
+        "Title": "Canal de registro de sugestoes e reclamacoes",
+        "Categoria": "Relacionamento",
+        "Status": "Publicado",
+        "Conteudo": "Para a demonstracao, sugestoes e reclamacoes recebem um protocolo no canal digital ficticio. Solicitar estacao, data, horario aproximado e descricao do ocorrido, evitando registrar dados pessoais desnecessarios.",
+        "PalavrasChave": "reclamacao sugestao protocolo canal atendimento"
+      }
+    },
+    {
+      "id": "303",
+      "createdDateTime": "2026-04-07T09:30:00Z",
+      "lastModifiedDateTime": "2026-08-12T11:05:00Z",
+      "webUrl": "https://mock.sharepoint.local/sites/metro-mvp/Lists/Atendimento/303",
+      "fields": {
+        "Title": "Transporte de bicicleta",
+        "Categoria": "Regras de uso",
+        "Status": "Publicado",
+        "Conteudo": "Na politica ficticia do MVP, bicicletas sao aceitas aos sabados, domingos e feriados durante toda a operacao, e nos dias uteis apos as 20h30. O passageiro deve usar o ultimo carro e respeitar a capacidade indicada pela equipe.",
+        "PalavrasChave": "bicicleta bike horario fim semana ultimo carro"
+      }
+    }
+  ]
+}

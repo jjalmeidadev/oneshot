@@ -1,1 +1,72 @@
+<<<<<<< HEAD
 .src/frontend
+=======
+# --- Python (backend) ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Segredos / configuracao local (chaves de API etc.)
+.env
+.env.*
+!.env.example
+
+# --- Node / frontend ---
+node_modules/
+dist/
+build/
+.vite/
+dev-server.log
+npm-debug.log*
+yarn-error.log*
+
+# Copia de seguranca gerada pela migracao do artefato do classificador
+*.joblib.notebook
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- Sistema operacional / editor ---
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# Environment & Secrets (AIOX)
+.env.local
+.env.*.local
+*.key
+*.pem
+!.env.example
+!**/.env.example
+
+
+# Dependencies (AIOX)
+node_modules
+
+# Build & Logs (AIOX)
+*.log
+logs/
+tmp/
+
+# AIOX Local (AIOX)
+.aiox-core/local/
+.claude/settings.local.json
+.aiox/install-log.txt
+.aiox-core
+.claude
+.codex
+.gemini
+.antigravity
+.cursor
+.github
+.kimi
+.agent
+AGENTS.md
+>>>>>>> 363ee167cc1a1ceb352f9aa77be25d2f08b63533
