@@ -49,7 +49,7 @@ Este arquivo reúne os documentos que compõem a documentação do projeto e ind
 | [../src/backend/](../src/backend/) | API FastAPI da bancada de teste, com o cliente de geração de resposta e a recuperação de contexto sobre listas simuladas do SharePoint. |
 | [../src/frontend/](../src/frontend/) | Bancada de teste em React, Vite e Tailwind, usada para exercitar o caminho de consulta do RAG. Não é a interface do produto, que é o Microsoft Teams. |
 | [../src/notebooks/](../src/notebooks/) | Notebook do classificador de intenções, com o benchmark reproduzível do pipeline de PLN. |
-| [../src/database/](../src/database/) | Scripts de criação e carga inicial do banco de dados. |
+| [../src/database/](../src/database/) | Scripts de criação, carga inicial sintética e rollback controlado do banco de dados. |
 
 ### Recursos
 

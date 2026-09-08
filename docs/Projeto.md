@@ -2518,17 +2518,19 @@ O objetivo da modelagem é representar, de forma simples e implementável, os da
 
 ## 4.1 Especificação da Base de Dados
 
-A base de dados do MVP foi desenhada para funcionar como uma camada intermediária entre o agente conversacional, o núcleo de PLN, o Copilot Studio, os fluxos do Power Automate e as fontes simuladas do SharePoint. Como o projeto utiliza dados sintéticos, a modelagem não replica dados reais do Metrô; ela replica a estrutura necessária para representar projetos, subportfólios, artefatos documentais, cronogramas, atualizações de status, riscos, mudanças, intenções e registros de auditoria.
+A base de dados do MVP foi desenhada para funcionar como uma camada intermediária entre o agente conversacional, o núcleo de PLN, o Copilot Studio, os fluxos do Power Automate e as fontes simuladas do SharePoint. Como o projeto utiliza dados sintéticos, a modelagem não replica dados reais do Metrô; ela replica a estrutura necessária para representar projetos, subportfólios, artefatos documentais, cronogramas, avanços físico-econômicos, entregas, marcos, termos de abertura, termos de encerramento, riscos, mudanças, intenções e registros de auditoria.
 
-A decisão de modelagem adotada foi reduzir a complexidade para um MVP, evitando uma tabela para cada página, lista ou biblioteca do SharePoint. Em vez disso, documentos, links, listas, prompts, normativos e planilhas são representados pela tabela `project_artifacts`. Quando o artefato for uma planilha de cronograma vinculada em uma lista do SharePoint, seus metadados ficam registrados em `project_artifacts` e suas linhas relevantes são extraídas para `schedule_items`.
+A decisão de modelagem adotada foi reduzir a complexidade para um MVP, evitando uma tabela para cada página, lista ou biblioteca do SharePoint. Em vez disso, documentos, links, anexos, prompts, normativos e planilhas são representados pela tabela `project_artifacts`. Quando uma lista do parceiro possui ciclo de vida e campos estruturados relevantes para consulta, ela é representada por uma tabela própria, como `project_progress_updates`, `project_deliverables_milestones`, `project_charters` ou `project_closure_terms`. Quando a origem é apenas documental ou um anexo de suporte, ela permanece como artefato consultável.
 
-Essa abordagem contempla o funcionamento observado no ambiente do parceiro: algumas listas do SharePoint apresentam linhas com links para arquivos Excel, especialmente cronogramas. No MVP, o link da planilha é armazenado em `project_artifacts.sharepoint_url`; a aba e o intervalo de leitura são indicados por `excel_sheet_name` e `excel_table_or_range`; e cada linha relevante do cronograma é normalizada em `schedule_items`, preservando a origem por meio de campos como `source_sheet_name`, `source_row_number` e `source_cell_range`.
+Essa abordagem contempla o funcionamento observado no ambiente do parceiro: algumas listas do SharePoint apresentam linhas com links ou anexos para arquivos Excel, especialmente cronogramas. No MVP, o link ou anexo da planilha é armazenado em `project_artifacts.sharepoint_url`, `attachment_name` e `attachment_url`; a aba e o intervalo de leitura são indicados por `excel_sheet_name` e `excel_table_or_range`; e cada linha relevante do cronograma é normalizada em `schedule_items`, preservando a origem por meio de campos como `source_sheet_name`, `source_row_number` e `source_cell_range`.
+
+Riscos/problemas e mudanças aparecem em duas granularidades no inventário do parceiro: projeto e subportfólio. Para evitar duplicação desnecessária, o modelo adota `scope_type` em `risk_issue_items` e `change_records`, com restrições que obrigam o preenchimento de exatamente um alvo: `project_id` quando o escopo é projeto, ou `subportfolio_id` quando o escopo é subportfólio. O histórico dos riscos e problemas foi separado em `risk_issue_history`, preservando a evolução de status e criticidade ao longo do tempo.
 
 O modelo também suporta a avaliação do núcleo de PLN implementado no notebook `src/notebooks/classificador_intencoes_metro.ipynb`. Esse notebook trabalha com um catálogo hierárquico de intenções em dois níveis: `macrointencao` (`CONSULTA`, `TRANSACAO`, `ALERTA` e `FORA_DE_ESCOPO`) e intenção específica, totalizando 31 classes na execução de referência. Por isso, a tabela `intent_catalog` registra tanto a macrointenção quanto a intenção específica, o fluxo associado, o handler previsto e os limiares de confiança usados para decidir entre roteamento, acionamento de handler específico ou resposta de limitação.
 
 A tabela `intent_test_cases` armazena exemplos rotulados derivados dos templates do notebook, preservando `template_id`, variação superficial, texto normalizado e split (`treino`, `validacao`, `teste`). Isso mantém a rastreabilidade do protocolo sem vazamento usado no classificador, em que a divisão é feita por template e não por frase. As interações reais ou simuladas são registradas em `ai_interactions`, incluindo macrointenção prevista, confiança da macro, intenção específica prevista, confiança da intenção, handler selecionado, alternativas top-k e eventual resposta de limitação. As fontes consultadas são rastreadas por `consulted_sources`, permitindo verificar quais documentos, extratos, planilhas ou linhas foram usados para compor o retorno ao usuário.
 
-O modelo físico inicial está implementado em [`src/database/sql/01_create_database.sql`](../src/database/sql/01_create_database.sql). A documentação operacional dos artefatos de banco, incluindo o papel futuro dos scripts de inserção e rollback, está registrada em [`src/database/docs/README.md`](../src/database/docs/README.md).
+O modelo físico inicial está implementado em [`src/database/sql/01_create_database.sql`](../src/database/sql/01_create_database.sql). A documentação operacional dos artefatos de banco, incluindo carga inicial sintética e rollback controlado, está registrada em [`src/database/docs/README.md`](../src/database/docs/README.md).
 
 ## 4.2 Modelo Conceitual de Dados
 
@@ -2539,13 +2541,20 @@ As principais entidades conceituais do MVP são:
 | Entidade | Descrição de negócio |
 |---|---|
 | Subportfólio | Categoria estratégica que agrupa projetos do portfólio, como Turnaround, Expansão da Rede Metrô e Gestão e Finanças. |
+| Situação de Subportfólio | Registro periódico da situação de um subportfólio, com data de referência, item, situação e ano. |
 | Projeto | Iniciativa acompanhada pelo PMO, associada a um subportfólio e composta por documentos, cronograma, status, riscos e mudanças. |
 | Artefato do Projeto | Fonte de informação vinculada ao projeto, podendo ser TAP, cronograma, relatório, planilha, lista SharePoint, prompt ou normativo. |
 | Extrato de Fonte | Parte extraída de um documento, lista ou planilha para consulta, referência e montagem de contexto controlado no Copilot. |
 | Item de Cronograma | Linha estruturada extraída de um cronograma, inclusive quando a origem for uma planilha Excel vinculada no SharePoint. |
+| Avanço do Projeto | Medição periódica de avanço físico e econômico previsto e realizado. |
+| Entrega ou Marco | Entrega, marco ou etapa relevante do projeto, com datas prevista e realizada e status de acompanhamento. |
 | Atualização de Status | Registro de avanço, situação, impedimentos, próximos passos e resumo executivo de um projeto. |
-| Risco ou Problema | Evento de risco ou problema materializado que afeta um projeto. |
-| Mudança | Registro de alteração de prazo, escopo, custo, prioridade ou outro aspecto relevante do projeto. |
+| Termo de Abertura | Registro estruturado do TAP, incluindo liderança, equipe, objetivo, justificativa, escopo, benefícios, premissas, restrições, custos, revisão e situação de liberação. |
+| Termo de Encerramento | Registro estruturado do encerramento do projeto, com situação, justificativa, pendências, custo realizado e data de encerramento. |
+| Benefício | Benefício esperado ou detalhado para o projeto, ligado ao TAP ou ao Mapa de Benefícios. |
+| Risco ou Problema | Evento de risco ou problema materializado que afeta um projeto ou subportfólio. |
+| Histórico de Risco ou Problema | Evolução temporal de status, criticidade e comentários de um risco ou problema. |
+| Mudança | Registro de alteração de prazo, escopo, custo, prioridade ou outro aspecto relevante de projeto ou subportfólio. |
 | Usuário | Pessoa que interage com o agente, vinculada a um perfil como Diretoria, PMO, Líder de Subportfólio ou Equipe de Projeto. |
 | Regra de Acesso | Definição conceitual de quais informações um usuário ou perfil pode consultar, alterar ou exportar. |
 | Intenção | Necessidade identificada pelo núcleo de PLN, organizada em macrointenção e intenção específica conforme o notebook do classificador. |
@@ -2573,18 +2582,25 @@ java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/modelo-conce
 
 O modelo lógico detalha o modelo conceitual em formato de tabelas, atributos principais, chaves primárias e chaves estrangeiras. Ele ainda não representa o código final do banco, mas define a estrutura lógica que deve ser implementada.
 
-Para manter o escopo adequado ao MVP, a modelagem lógica foi consolidada em 18 tabelas:
+Para manter o escopo adequado ao MVP e incorporar o inventário do parceiro, a modelagem lógica foi consolidada em 25 tabelas:
 
 | Tabela | PK | FKs principais | Finalidade |
 |---|---|---|---|
-| subportfolios | id | - | Armazena os subportfólios estratégicos. |
-| projects | id | subportfolio_id → subportfolios.id | Armazena os projetos do portfólio. |
-| project_artifacts | id | project_id → projects.id | Representa documentos, listas, links, planilhas, prompts e normativos vindos do SharePoint ou da massa sintética. |
+| subportfolios | id | - | Armazena os subportfólios estratégicos, responsáveis, aprovadores, apoio e identificador de origem do parceiro. |
+| subportfolio_status_updates | id | subportfolio_id → subportfolios.id | Armazena a situação periódica do subportfólio por data de referência, item, situação e ano. |
+| projects | id | subportfolio_id → subportfolios.id | Armazena os projetos do portfólio, incluindo status programa/projeto e identificador de origem. |
+| project_artifacts | id | project_id → projects.id | Representa documentos, listas, links, anexos, planilhas, prompts e normativos vindos do SharePoint ou da massa sintética. |
 | source_extracts | id | artifact_id → project_artifacts.id, project_id → projects.id | Armazena extratos consultáveis de documentos, listas e planilhas para composição de contexto no Copilot e rastreabilidade de fontes. |
 | schedule_items | id | project_id → projects.id, artifact_id → project_artifacts.id, parent_item_id → schedule_items.id | Armazena linhas estruturadas de cronograma, inclusive extraídas de Excel. |
+| project_progress_updates | id | project_id → projects.id | Armazena avanço físico e econômico previsto e realizado por data de referência. |
 | project_status_updates | id | project_id → projects.id, artifact_id → project_artifacts.id | Armazena avanço, situação e resumo de status dos projetos. |
-| risk_issue_items | id | project_id → projects.id, source_artifact_id → project_artifacts.id | Armazena riscos e problemas em uma estrutura unificada. |
-| change_records | id | project_id → projects.id, source_artifact_id → project_artifacts.id | Armazena registros de mudanças. |
+| project_deliverables_milestones | id | project_id → projects.id | Armazena entregas e marcos com descrição, datas prevista e realizada e status. |
+| project_charters | id | project_id → projects.id, subportfolio_id → subportfolios.id, artifact_id → project_artifacts.id | Armazena o Termo de Abertura do Projeto de forma estruturada. |
+| project_closure_terms | id | project_id → projects.id, artifact_id → project_artifacts.id | Armazena o Termo de Encerramento do Projeto. |
+| project_benefits | id | project_id → projects.id, charter_id → project_charters.id, source_artifact_id → project_artifacts.id | Armazena benefícios esperados ou detalhados para o projeto. |
+| risk_issue_items | id | project_id → projects.id ou subportfolio_id → subportfolios.id, source_artifact_id → project_artifacts.id | Armazena riscos e problemas em estrutura unificada por escopo. |
+| risk_issue_history | id | risk_issue_id → risk_issue_items.id | Armazena histórico de status, criticidade e comentários de riscos e problemas. |
+| change_records | id | project_id → projects.id ou subportfolio_id → subportfolios.id, source_artifact_id → project_artifacts.id | Armazena registros de mudanças de projeto ou subportfólio. |
 | users | id | - | Armazena usuários simulados ou autenticados via Entra ID em evolução futura. |
 | access_rules | id | user_id → users.id, subportfolio_id → subportfolios.id, project_id → projects.id | Armazena regras de acesso por usuário, perfil e escopo. |
 | intent_catalog | id | - | Armazena macrointenção, intenção específica, fluxo, handler e limiares do classificador. |
@@ -2611,7 +2627,16 @@ java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/modelo-logic
 As principais regras de integridade do modelo lógico são:
 
 - todo projeto deve pertencer a um subportfólio;
+- toda situação de subportfólio deve apontar para um subportfólio e uma data de referência;
+- todo avanço físico/econômico deve apontar para um projeto e uma data de referência;
+- toda entrega ou marco deve apontar para um projeto;
 - todo cronograma extraído deve apontar para um projeto e, quando houver origem documental, para um artefato de origem;
+- todo TAP estruturado deve apontar para um projeto e pode apontar para o artefato documental que originou seus campos;
+- todo termo de encerramento deve apontar para um projeto e pode apontar para o artefato documental correspondente;
+- todo benefício deve apontar para um projeto e pode apontar para o TAP ou artefato que o fundamenta;
+- todo risco/problema deve ter escopo exclusivo: projeto ou subportfólio, nunca ambos ao mesmo tempo;
+- todo registro de mudança deve ter escopo exclusivo: projeto ou subportfólio, nunca ambos ao mesmo tempo;
+- todo histórico de risco/problema deve apontar para o risco/problema original;
 - todo extrato consultável deve apontar para um artefato e pode apontar para um projeto quando o conteúdo for específico de uma iniciativa;
 - toda resposta que utilizar informação documental, lista ou planilha deve possuir ao menos uma fonte em consulted_sources;
 - toda interação deve registrar a intenção classificada ou o motivo de falha/fora de escopo;
@@ -2633,12 +2658,17 @@ A documentação técnica dos scripts de banco está em:
 
 - [`src/database/docs/README.md`](../src/database/docs/README.md)
 
-Essa documentação serve como ponto de entrada para os scripts de banco da solução. Além do script de criação, ela foi preparada para contemplar futuramente o script de inserção de dados sintéticos e o script de rollback.
+Essa documentação serve como ponto de entrada para os scripts de banco da solução. Além do script de criação, os arquivos de carga inicial sintética e rollback controlado também estão versionados em `src/database/sql`.
 
 O modelo físico adota as seguintes decisões:
 
 - uso de `UUID` como chave primária nas tabelas;
+- preservação dos identificadores textuais vindos das listas do parceiro em `partner_source_id`, sem substituir a chave técnica interna;
+- unicidade parcial de `partner_source_id` nas tabelas alimentadas por listas e anexos do parceiro, permitindo cargas idempotentes quando houver ID externo e mantendo flexibilidade para registros sem origem sincronizada;
 - uso de `JSONB` para metadados flexíveis, como atributos vindos do SharePoint, entidades extraídas pelo PLN e payloads de auditoria;
+- tabelas específicas para listas estruturadas do parceiro que possuem uso efetivo no MVP, como situação de subportfólio, avanço, entregas e marcos, TAP, termo de encerramento e benefícios;
+- uso de `scope_type` em `risk_issue_items` e `change_records` para representar registros de projeto e de subportfólio em uma estrutura única, com restrições que impedem alvo ambíguo;
+- separação do histórico de riscos/problemas em `risk_issue_history`, preservando a evolução temporal sem sobrescrever o registro principal;
 - armazenamento dos campos produzidos pelo classificador do notebook, incluindo `macro_intent`, `specific_intent`, confiança de macrointenção, confiança de intenção específica, handler, alternativas e resposta de limitação;
 - preservação de `template_id`, texto normalizado e split agrupado em `intent_test_cases`, em alinhamento com o protocolo de avaliação sem vazamento do notebook;
 - uso de `CHECK CONSTRAINTS` para domínios controlados, como status de projeto, tipo de artefato, tipo de fonte e perfil de usuário;
@@ -2654,7 +2684,7 @@ O tratamento das planilhas Excel vinculadas em listas do SharePoint também foi 
 
 Esta seção **evolui** a modelagem estática apresentada na Seção 3.1.2, e não a substitui. Aquela modelagem, produzida na Sprint 1, representa o pipeline de processamento: como uma `Solicitacao` percorre classificação, roteamento e geração de resposta. Ela permanece válida e continua sendo a referência da rastreabilidade da Seção 3.1.4.
 
-O que a Sprint 2 acrescentou foi a camada que faltava: o **domínio persistido**. A modelagem de dados das Seções 4.2 a 4.4 introduziu as entidades do portfólio, do conhecimento consultável e da auditoria, que a modelagem inicial não precisava representar porque ainda não havia banco. O diagrama abaixo une as duas camadas e explicita onde elas se tocam.
+O que a Sprint 2 acrescentou foi a camada que faltava: o **domínio persistido**. Com o inventário de listas do parceiro, essa camada foi refinada para representar também situação de subportfólio, avanço físico-econômico, entregas, marcos, termos de abertura, termos de encerramento, benefícios e histórico de riscos/problemas. O diagrama abaixo une o pipeline de processamento, o conhecimento consultável, a auditoria e o domínio persistido.
 
 ### 5.1.1 Modelo consolidado
 
@@ -2683,7 +2713,7 @@ plantuml -charset UTF-8 -tpng -o ../img docs/diagrams/classes-consolidado.puml
 | `EntidadeExtraida` | Mantida na Seção 3.1.2 | Existe no pipeline, mas não é persistida no MVP; não aparece no modelo de dados |
 | `SugestaoProativa`, `ConfiguracaoProatividade` | Mantidas na Seção 3.1.2 | Sustentam RF09 e RF10, cujo escopo está declarado na Seção 3.1.5 |
 | — | `Interacao`, `Conversa`, `Usuario`, `RegraAcesso`, `FonteConsultada`, `EventoAuditoria`, `SolicitacaoForaDeEscopo` | Novas. Vieram do modelo de dados: sem persistência, a Sprint 1 não precisava representá-las |
-| — | `Subportfolio`, `Projeto`, `ItemCronograma`, `RiscoProblema` | Novas. Domínio do portfólio, introduzido com o modelo conceitual da Seção 4.2 |
+| — | `Subportfolio`, `SituacaoSubportfolio`, `Projeto`, `AvancoProjeto`, `EntregaMarco`, `ItemCronograma`, `TermoAbertura`, `TermoEncerramento`, `Beneficio`, `RiscoProblema`, `HistoricoRiscoProblema`, `Mudanca` | Novas ou refinadas. Representam o domínio do portfólio após o alinhamento com as listas do parceiro |
 
 ### 5.1.3 Decisões refletidas no diagrama
 
@@ -2691,6 +2721,8 @@ plantuml -charset UTF-8 -tpng -o ../img docs/diagrams/classes-consolidado.puml
 - **`FonteConsultada` liga a resposta ao `TrechoRecuperado`, e não ao `Artefato`.** A rastreabilidade exigida pelo RNF03 precisa apontar o trecho utilizado, não apenas o documento de origem.
 - **`Intencao` carrega os limiares e as confianças.** Os valores de 0,550 e 0,700 definidos na Seção 8.10.3 pertencem ao catálogo, não ao código, de modo que possam ser ajustados sem nova implantação, à medida que novas execuções do benchmark recalibrem os limiares. `acimaDoLimiar()` é o que decide se um handler é acionado.
 - **`RegraAcesso` é classe, e não atributo de `Usuario`.** O mesmo usuário pode ter níveis diferentes por subportfólio ou por projeto, o que o RNF02 exige e um atributo simples não representaria.
+- **`RiscoProblema` e `Mudanca` têm escopo explícito.** Como o parceiro mantém registros em nível de projeto e de subportfólio, o modelo persistido usa `scope_type` e constraints para impedir que um mesmo registro aponte simultaneamente para os dois níveis.
+- **`TermoAbertura`, `TermoEncerramento` e `Beneficio` são entidades estruturadas.** Esses dados poderiam existir apenas como artefatos, mas possuem campos consultáveis no MVP e alimentam diretamente respostas sobre escopo, justificativa, custos, benefícios e encerramento.
 - **`ItemCronograma.somaDosPesosFecha()` está no domínio.** A validação de que os pesos fecham em 100%, prevista na Seção 2.4.3, é regra de negócio e não de interface.
 - **`SolicitacaoForaDeEscopo` é entidade própria.** Registrar o que o agente não soube responder é insumo para evoluir o catálogo, e não um estado descartável da interação.
 
@@ -2701,8 +2733,16 @@ A relação com as tabelas da Seção 4.3 não é de um para um. `Resposta`, por
 | Classe | Tabelas correspondentes |
 |---|---|
 | `Subportfolio`, `Projeto` | `subportfolios`, `projects` |
+| `SituacaoSubportfolio` | `subportfolio_status_updates` |
+| `AvancoProjeto` | `project_progress_updates` |
+| `EntregaMarco` | `project_deliverables_milestones` |
 | `Artefato`, `TrechoRecuperado` | `project_artifacts`, `source_extracts` |
-| `ItemCronograma`, `RiscoProblema` | `schedule_items`, `risk_issue_items` |
+| `ItemCronograma` | `schedule_items` |
+| `TermoAbertura` | `project_charters` |
+| `TermoEncerramento` | `project_closure_terms` |
+| `Beneficio` | `project_benefits` |
+| `RiscoProblema`, `HistoricoRiscoProblema` | `risk_issue_items`, `risk_issue_history` |
+| `Mudanca` | `change_records` |
 | `Usuario`, `RegraAcesso` | `users`, `access_rules` |
 | `Intencao` | `intent_catalog`, `prompt_templates` |
 | `Conversa`, `Interacao`, `Resposta` | `ai_conversations`, `ai_interactions` |
@@ -2710,7 +2750,7 @@ A relação com as tabelas da Seção 4.3 não é de um para um. `Resposta`, por
 | `EventoAuditoria` | `audit_events` |
 | `SolicitacaoForaDeEscopo` | `out_of_scope_requests` |
 
-As tabelas `project_status_updates`, `change_records` e `intent_test_cases` não aparecem como classes: as duas primeiras são registro histórico consultado por relatório, e a terceira pertence ao ciclo de avaliação do classificador descrito na Seção 8.10.1, não ao runtime.
+As tabelas `project_status_updates` e `intent_test_cases` não aparecem como classes próprias: a primeira é um registro narrativo de acompanhamento consultado por relatório, enquanto a segunda pertence ao ciclo de avaliação do classificador descrito na Seção 8.10.1, não ao runtime conversacional.
 
 ## 5.2 Diagrama de Componentes da UML
 
