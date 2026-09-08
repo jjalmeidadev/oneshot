@@ -4356,11 +4356,50 @@ Será executado na Sprint 4.
 
 Os testes de usabilidade têm como objetivo avaliar se o Agente de Gestão de Portfólio pode ser utilizado por pessoas externas à equipe de desenvolvimento para consultar, interpretar e validar informações de projetos por meio de uma interação conversacional. A avaliação concentra-se na experiência do usuário durante os fluxos centrais do MVP: entrada em linguagem natural, consulta de informações, análise comparativa entre projetos, tratamento de informação ausente ou fora de escopo, sugestão proativa e entrada por voz.
 
-A estratégia combina observação moderada de tarefas com aplicação do questionário SUS (*System Usability Scale*) adaptado ao contexto do projeto. A observação será registrada em uma planilha de acompanhamento criada no modelo de testes de usabilidade utilizado pelo grupo, com campos para resultado geral da tarefa, resultado por etapa e ocorrências. O SUS será aplicado por meio de formulário online ao final da sessão, usando escala Likert de 1 a 5, em que 1 significa "Discordo Completamente" e 5 significa "Concordo Completamente".
+A estratégia combina observação moderada de tarefas com aplicação do questionário SUS (*System Usability Scale*) adaptado ao contexto do projeto. A observação será registrada na planilha "Oneshot - Testes de Usabilidade - Agente de Gestão de Portifólio", criada no modelo de testes de usabilidade utilizado pelo grupo, com campos para resultado geral da tarefa, resultado por etapa e ocorrências. O SUS será aplicado por meio de formulário online ao final da sessão, usando escala Likert de 1 a 5, em que 1 significa "Discordo Completamente" e 5 significa "Concordo Completamente".
 
 ### 9.3.1 Planejamento dos testes de usabilidade
 
 O planejamento prevê a realização dos testes com pelo menos cinco usuários externos à turma. A planilha de registro foi estruturada para até seis participantes, permitindo incluir um usuário adicional caso haja disponibilidade. A seleção dos participantes deve buscar diversidade de perfil, familiaridade tecnológica e relação com gestão de projetos, para evitar que a avaliação reflita apenas a experiência de usuários com alta proximidade com o tema ou com ferramentas digitais.
+
+A planilha de execução funciona como instrumento de campo para o moderador e os observadores. A aba "Registro dos testes" organiza os cenários em blocos sequenciais, mantendo o mesmo padrão visual do modelo do grupo: título da tarefa, descrição da atividade, resultado geral, cinco etapas observáveis e campo de observações por usuário. A aba "Ocorrências" concentra problemas identificados durante as sessões, incluindo tarefa relacionada, severidade, resumo do ocorrido, potenciais melhorias e participante afetado. Dessa forma, o artefato permite registrar tanto o desempenho objetivo em cada etapa quanto evidências qualitativas de dificuldade, dúvida, hesitação, necessidade de ajuda ou quebra de confiança.
+
+As Figuras 27 a 31 apresentam os principais recortes da planilha criada para conduzir e registrar os testes. Esses prints documentam como o roteiro foi operacionalizado em tarefas observáveis, permitindo que diferentes avaliadores registrem os resultados de forma padronizada.
+
+<div align="center">
+  <img src="img/testes-usabilidade-p1e2.png" alt="Planilha de testes de usabilidade com os cenários 1 e 2" width="900">
+  <p><strong>Figura 27</strong> - Registro dos cenários 1 e 2 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+</div>
+
+A Figura 27 apresenta os dois primeiros cenários do roteiro: entrada em linguagem natural e consulta de status ou prazo. Esses cenários validam se o usuário consegue iniciar a interação com o agente sem comandos técnicos e se consegue interpretar uma resposta objetiva, incluindo a verificação da fonte indicada.
+
+<div align="center">
+  <img src="img/testes-usabilidade-p3e4.png" alt="Planilha de testes de usabilidade com os cenários 3 e 4" width="900">
+  <p><strong>Figura 28</strong> - Registro dos cenários 3 e 4 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+</div>
+
+A Figura 28 mostra os cenários voltados à consulta de riscos e à análise comparativa entre projetos. Nessa parte do teste, o observador registra se o participante consegue escolher o tema da consulta, compreender as informações retornadas, pedir detalhes quando necessário e avaliar se a comparação apresentada apoia a tomada de decisão.
+
+<div align="center">
+  <img src="img/testes-usabilidade-p5e6.png" alt="Planilha de testes de usabilidade com os cenários 5 e 6" width="900">
+  <p><strong>Figura 29</strong> - Registro dos cenários 5 e 6 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+</div>
+
+A Figura 29 registra os cenários de informação ausente ou fora de escopo e de sugestão proativa. Esses testes são importantes para avaliar confiança e controle: o agente deve declarar limites quando não houver informação suficiente e, quando sugerir um próximo passo, deve deixar claro que a ação depende da confirmação do usuário.
+
+<div align="center">
+  <img src="img/testes-usabilidade-p7.png" alt="Planilha de testes de usabilidade com o cenário 7" width="900">
+  <p><strong>Figura 30</strong> - Registro do cenário 7 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+</div>
+
+A Figura 30 apresenta o cenário de entrada por voz. O objetivo desse bloco é observar se o participante consegue acionar a entrada por áudio, formular uma pergunta curta, conferir a transcrição e obter uma resposta coerente, mantendo o mesmo fluxo previsto para solicitações textuais.
+
+<div align="center">
+  <img src="img/testes-usabilidade-ocorrencias.png" alt="Planilha de ocorrências dos testes de usabilidade" width="900">
+  <p><strong>Figura 31</strong> - Aba de ocorrências dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+</div>
+
+A Figura 31 apresenta a aba de ocorrências, usada para consolidar problemas identificados durante as sessões. O registro separado por tarefa, severidade, descrição do ocorrido, melhoria potencial e participante afetado permite priorizar correções após os testes, distinguindo falhas críticas de ajustes menores de clareza ou interface.
 
 Os perfis desejados são:
 
@@ -4386,7 +4425,7 @@ O roteiro operacional está dividido nos seguintes cenários:
 | Sugestão proativa e controle do usuário | Avaliar se a sugestão opcional é compreensível e mantém o controle com o usuário. | Realizar consulta válida; ler sugestão opcional; aceitar ou recusar sugestão; confirmar controle da ação; avaliar utilidade da sugestão. | RF07, RF09, RF10 |
 | Entrada por voz | Avaliar se a modalidade de áudio preserva a intenção do usuário quando disponível no protótipo. | Acionar entrada por voz; falar pergunta curta; conferir transcrição; enviar solicitação; avaliar resposta recebida. | RF01, RNF07, Seções 5.3.4 e 8.7 |
 
-Durante cada tarefa, o observador registrará:
+Durante cada tarefa, o observador registrará na planilha:
 
 - resultado geral da tarefa: sucesso, conseguiu com dificuldade, não conseguiu ou não testado;
 - resultado de cada etapa do fluxo;
@@ -4410,7 +4449,7 @@ Os resultados dos testes de usabilidade ainda não foram consolidados. Após a e
 - síntese dos comentários qualitativos dos participantes;
 - melhorias priorizadas para a evolução do agente.
 
-Os dados brutos serão registrados na planilha "Oneshot - Testes de Usabilidade - Agente de Gestão de Portifólio.xlsx", que organiza cada cenário em etapas observáveis e mantém uma aba específica para ocorrências. O formulário SUS será utilizado como fonte complementar para medir a percepção geral de usabilidade após a experiência prática com o agente.
+Os dados brutos serão registrados na planilha "Oneshot - Testes de Usabilidade - Agente de Gestão de Portifólio", que organiza cada cenário em etapas observáveis e mantém uma aba específica para ocorrências. O formulário SUS será utilizado como fonte complementar para medir a percepção geral de usabilidade após a experiência prática com o agente. A consolidação final deverá cruzar os registros da planilha com as respostas do SUS, permitindo identificar quais cenários tiveram maior taxa de sucesso, quais etapas concentraram dificuldades e quais problemas devem ser priorizados na evolução do agente.
 
 # 10. Procedimentos de Implantação
 
