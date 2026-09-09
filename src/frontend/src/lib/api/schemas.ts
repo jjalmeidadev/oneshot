@@ -57,6 +57,36 @@ export type ChatSource = {
   excerpt?: string;
 };
 
+export type ChatIntentAlternative = {
+  intent: string;
+  confidence: number;
+};
+
+export type ChatIntent = {
+  macro: MacroIntent | typeof UNDEFINED_MACRO | string;
+  specific: string | null;
+  confidence_macro: number;
+  confidence_specific: number;
+  flow: string;
+  handler: string;
+  alternatives: ChatIntentAlternative[];
+};
+
+export type ChatEntity = {
+  type: string;
+  value: string;
+  text: string;
+  start: number;
+  end: number;
+  types: string[];
+  ambiguous: boolean;
+};
+
+export type ChatPipelineMetrics = {
+  nlp_ms: number;
+  route_ms: number;
+};
+
 /** `GeminiChatResponse`. */
 export type ChatResponse = {
   text: string;
@@ -66,6 +96,9 @@ export type ChatResponse = {
   retrieval_ms: number;
   usage: ChatUsage;
   sources: ChatSource[];
+  intent: ChatIntent;
+  entities: ChatEntity[];
+  pipeline_metrics: ChatPipelineMetrics;
 };
 
 /* -------------------------------------------------------------------------
@@ -81,16 +114,24 @@ export type AudioTranscription = {
 
 /**
  * `AudioIntent` — saida do classificador hierarquico de intencoes.
- *
- * E o mesmo formato que `app/nlp/inference.Classificacao` produz. Enquanto
- * `pipeline_status` for `"stubbed"`, o backend preenche este bloco com
- * `FORA_DE_ESCOPO` / `pipeline_nao_implementado` e confiancas zeradas.
  */
 export type AudioIntent = {
   macro: MacroIntent | string;
   specific: string;
   confidence_macro: number;
   confidence_specific: number;
+  flow: string;
+  handler: string;
+  alternatives: ChatIntentAlternative[];
+};
+
+export type AudioEntity = ChatEntity;
+
+export type AudioPipelineMetrics = {
+  validation_ms: number;
+  stt_ms: number;
+  nlp_ms: number;
+  total_ms: number;
 };
 
 /** `AudioAnswerSource`. Formato diferente do `ChatSource` da rota de texto. */
@@ -111,9 +152,11 @@ export type AudioUploadResponse = {
   interaction_id: string;
   transcription: AudioTranscription;
   intent: AudioIntent;
+  entities: AudioEntity[];
   answer: AudioAnswer;
-  /** `"stubbed"` ate o pipeline de PLN ser ligado a rota; depois `"completed"`. */
+  /** `"completed"` quando STT e PLN concluem o fluxo de audio. */
   pipeline_status: 'stubbed' | 'completed' | string;
+  pipeline_metrics: AudioPipelineMetrics;
 };
 
 /* -------------------------------------------------------------------------

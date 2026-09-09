@@ -1,4 +1,5 @@
 from pathlib import Path
+from time import perf_counter
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
@@ -17,7 +18,18 @@ from app.gemini.client import (
     GeminiConfigurationError,
     generate_chat_response,
 )
-from app.gemini.schemas import GeminiChatRequest, GeminiChatResponse
+from app.gemini.schemas import (
+    ChatEntity,
+    ChatIntent,
+    ChatIntentAlternative,
+    ChatPipelineMetrics,
+    GeminiChatRequest,
+    GeminiChatResponse,
+    GeminiUsage,
+)
+from app.nlp.entities import Entidade
+from app.nlp.inference import Classificacao
+from app.nlp.pipeline import NlpPipelineResult, process_text_pipeline
 
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
@@ -79,12 +91,86 @@ def health() -> dict[str, str]:
 
 @app.post("/api/chat", response_model=GeminiChatResponse)
 def create_chat_response(request: GeminiChatRequest) -> GeminiChatResponse:
+    route_started_at = perf_counter()
+    pipeline = process_text_pipeline(request.message)
+    if pipeline.blocked:
+        return _controlled_chat_response(
+            text=pipeline.controlled_answer,
+            pipeline=pipeline,
+            route_started_at=route_started_at,
+        )
+
     try:
-        return generate_chat_response(request)
+        response = generate_chat_response(request)
     except GeminiConfigurationError as error:
         raise HTTPException(status_code=503, detail=str(error)) from error
     except GeminiAPIError as error:
         raise HTTPException(status_code=error.status_code, detail=str(error)) from error
+
+    response.intent = _serialize_intent(pipeline.classification)
+    response.entities = _serialize_entities(pipeline.entities)
+    response.pipeline_metrics = ChatPipelineMetrics(
+        nlp_ms=pipeline.nlp_ms,
+        route_ms=_elapsed_ms(route_started_at),
+    )
+    return response
+
+
+def _controlled_chat_response(
+    *,
+    text: str | None,
+    pipeline: NlpPipelineResult,
+    route_started_at: float,
+) -> GeminiChatResponse:
+    return GeminiChatResponse(
+        text=text or "",
+        model="pln-router",
+        interaction_id=None,
+        latency_ms=0,
+        retrieval_ms=0,
+        usage=GeminiUsage(),
+        sources=[],
+        intent=_serialize_intent(pipeline.classification),
+        entities=_serialize_entities(pipeline.entities),
+        pipeline_metrics=ChatPipelineMetrics(
+            nlp_ms=pipeline.nlp_ms,
+            route_ms=_elapsed_ms(route_started_at),
+        ),
+    )
+
+
+def _serialize_intent(classification: Classificacao) -> ChatIntent:
+    return ChatIntent(
+        macro=classification.macrointencao,
+        specific=classification.intencao,
+        confidence_macro=classification.confianca_macro,
+        confidence_specific=classification.confianca_intencao,
+        flow=classification.fluxo,
+        handler=classification.handler,
+        alternatives=[
+            ChatIntentAlternative(intent=intent, confidence=confidence)
+            for intent, confidence in classification.alternativas
+        ],
+    )
+
+
+def _serialize_entities(entities: list[Entidade]) -> list[ChatEntity]:
+    return [
+        ChatEntity(
+            type=entity.tipo,
+            value=entity.valor,
+            text=entity.texto,
+            start=entity.inicio,
+            end=entity.fim,
+            types=list(entity.tipos),
+            ambiguous=entity.ambigua,
+        )
+        for entity in entities
+    ]
+
+
+def _elapsed_ms(started_at: float) -> int:
+    return round((perf_counter() - started_at) * 1000)
 
 
 @app.post(
