@@ -92,6 +92,11 @@ def falha_do_provedor(excecao: Exception):
 
 @pytest.fixture(autouse=True)
 def reset_concurrency_control(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.gemini.schemas import GeminiChatResponse, GeminiUsage
+    monkeypatch.setattr("app.pipeline.generate_chat_response", lambda request: GeminiChatResponse(
+        text="Resposta fundamentada de teste", model="teste", interaction_id="interaction-teste",
+        latency_ms=1, usage=GeminiUsage(),
+    ))
     security._active_identities.clear()
     monkeypatch.delenv(transcription.AZURE_SPEECH_RESOURCE_ENV, raising=False)
     monkeypatch.delenv(transcription.AZURE_SPEECH_ENDPOINT_ENV, raising=False)
@@ -497,7 +502,9 @@ class TestAudioUploadEndpoint:
         assert response.status_code == 200
         body = response.json()
         assert body["conversation_id"] == "1f5c9a24-1c2e-4a8f-9a3e-2b6d8c0f1a77"
-        assert body["pipeline_status"] == "stubbed"
+        assert body["pipeline_status"] == "completed"
+        assert body["answer"]["text"] == "Resposta fundamentada de teste"
+        assert body["chat"]["interaction_id"] == "interaction-teste"
         assert body["transcription"]["text"] == "qual o prazo do projeto"
         assert body["transcription"]["confidence"] == 0.94
         assert body["transcription"]["duration_seconds"] == pytest.approx(3.0, abs=0.05)
@@ -515,7 +522,7 @@ class TestAudioUploadEndpoint:
         content = _build_ogg_opus(granule_position=32_000)
         response = post_audio(self.client, content, "p.ogg", "audio/ogg")
         assert response.status_code == 200
-        assert response.json()["pipeline_status"] == "stubbed"
+        assert response.json()["pipeline_status"] == "completed"
 
     def test_generates_conversation_id_when_absent(
         self, monkeypatch: pytest.MonkeyPatch
