@@ -4357,15 +4357,98 @@ As ferramentas escolhidas também respeitam os requisitos não funcionais já de
 
 ## 9.1 Testes Funcionais
 
-### 9.1.1 Planejamento
+O plano de testes funcionais valida o comportamento observável do MVP a partir dos critérios de aceitação da Seção 3.1. Ele cobre exclusivamente RF01 a RF08, que compõem o escopo do MVP conforme a Seção 3.1.5. Cada requisito possui ao menos um cenário positivo, que confirma o fluxo esperado, e um cenário negativo, que verifica a resposta segura e compreensível diante de entrada inválida, informação ausente ou rota não suportada.
 
-O plano de testes funcionais será desenvolvido na Sprint 3 a partir dos requisitos funcionais RF01 a RF10, contemplando cenários positivos, negativos e de limitação de escopo. A execução automatizada deverá utilizar `pytest` e `TestClient` para acionar os endpoints FastAPI, validando códigos de status, estrutura das respostas, mensagens de erro, fontes retornadas e aderência aos contratos definidos pelos modelos Pydantic.
+### 9.1.1 Estratégia e preparação
 
-Os cenários funcionais devem cobrir, no mínimo, consultas textuais ao agente, recuperação de contexto em dados sintéticos, ausência de informação suficiente, upload de áudio, transcrição em `pt-BR`, propagação de erros controlados e preservação do formato de resposta esperado pelo frontend de bancada. Quando o comportamento depender de serviços externos, o plano deve prever duplos de teste para manter a execução padrão independente de credenciais, disponibilidade de rede ou consumo de serviços pagos.
+Os testes são de sistema, orientados a cenários e executados pela interface disponível ou, quando aplicável, pela API do backend. A evidência de cada execução deve registrar o identificador do caso, data, responsável, versão testada, entrada utilizada, saída obtida, resultado (aprovado/reprovado) e captura de tela ou registro da requisição. Os dados de teste devem permanecer sintéticos ou anonimizados, em conformidade com o RNF01.
 
-Para o fluxo de áudio, a suíte automatizada deve validar o contrato local antes da chamada externa: campo `audio` obrigatório, formatos WAV/PCM e OGG/OPUS, limite de 60 segundos, teto de 2 MB, áudio sem fala, autenticação simulada, bloqueio de requisições simultâneas por usuário, resposta `200` com transcrição e envelopes de erro `400`, `401`, `413`, `422`, `429`, `502` e `503`. A fronteira com o Azure AI Speech deve ser testada com duplos de HTTP, cobrindo montagem de URL, cabeçalhos, endpoint regional, resposta detalhada, timeout, estados sem reconhecimento e códigos transitórios do provedor. Essa estratégia preserva a reprodutibilidade dos testes e evita consumo acidental da franquia do serviço durante a execução padrão.
+**Ferramentas e massa de teste:** o backend é iniciado com FastAPI/Uvicorn e seus testes de regressão são executados com `pytest`; a interface é iniciada com Vite (`npm run dev`) e verificada antes da execução com `npm run lint` e `npm run build`. Os testes funcionais usam uma massa controlada, com os projetos sintéticos `XPTO` e `ABC`, seus prazos, riscos e status, e sem os atributos de patrocinador e custo final. A massa também deve conter uma intenção com fluxo automatizado e uma intenção do escopo sem automação. Essa massa é pré-requisito do plano: os JSONs atualmente versionados no backend representam atendimento ao passageiro e não substituem os dados de portfólio exigidos por estes casos.
 
-A execução detalhada dos testes automatizados e das validações E2E controladas do backend fica registrada em `src/backend/README.md`, mantendo o `Projeto.md` como referência de escopo, contrato e estratégia de testes.
+**Pré-condições comuns:** ambiente do MVP em execução; massa de projetos acima carregada; catálogo de intenções e rotas configurado; e acesso à interface ou à documentação da API. Para casos que usam uma rota automatizada, deve haver uma intenção de teste cadastrada com essa rota. Para os demais, deve haver uma intenção do escopo sem automação, capaz de receber contexto estruturado.
+
+**Procedimento comum de execução:** (1) no backend, instalar dependências e executar `python -m pytest app/tests`; (2) iniciar backend e frontend conforme a Seção 6.2.8 e, no frontend, executar `npm run lint` e `npm run build`; (3) selecionar ou autenticar o perfil de teste, se a versão em validação o exigir; (4) enviar a entrada indicada no caso; (5) comparar a saída e os registros produzidos com o resultado esperado; e (6) salvar as evidências no repositório de testes da sprint. Uma execução é aprovada somente quando todos os resultados esperados do caso forem observados.
+
+### 9.1.2 Matriz de rastreabilidade
+
+| Requisito | Critérios de aceitação verificados | Casos de teste |
+|---|---|---|
+| RF01 | CA01.1 texto em linguagem natural; CA01.2 áudio convertido em texto; CA01.3 sem sintaxe técnica; CA01.4 encaminhamento ao PLN | CT-RF01-01, CT-RF01-02 |
+| RF02 | CA02.1 processamento semântico; CA02.2 identificação da intenção primária; CA02.3 encaminhamento para classificação | CT-RF02-01, CT-RF02-02 |
+| RF03 | CA03.1 associação ao catálogo; CA03.2 categorias consulta/transação/alerta; CA03.3 indicação de fluxo; CA03.4 tratamento fora de escopo | CT-RF03-01, CT-RF03-02 |
+| RF04 | CA04.1 consulta a dados sintéticos; CA04.2 recuperação relevante; CA04.3 uso como contexto | CT-RF04-01, CT-RF04-02 |
+| RF05 | CA05.1 resposta a consulta; CA05.2 considera projeto/contexto; CA05.3 usa informação recuperada; CA05.4 declara indisponibilidade | CT-RF05-01, CT-RF05-02 |
+| RF06 | CA06.1 identifica análise/comparação; CA06.2 compara dois ou mais projetos; CA06.3 considera critérios solicitados; CA06.4 fundamenta nos dados | CT-RF06-01, CT-RF06-02 |
+| RF07 | CA07.1 envia intenção/parâmetros ao fluxo; CA07.2 não usa LLM no fluxo; CA07.3 envia somente intenção/contexto validado ao LLM; CA07.4 demonstra ambas as rotas | CT-RF07-01, CT-RF07-02 |
+| RF08 | CA08.1 retorno do fluxo/estado; CA08.2 LLM limitado ao contexto validado; CA08.3 não inventa fatos; CA08.4 declara insuficiência; CA08.5 estrutura/referências; CA08.6 separa fatos de interpretação | CT-RF08-01, CT-RF08-02 |
+
+### 9.1.3 Casos de teste
+
+#### RF01 — Entrada de comandos em linguagem natural
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF01-01 | Positivo | Confirmar que entradas textual e em áudio, em linguagem natural e sem sintaxe técnica, entram no pipeline. | Enviar `Qual é o prazo do projeto XPTO?`; em seguida, enviar áudio com a mesma frase e verificar a transcrição antes do processamento. | Ambas as entradas são aceitas, preservam o texto (original ou transcrito) e são encaminhadas ao PLN; não é exigida sintaxe de consulta. |
+| CT-RF01-02 | Negativo | Confirmar tratamento de entrada vazia ou composta apenas por espaços. | Após o procedimento comum, enviar campo vazio ou `   `. | A solicitação não é encaminhada ao PLN; o sistema informa que é necessário fornecer uma pergunta ou comando válido. |
+
+#### RF02 — Identificação semântica da intenção
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF02-01 | Positivo | Verificar a identificação da intenção primária de uma consulta de projeto. | Enviar: `Mostre o status do projeto XPTO`. Inspecionar a resposta e o registro do pipeline. | A intenção primária de consulta de status é identificada e encaminhada para a classificação no catálogo. |
+| CT-RF02-02 | Negativo | Verificar que texto ambíguo ou sem objetivo de negócio não recebe uma intenção de domínio indevida. | Enviar: `bom dia, tudo certo?`. | O sistema não atribui uma intenção de projeto como fato; encaminha para tratamento de fora de escopo ou orienta a reformulação. |
+
+#### RF03 — Classificação e associação ao catálogo
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF03-01 | Positivo | Confirmar associação ao catálogo, suas categorias mínimas e a informação de rota. | No catálogo, verificar uma entrada de consulta, uma de transação e uma de alerta; enviar para cada uma sua frase de teste cadastrada e consultar o registro de classificação. | Cada registro contém intenção, categoria correta e indicação de existência de fluxo automatizado; o catálogo possui as três categorias. |
+| CT-RF03-02 | Negativo | Confirmar o limite explícito para intenção não suportada. | Enviar: `Reserve uma sala de reunião para amanhã`. | Não é criada associação fictícia ao catálogo; o sistema informa que a solicitação está fora do escopo ou pede reformulação. |
+
+#### RF04 — Recuperação de informações
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF04-01 | Positivo | Verificar a recuperação de conteúdo relevante da base sintética. | Enviar: `Qual é o prazo do projeto XPTO?` e consultar as fontes ou trechos associados à resposta. | O pipeline consulta a base sintética, recupera trecho relacionado ao projeto XPTO e o disponibiliza como contexto da resposta. |
+| CT-RF04-02 | Negativo | Verificar que uma chave de projeto inexistente não produz recuperação inventada. | Enviar: `Qual é o prazo do projeto INEXISTENTE-999?`. | Nenhuma informação não relacionada é apresentada como se fosse do projeto solicitado; a ausência de dados é registrada e comunicada. |
+
+#### RF05 — Consulta de informações dos projetos
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF05-01 | Positivo | Confirmar resposta a uma consulta simples usando o contexto do projeto pedido. | Enviar: `Qual é o status do projeto XPTO?`. | A resposta apresenta o status disponível para XPTO e faz referência ao contexto ou fonte recuperada. |
+| CT-RF05-02 | Negativo | Confirmar declaração explícita quando o dado solicitado não existe na base. | Enviar uma consulta válida sobre atributo não cadastrado, por exemplo `Quem é o patrocinador do projeto XPTO?`, quando esse atributo não estiver na massa. | O sistema informa a indisponibilidade da informação; não completa a resposta com suposição. |
+
+#### RF06 — Análise e comparação de projetos
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF06-01 | Positivo | Verificar comparação fundamentada de dois projetos segundo critérios pedidos. | Enviar: `Compare os prazos e riscos dos projetos XPTO e ABC`. | A resposta distingue os dois projetos, aborda prazo e risco e aponta os dados ou fontes que sustentam a comparação. |
+| CT-RF06-02 | Negativo | Verificar tratamento quando um participante da comparação não existe ou não contém o critério solicitado. | Enviar: `Compare os riscos dos projetos XPTO e INEXISTENTE-999`. | O sistema não cria comparação parcial enganosa; identifica qual dado está ausente e limita a conclusão. |
+
+#### RF07 — Roteamento híbrido das intenções
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF07-01 | Positivo | Confirmar que intenção com fluxo automatizado usa a rota direta, sem LLM. | Selecionar no catálogo a entrada automatizada da massa e enviar sua frase de teste cadastrada; inspecionar o registro de roteamento e o resultado da ação simulada. | A rota automatizada recebe a intenção e os parâmetros estruturados, devolve seu estado de conclusão e o registro não contém chamada ao LLM. |
+| CT-RF07-02 | Negativo | Confirmar que intenção válida sem automação não é enviada ao fluxo automatizado nem recebe contexto não validado. | Enviar uma consulta do escopo cadastrada sem automação, como `Qual é o prazo do projeto XPTO?`, e inspecionar o registro. | O sistema envia ao LLM somente a intenção e o contexto estruturado recuperado; não executa fluxo automatizado. |
+
+#### RF08 — Respostas estruturadas e fundamentadas
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF08-01 | Positivo | Verificar estrutura e fundamentação dos retornos do LLM e do fluxo automatizado. | Executar CT-RF06-01 e CT-RF07-01; avaliar o retorno completo, suas fontes e o estado da ação simulada. | O retorno do fluxo informa a ação e seu estado; o retorno do LLM usa somente o contexto recuperado, separa dados de interpretação e preserva as referências disponíveis. |
+| CT-RF08-02 | Negativo | Verificar que informação sem suporte não é apresentada como fato. | Enviar: `Qual será o custo final do projeto XPTO?` quando a base não possuir previsão de custo final. | A resposta informa insuficiência de dados ou impossibilidade de concluir; não cria valor, fonte ou certeza inexistentes. |
+
+### 9.1.4 Abrangência e limitações
+
+O plano cobre o fluxo funcional ponta a ponta do MVP: entrada, compreensão, classificação, recuperação, consulta ou análise, roteamento e resposta. Os cenários negativos privilegiam ausência de dados, solicitações fora de escopo e prevenção de respostas não fundamentadas, por serem riscos relevantes para um agente que apoia decisões de portfólio. A rastreabilidade é mantida pelo vínculo direto entre cada caso, o respectivo RF e os critérios de aceitação da Seção 3.1.
+
+Não fazem parte deste plano: testes de desempenho, segurança, acessibilidade, usabilidade, qualidade estatística do classificador e confiabilidade quantitativa de respostas; esses aspectos pertencem aos testes de RNFs e de usabilidade das Seções 9.2 e 9.3. Também ficam fora RF09 e RF10, pois são evolução pós-MVP. A validação de voz do RF01 depende da disponibilidade do endpoint de áudio especificado na Seção 8.7. Enquanto ele não estiver implementado, o subcenário de áudio do CT-RF01-01 fica bloqueado e deve ser registrado como tal; a aprovação integral de RF01 requer sua execução posterior, com a mesma expectativa de encaminhamento após transcrição.
+
+### 9.1.5 Resultados
+
+Os casos acima constituem o plano da Sprint 3. A execução e o registro dos resultados ocorrerão na Sprint 4. Esta subseção deve ser atualizada com a data da execução, a versão testada, o responsável, o resultado de cada caso e os links para suas evidências.
 
 ### 9.1.2 Resultados
 
