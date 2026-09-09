@@ -23,6 +23,9 @@ from app.audio.validation import (
     validate_audio_upload,
 )
 from app.main import app
+from app.nlp.entities import Entidade
+from app.nlp.inference import Classificacao
+from app.nlp.pipeline import NlpPipelineResult, OUT_OF_SCOPE_ANSWER
 
 TOKEN = "token-de-teste"
 AUTH_HEADER = {"Authorization": f"Bearer {TOKEN}"}
@@ -88,6 +91,40 @@ def falha_do_provedor(excecao: Exception):
         raise excecao
 
     return _falhar
+
+
+def classificacao(
+    *,
+    macro: str = "CONSULTA",
+    intencao: str | None = "consulta_cronograma_prazo",
+) -> Classificacao:
+    return Classificacao(
+        texto="qual o prazo da Linha 5-Lilas",
+        macrointencao=macro,
+        confianca_macro=0.91,
+        intencao=intencao,
+        confianca_intencao=0.83 if intencao else 0.0,
+        fluxo=f"fluxo generico de {macro}",
+        handler=f"handler:{intencao}" if intencao else f"fluxo generico de {macro}",
+        alternativas=[("consulta_cronograma_prazo", 0.83)],
+        resposta_sugerida=None,
+    )
+
+
+def resultado_pln_valido(text: str = "qual o prazo da Linha 5-Lilas"):
+    return NlpPipelineResult(
+        classification=classificacao(),
+        entities=[
+            Entidade(
+                tipo="projeto",
+                valor="Linha 5-Lilas",
+                texto="Linha 5-Lilas",
+                inicio=text.find("Linha 5-Lilas"),
+                fim=text.find("Linha 5-Lilas") + len("Linha 5-Lilas"),
+            )
+        ],
+        nlp_ms=7,
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -463,6 +500,8 @@ class TestAudioUploadEndpoint:
             "STT_PROVIDER_ERROR",
         )
         assert "connection reset" not in error["message"]
+        assert "app.audio" not in error["message"]
+        assert "Traceback" not in error["message"]
 
     def test_provider_unavailable_returns_503(
         self, monkeypatch: pytest.MonkeyPatch
@@ -481,12 +520,17 @@ class TestAudioUploadEndpoint:
     def test_valid_wav_upload_returns_200_with_transcription(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
+        texto = "qual o prazo da Linha 5-Lilas"
         monkeypatch.setattr(
             transcription,
             "transcribe",
             transcricao_fixa(
-                text="qual o prazo do projeto", confidence=0.94, duration_seconds=3.0
+                text=texto, confidence=0.94, duration_seconds=3.0
             ),
+        )
+        monkeypatch.setattr(
+            "app.audio.service.process_text_pipeline",
+            lambda received: resultado_pln_valido(received),
         )
         response = self.client.post(
             "/api/audio",
@@ -497,25 +541,42 @@ class TestAudioUploadEndpoint:
         assert response.status_code == 200
         body = response.json()
         assert body["conversation_id"] == "1f5c9a24-1c2e-4a8f-9a3e-2b6d8c0f1a77"
-        assert body["pipeline_status"] == "stubbed"
-        assert body["transcription"]["text"] == "qual o prazo do projeto"
+        assert body["pipeline_status"] == "completed"
+        assert body["transcription"]["text"] == texto
         assert body["transcription"]["confidence"] == 0.94
         assert body["transcription"]["duration_seconds"] == pytest.approx(3.0, abs=0.05)
+        assert body["intent"]["macro"] == "CONSULTA"
+        assert body["intent"]["specific"] == "consulta_cronograma_prazo"
+        assert body["intent"]["handler"] == "handler:consulta_cronograma_prazo"
+        assert body["entities"][0]["value"] == "Linha 5-Lilas"
+        assert body["pipeline_metrics"]["nlp_ms"] == 7
+        assert body["pipeline_metrics"]["stt_ms"] >= 0
+        assert body["pipeline_metrics"]["validation_ms"] >= 0
+        assert body["pipeline_metrics"]["total_ms"] >= body["pipeline_metrics"]["nlp_ms"]
 
     def test_valid_ogg_upload_returns_200(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
+        texto = "qual o status da Linha 5-Lilas"
         monkeypatch.setattr(
             transcription,
             "transcribe",
             transcricao_fixa(
-                text="consulta por voz", confidence=0.9, duration_seconds=0.67
+                text=texto, confidence=0.9, duration_seconds=0.67
             ),
+        )
+        monkeypatch.setattr(
+            "app.audio.service.process_text_pipeline",
+            lambda received: resultado_pln_valido(received),
         )
         content = _build_ogg_opus(granule_position=32_000)
         response = post_audio(self.client, content, "p.ogg", "audio/ogg")
         assert response.status_code == 200
-        assert response.json()["pipeline_status"] == "stubbed"
+        body = response.json()
+        assert body["pipeline_status"] == "completed"
+        assert body["transcription"]["text"] == texto
+        assert body["intent"]["macro"] == "CONSULTA"
+        assert body["entities"][0]["type"] == "projeto"
 
     def test_generates_conversation_id_when_absent(
         self, monkeypatch: pytest.MonkeyPatch
@@ -526,6 +587,10 @@ class TestAudioUploadEndpoint:
             transcricao_fixa(
                 text="consulta por voz", confidence=0.9, duration_seconds=1.0
             ),
+        )
+        monkeypatch.setattr(
+            "app.audio.service.process_text_pipeline",
+            lambda received: resultado_pln_valido(received),
         )
         response = post_audio(self.client, _build_wav(), "p.wav", "audio/wav")
         assert response.status_code == 200
@@ -541,9 +606,43 @@ class TestAudioUploadEndpoint:
                 text="qual o prazo do projeto", confidence=0.94, duration_seconds=2.0
             ),
         )
+        monkeypatch.setattr(
+            "app.audio.service.process_text_pipeline",
+            lambda received: resultado_pln_valido(received),
+        )
         response = post_audio(self.client, _build_wav(), "p.wav", "audio/wav")
         assert response.status_code == 200
         assert response.json()["transcription"]["text"] == "qual o prazo do projeto"
+
+    def test_transcribed_out_of_scope_request_returns_controlled_answer(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            transcription,
+            "transcribe",
+            transcricao_fixa(
+                text="qual a previsao do tempo", confidence=0.92, duration_seconds=1.0
+            ),
+        )
+        monkeypatch.setattr(
+            "app.audio.service.process_text_pipeline",
+            lambda _received: NlpPipelineResult(
+                classification=classificacao(macro="FORA_DE_ESCOPO", intencao=None),
+                entities=[],
+                nlp_ms=5,
+                controlled_answer=OUT_OF_SCOPE_ANSWER,
+            ),
+        )
+
+        response = post_audio(self.client, _build_wav(), "p.wav", "audio/wav")
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["pipeline_status"] == "completed"
+        assert body["intent"]["macro"] == "FORA_DE_ESCOPO"
+        assert body["intent"]["specific"] == ""
+        assert body["answer"]["text"] == OUT_OF_SCOPE_ANSWER
+        assert "pipeline_nao_" + "implementado" not in response.text
 
 
 class TestAzureSpeechTranscription:

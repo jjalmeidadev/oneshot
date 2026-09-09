@@ -16,6 +16,26 @@ class AudioIntent(BaseModel):
     specific: str
     confidence_macro: float
     confidence_specific: float
+    flow: str = ""
+    handler: str = ""
+    alternatives: list[dict[str, float | str]] = Field(default_factory=list)
+
+
+class AudioEntity(BaseModel):
+    type: str
+    value: str
+    text: str
+    start: int
+    end: int
+    types: list[str] = Field(default_factory=list)
+    ambiguous: bool = False
+
+
+class AudioPipelineMetrics(BaseModel):
+    validation_ms: int = 0
+    stt_ms: int = 0
+    nlp_ms: int = 0
+    total_ms: int = 0
 
 
 class AudioAnswerSource(BaseModel):
@@ -33,13 +53,16 @@ class AudioUploadResponse(BaseModel):
     interaction_id: str
     transcription: AudioTranscription
     intent: AudioIntent
+    entities: list[AudioEntity] = Field(default_factory=list)
     answer: AudioAnswer
     pipeline_status: str = Field(
         description=(
-            "'stubbed' enquanto o pipeline de PLN nao esta implementado; "
-            "'completed' quando a classificacao e a resposta fundamentada "
-            "forem geradas pela API."
+            "'completed' quando STT e PLN concluem o processamento da "
+            "solicitacao de audio."
         ),
+    )
+    pipeline_metrics: AudioPipelineMetrics = Field(
+        default_factory=AudioPipelineMetrics
     )
 
 

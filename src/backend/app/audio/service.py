@@ -1,14 +1,9 @@
-"""Orquestracao do upload de audio.
-
-O fluxo cobre o recebimento, a validacao local e a transcricao via
-Speech-to-Text. A classificacao de intencao e a resposta fundamentada continuam
-em task separada; por isso a resposta ainda usa ``pipeline_status`` igual a
-``"stubbed"`` depois de transcrever o audio.
-"""
+"""Orquestracao do upload de audio."""
 
 from __future__ import annotations
 
 import uuid
+from time import perf_counter
 
 from app.audio import transcription
 from app.audio.errors import (
@@ -18,16 +13,20 @@ from app.audio.errors import (
 )
 from app.audio.schemas import (
     AudioAnswer,
+    AudioEntity,
     AudioIntent,
+    AudioPipelineMetrics,
     AudioTranscription,
     AudioUploadResponse,
 )
 from app.audio.validation import AudioProbe, validate_audio_upload
+from app.nlp.entities import Entidade
+from app.nlp.inference import Classificacao
+from app.nlp.pipeline import NlpPipelineResult, process_text_pipeline
 
-STUB_ANSWER_TEXT = (
-    "Audio recebido, validado e transcrito. A classificacao de intencao e a "
-    "resposta do agente ainda nao estao disponiveis: o pipeline de PLN e "
-    "implementado em uma task separada."
+GENERIC_AUDIO_ANSWER_TEXT = (
+    "Audio transcrito e classificado. A solicitacao foi encaminhada para o "
+    "fluxo correspondente do portfolio."
 )
 
 
@@ -44,10 +43,31 @@ async def process_audio_upload(
     qualquer integracao externa, conforme a Secao 8.7.1.
     """
 
+    total_started_at = perf_counter()
+    validation_started_at = perf_counter()
     probe = validate_audio_upload(data)
-    result = await _transcribe(data, probe, language)
+    validation_ms = _elapsed_ms(validation_started_at)
 
-    return _completed_response(result, conversation_id=conversation_id)
+    stt_started_at = perf_counter()
+    result = await _transcribe(data, probe, language)
+    stt_ms = _elapsed_ms(stt_started_at)
+
+    pipeline = process_text_pipeline(result.text)
+
+    elapsed_total_ms = _elapsed_ms(total_started_at)
+    measured_total_ms = validation_ms + stt_ms + pipeline.nlp_ms
+
+    return _completed_response(
+        result,
+        pipeline=pipeline,
+        conversation_id=conversation_id,
+        metrics=AudioPipelineMetrics(
+            validation_ms=validation_ms,
+            stt_ms=stt_ms,
+            nlp_ms=pipeline.nlp_ms,
+            total_ms=max(elapsed_total_ms, measured_total_ms),
+        ),
+    )
 
 
 async def _transcribe(
@@ -66,14 +86,13 @@ async def _transcribe(
 
 
 def _completed_response(
-    result: transcription.Transcription, *, conversation_id: str | None
+    result: transcription.Transcription,
+    *,
+    pipeline: NlpPipelineResult,
+    conversation_id: str | None,
+    metrics: AudioPipelineMetrics,
 ) -> AudioUploadResponse:
-    """Resposta com transcricao real; a intencao ainda vem do pipeline stub.
-
-    A classificacao de intencao e a resposta fundamentada continuam a cargo da
-    integracao do pipeline de PLN, entao `pipeline_status` so passa a
-    "completed" quando aquela task tambem estiver concluida.
-    """
+    """Resposta com transcricao real e classificacao do pipeline de PLN."""
 
     return AudioUploadResponse(
         conversation_id=conversation_id or str(uuid.uuid4()),
@@ -83,12 +102,46 @@ def _completed_response(
             confidence=result.confidence,
             duration_seconds=result.duration_seconds,
         ),
-        intent=AudioIntent(
-            macro="FORA_DE_ESCOPO",
-            specific="pipeline_nao_implementado",
-            confidence_macro=0.0,
-            confidence_specific=0.0,
+        intent=_serialize_intent(pipeline.classification),
+        entities=_serialize_entities(pipeline.entities),
+        answer=AudioAnswer(
+            text=pipeline.controlled_answer or GENERIC_AUDIO_ANSWER_TEXT,
+            sources=[],
         ),
-        answer=AudioAnswer(text=STUB_ANSWER_TEXT, sources=[]),
-        pipeline_status="stubbed",
+        pipeline_status="completed",
+        pipeline_metrics=metrics,
     )
+
+
+def _serialize_intent(classification: Classificacao) -> AudioIntent:
+    return AudioIntent(
+        macro=classification.macrointencao,
+        specific=classification.intencao or "",
+        confidence_macro=classification.confianca_macro,
+        confidence_specific=classification.confianca_intencao,
+        flow=classification.fluxo,
+        handler=classification.handler,
+        alternatives=[
+            {"intent": intent, "confidence": confidence}
+            for intent, confidence in classification.alternativas
+        ],
+    )
+
+
+def _serialize_entities(entities: list[Entidade]) -> list[AudioEntity]:
+    return [
+        AudioEntity(
+            type=entity.tipo,
+            value=entity.valor,
+            text=entity.texto,
+            start=entity.inicio,
+            end=entity.fim,
+            types=list(entity.tipos),
+            ambiguous=entity.ambigua,
+        )
+        for entity in entities
+    ]
+
+
+def _elapsed_ms(started_at: float) -> int:
+    return round((perf_counter() - started_at) * 1000)
