@@ -206,7 +206,7 @@
     - [9.2.3 Abrangência e limitações](#923-abrangência-e-limitações)
     - [9.2.4 Resultados](#924-resultados)
   - [9.3 Testes de Usabilidade](#93-testes-de-usabilidade)
-    - [9.3.1 Planejamento](#931-planejamento)
+    - [9.3.1 Planejamento dos testes de usabilidade](#931-planejamento-dos-testes-de-usabilidade)
     - [9.3.2 Resultados](#932-resultados)
 - [10. Procedimentos de Implantação](#10-procedimentos-de-implantação)
   - [10.1 Implantação e Configuração do Banco de Dados](#101-implantação-e-configuração-do-banco-de-dados)
@@ -2531,17 +2531,19 @@ O objetivo da modelagem é representar, de forma simples e implementável, os da
 
 ## 4.1 Especificação da Base de Dados
 
-A base de dados do MVP foi desenhada para funcionar como uma camada intermediária entre o agente conversacional, o núcleo de PLN, o Copilot Studio, os fluxos do Power Automate e as fontes simuladas do SharePoint. Como o projeto utiliza dados sintéticos, a modelagem não replica dados reais do Metrô; ela replica a estrutura necessária para representar projetos, subportfólios, artefatos documentais, cronogramas, atualizações de status, riscos, mudanças, intenções e registros de auditoria.
+A base de dados do MVP foi desenhada para funcionar como uma camada intermediária entre o agente conversacional, o núcleo de PLN, o Copilot Studio, os fluxos do Power Automate e as fontes simuladas do SharePoint. Como o projeto utiliza dados sintéticos, a modelagem não replica dados reais do Metrô; ela replica a estrutura necessária para representar projetos, subportfólios, artefatos documentais, cronogramas, avanços físico-econômicos, entregas, marcos, termos de abertura, termos de encerramento, riscos, mudanças, intenções e registros de auditoria.
 
-A decisão de modelagem adotada foi reduzir a complexidade para um MVP, evitando uma tabela para cada página, lista ou biblioteca do SharePoint. Em vez disso, documentos, links, listas, prompts, normativos e planilhas são representados pela tabela `project_artifacts`. Quando o artefato for uma planilha de cronograma vinculada em uma lista do SharePoint, seus metadados ficam registrados em `project_artifacts` e suas linhas relevantes são extraídas para `schedule_items`.
+A decisão de modelagem adotada foi reduzir a complexidade para um MVP, evitando uma tabela para cada página, lista ou biblioteca do SharePoint. Em vez disso, documentos, links, anexos, prompts, normativos e planilhas são representados pela tabela `project_artifacts`. Quando uma lista do parceiro possui ciclo de vida e campos estruturados relevantes para consulta, ela é representada por uma tabela própria, como `project_progress_updates`, `project_deliverables_milestones`, `project_charters` ou `project_closure_terms`. Quando a origem é apenas documental ou um anexo de suporte, ela permanece como artefato consultável.
 
-Essa abordagem contempla o funcionamento observado no ambiente do parceiro: algumas listas do SharePoint apresentam linhas com links para arquivos Excel, especialmente cronogramas. No MVP, o link da planilha é armazenado em `project_artifacts.sharepoint_url`; a aba e o intervalo de leitura são indicados por `excel_sheet_name` e `excel_table_or_range`; e cada linha relevante do cronograma é normalizada em `schedule_items`, preservando a origem por meio de campos como `source_sheet_name`, `source_row_number` e `source_cell_range`.
+Essa abordagem contempla o funcionamento observado no ambiente do parceiro: algumas listas do SharePoint apresentam linhas com links ou anexos para arquivos Excel, especialmente cronogramas. No MVP, o link ou anexo da planilha é armazenado em `project_artifacts.sharepoint_url`, `attachment_name` e `attachment_url`; a aba e o intervalo de leitura são indicados por `excel_sheet_name` e `excel_table_or_range`; e cada linha relevante do cronograma é normalizada em `schedule_items`, preservando a origem por meio de campos como `source_sheet_name`, `source_row_number` e `source_cell_range`.
+
+Riscos/problemas e mudanças aparecem em duas granularidades no inventário do parceiro: projeto e subportfólio. Para evitar duplicação desnecessária, o modelo adota `scope_type` em `risk_issue_items` e `change_records`, com restrições que obrigam o preenchimento de exatamente um alvo: `project_id` quando o escopo é projeto, ou `subportfolio_id` quando o escopo é subportfólio. O histórico dos riscos e problemas foi separado em `risk_issue_history`, preservando a evolução de status e criticidade ao longo do tempo.
 
 O modelo também suporta a avaliação do núcleo de PLN implementado no notebook `src/notebooks/classificador_intencoes_metro.ipynb`. Esse notebook trabalha com um catálogo hierárquico de intenções em dois níveis: `macrointencao` (`CONSULTA`, `TRANSACAO`, `ALERTA` e `FORA_DE_ESCOPO`) e intenção específica, totalizando 31 classes na execução de referência. Por isso, a tabela `intent_catalog` registra tanto a macrointenção quanto a intenção específica, o fluxo associado, o handler previsto e os limiares de confiança usados para decidir entre roteamento, acionamento de handler específico ou resposta de limitação.
 
 A tabela `intent_test_cases` armazena exemplos rotulados derivados dos templates do notebook, preservando `template_id`, variação superficial, texto normalizado e split (`treino`, `validacao`, `teste`). Isso mantém a rastreabilidade do protocolo sem vazamento usado no classificador, em que a divisão é feita por template e não por frase. As interações reais ou simuladas são registradas em `ai_interactions`, incluindo macrointenção prevista, confiança da macro, intenção específica prevista, confiança da intenção, handler selecionado, alternativas top-k e eventual resposta de limitação. As fontes consultadas são rastreadas por `consulted_sources`, permitindo verificar quais documentos, extratos, planilhas ou linhas foram usados para compor o retorno ao usuário.
 
-O modelo físico inicial está implementado em [`src/database/sql/01_create_database.sql`](../src/database/sql/01_create_database.sql). A documentação operacional dos artefatos de banco, incluindo o papel futuro dos scripts de inserção e rollback, está registrada em [`src/database/docs/README.md`](../src/database/docs/README.md).
+O modelo físico inicial está implementado em [`src/database/sql/01_create_database.sql`](../src/database/sql/01_create_database.sql). A documentação operacional dos artefatos de banco, incluindo carga inicial sintética e rollback controlado, está registrada em [`src/database/docs/README.md`](../src/database/docs/README.md).
 
 ## 4.2 Modelo Conceitual de Dados
 
@@ -2552,13 +2554,20 @@ As principais entidades conceituais do MVP são:
 | Entidade | Descrição de negócio |
 |---|---|
 | Subportfólio | Categoria estratégica que agrupa projetos do portfólio, como Turnaround, Expansão da Rede Metrô e Gestão e Finanças. |
+| Situação de Subportfólio | Registro periódico da situação de um subportfólio, com data de referência, item, situação e ano. |
 | Projeto | Iniciativa acompanhada pelo PMO, associada a um subportfólio e composta por documentos, cronograma, status, riscos e mudanças. |
 | Artefato do Projeto | Fonte de informação vinculada ao projeto, podendo ser TAP, cronograma, relatório, planilha, lista SharePoint, prompt ou normativo. |
 | Extrato de Fonte | Parte extraída de um documento, lista ou planilha para consulta, referência e montagem de contexto controlado no Copilot. |
 | Item de Cronograma | Linha estruturada extraída de um cronograma, inclusive quando a origem for uma planilha Excel vinculada no SharePoint. |
+| Avanço do Projeto | Medição periódica de avanço físico e econômico previsto e realizado. |
+| Entrega ou Marco | Entrega, marco ou etapa relevante do projeto, com datas prevista e realizada e status de acompanhamento. |
 | Atualização de Status | Registro de avanço, situação, impedimentos, próximos passos e resumo executivo de um projeto. |
-| Risco ou Problema | Evento de risco ou problema materializado que afeta um projeto. |
-| Mudança | Registro de alteração de prazo, escopo, custo, prioridade ou outro aspecto relevante do projeto. |
+| Termo de Abertura | Registro estruturado do TAP, incluindo liderança, equipe, objetivo, justificativa, escopo, benefícios, premissas, restrições, custos, revisão e situação de liberação. |
+| Termo de Encerramento | Registro estruturado do encerramento do projeto, com situação, justificativa, pendências, custo realizado e data de encerramento. |
+| Benefício | Benefício esperado ou detalhado para o projeto, ligado ao TAP ou ao Mapa de Benefícios. |
+| Risco ou Problema | Evento de risco ou problema materializado que afeta um projeto ou subportfólio. |
+| Histórico de Risco ou Problema | Evolução temporal de status, criticidade e comentários de um risco ou problema. |
+| Mudança | Registro de alteração de prazo, escopo, custo, prioridade ou outro aspecto relevante de projeto ou subportfólio. |
 | Usuário | Pessoa que interage com o agente, vinculada a um perfil como Diretoria, PMO, Líder de Subportfólio ou Equipe de Projeto. |
 | Regra de Acesso | Definição conceitual de quais informações um usuário ou perfil pode consultar, alterar ou exportar. |
 | Intenção | Necessidade identificada pelo núcleo de PLN, organizada em macrointenção e intenção específica conforme o notebook do classificador. |
@@ -2586,18 +2595,25 @@ java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/modelo-conce
 
 O modelo lógico detalha o modelo conceitual em formato de tabelas, atributos principais, chaves primárias e chaves estrangeiras. Ele ainda não representa o código final do banco, mas define a estrutura lógica que deve ser implementada.
 
-Para manter o escopo adequado ao MVP, a modelagem lógica foi consolidada em 18 tabelas:
+Para manter o escopo adequado ao MVP e incorporar o inventário do parceiro, a modelagem lógica foi consolidada em 25 tabelas:
 
 | Tabela | PK | FKs principais | Finalidade |
 |---|---|---|---|
-| subportfolios | id | - | Armazena os subportfólios estratégicos. |
-| projects | id | subportfolio_id → subportfolios.id | Armazena os projetos do portfólio. |
-| project_artifacts | id | project_id → projects.id | Representa documentos, listas, links, planilhas, prompts e normativos vindos do SharePoint ou da massa sintética. |
+| subportfolios | id | - | Armazena os subportfólios estratégicos, responsáveis, aprovadores, apoio e identificador de origem do parceiro. |
+| subportfolio_status_updates | id | subportfolio_id → subportfolios.id | Armazena a situação periódica do subportfólio por data de referência, item, situação e ano. |
+| projects | id | subportfolio_id → subportfolios.id | Armazena os projetos do portfólio, incluindo status programa/projeto e identificador de origem. |
+| project_artifacts | id | project_id → projects.id | Representa documentos, listas, links, anexos, planilhas, prompts e normativos vindos do SharePoint ou da massa sintética. |
 | source_extracts | id | artifact_id → project_artifacts.id, project_id → projects.id | Armazena extratos consultáveis de documentos, listas e planilhas para composição de contexto no Copilot e rastreabilidade de fontes. |
 | schedule_items | id | project_id → projects.id, artifact_id → project_artifacts.id, parent_item_id → schedule_items.id | Armazena linhas estruturadas de cronograma, inclusive extraídas de Excel. |
+| project_progress_updates | id | project_id → projects.id | Armazena avanço físico e econômico previsto e realizado por data de referência. |
 | project_status_updates | id | project_id → projects.id, artifact_id → project_artifacts.id | Armazena avanço, situação e resumo de status dos projetos. |
-| risk_issue_items | id | project_id → projects.id, source_artifact_id → project_artifacts.id | Armazena riscos e problemas em uma estrutura unificada. |
-| change_records | id | project_id → projects.id, source_artifact_id → project_artifacts.id | Armazena registros de mudanças. |
+| project_deliverables_milestones | id | project_id → projects.id | Armazena entregas e marcos com descrição, datas prevista e realizada e status. |
+| project_charters | id | project_id → projects.id, subportfolio_id → subportfolios.id, artifact_id → project_artifacts.id | Armazena o Termo de Abertura do Projeto de forma estruturada. |
+| project_closure_terms | id | project_id → projects.id, artifact_id → project_artifacts.id | Armazena o Termo de Encerramento do Projeto. |
+| project_benefits | id | project_id → projects.id, charter_id → project_charters.id, source_artifact_id → project_artifacts.id | Armazena benefícios esperados ou detalhados para o projeto. |
+| risk_issue_items | id | project_id → projects.id ou subportfolio_id → subportfolios.id, source_artifact_id → project_artifacts.id | Armazena riscos e problemas em estrutura unificada por escopo. |
+| risk_issue_history | id | risk_issue_id → risk_issue_items.id | Armazena histórico de status, criticidade e comentários de riscos e problemas. |
+| change_records | id | project_id → projects.id ou subportfolio_id → subportfolios.id, source_artifact_id → project_artifacts.id | Armazena registros de mudanças de projeto ou subportfólio. |
 | users | id | - | Armazena usuários simulados ou autenticados via Entra ID em evolução futura. |
 | access_rules | id | user_id → users.id, subportfolio_id → subportfolios.id, project_id → projects.id | Armazena regras de acesso por usuário, perfil e escopo. |
 | intent_catalog | id | - | Armazena macrointenção, intenção específica, fluxo, handler e limiares do classificador. |
@@ -2624,7 +2640,16 @@ java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/modelo-logic
 As principais regras de integridade do modelo lógico são:
 
 - todo projeto deve pertencer a um subportfólio;
+- toda situação de subportfólio deve apontar para um subportfólio e uma data de referência;
+- todo avanço físico/econômico deve apontar para um projeto e uma data de referência;
+- toda entrega ou marco deve apontar para um projeto;
 - todo cronograma extraído deve apontar para um projeto e, quando houver origem documental, para um artefato de origem;
+- todo TAP estruturado deve apontar para um projeto e pode apontar para o artefato documental que originou seus campos;
+- todo termo de encerramento deve apontar para um projeto e pode apontar para o artefato documental correspondente;
+- todo benefício deve apontar para um projeto e pode apontar para o TAP ou artefato que o fundamenta;
+- todo risco/problema deve ter escopo exclusivo: projeto ou subportfólio, nunca ambos ao mesmo tempo;
+- todo registro de mudança deve ter escopo exclusivo: projeto ou subportfólio, nunca ambos ao mesmo tempo;
+- todo histórico de risco/problema deve apontar para o risco/problema original;
 - todo extrato consultável deve apontar para um artefato e pode apontar para um projeto quando o conteúdo for específico de uma iniciativa;
 - toda resposta que utilizar informação documental, lista ou planilha deve possuir ao menos uma fonte em consulted_sources;
 - toda interação deve registrar a intenção classificada ou o motivo de falha/fora de escopo;
@@ -2646,12 +2671,17 @@ A documentação técnica dos scripts de banco está em:
 
 - [`src/database/docs/README.md`](../src/database/docs/README.md)
 
-Essa documentação serve como ponto de entrada para os scripts de banco da solução. Além do script de criação, ela foi preparada para contemplar futuramente o script de inserção de dados sintéticos e o script de rollback.
+Essa documentação serve como ponto de entrada para os scripts de banco da solução. Além do script de criação, os arquivos de carga inicial sintética e rollback controlado também estão versionados em `src/database/sql`.
 
 O modelo físico adota as seguintes decisões:
 
 - uso de `UUID` como chave primária nas tabelas;
+- preservação dos identificadores textuais vindos das listas do parceiro em `partner_source_id`, sem substituir a chave técnica interna;
+- unicidade parcial de `partner_source_id` nas tabelas alimentadas por listas e anexos do parceiro, permitindo cargas idempotentes quando houver ID externo e mantendo flexibilidade para registros sem origem sincronizada;
 - uso de `JSONB` para metadados flexíveis, como atributos vindos do SharePoint, entidades extraídas pelo PLN e payloads de auditoria;
+- tabelas específicas para listas estruturadas do parceiro que possuem uso efetivo no MVP, como situação de subportfólio, avanço, entregas e marcos, TAP, termo de encerramento e benefícios;
+- uso de `scope_type` em `risk_issue_items` e `change_records` para representar registros de projeto e de subportfólio em uma estrutura única, com restrições que impedem alvo ambíguo;
+- separação do histórico de riscos/problemas em `risk_issue_history`, preservando a evolução temporal sem sobrescrever o registro principal;
 - armazenamento dos campos produzidos pelo classificador do notebook, incluindo `macro_intent`, `specific_intent`, confiança de macrointenção, confiança de intenção específica, handler, alternativas e resposta de limitação;
 - preservação de `template_id`, texto normalizado e split agrupado em `intent_test_cases`, em alinhamento com o protocolo de avaliação sem vazamento do notebook;
 - uso de `CHECK CONSTRAINTS` para domínios controlados, como status de projeto, tipo de artefato, tipo de fonte e perfil de usuário;
@@ -2667,7 +2697,7 @@ O tratamento das planilhas Excel vinculadas em listas do SharePoint também foi 
 
 Esta seção **evolui** a modelagem estática apresentada na Seção 3.1.2, e não a substitui. Aquela modelagem, produzida na Sprint 1, representa o pipeline de processamento: como uma `Solicitacao` percorre classificação, roteamento e geração de resposta. Ela permanece válida e continua sendo a referência da rastreabilidade da Seção 3.1.4.
 
-O que a Sprint 2 acrescentou foi a camada que faltava: o **domínio persistido**. A modelagem de dados das Seções 4.2 a 4.4 introduziu as entidades do portfólio, do conhecimento consultável e da auditoria, que a modelagem inicial não precisava representar porque ainda não havia banco. O diagrama abaixo une as duas camadas e explicita onde elas se tocam.
+O que a Sprint 2 acrescentou foi a camada que faltava: o **domínio persistido**. Com o inventário de listas do parceiro, essa camada foi refinada para representar também situação de subportfólio, avanço físico-econômico, entregas, marcos, termos de abertura, termos de encerramento, benefícios e histórico de riscos/problemas. O diagrama abaixo une o pipeline de processamento, o conhecimento consultável, a auditoria e o domínio persistido.
 
 ### 5.1.1 Modelo consolidado
 
@@ -2696,7 +2726,7 @@ plantuml -charset UTF-8 -tpng -o ../img docs/diagrams/classes-consolidado.puml
 | `EntidadeExtraida` | Mantida na Seção 3.1.2 | Existe no pipeline, mas não é persistida no MVP; não aparece no modelo de dados |
 | `SugestaoProativa`, `ConfiguracaoProatividade` | Mantidas na Seção 3.1.2 | Sustentam RF09 e RF10, cujo escopo está declarado na Seção 3.1.5 |
 | — | `Interacao`, `Conversa`, `Usuario`, `RegraAcesso`, `FonteConsultada`, `EventoAuditoria`, `SolicitacaoForaDeEscopo` | Novas. Vieram do modelo de dados: sem persistência, a Sprint 1 não precisava representá-las |
-| — | `Subportfolio`, `Projeto`, `ItemCronograma`, `RiscoProblema` | Novas. Domínio do portfólio, introduzido com o modelo conceitual da Seção 4.2 |
+| — | `Subportfolio`, `SituacaoSubportfolio`, `Projeto`, `AvancoProjeto`, `EntregaMarco`, `ItemCronograma`, `TermoAbertura`, `TermoEncerramento`, `Beneficio`, `RiscoProblema`, `HistoricoRiscoProblema`, `Mudanca` | Novas ou refinadas. Representam o domínio do portfólio após o alinhamento com as listas do parceiro |
 
 ### 5.1.3 Decisões refletidas no diagrama
 
@@ -2704,6 +2734,8 @@ plantuml -charset UTF-8 -tpng -o ../img docs/diagrams/classes-consolidado.puml
 - **`FonteConsultada` liga a resposta ao `TrechoRecuperado`, e não ao `Artefato`.** A rastreabilidade exigida pelo RNF03 precisa apontar o trecho utilizado, não apenas o documento de origem.
 - **`Intencao` carrega os limiares e as confianças.** Os valores de 0,550 e 0,700 definidos na Seção 8.10.3 pertencem ao catálogo, não ao código, de modo que possam ser ajustados sem nova implantação, à medida que novas execuções do benchmark recalibrem os limiares. `acimaDoLimiar()` é o que decide se um handler é acionado.
 - **`RegraAcesso` é classe, e não atributo de `Usuario`.** O mesmo usuário pode ter níveis diferentes por subportfólio ou por projeto, o que o RNF02 exige e um atributo simples não representaria.
+- **`RiscoProblema` e `Mudanca` têm escopo explícito.** Como o parceiro mantém registros em nível de projeto e de subportfólio, o modelo persistido usa `scope_type` e constraints para impedir que um mesmo registro aponte simultaneamente para os dois níveis.
+- **`TermoAbertura`, `TermoEncerramento` e `Beneficio` são entidades estruturadas.** Esses dados poderiam existir apenas como artefatos, mas possuem campos consultáveis no MVP e alimentam diretamente respostas sobre escopo, justificativa, custos, benefícios e encerramento.
 - **`ItemCronograma.somaDosPesosFecha()` está no domínio.** A validação de que os pesos fecham em 100%, prevista na Seção 2.4.3, é regra de negócio e não de interface.
 - **`SolicitacaoForaDeEscopo` é entidade própria.** Registrar o que o agente não soube responder é insumo para evoluir o catálogo, e não um estado descartável da interação.
 
@@ -2714,8 +2746,16 @@ A relação com as tabelas da Seção 4.3 não é de um para um. `Resposta`, por
 | Classe | Tabelas correspondentes |
 |---|---|
 | `Subportfolio`, `Projeto` | `subportfolios`, `projects` |
+| `SituacaoSubportfolio` | `subportfolio_status_updates` |
+| `AvancoProjeto` | `project_progress_updates` |
+| `EntregaMarco` | `project_deliverables_milestones` |
 | `Artefato`, `TrechoRecuperado` | `project_artifacts`, `source_extracts` |
-| `ItemCronograma`, `RiscoProblema` | `schedule_items`, `risk_issue_items` |
+| `ItemCronograma` | `schedule_items` |
+| `TermoAbertura` | `project_charters` |
+| `TermoEncerramento` | `project_closure_terms` |
+| `Beneficio` | `project_benefits` |
+| `RiscoProblema`, `HistoricoRiscoProblema` | `risk_issue_items`, `risk_issue_history` |
+| `Mudanca` | `change_records` |
 | `Usuario`, `RegraAcesso` | `users`, `access_rules` |
 | `Intencao` | `intent_catalog`, `prompt_templates` |
 | `Conversa`, `Interacao`, `Resposta` | `ai_conversations`, `ai_interactions` |
@@ -2723,7 +2763,7 @@ A relação com as tabelas da Seção 4.3 não é de um para um. `Resposta`, por
 | `EventoAuditoria` | `audit_events` |
 | `SolicitacaoForaDeEscopo` | `out_of_scope_requests` |
 
-As tabelas `project_status_updates`, `change_records` e `intent_test_cases` não aparecem como classes: as duas primeiras são registro histórico consultado por relatório, e a terceira pertence ao ciclo de avaliação do classificador descrito na Seção 8.10.1, não ao runtime.
+As tabelas `project_status_updates` e `intent_test_cases` não aparecem como classes próprias: a primeira é um registro narrativo de acompanhamento consultado por relatório, enquanto a segunda pertence ao ciclo de avaliação do classificador descrito na Seção 8.10.1, não ao runtime conversacional.
 
 ## 5.2 Diagrama de Componentes da UML
 
@@ -4330,15 +4370,98 @@ As ferramentas escolhidas também respeitam os requisitos não funcionais já de
 
 ## 9.1 Testes Funcionais
 
-### 9.1.1 Planejamento
+O plano de testes funcionais valida o comportamento observável do MVP a partir dos critérios de aceitação da Seção 3.1. Ele cobre exclusivamente RF01 a RF08, que compõem o escopo do MVP conforme a Seção 3.1.5. Cada requisito possui ao menos um cenário positivo, que confirma o fluxo esperado, e um cenário negativo, que verifica a resposta segura e compreensível diante de entrada inválida, informação ausente ou rota não suportada.
 
-O plano de testes funcionais será desenvolvido na Sprint 3 a partir dos requisitos funcionais RF01 a RF10, contemplando cenários positivos, negativos e de limitação de escopo. A execução automatizada deverá utilizar `pytest` e `TestClient` para acionar os endpoints FastAPI, validando códigos de status, estrutura das respostas, mensagens de erro, fontes retornadas e aderência aos contratos definidos pelos modelos Pydantic.
+### 9.1.1 Estratégia e preparação
 
-Os cenários funcionais devem cobrir, no mínimo, consultas textuais ao agente, recuperação de contexto em dados sintéticos, ausência de informação suficiente, upload de áudio, transcrição em `pt-BR`, propagação de erros controlados e preservação do formato de resposta esperado pelo frontend de bancada. Quando o comportamento depender de serviços externos, o plano deve prever duplos de teste para manter a execução padrão independente de credenciais, disponibilidade de rede ou consumo de serviços pagos.
+Os testes são de sistema, orientados a cenários e executados pela interface disponível ou, quando aplicável, pela API do backend. A evidência de cada execução deve registrar o identificador do caso, data, responsável, versão testada, entrada utilizada, saída obtida, resultado (aprovado/reprovado) e captura de tela ou registro da requisição. Os dados de teste devem permanecer sintéticos ou anonimizados, em conformidade com o RNF01.
 
-Para o fluxo de áudio, a suíte automatizada deve validar o contrato local antes da chamada externa: campo `audio` obrigatório, formatos WAV/PCM e OGG/OPUS, limite de 60 segundos, teto de 2 MB, áudio sem fala, autenticação simulada, bloqueio de requisições simultâneas por usuário, resposta `200` com transcrição e envelopes de erro `400`, `401`, `413`, `422`, `429`, `502` e `503`. A fronteira com o Azure AI Speech deve ser testada com duplos de HTTP, cobrindo montagem de URL, cabeçalhos, endpoint regional, resposta detalhada, timeout, estados sem reconhecimento e códigos transitórios do provedor. Essa estratégia preserva a reprodutibilidade dos testes e evita consumo acidental da franquia do serviço durante a execução padrão.
+**Ferramentas e massa de teste:** o backend é iniciado com FastAPI/Uvicorn e seus testes de regressão são executados com `pytest`; a interface é iniciada com Vite (`npm run dev`) e verificada antes da execução com `npm run lint` e `npm run build`. Os testes funcionais usam uma massa controlada, com os projetos sintéticos `XPTO` e `ABC`, seus prazos, riscos e status, e sem os atributos de patrocinador e custo final. A massa também deve conter uma intenção com fluxo automatizado e uma intenção do escopo sem automação. Essa massa é pré-requisito do plano: os JSONs atualmente versionados no backend representam atendimento ao passageiro e não substituem os dados de portfólio exigidos por estes casos.
 
-A execução detalhada dos testes automatizados e das validações E2E controladas do backend fica registrada em `src/backend/README.md`, mantendo o `Projeto.md` como referência de escopo, contrato e estratégia de testes.
+**Pré-condições comuns:** ambiente do MVP em execução; massa de projetos acima carregada; catálogo de intenções e rotas configurado; e acesso à interface ou à documentação da API. Para casos que usam uma rota automatizada, deve haver uma intenção de teste cadastrada com essa rota. Para os demais, deve haver uma intenção do escopo sem automação, capaz de receber contexto estruturado.
+
+**Procedimento comum de execução:** (1) no backend, instalar dependências e executar `python -m pytest app/tests`; (2) iniciar backend e frontend conforme a Seção 6.2.8 e, no frontend, executar `npm run lint` e `npm run build`; (3) selecionar ou autenticar o perfil de teste, se a versão em validação o exigir; (4) enviar a entrada indicada no caso; (5) comparar a saída e os registros produzidos com o resultado esperado; e (6) salvar as evidências no repositório de testes da sprint. Uma execução é aprovada somente quando todos os resultados esperados do caso forem observados.
+
+### 9.1.2 Matriz de rastreabilidade
+
+| Requisito | Critérios de aceitação verificados | Casos de teste |
+|---|---|---|
+| RF01 | CA01.1 texto em linguagem natural; CA01.2 áudio convertido em texto; CA01.3 sem sintaxe técnica; CA01.4 encaminhamento ao PLN | CT-RF01-01, CT-RF01-02 |
+| RF02 | CA02.1 processamento semântico; CA02.2 identificação da intenção primária; CA02.3 encaminhamento para classificação | CT-RF02-01, CT-RF02-02 |
+| RF03 | CA03.1 associação ao catálogo; CA03.2 categorias consulta/transação/alerta; CA03.3 indicação de fluxo; CA03.4 tratamento fora de escopo | CT-RF03-01, CT-RF03-02 |
+| RF04 | CA04.1 consulta a dados sintéticos; CA04.2 recuperação relevante; CA04.3 uso como contexto | CT-RF04-01, CT-RF04-02 |
+| RF05 | CA05.1 resposta a consulta; CA05.2 considera projeto/contexto; CA05.3 usa informação recuperada; CA05.4 declara indisponibilidade | CT-RF05-01, CT-RF05-02 |
+| RF06 | CA06.1 identifica análise/comparação; CA06.2 compara dois ou mais projetos; CA06.3 considera critérios solicitados; CA06.4 fundamenta nos dados | CT-RF06-01, CT-RF06-02 |
+| RF07 | CA07.1 envia intenção/parâmetros ao fluxo; CA07.2 não usa LLM no fluxo; CA07.3 envia somente intenção/contexto validado ao LLM; CA07.4 demonstra ambas as rotas | CT-RF07-01, CT-RF07-02 |
+| RF08 | CA08.1 retorno do fluxo/estado; CA08.2 LLM limitado ao contexto validado; CA08.3 não inventa fatos; CA08.4 declara insuficiência; CA08.5 estrutura/referências; CA08.6 separa fatos de interpretação | CT-RF08-01, CT-RF08-02 |
+
+### 9.1.3 Casos de teste
+
+#### RF01 — Entrada de comandos em linguagem natural
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF01-01 | Positivo | Confirmar que entradas textual e em áudio, em linguagem natural e sem sintaxe técnica, entram no pipeline. | Enviar `Qual é o prazo do projeto XPTO?`; em seguida, enviar áudio com a mesma frase e verificar a transcrição antes do processamento. | Ambas as entradas são aceitas, preservam o texto (original ou transcrito) e são encaminhadas ao PLN; não é exigida sintaxe de consulta. |
+| CT-RF01-02 | Negativo | Confirmar tratamento de entrada vazia ou composta apenas por espaços. | Após o procedimento comum, enviar campo vazio ou `   `. | A solicitação não é encaminhada ao PLN; o sistema informa que é necessário fornecer uma pergunta ou comando válido. |
+
+#### RF02 — Identificação semântica da intenção
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF02-01 | Positivo | Verificar a identificação da intenção primária de uma consulta de projeto. | Enviar: `Mostre o status do projeto XPTO`. Inspecionar a resposta e o registro do pipeline. | A intenção primária de consulta de status é identificada e encaminhada para a classificação no catálogo. |
+| CT-RF02-02 | Negativo | Verificar que texto ambíguo ou sem objetivo de negócio não recebe uma intenção de domínio indevida. | Enviar: `bom dia, tudo certo?`. | O sistema não atribui uma intenção de projeto como fato; encaminha para tratamento de fora de escopo ou orienta a reformulação. |
+
+#### RF03 — Classificação e associação ao catálogo
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF03-01 | Positivo | Confirmar associação ao catálogo, suas categorias mínimas e a informação de rota. | No catálogo, verificar uma entrada de consulta, uma de transação e uma de alerta; enviar para cada uma sua frase de teste cadastrada e consultar o registro de classificação. | Cada registro contém intenção, categoria correta e indicação de existência de fluxo automatizado; o catálogo possui as três categorias. |
+| CT-RF03-02 | Negativo | Confirmar o limite explícito para intenção não suportada. | Enviar: `Reserve uma sala de reunião para amanhã`. | Não é criada associação fictícia ao catálogo; o sistema informa que a solicitação está fora do escopo ou pede reformulação. |
+
+#### RF04 — Recuperação de informações
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF04-01 | Positivo | Verificar a recuperação de conteúdo relevante da base sintética. | Enviar: `Qual é o prazo do projeto XPTO?` e consultar as fontes ou trechos associados à resposta. | O pipeline consulta a base sintética, recupera trecho relacionado ao projeto XPTO e o disponibiliza como contexto da resposta. |
+| CT-RF04-02 | Negativo | Verificar que uma chave de projeto inexistente não produz recuperação inventada. | Enviar: `Qual é o prazo do projeto INEXISTENTE-999?`. | Nenhuma informação não relacionada é apresentada como se fosse do projeto solicitado; a ausência de dados é registrada e comunicada. |
+
+#### RF05 — Consulta de informações dos projetos
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF05-01 | Positivo | Confirmar resposta a uma consulta simples usando o contexto do projeto pedido. | Enviar: `Qual é o status do projeto XPTO?`. | A resposta apresenta o status disponível para XPTO e faz referência ao contexto ou fonte recuperada. |
+| CT-RF05-02 | Negativo | Confirmar declaração explícita quando o dado solicitado não existe na base. | Enviar uma consulta válida sobre atributo não cadastrado, por exemplo `Quem é o patrocinador do projeto XPTO?`, quando esse atributo não estiver na massa. | O sistema informa a indisponibilidade da informação; não completa a resposta com suposição. |
+
+#### RF06 — Análise e comparação de projetos
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF06-01 | Positivo | Verificar comparação fundamentada de dois projetos segundo critérios pedidos. | Enviar: `Compare os prazos e riscos dos projetos XPTO e ABC`. | A resposta distingue os dois projetos, aborda prazo e risco e aponta os dados ou fontes que sustentam a comparação. |
+| CT-RF06-02 | Negativo | Verificar tratamento quando um participante da comparação não existe ou não contém o critério solicitado. | Enviar: `Compare os riscos dos projetos XPTO e INEXISTENTE-999`. | O sistema não cria comparação parcial enganosa; identifica qual dado está ausente e limita a conclusão. |
+
+#### RF07 — Roteamento híbrido das intenções
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF07-01 | Positivo | Confirmar que intenção com fluxo automatizado usa a rota direta, sem LLM. | Selecionar no catálogo a entrada automatizada da massa e enviar sua frase de teste cadastrada; inspecionar o registro de roteamento e o resultado da ação simulada. | A rota automatizada recebe a intenção e os parâmetros estruturados, devolve seu estado de conclusão e o registro não contém chamada ao LLM. |
+| CT-RF07-02 | Negativo | Confirmar que intenção válida sem automação não é enviada ao fluxo automatizado nem recebe contexto não validado. | Enviar uma consulta do escopo cadastrada sem automação, como `Qual é o prazo do projeto XPTO?`, e inspecionar o registro. | O sistema envia ao LLM somente a intenção e o contexto estruturado recuperado; não executa fluxo automatizado. |
+
+#### RF08 — Respostas estruturadas e fundamentadas
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF08-01 | Positivo | Verificar estrutura e fundamentação dos retornos do LLM e do fluxo automatizado. | Executar CT-RF06-01 e CT-RF07-01; avaliar o retorno completo, suas fontes e o estado da ação simulada. | O retorno do fluxo informa a ação e seu estado; o retorno do LLM usa somente o contexto recuperado, separa dados de interpretação e preserva as referências disponíveis. |
+| CT-RF08-02 | Negativo | Verificar que informação sem suporte não é apresentada como fato. | Enviar: `Qual será o custo final do projeto XPTO?` quando a base não possuir previsão de custo final. | A resposta informa insuficiência de dados ou impossibilidade de concluir; não cria valor, fonte ou certeza inexistentes. |
+
+### 9.1.4 Abrangência e limitações
+
+O plano cobre o fluxo funcional ponta a ponta do MVP: entrada, compreensão, classificação, recuperação, consulta ou análise, roteamento e resposta. Os cenários negativos privilegiam ausência de dados, solicitações fora de escopo e prevenção de respostas não fundamentadas, por serem riscos relevantes para um agente que apoia decisões de portfólio. A rastreabilidade é mantida pelo vínculo direto entre cada caso, o respectivo RF e os critérios de aceitação da Seção 3.1.
+
+Não fazem parte deste plano: testes de desempenho, segurança, acessibilidade, usabilidade, qualidade estatística do classificador e confiabilidade quantitativa de respostas; esses aspectos pertencem aos testes de RNFs e de usabilidade das Seções 9.2 e 9.3. Também ficam fora RF09 e RF10, pois são evolução pós-MVP. A validação de voz do RF01 depende da disponibilidade do endpoint de áudio especificado na Seção 8.7. Enquanto ele não estiver implementado, o subcenário de áudio do CT-RF01-01 fica bloqueado e deve ser registrado como tal; a aprovação integral de RF01 requer sua execução posterior, com a mesma expectativa de encaminhamento após transcrição.
+
+### 9.1.5 Resultados
+
+Os casos acima constituem o plano da Sprint 3. A execução e o registro dos resultados ocorrerão na Sprint 4. Esta subseção deve ser atualizada com a data da execução, a versão testada, o responsável, o resultado de cada caso e os links para suas evidências.
 
 ### 9.1.2 Resultados
 
@@ -4391,15 +4514,102 @@ Será executado na Sprint 4.
 
 ## 9.3 Testes de Usabilidade
 
-### 9.3.1 Planejamento
+Os testes de usabilidade têm como objetivo avaliar se o Agente de Gestão de Portfólio pode ser utilizado por pessoas externas à equipe de desenvolvimento para consultar, interpretar e validar informações de projetos por meio de uma interação conversacional. A avaliação concentra-se na experiência do usuário durante os fluxos centrais do MVP: entrada em linguagem natural, consulta de informações, análise comparativa entre projetos, tratamento de informação ausente ou fora de escopo, sugestão proativa e entrada por voz.
 
-O plano de usabilidade será desenvolvido na Sprint 3 com roteiro de tarefas, perfis dos cinco participantes externos e questionário SUS. A coleta será feita por Microsoft Forms, preferencialmente distribuído por link ou Teams, para manter alinhamento com o ambiente de trabalho previsto para os usuários do Metrô.
+A estratégia combina observação moderada de tarefas com aplicação do questionário SUS (*System Usability Scale*) adaptado ao contexto do projeto. A observação será registrada na planilha "Oneshot - Testes de Usabilidade - Agente de Gestão de Portifólio", criada no modelo de testes de usabilidade utilizado pelo grupo, com campos para resultado geral da tarefa, resultado por etapa e ocorrências. O SUS será aplicado por meio de formulário online ao final da sessão, usando escala Likert de 1 a 5, em que 1 significa "Discordo Completamente" e 5 significa "Concordo Completamente".
 
-O formulário deverá registrar as respostas do SUS, comentários qualitativos, dificuldades percebidas e observações sobre clareza das respostas, confiança nas fontes apresentadas e facilidade de formular perguntas em linguagem natural. Os dados coletados devem ser consolidados de forma agregada na Sprint 4, evitando exposição de informações pessoais desnecessárias e preservando o uso de cenários sintéticos ou anonimizados durante a avaliação.
+### 9.3.1 Planejamento dos testes de usabilidade
+
+O planejamento prevê a realização dos testes com pelo menos cinco usuários externos à turma. A planilha de registro foi estruturada para até seis participantes, permitindo incluir um usuário adicional caso haja disponibilidade. A seleção dos participantes deve buscar diversidade de perfil, familiaridade tecnológica e relação com gestão de projetos, para evitar que a avaliação reflita apenas a experiência de usuários com alta proximidade com o tema ou com ferramentas digitais.
+
+A planilha de execução funciona como instrumento de campo para o moderador e os observadores. A aba "Registro dos testes" organiza os cenários em blocos sequenciais, mantendo o mesmo padrão visual do modelo do grupo: título da tarefa, descrição da atividade, resultado geral, cinco etapas observáveis e campo de observações por usuário. A aba "Ocorrências" concentra problemas identificados durante as sessões, incluindo tarefa relacionada, severidade, resumo do ocorrido, potenciais melhorias e participante afetado. Dessa forma, o artefato permite registrar tanto o desempenho objetivo em cada etapa quanto evidências qualitativas de dificuldade, dúvida, hesitação, necessidade de ajuda ou quebra de confiança.
+
+As Figuras 27 a 31 apresentam os principais recortes da planilha criada para conduzir e registrar os testes. Esses prints documentam como o roteiro foi operacionalizado em tarefas observáveis, permitindo que diferentes avaliadores registrem os resultados de forma padronizada.
+
+<div align="center">
+  <img src="img/testes-usabilidade-p1e2.png" alt="Planilha de testes de usabilidade com os cenários 1 e 2" width="900">
+  <p><strong>Figura 27</strong> - Registro dos cenários 1 e 2 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+</div>
+
+A Figura 27 apresenta os dois primeiros cenários do roteiro: entrada em linguagem natural e consulta de status ou prazo. Esses cenários validam se o usuário consegue iniciar a interação com o agente sem comandos técnicos e se consegue interpretar uma resposta objetiva, incluindo a verificação da fonte indicada.
+
+<div align="center">
+  <img src="img/testes-usabilidade-p3e4.png" alt="Planilha de testes de usabilidade com os cenários 3 e 4" width="900">
+  <p><strong>Figura 28</strong> - Registro dos cenários 3 e 4 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+</div>
+
+A Figura 28 mostra os cenários voltados à consulta de riscos e à análise comparativa entre projetos. Nessa parte do teste, o observador registra se o participante consegue escolher o tema da consulta, compreender as informações retornadas, pedir detalhes quando necessário e avaliar se a comparação apresentada apoia a tomada de decisão.
+
+<div align="center">
+  <img src="img/testes-usabilidade-p5e6.png" alt="Planilha de testes de usabilidade com os cenários 5 e 6" width="900">
+  <p><strong>Figura 29</strong> - Registro dos cenários 5 e 6 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+</div>
+
+A Figura 29 registra os cenários de informação ausente ou fora de escopo e de sugestão proativa. Esses testes são importantes para avaliar confiança e controle: o agente deve declarar limites quando não houver informação suficiente e, quando sugerir um próximo passo, deve deixar claro que a ação depende da confirmação do usuário.
+
+<div align="center">
+  <img src="img/testes-usabilidade-p7.png" alt="Planilha de testes de usabilidade com o cenário 7" width="900">
+  <p><strong>Figura 30</strong> - Registro do cenário 7 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+</div>
+
+A Figura 30 apresenta o cenário de entrada por voz. O objetivo desse bloco é observar se o participante consegue acionar a entrada por áudio, formular uma pergunta curta, conferir a transcrição e obter uma resposta coerente, mantendo o mesmo fluxo previsto para solicitações textuais.
+
+<div align="center">
+  <img src="img/testes-usabilidade-ocorrencias.png" alt="Planilha de ocorrências dos testes de usabilidade" width="900">
+  <p><strong>Figura 31</strong> - Aba de ocorrências dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+</div>
+
+A Figura 31 apresenta a aba de ocorrências, usada para consolidar problemas identificados durante as sessões. O registro separado por tarefa, severidade, descrição do ocorrido, melhoria potencial e participante afetado permite priorizar correções após os testes, distinguindo falhas críticas de ajustes menores de clareza ou interface.
+
+Os perfis desejados são:
+
+| Perfil de participante | Justificativa de inclusão |
+|---|---|
+| Usuário com experiência em gestão de projetos | Avaliar se as respostas do agente apoiam consultas reais sobre status, prazos, riscos e marcos. |
+| Usuário com experiência em análise ou acompanhamento de indicadores | Avaliar se as respostas e comparações são compreensíveis para tomada de decisão. |
+| Usuário com familiaridade com ferramentas Microsoft, como Teams ou SharePoint | Avaliar se o canal de interação está aderente ao ambiente corporativo previsto. |
+| Usuário com baixa familiaridade com agentes conversacionais | Avaliar se a linguagem natural reduz a necessidade de treinamento ou comandos técnicos. |
+| Usuário sem vínculo com a equipe desenvolvedora | Reduzir viés de confirmação e observar dúvidas espontâneas durante o uso. |
+
+Antes do início da sessão, o moderador deve apresentar brevemente o contexto do teste, reforçando que o objetivo é avaliar o sistema, não o participante. O usuário deve ser orientado a verbalizar dúvidas, expectativas e dificuldades durante a execução das tarefas. Cada sessão seguirá o mesmo roteiro, permitindo comparação entre participantes.
+
+O roteiro operacional está dividido nos seguintes cenários:
+
+| Cenário | Objetivo de usabilidade | Etapas observadas | Requisitos relacionados |
+|---|---|---|---|
+| Entrada em linguagem natural | Verificar se o participante consegue iniciar a interação sem comandos técnicos. | Abrir a interface do agente; formular pergunta sem comando técnico; enviar a pergunta; ler a resposta; dizer se a resposta atende. | RF01, RF02, RF03, RNF07 |
+| Consulta de status e prazo | Avaliar clareza e suficiência de uma resposta objetiva sobre projeto. | Identificar o projeto; perguntar status ou prazo; localizar dado principal; verificar fonte indicada; avaliar suficiência da resposta. | RF04, RF05, RF08, RNF04 |
+| Consulta de riscos e informações do projeto | Avaliar a qualidade das respostas sobre riscos, avanço, marcos ou indicadores. | Escolher tema da consulta; enviar pergunta ao agente; identificar informações retornadas; pedir detalhe se necessário; avaliar clareza da resposta. | RF04, RF05, RF08, RNF04 |
+| Análise e comparação entre projetos | Avaliar se o agente apoia comparações entre iniciativas do portfólio. | Escolher dois projetos; definir critério de comparação; enviar pedido ao agente; interpretar comparação; avaliar apoio à decisão. | RF04, RF06, RF08 |
+| Informação ausente ou fora de escopo | Verificar se o agente declara limites em vez de inventar respostas. | Formular pergunta limite; enviar ao agente; identificar mensagem de limite; entender orientação recebida; avaliar confiança na resposta. | RF03, RF08, RNF04, RNF11 |
+| Sugestão proativa e controle do usuário | Avaliar se a sugestão opcional é compreensível e mantém o controle com o usuário. | Realizar consulta válida; ler sugestão opcional; aceitar ou recusar sugestão; confirmar controle da ação; avaliar utilidade da sugestão. | RF07, RF09, RF10 |
+| Entrada por voz | Avaliar se a modalidade de áudio preserva a intenção do usuário quando disponível no protótipo. | Acionar entrada por voz; falar pergunta curta; conferir transcrição; enviar solicitação; avaliar resposta recebida. | RF01, RNF07, Seções 5.3.4 e 8.7 |
+
+Durante cada tarefa, o observador registrará na planilha:
+
+- resultado geral da tarefa: sucesso, conseguiu com dificuldade, não conseguiu ou não testado;
+- resultado de cada etapa do fluxo;
+- comentários espontâneos do participante;
+- dúvidas, hesitações, reformulações de pergunta e necessidade de ajuda;
+- ocorrências com severidade alta, média, baixa ou cosmética;
+- potenciais melhorias relacionadas à interface, clareza das respostas, precisão percebida, indicação de fonte, tratamento de limites e controle da proatividade.
+
+Após a execução das tarefas, o participante responderá ao SUS adaptado no formulário online disponível em: https://docs.google.com/forms/d/e/1FAIpQLSev4yrWdqAepCaFaPPoLvj9v6dCIkwuLT7wBWMbkcO4w5_Ehw/viewform. O questionário contém 10 perguntas alternadas entre formulações positivas e negativas, seguindo a estrutura do SUS de John Brooke (1986), adaptadas ao contexto do Agente de Gestão de Portfólio. As perguntas avaliam facilidade de uso, complexidade percebida, integração das funcionalidades, necessidade de suporte, clareza das respostas, confiança, rapidez de aprendizagem e aderência do agente às necessidades do projeto.
+
+O cálculo do SUS seguirá o método tradicional: para itens positivos, subtrai-se 1 da nota atribuída; para itens negativos, subtrai-se a nota de 5. A soma dos valores ajustados é multiplicada por 2,5, resultando em uma pontuação de 0 a 100. Além da pontuação final, os comentários qualitativos e as ocorrências observadas serão usados para priorizar melhorias no agente.
 
 ### 9.3.2 Resultados
 
-Será executado na Sprint 4.
+Os resultados dos testes de usabilidade ainda não foram consolidados. Após a execução com os participantes externos, esta seção deverá apresentar:
+
+- quantidade de participantes e descrição dos perfis avaliados;
+- taxa de sucesso, dificuldade e falha por cenário;
+- principais ocorrências observadas e sua severidade;
+- pontuação SUS individual e média geral;
+- síntese dos comentários qualitativos dos participantes;
+- melhorias priorizadas para a evolução do agente.
+
+Os dados brutos serão registrados na planilha "Oneshot - Testes de Usabilidade - Agente de Gestão de Portifólio", que organiza cada cenário em etapas observáveis e mantém uma aba específica para ocorrências. O formulário SUS será utilizado como fonte complementar para medir a percepção geral de usabilidade após a experiência prática com o agente. A consolidação final deverá cruzar os registros da planilha com as respostas do SUS, permitindo identificar quais cenários tiveram maior taxa de sucesso, quais etapas concentraram dificuldades e quais problemas devem ser priorizados na evolução do agente.
 
 # 10. Procedimentos de Implantação
 

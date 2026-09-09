@@ -97,7 +97,8 @@ O repositório do projeto segue a seguinte organização:
  ┣ 📂 src                             código-fonte e artefatos técnicos da solução
  ┃ ┣ 📂 database                      scripts de banco de dados
  ┃ ┃ ┣ 📄 01_create_database.sql      criação da estrutura inicial do banco
- ┃ ┃ ┗ 📄 02_initial_data.sql         carga inicial de dados sintéticos
+ ┃ ┃ ┣ 📄 02_initial_data.sql         carga inicial de dados sintéticos
+ ┃ ┃ ┗ 📄 03_rollback_data.sql        rollback controlado do baseline
  ┃ ┗ 📂 notebooks                     notebooks de experimentação e validação técnica
  ┃   ┗ 📄 classificador_intencoes_metro.ipynb notebook do classificador de intenções
  ┣ 📄 .gitignore                      arquivos e pastas ignorados pelo Git

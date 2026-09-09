@@ -1,6 +1,6 @@
 @startuml classes-consolidado
-' Diagrama de classes consolidado — Seção 5.1 do Projeto.md
-' Une o pipeline de processamento da Sprint 1 ao domínio persistido da Sprint 2.
+' Diagrama de classes consolidado - Secao 5.1 do Projeto.md
+' Une o pipeline de processamento ao dominio persistido alinhado ao inventario do parceiro.
 
 skinparam shadowing false
 skinparam linetype ortho
@@ -22,7 +22,7 @@ skinparam package {
 }
 left to right direction
 
-package "Pipeline de processamento — origem na Seção 3.1.2" as P1 {
+package "Pipeline de processamento" as P1 {
   class Solicitacao {
     +UUID id
     +String texto
@@ -39,8 +39,7 @@ package "Pipeline de processamento — origem na Seção 3.1.2" as P1 {
     +String intencaoEspecifica
     +Float confiancaMacro
     +Float confiancaEspecifica
-    +Boolean possuiFluxoAutomatizado
-    +acimaDoLimiar() : Boolean
+    +Boolean acimaDoLimiar()
   }
   class RoteadorIntencao {
     +rotear(Intencao) : RotaProcessamento
@@ -52,7 +51,7 @@ package "Pipeline de processamento — origem na Seção 3.1.2" as P1 {
   }
 }
 
-package "Interação e governança — novas na Sprint 2" as P2 {
+package "Interacao e governanca" as P2 {
   class Conversa {
     +UUID id
     +UUID usuarioId
@@ -84,11 +83,12 @@ package "Interação e governança — novas na Sprint 2" as P2 {
   }
 }
 
-package "Conhecimento consultável" as P3 {
+package "Conhecimento consultavel" as P3 {
   class Artefato {
     +UUID id
     +String tipo
     +String origem
+    +String anexo
   }
   class TrechoRecuperado {
     +UUID id
@@ -102,27 +102,76 @@ package "Conhecimento consultável" as P3 {
   }
 }
 
-package "Domínio do portfólio" as P4 {
+package "Dominio do portfolio" as P4 {
   class Subportfolio {
     +UUID id
-    +String nome
+    +String titulo
+    +String responsavel
+    +String membroGpm
+  }
+  class SituacaoSubportfolio {
+    +Date dataReferencia
+    +String situacao
+    +String ano
   }
   class Projeto {
     +UUID id
-    +String nome
-    +Date prazoVigente
-    +avancoAtual() : StatusProjeto
+    +String titulo
+    +String statusProgramaProjeto
+  }
+  class AvancoProjeto {
+    +Date dataReferencia
+    +Decimal previstoFisico
+    +Decimal realizadoFisico
+    +Decimal previstoEconomico
+    +Decimal realizadoEconomico
+  }
+  class EntregaMarco {
+    +String descricao
+    +Date dataPrevista
+    +Date dataRealizada
+    +String status
   }
   class ItemCronograma {
     +UUID id
-    +Float peso
-    +somaDosPesosFecha() : Boolean
+    +String status
+    +String referenciaAnexo
+  }
+  class TermoAbertura {
+    +Integer revisao
+    +String objetivo
+    +String escopo
+    +String beneficiosEsperados
+    +Decimal custo
+  }
+  class TermoEncerramento {
+    +String situacao
+    +String justificativa
+    +Decimal custoRealizado
+    +Date dataEncerramento
   }
   class RiscoProblema {
     +UUID id
-    +Integer probabilidade
-    +Integer impacto
-    +severidade() : Integer
+    +String escopo
+    +String criticidade
+    +String planoAcao
+    +Boolean escalar
+  }
+  class HistoricoRiscoProblema {
+    +Date dataReferencia
+    +String statusAnterior
+    +String novoStatus
+  }
+  class Mudanca {
+    +UUID id
+    +String escopo
+    +String motivo
+    +String impactoAprovacao
+  }
+  class Beneficio {
+    +UUID id
+    +String descricao
+    +String indicador
   }
 }
 
@@ -147,8 +196,19 @@ FonteConsultada "1" --> "1" TrechoRecuperado
 Artefato "1" o-- "0..*" TrechoRecuperado
 
 Subportfolio "1" o-- "0..*" Projeto
+Subportfolio "1" o-- "0..*" SituacaoSubportfolio
+Subportfolio "1" o-- "0..*" RiscoProblema
+Subportfolio "1" o-- "0..*" Mudanca
 Projeto "1" o-- "0..*" Artefato
+Projeto "1" o-- "0..*" AvancoProjeto
+Projeto "1" o-- "0..*" EntregaMarco
 Projeto "1" o-- "0..*" ItemCronograma
+Projeto "1" o-- "0..*" TermoAbertura
+Projeto "1" o-- "0..*" TermoEncerramento
 Projeto "1" o-- "0..*" RiscoProblema
+Projeto "1" o-- "0..*" Mudanca
+Projeto "1" o-- "0..*" Beneficio
+TermoAbertura "1" o-- "0..*" Beneficio
+RiscoProblema "1" o-- "0..*" HistoricoRiscoProblema
 
 @enduml

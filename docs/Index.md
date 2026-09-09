@@ -33,6 +33,15 @@ Este arquivo reúne os documentos que compõem a documentação do projeto e ind
 | [Projeto.md](Projeto.md) | Entendimento do negócio e especificação de requisitos: problema e SWOT, contexto da indústria, visão e objetivo do produto, personas e jornada, fluxo do negócio, brainstorming de features, canvas do MVP, matriz de risco, business drivers, requisitos funcionais e não funcionais, visão técnica da solução e visão inicial sobre tecnologias e ferramentas. |
 | [Manual-instalacao.md](Manual-instalacao.md) | Instruções de instalação e execução da solução. |
 
+### Código-fonte
+
+| Pasta | Conteúdo |
+|---|---|
+| [../src/backend/](../src/backend/) | API FastAPI da bancada de teste, com o cliente de geração de resposta e a recuperação de contexto sobre listas simuladas do SharePoint. |
+| [../src/frontend/](../src/frontend/) | Bancada de teste em React, Vite e Tailwind, usada para exercitar o caminho de consulta do RAG. Não é a interface do produto, que é o Microsoft Teams. |
+| [../src/notebooks/](../src/notebooks/) | Notebook do classificador de intenções, com o benchmark reproduzível do pipeline de PLN. |
+| [../src/database/](../src/database/) | Scripts de criação, carga inicial sintética e rollback controlado do banco de dados. |
+
 ### Recursos
 
 | Pasta | Conteúdo |
