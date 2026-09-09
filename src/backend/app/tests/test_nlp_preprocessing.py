@@ -1,6 +1,7 @@
 """Pre-processamento textual do pipeline de PLN (Secao 8.10.3 do Projeto.md)."""
 
 import pytest
+from nltk.data import find
 
 from app.nlp.preprocessing import (
     REGEX_TOKEN_PATTERN,
@@ -9,6 +10,13 @@ from app.nlp.preprocessing import (
     tokenize,
     tokenize_all,
 )
+
+
+def skip_without_nltk_resource(resource_name: str) -> None:
+    try:
+        find(resource_name)
+    except LookupError:
+        pytest.skip(f"recurso NLTK ausente: {resource_name}")
 
 
 class TestSelectedConfiguration:
@@ -76,6 +84,7 @@ class TestConfigurableGrid:
     """As demais opcoes existem para manter o benchmark reproduzivel."""
 
     def test_removes_stopwords_when_requested(self) -> None:
+        skip_without_nltk_resource("corpora/stopwords")
         tokens = preprocess_text(
             "qual é o status", tokenizer="regex", remove_stopwords=True
         )
@@ -112,14 +121,24 @@ class TestConfigurableGrid:
         ("kwargs", "message"),
         [
             pytest.param({"tokenizer": "inexistente"}, "Tokenizador", id="tokenizador"),
-            pytest.param({"morphology": "inexistente"}, "Normalizacao", id="morfologia"),
             pytest.param(
-                {"morphology": "stemming", "stemmer_type": "inexistente"},
+                {"tokenizer": "regex", "morphology": "inexistente"},
+                "Normalizacao",
+                id="morfologia",
+            ),
+            pytest.param(
+                {
+                    "tokenizer": "regex",
+                    "morphology": "stemming",
+                    "stemmer_type": "inexistente",
+                },
                 "Stemmer",
                 id="stemmer",
             ),
             pytest.param(
-                {"morphology": "lemmatization"}, "custom_lemmatizer", id="lematizacao"
+                {"tokenizer": "regex", "morphology": "lemmatization"},
+                "custom_lemmatizer",
+                id="lematizacao",
             ),
         ],
     )
@@ -130,7 +149,11 @@ class TestConfigurableGrid:
     def test_rslp_is_rejected_outside_portuguese(self) -> None:
         with pytest.raises(ValueError, match="RSLP"):
             preprocess_text(
-                "text", morphology="stemming", stemmer_type="rslp", language="english"
+                "text",
+                tokenizer="regex",
+                morphology="stemming",
+                stemmer_type="rslp",
+                language="english",
             )
 
     def test_accepts_a_custom_lemmatizer_in_portuguese(self) -> None:

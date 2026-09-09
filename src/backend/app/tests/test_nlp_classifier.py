@@ -8,6 +8,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+pytest.importorskip("sklearn", reason="instale requirements.txt com Python <=3.13")
+
 from app.nlp.classifier import (
     ARTIFACT_PATH,
     MACRO_INTENTS,
