@@ -107,9 +107,9 @@ exigencia estrita de 16 kHz da Secao 8.7.3.
 
 O Speech-to-Text usa o Azure AI Speech para audio curto, em `pt-BR`, via
 `app/audio/transcription.py`. Um audio aprovado na validacao recebe `200` com a
-transcricao retornada pelo provedor. O campo `pipeline_status` permanece
-`"stubbed"` ate a integracao do classificador de intencoes e da resposta
-fundamentada, que sao tasks separadas.
+transcricao retornada pelo provedor, a intencao classificada, as entidades
+extraidas e metricas do fluxo. Quando STT e PLN concluem, o campo
+`pipeline_status` e `"completed"`.
 
 **A chamada ao provedor e assincrona.** A rota de audio e `async def`, e um
 cliente HTTP sincrono dentro dela bloquearia o laco de eventos: enquanto o

@@ -3398,7 +3398,13 @@ app/tests/test_sharepoint_rag.py::test_builds_prompt_with_source_labels_and_disc
 
 **Verificação do frontend.** O build executa `tsc --noEmit` antes do empacotamento, o que valida a aderência ao contrato do backend, e o lint roda com `--max-warnings=0`. Ambos passam sem erro nem aviso. Testes unitários por componente e automação de testes de interface são entrega da Sprint 5, conforme a Seção 8.3.3.
 
-**Cobertura ainda não atingida.** Não há teste do endpoint HTTP de ponta a ponta, nem teste de integração com serviço externo real, nem teste do pipeline de PLN dentro do serviço. Os três dependem de itens da Sprint 3 — endpoint de áudio, credencial do Azure AI Speech e carregamento do classificador no backend — e estão registrados no backlog da Seção 6.2 do `GestaoProjeto.md`.
+**Cobertura de integração.** A API possui testes de integração com `TestClient`
+para o caminho textual (`POST /api/chat`) e para o caminho de áudio
+(`POST /api/audio`) com STT mockado. Esses testes verificam intenção,
+entidades, métricas de tempo, mensagens controladas para fora do catálogo e a
+ausência de detalhes técnicos em falhas de classificação. A integração com
+serviço externo real continua separada da suíte determinística e depende de
+ambiente autorizado.
 
 ## 8.5 Documentações automáticas
 
@@ -3542,33 +3548,53 @@ curl --request POST \
 
 ### 8.7.5 Resposta de sucesso
 
-`200 OK`. Nesta entrega, o endpoint confirma o recebimento e a validação local
-do arquivo. A integração com Speech-to-Text e com o pipeline de PLN ainda é
-uma etapa separada; por isso, a resposta traz `pipeline_status: "stubbed"`, a
-transcrição permanece vazia e os campos de intenção são valores temporários.
-O cliente deve usar esse status para não apresentar o conteúdo como uma
-transcrição real.
+`200 OK`. O endpoint confirma o recebimento e a validação local do arquivo,
+chama o Speech-to-Text e submete a transcrição ao pipeline de PLN. A resposta
+traz `pipeline_status: "completed"`, a transcrição reconhecida, a intenção
+classificada, as entidades extraídas e métricas de tempo do fluxo.
 
 ```json
 {
   "conversation_id": "1f5c9a24-1c2e-4a8f-9a3e-2b6d8c0f1a77",
   "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
   "transcription": {
-    "text": "",
-    "confidence": 0.0,
+    "text": "qual o status da Linha 5-Lilas",
+    "confidence": 0.94,
     "duration_seconds": 4.8
   },
   "intent": {
-    "macro": "FORA_DE_ESCOPO",
-    "specific": "pipeline_nao_implementado",
-    "confidence_macro": 0.0,
-    "confidence_specific": 0.0
+    "macro": "CONSULTA",
+    "specific": "consulta_status_projeto",
+    "confidence_macro": 0.93,
+    "confidence_specific": 0.88,
+    "flow": "RecuperadorInformacao -> Estruturador de Resposta",
+    "handler": "handler:consulta_status_projeto",
+    "alternatives": [
+      { "intent": "consulta_status_projeto", "confidence": 0.88 }
+    ]
   },
+  "entities": [
+    {
+      "type": "projeto",
+      "value": "Linha 5-Lilas",
+      "text": "Linha 5-Lilas",
+      "start": 17,
+      "end": 30,
+      "types": ["projeto"],
+      "ambiguous": false
+    }
+  ],
   "answer": {
-    "text": "Audio recebido e validado. A transcricao e a resposta do agente ainda nao estao disponiveis: a integracao com o Speech-to-Text (Secao 8.8) e o pipeline de PLN sao implementados em uma task separada.",
+    "text": "Audio transcrito e classificado. A solicitacao foi encaminhada para o fluxo correspondente do portfolio.",
     "sources": []
   },
-  "pipeline_status": "stubbed"
+  "pipeline_status": "completed",
+  "pipeline_metrics": {
+    "validation_ms": 1,
+    "stt_ms": 120,
+    "nlp_ms": 7,
+    "total_ms": 128
+  }
 }
 ```
 
@@ -3576,13 +3602,15 @@ transcrição real.
 |---|---|---|
 | `conversation_id` | `string` | Valor recebido no formulário ou UUID gerado pela API se o campo não foi enviado. |
 | `interaction_id` | `string` | UUID gerado para a interação. |
-| `transcription.text` | `string` | Vazio enquanto a transcrição real não estiver integrada. |
-| `transcription.confidence` | `float` | `0.0` enquanto a transcrição real não estiver integrada. |
+| `transcription.text` | `string` | Texto reconhecido pelo STT e encaminhado ao PLN. |
+| `transcription.confidence` | `float` | Confiança retornada pelo STT, quando disponível. |
 | `transcription.duration_seconds` | `float` | Duração extraída do arquivo e arredondada para duas casas decimais. |
-| `intent` | `object` | Placeholder do pipeline de PLN; `macro` é `FORA_DE_ESCOPO` e `specific` é `pipeline_nao_implementado` nesta entrega. |
-| `answer.text` | `string` | Mensagem que informa que o áudio foi validado e que STT/PLN ainda não foram integrados. |
-| `answer.sources` | `array` | Vazio nesta entrega. |
-| `pipeline_status` | `string` | `stubbed` enquanto o resultado for temporário; será `completed` após a integração completa. |
+| `intent` | `object` | Macrointenção, intenção específica quando confirmada, confianças, fluxo, handler e alternativas. |
+| `entities` | `array` | Entidades extraídas da transcrição, como projeto, indicador, critério, data e período. |
+| `answer.text` | `string` | Mensagem estruturada do fluxo ou mensagem controlada para limitação/fora do catálogo. |
+| `answer.sources` | `array` | Fontes da resposta quando houver recuperação documental nesta rota. |
+| `pipeline_status` | `string` | `completed` quando STT e PLN concluem o processamento. |
+| `pipeline_metrics` | `object` | Tempos `validation_ms`, `stt_ms`, `nlp_ms` e `total_ms`, usados como evidência do RNF05. |
 
 ### 8.7.6 Códigos de resposta e tratamento de erro
 
@@ -3628,10 +3656,9 @@ externa. Na prova de conceito, quando a variável `AUDIO_SIMULATED_IDENTITIES`
 não é configurada, qualquer token Bearer não vazio identifica o usuário de
 forma estável; quando ela é configurada, apenas os tokens mapeados são aceitos.
 
-O upload, a validação e os retornos de erro desta seção estão concluídos. A
-transcrição real, a autorização de escopo e o processamento de PLN continuam
-fora desta entrega; até essas integrações existirem, respostas aprovadas terão
-`pipeline_status` igual a `stubbed`.
+O upload, a validação, a transcrição por STT, o processamento de PLN e os
+retornos de erro desta seção estão concluídos no backend. A autorização de
+escopo e a auditoria dependem de persistência e continuam fora desta entrega.
 
 ## 8.8 Speech-to-Text
 
