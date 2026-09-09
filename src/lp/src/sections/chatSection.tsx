@@ -27,7 +27,7 @@ export default function ChatSection() {
                     message to the last — new bubbles scroll inside it instead
                     of growing the panel and shifting the layout. */}
                 <ChatMessages
-                    className="h-[420px] w-full"
+                    className="h-[min(62vh,560px)] w-full"
                     messages={INTRO_MESSAGES}
                     autoPlay={false}
                     active={active}

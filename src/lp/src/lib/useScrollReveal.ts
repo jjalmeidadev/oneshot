@@ -16,6 +16,13 @@ const SCROLL_KEYS = new Set([
 ]);
 const FORWARD_KEYS = new Set(["ArrowDown", "PageDown", "End", " "]);
 
+/**
+ * Ordem para todas as seções de conversa largarem a página. Com
+ * `detail.complete`, a conversa também é dada por encerrada — é o que a
+ * navbar dispara ao mandar o visitante para uma seção depois dos chats.
+ */
+export const RELEASE_HOLDS_EVENT = "oneshot:release-holds";
+
 /** Scroll distance (px) that brings in the next message. */
 const STEP_DISTANCE = 140;
 /** Minimum gap between two consecutive messages, per the 0.5s pacing. */
@@ -164,6 +171,24 @@ export function useScrollReveal(sectionSelector: string) {
             releaseRef.current = null;
         };
     }, [sectionSelector]);
+
+    // Navegação por link: a seção larga a página na hora, e se o destino
+    // fica depois dela a conversa é dada por concluída (o ChatMessages
+    // detecta o salto e mostra tudo de uma vez).
+    useEffect(() => {
+        const onRelease = (event: Event) => {
+            const complete = (event as CustomEvent<{ complete?: boolean }>).detail?.complete;
+            if (complete) {
+                startedRef.current = true;
+                setActive(true);
+                setStep(Number.MAX_SAFE_INTEGER);
+            }
+            releaseRef.current?.();
+        };
+
+        window.addEventListener(RELEASE_HOLDS_EVENT, onRelease);
+        return () => window.removeEventListener(RELEASE_HOLDS_EVENT, onRelease);
+    }, []);
 
     const onBusyChange = useCallback((busy: boolean) => {
         busyRef.current = busy;

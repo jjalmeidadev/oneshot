@@ -21,15 +21,36 @@ export interface LiveSession {
 }
 
 /**
- * Endereço do backend de presença (lp/src/rag/backend), a ser preenchido
- * quando ele existir. Enquanto estiver vazio, a interface roda em modo
- * simulado — o suficiente para validar layout e interação.
+ * Endereço do backend de presença (`lp/src/rag/backend`), vindo de
+ * `VITE_LIVE_BACKEND_URL` — por exemplo `http://localhost:8000` em
+ * desenvolvimento, ou `/` se o backend for servido na mesma origem.
+ *
+ * Enquanto estiver vazio, a interface roda em modo simulado — o suficiente
+ * para validar layout e interação, e o comportamento que a página tinha antes
+ * de o backend existir.
  */
-const PRESENCE_ENDPOINT = "";
-/** Intervalo do polling, quando houver endpoint. */
+const RAW_BACKEND_URL = (import.meta.env.VITE_LIVE_BACKEND_URL ?? "").trim();
+const HAS_BACKEND = RAW_BACKEND_URL !== "";
+/** Sem a barra final, para concatenar os caminhos sem duplicá-la. */
+const BACKEND_URL = RAW_BACKEND_URL.replace(/\/+$/, "");
+/** Rota de leitura da sala inteira (o mesmo corpo que o WebSocket empurra). */
+const SESSIONS_PATH = "/api/live/sessions";
+/** Canal de observação, que dispensa o polling enquanto estiver aberto. */
+const LIVE_WS_PATH = "/ws/live";
+/** Intervalo do polling — usado só enquanto o WebSocket não estiver de pé. */
 const POLL_INTERVAL = 2500;
+/** Espera antes de tentar reabrir o canal que caiu. */
+const RECONNECT_DELAY = 3000;
 /** `?ao-vivo=1` (ou `?ao-vivo=3`) liga a simulação e define quantas sessões. */
 const SIMULATION_PARAM = "ao-vivo";
+
+/** Endereço do canal, derivado do mesmo `VITE_LIVE_BACKEND_URL`. */
+function websocketUrl(): string {
+    const absolute = /^https?:/.test(BACKEND_URL)
+        ? BACKEND_URL
+        : `${window.location.origin}${BACKEND_URL}`;
+    return `${absolute.replace(/^http/, "ws")}${LIVE_WS_PATH}`;
+}
 
 const COLORS = ["#818cf8", "#34d399", "#fbbf24", "#f472b6", "#38bdf8"];
 
@@ -79,26 +100,91 @@ export function useLivePresence(): { sessions: LiveSession[] } {
         const params = new URLSearchParams(window.location.search);
         const simulationRaw = params.get(SIMULATION_PARAM);
 
-        // --- Caminho real: polling do backend de presença ---------------
-        if (PRESENCE_ENDPOINT) {
+        // --- Caminho real: WebSocket, com polling como rede de segurança -
+        //
+        // O polling sobe primeiro: ele garante conteúdo já na primeira
+        // pintura e é para onde a interface cai se o canal não abrir. Assim
+        // que o WebSocket conecta, o polling para; se o canal cair, o polling
+        // volta e uma nova tentativa de conexão é agendada.
+        if (HAS_BACKEND) {
             let cancelled = false;
+            let socket: WebSocket | null = null;
+            let pollTimer: number | null = null;
+            let reconnectTimer: number | null = null;
+
+            const apply = (incoming: LiveSession[] | undefined) => {
+                if (!cancelled) setSessions(incoming ?? []);
+            };
 
             const poll = async () => {
                 try {
-                    const response = await fetch(PRESENCE_ENDPOINT, { cache: "no-store" });
+                    const response = await fetch(`${BACKEND_URL}${SESSIONS_PATH}`, {
+                        cache: "no-store",
+                    });
                     const data = (await response.json()) as { sessions?: LiveSession[] };
-                    if (!cancelled) setSessions(data.sessions ?? []);
+                    apply(data.sessions);
                 } catch {
                     // Uma falha de rede não deve derrubar a página: mantém o
                     // último estado conhecido e tenta de novo no próximo ciclo.
                 }
             };
 
-            void poll();
-            const timer = window.setInterval(poll, POLL_INTERVAL);
+            const startPolling = () => {
+                if (cancelled || pollTimer !== null) return;
+                void poll();
+                pollTimer = window.setInterval(poll, POLL_INTERVAL);
+            };
+
+            const stopPolling = () => {
+                if (pollTimer === null) return;
+                window.clearInterval(pollTimer);
+                pollTimer = null;
+            };
+
+            const connect = () => {
+                if (cancelled) return;
+
+                try {
+                    socket = new WebSocket(websocketUrl());
+                } catch {
+                    startPolling();
+                    return;
+                }
+
+                socket.onopen = () => stopPolling();
+
+                socket.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data as string) as {
+                            sessions?: LiveSession[];
+                        };
+                        apply(data.sessions);
+                    } catch {
+                        // Mensagem malformada não é motivo para limpar a sala.
+                    }
+                };
+
+                // `onerror` é sempre seguido de `onclose`, então a reconexão
+                // fica em um lugar só.
+                socket.onclose = () => {
+                    socket = null;
+                    if (cancelled) return;
+                    startPolling();
+                    reconnectTimer = window.setTimeout(connect, RECONNECT_DELAY);
+                };
+            };
+
+            startPolling();
+            connect();
+
             return () => {
                 cancelled = true;
-                window.clearInterval(timer);
+                stopPolling();
+                if (reconnectTimer !== null) window.clearTimeout(reconnectTimer);
+                if (socket) {
+                    socket.onclose = null;
+                    socket.close();
+                }
             };
         }
 

@@ -31,16 +31,22 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
  */
 export default function FloatingChat() {
     const wrapRef = useRef<HTMLDivElement>(null);
-    // Until the window has finished growing, it neither scrolls its own
-    // conversation nor takes pointer events — every gesture over it belongs
-    // to the page, which is what drives the expansion.
-    const [expanded, setExpanded] = useState(false);
-    const expandedRef = useRef(false);
+    // A janela só recebe gestos — e só rola a própria conversa — quando isso
+    // não disputa com o scroll da página: parada no slot da seção 2 com a
+    // conversa já revelada, ou depois de terminar de crescer. Durante a
+    // expansão, todo gesto pertence à página.
+    const [interactive, setInteractive] = useState(false);
+    const interactiveRef = useRef(false);
     // Chat 2 has its own conversation — about where each answer came from —
     // and reveals it step by step while the swap section holds the page.
     const { active, step, holding, skip, onBusyChange, onComplete } = useScrollReveal(
         "[data-chat-swap-section]",
     );
+    // Espelho para o laço de quadro, que não enxerga estado do React.
+    const holdingRef = useRef(holding);
+    useEffect(() => {
+        holdingRef.current = holding;
+    }, [holding]);
 
     useEffect(() => {
         const wrap = wrapRef.current;
@@ -92,10 +98,14 @@ export default function FloatingChat() {
                 height: lerp(a.height, b.height, p),
             });
 
-            const isExpanded = p >= EXPANDED_AT;
-            if (isExpanded !== expandedRef.current) {
-                expandedRef.current = isExpanded;
-                setExpanded(isExpanded);
+            // Parada no slot da seção 2 (p ≈ 0) e sem a seção segurando a
+            // página: a conversa pode ser rolada para cima e para baixo.
+            // Em tela cheia (p ≈ 1), idem.
+            const settled = p < 0.02 && !holdingRef.current;
+            const isInteractive = p >= EXPANDED_AT || settled;
+            if (isInteractive !== interactiveRef.current) {
+                interactiveRef.current = isInteractive;
+                setInteractive(isInteractive);
             }
 
             if (setHeadingOpacity && setHeadingY) {
@@ -151,7 +161,7 @@ export default function FloatingChat() {
             data-chat-panel="to"
             className={cn(
                 "fixed top-0 left-0 z-30 opacity-0",
-                expanded ? "pointer-events-auto" : "pointer-events-none",
+                interactive ? "pointer-events-auto" : "pointer-events-none",
             )}
         >
             <ChatMessages
@@ -165,7 +175,7 @@ export default function FloatingChat() {
                 onComplete={onComplete}
                 compact
                 interactive
-                lockScroll={!expanded}
+                lockScroll={!interactive}
                 onSendMessage={handleSendMessage}
             />
         </div>

@@ -23,12 +23,12 @@ const initials = (name: string) =>
         .toUpperCase();
 
 export const TEAM: TeamMember[] = [
-    { name: "Felipe Neves", designation: "Desenvolvimento", color: "#818cf8", instagram: "#", linkedin: "#" },
-    { name: "Henrique Diniz", designation: "Desenvolvimento", color: "#a78bfa", instagram: "#", linkedin: "#" },
-    { name: "Wendel Feitosa", designation: "Desenvolvimento", color: "#38bdf8", instagram: "#", linkedin: "#" },
-    { name: "Pedro Uchoa", designation: "Desenvolvimento", color: "#34d399", instagram: "#", linkedin: "#" },
-    { name: "Leonardo Ramos", designation: "Desenvolvimento", color: "#fbbf24", instagram: "#", linkedin: "#" },
-    { name: "Jaime Almeida", designation: "Desenvolvimento", color: "#f472b6", instagram: "#", linkedin: "#" },
+    { name: "Felipe Neves", imageSrc: "/felipe.jpg", designation: "Desenvolvimento", color: "#818cf8", instagram: "#", linkedin: "#" },
+    { name: "Henrique Diniz", imageSrc: "/henrique.jpeg", designation: "Desenvolvimento", color: "#a78bfa", instagram: "#", linkedin: "#" },
+    { name: "Wendel Feitosa", imageSrc: "/wendel.jpeg", designation: "Desenvolvimento", color: "#38bdf8", instagram: "#", linkedin: "#" },
+    { name: "Pedro Uchoa", imageSrc: "/pedro.jpeg", designation: "Desenvolvimento", color: "#34d399", instagram: "#", linkedin: "#" },
+    { name: "Leonardo Ramos", imageSrc: "/leo.jpeg", designation: "Desenvolvimento", color: "#fbbf24", instagram: "#", linkedin: "#" },
+    { name: "Jaime Almeida", imageSrc: "/jaime.jpeg", designation: "Desenvolvimento", color: "#f472b6", instagram: "#", linkedin: "#" },
 ];
 
 export const teamInitials = initials;

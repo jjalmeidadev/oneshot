@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import AnimatedNavLink from "@/components/navbar/navbar";
 import { cn } from "@/lib/utils";
 import { beginProgrammaticScroll } from "@/lib/scrollHold";
+import { RELEASE_HOLDS_EVENT } from "@/lib/useScrollReveal";
 import { GLASS } from "@/lib/styles";
 
 /** `target: null` = topo da página; senão, o seletor da seção de destino. */
@@ -62,16 +63,30 @@ function NavbarSection() {
         (selector: string | null) => (event: React.MouseEvent<HTMLAnchorElement>) => {
             event.preventDefault();
             beginProgrammaticScroll(1600);
-            if (!selector) {
-                window.scrollTo({ top: 0, behavior: "smooth" });
-                return;
-            }
-            const destination = document.querySelector<HTMLElement>(selector);
-            if (!destination) return;
-            window.scrollTo({
-                top: window.scrollY + destination.getBoundingClientRect().top,
-                behavior: "smooth",
-            });
+
+            const destination = selector
+                ? document.querySelector<HTMLElement>(selector)
+                : null;
+            if (selector && !destination) return;
+            const targetY = destination
+                ? window.scrollY + destination.getBoundingClientRect().top
+                : 0;
+
+            // As seções de conversa seguram a página até a conversa terminar.
+            // Num clique de navegação isso vira uma armadilha: elas largam na
+            // hora — e, se o destino fica depois delas, a conversa é dada por
+            // concluída em vez de recomeçar mais tarde do zero.
+            const chatStart = document.querySelector<HTMLElement>("[data-chat-section]");
+            const chatY = chatStart
+                ? window.scrollY + chatStart.getBoundingClientRect().top
+                : Number.POSITIVE_INFINITY;
+            window.dispatchEvent(
+                new CustomEvent(RELEASE_HOLDS_EVENT, {
+                    detail: { complete: targetY > chatY },
+                }),
+            );
+
+            window.scrollTo({ top: targetY, behavior: "smooth" });
         },
         [],
     );

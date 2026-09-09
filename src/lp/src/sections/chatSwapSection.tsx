@@ -14,7 +14,7 @@ export default function ChatSwapSection() {
             <div
                 data-chat-slot="swap"
                 aria-hidden
-                className="h-[420px] w-full max-w-[360px] shrink-0 md:max-w-[33vw]"
+                className="h-[min(62vh,560px)] w-full max-w-[360px] shrink-0 md:max-w-[33vw]"
             />
 
             <div

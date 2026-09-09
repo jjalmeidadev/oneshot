@@ -16,9 +16,9 @@ gsap.registerPlugin(ScrollTrigger);
  * malha de fundo, o cabeçalho com a palavra espaçada, a onda que sobe no
  * hover e o anel do avatar.
  *
- * A seção entra como um painel: sobe por cima da seção de integrações, com
- * cantos arredondados e sombra na borda de cima, em vez de trocar de cor num
- * corte seco.
+ * A chegada é toda presa ao scroll: o fundo cinza vai ganhando corpo
+ * conforme a seção entra, e o conteúdo chega pela esquerda com um leve
+ * repique, um card de cada vez.
  */
 export default function TeamSection() {
     const sectionRef = useRef<HTMLElement>(null);
@@ -29,39 +29,82 @@ export default function TeamSection() {
         if (!section) return;
 
         const ctx = gsap.context(() => {
-            // O painel subindo — preso ao scroll, então acompanha o gesto.
+            // O fundo cinza aparece aos poucos, preso ao scroll: no começo
+            // ainda se vê o gradiente por baixo, e ele termina opaco junto com
+            // a entrada do conteúdo.
             gsap.fromTo(
-                section,
-                { y: 120 },
+                "[data-team-backdrop]",
+                { opacity: 0 },
                 {
-                    y: 0,
+                    opacity: 1,
                     ease: "none",
                     scrollTrigger: {
                         trigger: section,
                         start: "top bottom",
-                        end: "top 55%",
+                        end: "top 35%",
                         scrub: 0.8,
                     },
                 },
             );
 
-            // `fromTo` com `immediateRender: false`: o estado inicial só é
-            // aplicado quando o gatilho dispara. Com `from`, os cards nascem
-            // invisíveis e ficam assim para sempre se o gatilho não vier —
-            // que é exatamente o modo de falha a evitar aqui.
-            gsap.fromTo(
-                "[data-team-card]",
-                { y: 40, opacity: 0 },
-                {
-                    y: 0,
+            // Entrada em cascata pela esquerda, com repique.
+            //
+            // O scroll é o gatilho, não a agulha: o repique precisa de duração
+            // própria — com `scrub`, a curva do `back.out` seria percorrida
+            // pela roda do mouse e o salto viraria arrasto.
+            //
+            // Fora de quadro tudo volta ao estado inicial (`pause(0)`): a
+            // seção não existe antes de aparecer, e a entrada se refaz toda
+            // vez que se chega nela, descendo ou subindo.
+            const enterFromLeft = (
+                targets: string,
+                triggerSelector: string,
+                options: { distance: number; stagger: number; duration: number },
+            ) => {
+                const elements = gsap.utils.toArray<HTMLElement>(targets);
+                if (elements.length === 0) return;
+
+                gsap.set(elements, { x: -options.distance, opacity: 0, rotate: -3 });
+
+                const tween = gsap.to(elements, {
+                    x: 0,
                     opacity: 1,
-                    duration: 0.8,
-                    ease: "power3.out",
-                    stagger: 0.08,
-                    immediateRender: false,
-                    scrollTrigger: { trigger: "[data-team-grid]", start: "top 90%" },
-                },
-            );
+                    rotate: 0,
+                    duration: options.duration,
+                    ease: "back.out(1.7)",
+                    stagger: { each: options.stagger, from: "start" },
+                    paused: true,
+                });
+
+                ScrollTrigger.create({
+                    trigger: triggerSelector,
+                    start: "top bottom",
+                    end: "bottom top",
+                    onEnter: () => tween.restart(),
+                    onEnterBack: () => tween.restart(),
+                    onLeave: () => tween.pause(0),
+                    onLeaveBack: () => tween.pause(0),
+                    onRefresh: (self) => {
+                        // Recarregou com a seção já em quadro: toca sem
+                        // esperar um cruzamento que não vai acontecer.
+                        if (self.isActive && !tween.isActive() && tween.progress() === 0) {
+                            tween.restart();
+                        }
+                    },
+                });
+            };
+
+            enterFromLeft("[data-team-heading] > *", "[data-team-heading]", {
+                distance: 120,
+                stagger: 0.1,
+                duration: 1,
+            });
+
+            enterFromLeft("[data-team-card]", "[data-team-grid]", {
+                distance: 140,
+                stagger: 0.14,
+                duration: 1.1,
+            });
 
             // Inclinação seguindo o cursor: cada card responde ao ponteiro,
             // com `quickTo` para não criar um tween novo a cada movimento.
@@ -94,8 +137,16 @@ export default function TeamSection() {
         <section
             ref={sectionRef}
             id="time"
-            className="relative z-10 -mt-[10vh] w-full overflow-hidden rounded-t-[2.5rem] bg-neutral-800 py-24 shadow-[0_-30px_60px_-24px_rgba(0,0,0,0.7)] md:py-32"
+            className="relative z-10 w-full overflow-hidden py-24 md:py-32"
         >
+            {/* O cinza é uma camada própria: assim dá para trazê-lo com o
+                scroll em vez de trocar de cor de um quadro para o outro. */}
+            <div
+                data-team-backdrop
+                aria-hidden
+                className="pointer-events-none absolute inset-0 bg-neutral-800 opacity-0"
+            />
+
             {/* Malha de fundo, bem discreta */}
             <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.07]">
                 <svg className="h-full w-full" fill="none">
@@ -109,7 +160,7 @@ export default function TeamSection() {
             </div>
 
             <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 md:px-16">
-                <div className="flex flex-col gap-3">
+                <div data-team-heading className="flex flex-col gap-3">
                     <span className="text-sm font-medium uppercase tracking-[0.4em] text-indigo-300">
                         Nosso
                     </span>
