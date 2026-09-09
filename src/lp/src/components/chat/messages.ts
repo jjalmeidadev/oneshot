@@ -9,13 +9,12 @@ export const INTRO_MESSAGES: ChatMessage[] = [
         id: "intro-1",
         sender: "assistant",
         content:
-            "Olá como posso te ajudar? Sou o assistente virtual da MetroSP AI, pronto para responder suas perguntas e fornecer informações sobre nossos serviços.",
+            "Olá como posso te ajudar? Sou o OneShot, pronto para responder suas perguntas e fornecer informações sobre nossos serviços.",
     },
     { id: "intro-2", sender: "user", content: "Quero conferir o estado do portfólio." },
     { id: "intro-3", sender: "assistant", content: "Qual portfólio você gostaria de verificar?" },
     { id: "intro-4", sender: "user", content: "Portfólio XPTO." },
     { id: "intro-5", sender: "assistant", content: "Portfólio em andamento." },
-    { id: "intro-6", sender: "user", content: "Obrigado!" },
 ];
 
 /**
@@ -27,7 +26,7 @@ export const SOURCE_MESSAGES: ChatMessage[] = [
         id: "source-1",
         sender: "assistant",
         content:
-            "Tudo que eu respondo sobre o Portfólio XPTO vem dos documentos oficiais do projeto — posso mostrar de onde saiu cada informação.",
+            "Tudo que eu respondo sobre o Portfólio XPTO vem dos documentos oficiais do projeto. Posso mostrar de onde saiu cada informação.",
     },
     { id: "source-2", sender: "user", content: "De onde veio o status do cronograma?" },
     {

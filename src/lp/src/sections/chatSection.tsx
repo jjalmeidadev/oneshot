@@ -49,7 +49,7 @@ export default function ChatSection() {
                 </h2>
                 <p className="text-lg leading-relaxed text-gray-300">
                     O OneShot entende dúvidas sobre TAP, cronogramas, documentos
-                    normativos e o andamento dos projetos do portfólio do Metrô — e
+                    normativos e o andamento dos projetos do portfólio do Metrô e
                     aponta de onde cada resposta veio, sem você precisar procurar
                     entre planilhas e pastas espalhadas.
                 </p>

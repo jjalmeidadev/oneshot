@@ -168,7 +168,7 @@ export default function TeamSection() {
                         Time
                     </h2>
                     <p className="max-w-2xl text-lg leading-relaxed text-white/60">
-                        Seis pessoas construindo o OneShot — do modelo que responde à
+                        Seis pessoas construindo o OneShot - do modelo que responde à
                         interface que você acabou de percorrer.
                     </p>
                 </div>

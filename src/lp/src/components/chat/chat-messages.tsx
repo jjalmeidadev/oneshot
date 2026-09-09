@@ -425,7 +425,7 @@ export function ChatMessages({
           </div>
           <div>
             <h3 className="text-sm font-medium text-white">OneShot AI</h3>
-            <p className="text-xs text-white/40">Verifique os Portfólios</p>
+            <p className="text-xs text-white/40"></p>
           </div>
         </div>
         {showReplay && (
