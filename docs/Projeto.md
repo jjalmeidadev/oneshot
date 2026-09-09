@@ -198,13 +198,19 @@
     - [8.10.5 Limitações e próximos passos](#8105-limitações-e-próximos-passos)
 - [9. Planejamento e Execução de Testes](#9-planejamento-e-execução-de-testes)
   - [9.1 Testes Funcionais](#91-testes-funcionais)
-    - [9.1.1 Planejamento](#911-planejamento)
-    - [9.1.2 Resultados](#912-resultados)
+    - [9.1.1 Estratégia e preparação](#911-estratégia-e-preparação)
+    - [9.1.2 Matriz de rastreabilidade](#912-matriz-de-rastreabilidade)
+    - [9.1.3 Casos de teste](#913-casos-de-teste)
+    - [9.1.4 Abrangência e limitações](#914-abrangência-e-limitações)
+    - [9.1.5 Resultados](#915-resultados)
   - [9.2 Testes de RNFs](#92-testes-de-rnfs)
     - [9.2.1 Planejamento](#921-planejamento)
-    - [9.2.2 Instruções de execução e evidências](#922-instruções-de-execução-e-evidências)
-    - [9.2.3 Abrangência e limitações](#923-abrangência-e-limitações)
-    - [9.2.4 Resultados](#924-resultados)
+    - [9.2.2 Matriz de rastreabilidade e critérios](#922-matriz-de-rastreabilidade-e-critérios)
+    - [9.2.3 Casos positivos e negativos](#923-casos-positivos-e-negativos)
+    - [9.2.4 Teste obrigatório de desempenho do RNF05](#924-teste-obrigatório-de-desempenho-do-rnf05)
+    - [9.2.5 Instruções gerais de execução e evidências](#925-instruções-gerais-de-execução-e-evidências)
+    - [9.2.6 Abrangência e limitações](#926-abrangência-e-limitações)
+    - [9.2.7 Resultados](#927-resultados)
   - [9.3 Testes de Usabilidade](#93-testes-de-usabilidade)
     - [9.3.1 Planejamento dos testes de usabilidade](#931-planejamento-dos-testes-de-usabilidade)
     - [9.3.2 Resultados](#932-resultados)
@@ -4357,17 +4363,17 @@ As ferramentas escolhidas também respeitam os requisitos não funcionais já de
 
 ## 9.1 Testes Funcionais
 
-O plano de testes funcionais valida o comportamento observável do MVP a partir dos critérios de aceitação da Seção 3.1. Ele cobre exclusivamente RF01 a RF08, que compõem o escopo do MVP conforme a Seção 3.1.5. Cada requisito possui ao menos um cenário positivo, que confirma o fluxo esperado, e um cenário negativo, que verifica a resposta segura e compreensível diante de entrada inválida, informação ausente ou rota não suportada.
+O plano de testes funcionais valida o comportamento observável definido pelos critérios de aceitação da Seção 3.1. A cobertura contempla RF01 a RF10: RF01 a RF08 formam o núcleo do MVP e devem ser executados sobre a versão entregue; RF09 e RF10 representam a evolução pós-MVP, mas permanecem planejados e rastreáveis para que sua implementação futura já tenha critérios objetivos. Enquanto essa evolução não estiver disponível, seus casos devem ser registrados como **bloqueados por funcionalidade não implementada**, nunca como aprovados sem execução. Cada requisito possui ao menos um cenário positivo, que confirma o fluxo esperado, e um cenário negativo, que exercita entrada inválida, ausência de dados, estado desabilitado ou rota não suportada.
 
 ### 9.1.1 Estratégia e preparação
 
-Os testes são de sistema, orientados a cenários e executados pela interface disponível ou, quando aplicável, pela API do backend. A evidência de cada execução deve registrar o identificador do caso, data, responsável, versão testada, entrada utilizada, saída obtida, resultado (aprovado/reprovado) e captura de tela ou registro da requisição. Os dados de teste devem permanecer sintéticos ou anonimizados, em conformidade com o RNF01.
+Os testes são de sistema, orientados a cenários e executados pela interface disponível ou, quando aplicável, pela API do backend. Cada caso declara propósito, entrada e execução específica e resultado esperado; essas informações complementam o procedimento comum abaixo e devem ser seguidas na ordem apresentada. A evidência de cada execução deve registrar o identificador do caso, data, responsável, versão ou *commit* testado, ambiente, entrada utilizada, saída obtida, resultado (aprovado, reprovado ou bloqueado) e captura de tela ou registro da requisição. Os dados de teste devem permanecer sintéticos ou anonimizados, em conformidade com o RNF01.
 
 **Ferramentas e massa de teste:** o backend é iniciado com FastAPI/Uvicorn e seus testes de regressão são executados com `pytest`; a interface é iniciada com Vite (`npm run dev`) e verificada antes da execução com `npm run lint` e `npm run build`. Os testes funcionais usam uma massa controlada, com os projetos sintéticos `XPTO` e `ABC`, seus prazos, riscos e status, e sem os atributos de patrocinador e custo final. A massa também deve conter uma intenção com fluxo automatizado e uma intenção do escopo sem automação. Essa massa é pré-requisito do plano: os JSONs atualmente versionados no backend representam atendimento ao passageiro e não substituem os dados de portfólio exigidos por estes casos.
 
 **Pré-condições comuns:** ambiente do MVP em execução; massa de projetos acima carregada; catálogo de intenções e rotas configurado; e acesso à interface ou à documentação da API. Para casos que usam uma rota automatizada, deve haver uma intenção de teste cadastrada com essa rota. Para os demais, deve haver uma intenção do escopo sem automação, capaz de receber contexto estruturado.
 
-**Procedimento comum de execução:** (1) no backend, instalar dependências e executar `python -m pytest app/tests`; (2) iniciar backend e frontend conforme a Seção 6.2.8 e, no frontend, executar `npm run lint` e `npm run build`; (3) selecionar ou autenticar o perfil de teste, se a versão em validação o exigir; (4) enviar a entrada indicada no caso; (5) comparar a saída e os registros produzidos com o resultado esperado; e (6) salvar as evidências no repositório de testes da sprint. Uma execução é aprovada somente quando todos os resultados esperados do caso forem observados.
+**Procedimento comum de execução:** (1) registrar o *commit* e o ambiente sob teste; (2) em `src/backend`, instalar as dependências de `requirements.txt` e executar `python -m pytest app/tests`; (3) iniciar a API FastAPI e a interface conforme a Seção 6.2.8 e, em `src/frontend`, executar `npm run lint` e `npm run build`; (4) selecionar ou autenticar o perfil de teste, se a versão em validação o exigir; (5) restaurar a massa sintética conhecida; (6) executar exatamente a entrada e as verificações do caso; (7) comparar resposta, código HTTP e registros internos com o resultado esperado; e (8) salvar a evidência identificada pelo ID do caso. Uma execução é aprovada somente quando todos os resultados esperados forem observados; qualquer divergência reprova o caso e deve ser registrada sem alterar a expectativa retrospectivamente.
 
 ### 9.1.2 Matriz de rastreabilidade
 
@@ -4381,6 +4387,8 @@ Os testes são de sistema, orientados a cenários e executados pela interface di
 | RF06 | CA06.1 identifica análise/comparação; CA06.2 compara dois ou mais projetos; CA06.3 considera critérios solicitados; CA06.4 fundamenta nos dados | CT-RF06-01, CT-RF06-02 |
 | RF07 | CA07.1 envia intenção/parâmetros ao fluxo; CA07.2 não usa LLM no fluxo; CA07.3 envia somente intenção/contexto validado ao LLM; CA07.4 demonstra ambas as rotas | CT-RF07-01, CT-RF07-02 |
 | RF08 | CA08.1 retorno do fluxo/estado; CA08.2 LLM limitado ao contexto validado; CA08.3 não inventa fatos; CA08.4 declara insuficiência; CA08.5 estrutura/referências; CA08.6 separa fatos de interpretação | CT-RF08-01, CT-RF08-02 |
+| RF09 | CA09.1 somente intenção sem automação e proatividade ativa; CA09.2 intenção secundária compatível; CA09.3 sugestão separada e opcional; CA09.4 confirmação antes da execução; CA09.5 recusa preserva resposta; CA09.6 ausência de sugestão compatível | CT-RF09-01, CT-RF09-02 |
+| RF10 | CA10.1 controle ativado/desativado; CA10.2 estado vale nas interações seguintes; CA10.3 desativado não sugere; CA10.4 intenção primária permanece funcional | CT-RF10-01, CT-RF10-02 |
 
 ### 9.1.3 Casos de teste
 
@@ -4440,64 +4448,110 @@ Os testes são de sistema, orientados a cenários e executados pela interface di
 | CT-RF08-01 | Positivo | Verificar estrutura e fundamentação dos retornos do LLM e do fluxo automatizado. | Executar CT-RF06-01 e CT-RF07-01; avaliar o retorno completo, suas fontes e o estado da ação simulada. | O retorno do fluxo informa a ação e seu estado; o retorno do LLM usa somente o contexto recuperado, separa dados de interpretação e preserva as referências disponíveis. |
 | CT-RF08-02 | Negativo | Verificar que informação sem suporte não é apresentada como fato. | Enviar: `Qual será o custo final do projeto XPTO?` quando a base não possuir previsão de custo final. | A resposta informa insuficiência de dados ou impossibilidade de concluir; não cria valor, fonte ou certeza inexistentes. |
 
+#### RF09 — Sugestão proativa de intenção secundária
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF09-01 | Positivo | Confirmar que uma consulta sem fluxo automatizado pode gerar uma sugestão opcional compatível, sem retirar do usuário o controle da execução. | Ativar a proatividade; enviar `Qual é o status do projeto XPTO?` usando uma intenção primária do catálogo sem automação e com intenção secundária compatível; registrar a resposta antes de confirmar a sugestão; então selecionar a confirmação. | A resposta principal é concluída normalmente; a sugestão aparece em bloco separado, identificada como opcional e vinculada a uma intenção cadastrada; nenhuma ação secundária ocorre antes da confirmação; depois dela, somente a intenção sugerida é encaminhada à rota prevista. |
+| CT-RF09-02 | Negativo | Verificar que o sistema não inventa nem executa sugestão quando falta condição para oferecê-la. | Com a proatividade ativa, executar duas variações: (a) usar uma intenção sem secundária compatível; (b) usar uma intenção com sugestão e selecionar a recusa. Comparar resposta e registros de roteamento. | Na variação (a), somente a resposta principal é devolvida e nenhuma sugestão fictícia é criada; na (b), a recusa encerra a sugestão sem executar a intenção secundária e sem alterar a resposta principal. |
+
+#### RF10 — Controle da proatividade
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF10-01 | Positivo | Confirmar que o controle de proatividade altera o comportamento das interações posteriores. | Abrir a configuração; registrar o estado inicial; ativar a proatividade; iniciar nova consulta elegível à sugestão do CT-RF09-01; desativar a opção e repetir a mesma consulta em uma nova interação. | O controle exibe os dois estados e persiste a escolha; com a opção ativa, a sugestão compatível é exibida; após desativá-la, a nova interação mantém a resposta primária, mas não apresenta sugestão. |
+| CT-RF10-02 | Negativo | Confirmar que desativar sugestões não desativa nem degrada o processamento principal. | Manter a proatividade desativada e executar uma consulta simples, uma comparação e uma solicitação fora do escopo. Inspecionar intenção, rota e resposta de cada execução. | As intenções primárias continuam sendo identificadas, roteadas e respondidas conforme RF02 a RF08; nenhuma sugestão do RF09 aparece e o estado desativado não provoca erro nem altera o tratamento de fora do escopo. |
+
 ### 9.1.4 Abrangência e limitações
 
-O plano cobre o fluxo funcional ponta a ponta do MVP: entrada, compreensão, classificação, recuperação, consulta ou análise, roteamento e resposta. Os cenários negativos privilegiam ausência de dados, solicitações fora de escopo e prevenção de respostas não fundamentadas, por serem riscos relevantes para um agente que apoia decisões de portfólio. A rastreabilidade é mantida pelo vínculo direto entre cada caso, o respectivo RF e os critérios de aceitação da Seção 3.1.
+O plano cobre os dez requisitos funcionais e os três regimes principais do produto: entrada e entendimento (RF01 a RF03), recuperação e resposta fundamentada (RF04 a RF08) e proatividade controlada (RF09 e RF10). A combinação de um caso positivo e um negativo por requisito produz vinte casos rastreáveis. Os positivos percorrem texto, áudio, consulta, comparação, fluxo automatizado, rota com LLM e sugestão opcional. Os negativos concentram-se nas fronteiras de maior risco: entrada vazia ou ambígua, intenção fora do catálogo, projeto ou atributo inexistente, contexto não validado, resposta sem fundamento, sugestão incompatível, recusa e proatividade desativada.
 
-Não fazem parte deste plano: testes de desempenho, segurança, acessibilidade, usabilidade, qualidade estatística do classificador e confiabilidade quantitativa de respostas; esses aspectos pertencem aos testes de RNFs e de usabilidade das Seções 9.2 e 9.3. Também ficam fora RF09 e RF10, pois são evolução pós-MVP. A validação de voz do RF01 depende da disponibilidade do endpoint de áudio especificado na Seção 8.7. Enquanto ele não estiver implementado, o subcenário de áudio do CT-RF01-01 fica bloqueado e deve ser registrado como tal; a aprovação integral de RF01 requer sua execução posterior, com a mesma expectativa de encaminhamento após transcrição.
+A abrangência é adequada ao planejamento sistêmico porque cada critério de aceitação da Seção 3.1 aparece na matriz e é observado em pelo menos um resultado esperado. Ela não pretende substituir testes unitários de todas as funções nem combinações exaustivas de frases, perfis e documentos. Variações linguísticas e métricas quantitativas do classificador pertencem aos RNF06 e RNF07; desempenho, segurança, acessibilidade, usabilidade e confiabilidade quantitativa pertencem às Seções 9.2 e 9.3.
+
+RF09 e RF10 ficam fora da implementação obrigatória do MVP, mas não ficam fora do plano: seus quatro casos permanecem com resultado esperado explícito e serão marcados como bloqueados até a funcionalidade existir. A validação de voz do RF01 depende da disponibilidade do endpoint de áudio especificado na Seção 8.7. Enquanto ele não estiver implementado, o subcenário de áudio do CT-RF01-01 também fica bloqueado e deve ser registrado como tal; a aprovação integral de RF01 requer execução posterior, com a mesma expectativa de encaminhamento após transcrição.
 
 ### 9.1.5 Resultados
 
-Os casos acima constituem o plano da Sprint 3. A execução e o registro dos resultados ocorrerão na Sprint 4. Esta subseção deve ser atualizada com a data da execução, a versão testada, o responsável, o resultado de cada caso e os links para suas evidências.
-
-### 9.1.2 Resultados
-
-Será executado na Sprint 4.
+Os casos acima constituem o plano da Sprint 3. A execução e o registro dos resultados ocorrerão na Sprint 4. Esta subseção deve ser atualizada com a data da execução, a versão testada, o responsável, o resultado de cada caso e os links para suas evidências. Casos ainda indisponíveis devem aparecer como bloqueados, com a dependência identificada, em vez de serem omitidos ou aprovados por planejamento.
 
 ## 9.2 Testes de RNFs
 
 ### 9.2.1 Planejamento
 
-Este plano transforma os critérios da Seção 3.2.2 em casos rastreáveis. A execução padrão usa `pytest` e `TestClient`/`httpx`, com duplos nas fronteiras externas; o desempenho é medido com `Locust`, conforme a definição de ferramentas da Seção 9. Os dados, prompts, perfis e fontes de teste são sintéticos ou anonimizados. Cada caso deve registrar ID, versão, data, responsável, ambiente, massa, resultado e evidência, sem incluir chaves, tokens ou conteúdo sensível. Para o RNF06, `scikit-learn` mede F1 macro e recall do núcleo de PLN; essa avaliação complementa, sem substituir, os testes da API.
+Este plano transforma os critérios mensuráveis da Seção 3.2 em 24 casos rastreáveis: um cenário positivo e um negativo para cada RNF01 a RNF12. O cenário positivo demonstra o atributo de qualidade nas condições previstas; o negativo introduz uma violação ou falha controlada e verifica se o sistema a impede, detecta ou comunica. A execução padrão usa `pytest` e `TestClient`/`httpx`, com duplos nas fronteiras externas; o desempenho, obrigatório neste plano, é medido com `Locust`. Para o RNF06, `scikit-learn` mede F1 macro e *recall* do núcleo de PLN.
 
-| RNF | Propósito e critério de aprovação | Cenário positivo | Cenário negativo | Ferramenta e evidência |
-|---|---|---|---|---|
-| RNF01 | Garantir que 100% da massa seja sintética/anonimizada e não siga a serviços externos não homologados. | Auditar JSONs, prompts e logs de teste; confirmar rótulo de dado fictício e origem controlada. | Inserir marcador de dado sensível na massa de validação; o lint/auditoria deve reprovar antes da chamada externa. | Revisão versionada, `pytest` e inspeção de payload com duplo de rede. |
-| RNF02 | Verificar que 100% das respostas por perfil simulado respeitam a permissão. | Perfil autorizado consulta fonte permitida e recebe somente seu escopo. | Perfil sem permissão tenta a mesma consulta; deve receber negação controlada, sem conteúdo ou metadados protegidos. | `pytest` + `TestClient`; matriz perfil x recurso. |
-| RNF03 | Verificar registro estruturado de 100% das interações: perfil, horário, intenção, fontes e resposta. | Executar consulta e conferir todos os campos no registro. | Forçar erro de recuperação/geração e conferir registro com falha e sem omissão dos campos disponíveis. | `pytest`, capturador de logs/repositório de auditoria simulado. |
-| RNF04 | Atingir >=90% de respostas fundamentadas e <=5% de alucinação na amostra sintética. | Perguntas com fonte conhecida retornam resposta vinculada à fonte. | Pergunta sem fonte recebe declaração de limitação, não fato inventado. | `pytest` e planilha de avaliação cega da amostra. |
-| RNF05 | Medir o intervalo API recebida -> resposta estruturada: simples <=10 s; comparativa <=20 s. | Cada cenário atende ao respectivo teto sob carga definida abaixo. | Induzir atraso acima do teto ou resposta inválida; Locust deve marcar falha e preservar o valor observado. | `Locust`, relatório HTML/CSV com percentis, taxa de erro, RPS e configuração. |
-| RNF06 | Confirmar F1 macro >=0,80 e recall de recuperação >=0,80 na massa sintética. | Executar notebook/script com conjunto rotulado e comparar métricas ao limiar. | Usar conjunto com intenção/termo ausente; métrica abaixo do limiar reprova a execução e abre ajuste de dados/modelo. | `scikit-learn` e artefato de métricas versionado. |
-| RNF07 | Confirmar que >=80% das formulações em português são compreendidas ou orientadas para reformulação. | Usuário formula consulta natural e recebe resposta/roteamento adequado. | Formulação ambígua ou desconhecida recebe orientação clara, sem exigir sintaxe técnica. | `pytest` para roteiro e Microsoft Forms para teste com usuários. |
-| RNF08 | Confirmar Teams como canal previsto, OpenAPI documentado e integração homologável no ecossistema Microsoft. | Revisão arquitetural encontra os contratos e componentes previstos. | Remover/alterar contrato OpenAPI ou usar conector incompatível; checklist reprova a entrega. | Revisão documental, `/openapi.json` via `TestClient` e checklist. |
-| RNF09 | Confirmar pipeline com dados estruturados e execução independente da plataforma final. | Carregar a mesma massa por diretório configurável e executar localmente. | Fornecer formato inválido/ausente; falha deve ser explícita, sem acoplamento a UI ou fonte concreta. | `pytest` de RAG e execução local documentada. |
-| RNF10 | Confirmar separação interface/lógica/dados, API documentada, testes e instruções. | Revisão encontra módulos, OpenAPI, suíte e README atualizados. | Mover acesso externo para rota/UI ou remover instrução; checklist e teste de importação devem reprovar. | Revisão de estrutura, `pytest` e `git diff --check`. |
-| RNF11 | Garantir resposta controlada em 100% dos erros previstos, sem detalhes técnicos ao usuário. | Simular indisponibilidade externa e ausência de resultado; API retorna erro/mensagem segura. | Provedor retorna erro inesperado ou payload inválido; API não expõe stack trace, chave ou corpo do provedor. | `pytest`, `TestClient` e duplos de rede. |
-| RNF12 | Confirmar que a massa inclui projetos, subportfólios, marcos, riscos, indicadores e documentos dos fluxos. | Validador encontra todos os tipos e exemplos consultáveis. | Remover uma categoria obrigatória; validação reprova a massa antes dos cenários. | `pytest` de esquema e checklist de massa. |
+Os dados, prompts, perfis e fontes devem ser sintéticos ou anonimizados. Cada execução registra ID, data, responsável, *commit*, ambiente, massa, entrada, saída, resultado (aprovado, reprovado ou bloqueado) e caminho da evidência, sem incluir chaves, tokens ou conteúdo sensível. Antes de executar, a equipe deve congelar a massa e os critérios: resultados observados não podem ser usados para flexibilizar a meta depois da medição.
 
-#### Carga e cenário de medição do RNF05
+**Pré-condições comuns:** API iniciada; massa sintética versionada; duplos das integrações externas configurados; dois perfis simulados com permissões distintas; catálogo de intenções disponível; diretório de evidências identificado pela sprint e pelo *commit*; relógio do ambiente sincronizado. Dependências exclusivas de Teams, SharePoint, Entra ID ou Azure são simuladas na bancada e registradas como pendentes de homologação no ambiente do parceiro.
 
-O relógio começa quando o `POST /api/chat` é recebido pela API e termina ao devolver o JSON estruturado; inclui recuperação, cache e chamada ao provedor quando houver *cache miss*, mas exclui renderização do frontend, digitação do usuário e STT/TTS. A massa contém perguntas sintéticas curtas de consulta e perguntas comparativas sobre ao menos duas fontes. Antes da coleta, reiniciar a API, aquecer uma vez cada prompt e anotar se a rodada mede cache frio ou quente; não misturar as duas modalidades no mesmo resultado.
+### 9.2.2 Matriz de rastreabilidade e critérios
 
-Executar duas rodadas de 5 minutos: (a) 1 usuário para estabelecer a linha de base e (b) 5 usuários simultâneos, com espera de 1 a 3 segundos. O cenário Locust versionado para a Sprint 4 deve pesar 75% de consultas simples e 25% de comparativas. A rodada é aprovada somente se não houver erro HTTP/contrato e o percentil 95 de cada tipo ficar no teto do RNF05 (10 s e 20 s respectivamente). Média não substitui percentil; qualquer amostra acima do teto deve ser registrada e investigada. Para evitar custo e não determinismo, a CI executa apenas os testes com duplos; a rodada com provedor real é controlada e depende de ambiente autorizado.
+| RNF | Propósito e critério objetivo de aprovação | Casos | Ferramenta e evidência mínima |
+|---|---|---|---|
+| RNF01 | Impedir exposição: 100% da massa é sintética/anonimizada e nenhum dado marcado como sensível chega a serviço não homologado. | CT-RNF01-P, CT-RNF01-N | `pytest`, inventário da massa e payload capturado pelo duplo de rede. |
+| RNF02 | Respeitar permissões: 100% das respostas de cada perfil contêm somente recursos autorizados. | CT-RNF02-P, CT-RNF02-N | `pytest`/`TestClient` e matriz perfil × recurso. |
+| RNF03 | Auditar interações: 100% dos casos registram perfil, horário, intenção, fontes e resposta ou falha. | CT-RNF03-P, CT-RNF03-N | `pytest` e registro estruturado persistido. |
+| RNF04 | Obter pelo menos 90% de respostas fundamentadas e no máximo 5% de alucinação na amostra congelada. | CT-RNF04-P, CT-RNF04-N | Planilha cega, respostas e fontes da amostra. |
+| RNF05 | Manter P95 de consulta simples em até 10 s e de comparação em até 20 s, sem erro HTTP ou de contrato na carga definida. | CT-RNF05-P, CT-RNF05-N | `Locust`, CSV/HTML, log da API e configuração do ambiente. |
+| RNF06 | Atingir F1 macro ≥ 0,80 na classificação de intenções e *recall* ≥ 0,80 na recuperação. | CT-RNF06-P, CT-RNF06-N | `scikit-learn`, notebook executado e `metricas.json`. |
+| RNF07 | Compreender ou orientar a reformulação em pelo menos 80% das formulações em português da amostra. | CT-RNF07-P, CT-RNF07-N | `pytest`, roteiro de usuários e planilha consolidada. |
+| RNF08 | Manter Teams como canal previsto, contrato OpenAPI válido e componentes compatíveis com o ecossistema Microsoft. | CT-RNF08-P, CT-RNF08-N | `/openapi.json`, checklist arquitetural e relatório de validação. |
+| RNF09 | Executar o núcleo com dados estruturados sem depender da plataforma final ou de uma fonte concreta. | CT-RNF09-P, CT-RNF09-N | `pytest` do RAG, configuração da fonte e log de execução local. |
+| RNF10 | Preservar separação entre interface, negócio e dados, API documentada, testes e instruções reproduzíveis. | CT-RNF10-P, CT-RNF10-N | Testes de importação, checklist de estrutura e documentação. |
+| RNF11 | Tratar 100% das falhas previstas com resposta controlada, sem *stack trace*, segredo ou corpo bruto do provedor. | CT-RNF11-P, CT-RNF11-N | `pytest`/`TestClient`, respostas HTTP e logs sanitizados. |
+| RNF12 | Representar projetos, subportfólios, marcos, riscos, indicadores e documentos na massa sintética. | CT-RNF12-P, CT-RNF12-N | Validador de esquema e relatório de cobertura da massa. |
 
-### 9.2.2 Instruções de execução e evidências
+### 9.2.3 Casos positivos e negativos
 
-1. Em `src/backend`, criar o ambiente virtual, instalar `requirements.txt` e executar `.venv\\Scripts\\python.exe -m pytest app/tests`.
-2. Para validar o contrato HTTP, iniciar `.venv\\Scripts\\python.exe -m uvicorn app.main:app` e conferir `http://127.0.0.1:8000/openapi.json`; não inserir credenciais em evidências.
-3. Para desempenho, instalar o `Locust` no ambiente de teste, iniciar a API em ambiente autorizado e executar `locust -f <cenario-locust-versionado> --host http://127.0.0.1:8000`. Configurar as duas rodadas descritas no RNF05, exportar relatório e registrar P95 separado por tipo de cenário.
-4. Para RNF06, executar o notebook de classificação com a massa sintética e registrar F1 macro e recall. Para RNF07, aplicar o roteiro no Microsoft Forms e calcular a proporção de compreensão/orientação.
-5. Anexar ao registro da sprint os relatórios, versões, parâmetros de carga, massa, resultados e falhas. Não declarar RNF aprovado por plano: aprovação ocorre somente após a evidência da execução.
+| Casos | Propósito | Instruções de execução | Resultado esperado e evidência |
+|---|---|---|---|
+| CT-RNF01-P / CT-RNF01-N | Verificar confidencialidade tanto no uso normal quanto diante de dado proibido. | **P:** percorrer os arquivos da massa, registrar origem e classificação e executar uma consulta com o duplo de rede capturando o payload. **N:** inserir em uma cópia temporária um marcador inequivocamente classificado como sensível e repetir o envio. | **P:** inventário 100% sintético/anonimizado e payload apenas com dados permitidos. **N:** validação bloqueia o processamento antes da fronteira externa; a evidência contém o relatório e a contagem zero de chamadas externas. |
+| CT-RNF02-P / CT-RNF02-N | Confirmar isolamento por perfil e negação segura. | **P:** autenticar o perfil A, consultar um recurso permitido e comparar os campos retornados com a matriz de acesso. **N:** com o perfil B sem permissão, repetir a mesma consulta e inspecionar corpo, metadados e logs. | **P:** somente o escopo autorizado aparece. **N:** resposta de negação controlada, sem conteúdo nem metadados protegidos; anexar requisições e matriz preenchida. |
+| CT-RNF03-P / CT-RNF03-N | Demonstrar rastreabilidade em sucesso e falha. | **P:** executar uma consulta válida e buscar o registro pelo identificador da interação. **N:** configurar o duplo de recuperação para falhar, repetir a consulta e buscar o registro correspondente. | Os dois registros contêm perfil, carimbo de tempo, intenção, fontes disponíveis e resposta ou estado de falha; anexar os registros sanitizados e seus IDs. |
+| CT-RNF04-P / CT-RNF04-N | Medir fundamentação e alucinação sem seleção oportunista de exemplos. | Congelar amostra com no mínimo 20 perguntas rotuladas. **P:** executar perguntas cujas respostas existem e conferir cada afirmação contra a fonte. **N:** executar perguntas com atributo ausente e marcar qualquer afirmação sem fonte como alucinação. | Planilha informa numerador, denominador e exemplos divergentes; aprovação exige ≥90% fundamentadas e ≤5% de alucinação no conjunto completo. |
+| CT-RNF05-P / CT-RNF05-N | Medir desempenho conversacional e provar que violações são detectadas. | Executar as duas rodadas Locust descritas na Seção 9.2.4. Na negativa, o duplo do provedor adiciona atraso superior ao teto em uma rota identificada, sem alterar as demais. | A positiva atende aos dois P95 e tem zero erro; a negativa é marcada como falha e preserva latência, rota e resposta observadas no CSV/HTML. |
+| CT-RNF06-P / CT-RNF06-N | Avaliar qualidade do PLN contra limiares reproduzíveis. | **P:** executar integralmente `src/notebooks/classificador_intencoes_metro.ipynb` com o conjunto de teste fechado e calcular F1 macro e *recall*. **N:** avaliar separadamente classes e termos ausentes ou fracos, sem treiná-los novamente, e aplicar os mesmos limiares. | `metricas.json` e notebook registram valores e versão da massa; qualquer métrica abaixo de 0,80 reprova o requisito e identifica as classes afetadas. |
+| CT-RNF07-P / CT-RNF07-N | Verificar interação em português natural e orientação de reformulação. | Congelar ao menos 20 formulações. **P:** participantes enviam frases naturais válidas sem conhecer nomes internos. **N:** enviar frases ambíguas, com sinônimos não cadastrados e erros leves; registrar se houve compreensão ou orientação útil. | Pelo menos 80% do conjunto total é compreendido ou recebe reformulação acionável; anexar roteiro, respostas anonimizadas e cálculo. |
+| CT-RNF08-P / CT-RNF08-N | Conferir aderência aos contratos e ao ecossistema definido. | **P:** iniciar a API, abrir `/openapi.json` e confrontar canal, conector e componentes com a arquitetura. **N:** validar uma cópia do contrato com operação obrigatória removida ou tipo incompatível. | Contrato real é válido e a arquitetura mantém Teams/Copilot/SharePoint/Azure previstos; a cópia alterada reprova no checklist, sem substituir o contrato versionado. |
+| CT-RNF09-P / CT-RNF09-N | Provar portabilidade da origem de dados. | **P:** apontar a configuração para um diretório sintético alternativo e executar a mesma consulta localmente. **N:** apontar para arquivo ausente e depois para formato inválido, observando inicialização e resposta. | A troca válida não exige alteração no núcleo; origens inválidas geram falha explícita e localizada, sem acoplamento à interface ou à fonte concreta. |
+| CT-RNF10-P / CT-RNF10-N | Verificar manutenibilidade por evidências estruturais e reprodução. | **P:** seguir o README em ambiente limpo, executar testes e conferir limites entre interface, negócio e dados. **N:** aplicar o checklist a uma cópia com instrução obrigatória removida ou dependência direta de acesso externo introduzida na rota. | A estrutura real passa nos itens objetivos; a violação controlada é detectada pelo teste de importação ou checklist. Anexar comandos, árvore relevante e resultado. |
+| CT-RNF11-P / CT-RNF11-N | Garantir respostas controladas para falhas previstas e inesperadas. | **P:** parametrizar falha de classificação, ausência de resultado, indisponibilidade da fonte e *timeout*. **N:** fazer o duplo retornar exceção inesperada e payload inválido; inspecionar resposta e logs. | Todos os casos retornam código e mensagem definidos, preservam auditoria e não expõem *stack trace*, segredo ou corpo bruto do provedor. |
+| CT-RNF12-P / CT-RNF12-N | Medir completude da massa sintética. | **P:** executar o validador sobre a massa congelada e contar projetos, subportfólios, marcos, riscos, indicadores e documentos. **N:** remover cada categoria, uma por vez, em cópias temporárias e repetir a validação. | A massa oficial contém todas as categorias; cada cópia incompleta é reprovada com a categoria ausente identificada. Anexar relatório e versão da massa. |
 
-### 9.2.3 Abrangência e limitações
+### 9.2.4 Teste obrigatório de desempenho do RNF05
 
-A abrangência cobre os doze RNFs porque eles atravessam a mesma cadeia de consulta: dados e permissões antes da chamada, rastreabilidade e fundamentação durante o processamento, desempenho e falhas na resposta, e qualidade/manutenção da base que sustenta a evolução. Os positivos demonstram atendimento; os negativos cobrem as falhas que poderiam expor dados, inventar informação, degradar a conversa ou repetir chamadas externas. A separação entre testes determinísticos e rodada real do provedor mantém a validação reprodutível e ainda mede o comportamento ponta a ponta exigido pelo RNF05.
+O relógio começa no recebimento do `POST /api/chat` pela API e termina na devolução do JSON estruturado. A medição inclui classificação, recuperação, cache e chamada ao provedor em *cache miss*, mas exclui renderização do frontend, digitação, STT e TTS. O arquivo de cenário a ser versionado antes da execução é `src/backend/app/tests/performance/locustfile.py`; ele deve produzir 75% de consultas simples e 25% de comparações entre pelo menos dois projetos, com espera aleatória de 1 a 3 segundos.
 
-Limitações conhecidas: permissões corporativas, Teams, SharePoint real, Azure e transcrição não estão disponíveis nesta bancada e, portanto, são simulados; sua homologação depende do ambiente do parceiro. Os resultados permanecem pendentes da Sprint 4 e devem ser preenchidos com evidências, não estimativas.
+Antes de medir, registrar CPU, memória, sistema operacional, versão do Python, *commit*, configuração da API e modalidade de cache. Reiniciar a API e aquecer uma vez cada prompt. Cache frio e quente são rodadas diferentes e nunca devem ser misturados no mesmo resultado. Chamadas reais ao provedor só podem ocorrer em ambiente autorizado; na CI, usam-se duplos determinísticos.
 
-### 9.2.4 Resultados
+A partir de `src/backend`, com API e Locust instalados no ambiente de teste, executar:
 
-Será executado na Sprint 4.
+```powershell
+locust -f app/tests/performance/locustfile.py --host http://127.0.0.1:8000 --headless -u 1 -r 1 -t 5m --csv evidencias/rnf05-baseline
+locust -f app/tests/performance/locustfile.py --host http://127.0.0.1:8000 --headless -u 5 -r 1 -t 5m --csv evidencias/rnf05-carga
+```
+
+A primeira rodada estabelece a linha de base com um usuário; a segunda mede cinco usuários simultâneos. Separar no relatório consultas simples e comparativas. O RNF05 é aprovado somente se, nas duas rodadas, houver zero erro HTTP/contrato, P95 simples ≤10 s e P95 comparativo ≤20 s. Registrar também média, mediana, P90, P99, RPS e quantidade de amostras para diagnóstico, mas nenhum desses valores substitui o P95 como critério. No CT-RNF05-N, o atraso injetado deve fazer o Locust registrar a violação; se o relatório permanecer aprovado, o próprio teste de desempenho está incorreto.
+
+### 9.2.5 Instruções gerais de execução e evidências
+
+1. Criar o diretório de evidências da execução, nomeado com sprint e *commit*, sem adicionar credenciais ou dados pessoais.
+2. Em `src/backend`, criar ou ativar o ambiente virtual, instalar `requirements.txt` e executar `.venv\\Scripts\\python.exe -m pytest app/tests -q` no Windows ou `python -m pytest app/tests -q` nos demais ambientes.
+3. Iniciar a API com `python -m uvicorn app.main:app`, confirmar `GET /health` e salvar o contrato de `http://127.0.0.1:8000/openapi.json`.
+4. Executar CT-RNF01 a CT-RNF04 e CT-RNF09 a CT-RNF12 com duplos de rede e massa restaurada antes de cada cenário negativo.
+5. Executar o RNF05 conforme a Seção 9.2.4 e anexar todos os CSVs, o relatório e a configuração. Não executar carga contra ambiente compartilhado sem autorização.
+6. Para RNF06, executar o notebook `src/notebooks/classificador_intencoes_metro.ipynb` do início ao fim e salvar as métricas versionadas. Para RNF07, aplicar o roteiro e consolidar as respostas anonimizadas.
+7. Preencher a matriz de resultados com aprovado, reprovado ou bloqueado e vincular cada evidência ao ID do caso. Não declarar RNF aprovado por planejamento: aprovação exige execução e evidência.
+
+### 9.2.6 Abrangência e limitações
+
+A abrangência cobre os doze RNFs e as duas direções de comportamento exigidas pelo barema. Os positivos demonstram confidencialidade, autorização, auditoria, fundamentação, desempenho, qualidade do PLN, linguagem natural, aderência tecnológica, portabilidade, manutenção, tratamento de falhas e completude dos dados. Os negativos foram escolhidos a partir das fronteiras de maior risco: vazamento, acesso indevido, perda de auditoria, alucinação, latência, classe fraca, ambiguidade, contrato incompatível, fonte inválida, acoplamento, exceção inesperada e massa incompleta. Essa seleção oferece cobertura sistêmica e rastreável, mas não é uma enumeração de todas as combinações de perfil, documento, intenção e infraestrutura.
+
+Permissões corporativas, Teams, SharePoint real, Entra ID, Azure e transcrição não estão disponíveis na bancada local e, portanto, são simulados; a homologação final depende do ambiente do parceiro. O teste de carga planejado mede o ambiente descrito e não permite extrapolar capacidade de produção. Os resultados permanecem pendentes da Sprint 4 e devem ser preenchidos com evidências observadas, nunca com estimativas.
+
+### 9.2.7 Resultados
+
+A execução ocorrerá na Sprint 4. Para cada CT-RNF, registrar data, *commit*, ambiente, responsável, resultado, métricas aplicáveis, falha encontrada e link da evidência. Casos bloqueados devem identificar a dependência e o plano de desbloqueio.
 
 ## 9.3 Testes de Usabilidade
 
