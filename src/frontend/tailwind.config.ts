@@ -1,48 +1,55 @@
+import animate from 'tailwindcss-animate';
 import type { Config } from 'tailwindcss';
 
 export default {
+  darkMode: 'class',
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        background: 'var(--background)',
-        foreground: 'var(--foreground)',
+        app: 'var(--bg-app)',
+        surface: 'var(--bg-surface)',
+        elevated: 'var(--bg-elevated)',
+        muted: 'var(--bg-muted)',
+        subtle: 'var(--bg-subtle)',
         border: 'var(--border)',
-        input: 'var(--input)',
-        ring: 'var(--ring)',
+        'border-strong': 'var(--border-strong)',
+        fg: {
+          DEFAULT: 'var(--fg)',
+          muted: 'var(--fg-muted)',
+          subtle: 'var(--fg-subtle)',
+        },
         primary: {
           DEFAULT: 'var(--primary)',
-          foreground: 'var(--primary-foreground)',
+          hover: 'var(--primary-hover)',
+          soft: 'var(--primary-soft)',
+          fg: 'var(--primary-fg)',
         },
-        secondary: {
-          DEFAULT: 'var(--secondary)',
-          foreground: 'var(--secondary-foreground)',
+        success: {
+          DEFAULT: 'var(--success)',
+          soft: 'var(--success-soft)',
         },
-        destructive: {
-          DEFAULT: 'var(--destructive)',
-          foreground: 'var(--destructive-foreground)',
+        warning: {
+          DEFAULT: 'var(--warning)',
+          soft: 'var(--warning-soft)',
         },
-        accent: {
-          DEFAULT: 'var(--accent)',
-          foreground: 'var(--accent-foreground)',
+        danger: {
+          DEFAULT: 'var(--danger)',
+          soft: 'var(--danger-soft)',
         },
-        muted: {
-          DEFAULT: 'var(--muted)',
-          foreground: 'var(--muted-foreground)',
-        },
-        metro: {
-          blue: '#2864a4',
-          blueDark: '#164f8a',
-          text: '#123f68',
-          line: '#d9e7f5',
-          surface: '#ffffff',
-          background: '#f7fafc',
-        },
+        ring: 'var(--ring)',
+      },
+      boxShadow: {
+        panel: 'var(--shadow-panel)',
       },
       fontFamily: {
-        sans: ['Inter', 'Segoe UI', 'Arial', 'sans-serif'],
+        sans: ['Inter', 'Segoe UI', 'system-ui', 'Arial', 'sans-serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+      },
+      fontSize: {
+        '2xs': ['0.6875rem', { lineHeight: '1rem' }],
       },
     },
   },
-  plugins: [],
+  plugins: [animate],
 } satisfies Config;

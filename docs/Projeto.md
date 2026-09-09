@@ -472,6 +472,18 @@ O desenvolvimento da solução envolve responsabilidades compartilhadas entre os
 
 Quando uma responsabilidade da coluna do Metrô não é cumprida no prazo acordado, a equipe registra o bloqueio na issue correspondente e comunica o impacto sobre a sprint, conforme o mecanismo de acompanhamento de riscos descrito no documento de gestão de projeto.
 
+#### Consolidação dos objetivos por métrica
+
+Para reduzir ambiguidades entre objetivo estratégico, indicador e validação do MVP, os objetivos foram consolidados na matriz abaixo.
+
+| Objetivo | Métrica de acompanhamento | Meta inicial do MVP | Forma de verificação | Relação com o escopo |
+| --- | --- | --- | --- | --- |
+| Reduzir esforço de localização de informações | Tempo médio para encontrar uma informação de projeto | Redução esperada de 50% em cenário controlado | Comparação entre busca manual e consulta ao agente usando os mesmos casos sintéticos | Consulta de informações dos projetos |
+| Aumentar confiabilidade das respostas | Percentual de respostas fundamentadas em fontes disponíveis | 100% das respostas do escopo devem indicar base documental ou limitação | Testes com perguntas de consulta, comparação e ausência de informação | Respostas estruturadas e fundamentadas |
+| Melhorar autonomia dos usuários | Percentual de solicitações compreendidas sem sintaxe técnica | Pelo menos 80% das solicitações em português devem ser compreendidas ou orientadas para reformulação | Casos de teste com variações de linguagem natural | Entrada textual e interpretação de intenção |
+| Apoiar decisões do PMO | Capacidade de comparar projetos, riscos, marcos e indicadores | Consultas analíticas demonstráveis com dados sintéticos | Cenários de comparação entre dois ou mais projetos | Fluxos de consulta e análise comparativa |
+| Preservar governança e confidencialidade | Uso de dados sintéticos/anonimizados e rastreio das interações | 100% da prova de conceito sem dados sensíveis reais | Auditoria da base utilizada e dos registros gerados pelo pipeline | Segurança, rastreabilidade e aderência tecnológica |
+
 ---
 
 As capacidades da Seção 2.4.3, as metas da Seção 2.4.4 e a divisão de responsabilidades da Seção 2.4.5 formam o contrato de escopo deste projeto: o que o agente faz, como saberemos se funcionou e de quem depende cada parte. As seções seguintes detalham para quem o produto é construído (2.5), sobre qual processo de negócio ele atua (2.6) e quais riscos podem comprometer essa entrega (2.7).
@@ -632,6 +644,7 @@ A comparação evidenciada na imagem da cadeia, mostra que a proposta **não alt
 
 Assim, a Cadeia de Valor complementa os fluxos **AS-IS** e **TO-BE**, demonstrando de forma visual e operacional **onde o agente agrega valor ao processo e quais atividades são impactadas pela sua utilização**.
 
+---
 
 
 ---

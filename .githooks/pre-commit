@@ -42,8 +42,11 @@ if [ -n "$staged_files" ]; then
   while IFS= read -r staged_file; do
     lower_file="$(printf '%s' "$staged_file" | tr '[:upper:]' '[:lower:]')"
     case "$lower_file" in
+<<<<<<< HEAD
+=======
       *.example|*.sample|*.template)
         ;;
+>>>>>>> 363ee167cc1a1ceb352f9aa77be25d2f08b63533
       .env|*/.env|.env.*|*/.env.*|*.pem|*.key|*secret*|*credential*)
         sensitive_files="${sensitive_files}
 $staged_file"

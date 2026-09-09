@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+.src/frontend
+=======
 # --- Python (backend) ---
 __pycache__/
 *.py[cod]
@@ -66,3 +69,4 @@ tmp/
 .kimi
 .agent
 AGENTS.md
+>>>>>>> 363ee167cc1a1ceb352f9aa77be25d2f08b63533

@@ -10,6 +10,11 @@ export default defineConfig({
         target: 'http://127.0.0.1:8000',
         changeOrigin: true,
       },
+      // `GET /health` fica fora do prefixo `/api` em `app/main.py`.
+      '/health': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+      },
     },
   },
   resolve: {
