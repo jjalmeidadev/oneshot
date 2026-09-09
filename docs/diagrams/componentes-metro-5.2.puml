@@ -47,8 +47,13 @@ actor "Usuário do PMO" as Usuario
 ' 1. INTERFACE
 ' ============================================================
 package "1. Camada de Interface Humano-Computador" as Interface {
+<<<<<<< HEAD
+  component "Interface Própria de Chat" as Chat <<Frontend>>
+  component "Entrada de Voz" as Voz <<opcional>>
+=======
   component "Microsoft Teams" as Chat <<canal corporativo>>
   component "Entrada de Voz" as Voz <<captura no canal>>
+>>>>>>> 363ee167cc1a1ceb352f9aa77be25d2f08b63533
 }
 
 ' ============================================================
@@ -75,7 +80,11 @@ package "3. Rotas de Atendimento" as Rotas {
   package "Rota A — Consulta / RAG" as RAG {
     component "Recuperador RAG" as Retriever <<retrieval>>
     component "Montagem de Contexto" as Contexto <<prompt / context>>
+<<<<<<< HEAD
+    component "Google Gemini API" as Gemini <<LLM generativo>>
+=======
     component "API de LLM" as LLM <<LLM generativo>>
+>>>>>>> 363ee167cc1a1ceb352f9aa77be25d2f08b63533
   }
 
   package "Rota B — Fluxos Funcionais" as Fluxos {
@@ -145,8 +154,13 @@ Retriever --> SPAdapter : recuperação documental
 SPAdapter --> SharePoint : leitura / metadados
 SPAdapter --> Retriever : conteúdo relevante
 Retriever --> Contexto : trechos + referências
+<<<<<<< HEAD
+Contexto --> Gemini : prompt + contexto recuperado
+Gemini --> Conversa : resposta gerada
+=======
 Contexto --> LLM : prompt + contexto recuperado
 LLM --> Conversa : resposta gerada
+>>>>>>> 363ee167cc1a1ceb352f9aa77be25d2f08b63533
 
 ' ============================================================
 ' ROTA B — FLUXOS FUNCIONAIS
@@ -179,7 +193,11 @@ Auditoria --> AuditStore : persistência
 ' ============================================================
 ' SECRETS / CONFIGURAÇÃO
 ' ============================================================
+<<<<<<< HEAD
+Secrets ..> Gemini : GEMINI_API_KEY
+=======
 Secrets ..> LLM : credencial da API
+>>>>>>> 363ee167cc1a1ceb352f9aa77be25d2f08b63533
 Secrets ..> Speech : credenciais
 Secrets ..> API : configuração
 
@@ -197,11 +215,19 @@ Servicos -[hidden]-> Transversal
 RAG -[hidden]right- Fluxos
 Retriever -[hidden]right- Copilot
 Contexto -[hidden]right- Topicos
+<<<<<<< HEAD
+Gemini -[hidden]right- Automate
+
+' Sequência interna explícita.
+Retriever -[hidden]-> Contexto
+Contexto -[hidden]-> Gemini
+=======
 LLM -[hidden]right- Automate
 
 ' Sequência interna explícita.
 Retriever -[hidden]-> Contexto
 Contexto -[hidden]-> LLM
+>>>>>>> 363ee167cc1a1ceb352f9aa77be25d2f08b63533
 Copilot -[hidden]-> Topicos
 Topicos -[hidden]-> Automate
 
@@ -220,17 +246,28 @@ Embeddings -[hidden]right- Vetor
 SharePoint -[hidden]right- Entra
 Entra -[hidden]right- Speech
 
+<<<<<<< HEAD
+note top of Gemini
+O Gemini atua somente na geração da resposta
+com base no contexto recuperado pelo RAG.
+A chave permanece no backend/configuração
+=======
 note top of LLM
 O LLM atua somente na geração da resposta
 com base no contexto recuperado pelo RAG.
 A credencial permanece no backend/configuração
+>>>>>>> 363ee167cc1a1ceb352f9aa77be25d2f08b63533
 e nunca fica exposta à interface.
 end note
 
 note top of Catalogo
 O catálogo reúne as intenções reconhecidas pelo PLN
 e associa cada intenção a uma capacidade do produto.
+<<<<<<< HEAD
+A decisão de roteamento não é delegada ao Gemini.
+=======
 A decisão de roteamento não é delegada ao LLM.
+>>>>>>> 363ee167cc1a1ceb352f9aa77be25d2f08b63533
 end note
 
 note top of Retriever
@@ -265,7 +302,11 @@ legend bottom
   | <b>Pilar 1</b> | Interpretação, classificação, escopo e roteamento |
   | <b>RAG</b> | Recuperação de conhecimento documental |
   | <b>Copilot Studio</b> | Orquestração de fluxos funcionais |
+<<<<<<< HEAD
+  | <b>Gemini</b> | Geração de linguagem natural a partir do contexto |
+=======
   | <b>LLM</b> | Geração de linguagem natural a partir do contexto |
+>>>>>>> 363ee167cc1a1ceb352f9aa77be25d2f08b63533
   | <b>SharePoint</b> | Fonte documental e dados corporativos |
 endlegend
 
