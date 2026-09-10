@@ -275,6 +275,17 @@ sessões no Redis (o TTL de 90s vira `EXPIRE`) e `LiveHub` usa pub/sub para
 alcançar as outras instâncias. Nenhuma rota muda — elas só conhecem os métodos
 públicos do store, que foi desenhado assim de propósito.
 
+### Antes de publicar
+
+```bash
+cd src/lp/src/rag
+python verificar.py
+```
+
+Um comando com todas as conferências: índice em dia com a documentação, nenhum
+documento sem carregador, toda fonte indexada disponível para download, os dois
+conjuntos de testes e a chave no ambiente. Ele termina dizendo o que commitar.
+
 ### O backend
 
 | Campo | Valor |

@@ -70,7 +70,10 @@ python -m model.index            # reconstrói
 
 O `--check` compara a impressão digital do corpus guardada no índice com a da
 documentação em disco e sai com código 1 se divergirem. **É a salvaguarda contra
-apresentar com índice velho** — rode antes de subir o deploy.
+apresentar com índice velho.**
+
+Para conferir tudo de uma vez antes de publicar — índice, fontes, testes e
+configuração — use `python verificar.py`, uma pasta acima.
 
 > Tanto `model/artifacts/` quanto `documentsRAG/` precisam ir para o
 > repositório: o serviço publicado carrega o índice do disco, não o reconstrói

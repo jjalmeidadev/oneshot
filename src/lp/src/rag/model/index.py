@@ -22,13 +22,13 @@ import numpy as np
 
 from model.config import ModelSettings, get_model_settings
 from model.corpus import build_chunks, fingerprint
-from model.embeddings import embed_texts
+from model.embeddings import EmbeddingCache, embed_texts
 from model.store import IndexNotBuilt, VectorIndex
 
 
 def _progresso(feitos: int, total: int) -> None:
     if feitos % 25 == 0 or feitos == total:
-        print(f"  vetorizados {feitos}/{total}", flush=True)
+        print(f"  vetorizados {feitos}/{total} ({feitos * 100 // total}%)", flush=True)
 
 
 def _copiar_para_documentos(documentos, destino: Path) -> int:
@@ -59,9 +59,18 @@ async def construir(settings: ModelSettings) -> VectorIndex:
         for nome in ignorados[:10]:
             print(f"    - {nome}")
 
-    print(f"Vetorizando com {settings.embedding_model} ({settings.embedding_dimensions}d)")
+    cache = EmbeddingCache(settings.artifacts_dir)
+    if len(cache):
+        print(f"  cache com {len(cache)} vetores de execuções anteriores")
+
+    print(
+        f"Vetorizando com {settings.embedding_model} "
+        f"({settings.embedding_dimensions}d, até {settings.embedding_requests_per_minute}/min)"
+    )
+    print("  o que já estiver no cache não é pedido de novo; se tomar 429, o")
+    print("  ritmo desacelera sozinho e o progresso fica guardado.")
     vetores = await embed_texts(
-        [t.embed_text for t in trechos], settings, progress=_progresso
+        [t.embed_text for t in trechos], settings, progress=_progresso, cache=cache
     )
 
     indice = VectorIndex(

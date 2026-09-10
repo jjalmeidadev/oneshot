@@ -81,9 +81,13 @@ class ModelSettings:
     #: 768 é o tamanho recomendado pelo Google e o suficiente para um corpus
     #: desta escala — 3072 triplicaria o índice sem ganho perceptível aqui.
     embedding_dimensions: int = 768
-    #: Chamadas simultâneas ao indexar. Acima disso o serviço começa a
-    #: devolver 429 e o retry acaba custando mais do que a paralelização rende.
-    embedding_concurrency: int = 4
+    #: Chamadas simultâneas ao indexar.
+    embedding_concurrency: int = 3
+    #: Teto de chamadas por minuto. O limite real da conta é desconhecido e
+    #: muda por plano, então este é um chute conservador que o freio adaptativo
+    #: aperta sozinho a cada 429. Baixe se o lote estiver tomando muito 429;
+    #: suba se sobrar cota e você tiver pressa.
+    embedding_requests_per_minute: int = 90
 
     # --- Geração ----------------------------------------------------------
     generation_model: str = "gemini-3.7-flash"
@@ -128,7 +132,8 @@ def get_model_settings() -> ModelSettings:
         embedding_model=os.getenv("GEMINI_EMBEDDING_MODEL", "gemini-embedding-2").strip()
         or "gemini-embedding-2",
         embedding_dimensions=_env_int("GEMINI_EMBEDDING_DIMENSIONS", 768),
-        embedding_concurrency=_env_int("GEMINI_EMBEDDING_CONCURRENCY", 4),
+        embedding_concurrency=_env_int("GEMINI_EMBEDDING_CONCURRENCY", 3),
+        embedding_requests_per_minute=_env_int("RAG_EMBEDDING_RPM", 90),
         generation_model=os.getenv("GEMINI_MODEL", "gemini-3.7-flash").strip()
         or "gemini-3.7-flash",
         max_output_tokens=_env_int("GEMINI_MAX_OUTPUT_TOKENS", 900),

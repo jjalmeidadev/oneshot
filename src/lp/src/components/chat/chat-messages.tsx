@@ -225,6 +225,10 @@ export function ChatMessages({
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(messages);
   const scrollRef = useRef<HTMLDivElement>(null);
   const isAutoPlaying = useRef(false);
+  // Espelho da conversa para os laços de revelação. Sem ele, `revealNext`
+  // mudaria de identidade a cada mensagem nova, e o efeito que depende dela
+  // reiniciaria a reprodução — apagando a mensagem que acabou de chegar.
+  const chatMessagesRef = useRef<ChatMessage[]>(messages);
   // Mirror of `visibleCount` for the scroll-driven loop, which needs to read
   // the current position between awaits without re-subscribing to state.
   const visibleCountRef = useRef(0);
@@ -240,12 +244,13 @@ export function ChatMessages({
 
   const revealNext = useCallback(
     async (index: number) => {
-      if (index >= chatMessages.length) {
+      const conversa = chatMessagesRef.current;
+      if (index >= conversa.length) {
         isAutoPlaying.current = false;
         onComplete?.();
         return;
       }
-      const message = chatMessages[index];
+      const message = conversa[index];
       if (message.sender === "assistant") {
         setIsTyping(true);
         await wait(typingDuration);
@@ -263,18 +268,26 @@ export function ChatMessages({
         revealNext(index + 1);
       }
     },
-    [chatMessages, autoPlayDelay, typingDuration, scrollToBottom, onComplete],
+    [autoPlayDelay, typingDuration, scrollToBottom, onComplete],
   );
 
   const replay = useCallback(() => {
     setVisibleCount(0);
     setChatMessages(messages);
+    chatMessagesRef.current = messages;
     isAutoPlaying.current = true;
     setTimeout(() => revealNext(0), 100);
   }, [messages, revealNext]);
 
+  // A conversa recebida por prop é a origem; mensagens digitadas pelo
+  // visitante são acrescentadas a ela. Este efeito reage **só à prop** — se
+  // ele também reagisse à conversa, cada mensagem enviada se apagaria.
   useEffect(() => {
     setChatMessages(messages);
+    chatMessagesRef.current = messages;
+  }, [messages]);
+
+  useEffect(() => {
     // Scroll-driven mode owns the reveal; the timer path stays out of it.
     if (scrollControlled) return;
     if (!autoPlay) {
@@ -380,10 +393,14 @@ export function ChatMessages({
 
   const appendAssistant = useCallback(
     (content: string, sources?: ChatMessageSources) => {
-    setChatMessages((prev) => [
-      ...prev,
-      { id: `assistant-${Date.now()}`, sender: "assistant", content, sources },
-    ]);
+    setChatMessages((prev) => {
+      const proxima: ChatMessage[] = [
+        ...prev,
+        { id: `assistant-${Date.now()}`, sender: "assistant", content, sources },
+      ];
+      chatMessagesRef.current = proxima;
+      return proxima;
+    });
     setVisibleCount((prev) => prev + 1);
     visibleCountRef.current += 1;
     },
@@ -399,7 +416,11 @@ export function ChatMessages({
       sender: "user",
       content: text,
     };
-    setChatMessages((prev) => [...prev, userMessage]);
+    setChatMessages((prev) => {
+      const proxima = [...prev, userMessage];
+      chatMessagesRef.current = proxima;
+      return proxima;
+    });
     setInputValue("");
     setVisibleCount((prev) => prev + 1);
     visibleCountRef.current += 1;
