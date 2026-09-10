@@ -167,7 +167,16 @@
     - [8.3.2 Sprint 4](#832-sprint-4)
     - [8.3.3 Sprint 5](#833-sprint-5)
   - [8.4 Testes Unitários e de Integração](#84-testes-unitários-e-de-integração)
-  - [8.5 Documentações automáticas](#85-documentações-automáticas)
+  - [8.5 Documentação de front-end e back-end](#85-documentação-de-front-end-e-back-end)
+    - [8.5.1 Escopo e estado da implementação](#851-escopo-e-estado-da-implementação)
+    - [8.5.2 Arquitetura executável](#852-arquitetura-executável)
+    - [8.5.3 Documentação automática da API](#853-documentação-automática-da-api)
+    - [8.5.4 APIs consumidas pelo front-end](#854-apis-consumidas-pelo-front-end)
+    - [8.5.5 Integrações e limites operacionais](#855-integrações-e-limites-operacionais)
+    - [8.5.6 Banco de dados: artefato disponível e integração pendente](#856-banco-de-dados-artefato-disponível-e-integração-pendente)
+    - [8.5.7 Front-end: componentes e comportamento](#857-front-end-componentes-e-comportamento)
+    - [8.5.8 Back-end: ciclo de processamento](#858-back-end-ciclo-de-processamento)
+    - [8.5.9 Execução e verificação reproduzíveis](#859-execução-e-verificação-reproduzíveis)
   - [8.6 Requisitos das APIs de voz (STT/TTS)](#86-requisitos-das-apis-de-voz-stttts)
     - [8.6.1 Objetivo e delimitação](#861-objetivo-e-delimitação)
     - [8.6.2 Entradas, saídas e formatos](#862-entradas-saídas-e-formatos)
@@ -207,6 +216,7 @@
     - [8.11.7 Testes automatizados](#8117-testes-automatizados)
     - [8.11.8 Desempenho medido](#8118-desempenho-medido)
     - [8.11.9 Situação da integração](#8119-situação-da-integração)
+  - [8.12 Histórico da integração da interface web](#812-histórico-da-integração-da-interface-web)
 - [9. Planejamento e Execução de Testes](#9-planejamento-e-execução-de-testes)
   - [9.1 Testes Funcionais](#91-testes-funcionais)
     - [9.1.1 Estratégia e preparação](#911-estratégia-e-preparação)
@@ -225,6 +235,9 @@
   - [9.3 Testes de Usabilidade](#93-testes-de-usabilidade)
     - [9.3.1 Planejamento dos testes de usabilidade](#931-planejamento-dos-testes-de-usabilidade)
     - [9.3.2 Resultados](#932-resultados)
+  - [9.4 Testes de Integração](#94-testes-de-integração)
+    - [9.4.1 Planejamento](#941-planejamento)
+    - [9.4.2 Resultados](#942-Resultados)
 - [10. Procedimentos de Implantação](#10-procedimentos-de-implantação)
   - [10.1 Implantação e Configuração do Banco de Dados](#101-implantação-e-configuração-do-banco-de-dados)
   - [10.2 Implantação do Protótipo para uso por equipe de desenvolvimento](#102-implantação-do-protótipo-para-uso-por-equipe-de-desenvolvimento)
@@ -3374,7 +3387,7 @@ Ao final da Sprint 5, a entrega esperada é uma solução integrada, demonstráv
 
 ## 8.4 Testes Unitários e de Integração
 
-A Sprint 2 entregou a primeira bateria de testes automatizados do projeto, cobrindo a bancada de teste do caminho de consulta: recuperação de contexto e chamada ao provedor de LLM. A Sprint 3 ampliou a suíte com os testes da API de áudio da Seção 8.7 e os do núcleo de PLN da Seção 8.11, que somam 87 dos 158 testes atuais e estão detalhados na Seção 8.11.7. O plano completo de testes sistêmicos — funcionais, de RNFs, de integração e de usabilidade — é entrega da Sprint 3 e será registrado na Seção 9.
+A Sprint 2 entregou a primeira bateria de testes automatizados do projeto, cobrindo a bancada de teste do caminho de consulta: recuperação de contexto e chamada ao provedor de LLM. A Sprint 3 ampliou a suíte com os testes da API de áudio da Seção 8.7, do núcleo de PLN da Seção 8.11, do pipeline HTTP e da interface integrada. O plano completo de testes sistêmicos — funcionais, de RNFs, de integração e de usabilidade — está na Seção 9.
 
 A tabela abaixo registra a bateria original da Sprint 2, mantida como referência do que cobria o caminho de consulta.
 
@@ -3421,38 +3434,226 @@ app/tests/test_sharepoint_rag.py::test_builds_prompt_with_source_labels_and_disc
 ============================== 10 passed in 0.21s ==============================
 ```
 
-**Resultado da suíte completa após a Sprint 3:** 158 testes, 158 aprovados, em 15,69 s. Os 148 acrescentados desde a bateria acima cobrem a API de recebimento de áudio (61), o pré-processamento (20), a extração de entidades (30), o carregamento do artefato treinado (19) e a inferência do classificador (18).
+**Registro histórico da primeira suíte completa da Sprint 3:** 158 testes, 158 aprovados, em 15,69 s. Os 148 acrescentados desde a bateria original cobriam a API de áudio, o pré-processamento, a extração de entidades, o carregamento do artefato e a inferência.
 
 ```text
 158 passed, 11 warnings in 15.69s
 ```
 
-**Verificação do frontend.** O build executa `tsc --noEmit` antes do empacotamento, o que valida a aderência ao contrato do backend, e o lint roda com `--max-warnings=0`. Ambos passam sem erro nem aviso. Testes unitários por componente e automação de testes de interface são entrega da Sprint 5, conforme a Seção 8.3.3.
+**Verificação atual após a integração da interface.** A execução local em 10 de setembro de 2026 aprovou 171 testes do back-end, 46 testes unitários do front-end e 8 testes de navegador — quatro cenários em desktop e os mesmos quatro em celular. Também passaram lint sem avisos, verificação de formatação e build de produção. A cobertura unitária do front-end foi de 87,10% das linhas, 84,33% das instruções, 73,12% das ramificações e 83,83% das funções. Os comandos, a matriz por comportamento e os limites da evidência estão em `src/frontend/TESTES.md`.
 
-**Cobertura ainda não atingida.** O pipeline de PLN passou a ser testado dentro do serviço, conforme a Seção 8.11.7, e a fronteira HTTP do endpoint de áudio é exercitada com duplos de rede. Continuam descobertos o teste de integração contra o serviço externo real, executado à parte da suíte determinística, e o teste de ponta a ponta que atravessa áudio, transcrição, classificação e resposta — este último depende da exposição do núcleo de PLN em rota HTTP, ainda não implementada, conforme a Seção 8.11.9. Os itens estão registrados no backlog da Seção 6.2 do `GestaoProjeto.md`.
+**Cobertura ainda não atingida.** O teste de navegador atravessa front-end, FastAPI, validação WAV e pipeline, mas substitui Azure, Gemini e classificação nas fronteiras externas. Continuam sem evidência local as chamadas reais aos provedores, autenticação Entra ID, SharePoint corporativo, persistência PostgreSQL, latência de produção e validação manual completa com tecnologia assistiva. Os resultados determinísticos não devem ser usados como aprovação desses itens.
 
-## 8.5 Documentações automáticas
+## 8.5 Documentação de front-end e back-end
 
-O backend é implementado em FastAPI, que gera a especificação OpenAPI a partir dos modelos Pydantic declarados em `app/gemini/schemas.py`. Nenhuma anotação adicional é necessária: os contratos usados em tempo de execução são a mesma fonte que produz a documentação, o que impede que ela divirja do código.
+### 8.5.1 Escopo e estado da implementação
 
-Com o servidor em execução, ficam disponíveis:
+Esta seção descreve a aplicação **que pode ser executada a partir deste repositório**: a bancada web em React, a API FastAPI, o pipeline de classificação e resposta, as integrações externas e o modelo PostgreSQL. O objetivo é permitir que outra pessoa localize cada responsabilidade, reproduza o fluxo e diferencie código operacional de artefatos preparados para etapas futuras.
+
+Para evitar duplicação, os detalhes especializados continuam nas seções já existentes: o modelo de dados está na Seção 4; a arquitetura de implantação, na Seção 6; os contratos e decisões de voz, nas Seções 8.6 a 8.9; o classificador de intenções, nas Seções 8.10 e 8.11; e os testes sistêmicos, na Seção 9. Aqui são registradas as conexões entre esses elementos, o estado real de implementação e os caminhos de reprodução.
+
+O fluxo implementado até esta versão é:
+
+```text
+Navegador React
+  ├─ texto ───────────────► POST /api/chat ─┐
+  └─ WAV + Bearer token ──► POST /api/audio ├─► pipeline.py
+                                  │          │    ├─ classificador local opcional
+                                  └─ Azure STT    ├─ recuperação em JSONs SharePoint simulados
+                                                 └─ Gemini para geração da resposta
+                                                        │
+                                                        ▼
+                                resposta + intenção + fontes + métricas
+```
+
+O `GET /health` verifica se o processo FastAPI terminou de iniciar. O caminho de texto e o caminho posterior à transcrição de áudio convergem em `app/pipeline.py`, portanto classificação, recuperação de contexto e geração não possuem implementações paralelas. O front-end transforma o contrato HTTP em mensagens, fontes, indicadores de intenção e estados de carregamento, mas não acessa Azure ou Gemini diretamente e não recebe suas credenciais.
+
+Não estão conectados ao fluxo em execução: o PostgreSQL, o Microsoft Entra ID, o SharePoint corporativo, o Microsoft Teams, o Copilot Studio, o Power Automate e a execução de transações. O repositório contém o esquema PostgreSQL e dados sintéticos reprodutíveis, enquanto o RAG usa exports JSON locais que simulam listas do SharePoint. Conversas, token da bancada e preferências de resposta permanecem na sessão do navegador; somente o tema pode ser persistido localmente.
+
+### 8.5.2 Arquitetura executável
+
+A visão completa de diretórios está na Seção 8.1. Para acompanhar uma requisição, os pontos de entrada e fronteiras efetivamente usados são:
+
+| Camada | Ponto de entrada | Responsabilidade no fluxo atual |
+| --- | --- | --- |
+| Interface | `src/frontend/src/App.tsx` | Instala os provedores de tema e conversa e monta a aplicação. |
+| Estado do front-end | `src/frontend/src/state/chat-store.tsx` | Mantém conversas em memória, encadeia `previous_interaction_id`, cancela requisições e impede que respostas tardias contaminem outra conversa. |
+| Cliente HTTP | `src/frontend/src/lib/api/` | Serializa JSON ou multipart, aplica prazo máximo, interpreta schemas e converte erros em mensagens seguras. |
+| API | `src/backend/app/main.py` | Expõe saúde, chat e áudio; valida o contrato externo e normaliza erros. |
+| Orquestração | `src/backend/app/pipeline.py` | Executa classificação opcional, resposta controlada fora de escopo e geração fundamentada. |
+| Voz | `src/backend/app/audio/` | Autentica a identidade simulada, limita concorrência, valida WAV e chama o Azure Speech-to-Text. |
+| Recuperação | `src/backend/app/rag/sharepoint.py` | Carrega exports JSON, ranqueia trechos e monta contexto com fontes declaradas. |
+| Geração | `src/backend/app/gemini/` | Chama o Gemini com timeout e retentativas e mapeia texto, uso, latência e fontes. |
+| PLN | `src/backend/app/nlp/` | Carrega artefatos treinados, extrai entidades e classifica macrointenção e intenção específica. |
+| Dados preparados | `src/database/sql/` | Cria, popula e reverte o modelo PostgreSQL ainda não conectado à API. |
+
+Os componentes visuais não chamam `fetch` diretamente; eles acionam operações do estado, que delega ao cliente de `lib/api/`. No back-end, `main.py` não reproduz regras do classificador ou do RAG: encaminha a entrada ao pipeline e converte apenas as falhas previstas em respostas HTTP. Essa separação permite testar a interface, os contratos e cada integração com duplos determinísticos.
+
+### 8.5.3 Documentação automática da API
+
+O FastAPI gera a especificação OpenAPI a partir das rotas de `app/main.py` e dos modelos Pydantic de `app/gemini/schemas.py`, `app/audio/schemas.py` e `app/nlp/schemas.py`. Assim, os contratos validados em execução também alimentam a referência automática.
+
+Com o servidor local na porta padrão, ficam disponíveis:
 
 | Recurso | Endereço local | Conteúdo |
 | --- | --- | --- |
-| Swagger UI | `http://127.0.0.1:8000/docs` | Documentação navegável, com formulário para executar as rotas. |
-| ReDoc | `http://127.0.0.1:8000/redoc` | Referência em formato de leitura, adequada para consulta. |
-| Especificação OpenAPI | `http://127.0.0.1:8000/openapi.json` | Contrato em JSON, utilizável para gerar clientes ou testes de contrato. |
+| Swagger UI | `http://127.0.0.1:8000/docs` | Referência navegável e formulários para executar as rotas. |
+| ReDoc | `http://127.0.0.1:8000/redoc` | Contratos em formato de leitura. |
+| OpenAPI JSON | `http://127.0.0.1:8000/openapi.json` | Especificação utilizável por clientes e testes de contrato. |
 
-Para subir o servidor:
+O título, a descrição e a versão exibidos são definidos na instância `FastAPI` em `app/main.py`. A referência automática demonstra o contrato exposto, mas não substitui as condições de operação registradas a seguir: o teste interativo de áudio exige um token simulado e credenciais válidas do Azure, enquanto o chat que chega ao Gemini requer a respectiva chave.
 
-```bash
-cd src/backend
-.venv/bin/python -m uvicorn app.main:app --reload
+### 8.5.4 APIs consumidas pelo front-end
+
+O front-end consome somente três rotas de mesma origem. Em desenvolvimento, o Vite encaminha `/api` e `/health` para o FastAPI; no build publicado, o servidor responsável pelos arquivos estáticos deve oferecer o mesmo encaminhamento. A variável `API_PROXY_TARGET` muda o destino apenas no servidor de desenvolvimento e nos testes.
+
+| Método e rota | Entrada | Saída utilizada pela interface | Observações de reprodução |
+| --- | --- | --- | --- |
+| `GET /health` | Sem corpo ou autenticação. | `{"status":"ok"}`. | Confirma a inicialização do processo; não testa Azure, Gemini ou a disponibilidade dos dados. |
+| `POST /api/chat` | JSON com `message` (1 a 20.000 caracteres), `previous_interaction_id` opcional e `use_intent_classifier` booleano. | Texto, ID da interação, modelo, latências, consumo, intenção opcional e lista de fontes. | Não exige Bearer token na versão atual. O ID anterior mantém o encadeamento lógico da conversa. |
+| `POST /api/audio` | Multipart com arquivo `audio`; `conversation_id`, `language`, `previous_interaction_id` e `use_intent_classifier` opcionais; cabeçalho `Authorization: Bearer <token>`. | Transcrição, conversa, interação, intenção, resposta resumida, resposta completa em `chat` e `pipeline_status`. | O navegador envia WAV PCM mono, 16 bits e 16 kHz. O back-end revalida o conteúdo e aceita uma requisição simultânea por identidade. |
+
+Uma chamada textual pode ser reproduzida sem o front-end, depois de iniciar o FastAPI e configurar o Gemini:
+
+```powershell
+$body = @{
+  message = "Qual é o status do projeto de sinalização?"
+  previous_interaction_id = $null
+  use_intent_classifier = $false
+} | ConvertTo-Json
+
+$response = Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/chat `
+  -ContentType "application/json" `
+  -Body $body
+
+$response | Select-Object text, interaction_id, model, latency_ms, retrieval_ms
+$response.sources | Select-Object id, title, list_name, web_url, score
 ```
 
-O título, a descrição e a versão exibidos são os declarados na instância `FastAPI` em `app/main.py`. Quando o endpoint de áudio da Seção 8.7 for implementado na Sprint 3, ele passará a aparecer automaticamente nas três interfaces, sem edição manual de documentação.
+O resultado esperado é um objeto com `text`, métricas e `sources`; a lista pode estar vazia quando nenhum trecho ultrapassa o critério de relevância. Para testar o encadeamento, envie o `interaction_id` recebido como `previous_interaction_id` na chamada seguinte. O multipart de áudio já possui exemplo completo na Seção 8.7.4 e pode ser exercitado sem montar o corpo manualmente pelo Swagger UI.
 
-No frontend não há geração automática de documentação: a descrição de estrutura, componentes e instruções de uso é entrega da Sprint 3, registrada no backlog da Seção 6.2 do `GestaoProjeto.md`.
+No chat, `use_intent_classifier=false` encaminha a mensagem diretamente à recuperação e à geração. Quando o campo é `true`, o pipeline classifica primeiro: solicitações fora de escopo ou abaixo dos limiares recebem uma resposta controlada sem chamada ao Gemini; solicitações roteadas seguem para o mesmo caminho RAG. A resposta pode, portanto, não possuir `interaction_id`, e o front-end mantém nesse caso o último ID válido da conversa.
+
+No áudio, a ordem é validação, transcrição no Azure e chamada ao mesmo `process_message` usado pelo chat. `conversation_id` identifica a conversa da interface, enquanto `interaction_id` vem do processamento textual. O objeto legado `answer` oferece texto e referências resumidas; `chat` preserva o contrato completo do endpoint textual, inclusive métricas, trecho recuperado e metadados das fontes.
+
+As fontes completas contêm identificador, título, lista de origem, URL, data de alteração, pontuação e trecho opcional. A interface não cria referências quando a API devolve uma lista vazia. Os detalhes do multipart, limites de áudio e códigos específicos estão nas Seções 8.7 e 8.8, evitando repetir aqui a especificação de voz.
+
+O cliente aplica limite de 120 segundos e permite cancelamento por `AbortController`. Cancelar interrompe a espera no navegador e impede que uma resposta tardia altere o estado atual; isso não garante o cancelamento de uma chamada que o back-end ou um provedor já tenha recebido. Erros conhecidos de validação, autenticação, limite, concorrência, provedor e rede são convertidos em mensagens próprias. HTML de proxy, traceback e mensagens privadas dos provedores não são exibidos à pessoa usuária.
+
+### 8.5.5 Integrações e limites operacionais
+
+| Integração | Implementação atual | Configuração ou fonte | Limite conhecido |
+| --- | --- | --- | --- |
+| Azure AI Speech | `audio/transcription.py` envia o WAV validado para transcrição `pt-BR`, com timeout e retentativas. | `AZURE_SPEECH_RESOURCE` ou `AZURE_SPEECH_ENDPOINT`, `AZURE_SPEECH_KEY`, timeout e número de tentativas no `.env` do back-end. | Exige credencial e rede; a suíte padrão substitui a fronteira HTTP por duplo. |
+| Gemini | `gemini/client.py` gera a resposta a partir da pergunta e do contexto recuperado, com timeout e backoff. | `GEMINI_API_KEY`, modelo, limite de saída, nível de raciocínio, timeout e retentativas. | Sem chave, o chat que precisa de geração devolve indisponibilidade controlada. |
+| RAG de SharePoint simulado | `rag/sharepoint.py` pesquisa exports JSON versionados e inclui rótulos de fonte no prompt. | `rag/data/sharepoint/` ou `SHAREPOINT_MOCK_DATA_DIR`. | Não acessa o tenant corporativo nem sincroniza alterações do SharePoint. |
+| Classificador local | `nlp/` carrega o `joblib`, Word2Vec e encoder ONNX; `PLN_WARMUP=1` antecipa a carga. | Artefatos em `src/notebooks/artefatos/`; encoder obtido do repositório de modelo indicado na Seção 8.11. | A primeira instalação/carga pode exigir internet e cache local; não executa transações. |
+| Identidade do áudio | `audio/security.py` resolve o Bearer token por um mapa simulado e limita uma transcrição ativa por identidade. | `AUDIO_SIMULATED_IDENTITIES`, por exemplo `token-local=usuario-local`. | Não valida JWT do Entra ID e não aplica as regras da tabela `access_rules`. |
+
+O SharePoint corporativo, Entra ID, Teams, Copilot Studio e Power Automate aparecem nos desenhos e no modelo-alvo, mas não possuem adaptador ativo nesta versão. Em particular, classificar uma solicitação como transacional não executa escrita externa: o resultado apenas descreve a intenção. Essa distinção evita interpretar a bancada como um canal de produção ou como evidência de autorização corporativa.
+
+### 8.5.6 Banco de dados: artefato disponível e integração pendente
+
+O modelo físico descrito na Seção 4.3 está implementado em `src/database/sql/01_create_database.sql` para PostgreSQL 14 ou superior, inclusive Supabase PostgreSQL. São 25 tabelas com UUIDs gerados por `pgcrypto`, chaves estrangeiras, restrições de domínio, índices para os caminhos previstos e `JSONB` para metadados cuja estrutura ainda pode evoluir. A relação completa de tabelas e as decisões de modelagem permanecem em `src/database/docs/README.md` para não repetir o dicionário da Seção 4.
+
+Os três scripts têm responsabilidades separadas e ordem explícita:
+
+1. `01_create_database.sql` cria extensões, tabelas, restrições, índices, gatilhos de `updated_at` e comentários;
+2. `02_initial_data.sql` insere um subportfólio e um projeto sintéticos, artefato, TAP, benefício, avanço, marco, risco e catálogo mínimo de intenções;
+3. `03_rollback_data.sql` remove o baseline em ordem reversa de dependência e deve ser usado somente em ambiente descartável ou depois de backup.
+
+Com um PostgreSQL acessível e `psql` no `PATH`, a criação e a carga podem ser reproduzidas da raiz do repositório:
+
+```powershell
+$env:DATABASE_URL = "postgresql://usuario:senha@localhost:5432/metro_poc"
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/01_create_database.sql
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/02_initial_data.sql
+```
+
+Em um banco vazio dedicado à PoC, confirme o baseline e a carga sem depender de uma ferramenta gráfica:
+
+```powershell
+psql "$env:DATABASE_URL" -c "SELECT COUNT(*) AS tabelas_public FROM pg_tables WHERE schemaname = 'public';"
+psql "$env:DATABASE_URL" -c "SELECT code, title, status FROM public.projects WHERE code = 'PRJ-0442';"
+psql "$env:DATABASE_URL" -c "SELECT macro_intent, COUNT(*) FROM public.intent_catalog GROUP BY macro_intent ORDER BY macro_intent;"
+```
+
+O primeiro comando deve informar 25 tabelas em um schema `public` inicialmente vazio. O segundo deve devolver o projeto sintético `PRJ-0442`, e o terceiro deve listar as macrointenções da carga mínima. Falha em qualquer uma dessas consultas indica que criação e carga não terminaram conforme o esperado; não avance para uma integração antes de corrigir o primeiro erro reportado por `ON_ERROR_STOP`.
+
+A opção `ON_ERROR_STOP` faz o processo terminar na primeira falha em vez de continuar com uma instalação parcial. A carga usa conflitos controlados e verificações de existência para que uma nova execução atualize ou preserve os registros sintéticos esperados, em vez de duplicá-los.
+
+O banco é, nesta versão, um **artefato executável isolado**: o back-end não lê `DATABASE_URL`, não abre conexão PostgreSQL e não persiste conversas, interações, fontes ou auditoria. Também não há migração automatizada nem integração Supabase ativa. Até que um adaptador seja implementado, a resposta do agente vem dos JSONs simulados do SharePoint, e a interface mantém o histórico apenas em memória. Essa fronteira é importante para reproduzir o que existe sem pressupor uma persistência ainda não entregue.
+
+### 8.5.7 Front-end: componentes e comportamento
+
+A bancada usa React 19, TypeScript e Vite. `App.tsx` instala `ThemeProvider` e `ChatProvider`; `AppShell` organiza a barra de conversas, o chat e o painel de documentos. A implementação detalhada de cada componente está em `src/frontend/README.md`; o mapa abaixo registra como as pastas colaboram sem repetir a lista de arquivos da Seção 8.1.
+
+| Área | Responsabilidade observável |
+| --- | --- |
+| `components/sidebar/` | Criação, busca, seleção e exclusão de conversas da sessão, além do token simulado usado somente no áudio. |
+| `components/chat/` | Estado vazio, histórico de mensagens, Markdown seguro, classificação, fontes e indicação de processamento. |
+| `components/composer/` | Entrada de texto, alternância da validação de intenção, captura, prévia, descarte e envio de áudio. |
+| `components/documents/` | Lista de fontes, trecho recuperado, link original e métricas da resposta selecionada. |
+| `components/layout/` e `components/ui/` | Layout responsivo, tema, diálogos, abas e controles acessíveis reutilizáveis. |
+| `hooks/`, `lib/` e `state/` | Microfone, conversão WAV, domínio, cliente HTTP, reducer, concorrência e cancelamento. |
+
+A rastreabilidade entre ação, estado e contrato ajuda a localizar uma alteração sem percorrer toda a árvore:
+
+| Ação na interface | Operação de estado | Fronteira chamada | Resultado renderizado |
+| --- | --- | --- | --- |
+| Enviar texto | `sendMessage` delega ao fluxo comum `send` | `sendChatMessage` em `lib/api/chat.ts` | Mensagem da pessoa, resposta, intenção, fontes e métricas. |
+| Enviar gravação | `sendAudio` delega ao mesmo `send` | `uploadAudio` em `lib/api/audio.ts` | Transcrição como entrada e `chat` como resposta do agente. |
+| Interromper | `stop` aborta o controlador pendente | `AbortSignal` recebido pelo cliente comum | O indicador termina e nenhuma resposta tardia é aplicada. |
+| Trocar ou excluir conversa | `selectConversation` ou `deleteConversation` despacha no reducer | Nenhuma chamada HTTP | Histórico, fontes e documento selecionado mudam apenas na sessão. |
+| Abrir uma fonte | seleção derivada de `activeSources` | Nenhuma nova chamada HTTP | `DocumentViewer` mostra metadados e o trecho já devolvido pela API. |
+
+Essa cadeia também define onde testar: componentes verificam a apresentação, a store verifica concorrência e associação à conversa, o cliente verifica serialização e erros, e o Playwright atravessa as quatro camadas pelo comportamento observável.
+
+O envio por texto aceita uma sugestão ou mensagem digitada, usa `Enter` para enviar e `Shift+Enter` para nova linha. O envio por voz requer o token da bancada, permissão do microfone, conclusão da gravação e confirmação da prévia. A captura para em 60 segundos; o navegador converte o sinal para o formato aceito antes do upload. Durante qualquer chamada, a interface bloqueia duplicidade e oferece interrupção.
+
+Cada conversa mantém seu último `interaction_id`, mensagens, fontes e preferências enquanto a página permanece aberta. Criar ou selecionar outra conversa cancela a espera corrente, e o identificador interno da requisição impede que um retorno atrasado seja inserido no destino errado. A busca e a exclusão alteram apenas o estado local. Recarregar a página remove histórico e token; o tema é a única preferência com persistência prevista.
+
+No desktop, as três áreas ficam lado a lado. Abaixo de 1024 px, conversas e documentos abrem em diálogos que podem ser fechados com `Escape`. Estados de carregamento e mudanças relevantes possuem anúncios para tecnologias assistivas, os controles têm nomes acessíveis e o foco retorna ao contexto apropriado ao fechar um diálogo. Essas propriedades fazem parte dos testes descritos em `src/frontend/TESTES.md`, não apenas do desenho visual.
+
+### 8.5.8 Back-end: ciclo de processamento
+
+O back-end usa FastAPI e Pydantic. Na inicialização, `lifespan` lê `PLN_WARMUP`: quando igual a `1`, o classificador é carregado em uma thread antes de o serviço aceitar consultas; quando igual a `0`, a carga ocorre na primeira classificação. O carregamento é protegido por lock para evitar inicializações concorrentes.
+
+Em `POST /api/chat`, Pydantic remove espaços externos e rejeita mensagem vazia ou acima de 20.000 caracteres. `process_message` classifica somente quando solicitado. Uma classificação não roteável encerra o fluxo com uma resposta local e segura; as demais entradas seguem para recuperação de contexto e Gemini. Erros de configuração ou do provedor são convertidos em indisponibilidade ou falha controlada, sem expor detalhes internos.
+
+Em `POST /api/audio`, a identidade simulada é resolvida antes da leitura. O arquivo é lido em blocos de 64 KiB e interrompido assim que ultrapassa o teto, evitando manter em memória um upload que será recusado. Depois da validação e do Azure STT, a transcrição é entregue ao mesmo pipeline do chat por meio de uma thread, para não bloquear o laço assíncrono. A resposta combina o resultado de voz com o contrato completo do chat.
+
+O RAG carrega dados sintéticos substituíveis por diretório, pontua a correspondência e injeta somente resultados relevantes com identificação da fonte. O cliente Gemini controla timeout e retentativas de falhas transitórias. Nenhuma dessas etapas grava no banco; logs de auditoria, persistência e autorização por perfil continuam como fronteiras de implementação futuras.
+
+Para isolar uma falha sem confundir disponibilidade do processo com disponibilidade dos provedores, use os checkpoints na ordem:
+
+| Checkpoint | O que comprova | O que ainda não comprova |
+| --- | --- | --- |
+| `GET /health` | FastAPI terminou a inicialização; com `PLN_WARMUP=1`, a carga inicial do classificador também terminou. | Credenciais, cota ou rede de Azure e Gemini. |
+| `POST /api/chat` com classificador desligado | Validação JSON, RAG local, montagem do prompt e fronteira Gemini. | Encoder e limiares do classificador. |
+| `POST /api/chat` com classificador ligado | Carga do modelo, inferência, limiares e roteamento antes da geração. | Captura, WAV e Azure STT. |
+| `POST /api/audio` | Identidade simulada, concorrência, leitura limitada, validação WAV, Azure STT e reutilização do pipeline. | Autenticação Entra ID e persistência. |
+| Resposta com `sources` | Recuperação dos JSONs, metadados e propagação até o contrato. | Consulta ao SharePoint corporativo. |
+
+Se um checkpoint falhar, teste primeiro o anterior e consulte o corpo controlado da resposta. Os testes determinísticos reproduzem cada fronteira com duplos; uma validação do provedor real deve ser executada separadamente, pois depende de credenciais, rede, cota e região.
+
+### 8.5.9 Execução e verificação reproduzíveis
+
+O passo a passo completo, incluindo pré-requisitos, configuração sem credenciais versionadas, inicialização dos dois serviços, banco opcional, teste manual e solução de problemas, está em `docs/Manual-instalacao.md`. A sequência mínima parte da raiz:
+
+```powershell
+python -m venv .venv
+.venv/Scripts/python.exe -m pip install -r src/backend/requirements.txt -r src/backend/requirements-pln.txt
+Copy-Item src/backend/.env.example src/backend/.env
+Set-Location src/frontend
+npm ci
+```
+
+Depois de preencher o `.env` local, o back-end deve ser iniciado na porta 8000 e o Vite na 5173, em terminais separados. `GET /health` deve devolver `status=ok` antes do uso. A referência automática fica em `/docs`; a interface, em `http://localhost:5173`.
+
+As verificações locais são `pytest` para o back-end e, no front-end, lint, formatação, cobertura, build e Playwright. Os comandos e resultados de referência estão em `src/frontend/TESTES.md`. Os testes automatizados substituem Azure e Gemini por duplos na fronteira de rede; por isso são reproduzíveis sem credenciais, mas não comprovam integrações corporativas nem os RNFs dependentes do ambiente de produção.
 
 ## 8.6 Requisitos das APIs de voz (STT/TTS)
 
@@ -3559,7 +3760,9 @@ Content-Length: <TAMANHO>
 |---|:---:|---|
 | `audio` | Sim | Arquivo binário de áudio. A extensão e o `Content-Type` informado no formulário não substituem a validação do conteúdo do arquivo. |
 | `conversation_id` | Não | Texto que identifica uma conversa existente. É devolvido sem alteração; se ausente, a API gera um UUID. |
-| `language` | Não | Idioma a ser enviado à futura integração STT. O padrão é `pt-BR`. |
+| `language` | Não | Idioma enviado ao Azure Speech-to-Text. O padrão é `pt-BR`. |
+| `previous_interaction_id` | Não | Identificador da interação anterior para preservar o contexto lógico do chat. |
+| `use_intent_classifier` | Não | Booleano que habilita a classificação local antes da geração; o padrão é `false`. |
 
 Exemplo com cURL:
 
@@ -3568,7 +3771,8 @@ curl --request POST \
   --url https://<HOST-DA-APLICACAO>/api/audio \
   --header 'Authorization: Bearer <TOKEN>' \
   --form 'audio=@pergunta.wav;type=audio/wav' \
-  --form 'conversation_id=1f5c9a24-1c2e-4a8f-9a3e-2b6d8c0f1a77'
+  --form 'conversation_id=1f5c9a24-1c2e-4a8f-9a3e-2b6d8c0f1a77' \
+  --form 'use_intent_classifier=true'
 ```
 
 ### 8.7.5 Resposta de sucesso
@@ -3650,8 +3854,35 @@ rota segura.
     "sources": []
   },
   "answer": {
-    "text": "O prazo do projeto XPTO consta nas fontes recuperadas para esta consulta.",
-    "sources": []
+    "text": "O projeto está em andamento.",
+    "sources": [
+      { "artifact": "Status do projeto", "section": "base_atendimento" }
+    ]
+  },
+  "chat": {
+    "text": "O projeto está em andamento.",
+    "model": "gemini-3.7-flash",
+    "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
+    "latency_ms": 840,
+    "retrieval_ms": 12,
+    "usage": { "input_tokens": 120, "output_tokens": 34, "thought_tokens": 0, "total_tokens": 154 },
+    "sources": [
+      {
+        "id": "status-projeto-01",
+        "title": "Status do projeto",
+        "list_name": "base_atendimento",
+        "web_url": "https://mock.sharepoint.local/status-projeto-01",
+        "last_modified": "2026-08-26T12:00:00Z",
+        "score": 4.2,
+        "excerpt": "Projeto em andamento."
+      }
+    ],
+    "intent": {
+      "macro": "CONSULTA",
+      "specific": "consulta_status_projeto",
+      "confidence_macro": 0.97,
+      "confidence_specific": 0.91
+    }
   },
   "pipeline_status": "completed"
 }
@@ -4839,15 +5070,9 @@ Exemplo resumido do contrato textual exposto por `POST /api/chat`:
 
 A Seção 8.4 registra a cobertura de teste correspondente e o que continua descoberto.
 
-## 8.12 Integração da interface web — S3/S5 (#131)
+## 8.12 Histórico da integração da interface web
 
-A bancada em React integra o envio de texto e de áudio às APIs FastAPI, apresenta transcrição, resposta, fontes e classificação, e trata carregamento, cancelamento e falhas. A implementação preserva o contexto por conversa e converte a gravação do navegador para WAV PCM mono a 16 kHz antes do envio. O backend usa o mesmo pipeline de resposta para as duas entradas.
-
-A [documentação da interface](../src/frontend/README.md) registra estrutura e componentes, navegabilidade desktop/móvel, decisões de implementação, contratos HTTP, configuração e instruções de uso. A [matriz de testes e resultados](../src/frontend/TESTES.md) registra casos por componente, integração, áudio, falhas, acessibilidade e cobertura, distinguindo testes determinísticos de validação com serviços externos.
-
-Esta entrega cobre a comunicação com as APIs de texto e áudio disponíveis e a bancada web para testá-las. Não substitui o canal Microsoft Teams, a autenticação Entra ID, a persistência de conversas ou a conexão com dados corporativos. Os resultados automatizados não devem ser interpretados como aprovação dos RNFs dependentes desses ambientes.
-
-Atualização da integração: as lacunas de exposição HTTP e inicialização descritas em 8.11.9 correspondem ao estado anterior à issue #131. Agora, texto e áudio alcançam o pipeline compartilhado e o carregamento inicial é controlado por PLN_WARMUP. Persistência e validação com serviços corporativos continuam pendentes.
+A issue #131 conectou a bancada React aos endpoints de texto e áudio, unificou ambos no pipeline de resposta e acrescentou os testes de componentes, contratos e navegador. A documentação operacional consolidada está na Seção 8.5 e no `src/frontend/README.md`; as evidências permanecem em `src/frontend/TESTES.md`. Esta nota histórica é mantida para rastreabilidade da entrega, sem repetir contratos, componentes ou instruções de execução.
 
 
 # 9. Planejamento e Execução de Testes
@@ -5157,6 +5382,54 @@ Os resultados dos testes de usabilidade ainda não foram consolidados. Após a e
 - melhorias priorizadas para a evolução do agente.
 
 Os dados brutos serão registrados na planilha "Oneshot - Testes de Usabilidade - Agente de Gestão de Portifólio", que organiza cada cenário em etapas observáveis e mantém uma aba específica para ocorrências. O formulário SUS será utilizado como fonte complementar para medir a percepção geral de usabilidade após a experiência prática com o agente. A consolidação final deverá cruzar os registros da planilha com as respostas do SUS, permitindo identificar quais cenários tiveram maior taxa de sucesso, quais etapas concentraram dificuldades e quais problemas devem ser priorizados na evolução do agente.
+
+---
+
+## 9.4 Testes de Integração
+
+### 9.4.1 Planejamento
+
+O plano de testes de integração com o módulo de VHS será desenvolvido na Sprint 3, cobrindo a fronteira entre `app.audio.transcription` e o provedor externo de Speech-to-Text (Azure AI Speech, Seção 8.8). O objetivo é comprovar que os componentes se comunicam de forma verificável e que o VHS evita chamadas repetidas ao provedor externo para uma mesma requisição, sem que a suíte padrão dependa do serviço real estar disponível a cada execução — o mesmo princípio já adotado para Gemini e SharePoint na Seção 8.4, aplicado agora à integração de voz.
+
+Das três integrações externas mencionadas no item 3 do artefato — Speech-to-Text, banco de dados e canal do Copilot Studio —, este plano cobre apenas a primeira. É a única que hoje conta com mecanismo de cache obrigatório e a única cuja integração está prevista no backlog da Sprint 3/4; banco e Copilot Studio ainda não têm client implementado no backend, e o planejamento dos testes correspondentes fica para quando essa integração existir.
+
+#### Mecanismo de cache do VHS
+
+O VHS funciona no modelo de cassete: na primeira vez que um áudio é enviado (cache *miss*), o módulo chama o provedor externo normalmente, grava a resposta recebida associada a uma chave, e devolve essa resposta ao chamador. Em qualquer requisição seguinte cuja chave já exista no cache (cache *hit*), o VHS devolve a resposta gravada diretamente, sem realizar nova chamada ao provedor externo — é essa ausência de nova chamada, e não apenas a igualdade das respostas, que os testes precisam comprovar.
+
+A chave de cache identifica o conteúdo a ser transcrito — um hash do áudio combinado ao idioma — e não metadados de sessão como `conversation_id`: dois usuários enviando o mesmo áudio compartilham o cache, e o mesmo usuário enviando áudios diferentes não reaproveita uma resposta que não corresponde ao novo conteúdo. Respostas de erro do provedor (falha de conexão ou indisponibilidade) não são gravadas como cassete: cada nova tentativa após um erro deve acionar o provedor de novo, e não repetir a falha a partir do cache.
+
+#### Ferramentas e instruções de execução
+
+A execução automatizada segue `pytest` com `fastapi.testclient.TestClient`, na mesma linha já adotada para os testes de integração existentes (Seção 8.4). O provedor externo é sempre substituído por um duplo de teste (`monkeypatch` sobre o ponto de chamada em `app.audio.transcription`) que conta quantas vezes foi efetivamente invocado; nenhum teste desta suíte realiza chamada de rede real ao Azure AI Speech.
+
+Execução prevista: `pytest src/backend/app/tests/test_vhs_integration.py -v`, a partir de `src/backend`, com o ambiente virtual do projeto ativo (conforme `Manual-instalacao.md`). Cada teste deve iniciar com o cache do VHS vazio, usando uma fixture de limpeza equivalente a `reset_concurrency_control` de `test_audio_upload.py`, para que a ordem de execução não influencie o resultado.
+
+#### Cenários de teste (positivos e negativos)
+
+| Cenário | Tipo | Resultado esperado |
+|---|:---:|---|
+| Primeira requisição para um áudio novo | Positivo (comunicação) | Provedor chamado 1 vez; resposta registrada no cache |
+| Requisição repetida com o mesmo áudio | Positivo (cache) | Provedor **não** é chamado de novo; resposta idêntica à primeira; contador de chamadas ao duplo permanece em 1 |
+| Requisição com áudio diferente | Positivo (chave de cache) | Provedor chamado novamente, sem colisão de chave |
+| Cache expirado (TTL vencido) | Positivo (expiração) | Provedor chamado novamente após o TTL; antes do TTL, não |
+| Erro de conexão do provedor (`SttProviderError`) | Negativo (falha externa) | Endpoint responde 502 `STT_PROVIDER_ERROR`; erro não é cacheado; nova tentativa do mesmo áudio chama o provedor de novo |
+| Provedor indisponível (`SttProviderUnavailable`) | Negativo (indisponibilidade) | Endpoint responde 503 `STT_PROVIDER_UNAVAILABLE`; erro não é cacheado |
+| Recuperação após falha anterior no mesmo áudio | Negativo → Positivo | Requisição seguinte chama o provedor normalmente (falha não fica presa no cache) e, a partir daí, passa a cachear a resposta com sucesso |
+
+#### Comportamento esperado diante de erro externo
+
+Diante de qualquer falha do provedor de STT, o comportamento esperado do sistema é: (1) o endpoint mapeia a exceção para o código HTTP já definido no contrato (502 para `SttProviderError`, 503 para `SttProviderUnavailable`); (2) a mensagem de erro devolvida ao cliente não expõe detalhe técnico interno da falha, seguindo o mesmo padrão de mensagens controladas já testado em `TestControlledErrorMessages`; (3) o VHS não grava a falha como se fosse uma resposta válida, para que o sistema volte a tentar o provedor real na próxima requisição em vez de repetir um erro obsoleto indefinidamente.
+
+#### Validação dos resultados
+
+A evidência de que o cache está funcionando é o contador de chamadas do duplo de teste: um cenário de cache hit só passa se esse contador permanecer em 1 após duas ou mais requisições do mesmo áudio. A evidência de que erros não são cacheados é o mesmo contador voltando a incrementar em uma nova tentativa após uma falha. Os resultados da execução (saída do `pytest`, com contagem de testes passando/falhando) devem ser anexados como evidência na issue de execução da Sprint 4, junto com o relatório de cobertura, se disponível.
+
+A execução real desta suíte depende da integração com o Azure AI Speech sair do estágio de stub em que se encontra hoje (task 11 do backlog). Isso está alinhado com a Seção 6.2 do `GestaoProjeto.md`, que trata o planejamento de testes como frente independente da cadeia crítica de implementação: o plano pode ser escrito e a suíte pode rodar com o duplo de teste desde já, e só troca de alvo real quando o provedor estiver integrado.
+
+### 9.4.2 Resultados
+
+Será executado na Sprint 4.
 
 # 10. Procedimentos de Implantação
 
