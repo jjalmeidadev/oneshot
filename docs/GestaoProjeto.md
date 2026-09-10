@@ -926,7 +926,7 @@ Regras de entrada no board:
 - nenhuma task pode crescer além de G; se crescer, volta para `Open` e é dividida;
 - implementação, teste automatizado direto e documentação específica permanecem na mesma task quando produzem um único resultado verificável; o DoD deve atualizar o trecho correspondente do `Projeto.md`, exemplos de API e a fonte `.puml` e imagem do diagrama quando aplicável, sem abrir um card apenas para documentar a mesma implementação;
 - uma integração só fecha com evidência que atravesse os componentes envolvidos;
-- aplicar exatamente uma label de cada eixo vigente: tipo (`FEATURE`, `BUG FIX` ou `DOCUMENTATION`), tamanho (`SIZE_PP`, `SIZE_P`, `SIZE_M` ou `SIZE_G`) e prioridade (`PRIORIDADE ALTA`, `PRIORIDADE MÉDIA` ou `PRIORIDADE BAIXA`); a frente técnica é informada pelo agrupamento da tabela.
+- aplicar labels existentes no projeto: natureza (`FEATURE`, `BUG` ou `DOCS`, conforme a coluna **Tipo GitLab**), tamanho (`SIZE_P`, `SIZE_M` ou `SIZE_G`) e exatamente uma prioridade (`PRIORIDADE ALTA`, `PRIORIDADE MÉDIA` ou `PRIORIDADE BAIXA`), além da frente ou do artefato quando aplicável; `SIZE_PP` ainda não existe no GitLab e deve ser criado antes de uma estimativa PP ser materializada.
 
 ### 6.4.2 Backlog refinado por resultado
 
@@ -934,10 +934,10 @@ Regras de entrada no board:
 
 | ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Executor | Revisor | DoR | DoD |
 | :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- |
-| S4-01 | Resolver os conflitos do `README.md` | BUG FIX | M | Alta | Henrique | Leonardo | Versões conflitantes comparadas com a execução atual | Texto único revisado, sem marcador e com instruções coerentes |
-| S4-02 | Resolver os conflitos do `.gitignore` e do `pre-commit` | BUG FIX | M | Alta | Henrique | Leonardo | Regras válidas identificadas | Arquivos sem marcador; exceções de arquivo e hook validadas |
-| S4-03A | Resolver o diagrama de componentes e regenerar a imagem | BUG FIX | M | Média | Henrique | Leonardo | Arquitetura vigente conferida no `Projeto.md` | `.puml` válido, sem marcador, e imagem correspondente atualizada |
-| S4-03B | Resolver o conflito do notebook do classificador | BUG FIX | M | Alta | Pedro | Jaime | Lados do conflito e execução de referência identificados | Notebook é JSON válido, abre sem erro e preserva a execução de referência |
+| S4-01 | Resolver os conflitos do `README.md` | BUG | M | Alta | Henrique | Leonardo | Versões conflitantes comparadas com a execução atual | Texto único revisado, sem marcador e com instruções coerentes |
+| S4-02 | Resolver os conflitos do `.gitignore` e do `pre-commit` | BUG | M | Alta | Henrique | Leonardo | Regras válidas identificadas | Arquivos sem marcador; exceções de arquivo e hook validadas |
+| S4-03A | Resolver o diagrama de componentes e regenerar a imagem | BUG | M | Média | Henrique | Leonardo | Arquitetura vigente conferida no `Projeto.md` | `.puml` válido, sem marcador, e imagem correspondente atualizada |
+| S4-03B | Resolver o conflito do notebook do classificador | BUG | M | Alta | Pedro | Jaime | Lados do conflito e execução de referência identificados | Notebook é JSON válido, abre sem erro e preserva a execução de referência |
 | S4-04 | Implementar gate exato de marcadores e registrar a linha de base | FEATURE | G | Alta | Henrique | Leonardo | S4-01 a S4-03B concluídas | Hook e servidor bloqueiam marcadores reais, aceitam `================ 10 passed...` e registram comandos, versões, resultados e bloqueios de backend, frontend e banco |
 | S4-05 | Configurar validação automática do título de MR | FEATURE | M | Média | Henrique | Leonardo | Acesso do projeto verificado | Regra do GitLab ativa ou job equivalente bloqueia título inválido e aceita o padrão documentado |
 
@@ -984,7 +984,7 @@ Regras de entrada no board:
 
 | ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Executor | Revisor | DoR | DoD |
 | :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- |
-| S4-27 | Configurar e documentar desenvolvimento e produção em nuvem | DOCUMENTATION | G | Média | Henrique | Leonardo | Restrições da Seção 6 do `Projeto.md` e acessos conhecidos | Destino temporário, separação dos ambientes, procedimento de configuração, origem de cada variável e consumidores ficam reproduzíveis e sem segredo |
+| S4-27 | Configurar e documentar desenvolvimento e produção em nuvem | DOCS | G | Média | Henrique | Leonardo | Restrições da Seção 6 do `Projeto.md` e acessos conhecidos | Destino temporário, separação dos ambientes, procedimento de configuração, origem de cada variável e consumidores ficam reproduzíveis e sem segredo |
 | S4-28 | Publicar e documentar o backend manualmente | FEATURE | G | Alta | Henrique | Leonardo | S4-04, S4-12 e S4-27 | URL temporária responde `/health` e um caso textual real; script ou comandos de implantação e limitações observadas ficam versionados |
 | S4-29 | Publicar e documentar o frontend apontando para o backend | FEATURE | G | Média | Felipe | Wendel | S4-14B, S4-28 e build local válido | Interface publicada completa o caminho textual mínimo; configuração e execução ficam reproduzíveis |
 | S4-30 | Executar smoke test e validar rollback manual | FEATURE | G | Alta | Henrique | Leonardo | S4-28, S4-29 e versão anterior identificada | Saúde, texto, persistência e erro controlado têm evidência; procedimento documentado restaura a versão anterior |
@@ -1001,7 +1001,7 @@ Regras de entrada no board:
 | S4-34 | Executar RNF04 | FEATURE | G | Alta | Leonardo | Henrique | Amostra congelada com pelo menos 20 perguntas | Fundamentação e alucinação são calculadas nos cenários positivo e negativo, sem seleção posterior de casos |
 | S4-35 | Executar desempenho RNF05 | FEATURE | G | Alta | Jaime | Pedro | Locust e ambiente estável | Rodadas positivas de 1 e 5 usuários e violação controlada registram P95, erros e comportamento com cache frio e quente |
 | S4-36 | Reexecutar o benchmark do RNF06 | FEATURE | M | Alta | Jaime | Pedro | Dependências disponíveis e massa de avaliação congelada | Comando reproduz F1 e recall do classificador; versão, resultado e eventual valor abaixo de 0,80 são publicados sem alterar a amostra após a medição |
-| S4-39 | Preparar participantes e instrumentos de usabilidade | DOCUMENTATION | M | Média | Felipe | Wendel | Interface demonstrável e roteiro aprovado | Ao menos cinco participantes externos à turma, com diversidade de perfil e familiaridade tecnológica, são confirmados; cenários, consentimento, ambiente, planilha e SUS ficam prontos |
+| S4-39 | Preparar participantes e instrumentos de usabilidade | DOCS | M | Média | Felipe | Wendel | Interface demonstrável e roteiro aprovado | Ao menos cinco participantes externos à turma, com diversidade de perfil e familiaridade tecnológica, são confirmados; cenários, consentimento, ambiente, planilha e SUS ficam prontos |
 | S4-40 | Conduzir usabilidade com participantes 1 e 2 | FEATURE | G | Média | Felipe | Wendel | S4-39 | Duas sessões e respostas SUS anonimizadas registradas |
 | S4-41 | Conduzir usabilidade com participantes 3 a 5 | FEATURE | G | Média | Leonardo | Henrique | S4-39 | Três sessões e respostas SUS anonimizadas registradas |
 | S4-42 | Consolidar SUS, falhas e retestes críticos | FEATURE | G | Alta | Wendel | Felipe | S4-32A a S4-36 e S4-39 a S4-41 | Relatório separa aprovado, falhou, bloqueado e não executado; defeitos críticos são corrigidos ou têm impedimento e reteste |
@@ -1010,23 +1010,23 @@ Regras de entrada no board:
 
 | ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Executor | Revisor | DoR | DoD |
 | :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- |
-| S4-46 | Planejar narrativa, sequência, responsáveis, métricas e evidências da Sprint Review | DOCUMENTATION | M | Média | Leonardo | Henrique | Incremento demonstrável e inventário preliminar de evidências | Objetivo, três mensagens, sequência e transições ficam definidos; cada evidência possui origem, versão e leitura correta |
-| S4-47 | Construir o material e validar a contingência técnica | DOCUMENTATION | G | Média | Felipe | Wendel | S4-46 | Material textual e visual apresenta incremento, resultados, riscos e próximos passos; capturas substituem dependências externas e links são verificados |
+| S4-46 | Planejar narrativa, sequência, responsáveis, métricas e evidências da Sprint Review | DOCS | M | Média | Leonardo | Henrique | Incremento demonstrável e inventário preliminar de evidências | Objetivo, três mensagens, sequência e transições ficam definidos; cada evidência possui origem, versão e leitura correta |
+| S4-47 | Construir o material e validar a contingência técnica | DOCS | G | Média | Felipe | Wendel | S4-46 | Material textual e visual apresenta incremento, resultados, riscos e próximos passos; capturas substituem dependências externas e links são verificados |
 
 #### Frente H — gestão evolutiva e viabilidade financeira
 
 | ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Executor | Revisor | DoR | DoD |
 | :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- |
-| S4-48A | Analisar a Sprint 4 e definir ações para a Sprint 5 | DOCUMENTATION | G | Média | Wendel | Felipe | Sprint encerrada, MRs inventariados e evidências disponíveis | Indicadores finais, pontos fortes/fracos, entregue/falhou/bloqueado e ações com gatilho, responsável e critério verificável ficam registrados |
-| S4-48B | Atualizar a matriz de riscos no fechamento da Sprint 4 | DOCUMENTATION | G | Média | Wendel | Felipe | S4-48A e revisão dos responsáveis | Todos os itens têm status, P, I, severidade, responsável e data; novos itens, histórico, efetividade das respostas, matriz P×I e três críticos são atualizados |
-| S4-49 | Registrar papéis, rotação e equilíbrio da Sprint 4 | DOCUMENTATION | M | Média | Wendel | Felipe | Issues, estimativas e evidências por integrante disponíveis | Matriz liga cada integrante às issues e entregas, compara as quatro sprints e expõe rotação, redistribuições e concentração sem inferir autoria |
-| S4-50A | Revisar contrato, SLA, rituais e políticas de desenvolvimento | DOCUMENTATION | M | Média | Wendel | Felipe | S4-48A e indicadores de processo | Dailies, uso do GitLab e commits são coerentes com contrato, SLA e rituais; mudanças apresentam redação anterior, nova, fato, gatilho e evidência, e regras mantidas possuem justificativa |
-| S4-50B | Revisar GitFlow, branches e integridade do repositório | DOCUMENTATION | M | Média | Henrique | Leonardo | MRs integrados e S4-50A | `GestaoConfiguracao.md` documenta convenções e criação, merge e exclusão de `main`, `develop`, `feature`, `release` e `hotfix`, com exemplos do projeto; auditoria final não encontra conflito, segredo ou divergência sem justificativa |
-| S4-51A | Delimitar capacidade, escopo e sequenciamento da Sprint 5 | DOCUMENTATION | M | Média | Wendel | Felipe | Trabalho residual da Sprint 4 ordenado e baremas da Sprint 5 disponíveis | Objetivo, capacidade, cadeia crítica, paralelismo, reserva e critérios de corte incluem mensageria, frontend completo, integração total, documentação final e fechamento gerencial, sem ocultar pendências |
-| S4-51B | Detalhar e materializar o backlog da Sprint 5 no Kanban | DOCUMENTATION | M | Média | Wendel | Felipe | S4-51A | Tasks incorporam `comparacao_entre_projetos`, referências no frontend e complementação de RNF07–RNF12, além das entregas próprias da Sprint 5, com issue, tipo, PP/P/M/G, prioridade, DoR, DoD, milestone e sequenciamento |
-| S4-52A | Definir escopo comercial e custos de trabalho | DOCUMENTATION | M | Média | Wendel | Felipe | Escopo efetivamente desenvolvido e papéis históricos disponíveis | Descrição breve delimita o que é vendido; tempo de cada integrante, função exercida, valor-hora e subtotal são justificados e conciliados com os papéis do módulo |
-| S4-52B | Estimar custos diretos e despesas operacionais | DOCUMENTATION | M | Média | Wendel | Felipe | S4-52A e tecnologias efetivamente usadas identificadas | Materiais, insumos, licenças, plataformas, infraestrutura, domínio, ferramentas administrativas, atendimento e divulgação têm premissa, quantidade e valor |
-| S4-52C | Calcular tributos, margem e preço final | DOCUMENTATION | M | Alta | Henrique | Leonardo | S4-52A e S4-52B | Percentual único de imposto e margem são justificados; memória de cálculo demonstra custos, despesas, tributos, lucro e preço final sem dupla contagem |
+| S4-48A | Analisar a Sprint 4 e definir ações para a Sprint 5 | DOCS | G | Média | Wendel | Felipe | Sprint encerrada, MRs inventariados e evidências disponíveis | Indicadores finais, pontos fortes/fracos, entregue/falhou/bloqueado e ações com gatilho, responsável e critério verificável ficam registrados |
+| S4-48B | Atualizar a matriz de riscos no fechamento da Sprint 4 | DOCS | G | Média | Wendel | Felipe | S4-48A e revisão dos responsáveis | Todos os itens têm status, P, I, severidade, responsável e data; novos itens, histórico, efetividade das respostas, matriz P×I e três críticos são atualizados |
+| S4-49 | Registrar papéis, rotação e equilíbrio da Sprint 4 | DOCS | M | Média | Wendel | Felipe | Issues, estimativas e evidências por integrante disponíveis | Matriz liga cada integrante às issues e entregas, compara as quatro sprints e expõe rotação, redistribuições e concentração sem inferir autoria |
+| S4-50A | Revisar contrato, SLA, rituais e políticas de desenvolvimento | DOCS | M | Média | Wendel | Felipe | S4-48A e indicadores de processo | Dailies, uso do GitLab e commits são coerentes com contrato, SLA e rituais; mudanças apresentam redação anterior, nova, fato, gatilho e evidência, e regras mantidas possuem justificativa |
+| S4-50B | Revisar GitFlow, branches e integridade do repositório | DOCS | M | Média | Henrique | Leonardo | MRs integrados e S4-50A | `GestaoConfiguracao.md` documenta convenções e criação, merge e exclusão de `main`, `develop`, `feature`, `release` e `hotfix`, com exemplos do projeto; auditoria final não encontra conflito, segredo ou divergência sem justificativa |
+| S4-51A | Delimitar capacidade, escopo e sequenciamento da Sprint 5 | DOCS | M | Média | Wendel | Felipe | Trabalho residual da Sprint 4 ordenado e baremas da Sprint 5 disponíveis | Objetivo, capacidade, cadeia crítica, paralelismo, reserva e critérios de corte incluem mensageria, frontend completo, integração total, documentação final e fechamento gerencial, sem ocultar pendências |
+| S4-51B | Detalhar e materializar o backlog da Sprint 5 no Kanban | DOCS | M | Média | Wendel | Felipe | S4-51A | Tasks incorporam `comparacao_entre_projetos`, referências no frontend e complementação de RNF07–RNF12, além das entregas próprias da Sprint 5, com issue, tipo, PP/P/M/G, prioridade, DoR, DoD, milestone e sequenciamento |
+| S4-52A | Definir escopo comercial e custos de trabalho | DOCS | M | Média | Wendel | Felipe | Escopo efetivamente desenvolvido e papéis históricos disponíveis | Descrição breve delimita o que é vendido; tempo de cada integrante, função exercida, valor-hora e subtotal são justificados e conciliados com os papéis do módulo |
+| S4-52B | Estimar custos diretos e despesas operacionais | DOCS | M | Média | Wendel | Felipe | S4-52A e tecnologias efetivamente usadas identificadas | Materiais, insumos, licenças, plataformas, infraestrutura, domínio, ferramentas administrativas, atendimento e divulgação têm premissa, quantidade e valor |
+| S4-52C | Calcular tributos, margem e preço final | DOCS | M | Alta | Henrique | Leonardo | S4-52A e S4-52B | Percentual único de imposto e margem são justificados; memória de cálculo demonstra custos, despesas, tributos, lucro e preço final sem dupla contagem |
 
 ### 6.4.3 Sequenciamento e dependências
 
@@ -1140,7 +1140,7 @@ As issues devem seguir as regras avaliadas pelo Dashboard Ágil do módulo.
 | DoR | Deve usar `**DoR (Definition of Ready):**` com checklist de pré-condições. |
 | DoD | Deve usar `**DoD (Definition of Done):**` com checklist verificável. |
 | Assignee | Deve haver exatamente um responsável pela execução. |
-| Labels | Deve conter exatamente uma label de tipo (`FEATURE`, `BUG FIX` ou `DOCUMENTATION`), uma de tamanho (`SIZE_PP`, `SIZE_P`, `SIZE_M` ou `SIZE_G`) e uma de prioridade (`PRIORIDADE ALTA`, `PRIORIDADE MÉDIA` ou `PRIORIDADE BAIXA`). |
+| Labels | Deve usar labels existentes: natureza (`FEATURE`, `BUG` ou `DOCS`), tamanho (`SIZE_P`, `SIZE_M` ou `SIZE_G`), uma prioridade (`PRIORIDADE ALTA`, `PRIORIDADE MÉDIA` ou `PRIORIDADE BAIXA`) e, quando aplicável, a frente ou o artefato. Como `SIZE_PP` ainda não existe, deve ser criado antes do primeiro card PP. |
 | Milestone | Deve estar vinculada à sprint correspondente, como `Sprint 03` ou `Sprint 04`. |
 
 Template mínimo:

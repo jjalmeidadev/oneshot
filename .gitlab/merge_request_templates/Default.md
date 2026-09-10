@@ -23,7 +23,8 @@ Closes #N
 > A partir deste ponto, as informações servem apenas como lembrete para quem estiver realizando o merge. Apague esta seção antes de finalizar o Merge Request.
 
 - [ ] Branch de origem segue o padrão `feature/`, `fix/`, `docs/` ou equivalente
-- [ ] Labels definidas: tipo (`FEATURE`, `BUG FIX` ou `DOCUMENTATION`), tamanho (`SIZE_PP`, `SIZE_P`, `SIZE_M` ou `SIZE_G`) e prioridade (`PRIORIDADE ALTA`, `PRIORIDADE MÉDIA` ou `PRIORIDADE BAIXA`)
+- [ ] Labels vigentes definidas: natureza (`CODE`, `DOCS`, `TEST`, `FEATURE` ou `BUG`, conforme a entrega), tamanho (`SIZE_P`, `SIZE_M` ou `SIZE_G`) e prioridade (`PRIORIDADE ALTA`, `PRIORIDADE MÉDIA` ou `PRIORIDADE BAIXA`)
+- [ ] Label da frente ou do artefato definida quando aplicável, como `BACKEND`, `FRONTEND` ou `GESTÃO DE PROJETO E CONFIGURAÇÃO`
 - [ ] Milestone definida e igual à sprint da issue de origem
 - [ ] Reviewer definido no campo `Reviewers`
 - [ ] Revisão contém pelo menos um comentário/nota antes da aprovação
