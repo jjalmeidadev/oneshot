@@ -44,9 +44,9 @@ Explique por que esta tarefa existe, qual problema resolve e quais artefatos ou 
 
 - [ ] Adicionar uma label de tipo: `FEATURE`, `BUG FIX` ou `DOCUMENTATION`.
 - [ ] Adicionar uma label de tamanho: `SIZE_PP`, `SIZE_P`, `SIZE_M` ou `SIZE_G`.
-- [ ] Adicionar `PRIORIDADE ALTA` quando a tarefa for critica para a sprint.
+- [ ] Adicionar exatamente uma prioridade: `PRIORIDADE ALTA`, `PRIORIDADE MÉDIA` ou `PRIORIDADE BAIXA`.
 
 ## Checklist para milestone
 
-- [ ] Vincular a issue a uma milestone de sprint, por exemplo: `Sprint 01`, `Sprint 02`, `Sprint 03`.
+- [ ] Vincular a issue a uma milestone de sprint, por exemplo: `Sprint 01`, `Sprint 02`, `Sprint 03` ou `Sprint 04`.
 - [ ] Confirmar que a milestone corresponde a sprint em que a tarefa sera executada.

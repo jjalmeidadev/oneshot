@@ -1,3 +1,5 @@
+# Merge Request
+
 ## O que foi feito
 
 Descreva de forma objetiva as alterações realizadas neste Merge Request, indicando o que foi desenvolvido, corrigido ou documentado.
@@ -7,7 +9,7 @@ Closes #N
 ## Como testar
 
 1. Descreva os passos necessários para validar as alterações.
-2. Informe o resultado esperado após a execução dos testes.
+2. Registre o comando ou procedimento executado, o resultado obtido e a evidência correspondente.
 
 ## Checklist
 
@@ -21,7 +23,7 @@ Closes #N
 > A partir deste ponto, as informações servem apenas como lembrete para quem estiver realizando o merge. Apague esta seção antes de finalizar o Merge Request.
 
 - [ ] Branch de origem segue o padrão `feature/`, `fix/`, `docs/` ou equivalente
-- [ ] Label definida (`FEATURE`, `BUG FIX` ou `DOCUMENTATION`)
+- [ ] Labels definidas: tipo (`FEATURE`, `BUG FIX` ou `DOCUMENTATION`), tamanho (`SIZE_PP`, `SIZE_P`, `SIZE_M` ou `SIZE_G`) e prioridade (`PRIORIDADE ALTA`, `PRIORIDADE MÉDIA` ou `PRIORIDADE BAIXA`)
 - [ ] Milestone definida e igual à sprint da issue de origem
 - [ ] Reviewer definido no campo `Reviewers`
 - [ ] Revisão contém pelo menos um comentário/nota antes da aprovação

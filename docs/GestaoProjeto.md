@@ -662,7 +662,7 @@ A matriz separa a responsabilidade planejada da evidência encontrada. A primeir
 
 A distribuição **não foi equilibrada no planejamento**. Felipe recebeu nove identificadores de task, Henrique cinco, Leonardo e Pedro quatro cada, Jaime e Wendel três cada. No histórico de entregas sem merge, Henrique e Pedro aparecem com quatro commits materiais, Jaime com três, Wendel com dois e Felipe e Leonardo com um cada. Nenhuma das duas contagens mede esforço diretamente, mas ambas sinalizam que quantidade de tasks e volume de commit não foram usados juntos para revisar carga.
 
-Na Sprint 4, a matriz só deve receber nomes após a criação dos cards e a comparação da carga estimada. A regra será: nenhuma pessoa recebe uma segunda task G simultânea enquanto outra estiver sem task pronta, e cada frente crítica deve possuir executor e revisor de frentes diferentes.
+Na Sprint 4, a matriz recebe nomes somente após a comparação da carga estimada. A distribuição registrada na Seção 6.4 é a base para a criação dos cards: qualquer mudança deve manter a capacidade, registrar a redistribuição e preservar executor e revisor de frentes diferentes. Nenhuma pessoa recebe uma segunda task G simultânea enquanto outra estiver sem task pronta.
 
 # 5. Contrato de convivência, SLA e rituais
 
@@ -909,135 +909,142 @@ Tarefas maiores que G devem ser quebradas antes de entrarem na sprint.
 
 O backlog abaixo parte somente do estado atual e das evoluções previstas no `Projeto.md`. Considera-se funcional, como premissa informada pelo grupo, o caminho **frontend → API → classificador de intenções → Supabase**. Permanecem pendentes o encadeamento do áudio ao PLN, a recuperação e resposta fundamentada, webhooks, execução dos testes sistêmicos, deploy controlado e Copilot Studio.
 
-O roteamento respeita a arquitetura vigente: `consulta_status_projeto` e `comparacao_entre_projetos` permanecem na rota **RAG**, enquanto o Copilot Studio recebe o recorte funcional essencial formado por `transacao_gerar_relatorio` e `alerta_prazo_atraso`. Esses dois fluxos incluem conector, autenticação, Power Automate sobre dados sintéticos, webhook de retorno, idempotência, auditoria e teste ponta a ponta. A disponibilidade do ambiente Copilot é verificada no primeiro dia. Se houver bloqueio externo, o contrato e o duplo controlado são concluídos e o impedimento é publicado; a integração real não pode ser declarada pronta sem execução no ambiente.
+O roteamento respeita a arquitetura vigente: `consulta_status_projeto` deve fechar o primeiro caminho **RAG** ponta a ponta na Sprint 4; `comparacao_entre_projetos` conserva a mesma rota arquitetural, mas não integra o compromisso técnico desta sprint e deve ser ordenada no planejamento da Sprint 5. A renderização dedicada das referências no frontend acompanha o desenvolvimento completo da interface na Sprint 5; nesta sprint, a origem permanece obrigatória no contrato do backend e nas evidências do teste ponta a ponta. O Copilot Studio recebe o recorte funcional essencial formado por `transacao_gerar_relatorio` e `alerta_prazo_atraso`. Esses dois fluxos incluem conector, autenticação, Power Automate sobre dados sintéticos, dois webhooks de retorno, idempotência, auditoria e teste ponta a ponta. A disponibilidade do ambiente Copilot é verificada no primeiro dia. Se houver bloqueio externo, o contrato e o duplo controlado são concluídos e o impedimento é publicado; a integração real não pode ser declarada pronta sem execução no ambiente.
 
-O deploy da sprint é **manual e controlado**, em hospedagem temporária compatível com a estratégia do `Projeto.md`. Docker e pipeline de deploy permanecem fora do compromisso atual. O pipeline citado nas tasks de qualidade é somente um gate de validação do repositório, não uma automação de publicação.
+O deploy da sprint é **manual e controlado em nuvem**, com ambientes de desenvolvimento e produção separados em hospedagem temporária compatível com a estratégia do `Projeto.md`. Inclui configuração, scripts ou comandos versionados, manual de implantação e uso, monitoramento e rotina mínima de manutenção. Docker e pipeline de deploy permanecem fora do compromisso atual. O pipeline citado nas tasks de qualidade é somente um gate de validação do repositório, não uma automação de publicação.
 
-A capacidade bruta é de 96 horas: seis integrantes × 16 horas. O backlog consome 89 horas, incluindo 6 horas para planejar e construir o material da Sprint Review, sem ensaio formal e sem contar a apresentação em si. Restam 7 horas para defeitos e bloqueios. As duas pessoas que apresentarão recebem, cada uma, no máximo 13 horas de trabalho não relacionado à apresentação e não permanecem em implementação crítica após terça-feira da segunda semana. As tasks ainda **não possuem assignee**; a atribuição será feita depois da comparação de carga e da confirmação de disponibilidade.
+A execução de RNF07 a RNF12 permanece integralmente planejada, mas sua rodada sistêmica é reservada à complementação de testes da Sprint 5. A Sprint 4 executa o núcleo de maior risco — confidencialidade, acesso, auditoria, fundamentação, desempenho, qualidade do classificador e usabilidade — e registra os demais casos como não executados, nunca como aprovados por planejamento. O RNF06 permanece porque sua meta de F1 já foi descumprida e o risco está materializado. Essa fronteira evita comprimir componentes obrigatórios para produzir volume de testes e usa exatamente a continuidade prevista no artefato técnico final.
+
+A capacidade bruta é de 96 horas: seis integrantes × 16 horas. O backlog consome no máximo 88,5 horas, incluindo 3 horas para planejar e construir o material da Sprint Review, sem ensaio formal e sem contar a apresentação em si. Restam 7,5 horas para defeitos e bloqueios. Felipe e Leonardo foram definidos como apresentadores: Felipe possui 12,5 horas e Leonardo 13 horas de trabalho não relacionado à apresentação, e nenhum dos dois permanece em implementação crítica após terça-feira da segunda semana. A distribuição abaixo fixa um executor e um revisor de outra frente para cada task e mantém todos os integrantes entre 14 e 15 horas planejadas.
 
 Regras de entrada no board:
 
 - manter um ID provisório por task; quando o grupo materializar o plano, criar a issue correspondente e substituir o ID pelo link real;
 - aplicar milestone `Sprint 04`, tipo, tamanho e prioridade;
-- manter exatamente um assignee após a distribuição, mas nunca antes dela;
+- manter exatamente um executor e um revisor diferente em cada issue; a atribuição só muda quando a redistribuição e seu efeito na carga forem registrados;
 - não mover para `Backlog` sem DoR atendida;
 - nenhuma task pode crescer além de G; se crescer, volta para `Open` e é dividida;
-- implementação, teste automatizado direto e documentação específica permanecem na mesma task quando produzem um único resultado verificável; a divisão só ocorre entre entregas independentes ou componentes que possam avançar separadamente;
+- implementação, teste automatizado direto e documentação específica permanecem na mesma task quando produzem um único resultado verificável; o DoD deve atualizar o trecho correspondente do `Projeto.md`, exemplos de API e a fonte `.puml` e imagem do diagrama quando aplicável, sem abrir um card apenas para documentar a mesma implementação;
 - uma integração só fecha com evidência que atravesse os componentes envolvidos;
-- o campo **Tipo GitLab** usa somente `FEATURE`, `BUG FIX` ou `DOCUMENTATION`; a frente técnica é informada pelo agrupamento da tabela.
+- aplicar exatamente uma label de cada eixo vigente: tipo (`FEATURE`, `BUG FIX` ou `DOCUMENTATION`), tamanho (`SIZE_PP`, `SIZE_P`, `SIZE_M` ou `SIZE_G`) e prioridade (`PRIORIDADE ALTA`, `PRIORIDADE MÉDIA` ou `PRIORIDADE BAIXA`); a frente técnica é informada pelo agrupamento da tabela.
 
 ### 6.4.2 Backlog refinado por resultado
 
 #### Frente A — integridade e linha de base
 
-| ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Assignee | DoR | DoD |
-| :---: | --- | :---: | :---: | :---: | :---: | --- | --- |
-| S4-01 | Resolver os conflitos do `README.md` | BUG FIX | M | Alta | — | Versões conflitantes comparadas com a execução atual | Texto único revisado, sem marcador e com instruções coerentes |
-| S4-02 | Resolver os conflitos do `.gitignore` e do `pre-commit` | BUG FIX | M | Alta | — | Regras válidas identificadas | Arquivos sem marcador; exceções de arquivo e hook validadas |
-| S4-03A | Resolver o diagrama de componentes e regenerar a imagem | BUG FIX | M | Média | — | Arquitetura vigente conferida no `Projeto.md` | `.puml` válido, sem marcador, e imagem correspondente atualizada |
-| S4-03B | Resolver o conflito do notebook do classificador | BUG FIX | M | Alta | — | Lados do conflito e execução de referência identificados | Notebook é JSON válido, abre sem erro e preserva a execução de referência |
-| S4-04 | Implementar gate exato de marcadores de conflito | FEATURE | G | Alta | — | S4-01 a S4-03B concluídas | Hook e verificação de servidor bloqueiam marcadores reais e aceitam a linha legítima `================ 10 passed...` |
-| S4-05 | Configurar validação automática do título de MR | FEATURE | M | Alta | — | Acesso do projeto verificado | Regra do GitLab ativa ou job equivalente bloqueia título inválido e aceita o padrão documentado |
-| S4-06 | Registrar linha de base reproduzível | DOCUMENTATION | M | Alta | — | Conflitos resolvidos e dependências identificadas | Backend, frontend e banco possuem comandos, versão, resultado e bloqueio documentados |
+| ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Executor | Revisor | DoR | DoD |
+| :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- |
+| S4-01 | Resolver os conflitos do `README.md` | BUG FIX | M | Alta | Henrique | Leonardo | Versões conflitantes comparadas com a execução atual | Texto único revisado, sem marcador e com instruções coerentes |
+| S4-02 | Resolver os conflitos do `.gitignore` e do `pre-commit` | BUG FIX | M | Alta | Henrique | Leonardo | Regras válidas identificadas | Arquivos sem marcador; exceções de arquivo e hook validadas |
+| S4-03A | Resolver o diagrama de componentes e regenerar a imagem | BUG FIX | M | Média | Henrique | Leonardo | Arquitetura vigente conferida no `Projeto.md` | `.puml` válido, sem marcador, e imagem correspondente atualizada |
+| S4-03B | Resolver o conflito do notebook do classificador | BUG FIX | M | Alta | Pedro | Jaime | Lados do conflito e execução de referência identificados | Notebook é JSON válido, abre sem erro e preserva a execução de referência |
+| S4-04 | Implementar gate exato de marcadores e registrar a linha de base | FEATURE | G | Alta | Henrique | Leonardo | S4-01 a S4-03B concluídas | Hook e servidor bloqueiam marcadores reais, aceitam `================ 10 passed...` e registram comandos, versões, resultados e bloqueios de backend, frontend e banco |
+| S4-05 | Configurar validação automática do título de MR | FEATURE | M | Média | Henrique | Leonardo | Acesso do projeto verificado | Regra do GitLab ativa ou job equivalente bloqueia título inválido e aceita o padrão documentado |
 
 #### Frente B — Supabase e persistência
 
-| ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Assignee | DoR | DoD |
-| :---: | --- | :---: | :---: | :---: | :---: | --- | --- |
-| S4-07 | Validar variáveis e conexão do Supabase | FEATURE | M | Alta | — | Projeto Supabase disponível sem expor segredo | Health check confirma conexão; `.env.example` documenta apenas nomes |
-| S4-08 | Aplicar e verificar o esquema físico | FEATURE | G | Alta | — | S4-07 e SQL revisado | Migração conclui; versão, 25 tabelas, 43 índices e 25 triggers são conferidos |
-| S4-09 | Executar e verificar a carga sintética idempotente | FEATURE | G | Média | — | S4-08 | Duas execuções concluem sem duplicação e registram contagens por domínio |
-| S4-10 | Verificar persistência e auditoria do fluxo já integrado | FEATURE | M | Média | — | S4-09 e caminho informado como funcional | Conversa, interação, fontes e eventos ficam correlacionados no Supabase |
-| S4-11 | Validar acesso permitido e negado por perfil sintético | FEATURE | M | Alta | — | S4-10 e regras sintéticas disponíveis | Perfil permitido acessa seu escopo; perfil negado recebe erro controlado e evento auditável |
+| ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Executor | Revisor | DoR | DoD |
+| :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- |
+| S4-07 | Validar variáveis e conexão do Supabase | FEATURE | M | Alta | Jaime | Pedro | Projeto Supabase disponível sem expor segredo | Health check confirma conexão; `.env.example` documenta apenas nomes |
+| S4-08 | Aplicar e verificar o esquema físico | FEATURE | G | Alta | Jaime | Pedro | S4-07 e SQL revisado | Migração conclui; versão, 25 tabelas, 43 índices e 25 triggers são conferidos |
+| S4-09 | Executar e verificar a carga sintética idempotente | FEATURE | G | Média | Leonardo | Henrique | S4-08 | Duas execuções concluem sem duplicação e registram contagens por domínio |
+| S4-11 | Validar persistência, auditoria e acesso por perfil sintético | FEATURE | G | Alta | Leonardo | Henrique | S4-09, regras sintéticas e caminho informado como funcional | Conversa, interação, fontes e eventos ficam correlacionados; perfil permitido acessa seu escopo e perfil negado recebe erro controlado e auditável |
 
 #### Frente C — fechamento do fluxo funcional
 
-| ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Assignee | DoR | DoD |
-| :---: | --- | :---: | :---: | :---: | :---: | --- | --- |
-| S4-12 | Confirmar classificação real na rota textual e automatizar seu contrato | FEATURE | G | Alta | — | Integração informada e classificador carregável | `/api/chat` retorna macro, intenção, confiança e rota sem stub; teste reproduzível confirma contrato, limiares e persistência mínima |
-| S4-13 | Encadear e testar áudio → STT → PLN | FEATURE | G | Alta | — | STT e S4-12 funcionais | Áudio válido retorna transcrição e classificação reais; falha é controlada por teste automatizado |
-| S4-14A | Unificar o schema de resposta do backend | FEATURE | M | Alta | — | S4-12 e S4-13 | Texto e áudio usam contrato compatível e versionado |
-| S4-14B | Adaptar o frontend ao contrato unificado | FEATURE | M | Média | — | S4-14A | Interface consome texto e áudio com loading, sucesso e erro tratados |
-| S4-15 | Aplicar fallback de baixa confiança e fora de escopo | FEATURE | M | Média | — | Limiares e catálogo confirmados | Entrada não confiável não aciona handler; limitação e `out_of_scope_requests` são registrados |
-| S4-16 | Integrar `consulta_status_projeto` à rota RAG e validar as fontes | FEATURE | G | Alta | — | S4-10 e recuperador testável | Consulta recupera dados sintéticos do projeto; teste comprova que as fontes pertencem ao projeto e sustentam a resposta |
-| S4-17A | Incluir referências no schema de resposta | FEATURE | M | Média | — | S4-14A e S4-16 | Resposta retorna artefato, trecho e identificadores disponíveis |
-| S4-17B | Renderizar referências no frontend | FEATURE | M | Média | — | S4-17A | Interface exibe a origem e não inventa referência ausente |
-| S4-18 | Recuperar, comparar e formatar dados de dois projetos | FEATURE | G | Média | — | S4-16 e massa comparável | Retorno separa projetos, critérios e fontes, diferencia fato de interpretação e preserva referências |
-| S4-19 | Automatizar informação ausente e falha de recuperação | FEATURE | M | Média | — | S4-15 e S4-16 | Cenários retornam limitação controlada, sem fato não sustentado |
-| S4-20 | Executar E2E textual com RAG e verificar sua persistência | FEATURE | G | Alta | — | S4-12 a S4-19 | Cenário atravessa frontend, API, PLN, recuperação e resposta; conversa, fontes e auditoria são localizadas no Supabase |
+| ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Executor | Revisor | DoR | DoD |
+| :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- |
+| S4-12 | Confirmar classificação real na rota textual e automatizar seu contrato | FEATURE | G | Alta | Pedro | Jaime | Integração informada e classificador carregável | `/api/chat` retorna macro, intenção, confiança e rota sem stub; teste reproduzível confirma contrato, limiares e persistência mínima |
+| S4-13 | Encadear e testar áudio → STT → PLN | FEATURE | G | Alta | Jaime | Pedro | STT e S4-12 funcionais | Áudio válido retorna transcrição e classificação reais; falha é controlada por teste automatizado |
+| S4-14A | Unificar o schema de resposta do backend | FEATURE | M | Alta | Pedro | Jaime | S4-12 e S4-13 | Texto e áudio usam contrato compatível e versionado |
+| S4-14B | Adaptar o frontend ao contrato unificado | FEATURE | M | Média | Felipe | Wendel | S4-14A | Interface consome texto e áudio com loading, sucesso e erro tratados |
+| S4-15 | Aplicar fallback de baixa confiança e fora de escopo | FEATURE | M | Média | Pedro | Jaime | Limiares e catálogo confirmados | Entrada não confiável não aciona handler; limitação e `out_of_scope_requests` são registrados |
+| S4-16 | Integrar `consulta_status_projeto` à rota RAG e validar as fontes | FEATURE | G | Alta | Leonardo | Henrique | S4-11 e recuperador testável | Consulta recupera dados sintéticos do projeto; teste comprova que as fontes pertencem ao projeto e sustentam a resposta |
+| S4-17A | Incluir referências no schema de resposta | FEATURE | M | Média | Leonardo | Henrique | S4-14A e S4-16 | Resposta retorna artefato, trecho e identificadores disponíveis |
+| S4-19 | Automatizar informação ausente e falha de recuperação | FEATURE | M | Média | Wendel | Felipe | S4-15 e S4-16 | Cenários retornam limitação controlada, sem fato não sustentado |
+| S4-20 | Executar E2E textual com RAG e verificar sua persistência | FEATURE | G | Alta | Leonardo | Henrique | S4-12 a S4-17A e S4-19 | Cenário atravessa frontend, API, PLN, recuperação e resposta; referências do backend, conversa, fontes e auditoria são localizadas no Supabase |
 
 #### Frente D — Copilot Studio, Power Automate e webhooks essenciais
 
-| ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Assignee | DoR | DoD |
-| :---: | --- | :---: | :---: | :---: | :---: | --- | --- |
-| S4-21A | Verificar acesso e limitações do ambiente Copilot | FEATURE | M | Alta | — | Conta e responsável pelo ambiente identificados | Disponibilidade, permissões e bloqueios são registrados no primeiro dia |
-| S4-21B | Mapear os dois fluxos e congelar contratos | DOCUMENTATION | M | Alta | — | Catálogo e arquitetura vigentes | Relatório e alerta possuem entrada, confirmação, saída, erro, fallback e callback definidos |
-| S4-22 | Configurar conector OpenAPI, autenticação e segredos do Copilot | FEATURE | G | Alta | — | S4-21A, S4-21B e contrato da API estável | Conector realiza chamada autorizada; credencial inválida falha sem exposição |
-| S4-23A | Implementar o tópico `transacao_gerar_relatorio` | FEATURE | M | Média | — | S4-22 e dados sintéticos disponíveis | Tópico solicita confirmação e envia parâmetros validados |
-| S4-23B | Implementar o fluxo de relatório no Power Automate | FEATURE | G | Alta | — | S4-23A, modelo de relatório e ambiente disponíveis | **Concluída** somente se o fluxo real gerar resultado rastreável sobre dados sintéticos; sem ambiente, registrar bloqueio e validar o contrato com duplo, sem fechar a task |
-| S4-24A | Implementar o tópico `alerta_prazo_atraso` | FEATURE | M | Média | — | S4-22 e regra de atraso definida | Tópico valida projeto, limiar e confirmação necessária |
-| S4-24B | Implementar regra e notificação no Power Automate | FEATURE | G | Média | — | S4-24A e ambiente disponíveis | **Concluída** somente se o fluxo real notificar o atraso elegível e ignorar a condição não atendida; sem ambiente, registrar bloqueio e validar o contrato com duplo, sem fechar a task |
-| S4-25A | Rotear os handlers funcionais para o Copilot | FEATURE | M | Alta | — | S4-12 e tópicos disponíveis | Relatório e alerta acionam o tópico correto; consultas continuam no RAG |
-| S4-25B | Implementar e testar webhook autenticado e idempotente | FEATURE | G | Alta | — | S4-21B e backend publicado | Payload válido é correlacionado, inválido é rejeitado e repetição do mesmo evento não duplica efeito |
-| S4-25D | Persistir tentativa, conclusão e falha | FEATURE | M | Média | — | S4-10 e S4-25B | Estados do fluxo ficam correlacionados em `audit_events` |
-| S4-26A | Executar E2E do fluxo de relatório | FEATURE | M | Alta | — | S4-23B, S4-25A, S4-25B e S4-25D | Classificação, confirmação, execução, retorno e auditoria possuem evidência |
-| S4-26B | Executar E2E do fluxo de alerta | FEATURE | M | Média | — | S4-24B, S4-25A, S4-25B e S4-25D | Regra, notificação, retorno, repetição e auditoria possuem evidência |
+| ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Executor | Revisor | DoR | DoD |
+| :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- |
+| S4-21A | Verificar acesso e limitações do ambiente Copilot | FEATURE | P | Alta | Felipe | Wendel | Conta e responsável pelo ambiente identificados | Disponibilidade, permissões e bloqueios são registrados no primeiro dia |
+| S4-22 | Configurar conector OpenAPI, autenticação e segredos do Copilot | FEATURE | G | Alta | Felipe | Wendel | S4-21A, catálogo vigente e contrato da API estável | Conector realiza chamada autorizada; credencial inválida falha sem exposição |
+| S4-23A | Definir o contrato e implementar o tópico `transacao_gerar_relatorio` | FEATURE | G | Média | Felipe | Wendel | S4-22 e dados sintéticos disponíveis | Entrada, confirmação, saída, erro, fallback e callback ficam documentados; tópico envia parâmetros validados |
+| S4-23B | Implementar o fluxo de relatório no Power Automate | FEATURE | G | Alta | Jaime | Pedro | S4-23A, modelo de relatório e ambiente disponíveis | **Concluída** somente se o fluxo real gerar resultado rastreável sobre dados sintéticos; sem ambiente, registrar bloqueio e validar o contrato com duplo, sem fechar a task |
+| S4-24A | Definir o contrato e implementar o tópico `alerta_prazo_atraso` | FEATURE | G | Média | Felipe | Wendel | S4-22 e regra de atraso definida | Entrada, confirmação, saída, erro, fallback e callback ficam documentados; tópico valida projeto, limiar e confirmação necessária |
+| S4-24B | Implementar regra e notificação no Power Automate | FEATURE | G | Média | Pedro | Jaime | S4-24A e ambiente disponíveis | **Concluída** somente se o fluxo real notificar o atraso elegível e ignorar a condição não atendida; sem ambiente, registrar bloqueio e validar o contrato com duplo, sem fechar a task |
+| S4-25A | Rotear os handlers funcionais para o Copilot | FEATURE | M | Alta | Pedro | Jaime | S4-12 e tópicos disponíveis | Relatório e alerta acionam o tópico correto; consultas continuam no RAG |
+| S4-25B | Implementar, documentar e testar o webhook de relatório | FEATURE | G | Alta | Jaime | Pedro | S4-22 e backend publicado | Rota, método, campos e tipos são documentados; payload válido recebe `200`, inválido é rejeitado, repetição é idempotente e tentativa, conclusão ou falha ficam correlacionadas no Supabase |
+| S4-25C | Implementar, documentar e testar o webhook de alerta | FEATURE | G | Alta | Pedro | Jaime | S4-22 e backend publicado | Rota, método, campos e tipos são documentados; payload válido recebe `200`, inválido é rejeitado, repetição é idempotente e tentativa, conclusão ou falha ficam correlacionadas no Supabase |
+| S4-26A | Executar E2E do fluxo de relatório | FEATURE | M | Alta | Jaime | Pedro | S4-23B, S4-25A e S4-25B | Classificação, confirmação, execução, retorno, armazenamento e auditoria possuem evidência |
+| S4-26B | Executar E2E do fluxo de alerta | FEATURE | M | Média | Pedro | Jaime | S4-24B, S4-25A e S4-25C | Regra, notificação, retorno, repetição, armazenamento e auditoria possuem evidência |
 
 #### Frente E — deploy em ambiente controlado
 
-| ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Assignee | DoR | DoD |
-| :---: | --- | :---: | :---: | :---: | :---: | --- | --- |
-| S4-27 | Definir e documentar hospedagem temporária, variáveis e segredos | DOCUMENTATION | G | Média | — | Restrições da Seção 6 do `Projeto.md` e acessos conhecidos | Destino manual, procedimento de configuração, origem de cada variável e consumidores ficam reproduzíveis e sem segredo |
-| S4-28 | Publicar e documentar o backend manualmente | FEATURE | G | Alta | — | S4-06, S4-12 e S4-27 | URL temporária responde `/health` e um caso textual real; comandos e limitações observadas ficam registrados |
-| S4-29 | Publicar e documentar o frontend apontando para o backend | FEATURE | G | Média | — | S4-14B, S4-28 e build local válido | Interface publicada completa o caminho textual mínimo; configuração e execução ficam reproduzíveis |
-| S4-30 | Executar smoke test e validar rollback manual | FEATURE | G | Alta | — | S4-28, S4-29 e versão anterior identificada | Saúde, texto, persistência e erro controlado têm evidência; procedimento documentado restaura a versão anterior |
+| ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Executor | Revisor | DoR | DoD |
+| :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- |
+| S4-27 | Configurar e documentar desenvolvimento e produção em nuvem | DOCUMENTATION | G | Média | Henrique | Leonardo | Restrições da Seção 6 do `Projeto.md` e acessos conhecidos | Destino temporário, separação dos ambientes, procedimento de configuração, origem de cada variável e consumidores ficam reproduzíveis e sem segredo |
+| S4-28 | Publicar e documentar o backend manualmente | FEATURE | G | Alta | Henrique | Leonardo | S4-04, S4-12 e S4-27 | URL temporária responde `/health` e um caso textual real; script ou comandos de implantação e limitações observadas ficam versionados |
+| S4-29 | Publicar e documentar o frontend apontando para o backend | FEATURE | G | Média | Felipe | Wendel | S4-14B, S4-28 e build local válido | Interface publicada completa o caminho textual mínimo; configuração e execução ficam reproduzíveis |
+| S4-30 | Executar smoke test e validar rollback manual | FEATURE | G | Alta | Henrique | Leonardo | S4-28, S4-29 e versão anterior identificada | Saúde, texto, persistência e erro controlado têm evidência; procedimento documentado restaura a versão anterior |
+| S4-30B | Configurar observabilidade mínima e rotina de manutenção | FEATURE | M | Média | Henrique | Leonardo | S4-28 a S4-30 | Logs de erro e saúde ficam acessíveis; responsável, frequência de verificação, retenção, resposta a indisponibilidade e uso da PoC são documentados no manual operacional |
 
 #### Frente F — execução dos testes sistêmicos
 
-| ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Assignee | DoR | DoD |
-| :---: | --- | :---: | :---: | :---: | :---: | --- | --- |
-| S4-31 | Finalizar plano e fixtures de VHS/cache | FEATURE | G | Média | — | Fronteiras externas identificadas | Estratégia, fixtures, invalidação e teste de hit/miss funcionam sem chamada repetida |
-| S4-32 | Consolidar resultados de RF01–RF08 e registrar RF09–RF10 | DOCUMENTATION | G | Alta | — | Evidências das Frentes C e D disponíveis | Casos do MVP têm resultado/evidência; RF09–RF10 aparecem bloqueados por estarem fora do MVP |
-| S4-33 | Executar RNF01–RNF03 | FEATURE | G | Alta | — | Massa, perfis e persistência disponíveis | Confidencialidade, acesso e auditoria possuem casos positivo/negativo e evidência |
-| S4-34 | Executar RNF04 | FEATURE | G | Alta | — | Amostra congelada com pelo menos 20 perguntas | Fundamentação e alucinação são calculadas sem seleção posterior de casos |
-| S4-35 | Executar desempenho RNF05 | FEATURE | G | Alta | — | Locust e ambiente estável | Rodadas de 1 e 5 usuários registram P95, erros e cache frio/quente |
-| S4-36 | Executar RNF06 | FEATURE | G | Alta | — | Dependências do notebook instaladas e massa congelada | F1 e recall são reproduzidos; resultado abaixo de 0,80 é publicado como falha |
-| S4-37 | Executar RNF07–RNF08 | FEATURE | G | Média | — | Formulações congeladas, OpenAPI e arquitetura disponíveis | Compreensão/reformulação e aderência Microsoft possuem resultado rastreável |
-| S4-38 | Executar e consolidar RNF09–RNF12 | FEATURE | G | Média | — | Evidências de dados, deploy e falhas disponíveis | Portabilidade, manutenção, falhas e massa sintética têm positivo/negativo registrados |
-| S4-39 | Preparar participantes e instrumentos de usabilidade | DOCUMENTATION | M | Média | — | Interface demonstrável e roteiro aprovado | Cinco participantes externos confirmados; consentimento, ambiente e planilha prontos |
-| S4-40 | Conduzir usabilidade com participantes 1 e 2 | FEATURE | G | Média | — | S4-39 | Duas sessões e respostas SUS anonimizadas registradas |
-| S4-41 | Conduzir usabilidade com participantes 3 a 5 | FEATURE | G | Média | — | S4-39 | Três sessões e respostas SUS anonimizadas registradas |
-| S4-42 | Consolidar SUS, falhas e retestes críticos | FEATURE | G | Alta | — | S4-32 a S4-41 | Relatório separa aprovado, falhou e bloqueado; defeitos críticos são corrigidos ou têm impedimento e reteste |
+| ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Executor | Revisor | DoR | DoD |
+| :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- |
+| S4-31 | Implementar o módulo VHS/cache e finalizar seu plano de integração | FEATURE | G | Média | Jaime | Pedro | Fronteiras externas identificadas | Resposta externa é gravada e reproduzida; repetição não faz nova chamada, e miss, invalidação e erro do provedor possuem cenário, instrução, ferramenta e evidência documentados |
+| S4-32A | Executar e consolidar os testes funcionais disponíveis | FEATURE | G | Alta | Wendel | Felipe | Requisitos vigentes e caminho demonstrável congelado | RF01–RF10 preservam propósito, positivo/negativo, instrução, ferramenta e resultado esperado; casos disponíveis têm resultado e evidência, e os ainda não implementados ficam identificados como não executados |
+| S4-32B | Executar e consolidar os testes de integração disponíveis | FEATURE | G | Alta | Pedro | Jaime | Frentes B a E testáveis e S4-31 | Comunicação interna, serviços externos, VHS/cache e tratamento de erro possuem instrução, ferramenta, validação esperada, resultado e evidência; dependência indisponível é registrada como bloqueio |
+| S4-33 | Executar RNF01–RNF03 | FEATURE | G | Alta | Pedro | Jaime | Massa, perfis e persistência disponíveis | Confidencialidade, acesso e auditoria têm casos positivos e negativos executados, com instruções, resultados e evidências |
+| S4-34 | Executar RNF04 | FEATURE | G | Alta | Leonardo | Henrique | Amostra congelada com pelo menos 20 perguntas | Fundamentação e alucinação são calculadas nos cenários positivo e negativo, sem seleção posterior de casos |
+| S4-35 | Executar desempenho RNF05 | FEATURE | G | Alta | Jaime | Pedro | Locust e ambiente estável | Rodadas positivas de 1 e 5 usuários e violação controlada registram P95, erros e comportamento com cache frio e quente |
+| S4-36 | Reexecutar o benchmark do RNF06 | FEATURE | M | Alta | Jaime | Pedro | Dependências disponíveis e massa de avaliação congelada | Comando reproduz F1 e recall do classificador; versão, resultado e eventual valor abaixo de 0,80 são publicados sem alterar a amostra após a medição |
+| S4-39 | Preparar participantes e instrumentos de usabilidade | DOCUMENTATION | M | Média | Felipe | Wendel | Interface demonstrável e roteiro aprovado | Ao menos cinco participantes externos à turma, com diversidade de perfil e familiaridade tecnológica, são confirmados; cenários, consentimento, ambiente, planilha e SUS ficam prontos |
+| S4-40 | Conduzir usabilidade com participantes 1 e 2 | FEATURE | G | Média | Felipe | Wendel | S4-39 | Duas sessões e respostas SUS anonimizadas registradas |
+| S4-41 | Conduzir usabilidade com participantes 3 a 5 | FEATURE | G | Média | Leonardo | Henrique | S4-39 | Três sessões e respostas SUS anonimizadas registradas |
+| S4-42 | Consolidar SUS, falhas e retestes críticos | FEATURE | G | Alta | Wendel | Felipe | S4-32A a S4-36 e S4-39 a S4-41 | Relatório separa aprovado, falhou, bloqueado e não executado; defeitos críticos são corrigidos ou têm impedimento e reteste |
 
-#### Frente G — documentação, fechamento e preparação da Sprint Review
+#### Frente G — preparação da Sprint Review
 
-| ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Assignee | DoR | DoD |
-| :---: | --- | :---: | :---: | :---: | :---: | --- | --- |
-| S4-43 | Consolidar arquitetura, APIs e diagramas transversais conforme implementado | DOCUMENTATION | G | Média | — | Fluxos estabilizados e documentação específica concluída em suas próprias tasks | `Projeto.md`, `.puml` e imagens refletem conjuntamente RAG, Copilot, webhook e comportamento observado, sem repetir manuais locais |
-| S4-44 | Executar auditoria final do repositório | DOCUMENTATION | M | Média | — | MRs da sprint integrados | Auditoria sem conflito, segredo ou divergência; exceções ficam justificadas |
-| S4-45 | Consolidar evidências e trabalho residual por criticidade | DOCUMENTATION | G | Média | — | S4-42, S4-43 e S4-44 | Entregue, falhou e bloqueado ficam separados; pendências são ordenadas por risco e dependência |
-| S4-46A | Planejar narrativa, público, métricas e evidências da Sprint Review | DOCUMENTATION | G | Média | — | Incremento demonstrável, S4-42 e S4-45 | Objetivo e três mensagens registrados; cada métrica e evidência possui origem, versão e leitura correta |
-| S4-46B | Definir a sequência da demonstração e seus responsáveis | DOCUMENTATION | M | Média | — | Fluxos demonstráveis confirmados | Sequência cobre caminho principal, limitações e transições sem depender de improviso |
-| S4-47A | Construir conteúdo textual, elementos visuais e referências | DOCUMENTATION | G | Média | — | S4-46A | Material apresenta problema, incremento, resultados, riscos e próximos passos, com leitura consistente e fontes rastreáveis |
-| S4-47B | Preparar contingência demonstrável e verificar links | DOCUMENTATION | M | Média | — | S4-46B e S4-47A | Capturas ou registros substituem dependência externa; todos os links e acessos necessários são verificados |
+| ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Executor | Revisor | DoR | DoD |
+| :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- |
+| S4-46 | Planejar narrativa, sequência, responsáveis, métricas e evidências da Sprint Review | DOCUMENTATION | M | Média | Leonardo | Henrique | Incremento demonstrável e inventário preliminar de evidências | Objetivo, três mensagens, sequência e transições ficam definidos; cada evidência possui origem, versão e leitura correta |
+| S4-47 | Construir o material e validar a contingência técnica | DOCUMENTATION | G | Média | Felipe | Wendel | S4-46 | Material textual e visual apresenta incremento, resultados, riscos e próximos passos; capturas substituem dependências externas e links são verificados |
+
+#### Frente H — gestão evolutiva e viabilidade financeira
+
+| ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Executor | Revisor | DoR | DoD |
+| :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- |
+| S4-48A | Analisar a Sprint 4 e definir ações para a Sprint 5 | DOCUMENTATION | G | Média | Wendel | Felipe | Sprint encerrada, MRs inventariados e evidências disponíveis | Indicadores finais, pontos fortes/fracos, entregue/falhou/bloqueado e ações com gatilho, responsável e critério verificável ficam registrados |
+| S4-48B | Atualizar a matriz de riscos no fechamento da Sprint 4 | DOCUMENTATION | G | Média | Wendel | Felipe | S4-48A e revisão dos responsáveis | Todos os itens têm status, P, I, severidade, responsável e data; novos itens, histórico, efetividade das respostas, matriz P×I e três críticos são atualizados |
+| S4-49 | Registrar papéis, rotação e equilíbrio da Sprint 4 | DOCUMENTATION | M | Média | Wendel | Felipe | Issues, estimativas e evidências por integrante disponíveis | Matriz liga cada integrante às issues e entregas, compara as quatro sprints e expõe rotação, redistribuições e concentração sem inferir autoria |
+| S4-50A | Revisar contrato, SLA, rituais e políticas de desenvolvimento | DOCUMENTATION | M | Média | Wendel | Felipe | S4-48A e indicadores de processo | Dailies, uso do GitLab e commits são coerentes com contrato, SLA e rituais; mudanças apresentam redação anterior, nova, fato, gatilho e evidência, e regras mantidas possuem justificativa |
+| S4-50B | Revisar GitFlow, branches e integridade do repositório | DOCUMENTATION | M | Média | Henrique | Leonardo | MRs integrados e S4-50A | `GestaoConfiguracao.md` documenta convenções e criação, merge e exclusão de `main`, `develop`, `feature`, `release` e `hotfix`, com exemplos do projeto; auditoria final não encontra conflito, segredo ou divergência sem justificativa |
+| S4-51A | Delimitar capacidade, escopo e sequenciamento da Sprint 5 | DOCUMENTATION | M | Média | Wendel | Felipe | Trabalho residual da Sprint 4 ordenado e baremas da Sprint 5 disponíveis | Objetivo, capacidade, cadeia crítica, paralelismo, reserva e critérios de corte incluem mensageria, frontend completo, integração total, documentação final e fechamento gerencial, sem ocultar pendências |
+| S4-51B | Detalhar e materializar o backlog da Sprint 5 no Kanban | DOCUMENTATION | M | Média | Wendel | Felipe | S4-51A | Tasks incorporam `comparacao_entre_projetos`, referências no frontend e complementação de RNF07–RNF12, além das entregas próprias da Sprint 5, com issue, tipo, PP/P/M/G, prioridade, DoR, DoD, milestone e sequenciamento |
+| S4-52A | Definir escopo comercial e custos de trabalho | DOCUMENTATION | M | Média | Wendel | Felipe | Escopo efetivamente desenvolvido e papéis históricos disponíveis | Descrição breve delimita o que é vendido; tempo de cada integrante, função exercida, valor-hora e subtotal são justificados e conciliados com os papéis do módulo |
+| S4-52B | Estimar custos diretos e despesas operacionais | DOCUMENTATION | M | Média | Wendel | Felipe | S4-52A e tecnologias efetivamente usadas identificadas | Materiais, insumos, licenças, plataformas, infraestrutura, domínio, ferramentas administrativas, atendimento e divulgação têm premissa, quantidade e valor |
+| S4-52C | Calcular tributos, margem e preço final | DOCUMENTATION | M | Alta | Henrique | Leonardo | S4-52A e S4-52B | Percentual único de imposto e margem são justificados; memória de cálculo demonstra custos, despesas, tributos, lucro e preço final sem dupla contagem |
 
 ### 6.4.3 Sequenciamento e dependências
 
 A cadeia crítica é:
 
 ```text
-S4-01..06
-  → S4-07..11
-  → S4-12..20
-  → S4-28..30
-  → S4-22..26B
-  → S4-32..42
-  → S4-43..47B
+S4-01..05
+  → S4-07..09 → S4-11
+  → S4-12..17A → S4-19..20
+  → S4-27..30B
+  → S4-21A → S4-22..25C → S4-26A/B
+  → S4-31 → S4-32A/B → S4-33..36 → S4-39..42
+  → S4-46..52C
 ```
 
-Os intervalos representam portas de saída, não a execução serial de todas as linhas. `S4-21A`, que valida o acesso ao Copilot, e `S4-27`, que define o destino de deploy, começam no primeiro dia em paralelo à limpeza do repositório. O contrato `S4-21B` pode avançar antes da publicação; o conector e os testes reais dependem da API disponível em `S4-28`. Se o ambiente Microsoft estiver bloqueado, o impedimento é registrado imediatamente e a equipe executa o contrato com duplo controlado, sem declarar a integração externa concluída.
+Os intervalos representam portas de saída, não a execução serial de todas as linhas. `S4-21A`, que valida o acesso ao Copilot, e `S4-27`, que define o destino de deploy, começam no primeiro dia em paralelo à limpeza do repositório. Os contratos dos dois fluxos podem avançar em `S4-23A` e `S4-24A` antes da publicação; o conector e os testes reais dependem da API disponível em `S4-28`. Se o ambiente Microsoft estiver bloqueado, o impedimento é registrado imediatamente e a equipe executa o contrato com duplo controlado, sem declarar a integração externa concluída.
 
-Os testes são deslocados para perto do incremento que validam: as Frentes B, C, D e E já produzem evidências de integração e RNFs associados; a Frente F executa os cenários sistêmicos restantes e consolida os resultados sem repetir trabalho. Consultas de status e comparação permanecem na rota RAG. Somente relatório e alerta seguem pelo Copilot e, quando disponível, Power Automate.
+Os testes são deslocados para perto do incremento que validam: as Frentes B, C, D e E já produzem evidências de integração e RNFs associados; a Frente F preserva o plano completo, executa funcionalidade, integração, RNF01–RNF06 e usabilidade e separa com transparência o complemento RNF07–RNF12. A consulta de status fecha a primeira rota RAG nesta sprint; a comparação permanece definida como RAG, mas é encaminhada ao planejamento seguinte. Somente relatório e alerta seguem pelo Copilot e, quando disponível, Power Automate.
 
 Cadência das duas semanas:
 
@@ -1047,8 +1054,9 @@ Cadência das duas semanas:
 | Restante da primeira semana | Caminho textual com RAG e backend publicado; áudio encadeado ao PLN |
 | Segunda-feira e terça-feira da segunda semana | Dois fluxos essenciais do Copilot/webhook e interface demonstrável concluídos ou com bloqueio externo comprovado |
 | Fim da terça-feira | Congelamento do caminho usado na demonstração; depois disso só entram correções, testes e documentação |
-| A partir de quarta-feira | Duas pessoas concentram-se na construção do material da Sprint Review; as outras quatro concluem testes, correções e fechamento |
-| Quinta-feira | Evidências, documentação, material e auditoria final concluídos |
+| A partir de quarta-feira | Duas pessoas concentram-se na construção do material da Sprint Review; as outras quatro concluem testes, correções, orçamento e insumos do fechamento |
+| Quinta-feira | Evidências, documentação, material, orçamento e auditoria final concluídos; indicadores permanecem preliminares até o encerramento da janela da sprint |
+| Após o encerramento da janela da sprint | Indicadores finais, retrospectiva, riscos, papéis e planejamento da Sprint 5 são consolidados sem substituir dados parciais por estimativas |
 
 Não há task de ensaio formal. A preparação cobre planejamento, seleção de evidências, construção do material, sequência demonstrável e contingência técnica.
 
@@ -1056,35 +1064,46 @@ Marcos de controle:
 
 | Marco | Condição de saída |
 | --- | --- |
-| M1 — repositório confiável | S4-01 a S4-06 concluídas; os cinco arquivos corrigidos e o gate sem falso positivo |
-| M2 — dados auditáveis | S4-07 a S4-11 concluídas com massa sintética, acesso e rastreabilidade |
-| M3 — caminho de consulta integrado | S4-12 a S4-20 concluídas; texto/RAG e áudio/PLN com evidência |
-| M4 — ambiente demonstrável | S4-27 a S4-30 concluídas em hospedagem temporária, sem exigir Docker |
-| M5 — Copilot essencial integrado | S4-21A a S4-26B concluídas no ambiente real; relatório e alerta exercitados com webhook e auditoria. Duplo ou simulação comprovam apenas a contingência e não atingem este marco |
-| M6 — diagnóstico de qualidade | S4-31 a S4-45 com resultados, falhas, retestes e pendências publicados |
-| M7 — material verificável | S4-46A a S4-47B concluídas sem ensaio formal |
+| M1 — repositório confiável | S4-01 a S4-05 concluídas; os cinco arquivos conflitantes corrigidos e os gates sem falso positivo |
+| M2 — dados auditáveis | S4-07 a S4-09 e S4-11 concluídas com massa sintética, acesso e rastreabilidade |
+| M3 — caminho de consulta integrado | S4-12 a S4-17A e S4-19 a S4-20 concluídas; texto/RAG e áudio/PLN com evidência |
+| M4 — ambiente demonstrável | S4-27 a S4-30B concluídas em hospedagem temporária em nuvem, com desenvolvimento, produção, monitoramento e manual, sem exigir Docker |
+| M5 — Copilot essencial integrado | S4-21A, S4-22 a S4-25C e S4-26A/B concluídas no ambiente real; relatório e alerta exercitados com seus webhooks e auditoria. Duplo ou simulação comprovam apenas a contingência e não atingem este marco |
+| M6 — diagnóstico de qualidade | S4-31, S4-32A/B, S4-33 a S4-36 e S4-39 a S4-42 com planos, resultados, falhas, retestes e complementos publicados |
+| M7 — material verificável | S4-46 e S4-47 concluídas sem ensaio formal |
+| M8 — fechamento gerencial e financeiro | S4-48A a S4-52C concluídas após a janela de medição; riscos, rotação, acordos, Sprint 5 e preço final ficam verificáveis |
 
 Se um marco atrasar, as tasks dependentes permanecem em `Open`; não recebem status fictício de avanço. A folga é usada primeiro em correções encontradas pelos testes, depois em documentação. Nenhuma funcionalidade nova entra antes de a cadeia mínima estar demonstrável.
 
 ### 6.4.4 Distribuição da capacidade
 
-O refinamento consolida etapas que produzem um único resultado: implementação e teste direto, conector e autenticação, smoke test e rollback, documentação operacional junto da publicação e construção integrada do material da Review. Assim, a Sprint 4 possui **58 tasks**, contra 26 no planejamento da Sprint 3, sem transformar cada passo técnico ou documental em um card independente. A maior quantidade decorre do escopo de integração, Copilot, deploy e execução dos testes sistêmicos; não de documentação duplicada. O teto de 55% em G equilibra dois controles: reduz os 62% observados na Sprint 3 e impede recriar cards separados apenas para teste direto ou documentação específica da mesma implementação. A unidade de refinamento é o **resultado independentemente verificável**, não cada passo usado para produzi-lo.
+O refinamento consolida etapas que produzem um único resultado: implementação, teste direto e documentação específica; conector e autenticação; smoke test e rollback; publicação e instruções operacionais; e construção integrada do material da Review. Os webhooks e as categorias funcional e integração permanecem separados porque geram resultados independentes e não caberiam honestamente no teto G se reunidos. Assim, a Sprint 4 possui **58 tasks**, contra 26 no planejamento da Sprint 3, sem transformar cada passo técnico ou documental em um card independente. A maior quantidade decorre da inclusão conjunta dos três artefatos da sprint — desenvolvimento, testes sistêmicos e gestão com viabilidade financeira —, além da correção de pendências que bloqueiam a integração; não de documentação duplicada. O teto de 55% em G equilibra dois controles: reduz os 62% observados na Sprint 3 e impede recriar cards separados apenas para teste direto ou documentação específica da mesma implementação. A unidade de refinamento é o **resultado independentemente verificável**, não cada passo usado para produzi-lo.
 
 | Faixa | Quantidade | Teto por task | Capacidade máxima |
 | :---: | :---: | :---: | :---: |
 | G | 31 | 2 h | 62 h |
-| M | 27 | 1 h | 27 h |
-| P | 0 | 0,5 h | 0 h |
+| M | 26 | 1 h | 26 h |
+| P | 1 | 0,5 h | 0,5 h |
 | PP | 0 | 0,25 h | 0 h |
-| **Total planejado** | **58** | — | **89 h** |
-| **Reserva explícita** | — | — | **7 h** |
+| **Total planejado** | **58** | — | **88,5 h** |
+| **Reserva explícita** | — | — | **7,5 h** |
 | **Capacidade bruta** | — | — | **96 h** |
 
-O backlog ocupa no máximo 92,7% da capacidade e mantém 7,3% de reserva. São 31 de 58 tasks em G (53,4%), abaixo dos 62% da Sprint 3 e dentro do limite de 55%; as demais 27 (46,6%) estão em M. A distribuição de prioridade é equilibrada: 29 tasks Altas (50%) e 29 Médias (50%). Isso evita produzir cards artificiais apenas para elevar a proporção de M, mantém a prioridade Alta capaz de ordenar trabalho e preserva folga explícita para defeitos e bloqueios.
+O backlog ocupa no máximo 92,2% da capacidade e mantém 7,8% de reserva. São 31 de 58 tasks em G (53,4%), abaixo dos 62% da Sprint 3 e dentro do limite de 55%; 26 (44,8%) estão em M e uma (1,7%) em P. A distribuição de prioridade é equilibrada: 29 tasks Altas (50%) e 29 Médias (50%). Isso evita produzir cards artificiais apenas para elevar a proporção de M, mantém a prioridade Alta no teto estabelecido e preserva folga explícita para defeitos e bloqueios.
 
-As 89 horas incluem **6 horas de preparação da Sprint Review**, distribuídas entre `S4-46A` e `S4-47B`; a apresentação e ensaios formais não entram no cálculo. Depois de escolhidos os dois apresentadores, cada um pode receber no máximo 13 horas de trabalho não relacionado ao material, preservando 3 horas para preparação a partir de quarta-feira. Os quatro integrantes restantes mantêm até 16 horas cada. A reserva de 7 horas não deve ser pré-atribuída: ela é acionada por falha de teste, bloqueio externo ou correção necessária ao caminho demonstrável.
+As 88,5 horas incluem **3 horas de preparação da Sprint Review**, distribuídas entre `S4-46` e `S4-47`; a apresentação e ensaios formais não entram no cálculo. Felipe executa `S4-47` e possui 12,5 horas fora da preparação; Leonardo executa `S4-46` e possui 13 horas fora dela. A reserva de 7,5 horas não é pré-atribuída: ela é acionada por falha de teste, bloqueio externo ou correção necessária ao caminho demonstrável.
 
-A ausência de assignees é deliberada nesta versão. Antes da atribuição, o grupo deve somar o teto das tasks por pessoa, identificar as duas linhas de capacidade reduzida dos apresentadores e garantir revisor cruzado. Nenhuma pessoa recebe uma segunda task G simultânea enquanto outra estiver sem task pronta, e nenhuma frente documental ou técnica inteira fica concentrada em uma única pessoa.
+| Integrante | Tasks como executor | Carga | Tasks como revisor | Situação |
+| --- | :---: | :---: | :---: | --- |
+| Felipe | 9 | 14,5 h | 11 | Apresentador; 12,5 h fora da preparação |
+| Henrique | 11 | 15 h | 8 | Dentro da capacidade |
+| Jaime | 9 | 15 h | 10 | Dentro da capacidade |
+| Leonardo | 8 | 14 h | 11 | Apresentador; 13 h fora da preparação |
+| Pedro | 10 | 15 h | 9 | Dentro da capacidade |
+| Wendel | 11 | 15 h | 9 | Dentro da capacidade |
+| **Total** | **58** | **88,5 h** | **58** | **7,5 h de reserva coletiva** |
+
+A amplitude de carga é de apenas uma hora, entre 14 e 15 horas por pessoa. Todo executor possui revisor diferente: Felipe é revisado por Wendel; Henrique, por Leonardo; Jaime, por Pedro; Leonardo, por Henrique; Pedro, por Jaime; e Wendel, por Felipe. A revisão não altera a estimativa da task, pois ocorre dentro da capacidade de colaboração e do SLA; se exigir retrabalho material, consome primeiro a reserva explícita. Nenhuma frente técnica ou documental inteira fica sob uma única pessoa, e a rotação desloca Wendel para gestão e testes, Henrique para integridade e deploy, Felipe para Copilot e publicação, Leonardo para dados/RAG e Jaime e Pedro para integrações cruzadas.
 
 # 7. Gestão do processo de desenvolvimento do grupo
 
@@ -1103,7 +1122,7 @@ Regras:
 - Toda tarefa deve nascer como issue na coluna `Open`;
 - A issue só deve avançar de `Open` para `Backlog` depois de refinada;
 - A issue deve ter responsável único, tipo, estimativa, prioridade e milestone;
-- A atribuição acontece depois da comparação de carga estimada da equipe, não no momento em que a task é escrita;
+- A atribuição deve reproduzir a distribuição de carga aprovada na Seção 6.4; alterações exigem registro da causa e nova soma por integrante;
 - O card deve ser atualizado sempre que houver mudança real de estado;
 - Tarefas bloqueadas devem ser sinalizadas como impedimento na daily;
 - Nenhuma tarefa deve ir para `Closed` sem evidência e revisão.
@@ -1121,7 +1140,7 @@ As issues devem seguir as regras avaliadas pelo Dashboard Ágil do módulo.
 | DoR | Deve usar `**DoR (Definition of Ready):**` com checklist de pré-condições. |
 | DoD | Deve usar `**DoD (Definition of Done):**` com checklist verificável. |
 | Assignee | Deve haver exatamente um responsável pela execução. |
-| Labels | Deve conter tipo (`FEATURE`, `BUG FIX` ou `DOCUMENTATION`), tamanho (`SIZE_PP`, `SIZE_P`, `SIZE_M` ou `SIZE_G`) e prioridade (`PRIORIDADE ALTA` quando aplicável). |
+| Labels | Deve conter exatamente uma label de tipo (`FEATURE`, `BUG FIX` ou `DOCUMENTATION`), uma de tamanho (`SIZE_PP`, `SIZE_P`, `SIZE_M` ou `SIZE_G`) e uma de prioridade (`PRIORIDADE ALTA`, `PRIORIDADE MÉDIA` ou `PRIORIDADE BAIXA`). |
 | Milestone | Deve estar vinculada à sprint correspondente, como `Sprint 03` ou `Sprint 04`. |
 
 Template mínimo:
