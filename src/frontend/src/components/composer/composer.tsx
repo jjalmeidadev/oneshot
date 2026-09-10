@@ -1,5 +1,5 @@
 import { AlertTriangle, ArrowUp, Square } from 'lucide-react';
-import { useState, type ChangeEvent, type KeyboardEvent } from 'react';
+import { useEffect, useRef, type ChangeEvent, type KeyboardEvent } from 'react';
 
 import { AudioButton } from '@/components/composer/audio-button';
 import { IntentToggle } from '@/components/composer/intent-toggle';
@@ -23,6 +23,8 @@ export function Composer({
   value,
   onChange,
   onSubmit,
+  onSendAudio,
+  conversationId = null,
   onStop,
   isSending,
   intentLayerEnabled,
@@ -31,21 +33,34 @@ export function Composer({
   value: string;
   onChange: (value: string) => void;
   onSubmit: () => void;
+  onSendAudio: (audio: Blob) => Promise<boolean>;
+  conversationId?: string | null;
   onStop: () => void;
   isSending: boolean;
   intentLayerEnabled: boolean;
   onIntentLayerChange: (enabled: boolean) => void;
 }) {
   const recorder = useAudioRecorder();
-  const [audioNotice, setAudioNotice] = useState<string | null>(null);
+  const previousConversation = useRef(conversationId);
+  const cancelRecording = recorder.cancel;
+  useEffect(() => {
+    if (previousConversation.current && previousConversation.current !== conversationId)
+      cancelRecording();
+    previousConversation.current = conversationId;
+  }, [conversationId, cancelRecording]);
   const textareaRef = useAutosizeTextarea(value, 1, 200);
 
   const overLimit = value.length > CHAT_MESSAGE_MAX_LENGTH;
-  const canSubmit = value.trim().length > 0 && !overLimit && !isSending;
+  const canSubmit =
+    value.trim().length > 0 &&
+    !overLimit &&
+    !isSending &&
+    recorder.state !== 'recording' &&
+    recorder.state !== 'requesting';
   const isRecording = recorder.state === 'recording';
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
+    if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
       event.preventDefault();
       if (canSubmit) onSubmit();
     }
@@ -55,20 +70,10 @@ export function Composer({
     onChange(event.target.value);
   };
 
-  /**
-   * PONTO DE INTEGRACAO 3: envio do audio.
-   *
-   * A captura ja entrega `recorder.recording.blob` pronto e conferido contra os
-   * limites do endpoint. Falta apenas chamar `uploadAudio` de `lib/api/audio.ts`
-   * com o token que o canal entregar, e transformar a resposta em mensagens —
-   * a transcricao vira a mensagem do usuario e `answer.text` a do assistente.
-   */
-  const handleSendAudio = () => {
-    setAudioNotice(
-      'Captura concluída. O envio para POST /api/audio entra na task de integração — ' +
-        'o áudio já está validado contra os limites do endpoint.',
-    );
-    recorder.discard();
+  const handleSendAudio = async () => {
+    if (!recorder.recording || isSending) return;
+    const sent = await onSendAudio(recorder.recording.blob);
+    if (sent) recorder.discard();
   };
 
   return (
@@ -93,7 +98,8 @@ export function Composer({
           <RecordingPreview
             recording={recorder.recording}
             onDiscard={recorder.discard}
-            onSend={handleSendAudio}
+            onSend={() => void handleSendAudio()}
+            disabled={isSending}
           />
         )}
 
@@ -101,12 +107,6 @@ export function Composer({
           <p className="flex items-start gap-1.5 text-2xs text-danger">
             <AlertTriangle size={12} className="mt-0.5 shrink-0" />
             {recorder.error}
-          </p>
-        )}
-
-        {audioNotice && (
-          <p className="rounded-lg border border-border bg-muted px-3 py-2 text-2xs leading-4 text-fg-muted">
-            {audioNotice}
           </p>
         )}
 
@@ -122,7 +122,6 @@ export function Composer({
             state={recorder.state}
             disabled={isSending || isRecording}
             onStart={() => {
-              setAudioNotice(null);
               void recorder.start();
             }}
           />

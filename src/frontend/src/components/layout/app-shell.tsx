@@ -40,9 +40,16 @@ export function AppShell() {
     sidebarOpen,
     setSidebarOpen,
     sendMessage,
+    sendAudio,
+    stop,
+    error,
   } = useChatStore();
 
-  const [draft, setDraft] = useState('');
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const draftId = activeConversation?.id ?? 'new';
+  const draft = drafts[draftId] ?? '';
+  const setDraft = (value: string) =>
+    setDrafts((current) => ({ ...current, [draftId]: value }));
   const isDesktop = useIsDesktop();
 
   const messages = activeConversation?.messages ?? [];
@@ -54,8 +61,12 @@ export function AppShell() {
   const submit = (content?: string) => {
     const text = content ?? draft;
     if (!text.trim()) return;
-    sendMessage(text);
-    setDraft('');
+    void sendMessage(text).then((sent) => {
+      if (sent)
+        setDrafts((current) =>
+          current[draftId] === text ? { ...current, [draftId]: '' } : current,
+        );
+    });
   };
 
   const showDocumentPanel = isDesktop && documentPanelOpen;
@@ -93,7 +104,7 @@ export function AppShell() {
         />
 
         <div className="min-h-0 flex-1">
-          {messages.length === 0 ? (
+          {messages.length === 0 && !isSending ? (
             <ChatEmptyState onPick={(prompt) => submit(prompt)} />
           ) : (
             <MessageList
@@ -109,11 +120,21 @@ export function AppShell() {
           )}
         </div>
 
+        {error && (
+          <p
+            role="alert"
+            className="mx-4 rounded-lg bg-danger-soft p-3 text-sm text-danger"
+          >
+            {error}
+          </p>
+        )}
         <Composer
+          conversationId={activeConversation?.id ?? null}
+          onSendAudio={sendAudio}
           value={draft}
           onChange={setDraft}
           onSubmit={() => submit()}
-          onStop={() => undefined}
+          onStop={stop}
           isSending={isSending}
           intentLayerEnabled={intentLayerEnabled}
           onIntentLayerChange={setIntentLayerEnabled}

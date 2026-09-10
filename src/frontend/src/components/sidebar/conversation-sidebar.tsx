@@ -1,7 +1,6 @@
 import { MessagesSquare, PenSquare, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import { ScenarioSwitcher } from '@/components/dev/scenario-switcher';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { ConversationItem } from '@/components/sidebar/conversation-item';
 import { UserCard } from '@/components/sidebar/user-card';
@@ -39,12 +38,7 @@ function groupByDay(conversations: Conversation[]) {
   }));
 }
 
-/**
- * Barra lateral esquerda: historico de conversas do usuario.
- *
- * O historico vive na store em memoria. Quando `GET /api/conversations`
- * existir, a lista vem de la — ver `lib/api/conversations.ts`.
- */
+/** Histórico em memória da sessão atual. Não há API de persistência de conversas. */
 export function ConversationSidebar({ onClose }: { onClose?: () => void }) {
   const {
     conversations,
@@ -152,7 +146,6 @@ export function ConversationSidebar({ onClose }: { onClose?: () => void }) {
       <Separator />
 
       <div className="space-y-2 p-2">
-        <ScenarioSwitcher />
         <div className="flex items-center gap-1">
           <div className="min-w-0 flex-1">
             <UserCard />

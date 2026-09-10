@@ -1,6 +1,6 @@
 import { Sparkles } from 'lucide-react';
 
-import { SUGGESTED_PROMPTS } from '@/data/mock';
+import { SUGGESTED_PROMPTS } from '@/data/prompts';
 
 /** Tela inicial de uma conversa vazia. */
 export function ChatEmptyState({ onPick }: { onPick: (prompt: string) => void }) {

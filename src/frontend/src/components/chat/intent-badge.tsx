@@ -10,9 +10,9 @@ const OUTCOME = {
   handler: {
     icon: Target,
     tone: 'success' as const,
-    label: 'Handler específico',
+    label: 'Intenção identificada',
     explanation:
-      'As duas confianças passaram dos limiares: a solicitação aciona o handler dedicado da intenção.',
+      'As duas confianças passaram dos limiares. A intenção identificada acompanha a resposta do agente.',
   },
   generic: {
     icon: Filter,
@@ -46,7 +46,10 @@ export function IntentBadge({ intent }: { intent: IntentResult }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <button type="button" className="focus-visible:outline-none">
+        <button
+          type="button"
+          className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
           <Badge tone={outcome.tone}>
             <Icon size={11} />
             <span className="font-mono">{label}</span>
