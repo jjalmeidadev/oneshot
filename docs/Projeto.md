@@ -225,6 +225,9 @@
   - [9.3 Testes de Usabilidade](#93-testes-de-usabilidade)
     - [9.3.1 Planejamento dos testes de usabilidade](#931-planejamento-dos-testes-de-usabilidade)
     - [9.3.2 Resultados](#932-resultados)
+  - [9.4 Testes de Integração](#94-testes-de-integração)
+    - [9.4.1 Planejamento](#941-planejamento)
+    - [9.4.2 Resultados](#942-Resultados)
 - [10. Procedimentos de Implantação](#10-procedimentos-de-implantação)
   - [10.1 Implantação e Configuração do Banco de Dados](#101-implantação-e-configuração-do-banco-de-dados)
   - [10.2 Implantação do Protótipo para uso por equipe de desenvolvimento](#102-implantação-do-protótipo-para-uso-por-equipe-de-desenvolvimento)
@@ -5059,6 +5062,54 @@ Os resultados dos testes de usabilidade ainda não foram consolidados. Após a e
 - melhorias priorizadas para a evolução do agente.
 
 Os dados brutos serão registrados na planilha "Oneshot - Testes de Usabilidade - Agente de Gestão de Portifólio", que organiza cada cenário em etapas observáveis e mantém uma aba específica para ocorrências. O formulário SUS será utilizado como fonte complementar para medir a percepção geral de usabilidade após a experiência prática com o agente. A consolidação final deverá cruzar os registros da planilha com as respostas do SUS, permitindo identificar quais cenários tiveram maior taxa de sucesso, quais etapas concentraram dificuldades e quais problemas devem ser priorizados na evolução do agente.
+
+---
+
+## 9.4 Testes de Integração
+
+### 9.4.1 Planejamento
+
+O plano de testes de integração com o módulo de VHS será desenvolvido na Sprint 3, cobrindo a fronteira entre `app.audio.transcription` e o provedor externo de Speech-to-Text (Azure AI Speech, Seção 8.8). O objetivo é comprovar que os componentes se comunicam de forma verificável e que o VHS evita chamadas repetidas ao provedor externo para uma mesma requisição, sem que a suíte padrão dependa do serviço real estar disponível a cada execução — o mesmo princípio já adotado para Gemini e SharePoint na Seção 8.4, aplicado agora à integração de voz.
+
+Das três integrações externas mencionadas no item 3 do artefato — Speech-to-Text, banco de dados e canal do Copilot Studio —, este plano cobre apenas a primeira. É a única que hoje conta com mecanismo de cache obrigatório e a única cuja integração está prevista no backlog da Sprint 3/4; banco e Copilot Studio ainda não têm client implementado no backend, e o planejamento dos testes correspondentes fica para quando essa integração existir.
+
+#### Mecanismo de cache do VHS
+
+O VHS funciona no modelo de cassete: na primeira vez que um áudio é enviado (cache *miss*), o módulo chama o provedor externo normalmente, grava a resposta recebida associada a uma chave, e devolve essa resposta ao chamador. Em qualquer requisição seguinte cuja chave já exista no cache (cache *hit*), o VHS devolve a resposta gravada diretamente, sem realizar nova chamada ao provedor externo — é essa ausência de nova chamada, e não apenas a igualdade das respostas, que os testes precisam comprovar.
+
+A chave de cache identifica o conteúdo a ser transcrito — um hash do áudio combinado ao idioma — e não metadados de sessão como `conversation_id`: dois usuários enviando o mesmo áudio compartilham o cache, e o mesmo usuário enviando áudios diferentes não reaproveita uma resposta que não corresponde ao novo conteúdo. Respostas de erro do provedor (falha de conexão ou indisponibilidade) não são gravadas como cassete: cada nova tentativa após um erro deve acionar o provedor de novo, e não repetir a falha a partir do cache.
+
+#### Ferramentas e instruções de execução
+
+A execução automatizada segue `pytest` com `fastapi.testclient.TestClient`, na mesma linha já adotada para os testes de integração existentes (Seção 8.4). O provedor externo é sempre substituído por um duplo de teste (`monkeypatch` sobre o ponto de chamada em `app.audio.transcription`) que conta quantas vezes foi efetivamente invocado; nenhum teste desta suíte realiza chamada de rede real ao Azure AI Speech.
+
+Execução prevista: `pytest src/backend/app/tests/test_vhs_integration.py -v`, a partir de `src/backend`, com o ambiente virtual do projeto ativo (conforme `Manual-instalacao.md`). Cada teste deve iniciar com o cache do VHS vazio, usando uma fixture de limpeza equivalente a `reset_concurrency_control` de `test_audio_upload.py`, para que a ordem de execução não influencie o resultado.
+
+#### Cenários de teste (positivos e negativos)
+
+| Cenário | Tipo | Resultado esperado |
+|---|:---:|---|
+| Primeira requisição para um áudio novo | Positivo (comunicação) | Provedor chamado 1 vez; resposta registrada no cache |
+| Requisição repetida com o mesmo áudio | Positivo (cache) | Provedor **não** é chamado de novo; resposta idêntica à primeira; contador de chamadas ao duplo permanece em 1 |
+| Requisição com áudio diferente | Positivo (chave de cache) | Provedor chamado novamente, sem colisão de chave |
+| Cache expirado (TTL vencido) | Positivo (expiração) | Provedor chamado novamente após o TTL; antes do TTL, não |
+| Erro de conexão do provedor (`SttProviderError`) | Negativo (falha externa) | Endpoint responde 502 `STT_PROVIDER_ERROR`; erro não é cacheado; nova tentativa do mesmo áudio chama o provedor de novo |
+| Provedor indisponível (`SttProviderUnavailable`) | Negativo (indisponibilidade) | Endpoint responde 503 `STT_PROVIDER_UNAVAILABLE`; erro não é cacheado |
+| Recuperação após falha anterior no mesmo áudio | Negativo → Positivo | Requisição seguinte chama o provedor normalmente (falha não fica presa no cache) e, a partir daí, passa a cachear a resposta com sucesso |
+
+#### Comportamento esperado diante de erro externo
+
+Diante de qualquer falha do provedor de STT, o comportamento esperado do sistema é: (1) o endpoint mapeia a exceção para o código HTTP já definido no contrato (502 para `SttProviderError`, 503 para `SttProviderUnavailable`); (2) a mensagem de erro devolvida ao cliente não expõe detalhe técnico interno da falha, seguindo o mesmo padrão de mensagens controladas já testado em `TestControlledErrorMessages`; (3) o VHS não grava a falha como se fosse uma resposta válida, para que o sistema volte a tentar o provedor real na próxima requisição em vez de repetir um erro obsoleto indefinidamente.
+
+#### Validação dos resultados
+
+A evidência de que o cache está funcionando é o contador de chamadas do duplo de teste: um cenário de cache hit só passa se esse contador permanecer em 1 após duas ou mais requisições do mesmo áudio. A evidência de que erros não são cacheados é o mesmo contador voltando a incrementar em uma nova tentativa após uma falha. Os resultados da execução (saída do `pytest`, com contagem de testes passando/falhando) devem ser anexados como evidência na issue de execução da Sprint 4, junto com o relatório de cobertura, se disponível.
+
+A execução real desta suíte depende da integração com o Azure AI Speech sair do estágio de stub em que se encontra hoje (task 11 do backlog). Isso está alinhado com a Seção 6.2 do `GestaoProjeto.md`, que trata o planejamento de testes como frente independente da cadeia crítica de implementação: o plano pode ser escrito e a suíte pode rodar com o duplo de teste desde já, e só troca de alvo real quando o provedor estiver integrado.
+
+### 9.4.2 Resultados
+
+Será executado na Sprint 4.
 
 # 10. Procedimentos de Implantação
 
