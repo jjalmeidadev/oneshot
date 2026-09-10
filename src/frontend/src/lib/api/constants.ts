@@ -30,10 +30,7 @@ export const AUDIO_REQUIRED_BITS_PER_SAMPLE = 16;
  * O ramo Opus aceita `input_sample_rate` 0, 16000 ou 48000 justamente porque o
  * `MediaRecorder` grava declarando 48 kHz (RFC 7845). O ramo WAV exige 16 kHz.
  *
- * ATENCAO: o Chrome nao produz `audio/ogg;codecs=opus` — ele grava
- * `audio/webm;codecs=opus`, continer que o backend recusa com
- * `AUDIO_FORMAT_UNSUPPORTED`. O gravador detecta isso e avisa; ver a secao
- * "Lacunas" do README.
+ * O WebM capturado pelo Chrome é convertido para WAV antes do envio.
  */
 export const AUDIO_ACCEPTED_MIME_TYPES = [
   'audio/ogg;codecs=opus',

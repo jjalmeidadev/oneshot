@@ -38,7 +38,13 @@ export function MessageList({
 
   return (
     <ScrollArea className="h-full" viewportRef={viewportRef}>
-      <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6">
+      <div
+        role="log"
+        aria-label="Mensagens da conversa"
+        aria-live="polite"
+        aria-busy={isSending}
+        className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6"
+      >
         {messages.map((message) => (
           <motion.div key={message.id} {...ENTRY}>
             <MessageBubble

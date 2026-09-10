@@ -107,9 +107,9 @@ exigencia estrita de 16 kHz da Secao 8.7.3.
 
 O Speech-to-Text usa o Azure AI Speech para audio curto, em `pt-BR`, via
 `app/audio/transcription.py`. Um audio aprovado na validacao recebe `200` com a
-transcricao retornada pelo provedor. O campo `pipeline_status` permanece
-`"stubbed"` ate a integracao do classificador de intencoes e da resposta
-fundamentada, que sao tasks separadas.
+transcricao retornada pelo provedor. A transcrição segue para o pipeline compartilhado de classificação e resposta.
+O campo `pipeline_status` é `"completed"` somente após a resposta; `chat` traz
+o mesmo contrato de `POST /api/chat`, incluindo fontes completas e métricas.
 
 **A chamada ao provedor e assincrona.** A rota de audio e `async def`, e um
 cliente HTTP sincrono dentro dela bloquearia o laco de eventos: enquanto o
@@ -346,3 +346,18 @@ deterministica. Um arquivo publico usado como amostra foi
 material. Como a amostra original esta em WAV estereo a 44,1 kHz, a copia de
 teste deve ser convertida para WAV PCM mono a 16 kHz antes do envio ao
 `POST /api/audio`.
+
+
+## Integração da bancada web (#131)
+
+`POST /api/chat` aceita `use_intent_classifier` (opcional, padrão `false` por compatibilidade) além de `message` e `previous_interaction_id`. A interface envia o estado do toggle explicitamente. A resposta inclui `intent` quando houver classificação e `sources[].excerpt` com o trecho recuperado. Perguntas sem confiança suficiente ou fora do escopo recebem resposta controlada sem chamada ao Gemini.
+
+`POST /api/audio` aceita também os campos multipart `previous_interaction_id` e `use_intent_classifier`. Depois de validar e transcrever, executa o mesmo pipeline de texto fora do laço assíncrono. Preserva `answer` e acrescenta `chat` com as fontes completas, métricas e ID real da interação. Não são mais gerados IDs de interação fictícios nem respostas provisórias de sucesso.
+
+O pipeline classifica e gera respostas informativas. A identificação de uma intenção transacional não executa uma alteração em sistemas corporativos. Autorização por perfil, persistência e integração Entra ID continuam dependendo dos módulos e do ambiente previstos para essas entregas.
+
+Com `PLN_WARMUP=1`, a inicialização carrega o classificador antes de aceitar requisições. As chamadas ao modelo são serializadas para evitar carregamentos concorrentes. Uma falha de inicialização exige corrigir dependências/modelos; em testes determinísticos use `PLN_WARMUP=0`.
+
+Erros de configuração e do Gemini são convertidos em mensagens controladas. Entradas textuais inválidas retornam `422` com `error.code=INVALID_INPUT`; detalhes internos de validação não são apresentados ao usuário.
+
+A [documentação do frontend](../frontend/README.md) descreve estrutura, fluxos, contratos, execução e limitações. A [matriz de testes](../frontend/TESTES.md) reúne as evidências da integração S3/S5.

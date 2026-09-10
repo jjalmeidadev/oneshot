@@ -10,8 +10,6 @@
  *   POST /api/audio  -> app/audio/schemas.py
  *   GET  /health     -> app/main.py
  *
- * O que **ainda nao existe** e esta marcado como proposto:
- *   GET/POST/DELETE /api/conversations (ver `conversations.ts`)
  */
 
 /* -------------------------------------------------------------------------
@@ -21,6 +19,7 @@
 /** `GeminiChatRequest`. `message` tem min_length=1 e max_length=20000. */
 export type ChatRequest = {
   message: string;
+  use_intent_classifier?: boolean;
   previous_interaction_id?: string | null;
 };
 
@@ -40,11 +39,7 @@ export type ChatUsage = {
  * `base-atendimento:301`, e o `score` **nao** e normalizado entre 0 e 1: e a
  * soma de tokens casados + 2x tokens casados no titulo + cobertura da consulta.
  *
- * `excerpt` NAO e devolvido pelo backend hoje. O texto existe do lado de la em
- * `RetrievedDocument.document.content`, mas e descartado na montagem da
- * resposta. O painel de documentos exibe o trecho quando o campo aparecer e
- * mostra o estado de ausencia enquanto isso — ver `documents/document-viewer.tsx`
- * e a secao "Lacunas" do README.
+ * `excerpt` contém o trecho recuperado usado na resposta.
  */
 export type ChatSource = {
   id: string;
@@ -54,11 +49,12 @@ export type ChatSource = {
   /** ISO 8601, vindo de `lastModifiedDateTime` da lista do SharePoint. */
   last_modified: string;
   score: number;
-  excerpt?: string;
+  excerpt?: string | null;
 };
 
 /** `GeminiChatResponse`. */
 export type ChatResponse = {
+  intent?: AudioIntent | null;
   text: string;
   model: string;
   interaction_id: string | null;
@@ -82,9 +78,7 @@ export type AudioTranscription = {
 /**
  * `AudioIntent` — saida do classificador hierarquico de intencoes.
  *
- * E o mesmo formato que `app/nlp/inference.Classificacao` produz. Enquanto
- * `pipeline_status` for `"stubbed"`, o backend preenche este bloco com
- * `FORA_DE_ESCOPO` / `pipeline_nao_implementado` e confiancas zeradas.
+ * Null na resposta quando a classificação está desligada.
  */
 export type AudioIntent = {
   macro: MacroIntent | string;
@@ -107,13 +101,14 @@ export type AudioAnswer = {
 
 /** `AudioUploadResponse`. */
 export type AudioUploadResponse = {
+  chat?: ChatResponse | null;
   conversation_id: string;
-  interaction_id: string;
+  interaction_id: string | null;
   transcription: AudioTranscription;
-  intent: AudioIntent;
+  intent: AudioIntent | null;
   answer: AudioAnswer;
-  /** `"stubbed"` ate o pipeline de PLN ser ligado a rota; depois `"completed"`. */
-  pipeline_status: 'stubbed' | 'completed' | string;
+  /** Uma resposta utilizável exige pipeline concluído. */
+  pipeline_status: string;
 };
 
 /* -------------------------------------------------------------------------

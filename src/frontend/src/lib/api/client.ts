@@ -54,26 +54,33 @@ export async function parseError(response: Response): Promise<ApiError> {
   const body = (await response.json().catch(() => null)) as
     AudioErrorEnvelope | DetailErrorEnvelope | null;
 
-  if (body && typeof body === 'object' && 'error' in body && body.error) {
-    return new ApiError(body.error.message || FALLBACK_MESSAGE, {
-      status: response.status,
-      code: body.error.code,
-      detail: body.error.detail ?? null,
-    });
-  }
-
-  if (body && typeof body === 'object' && 'detail' in body && body.detail) {
-    return new ApiError(String(body.detail), { status: response.status });
-  }
-
-  return new ApiError(FALLBACK_MESSAGE, { status: response.status });
+  const messages: Record<number, string> = {
+    400: 'Entrada inválida. Confira o texto ou o formato do áudio.',
+    401: 'Sua sessão não foi reconhecida. Confira o token de acesso.',
+    403: 'Você não tem acesso a esta informação.',
+    413: 'O áudio deve ter no máximo 2 MB.',
+    422: 'Confira a entrada. Para áudio, grave uma fala audível de até 60 segundos.',
+    429: 'Já existe uma solicitação em andamento. Aguarde e tente novamente.',
+    502: 'Não foi possível obter uma resposta do serviço. Tente novamente.',
+    503: 'O serviço está indisponível. Tente novamente em instantes.',
+    504: 'O processamento demorou mais que o esperado. Tente novamente.',
+  };
+  const code = body && 'error' in body && body.error ? body.error.code : null;
+  return new ApiError(messages[response.status] ?? FALLBACK_MESSAGE, {
+    status: response.status,
+    code,
+  });
 }
 
 export async function requestJson<T>(
   path: string,
   init: RequestInit & { signal?: AbortSignal } = {},
 ): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, init);
+  const signal = AbortSignal.any([
+    ...(init.signal ? [init.signal] : []),
+    AbortSignal.timeout(120_000),
+  ]);
+  const response = await fetch(`${API_BASE_URL}${path}`, { ...init, signal });
 
   if (!response.ok) {
     throw await parseError(response);
@@ -91,8 +98,8 @@ export function toDisplayMessage(error: unknown): string {
   if (error instanceof ApiError) {
     return error.message;
   }
-  if (error instanceof Error && error.message) {
-    return error.message;
+  if (error instanceof DOMException && error.name === 'TimeoutError') {
+    return 'O processamento demorou mais que o esperado. Tente novamente.';
   }
   return FALLBACK_MESSAGE;
 }
