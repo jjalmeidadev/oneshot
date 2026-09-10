@@ -2,6 +2,7 @@ from pathlib import Path
 from uuid import uuid4
 from contextlib import asynccontextmanager
 import os
+from time import perf_counter
 from starlette.concurrency import run_in_threadpool
 
 from dotenv import load_dotenv
@@ -22,6 +23,7 @@ from app.gemini.client import (
     GeminiConfigurationError,
 )
 from app.gemini.schemas import GeminiChatRequest, GeminiChatResponse
+from app.nlp.schemas import AudioPipelineMetrics
 from app.pipeline import process_message, warmup_classifier
 
 
@@ -116,9 +118,10 @@ async def create_audio_upload(
     conversation_id: str | None = Form(default=None),
     language: str | None = Form(default=None),
     previous_interaction_id: str | None = Form(default=None, max_length=1024),
-    use_intent_classifier: bool = Form(default=False),
+    use_intent_classifier: bool = Form(default=True),
     authorization: str | None = Header(default=None),
 ) -> AudioUploadResponse:
+    started_at = perf_counter()
     identity = resolve_identity(authorization)
 
     if audio is None:
@@ -129,26 +132,34 @@ async def create_audio_upload(
         if not data:
             raise AudioMissingError()
 
-        result = await process_audio_upload(
+        audio_result = await process_audio_upload(
             data,
             language=language or DEFAULT_LANGUAGE,
         )
         response = await run_in_threadpool(create_chat_response, GeminiChatRequest(
-            message=result.text,
+            message=audio_result.transcription.text,
             previous_interaction_id=previous_interaction_id,
             use_intent_classifier=use_intent_classifier,
         ))
         return AudioUploadResponse(
             conversation_id=conversation_id or str(uuid4()),
             interaction_id=response.interaction_id,
-            transcription=result,
+            transcription=audio_result.transcription,
             intent=response.intent,
+            entities=response.entities,
             answer=AudioAnswer(text=response.text, sources=[
                 AudioAnswerSource(artifact=source.title, section=source.list_name)
                 for source in response.sources
             ]),
             chat=response,
             pipeline_status="completed",
+            pipeline_metrics=AudioPipelineMetrics(
+                validation_ms=audio_result.validation_ms,
+                stt_ms=audio_result.stt_ms,
+                nlp_ms=response.pipeline_metrics.nlp_ms,
+                route_ms=response.pipeline_metrics.route_ms,
+                total_ms=round((perf_counter() - started_at) * 1000),
+            ),
         )
 
 

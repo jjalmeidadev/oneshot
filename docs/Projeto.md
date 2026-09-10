@@ -3777,25 +3777,81 @@ curl --request POST \
 
 ### 8.7.5 Resposta de sucesso
 
-`200 OK`. O endpoint devolve a transcrição real, a classificação quando
-solicitada e a resposta produzida pelo mesmo pipeline do chat. O objeto `answer`
-mantém a visão resumida para canais de voz; `chat` contém o contrato textual
-completo, incluindo métricas e fontes.
+`200 OK`. O endpoint valida o arquivo, executa a transcrição e encaminha o
+texto reconhecido ao mesmo pipeline de PLN usado por `POST /api/chat`. A
+resposta aprovada traz `pipeline_status: "completed"`, intenção estruturada,
+entidades extraídas e métricas do percurso de áudio e PLN, mantendo RNF05
+rastreável no contrato HTTP e RNF11 com mensagens controladas para entradas sem
+rota segura.
 
 ```json
 {
   "conversation_id": "1f5c9a24-1c2e-4a8f-9a3e-2b6d8c0f1a77",
   "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
   "transcription": {
-    "text": "Qual é o status do projeto de sinalização?",
-    "confidence": 0.94,
+    "text": "qual e o prazo do projeto XPTO?",
+    "confidence": 0.92,
     "duration_seconds": 4.8
   },
   "intent": {
     "macro": "CONSULTA",
-    "specific": "consulta_status_projeto",
-    "confidence_macro": 0.97,
-    "confidence_specific": 0.91
+    "specific": "consulta_prazo",
+    "confidence_macro": 0.98,
+    "confidence_specific": 0.86,
+    "flow": "consulta_documental",
+    "handler": "consultar_prazo",
+    "alternatives": [
+      { "specific": "consulta_status", "confidence": 0.09 }
+    ]
+  },
+  "entities": [
+    {
+      "type": "projeto",
+      "value": "XPTO",
+      "text": "projeto XPTO",
+      "start": 17,
+      "end": 29,
+      "types": ["projeto"],
+      "ambiguous": false
+    }
+  ],
+  "pipeline_metrics": {
+    "validation_ms": 3,
+    "stt_ms": 410,
+    "nlp_ms": 8,
+    "route_ms": 35,
+    "total_ms": 456
+  },
+  "chat": {
+    "text": "O prazo do projeto XPTO consta nas fontes recuperadas para esta consulta.",
+    "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
+    "intent": {
+      "macro": "CONSULTA",
+      "specific": "consulta_prazo",
+      "confidence_macro": 0.98,
+      "confidence_specific": 0.86,
+      "flow": "consulta_documental",
+      "handler": "consultar_prazo",
+      "alternatives": [
+        { "specific": "consulta_status", "confidence": 0.09 }
+      ]
+    },
+    "entities": [
+      {
+        "type": "projeto",
+        "value": "XPTO",
+        "text": "projeto XPTO",
+        "start": 17,
+        "end": 29,
+        "types": ["projeto"],
+        "ambiguous": false
+      }
+    ],
+    "pipeline_metrics": {
+      "nlp_ms": 8,
+      "route_ms": 35
+    },
+    "sources": []
   },
   "answer": {
     "text": "O projeto está em andamento.",
@@ -3835,12 +3891,17 @@ completo, incluindo métricas e fontes.
 | Campo | Tipo | Descrição |
 |---|---|---|
 | `conversation_id` | `string` | Valor recebido no formulário ou UUID gerado pela API se o campo não foi enviado. |
-| `interaction_id` | `string` ou `null` | Identificador produzido pelo chat; pode ser nulo em uma resposta local de limitação. |
-| `transcription` | `object` | Texto, confiança e duração retornados pela etapa de voz. |
-| `intent` | `object` ou `null` | Macrointenção, intenção específica e confianças quando a classificação foi habilitada. |
-| `answer` | `object` | Texto e fontes resumidas para consumidores do contrato de áudio. |
-| `chat` | `object` ou `null` | Resposta textual completa com modelo, uso, latências, fontes e intenção. |
-| `pipeline_status` | `string` | `completed` quando transcrição e processamento terminam com sucesso. |
+| `interaction_id` | `string` | UUID gerado para a interação. |
+| `transcription.text` | `string` | Texto reconhecido pelo STT e enviado ao pipeline de PLN. |
+| `transcription.confidence` | `float` | Confiança retornada pelo provedor de transcrição. |
+| `transcription.duration_seconds` | `float` | Duração extraída do arquivo e arredondada para duas casas decimais. |
+| `intent` | `object` | Intenção rica derivada da transcrição: `macro`, `specific`, confianças, `flow`, `handler` e `alternatives`. |
+| `entities` | `array` | Entidades extraídas da transcrição, com tipo, valor, texto original, posição e ambiguidade. |
+| `pipeline_metrics` | `object` | Tempos em milissegundos de validação, STT, PLN, roteamento e fluxo total, usados para acompanhar o RNF05. |
+| `chat` | `object` | Resposta textual completa no mesmo contrato de `POST /api/chat`, incluindo `intent`, `entities`, fontes e métricas do pipeline. |
+| `answer.text` | `string` | Espelho compatível do texto de resposta usado pelo frontend atual. |
+| `answer.sources` | `array` | Fontes resumidas preservadas por compatibilidade. |
+| `pipeline_status` | `string` | `completed` quando validação, STT e pipeline de chat terminam com resposta controlada. |
 
 ### 8.7.6 Códigos de resposta e tratamento de erro
 
@@ -3886,10 +3947,10 @@ externa. Na prova de conceito, quando a variável `AUDIO_SIMULATED_IDENTITIES`
 não é configurada, qualquer token Bearer não vazio identifica o usuário de
 forma estável; quando ela é configurada, apenas os tokens mapeados são aceitos.
 
-O upload, a validação, a transcrição e a chamada ao pipeline compartilhado estão
-integrados. Respostas concluídas possuem `pipeline_status` igual a `completed`
-e incluem o contrato completo de chat. A autenticação real via Entra ID, a
-autorização por escopo e a persistência continuam fora desta entrega.
+O upload, a validação, a transcrição, o encaminhamento ao pipeline de PLN e os
+retornos de erro desta seção estão concluídos para a prova de conceito. A
+autorização de escopo corporativa e a persistência continuam fora desta entrega;
+respostas aprovadas retornam `pipeline_status` igual a `completed`.
 
 ## 8.8 Speech-to-Text
 
@@ -4957,12 +5018,55 @@ A carga de 0,8 segundo acontece uma vez por processo e deve ser paga na subida d
 | Extração de entidades do domínio | Implementado e testado | `app/nlp/entities.py` |
 | Carregamento do artefato treinado | Implementado e testado | `app/nlp/classifier.py` |
 | Classificação e roteamento por limiares | Implementado e testado | `app/nlp/inference.py` |
-| Exposição do pipeline em rota HTTP | Implementada e testada | `app/main.py` e `app/pipeline.py` |
+| Exposição do pipeline em rota HTTP | Implementada | `POST /api/chat` e `POST /api/audio` em `app/main.py` e `app/pipeline.py` |
 | Persistência da intenção e das entidades | **Não implementada** | Depende do esquema da Seção 4 e das tabelas de rastreabilidade do RNF03 |
 
-O núcleo é alcançado por `POST /api/chat` e, depois da transcrição, por `POST /api/audio` quando `use_intent_classifier=true`. Texto e áudio chamam o mesmo `process_message`; respostas não roteáveis são produzidas localmente e as demais seguem para RAG e Gemini. `PLN_WARMUP=1` carrega o classificador no ciclo de vida do FastAPI antes do atendimento.
+O núcleo é importável, exercitável e agora alcançado pelas rotas HTTP. Em
+`POST /api/chat`, a classificação é o padrão quando `use_intent_classifier` está
+ausente ou `true`; `false` permanece como opt-out explícito da bancada web. Em
+`POST /api/audio`, a transcrição segue para o mesmo pipeline textual. As duas
+rotas devolvem intenção rica, entidades e métricas (`nlp_ms`, `route_ms`; no
+áudio também `validation_ms`, `stt_ms` e `total_ms`), o que viabiliza a medição
+incremental do RNF05. Solicitações fora de escopo, indefinidas ou sem rota segura
+recebem mensagem controlada sem chamada ao provedor gerador, preservando RNF11.
+Persistência da trilha exigida pelo RNF03 e autorização por perfil continuam
+pendentes das entregas específicas.
 
-Permanecem duas limitações: os testes de navegador usam duplos para os provedores e não medem o RNF05 no ambiente real; e a trilha exigida pelo RNF03 — solicitação, intenção, fontes e resposta — não é gravada, porque o pipeline ainda não possui adaptador PostgreSQL.
+Exemplo resumido do contrato textual exposto por `POST /api/chat`:
+
+```json
+{
+  "text": "O prazo do projeto XPTO consta nas fontes recuperadas para esta consulta.",
+  "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
+  "intent": {
+    "macro": "CONSULTA",
+    "specific": "consulta_prazo",
+    "confidence_macro": 0.98,
+    "confidence_specific": 0.86,
+    "flow": "consulta_documental",
+    "handler": "consultar_prazo",
+    "alternatives": [
+      { "specific": "consulta_status", "confidence": 0.09 }
+    ]
+  },
+  "entities": [
+    {
+      "type": "projeto",
+      "value": "XPTO",
+      "text": "projeto XPTO",
+      "start": 17,
+      "end": 29,
+      "types": ["projeto"],
+      "ambiguous": false
+    }
+  ],
+  "pipeline_metrics": {
+    "nlp_ms": 8,
+    "route_ms": 35
+  },
+  "sources": []
+}
+```
 
 A Seção 8.4 registra a cobertura de teste correspondente e o que continua descoberto.
 

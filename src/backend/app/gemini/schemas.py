@@ -1,11 +1,11 @@
 from pydantic import BaseModel, Field, field_validator
-from app.nlp.schemas import AudioIntent
+from app.nlp.schemas import AudioIntent, ChatPipelineMetrics, PublicEntity
 
 
 class GeminiChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=20000)
     previous_interaction_id: str | None = Field(default=None, max_length=1024)
-    use_intent_classifier: bool = False
+    use_intent_classifier: bool = True
 
     @field_validator("message")
     @classmethod
@@ -42,3 +42,5 @@ class GeminiChatResponse(BaseModel):
     usage: GeminiUsage
     sources: list[GeminiSource] = Field(default_factory=list)
     intent: AudioIntent | None = None
+    entities: list[PublicEntity] = Field(default_factory=list)
+    pipeline_metrics: ChatPipelineMetrics = Field(default_factory=ChatPipelineMetrics)

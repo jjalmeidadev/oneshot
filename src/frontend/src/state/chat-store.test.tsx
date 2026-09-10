@@ -104,6 +104,13 @@ describe('Estado e integração do chat', () => {
             confidence: 0.9,
             duration_seconds: 1,
           },
+          pipeline_metrics: {
+            validation_ms: 2,
+            stt_ms: 3,
+            nlp_ms: 4,
+            route_ms: 5,
+            total_ms: 12,
+          },
         }),
       ),
     );
@@ -122,5 +129,12 @@ describe('Estado e integração do chat', () => {
       'pergunta falada',
     );
     expect(result.current.activeConversation?.messages[1].content).toBe(response.text);
+    expect(result.current.activeConversation?.messages[1].entities?.[0].value).toBe(
+      'Projeto Linha Verde',
+    );
+    expect(result.current.activeConversation?.messages[1].metrics?.sttMs).toBe(3);
+    expect(result.current.activeConversation?.messages[1].metrics?.backendTotalMs).toBe(
+      12,
+    );
   });
 });
