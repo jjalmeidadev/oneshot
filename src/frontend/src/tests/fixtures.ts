@@ -22,5 +22,20 @@ export const response: ChatResponse = {
     specific: 'consulta_status_projeto',
     confidence_macro: 0.9,
     confidence_specific: 0.85,
+    flow: 'Consulta documental',
+    handler: 'handler:consulta_status_projeto',
+    alternatives: [{ intent: 'consulta_status_projeto', confidence: 0.85 }],
   },
+  entities: [
+    {
+      type: 'projeto',
+      value: 'Projeto Linha Verde',
+      text: 'Projeto Linha Verde',
+      start: 0,
+      end: 19,
+      types: ['projeto'],
+      ambiguous: false,
+    },
+  ],
+  pipeline_metrics: { nlp_ms: 3, route_ms: 2 },
 };
