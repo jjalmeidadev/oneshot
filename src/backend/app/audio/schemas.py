@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
-from app.nlp.schemas import AudioIntent
+from app.nlp.schemas import AudioIntent, AudioPipelineMetrics, PublicEntity
 from app.gemini.schemas import GeminiChatResponse
 
 
@@ -28,8 +28,10 @@ class AudioUploadResponse(BaseModel):
     interaction_id: str | None
     transcription: AudioTranscription
     intent: AudioIntent | None
+    entities: list[PublicEntity] = Field(default_factory=list)
     answer: AudioAnswer
     chat: GeminiChatResponse | None = None
+    pipeline_metrics: AudioPipelineMetrics = Field(default_factory=AudioPipelineMetrics)
     pipeline_status: str = Field(default="completed", description="Transcrição e resposta concluídas pelo pipeline.")
 
 

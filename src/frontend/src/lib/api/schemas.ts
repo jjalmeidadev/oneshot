@@ -55,6 +55,8 @@ export type ChatSource = {
 /** `GeminiChatResponse`. */
 export type ChatResponse = {
   intent?: AudioIntent | null;
+  entities?: PipelineEntity[];
+  pipeline_metrics?: ChatPipelineMetrics;
   text: string;
   model: string;
   interaction_id: string | null;
@@ -85,6 +87,35 @@ export type AudioIntent = {
   specific: string;
   confidence_macro: number;
   confidence_specific: number;
+  flow?: string;
+  handler?: string;
+  alternatives?: IntentAlternative[];
+};
+
+export type IntentAlternative = {
+  intent: string;
+  confidence: number;
+};
+
+export type PipelineEntity = {
+  type: string;
+  value: string;
+  text: string;
+  start: number;
+  end: number;
+  types: string[];
+  ambiguous: boolean;
+};
+
+export type ChatPipelineMetrics = {
+  nlp_ms: number;
+  route_ms: number;
+};
+
+export type AudioPipelineMetrics = ChatPipelineMetrics & {
+  validation_ms: number;
+  stt_ms: number;
+  total_ms: number;
 };
 
 /** `AudioAnswerSource`. Formato diferente do `ChatSource` da rota de texto. */
@@ -106,9 +137,11 @@ export type AudioUploadResponse = {
   interaction_id: string | null;
   transcription: AudioTranscription;
   intent: AudioIntent | null;
+  entities?: PipelineEntity[];
   answer: AudioAnswer;
   /** Uma resposta utilizável exige pipeline concluído. */
   pipeline_status: string;
+  pipeline_metrics?: AudioPipelineMetrics;
 };
 
 /* -------------------------------------------------------------------------

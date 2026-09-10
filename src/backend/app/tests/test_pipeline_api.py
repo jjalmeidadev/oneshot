@@ -23,26 +23,92 @@ def provider(monkeypatch):
     return calls
 
 
-def test_text_keeps_context_toggle_and_sources(provider):
+def _classification_result(
+    macro='CONSULTA',
+    routed=True,
+    suggested=None,
+    specific='consulta_status_projeto',
+):
+    return SimpleNamespace(
+        macrointencao=macro,
+        intencao=specific if routed else None,
+        confianca_macro=.9 if routed else .3,
+        confianca_intencao=.8,
+        fluxo='Consulta documental',
+        handler=f'handler:{specific}' if specific else 'limitacao',
+        alternativas=[(specific or 'fora_de_escopo', .8)],
+        roteada=routed,
+        resposta_sugerida=suggested,
+    )
+
+
+@pytest.fixture
+def classifier(monkeypatch):
+    calls = []
+
+    def classify(text):
+        calls.append(text)
+        return _classification_result()
+
+    monkeypatch.setattr('app.nlp.inference.classify', classify)
+    return calls
+
+
+def test_text_without_toggle_classifies_by_default_and_returns_entities(provider, classifier):
     with TestClient(app) as client:
-        result = client.post('/api/chat', json=dict(message=' prazo ', previous_interaction_id='before', use_intent_classifier=False))
+        result = client.post('/api/chat', json=dict(message=' status do Linha 15-Prata ', previous_interaction_id='before'))
     assert result.status_code == 200
-    assert provider[0].message == 'prazo'
+    assert classifier == ['status do Linha 15-Prata']
+    assert provider[0].message == 'status do Linha 15-Prata'
     assert provider[0].previous_interaction_id == 'before'
-    assert result.json()['sources'][0]['excerpt'] == 'Trecho recuperado'
-    assert result.json()['intent'] is None
+    data = result.json()
+    assert data['intent']['macro'] == 'CONSULTA'
+    assert data['intent']['flow'] == 'Consulta documental'
+    assert data['intent']['handler'] == 'handler:consulta_status_projeto'
+    assert data['intent']['alternatives'][0]['intent'] == 'consulta_status_projeto'
+    assert data['entities'][0]['type'] == 'projeto'
+    assert data['entities'][0]['value'] == 'Linha 15-Prata'
+    assert data['pipeline_metrics']['nlp_ms'] >= 0
+    assert data['pipeline_metrics']['route_ms'] >= data['pipeline_metrics']['nlp_ms']
+
+
+def test_text_true_toggle_classifies_and_returns_entities(provider, classifier):
+    with TestClient(app) as client:
+        result = client.post('/api/chat', json=dict(message='status do Linha 15-Prata', use_intent_classifier=True))
+    assert result.status_code == 200
+    data = result.json()
+    assert classifier == ['status do Linha 15-Prata']
+    assert data['intent']['specific'] == 'consulta_status_projeto'
+    assert data['entities'][0]['text'] == 'Linha 15-Prata'
+
+
+def test_text_false_toggle_opts_out_and_goes_direct_to_gemini(monkeypatch, provider):
+    def fail_if_called(text): raise AssertionError('classifier should not run')
+    monkeypatch.setattr('app.nlp.inference.classify', fail_if_called)
+    with TestClient(app) as client:
+        result = client.post('/api/chat', json=dict(message=' status do Linha 15-Prata ', previous_interaction_id='before', use_intent_classifier=False))
+    assert result.status_code == 200
+    assert provider[0].message == 'status do Linha 15-Prata'
+    assert provider[0].previous_interaction_id == 'before'
+    data = result.json()
+    assert data['sources'][0]['excerpt'] == 'Trecho recuperado'
+    assert data['intent'] is None
+    assert data['entities'] == []
+    assert data['pipeline_metrics']['nlp_ms'] == 0
+    assert data['pipeline_metrics']['route_ms'] >= 0
 
 
 @pytest.mark.parametrize('macro,routed,suggested', [('CONSULTA', True, None), ('INDEFINIDA', False, 'Reformule'), ('FORA_DE_ESCOPO', True, None)])
 def test_classifier_routes_or_limits(monkeypatch, provider, macro, routed, suggested):
-    monkeypatch.setattr('app.nlp.inference.classify', lambda text: SimpleNamespace(
-        macrointencao=macro, intencao='consulta_status_projeto' if routed else None,
-        confianca_macro=.9 if routed else .3, confianca_intencao=.8,
-        roteada=routed, resposta_sugerida=suggested))
+    monkeypatch.setattr('app.nlp.inference.classify', lambda text: _classification_result(macro=macro, routed=routed, suggested=suggested))
     with TestClient(app) as client:
         result = client.post('/api/chat', json=dict(message='prazo', use_intent_classifier=True))
     assert result.status_code == 200
     assert result.json()['intent']['macro'] == macro
+    assert result.json()['intent']['flow'] == 'Consulta documental'
+    assert result.json()['intent']['handler'] == 'handler:consulta_status_projeto'
+    assert result.json()['intent']['alternatives'][0]['intent'] == 'consulta_status_projeto'
+    assert result.json()['pipeline_metrics']['route_ms'] >= 0
     assert bool(provider) == (macro == 'CONSULTA')
     if macro != 'CONSULTA':
         assert result.json()['interaction_id'] is None
@@ -50,6 +116,7 @@ def test_classifier_routes_or_limits(monkeypatch, provider, macro, routed, sugge
 
 
 def test_audio_completes_same_pipeline_and_context(monkeypatch, provider):
+    monkeypatch.setattr('app.nlp.inference.classify', lambda text: _classification_result())
     monkeypatch.setattr(transcription, 'transcribe', transcricao_fixa(text='prazo', confidence=.9, duration_seconds=1))
     with TestClient(app) as client:
         result = client.post('/api/audio', files={'audio': ('teste.wav', _build_wav(), 'audio/wav')},
@@ -61,6 +128,11 @@ def test_audio_completes_same_pipeline_and_context(monkeypatch, provider):
     assert data['interaction_id'] == 'next-id'
     assert data['answer']['text'] == data['chat']['text']
     assert data['chat']['sources'][0]['excerpt'] == 'Trecho recuperado'
+    assert data['entities'] == data['chat']['entities']
+    assert data['pipeline_metrics']['validation_ms'] >= 0
+    assert data['pipeline_metrics']['stt_ms'] >= 0
+    assert data['pipeline_metrics']['nlp_ms'] >= 0
+    assert data['pipeline_metrics']['total_ms'] >= 0
     assert provider[0].previous_interaction_id == 'before'
     assert provider[0].message == 'prazo'
 
@@ -70,7 +142,7 @@ def test_provider_failure_is_controlled(monkeypatch, error, status):
     def fail(request): raise error
     monkeypatch.setattr('app.pipeline.generate_chat_response', fail)
     with TestClient(app) as client:
-        result = client.post('/api/chat', json={'message': 'prazo'})
+        result = client.post('/api/chat', json={'message': 'prazo', 'use_intent_classifier': False})
     assert result.status_code == status
     assert 'secret-internal' not in result.text
 
@@ -88,7 +160,7 @@ def test_classifier_unavailable_is_controlled(monkeypatch):
     def fail(text): raise RuntimeError('private-model-path')
     monkeypatch.setattr('app.nlp.inference.classify', fail)
     with TestClient(app) as client:
-        result = client.post('/api/chat', json={'message':'prazo', 'use_intent_classifier':True})
+        result = client.post('/api/chat', json={'message':'prazo'})
     assert result.status_code == 503
     assert 'private-model-path' not in result.text
 

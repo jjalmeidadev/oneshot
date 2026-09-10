@@ -230,6 +230,8 @@ describe('Documentos e conversas', () => {
       'true',
     );
     expect(screen.getByText('teste')).toBeVisible();
+    expect(screen.getByText(/Entidades/)).toBeVisible();
+    expect(screen.getByText('(Projeto Linha Verde)')).toBeVisible();
   });
   it('ResponseDetails não inventa métricas sem resposta', () => {
     mount(<ResponseDetails message={null} />);

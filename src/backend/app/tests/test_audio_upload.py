@@ -2,6 +2,7 @@
 
 import asyncio
 import struct
+from types import SimpleNamespace
 from hashlib import sha256
 
 import httpx
@@ -90,6 +91,26 @@ def falha_do_provedor(excecao: Exception):
     return _falhar
 
 
+def classificacao_fixa(
+    *,
+    macro: str = "CONSULTA",
+    intencao: str | None = "consulta_status_projeto",
+    roteada: bool = True,
+    resposta_sugerida: str | None = None,
+):
+    return SimpleNamespace(
+        macrointencao=macro,
+        intencao=intencao,
+        confianca_macro=.9 if roteada else .3,
+        confianca_intencao=.8,
+        fluxo="Consulta documental",
+        handler=f"handler:{intencao}" if intencao else "limitacao",
+        alternativas=[(intencao or "fora_de_escopo", .8)],
+        roteada=roteada,
+        resposta_sugerida=resposta_sugerida,
+    )
+
+
 @pytest.fixture(autouse=True)
 def reset_concurrency_control(monkeypatch: pytest.MonkeyPatch) -> None:
     from app.gemini.schemas import GeminiChatResponse, GeminiUsage
@@ -97,6 +118,7 @@ def reset_concurrency_control(monkeypatch: pytest.MonkeyPatch) -> None:
         text="Resposta fundamentada de teste", model="teste", interaction_id="interaction-teste",
         latency_ms=1, usage=GeminiUsage(),
     ))
+    monkeypatch.setattr("app.nlp.inference.classify", lambda text: classificacao_fixa())
     security._active_identities.clear()
     monkeypatch.delenv(transcription.AZURE_SPEECH_RESOURCE_ENV, raising=False)
     monkeypatch.delenv(transcription.AZURE_SPEECH_ENDPOINT_ENV, raising=False)
@@ -551,6 +573,69 @@ class TestAudioUploadEndpoint:
         response = post_audio(self.client, _build_wav(), "p.wav", "audio/wav")
         assert response.status_code == 200
         assert response.json()["transcription"]["text"] == "qual o prazo do projeto"
+
+    def test_audio_response_exposes_intent_entities_and_pipeline_metrics(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            transcription,
+            "transcribe",
+            transcricao_fixa(
+                text="status do Linha 15-Prata", confidence=0.91, duration_seconds=1.5
+            ),
+        )
+
+        response = post_audio(self.client, _build_wav(duration_seconds=1.5), "p.wav", "audio/wav")
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["pipeline_status"] == "completed"
+        assert body["intent"] == body["chat"]["intent"]
+        assert body["entities"] == body["chat"]["entities"]
+        assert body["intent"]["handler"] == "handler:consulta_status_projeto"
+        assert body["entities"][0]["type"] == "projeto"
+        assert body["entities"][0]["value"] == "Linha 15-Prata"
+        assert body["pipeline_metrics"]["validation_ms"] >= 0
+        assert body["pipeline_metrics"]["stt_ms"] >= 0
+        assert body["pipeline_metrics"]["nlp_ms"] == body["chat"]["pipeline_metrics"]["nlp_ms"]
+        assert body["pipeline_metrics"]["total_ms"] >= body["pipeline_metrics"]["stt_ms"]
+
+    def test_audio_out_of_scope_finishes_with_controlled_answer_without_gemini(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        def fail_if_called(_request):
+            raise AssertionError("Gemini/RAG should not run for out-of-scope audio")
+
+        monkeypatch.setattr("app.pipeline.generate_chat_response", fail_if_called)
+        monkeypatch.setattr(
+            "app.nlp.inference.classify",
+            lambda text: classificacao_fixa(
+                macro="FORA_DE_ESCOPO",
+                intencao=None,
+                roteada=True,
+            ),
+        )
+        monkeypatch.setattr(
+            transcription,
+            "transcribe",
+            transcricao_fixa(
+                text="qual a previsão do tempo amanhã", confidence=0.9, duration_seconds=1.0
+            ),
+        )
+
+        response = post_audio(self.client, _build_wav(), "p.wav", "audio/wav")
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["pipeline_status"] == "completed"
+        assert body["interaction_id"] is None
+        assert body["chat"]["interaction_id"] is None
+        assert body["chat"]["sources"] == []
+        assert body["intent"]["macro"] == "FORA_DE_ESCOPO"
+        assert body["answer"]["text"] == body["chat"]["text"]
+        assert "portfólio" in body["answer"]["text"]
+        assert body["pipeline_metrics"]["nlp_ms"] >= 0
+        assert body["pipeline_metrics"]["total_ms"] >= body["pipeline_metrics"]["nlp_ms"]
 
 
 class TestAzureSpeechTranscription:

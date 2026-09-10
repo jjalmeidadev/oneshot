@@ -300,6 +300,12 @@ Sem elas, os testes de inferencia sao pulados com a razao declarada.
 .venv/bin/python -m pip install -r requirements-pln.txt
 ```
 
+No Windows, use o mesmo interpretador do ambiente local:
+
+```powershell
+.venv\Scripts\python.exe -m pip install -r requirements.txt -r requirements-pln.txt
+```
+
 O ambiente exige **Python 3.13 ou anterior**: o `gensim` ainda nao publica wheel
 para o 3.14 e a compilacao a partir do fonte falha.
 
@@ -323,6 +329,15 @@ divergirem.
 ```powershell
 cd src/backend
 .venv\Scripts\python.exe -m pytest app/tests
+```
+
+Recorte mínimo para a integração PLN/API da task #126:
+
+```powershell
+cd src/backend
+.venv\Scripts\python.exe -m pytest app/tests/test_pipeline_api.py -q
+.venv\Scripts\python.exe -m pytest app/tests/test_audio_upload.py -q
+.venv\Scripts\python.exe -m pytest app/tests/test_nlp_entities.py -q
 ```
 
 A suite automatizada cobre validacao de formato, duracao, tamanho, silencio,
@@ -350,9 +365,9 @@ teste deve ser convertida para WAV PCM mono a 16 kHz antes do envio ao
 
 ## Integração da bancada web (#131)
 
-`POST /api/chat` aceita `use_intent_classifier` (opcional, padrão `false` por compatibilidade) além de `message` e `previous_interaction_id`. A interface envia o estado do toggle explicitamente. A resposta inclui `intent` quando houver classificação e `sources[].excerpt` com o trecho recuperado. Perguntas sem confiança suficiente ou fora do escopo recebem resposta controlada sem chamada ao Gemini.
+`POST /api/chat` aceita `use_intent_classifier` além de `message` e `previous_interaction_id`. Campo ausente ou `true` executa classificação e extração de entidades por padrão; `false` é opt-out explícito para preservar o toggle da interface. A resposta inclui `intent` rico (`macro`, `specific`, confianças, `flow`, `handler` e `alternatives`), `entities`, `pipeline_metrics` (`nlp_ms` e `route_ms`) e `sources[].excerpt` com o trecho recuperado. Perguntas sem confiança suficiente, fora do escopo ou sem rota segura recebem resposta controlada sem chamada ao Gemini.
 
-`POST /api/audio` aceita também os campos multipart `previous_interaction_id` e `use_intent_classifier`. Depois de validar e transcrever, executa o mesmo pipeline de texto fora do laço assíncrono. Preserva `answer` e acrescenta `chat` com as fontes completas, métricas e ID real da interação. Não são mais gerados IDs de interação fictícios nem respostas provisórias de sucesso.
+`POST /api/audio` aceita também os campos multipart `previous_interaction_id` e `use_intent_classifier`. Depois de validar e transcrever, executa o mesmo pipeline de texto fora do laço assíncrono. Preserva `answer`, retorna `pipeline_status="completed"` e acrescenta `chat` com as fontes completas, intenção rica, entidades, métricas (`validation_ms`, `stt_ms`, `nlp_ms`, `route_ms`, `total_ms`) e ID real da interação. Não são mais gerados IDs de interação fictícios nem respostas provisórias de sucesso.
 
 O pipeline classifica e gera respostas informativas. A identificação de uma intenção transacional não executa uma alteração em sistemas corporativos. Autorização por perfil, persistência e integração Entra ID continuam dependendo dos módulos e do ambiente previstos para essas entregas.
 
