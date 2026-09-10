@@ -17,14 +17,13 @@ import type { AudioUploadResponse } from './schemas';
 
 export type UploadAudioInput = {
   audio: Blob;
+  previousInteractionId?: string | null;
+  useIntentClassifier?: boolean;
   /** Nome do arquivo enviado no multipart; o backend infere o continer do conteudo. */
   filename?: string;
   conversationId?: string | null;
   language?: string;
-  /**
-   * Token que o canal entrega junto da mensagem. Ainda nao ha fonte de
-   * identidade nesta interface — ver README, "Ponto de integracao 3".
-   */
+  /** Token do ambiente informado na sessão, nunca persistido pelo frontend. */
   accessToken: string;
   signal?: AbortSignal;
 };
@@ -33,6 +32,9 @@ export async function uploadAudio(
   input: UploadAudioInput,
 ): Promise<AudioUploadResponse> {
   const form = new FormData();
+  if (input.previousInteractionId)
+    form.append('previous_interaction_id', input.previousInteractionId);
+  form.append('use_intent_classifier', String(input.useIntentClassifier ?? true));
   form.append('audio', input.audio, input.filename ?? 'gravacao.ogg');
   if (input.conversationId) {
     form.append('conversation_id', input.conversationId);

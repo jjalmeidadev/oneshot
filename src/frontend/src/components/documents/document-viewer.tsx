@@ -7,18 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { formatDateTime } from '@/lib/format';
 import type { RetrievedDocument } from '@/lib/domain';
 
-/**
- * Visualizacao do documento de onde a resposta saiu.
- *
- * Os metadados exibidos sao exatamente os campos de `GeminiSource`: titulo,
- * lista de origem, `webUrl`, `lastModifiedDateTime` e o score do recuperador.
- *
- * O trecho do documento e o unico campo que a API ainda nao entrega. O texto
- * existe no backend, em `RetrievedDocument.document.content`, mas e descartado
- * ao montar `GeminiSource` em `app/gemini/client.py`. Enquanto o campo nao vier,
- * esta area mostra o aviso abaixo em vez de inventar conteudo — ver README,
- * "Lacuna 1".
- */
+/** Documento recuperado, com trecho, metadados e acesso à origem. */
 export function DocumentViewer({ document }: { document: RetrievedDocument }) {
   return (
     <article className="flex h-full flex-col">

@@ -41,7 +41,10 @@ function UserMessage({ message }: { message: ChatMessage }) {
           {message.origin === 'audio' && message.transcription && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <button type="button" className="focus-visible:outline-none">
+                <button
+                  type="button"
+                  className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
                   <Badge tone="outline">
                     <AudioLines size={11} />
                     Transcrito

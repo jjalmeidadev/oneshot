@@ -78,10 +78,12 @@ export function RecordingPreview({
   recording,
   onDiscard,
   onSend,
+  disabled = false,
 }: {
   recording: Recording;
   onDiscard: () => void;
   onSend: () => void;
+  disabled?: boolean;
 }) {
   const blocked = !recording.containerAccepted || recording.tooLarge;
 
@@ -112,7 +114,7 @@ export function RecordingPreview({
           >
             <Trash2 size={15} />
           </Button>
-          <Button size="sm" onClick={onSend} disabled={blocked}>
+          <Button size="sm" onClick={onSend} disabled={blocked || disabled}>
             Enviar áudio
           </Button>
         </div>

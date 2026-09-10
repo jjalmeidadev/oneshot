@@ -4,15 +4,25 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          markdown: ['react-markdown', 'remark-gfm'],
+          motion: ['framer-motion'],
+        },
+      },
+    },
+  },
   server: {
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8000',
+        target: process.env.API_PROXY_TARGET ?? 'http://127.0.0.1:8000',
         changeOrigin: true,
       },
       // `GET /health` fica fora do prefixo `/api` em `app/main.py`.
       '/health': {
-        target: 'http://127.0.0.1:8000',
+        target: process.env.API_PROXY_TARGET ?? 'http://127.0.0.1:8000',
         changeOrigin: true,
       },
     },

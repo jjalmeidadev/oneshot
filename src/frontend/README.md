@@ -1,208 +1,107 @@
-# Frontend — interface do agente
+# Frontend integrado — bancada do agente
 
-Interface visual do agente de IA do portfólio de projetos do Metrô. Cobre o
-chat, a camada validadora de intenção, a visualização dos documentos que o RAG
-recuperou e o envio de áudio.
+A interface web em React 19 e TypeScript permite testar o agente por texto ou áudio, exibir a resposta, consultar as fontes e inspecionar a classificação. A entrega da issue #131 integra a base visual da MR !72 aos endpoints existentes. A interface corporativa prevista no projeto continua sendo o Microsoft Teams; esta aplicação é a bancada web de desenvolvimento e validação.
 
-**Esta camada ainda não está ligada ao backend.** A tela é funcional do ponto de
-vista visual e de interação, e todo ponto que precisa de rede está isolado e
-marcado — ver [Pontos de integração](#pontos-de-integração).
+## Instalação e execução
 
-## Stack
+Requisitos: Node.js 24, npm, Python 3.12 ou 3.13 e acesso às dependências documentadas. Os comandos abaixo partem da raiz do repositório, no PowerShell:
 
-React 19, TypeScript, Vite, Tailwind CSS, Radix UI (padrão shadcn/21st.dev),
-framer-motion, react-markdown. ESLint e Prettier.
+```powershell
+python -m venv .venv
+.venv/Scripts/python.exe -m pip install -r src/backend/requirements.txt -r src/backend/requirements-pln.txt
+Copy-Item src/backend/.env.example src/backend/.env
+```
 
-## Comandos
+Edite o arquivo local `.env`: informe `GEMINI_API_KEY`, o recurso e a chave Azure Speech. Não versione credenciais. Configure `AUDIO_SIMULATED_IDENTITIES` como `token-local=usuario-local` para a bancada. O campo **Token de acesso para áudio**, na barra lateral, recebe esse token; ele permanece somente na memória da sessão. Não informe a chave do Azure nem a chave do Gemini nesse campo.
 
-```bash
-npm install
-npm run dev      # http://localhost:5173
-npm run build    # tsc --noEmit && vite build
+`PLN_WARMUP=1` prepara o classificador na inicialização. A primeira execução baixa o encoder ONNX publicado no repositório Hugging Face documentado pelo backend. Aguarde a aplicação concluir a inicialização antes de abrir a bancada. Sem esse ajuste, a carga acontece na primeira pergunta com classificação habilitada.
+
+Abra dois terminais:
+
+```powershell
+# Terminal 1, na raiz
+.venv/Scripts/python.exe -m uvicorn app.main:app --app-dir src/backend --host 127.0.0.1 --port 8000
+```
+
+```powershell
+# Terminal 2
+cd src/frontend
+npm ci
+npm run dev
+```
+
+Abra `http://localhost:5173`. O Vite encaminha `/api` e `/health` para `http://127.0.0.1:8000`. A variável `API_PROXY_TARGET` permite trocar o destino no ambiente de desenvolvimento/teste. Em uma publicação do build estático, configure um proxy de mesma origem para essas rotas; `npm run preview` serve somente o build e não substitui esse proxy.
+
+## Uso e navegabilidade
+
+1. Digite uma pergunta ou selecione uma sugestão. **Enter** envia; **Shift + Enter** quebra a linha. A interface recusa texto vazio ou acima de 20.000 caracteres.
+2. O controle **Validação de intenção** liga ou desliga a classificação local. Quando ligado, os limiares de 0,55 e 0,70 orientam a apresentação da classificação. Perguntas fora de escopo ou sem confiança suficiente recebem resposta controlada sem chamar o Gemini. Identificar uma intenção não significa executar uma transação no portfólio.
+3. Durante a chamada, o chat anuncia processamento e impede envios duplicados. **Interromper resposta** aborta a espera HTTP e descarta respostas tardias. Uma chamada já recebida pelo provedor pode continuar no backend.
+4. Para voz, informe o token da bancada, clique no microfone, permita a captura, grave e use **Concluir gravação**. Ouça a prévia antes de clicar em **Enviar áudio**. **Descartar** elimina a captura. A gravação para em 60 segundos e é convertida para WAV PCM mono, 16 bits, 16 kHz, com corte por amostras e limite de 2 MB.
+5. A transcrição aparece como mensagem do usuário e a resposta como mensagem do agente. As fontes numeradas abaixo da resposta abrem o documento correspondente; a aba **Resposta** mostra métricas e classificação fornecidas pela API.
+6. **Nova conversa** inicia outro contexto. A barra lateral permite buscar, selecionar e excluir conversas da sessão. Trocar de conversa cancela a espera atual; uma resposta atrasada não é inserida na conversa selecionada depois.
+7. Em telas menores que 1024 px, o botão **Abrir conversas** abre o menu em diálogo; **Documentos** abre o painel à direita. **Escape** fecha os diálogos. No desktop, os três painéis ficam lado a lado.
+8. O tema segue a preferência do sistema até uma escolha explícita. A escolha de tema pode ser persistida; mensagens e token não são gravados no armazenamento do navegador.
+
+O histórico é da sessão em memória: recarregar a página o apaga. O backend documentado não possui rotas de persistência de conversas. Foram removidos os contratos propostos que lançavam exceção e os cenários fictícios de produção; o encadeamento real usa `previous_interaction_id` por conversa.
+
+## Estrutura e estratégia do código
+
+| Camada                           | Responsabilidade e componentes                                                                                                                                                          |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/App.tsx` e `state/`         | Provedores de tema e chat; reducer para conversas, fontes e estados; controle de concorrência e cancelamento.                                                                           |
+| `components/layout/`             | `AppShell` organiza desktop e diálogos móveis; `ThemeToggle` alterna o tema.                                                                                                            |
+| `components/sidebar/`            | `ConversationSidebar`, `ConversationItem` e `UserCard`: busca, seleção, exclusão e token da sessão.                                                                                     |
+| `components/chat/`               | `ChatHeader`, `ChatEmptyState`, `MessageList`, `MessageBubble`, `MarkdownMessage`, `IntentBadge`, `SourceCitations` e `TypingIndicator`: entrada no fluxo e apresentação de resultados. |
+| `components/composer/`           | `Composer`, `IntentToggle`, `AudioButton`, `RecordingBar` e `RecordingPreview`: texto, gravação, revisão e envio.                                                                       |
+| `components/documents/`          | `DocumentPanel`, `DocumentCard`, `DocumentViewer` e `ResponseDetails`: fontes, trechos e métricas.                                                                                      |
+| `components/ui/`                 | Primitivos Radix, botões, campos, diálogos, abas, indicadores e tooltips reutilizados pelos componentes de domínio.                                                                     |
+| `hooks/`                         | Captura e liberação do microfone, tamanho do campo, largura da tela e preferência de tema.                                                                                              |
+| `lib/api/`                       | Contratos HTTP, cancelamento, prazo máximo de espera e mensagens de erro controladas.                                                                                                   |
+| `lib/domain.ts` e `lib/audio.ts` | Conversão de schemas para a interface e conversão de áudio para o contrato aceito.                                                                                                      |
+| `data/prompts.ts`                | Sugestões de perguntas; não contém respostas nem histórico simulado.                                                                                                                    |
+
+Os componentes recebem propriedades ou consomem o contexto; as chamadas HTTP ficam na camada de API. O backend concentra classificação e geração em `app/pipeline.py`, compartilhada por texto e áudio. O upload realiza validação e transcrição antes de executar o pipeline em uma thread, preservando o atendimento assíncrono. O build separa Markdown e animações em módulos próprios.
+
+## Contratos de integração
+
+| Endpoint          | Entrada enviada                                                                                                                                                      | Resultado usado                                                                                                                                               |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST /api/chat`  | JSON: `message`, `previous_interaction_id`, `use_intent_classifier`.                                                                                                 | `text`, `interaction_id`, `intent`, `sources`, `usage`, `model`, `latency_ms`, `retrieval_ms`.                                                                |
+| `POST /api/audio` | Multipart: `audio`, `conversation_id`, `language`, `previous_interaction_id`, `use_intent_classifier`; `Authorization: Bearer <token>`. O navegador gera o boundary. | `transcription`, `conversation_id`, `interaction_id`, `intent`, `answer`, `chat`, `pipeline_status=completed`. `chat` usa o mesmo schema da resposta textual. |
+| `GET /health`     | Sem corpo; verificação operacional.                                                                                                                                  | `status=ok` após a inicialização. Não certifica credenciais dos provedores.                                                                                   |
+
+`GeminiSource.excerpt` acompanha o conteúdo recuperado que fundamentou a resposta. As fontes preservam ID, título, lista, URL, data e score; não se inventam fontes quando a lista estiver vazia. O formato legado `answer.sources` do áudio é preservado, enquanto `chat.sources` fornece os metadados completos para a interface. Uma resposta de limitação pode não trazer `interaction_id`; nesse caso o último contexto válido da conversa é mantido.
+
+### Validações e erros
+
+- O frontend valida texto e gera áudio dentro do contrato antes de enviar. O backend revalida bytes, codec, taxa, canais, profundidade, duração, tamanho e fala audível; uma indicação MIME do navegador não substitui essa validação.
+- Falhas 400, 401, 403, 413, 422, 429, 502, 503 e 504 recebem mensagens próprias. Respostas inesperadas, HTML de proxy e erros de rede usam uma mensagem genérica, sem traceback ou mensagem privada do provedor.
+- A espera HTTP é limitada a 120 segundos. Esse teto evita espera infinita e não constitui evidência de cumprimento do RNF05 de 10 segundos.
+- A API de áudio continua usando a identidade simulada documentada. A autenticação real Entra ID, autorização por `access_rules`, conexão com dados corporativos e persistência não são implementadas por esta integração.
+
+## Acessibilidade e responsividade
+
+Campos e botões têm nomes acessíveis; mensagens usam `role=log`, `aria-live` e `aria-busy`; erros usam `role=alert`. Os diálogos Radix oferecem navegação por teclado e fechamento por Escape. O foco dos botões de classificação e transcrição permanece visível. As cores secundárias e o tema escuro foram ajustados para corrigir as violações de contraste encontradas pelo axe. A aplicação respeita `prefers-reduced-motion`.
+
+Os testes automatizados cobrem 1440 × 900 e 390 × 844 em Chromium. Esse recorte não equivale a uma auditoria manual completa com leitores de tela nem garante outros navegadores.
+
+## Testes e evidências
+
+```powershell
+# Em src/frontend
 npm run lint
-npm run format
+npm run format:check
+npm run test:coverage
+npm run build
+npx playwright install chromium
+npm run test:e2e
 ```
 
-O Vite encaminha `/api` e `/health` para `http://127.0.0.1:8000`
-(`vite.config.ts`), mantendo a chave do Gemini apenas no backend. Para ver o
-backend respondendo, suba-o antes conforme `../backend/README.md`.
+O Vitest executa testes por componente, hooks e integração da store com o cliente HTTP. `coverage/index.html` apresenta a cobertura e `coverage/coverage-summary.json` permite comparação automática. O Playwright inicia um frontend e um backend exclusivos nas portas 5174 e 8001. As rotas FastAPI e a validação WAV são reais; somente classificação e provedores externos são substituídos no servidor de teste `app/tests/e2e_server.py`. A gravação usa microfone sintético do Chromium.
 
-## Layout
+O servidor E2E não é uma configuração de produção. Ele não usa chaves reais e não é importado por `app.main`. Os testes são determinísticos e não comprovam disponibilidade de Azure/Gemini nem desempenho em rede corporativa.
 
-```text
-┌──────────────┬───────────────────────────────┬──────────────────┐
-│  conversas   │  cabeçalho da conversa        │  documentos      │
-│  do usuário  │                               │  recuperados     │
-│              │  mensagens                    │  pelo RAG        │
-│  busca       │  ├ resposta em markdown       │  ├ lista ordenada│
-│  agrupamento │  ├ citações [Fonte N]         │  │  por citação  │
-│  por data    │  └ selo de intenção           │  ├ metadados     │
-│              │                               │  └ trecho        │
-│  perfil      │  ── toggle de intenção ──     │                  │
-│  tema        │  campo de texto + áudio       │  aba "Resposta": │
-│              │                               │  latência,       │
-│              │                               │  tokens, intenção│
-└──────────────┴───────────────────────────────┴──────────────────┘
-     280px              flexível                    320–384px
-```
+A automação de GitLab em `.gitlab-ci.yml` executa lint, formatação, testes com cobertura, build, contratos do backend e testes de navegador. O job de API usa o recorte determinístico; o benchmark completo do classificador pode ser executado localmente com as dependências de PLN e o encoder baixado.
 
-Abaixo de 1024 px a barra lateral e o painel de documentos viram painéis
-deslizantes e o chat ocupa a largura inteira.
-
-## Estrutura
-
-```text
-src/
-├── lib/
-│   ├── api/
-│   │   ├── schemas.ts        espelho dos BaseModel do backend
-│   │   ├── constants.ts      limites e limiares lidos do backend
-│   │   ├── client.ts         fetch + ApiError (normaliza os dois envelopes)
-│   │   ├── chat.ts           POST /api/chat, GET /health
-│   │   ├── audio.ts          POST /api/audio
-│   │   └── conversations.ts  contrato PROPOSTO, ainda não existe
-│   ├── domain.ts             tipos que os componentes usam + conversões
-│   ├── format.ts             datas, durações, tokens, confiança
-│   └── utils.ts              cn()
-├── state/
-│   ├── chat-store.tsx        conversas, mensagens, toggle, seleção
-│   └── theme-provider.tsx    tema claro/escuro
-├── hooks/
-│   ├── use-audio-recorder.ts captura via MediaRecorder
-│   ├── use-theme.ts
-│   ├── use-autosize-textarea.ts
-│   └── use-media-query.ts
-├── components/
-│   ├── ui/                   primitivos (button, switch, tooltip, tabs…)
-│   ├── layout/               app-shell, theme-toggle
-│   ├── sidebar/              histórico de conversas
-│   ├── chat/                 mensagens, markdown, citações, intenção
-│   ├── composer/             toggle de intenção, campo, áudio
-│   ├── documents/            painel do RAG e detalhes da resposta
-│   └── dev/                  alternador de estados (descartável)
-└── data/                     mock e cenários (descartáveis)
-```
-
-## O que já existe no backend e a interface consome
-
-| Rota              | Origem                  | Uso na interface                    |
-| ----------------- | ----------------------- | ----------------------------------- |
-| `POST /api/chat`  | `app/gemini/schemas.py` | resposta, fontes, latências, tokens |
-| `POST /api/audio` | `app/audio/schemas.py`  | transcrição, intenção, resposta     |
-| `GET /health`     | `app/main.py`           | indicador de conexão                |
-
-Os limites e limiares exibidos na interface — 60 s e 2 MB de áudio, limiares
-0,55 e 0,70 do classificador, teto de 20.000 caracteres da mensagem, orçamento
-de 10 s do RNF05 — **não** são escolha do frontend: estão em
-`src/lib/api/constants.ts`, cada um com o arquivo de origem anotado ao lado.
-
-## Pontos de integração
-
-### 1. Enviar a mensagem — `src/state/chat-store.tsx`
-
-`sendMessage` insere a mensagem do usuário e devolve uma resposta fixa. O bloco
-comentado logo abaixo, marcado `PONTO DE INTEGRACAO 1`, tem o código exato a
-colocar no lugar: `sendChatMessage` + `toAssistantMessage`. As conversões de
-`sources`, `usage` e latências já estão prontas em `lib/domain.ts`, então
-nenhum componente precisa ser tocado.
-
-O encadeamento de contexto já está modelado: cada conversa guarda
-`lastInteractionId`, que deve voltar como `previous_interaction_id`.
-
-### 2. Toggle da camada de intenção — `src/lib/api/chat.ts`
-
-`SendMessageInput.useIntentClassifier` carrega o estado do toggle, mas **não é
-enviado**: `GeminiChatRequest` só aceita `message` e `previous_interaction_id`.
-Para ligar de ponta a ponta, o backend precisa de:
-
-```python
-class GeminiChatRequest(BaseModel):
-    message: str
-    previous_interaction_id: str | None = None
-    use_intent_classifier: bool = True     # novo
-
-class GeminiChatResponse(BaseModel):
-    ...
-    intent: AudioIntent | None = None      # já existe em app/audio/schemas.py
-```
-
-Com o campo `intent` na resposta, `toIntentResult` (em `lib/domain.ts`) já
-converte, e o selo de intenção e a aba "Resposta" passam a exibir dados reais
-sem alteração de componente.
-
-### 3. Envio do áudio — `src/components/composer/composer.tsx`
-
-`handleSendAudio` para exatamente na fronteira: a captura já entrega um `Blob`
-conferido contra duração, tamanho e contêiner. Falta chamar `uploadAudio`
-(`lib/api/audio.ts`) e transformar `AudioUploadResponse` em duas mensagens — a
-transcrição vira a do usuário, `answer.text` a do assistente.
-
-O endpoint exige `Authorization: Bearer <token>`. A interface **não tem fonte de
-identidade**: a autenticação vem do Microsoft Entra ID pelo canal (Seção 6.2.4),
-e enquanto o ambiente corporativo não existe o backend usa o mapa simulado
-`AUDIO_SIMULATED_IDENTITIES`. O perfil exibido na barra lateral vem de
-`data/mock.ts` (`MOCK_USER`) e precisa ser trocado pelo que o canal entregar.
-
-### 4. Histórico de conversas — `src/lib/api/conversations.ts`
-
-Não existe rota de conversas no backend. O arquivo traz o contrato proposto,
-derivado das tabelas `ai_conversations`, `ai_interactions` e `consulted_sources`
-que já estão em `src/database/sql/01_create_database.sql`, com os mesmos nomes
-de coluna. As funções lançam de propósito e nenhuma tela as chama.
-
-Ao criar as rotas, troque `initialState()` em `chat-store.tsx` por lista vazia e
-carregue o histórico com `listConversations()`.
-
-## Lacunas do backend encontradas ao construir a interface
-
-São incoerências reais entre o que a interface precisa exibir e o que a API
-entrega hoje. Nenhuma foi contornada com dado inventado.
-
-**1. O trecho do documento não acompanha a resposta.** `GeminiSource` tem
-título, lista, URL, data e score, mas não o conteúdo. O texto existe do outro
-lado — `RetrievedDocument.document.content` em `app/rag/sharepoint.py` — e é
-descartado ao montar a resposta em `app/gemini/client.py`. Sem ele, o painel
-mostra os metadados e o link, e declara que o trecho não veio, em vez de exibir
-um texto que a API não garantiu. A correção é uma linha:
-
-```python
-GeminiSource(
-    ...,
-    score=result.score,
-    excerpt=result.document.content,   # + o campo em GeminiSource
-)
-```
-
-O tipo do frontend já aceita o campo (`ChatSource.excerpt`, opcional) e o painel
-já renderiza quando ele chega — o cenário "Fontes com trecho", no alternador de
-estados, mostra como fica.
-
-**2. O contêiner que o Chrome grava é recusado.** A validação aceita WAV/PCM e
-OGG/OPUS; o `MediaRecorder` do Chrome produz `audio/webm;codecs=opus`. O Firefox
-grava OGG e passa. O gravador negocia o tipo e avisa antes do envio
-(`containerAccepted`), mas a decisão é do backend: ou `app/audio/validation.py`
-passa a aceitar WebM/Opus — o codec é o mesmo, muda só o contêiner — ou o
-frontend precisa converter para WAV 16 kHz antes de enviar, o que custa uma
-biblioteca de áudio no navegador.
-
-**3. Duas formas de fonte para o mesmo conceito.** A rota de texto devolve
-`GeminiSource` (id, título, lista, URL, data, score) e a de áudio devolve
-`AudioAnswerSource` (artifact, section). Quando o pipeline de áudio passar a
-responder de verdade, convém unificar, senão o painel de documentos precisa de
-dois caminhos de renderização.
-
-**4. Identidade exigida só em uma rota.** `POST /api/audio` recusa sem
-`Authorization`; `POST /api/chat` não pede nada. Como observa o próprio
-`app/audio/security.py`, quando a rota de texto também exigir identidade o
-módulo deve subir para `app/security.py`.
-
-## Estados da interface
-
-O seletor no rodapé da barra lateral simula os estados que dependem do backend:
-resposta em andamento, erro 503 sem `GEMINI_API_KEY`, resposta sem fontes,
-fontes com trecho, confiança abaixo do limiar (resposta de limitação do RF08) e
-primeiro acesso sem histórico.
-
-**Remover ao integrar:** `src/data/mock.ts`, `src/data/scenarios.ts`,
-`src/components/dev/scenario-switcher.tsx`, o campo `scenario` da store e a
-chamada a `applyScenario` no provider.
+Veja a [matriz de casos e os resultados registrados](TESTES.md). Para uma verificação real com provedores, configure as credenciais, rode `app.main`, envie uma pergunta por texto e por microfone e confira a resposta, as fontes e as métricas. Essa etapa deve ser registrada separadamente dos testes com substitutos.

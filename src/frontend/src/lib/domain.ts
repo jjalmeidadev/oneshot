@@ -174,15 +174,17 @@ export function toRetrievedDocument(
     lastModified: source.last_modified,
     score: source.score,
     citationOrder: index + 1,
-    excerpt: source.excerpt,
+    excerpt: source.excerpt ?? undefined,
   };
 }
 
 export function toIntentResult(intent: AudioIntent, flow = ''): IntentResult {
   const routed = intent.confidence_macro >= INTENT_MACRO_THRESHOLD;
   const specific =
-    routed && intent.confidence_specific >= INTENT_SPECIFIC_THRESHOLD
-      ? intent.specific
+    routed &&
+    intent.macro !== 'FORA_DE_ESCOPO' &&
+    intent.confidence_specific >= INTENT_SPECIFIC_THRESHOLD
+      ? intent.specific || null
       : null;
 
   return {
@@ -214,6 +216,7 @@ export function toAssistantMessage(
     status: 'complete',
     interactionId: response.interaction_id,
     sources: response.sources.map(toRetrievedDocument),
+    intent: response.intent ? toIntentResult(response.intent) : undefined,
     metrics: {
       model: response.model,
       latencyMs: response.latency_ms,

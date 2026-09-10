@@ -13,15 +13,7 @@ import type { ChatRequest, ChatResponse, HealthResponse } from './schemas';
 export type SendMessageInput = {
   message: string;
   previousInteractionId: string | null;
-  /**
-   * Estado do toggle da camada validadora de intencao.
-   *
-   * NAO E ENVIADO HOJE. `GeminiChatRequest` so aceita `message` e
-   * `previous_interaction_id`; o classificador de `app/nlp/` existe, mas ainda
-   * nao esta ligado a esta rota. O campo fica aqui para o proximo integrante
-   * incluir no corpo assim que o backend aceitar — ver README, "Ponto de
-   * integracao 2".
-   */
+  /** Habilita a classificação local antes da resposta RAG. */
   useIntentClassifier: boolean;
   signal?: AbortSignal;
 };
@@ -29,6 +21,7 @@ export type SendMessageInput = {
 export async function sendChatMessage(input: SendMessageInput): Promise<ChatResponse> {
   const body: ChatRequest = {
     message: input.message,
+    use_intent_classifier: input.useIntentClassifier,
     previous_interaction_id: input.previousInteractionId,
   };
 

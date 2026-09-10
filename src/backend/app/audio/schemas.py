@@ -3,19 +3,14 @@
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
+from app.nlp.schemas import AudioIntent
+from app.gemini.schemas import GeminiChatResponse
 
 
 class AudioTranscription(BaseModel):
     text: str
     confidence: float
     duration_seconds: float
-
-
-class AudioIntent(BaseModel):
-    macro: str
-    specific: str
-    confidence_macro: float
-    confidence_specific: float
 
 
 class AudioAnswerSource(BaseModel):
@@ -30,17 +25,12 @@ class AudioAnswer(BaseModel):
 
 class AudioUploadResponse(BaseModel):
     conversation_id: str
-    interaction_id: str
+    interaction_id: str | None
     transcription: AudioTranscription
-    intent: AudioIntent
+    intent: AudioIntent | None
     answer: AudioAnswer
-    pipeline_status: str = Field(
-        description=(
-            "'stubbed' enquanto o pipeline de PLN nao esta implementado; "
-            "'completed' quando a classificacao e a resposta fundamentada "
-            "forem geradas pela API."
-        ),
-    )
+    chat: GeminiChatResponse | None = None
+    pipeline_status: str = Field(default="completed", description="Transcrição e resposta concluídas pelo pipeline.")
 
 
 class AudioErrorDetail(BaseModel):

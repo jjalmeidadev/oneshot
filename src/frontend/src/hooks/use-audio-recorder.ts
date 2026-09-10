@@ -1,3 +1,4 @@
+import { normalizeRecording } from '@/lib/audio';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
@@ -6,19 +7,7 @@ import {
   AUDIO_MAX_SIZE_BYTES,
 } from '@/lib/api/constants';
 
-/**
- * Captura de audio no navegador.
- *
- * A captura e responsabilidade do frontend; o envio para `POST /api/audio` e a
- * task de integracao. O hook para no ponto exato dessa fronteira: entrega um
- * `Blob` pronto, com duracao, tamanho e continer ja conferidos contra os
- * limites da Secao 8.7.3, e nao faz nenhuma chamada de rede.
- *
- * O continer importa. A validacao do backend aceita WAV/PCM e OGG/OPUS; o
- * `MediaRecorder` do Chrome grava `audio/webm;codecs=opus`, que seria recusado
- * com `AUDIO_FORMAT_UNSUPPORTED`. Por isso o hook negocia o tipo e expoe
- * `containerAccepted`, para a interface avisar antes de gastar uma requisicao.
- */
+/** Captura no contêiner do navegador e converte para WAV PCM mono de 16 kHz. */
 
 export type RecorderState =
   'idle' | 'requesting' | 'recording' | 'recorded' | 'error' | 'unsupported';
@@ -46,8 +35,7 @@ function pickMimeType(): { mimeType: string; accepted: boolean } {
     }
   }
 
-  // Ultimo recurso: grava no que o navegador oferecer, sinalizando que o
-  // backend recusaria o arquivo. O Chrome cai aqui, com webm/opus.
+  // O Chrome usa WebM; normalizeRecording converte antes do upload.
   for (const fallback of ['audio/webm;codecs=opus', 'audio/webm']) {
     if (MediaRecorder.isTypeSupported(fallback)) {
       return { mimeType: fallback, accepted: false };
@@ -64,6 +52,8 @@ export function useAudioRecorder() {
   const [recording, setRecording] = useState<Recording | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const generation = useRef(0);
+  const objectUrlRef = useRef<string | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
@@ -88,13 +78,13 @@ export function useAudioRecorder() {
 
   useEffect(
     () => () => {
+      generation.current++;
+      if (recorderRef.current) recorderRef.current.onstop = null;
+      if (recorderRef.current?.state === 'recording') recorderRef.current.stop();
       cleanup();
-      if (recording) URL.revokeObjectURL(recording.objectUrl);
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
     },
-    // A limpeza roda apenas na desmontagem; incluir `recording` reiniciaria o
-    // efeito a cada gravacao e revogaria a URL ainda em uso pelo player.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [cleanup],
   );
 
   const stop = useCallback(() => {
@@ -104,6 +94,7 @@ export function useAudioRecorder() {
   }, []);
 
   const start = useCallback(async () => {
+    const current = ++generation.current;
     setError(null);
 
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
@@ -122,9 +113,13 @@ export function useAudioRecorder() {
           noiseSuppression: true,
         },
       });
+      if (generation.current !== current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
       streamRef.current = stream;
 
-      const { mimeType, accepted } = pickMimeType();
+      const { mimeType } = pickMimeType();
       const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
       recorderRef.current = recorder;
       chunksRef.current = [];
@@ -133,26 +128,36 @@ export function useAudioRecorder() {
         if (event.data.size > 0) chunksRef.current.push(event.data);
       };
 
-      recorder.onstop = () => {
-        const type = recorder.mimeType || mimeType || 'audio/webm';
-        const blob = new Blob(chunksRef.current, { type });
-        const durationSeconds = (performance.now() - startedAtRef.current) / 1000;
-
-        setRecording((previous) => {
-          if (previous) URL.revokeObjectURL(previous.objectUrl);
-          return {
-            blob,
-            mimeType: type,
-            durationSeconds,
-            sizeBytes: blob.size,
-            containerAccepted: accepted,
-            tooLarge: blob.size > AUDIO_MAX_SIZE_BYTES,
-            objectUrl: URL.createObjectURL(blob),
-          };
+      recorder.onstop = async () => {
+        const raw = new Blob(chunksRef.current, {
+          type: recorder.mimeType || mimeType,
         });
-        setState('recorded');
-        setLevel(0);
         cleanup();
+        setLevel(0);
+        setState('requesting');
+        try {
+          const blob = await normalizeRecording(raw);
+          if (generation.current !== current) return;
+          if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+          const objectUrl = URL.createObjectURL(blob);
+          objectUrlRef.current = objectUrl;
+          setRecording({
+            blob,
+            mimeType: 'audio/wav',
+            durationSeconds: (blob.size - 44) / 32000,
+            sizeBytes: blob.size,
+            containerAccepted: true,
+            tooLarge: blob.size > AUDIO_MAX_SIZE_BYTES,
+            objectUrl,
+          });
+          setState('recorded');
+        } catch {
+          if (generation.current !== current) return;
+          setError(
+            'Não foi possível preparar a gravação. Grave novamente ou envie texto.',
+          );
+          setState('error');
+        }
       };
 
       // Medidor de nivel: so alimenta a animacao da barra de gravacao.
@@ -181,14 +186,18 @@ export function useAudioRecorder() {
         setElapsedSeconds(elapsed);
         // A gravacao para sozinha no limite do endpoint, em vez de deixar o
         // usuario gravar um arquivo que ja seria recusado com AUDIO_TOO_LONG.
-        if (elapsed >= AUDIO_MAX_DURATION_SECONDS) {
-          recorderRef.current?.stop();
+        if (
+          elapsed >= AUDIO_MAX_DURATION_SECONDS &&
+          recorderRef.current?.state === 'recording'
+        ) {
+          recorderRef.current.stop();
         }
       }, 100);
 
       recorder.start(250);
       setState('recording');
     } catch (cause) {
+      if (generation.current !== current) return;
       cleanup();
       setState('error');
       setError(
@@ -200,6 +209,8 @@ export function useAudioRecorder() {
   }, [cleanup]);
 
   const discard = useCallback(() => {
+    generation.current++;
+    objectUrlRef.current = null;
     setRecording((previous) => {
       if (previous) URL.revokeObjectURL(previous.objectUrl);
       return null;
@@ -211,6 +222,7 @@ export function useAudioRecorder() {
   }, []);
 
   const cancel = useCallback(() => {
+    generation.current++;
     if (recorderRef.current?.state === 'recording') {
       recorderRef.current.onstop = null;
       recorderRef.current.stop();

@@ -31,6 +31,7 @@ Este arquivo reúne os documentos que compõem a documentação do projeto e ind
 | Documento | Conteúdo |
 |---|---|
 | [Projeto.md](Projeto.md) | Entendimento do negócio e especificação de requisitos: problema e SWOT, contexto da indústria, visão e objetivo do produto, personas e jornada, fluxo do negócio, brainstorming de features, canvas do MVP, matriz de risco, business drivers, requisitos funcionais e não funcionais, visão técnica da solução e visão inicial sobre tecnologias e ferramentas. |
+| [Frontend integrado e testes](../src/frontend/README.md) | Estrutura, componentes, fluxos, APIs e evidências S3/S5 da bancada web (#131). |
 | [Manual-instalacao.md](Manual-instalacao.md) | Instruções de instalação e execução da solução. |
 
 ### Código-fonte

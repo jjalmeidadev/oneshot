@@ -1,14 +1,6 @@
-"""Orquestracao do upload de audio.
-
-O fluxo cobre o recebimento, a validacao local e a transcricao via
-Speech-to-Text. A classificacao de intencao e a resposta fundamentada continuam
-em task separada; por isso a resposta ainda usa ``pipeline_status`` igual a
-``"stubbed"`` depois de transcrever o audio.
-"""
+"""Validação e transcrição de áudio antes do pipeline comum de resposta."""
 
 from __future__ import annotations
-
-import uuid
 
 from app.audio import transcription
 from app.audio.errors import (
@@ -16,27 +8,14 @@ from app.audio.errors import (
     SttProviderFailedError,
     SttProviderUnavailableError,
 )
-from app.audio.schemas import (
-    AudioAnswer,
-    AudioIntent,
-    AudioTranscription,
-    AudioUploadResponse,
-)
+from app.audio.schemas import AudioTranscription
 from app.audio.validation import AudioProbe, validate_audio_upload
-
-STUB_ANSWER_TEXT = (
-    "Audio recebido, validado e transcrito. A classificacao de intencao e a "
-    "resposta do agente ainda nao estao disponiveis: o pipeline de PLN e "
-    "implementado em uma task separada."
-)
-
 
 async def process_audio_upload(
     data: bytes,
     *,
-    conversation_id: str | None,
     language: str = "pt-BR",
-) -> AudioUploadResponse:
+) -> AudioTranscription:
     """Valida o audio recebido e devolve a resposta no formato do contrato.
 
     Levanta ``AudioValidationError`` (ou subclasse) quando o audio nao passa
@@ -47,7 +26,7 @@ async def process_audio_upload(
     probe = validate_audio_upload(data)
     result = await _transcribe(data, probe, language)
 
-    return _completed_response(result, conversation_id=conversation_id)
+    return AudioTranscription(text=result.text, confidence=result.confidence, duration_seconds=result.duration_seconds)
 
 
 async def _transcribe(
@@ -64,31 +43,3 @@ async def _transcribe(
     except transcription.SttProviderError as error:
         raise SttProviderFailedError() from error
 
-
-def _completed_response(
-    result: transcription.Transcription, *, conversation_id: str | None
-) -> AudioUploadResponse:
-    """Resposta com transcricao real; a intencao ainda vem do pipeline stub.
-
-    A classificacao de intencao e a resposta fundamentada continuam a cargo da
-    integracao do pipeline de PLN, entao `pipeline_status` so passa a
-    "completed" quando aquela task tambem estiver concluida.
-    """
-
-    return AudioUploadResponse(
-        conversation_id=conversation_id or str(uuid.uuid4()),
-        interaction_id=str(uuid.uuid4()),
-        transcription=AudioTranscription(
-            text=result.text,
-            confidence=result.confidence,
-            duration_seconds=result.duration_seconds,
-        ),
-        intent=AudioIntent(
-            macro="FORA_DE_ESCOPO",
-            specific="pipeline_nao_implementado",
-            confidence_macro=0.0,
-            confidence_specific=0.0,
-        ),
-        answer=AudioAnswer(text=STUB_ANSWER_TEXT, sources=[]),
-        pipeline_status="stubbed",
-    )

@@ -1,29 +1,22 @@
-/**
- * Estado da interface do agente.
- *
- * A store guarda conversas, mensagens, o estado do toggle de intencao e o que
- * o painel de documentos exibe. Ela **nao fala com o backend**: o unico ponto
- * que chamaria a API esta isolado em `sendMessage`, marcado com
- * `PONTO DE INTEGRACAO`. Toda a arvore de componentes le daqui, entao ligar a
- * API nao exige tocar em nenhum componente.
- */
-
 import {
   createContext,
   useCallback,
   useContext,
   useMemo,
   useReducer,
+  useRef,
+  useEffect,
   type ReactNode,
 } from 'react';
 
-import { MOCK_ACTIVE_CONVERSATION_ID, MOCK_CONVERSATIONS } from '@/data/mock';
 import {
-  applyScenario,
-  stripExcerpts,
-  type ChatStatus,
-  type ScenarioId,
-} from '@/data/scenarios';
+  sendChatMessage,
+  uploadAudio,
+  toDisplayMessage,
+  CHAT_MESSAGE_MAX_LENGTH,
+} from '@/lib/api';
+import { toAssistantMessage } from '@/lib/domain';
+type ChatStatus = 'idle' | 'sending' | 'error';
 import { CONVERSATION_CHANNEL } from '@/lib/api/constants';
 import {
   deriveConversationTitle,
@@ -50,11 +43,11 @@ type State = {
   /** Painel deslizante, em telas estreitas. Fechado por padrao. */
   documentSheetOpen: boolean;
   sidebarOpen: boolean;
-  scenario: ScenarioId;
+  accessToken: string;
 };
 
 type Action =
-  | { type: 'new-conversation' }
+  | { type: 'new-conversation'; conversation: Conversation }
   | { type: 'select-conversation'; id: string }
   | { type: 'delete-conversation'; id: string }
   | { type: 'append-message'; conversationId: string; message: ChatMessage }
@@ -64,7 +57,7 @@ type Action =
   | { type: 'set-document-panel'; open: boolean }
   | { type: 'set-document-sheet'; open: boolean }
   | { type: 'set-sidebar'; open: boolean }
-  | { type: 'set-scenario'; scenario: ScenarioId };
+  | { type: 'set-token'; token: string };
 
 function createConversation(): Conversation {
   const now = new Date().toISOString();
@@ -83,7 +76,7 @@ function createConversation(): Conversation {
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'new-conversation': {
-      const conversation = createConversation();
+      const conversation = action.conversation;
       return {
         ...state,
         conversations: [conversation, ...state.conversations],
@@ -133,7 +126,12 @@ function reducer(state: State, action: Action): State {
             action.message.interactionId ?? conversation.lastInteractionId,
         };
       });
-      return { ...state, conversations };
+      return {
+        ...state,
+        conversations,
+        selectedDocumentId:
+          action.message.role === 'assistant' ? null : state.selectedDocumentId,
+      };
     }
 
     case 'set-status':
@@ -158,25 +156,19 @@ function reducer(state: State, action: Action): State {
     case 'set-sidebar':
       return { ...state, sidebarOpen: action.open };
 
-    case 'set-scenario':
-      return { ...state, scenario: action.scenario, selectedDocumentId: null };
+    case 'set-token':
+      return { ...state, accessToken: action.token };
 
     default:
       return state;
   }
 }
 
-/**
- * Estado inicial vindo do mock.
- *
- * AO LIGAR A API: troque por `{ conversations: [], activeConversationId: null }`
- * e carregue o historico com `listConversations()` num efeito. Ver README,
- * "Ponto de integracao 4".
- */
+/** Conversas apenas da sessão atual; nenhum dado fictício é carregado. */
 function initialState(): State {
   return {
-    conversations: stripExcerpts(MOCK_CONVERSATIONS),
-    activeConversationId: MOCK_ACTIVE_CONVERSATION_ID,
+    conversations: [],
+    activeConversationId: null,
     status: 'idle',
     error: null,
     intentLayerEnabled: true,
@@ -184,7 +176,7 @@ function initialState(): State {
     documentPanelOpen: true,
     documentSheetOpen: false,
     sidebarOpen: false,
-    scenario: 'default',
+    accessToken: '',
   };
 }
 
@@ -201,11 +193,13 @@ type ChatStoreValue = {
   documentPanelOpen: boolean;
   documentSheetOpen: boolean;
   sidebarOpen: boolean;
-  scenario: ScenarioId;
+  accessToken: string;
   /** Fontes da ultima resposta do assistente na conversa ativa. */
   activeSources: RetrievedDocument[];
   selectedDocument: RetrievedDocument | null;
-  sendMessage: (content: string) => void;
+  sendMessage: (content: string) => Promise<boolean>;
+  sendAudio: (audio: Blob) => Promise<boolean>;
+  stop: () => void;
   newConversation: () => void;
   selectConversation: (id: string) => void;
   deleteConversation: (id: string) => void;
@@ -214,7 +208,7 @@ type ChatStoreValue = {
   setDocumentPanelOpen: (open: boolean) => void;
   setDocumentSheetOpen: (open: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
-  setScenario: (scenario: ScenarioId) => void;
+  setAccessToken: (token: string) => void;
 };
 
 const ChatStoreContext = createContext<ChatStoreValue | null>(null);
@@ -222,27 +216,14 @@ const ChatStoreContext = createContext<ChatStoreValue | null>(null);
 export function ChatStoreProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, initialState);
 
-  // O cenario de revisao transforma o estado so na leitura. Ao remover o
-  // alternador, esta linha vira `const view = { ...state }`.
-  const view = useMemo(
-    () =>
-      applyScenario(state.scenario, {
-        conversations:
-          state.scenario === 'source-excerpt'
-            ? MOCK_CONVERSATIONS
-            : state.conversations,
-        activeConversationId: state.activeConversationId,
-        status: state.status,
-        error: state.error,
-      }),
-    [
-      state.scenario,
-      state.conversations,
-      state.activeConversationId,
-      state.status,
-      state.error,
-    ],
-  );
+  const view = state;
+  const pending = useRef<AbortController | null>(null);
+  const stop = useCallback(() => {
+    pending.current?.abort();
+    pending.current = null;
+    dispatch({ type: 'set-status', status: 'idle' });
+  }, []);
+  useEffect(() => () => pending.current?.abort(), []);
 
   const activeConversation = useMemo(
     () =>
@@ -254,6 +235,14 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
 
   const activeSources = useMemo(() => {
     if (!activeConversation) return [];
+    if (state.selectedDocumentId) {
+      const selected = [...activeConversation.messages]
+        .reverse()
+        .find((message) =>
+          message.sources?.some((source) => source.id === state.selectedDocumentId),
+        );
+      if (selected?.sources) return selected.sources;
+    }
     for (let index = activeConversation.messages.length - 1; index >= 0; index -= 1) {
       const message = activeConversation.messages[index];
       if (message.role === 'assistant' && message.sources) {
@@ -261,7 +250,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
       }
     }
     return [];
-  }, [activeConversation]);
+  }, [activeConversation, state.selectedDocumentId]);
 
   // Sem escolha explicita, o painel ja abre no primeiro documento citado: e o
   // de maior score e o que a resposta cita como [Fonte 1].
@@ -273,90 +262,116 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
     [activeSources, state.selectedDocumentId],
   );
 
-  const sendMessage = useCallback(
-    (content: string) => {
-      const trimmed = content.trim();
-      if (!trimmed) return;
-
-      const conversationId = state.activeConversationId;
-      if (!conversationId) return;
-
-      dispatch({
-        type: 'append-message',
-        conversationId,
-        message: {
-          id: crypto.randomUUID(),
-          role: 'user',
-          content: trimmed,
-          createdAt: new Date().toISOString(),
-          origin: 'text',
-          status: 'complete',
-        },
-      });
+  const send = useCallback(
+    async (input: string | Blob): Promise<boolean> => {
+      if (pending.current) return false;
+      if (
+        typeof input === 'string' &&
+        (!input.trim() || input.length > CHAT_MESSAGE_MAX_LENGTH)
+      ) {
+        dispatch({
+          type: 'set-status',
+          status: 'error',
+          error: 'Informe uma mensagem de 1 a 20.000 caracteres.',
+        });
+        return false;
+      }
+      if (input instanceof Blob && !state.accessToken.trim()) {
+        dispatch({
+          type: 'set-status',
+          status: 'error',
+          error: 'Informe o token de acesso da sessão antes de enviar áudio.',
+        });
+        return false;
+      }
+      const conversation = activeConversation ?? createConversation();
+      if (!activeConversation) dispatch({ type: 'new-conversation', conversation });
+      const controller = new AbortController();
+      pending.current = controller;
+      const started = performance.now();
       dispatch({ type: 'set-status', status: 'sending' });
-
-      /*
-       * ===================== PONTO DE INTEGRACAO 1 =====================
-       *
-       * Esta interface ainda nao chama o backend. Substitua o bloco abaixo
-       * por, literalmente:
-       *
-       *   const started = performance.now();
-       *   try {
-       *     const response = await sendChatMessage({
-       *       message: trimmed,
-       *       previousInteractionId: activeConversation?.lastInteractionId ?? null,
-       *       useIntentClassifier: state.intentLayerEnabled,
-       *       signal: controller.signal,
-       *     });
-       *     dispatch({
-       *       type: 'append-message',
-       *       conversationId,
-       *       message: toAssistantMessage(response, {
-       *         roundTripMs: performance.now() - started,
-       *         intentLayerEnabled: state.intentLayerEnabled,
-       *       }),
-       *     });
-       *     dispatch({ type: 'set-status', status: 'idle' });
-       *   } catch (cause) {
-       *     if (isAbortError(cause)) return;
-       *     dispatch({ type: 'set-status', status: 'error',
-       *                error: toDisplayMessage(cause) });
-       *   }
-       *
-       * `sendChatMessage`, `toAssistantMessage`, `isAbortError` e
-       * `toDisplayMessage` ja existem em `lib/api` e `lib/domain`, e
-       * `toAssistantMessage` ja converte `sources`, `usage` e as latencias
-       * para o formato que os componentes esperam.
-       * =================================================================
-       */
-      const timeout = window.setTimeout(() => {
+      try {
+        let response;
+        let transcription;
+        const text = typeof input === 'string' ? input.trim() : '';
+        if (typeof input === 'string') {
+          dispatch({
+            type: 'append-message',
+            conversationId: conversation.id,
+            message: {
+              id: crypto.randomUUID(),
+              role: 'user',
+              content: text,
+              createdAt: new Date().toISOString(),
+              origin: 'text',
+              status: 'complete',
+            },
+          });
+          response = await sendChatMessage({
+            message: text,
+            previousInteractionId: conversation.lastInteractionId,
+            useIntentClassifier: state.intentLayerEnabled,
+            signal: controller.signal,
+          });
+        } else {
+          const result = await uploadAudio({
+            audio: input,
+            filename: 'gravacao.wav',
+            conversationId: conversation.id,
+            accessToken: state.accessToken,
+            previousInteractionId: conversation.lastInteractionId,
+            useIntentClassifier: state.intentLayerEnabled,
+            signal: controller.signal,
+          });
+          if (result.pipeline_status !== 'completed' || !result.chat)
+            throw new Error('Incomplete pipeline');
+          response = result.chat;
+          transcription = result.transcription;
+        }
+        if (controller.signal.aborted || pending.current !== controller) return false;
+        if (transcription)
+          dispatch({
+            type: 'append-message',
+            conversationId: conversation.id,
+            message: {
+              id: crypto.randomUUID(),
+              role: 'user',
+              content: transcription.text,
+              createdAt: new Date().toISOString(),
+              origin: 'audio',
+              status: 'complete',
+              transcription: {
+                confidence: transcription.confidence,
+                durationSeconds: transcription.duration_seconds,
+              },
+            },
+          });
         dispatch({
           type: 'append-message',
-          conversationId,
-          message: {
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            content:
-              'Interface ainda não conectada ao pipeline de PLN. Esta tela cobre apenas ' +
-              'a camada visual: o envio da pergunta, a chamada ao classificador de ' +
-              'intenções e a resposta fundamentada entram na task de integração.\n\n' +
-              'Use o seletor de cenários, no rodapé da barra lateral, para revisar os ' +
-              'demais estados da interface.',
-            createdAt: new Date().toISOString(),
-            origin: 'text',
-            status: 'complete',
-            sources: [],
+          conversationId: conversation.id,
+          message: toAssistantMessage(response, {
+            roundTripMs: performance.now() - started,
             intentLayerEnabled: state.intentLayerEnabled,
-          },
+          }),
         });
         dispatch({ type: 'set-status', status: 'idle' });
-      }, 900);
-
-      return () => window.clearTimeout(timeout);
+        return true;
+      } catch (cause) {
+        if (!controller.signal.aborted && pending.current === controller)
+          dispatch({
+            type: 'set-status',
+            status: 'error',
+            error: toDisplayMessage(cause),
+          });
+        return false;
+      } finally {
+        if (pending.current === controller) pending.current = null;
+      }
     },
-    [state.activeConversationId, state.intentLayerEnabled],
+    [activeConversation, state.accessToken, state.intentLayerEnabled],
   );
+  const sendMessage = useCallback((content: string) => send(content), [send]);
+  const sendAudio = useCallback((audio: Blob) => send(audio), [send]);
 
   const value = useMemo<ChatStoreValue>(
     () => ({
@@ -368,20 +383,31 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
       documentPanelOpen: state.documentPanelOpen,
       documentSheetOpen: state.documentSheetOpen,
       sidebarOpen: state.sidebarOpen,
-      scenario: state.scenario,
+      accessToken: state.accessToken,
       activeSources,
       selectedDocument,
       sendMessage,
-      newConversation: () => dispatch({ type: 'new-conversation' }),
-      selectConversation: (id) => dispatch({ type: 'select-conversation', id }),
-      deleteConversation: (id) => dispatch({ type: 'delete-conversation', id }),
+      sendAudio,
+      stop,
+      newConversation: () => {
+        stop();
+        dispatch({ type: 'new-conversation', conversation: createConversation() });
+      },
+      selectConversation: (id) => {
+        stop();
+        dispatch({ type: 'select-conversation', id });
+      },
+      deleteConversation: (id) => {
+        stop();
+        dispatch({ type: 'delete-conversation', id });
+      },
       setIntentLayerEnabled: (enabled) =>
         dispatch({ type: 'toggle-intent-layer', enabled }),
       selectDocument: (id) => dispatch({ type: 'select-document', id }),
       setDocumentPanelOpen: (open) => dispatch({ type: 'set-document-panel', open }),
       setDocumentSheetOpen: (open) => dispatch({ type: 'set-document-sheet', open }),
       setSidebarOpen: (open) => dispatch({ type: 'set-sidebar', open }),
-      setScenario: (scenario) => dispatch({ type: 'set-scenario', scenario }),
+      setAccessToken: (token) => dispatch({ type: 'set-token', token }),
     }),
     [
       view.conversations,
@@ -394,8 +420,10 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
       state.documentPanelOpen,
       state.documentSheetOpen,
       state.sidebarOpen,
-      state.scenario,
+      state.accessToken,
       sendMessage,
+      sendAudio,
+      stop,
     ],
   );
 

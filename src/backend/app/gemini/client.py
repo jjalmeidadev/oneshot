@@ -95,6 +95,7 @@ def generate_chat_response(request: GeminiChatRequest) -> GeminiChatResponse:
                 web_url=result.document.web_url,
                 last_modified=result.document.last_modified,
                 score=result.score,
+                excerpt=result.document.content,
             )
             for result in retrieved_documents
         ],

@@ -8,7 +8,7 @@ import { INTENT_THRESHOLDS, intentOutcome, type ChatMessage } from '@/lib/domain
 import { formatConfidence, formatMilliseconds, formatNumber } from '@/lib/format';
 
 const OUTCOME_LABEL: Record<ReturnType<typeof intentOutcome>, string> = {
-  handler: 'Handler específico acionado',
+  handler: 'Intenção específica identificada',
   generic: 'Fluxo genérico da macrointenção',
   limitation: 'Resposta de limitação (RF08)',
   'out-of-scope': 'Fora de escopo',

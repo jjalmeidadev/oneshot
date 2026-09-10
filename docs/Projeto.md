@@ -4741,6 +4741,17 @@ O núcleo é importável e exercitável hoje — a Seção 8.11.6 é uma execuç
 
 A Seção 8.4 registra a cobertura de teste correspondente e o que continua descoberto.
 
+## 8.12 Integração da interface web — S3/S5 (#131)
+
+A bancada em React integra o envio de texto e de áudio às APIs FastAPI, apresenta transcrição, resposta, fontes e classificação, e trata carregamento, cancelamento e falhas. A implementação preserva o contexto por conversa e converte a gravação do navegador para WAV PCM mono a 16 kHz antes do envio. O backend usa o mesmo pipeline de resposta para as duas entradas.
+
+A [documentação da interface](../src/frontend/README.md) registra estrutura e componentes, navegabilidade desktop/móvel, decisões de implementação, contratos HTTP, configuração e instruções de uso. A [matriz de testes e resultados](../src/frontend/TESTES.md) registra casos por componente, integração, áudio, falhas, acessibilidade e cobertura, distinguindo testes determinísticos de validação com serviços externos.
+
+Esta entrega cobre a comunicação com as APIs de texto e áudio disponíveis e a bancada web para testá-las. Não substitui o canal Microsoft Teams, a autenticação Entra ID, a persistência de conversas ou a conexão com dados corporativos. Os resultados automatizados não devem ser interpretados como aprovação dos RNFs dependentes desses ambientes.
+
+Atualização da integração: as lacunas de exposição HTTP e inicialização descritas em 8.11.9 correspondem ao estado anterior à issue #131. Agora, texto e áudio alcançam o pipeline compartilhado e o carregamento inicial é controlado por PLN_WARMUP. Persistência e validação com serviços corporativos continuam pendentes.
+
+
 # 9. Planejamento e Execução de Testes
 
 O planejamento dos testes sistêmicos é entrega da Sprint 3, e a execução ocorre na Sprint 4, conforme as Seções 8.3.1 e 8.3.2. As tasks correspondentes já estão detalhadas, estimadas e sequenciadas no backlog da Seção 6.2 do `GestaoProjeto.md`.
