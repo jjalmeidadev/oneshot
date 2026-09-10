@@ -2,6 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ChatMessages from "@/components/chat/chat-messages";
+import type { ChatAnswer } from "@/components/chat/chat-messages";
+import { sendChatMessage, sourceDownloadUrl } from "@/lib/chatApi";
+import { useLiveSessionId } from "@/lib/liveSessionContext";
 import { SOURCE_MESSAGES } from "@/components/chat/messages";
 import { useScrollReveal } from "@/lib/useScrollReveal";
 import { LIVE_FOLLOW_EVENT } from "@/lib/useLivePresence";
@@ -147,12 +150,41 @@ export default function FloatingChat() {
         return () => window.removeEventListener(LIVE_FOLLOW_EVENT, onFollow);
     }, []);
 
-    // Seam for the RAG backend: this is the single place that has to change
-    // once the model that answers about the OneShot project is available.
-    const handleSendMessage = useCallback(async (message: string) => {
-        await new Promise((resolve) => setTimeout(resolve, 600));
-        return `Ainda não estou ligado à base de conhecimento do OneShot, então não consigo responder "${message}" de verdade. Assim que o modelo estiver conectado, a resposta vem dos documentos do projeto com a fonte junto.`;
-    }, []);
+    // A sessão desta aba na sala ao vivo. É ela que faz a pergunta digitada
+    // aqui aparecer, no mesmo instante, no painel de quem está acompanhando.
+    const sessionId = useLiveSessionId();
+    // O encadeamento de turnos é do próprio Gemini: guardar o id da última
+    // interação é o que faz a segunda pergunta lembrar da primeira, sem o
+    // backend precisar manter histórico.
+    const previousInteractionId = useRef<string | null>(null);
+
+    const handleSendMessage = useCallback(
+        async (message: string): Promise<ChatAnswer> => {
+            const resposta = await sendChatMessage(
+                message,
+                sessionId,
+                previousInteractionId.current,
+            );
+            previousInteractionId.current = resposta.interaction_id;
+
+            // Uma entrada por trecho recuperado, na mesma ordem em que o
+            // modelo os numerou: assim "[Fonte 2]" no texto corresponde ao
+            // segundo item da pasta.
+            const documentos = resposta.sources.map((fonte) => ({
+                name: fonte.document,
+                url: sourceDownloadUrl(fonte),
+                section: fonte.title,
+            }));
+
+            return {
+                text: resposta.text,
+                sources: documentos.length
+                    ? { label: "Fontes desta resposta", documents: documentos }
+                    : undefined,
+            };
+        },
+        [sessionId],
+    );
 
     return (
         <>

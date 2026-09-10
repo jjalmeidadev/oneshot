@@ -11,7 +11,7 @@ export const INTRO_MESSAGES: ChatMessage[] = [
         content:
             "Olá como posso te ajudar? Sou o OneShot, pronto para responder suas perguntas e fornecer informações sobre nossos serviços.",
     },
-    { id: "intro-2", sender: "user", content: "Quero conferir o estado do portfólio." },
+    { id: "intro-2", sender: "user", content: "Quero conferir o estado de um portfólio." },
     { id: "intro-3", sender: "assistant", content: "Qual portfólio você gostaria de verificar?" },
     { id: "intro-4", sender: "user", content: "Portfólio XPTO." },
     { id: "intro-5", sender: "assistant", content: "Portfólio em andamento." },
@@ -36,10 +36,13 @@ export const SOURCE_MESSAGES: ChatMessage[] = [
             "Do cronograma físico-financeiro anexado ao TAP, na revisão de agosto. Abra a pasta e escolha o documento para conferir.",
         sources: {
             label: "Fontes do Portfólio XPTO",
+            // Conversa roteirizada: nomes sem link, porque não há arquivo
+            // por trás. As respostas reais do RAG trazem `url` e o item da
+            // pasta vira download.
             documents: [
-                "TAP — Portfólio XPTO.pdf",
-                "Cronograma físico-financeiro — rev. ago/2026.xlsx",
-                "Nota técnica 12/2026 — acompanhamento.pdf",
+                { name: "TAP — Portfólio XPTO.pdf" },
+                { name: "Cronograma físico-financeiro — rev. ago/2026.xlsx" },
+                { name: "Nota técnica 12/2026 — acompanhamento.pdf" },
             ],
         },
     },

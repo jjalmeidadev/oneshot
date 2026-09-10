@@ -1,4 +1,10 @@
 import { useEffect, useState } from "react";
+import {
+    HAS_LIVE_BACKEND,
+    LIVE_SESSIONS_PATH,
+    liveApiUrl,
+    liveWebsocketUrl,
+} from "@/lib/liveBackend";
 
 /** Disparado quando alguém passa a (ou deixa de) acompanhar uma sessão. */
 export const LIVE_FOLLOW_EVENT = "oneshot:live-follow";
@@ -20,37 +26,12 @@ export interface LiveSession {
     messages: LiveMessage[];
 }
 
-/**
- * Endereço do backend de presença (`lp/src/rag/backend`), vindo de
- * `VITE_LIVE_BACKEND_URL` — por exemplo `http://localhost:8000` em
- * desenvolvimento, ou `/` se o backend for servido na mesma origem.
- *
- * Enquanto estiver vazio, a interface roda em modo simulado — o suficiente
- * para validar layout e interação, e o comportamento que a página tinha antes
- * de o backend existir.
- */
-const RAW_BACKEND_URL = (import.meta.env.VITE_LIVE_BACKEND_URL ?? "").trim();
-const HAS_BACKEND = RAW_BACKEND_URL !== "";
-/** Sem a barra final, para concatenar os caminhos sem duplicá-la. */
-const BACKEND_URL = RAW_BACKEND_URL.replace(/\/+$/, "");
-/** Rota de leitura da sala inteira (o mesmo corpo que o WebSocket empurra). */
-const SESSIONS_PATH = "/api/live/sessions";
-/** Canal de observação, que dispensa o polling enquanto estiver aberto. */
-const LIVE_WS_PATH = "/ws/live";
 /** Intervalo do polling — usado só enquanto o WebSocket não estiver de pé. */
 const POLL_INTERVAL = 2500;
 /** Espera antes de tentar reabrir o canal que caiu. */
 const RECONNECT_DELAY = 3000;
 /** `?ao-vivo=1` (ou `?ao-vivo=3`) liga a simulação e define quantas sessões. */
 const SIMULATION_PARAM = "ao-vivo";
-
-/** Endereço do canal, derivado do mesmo `VITE_LIVE_BACKEND_URL`. */
-function websocketUrl(): string {
-    const absolute = /^https?:/.test(BACKEND_URL)
-        ? BACKEND_URL
-        : `${window.location.origin}${BACKEND_URL}`;
-    return `${absolute.replace(/^http/, "ws")}${LIVE_WS_PATH}`;
-}
 
 const COLORS = ["#818cf8", "#34d399", "#fbbf24", "#f472b6", "#38bdf8"];
 
@@ -88,10 +69,12 @@ function simulatedSessions(count: number): LiveSession[] {
 /**
  * Quem está testando o assistente agora.
  *
- * Uma única porta de entrada para a interface: hoje ela é alimentada por um
- * simulador, e passará a ser alimentada pelo polling do backend sem que os
- * componentes precisem mudar. Sem endpoint e sem o parâmetro de simulação,
- * devolve lista vazia — e a página se comporta exatamente como antes.
+ * Uma única porta de entrada para a interface, seja qual for a origem do
+ * dado: o backend de presença quando há um configurado, o simulador de
+ * `?ao-vivo=N` quando não há. Sem os dois, devolve lista vazia — e a página
+ * se comporta exatamente como antes de o backend existir.
+ *
+ * Este hook só *observa*. Quem coloca o visitante na sala é `useLiveSession`.
  */
 export function useLivePresence(): { sessions: LiveSession[] } {
     const [sessions, setSessions] = useState<LiveSession[]>([]);
@@ -106,7 +89,7 @@ export function useLivePresence(): { sessions: LiveSession[] } {
         // pintura e é para onde a interface cai se o canal não abrir. Assim
         // que o WebSocket conecta, o polling para; se o canal cair, o polling
         // volta e uma nova tentativa de conexão é agendada.
-        if (HAS_BACKEND) {
+        if (HAS_LIVE_BACKEND) {
             let cancelled = false;
             let socket: WebSocket | null = null;
             let pollTimer: number | null = null;
@@ -118,7 +101,7 @@ export function useLivePresence(): { sessions: LiveSession[] } {
 
             const poll = async () => {
                 try {
-                    const response = await fetch(`${BACKEND_URL}${SESSIONS_PATH}`, {
+                    const response = await fetch(liveApiUrl(LIVE_SESSIONS_PATH), {
                         cache: "no-store",
                     });
                     const data = (await response.json()) as { sessions?: LiveSession[] };
@@ -145,7 +128,7 @@ export function useLivePresence(): { sessions: LiveSession[] } {
                 if (cancelled) return;
 
                 try {
-                    socket = new WebSocket(websocketUrl());
+                    socket = new WebSocket(liveWebsocketUrl());
                 } catch {
                     startPolling();
                     return;

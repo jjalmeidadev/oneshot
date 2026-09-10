@@ -7,6 +7,25 @@ import { cn } from "@/lib/utils";
 import SourceFolder from "@/components/chat/source-folder";
 import { INTRO_MESSAGES } from "@/components/chat/messages";
 
+/** Um documento que sustenta uma resposta. */
+export interface ChatSourceDocument {
+  /** Nome do arquivo, que é o que a pasta de fontes exibe. */
+  name: string;
+  /**
+   * Link do documento original. Quando presente, o item da pasta vira um
+   * download de verdade — é o que a resposta do RAG traz. A conversa
+   * roteirizada não tem, e continua só selecionável.
+   */
+  url?: string;
+  /** Seção de onde veio o trecho, quando o modelo souber dizer. */
+  section?: string;
+}
+
+export interface ChatMessageSources {
+  label: string;
+  documents: ChatSourceDocument[];
+}
+
 export interface ChatMessage {
   id: string;
   sender: "user" | "assistant";
@@ -14,12 +33,15 @@ export interface ChatMessage {
   timestamp?: string;
   /**
    * Documentos que sustentam a resposta. Quando presente, a bolha ganha a
-   * pasta interativa de fontes — hoje só as mensagens do chat 2 usam isso.
+   * pasta interativa de fontes.
    */
-  sources?: {
-    label: string;
-    documents: string[];
-  };
+  sources?: ChatMessageSources;
+}
+
+/** Resposta do assistente, quando ela vem acompanhada das fontes. */
+export interface ChatAnswer {
+  text: string;
+  sources?: ChatMessageSources;
 }
 
 export interface ChatMessagesProps {
@@ -68,10 +90,13 @@ export interface ChatMessagesProps {
   onComplete?: () => void;
   /**
    * Handler for messages typed by the visitor (needs `interactive`). Return
-   * the assistant's answer — this is the seam where the OneShot RAG backend
-   * plugs in. Without it, a placeholder answer is used.
+   * the assistant's answer — either the text alone or, quando o modelo
+   * devolver procedência, um `ChatAnswer` com as fontes junto. Sem handler,
+   * uma resposta de espera mantém a interação completa.
    */
-  onSendMessage?: (message: string) => Promise<string> | string;
+  onSendMessage?: (
+    message: string,
+  ) => Promise<string | ChatAnswer> | string | ChatAnswer;
   className?: string;
 }
 
@@ -353,14 +378,17 @@ export function ChatMessages({
     if (!lockScroll) scrollToBottom();
   }, [lockScroll, scrollToBottom]);
 
-  const appendAssistant = useCallback((content: string) => {
+  const appendAssistant = useCallback(
+    (content: string, sources?: ChatMessageSources) => {
     setChatMessages((prev) => [
       ...prev,
-      { id: `assistant-${Date.now()}`, sender: "assistant", content },
+      { id: `assistant-${Date.now()}`, sender: "assistant", content, sources },
     ]);
     setVisibleCount((prev) => prev + 1);
     visibleCountRef.current += 1;
-  }, []);
+    },
+    [],
+  );
 
   const handleSend = useCallback(() => {
     const text = inputValue.trim();
@@ -384,10 +412,19 @@ export function ChatMessages({
       : wait(typingDuration).then(() => PENDING_RAG_REPLY);
 
     answer
-      .then((content) => appendAssistant(content))
-      .catch(() =>
+      .then((resposta) =>
+        typeof resposta === "string"
+          ? appendAssistant(resposta)
+          : appendAssistant(resposta.text, resposta.sources),
+      )
+      .catch((erro: unknown) =>
+        // A mensagem do backend explica o motivo (modelo ainda não
+        // configurado, sessão expirada); repeti-la ajuda mais do que um
+        // "erro" genérico.
         appendAssistant(
-          "Não consegui responder agora. Tente de novo em alguns instantes.",
+          erro instanceof Error && erro.message
+            ? erro.message
+            : "Não consegui responder agora. Tente de novo em alguns instantes.",
         ),
       )
       .finally(() => setIsTyping(false));

@@ -11,6 +11,7 @@ import ProgressBar from './components/ui/progress-bar'
 import FooterSection from './sections/footer'
 import FloatingChat from './components/chat/floating-chat'
 import LoadingScreen from './components/ui/loading-screen'
+import LiveSessionProvider from './components/live/live-session-provider'
 import GhostDocuments from './components/ui/ghost-documents'
 import DocumentCarousel from './components/ui/document-carousel'
 import DocumentDispatch from './components/ui/document-dispatch'
@@ -25,6 +26,9 @@ function App() {
   useScrollSpeedLimit('[data-choreography-zone]')
 
   return (
+    // O provedor entra na sala ao vivo uma vez e empresta o id da sessão
+    // para o painel de presença e para a janela de chat.
+    <LiveSessionProvider>
     <div className="App relative min-h-screen">
       {/* Cortina de abertura: cobre a montagem do shader, das fontes e do
           handwriting, e só entrega a página quando tudo está pronto. */}
@@ -72,6 +76,7 @@ function App() {
       <AvatarHandoff />
       <FooterSection />
     </div>
+    </LiveSessionProvider>
   )
 }
 

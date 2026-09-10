@@ -1,5 +1,8 @@
+import JoinQr from "@/components/live/join-qr";
 import LivePresenceCard from "@/components/live/live-presence-card";
+import { HAS_LIVE_BACKEND } from "@/lib/liveBackend";
 import { useLivePresence } from "@/lib/useLivePresence";
+import { useLiveSessionId } from "@/lib/liveSessionContext";
 
 // Last section: the shared chat window (FloatingChat) morphs from the swap
 // section's slot into the slot below, ending up taking most of the screen.
@@ -13,7 +16,16 @@ import { useLivePresence } from "@/lib/useLivePresence";
 // comes into view.
 export default function TrySection() {
     const { sessions } = useLivePresence();
-    const live = sessions.length > 0;
+    // A entrada na sala acontece no provedor, no topo da página; aqui só
+    // se lê o id, para marcar qual das pessoas do painel é você.
+    const sessionId = useLiveSessionId();
+    // O painel só abre quando há companhia: como a própria página entra na
+    // sala, "1 pessoa" seria sempre você, e o layout nunca voltaria ao normal.
+    const live = sessions.some((session) => session.id !== sessionId);
+    // O convite por QR só faz sentido havendo sala de verdade para entrar;
+    // no modo simulado de `?ao-vivo=N` ele levaria a lugar nenhum.
+    const showQr = HAS_LIVE_BACKEND;
+    const showAside = showQr || live;
 
     return (
         <section className="relative min-h-[240vh] w-full">
@@ -33,16 +45,20 @@ export default function TrySection() {
                     </h2>
                 </div>
 
-                {/* Quando há gente testando ao vivo, o slot do chat cede um
-                    terço da largura para o painel de presença. A janela é
-                    fixa e persegue o retângulo do slot a cada quadro, então
-                    ela se reacomoda sozinha, animada, sem coreografia nova. */}
+                {/* A coluna da direita é a sala: o convite para entrar em
+                    cima, quem já está dentro embaixo. Quando ela aparece, o
+                    slot do chat cede um terço da largura — e como a janela é
+                    fixa e persegue o retângulo do slot a cada quadro, ela se
+                    reacomoda sozinha, animada, sem coreografia nova. */}
                 <div className="flex min-h-0 w-full max-w-6xl flex-1 gap-4">
                     <div data-chat-slot="try" aria-hidden className="min-h-0 flex-1" />
 
-                    {live && (
-                        <div className="hidden min-h-0 w-1/3 shrink-0 md:block">
-                            <LivePresenceCard sessions={sessions} />
+                    {showAside && (
+                        <div className="hidden min-h-0 w-1/3 shrink-0 flex-col gap-4 md:flex">
+                            {showQr && <JoinQr />}
+                            {live && (
+                                <LivePresenceCard sessions={sessions} selfId={sessionId} />
+                            )}
                         </div>
                     )}
                 </div>

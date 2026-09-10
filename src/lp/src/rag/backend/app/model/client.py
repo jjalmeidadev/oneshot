@@ -11,8 +11,11 @@ Duas implementações acompanham o pacote:
   e a rota de chat a traduz em `503`. Nada é inventado: o serviço prefere dizer
   que o modelo não está pronto a devolver uma resposta falsa.
 * `HttpRagModel` — fala com o modelo publicado como serviço HTTP próprio, seja
-  ele escrito em Python ou em TypeScript. É o caminho previsto para a próxima
-  task; basta apontar `RAG_MODEL_URL`.
+  ele escrito em Python ou em TypeScript. Serve para separar o modelo em outro
+  serviço quando fizer sentido; basta apontar `RAG_MODEL_URL`.
+* `LocalRagModel` (`app/model/local.py`) — **o que o projeto usa**. Importa o
+  pipeline de `lp/src/rag/model` e roda no mesmo processo: um deploy só, sem
+  rede entre backend e modelo.
 
 A escolha é feita por `RAG_MODEL_BACKEND` e resolvida em `build_model`.
 """
@@ -80,7 +83,7 @@ class NotConfiguredModel:
     ) -> ModelAnswer:
         raise RagModelNotConfigured(
             "O modelo RAG ainda não está configurado. Defina RAG_MODEL_BACKEND=http "
-            "e RAG_MODEL_URL apontando para o serviço de `lp/src/rag/model`."
+            "e RAG_MODEL_URL apontando para o serviço de lp/src/rag/model."
         )
 
 
@@ -150,6 +153,13 @@ class HttpRagModel:
 
 def build_model(settings: Settings) -> RagModel:
     """Escolhe a implementação do modelo a partir da configuração."""
+
+    if settings.model_backend == "local":
+        # Importado aqui para o backend continuar subindo mesmo sem as
+        # dependências do modelo instaladas.
+        from app.model.local import build_local_model  # noqa: PLC0415
+
+        return build_local_model(settings)
 
     if settings.model_backend == "http":
         if not settings.model_url:

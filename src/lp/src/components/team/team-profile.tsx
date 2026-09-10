@@ -72,16 +72,24 @@ export default function TeamProfile({ member, onClose }: TeamProfileProps) {
                                 </p>
                             )}
 
+                            {/* As marcas entram como imagem, e não como
+                                máscara: são logos coloridas, e achatá-las numa
+                                cor só descaracterizaria as duas. */}
                             <div className="mt-2 flex w-full flex-col gap-2">
                                 {member.instagram && (
                                     <a
                                         href={member.instagram}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-normal text-white/70 transition-colors hover:border-white/25 hover:bg-white/10 hover:text-white"
+                                        className="group/link flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-normal text-white/70 transition-colors hover:border-white/25 hover:bg-white/10 hover:text-white"
                                     >
+                                        <img
+                                            src="/instagram.svg"
+                                            alt=""
+                                            className="size-5 shrink-0 transition-transform duration-300 group-hover/link:scale-110"
+                                        />
                                         Instagram
-                                        <ArrowUpRight className="size-4" />
+                                        <ArrowUpRight className="ml-auto size-4 opacity-50 transition-opacity group-hover/link:opacity-100" />
                                     </a>
                                 )}
                                 {member.linkedin && (
@@ -89,10 +97,15 @@ export default function TeamProfile({ member, onClose }: TeamProfileProps) {
                                         href={member.linkedin}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-normal text-white/70 transition-colors hover:border-white/25 hover:bg-white/10 hover:text-white"
+                                        className="group/link flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-normal text-white/70 transition-colors hover:border-white/25 hover:bg-white/10 hover:text-white"
                                     >
+                                        <img
+                                            src="/linkedin-logo.png"
+                                            alt=""
+                                            className="size-5 shrink-0 object-contain transition-transform duration-300 group-hover/link:scale-110"
+                                        />
                                         LinkedIn
-                                        <ArrowUpRight className="size-4" />
+                                        <ArrowUpRight className="ml-auto size-4 opacity-50 transition-opacity group-hover/link:opacity-100" />
                                     </a>
                                 )}
                             </div>

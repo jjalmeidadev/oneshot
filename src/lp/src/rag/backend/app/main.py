@@ -28,7 +28,7 @@ from app.live.hub import LiveHub
 from app.live.store import LiveStore
 from app.model.client import RagModelError, build_model
 from app.model.client import NotConfiguredModel
-from app.routers import chat, documents, health, live
+from app.routers import bench, chat, documents, health, live
 
 load_dotenv(Path(BACKEND_DIR) / ".env")
 
@@ -91,9 +91,18 @@ app = FastAPI(
 )
 
 _settings = get_settings()
+if _settings.allowed_origins == ["*"]:
+    logger.warning(
+        "CORS liberado para qualquer origem. Em ambiente publicado, defina "
+        "CORS_ALLOW_ORIGINS com o domínio da landing page."
+    )
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_settings.allowed_origins,
+    # Os preview deploys da Vercel mudam de domínio a cada branch; o regex
+    # cobre todos sem precisar recadastrar um por um.
+    allow_origin_regex=_settings.allowed_origin_regex or None,
     # Não há cookie nem sessão autenticada; liberar credenciais junto com "*"
     # nem seria aceito pelo navegador.
     allow_credentials=False,
@@ -105,3 +114,4 @@ app.include_router(health.router)
 app.include_router(live.router)
 app.include_router(chat.router)
 app.include_router(documents.router)
+app.include_router(bench.router)

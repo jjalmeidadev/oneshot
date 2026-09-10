@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { Check, FileText } from "lucide-react";
+import { Check, Download, FileText } from "lucide-react";
+import type { ChatSourceDocument } from "@/components/chat/chat-messages";
 import { Folder } from "@/components/ui/folder";
 import { SOURCE_FOCUS_EVENT } from "@/components/ui/ghost-documents";
 import { cn } from "@/lib/utils";
 
 export interface SourceFolderProps {
     label: string;
-    documents: string[];
+    documents: ChatSourceDocument[];
 }
 
 /**
@@ -47,32 +48,70 @@ export default function SourceFolder({ label, documents }: SourceFolderProps) {
             </button>
 
             <span className="text-[11px] font-normal text-white/40">
-                {open ? "Escolha o documento" : "Clique na pasta para ver os documentos"}
+                {open
+                    ? documents.some((document) => document.url)
+                        ? "Clique para baixar o documento"
+                        : "Escolha o documento"
+                    : "Clique na pasta para ver os documentos"}
             </span>
 
             {open && (
                 <ul className="flex flex-col gap-1">
-                    {documents.map((document) => {
-                        const isSelected = selected === document;
+                    {documents.map((document, index) => {
+                        const isSelected = selected === document.name;
+                        const estilo = cn(
+                            "flex w-full items-start gap-2 rounded-lg px-2 py-1.5 text-left text-xs font-normal transition-colors",
+                            isSelected
+                                ? "bg-amber-400/15 text-amber-100"
+                                : "text-white/60 hover:bg-white/10 hover:text-white",
+                        );
+                        const icone = document.url ? (
+                            <Download className="mt-0.5 size-3.5 shrink-0" />
+                        ) : isSelected ? (
+                            <Check className="mt-0.5 size-3.5 shrink-0" />
+                        ) : (
+                            <FileText className="mt-0.5 size-3.5 shrink-0" />
+                        );
+                        const rotulo = (
+                            <span className="min-w-0 break-words">
+                                {document.name}
+                                {document.section && (
+                                    <span className="block text-[10px] text-white/35">
+                                        {document.section}
+                                    </span>
+                                )}
+                            </span>
+                        );
+
                         return (
-                            <li key={document}>
-                                <button
-                                    type="button"
-                                    onClick={() => setSelected(document)}
-                                    className={cn(
-                                        "flex w-full items-start gap-2 rounded-lg px-2 py-1.5 text-left text-xs font-normal transition-colors",
-                                        isSelected
-                                            ? "bg-amber-400/15 text-amber-100"
-                                            : "text-white/60 hover:bg-white/10 hover:text-white",
-                                    )}
-                                >
-                                    {isSelected ? (
-                                        <Check className="mt-0.5 size-3.5 shrink-0" />
-                                    ) : (
-                                        <FileText className="mt-0.5 size-3.5 shrink-0" />
-                                    )}
-                                    <span className="min-w-0 break-words">{document}</span>
-                                </button>
+                            // O nome pode repetir quando dois trechos vêm do
+                            // mesmo arquivo, então a posição entra na chave.
+                            <li key={`${document.name}-${index}`}>
+                                {document.url ? (
+                                    // Com link, o item é um download de
+                                    // verdade — que é a promessa do produto:
+                                    // toda resposta leva ao documento original.
+                                    <a
+                                        href={document.url}
+                                        download
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        onClick={() => setSelected(document.name)}
+                                        className={estilo}
+                                    >
+                                        {icone}
+                                        {rotulo}
+                                    </a>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelected(document.name)}
+                                        className={estilo}
+                                    >
+                                        {icone}
+                                        {rotulo}
+                                    </button>
+                                )}
                             </li>
                         );
                     })}

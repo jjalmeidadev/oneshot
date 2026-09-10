@@ -7,6 +7,12 @@ import { GLASS } from "@/lib/styles";
 
 export interface LivePresenceCardProps {
     sessions: LiveSession[];
+    /**
+     * Sessão desta aba, quando ela também está na sala. Serve só para a
+     * pessoa se reconhecer na lista — com vários dispositivos abertos, sem
+     * isso não dá para saber qual dos pontos é você.
+     */
+    selfId?: string | null;
 }
 
 function statusLabel(session: LiveSession) {
@@ -26,7 +32,7 @@ function statusLabel(session: LiveSession) {
  * acompanhar a conversa dela em tempo real — o mesmo gesto de "seguir" um
  * participante no Miro. É somente leitura: quem observa não interfere.
  */
-export default function LivePresenceCard({ sessions }: LivePresenceCardProps) {
+export default function LivePresenceCard({ sessions, selfId }: LivePresenceCardProps) {
     const [followingId, setFollowingId] = useState<string | null>(null);
     const feedRef = useRef<HTMLDivElement>(null);
 
@@ -98,6 +104,11 @@ export default function LivePresenceCard({ sessions }: LivePresenceCardProps) {
                                     <span className="text-sm font-medium text-white">
                                         {session.name}
                                     </span>
+                                    {session.id === selfId && (
+                                        <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-normal uppercase tracking-widest text-white/50">
+                                            você
+                                        </span>
+                                    )}
                                     <span className="ml-auto text-[11px] font-normal text-white/40">
                                         {statusLabel(session)}
                                     </span>
