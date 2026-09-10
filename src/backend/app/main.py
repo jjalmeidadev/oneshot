@@ -1,5 +1,7 @@
 from pathlib import Path
 from uuid import uuid4
+from contextlib import asynccontextmanager
+import os
 from starlette.concurrency import run_in_threadpool
 
 from dotenv import load_dotenv
@@ -20,7 +22,7 @@ from app.gemini.client import (
     GeminiConfigurationError,
 )
 from app.gemini.schemas import GeminiChatRequest, GeminiChatResponse
-from app.pipeline import process_message
+from app.pipeline import process_message, warmup_classifier
 
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
@@ -42,7 +44,15 @@ AUDIO_ERROR_RESPONSES: dict[int | str, dict] = {
     }.items()
 }
 
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    if os.getenv("PLN_WARMUP", "0") == "1":
+        await run_in_threadpool(warmup_classifier)
+    yield
+
+
 app = FastAPI(
+    lifespan=lifespan,
     title="API de IA do Metro",
     description="Chat via Gemini com recuperacao de contexto em listas simuladas do SharePoint.",
     version="0.1.0",
@@ -72,6 +82,9 @@ async def handle_request_validation_error(
         return JSONResponse(status_code=422, content={"error": {"code": "INVALID_INPUT", "message": "Informe uma mensagem de 1 a 20.000 caracteres e parâmetros válidos."}})
     if request.url.path != AUDIO_PATH:
         return await request_validation_exception_handler(request, error)
+
+    if any(item["loc"][-1] != "audio" for item in error.errors()):
+        return JSONResponse(status_code=400, content={"error": {"code": "INVALID_INPUT", "message": "Confira os parâmetros enviados com o áudio."}})
 
     missing = AudioMissingError()
     return JSONResponse(status_code=missing.status_code, content=missing.to_payload())

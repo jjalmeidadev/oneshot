@@ -82,3 +82,29 @@ def test_invalid_text_is_rejected(message, provider):
     assert result.status_code == 422
     assert result.json()['error']['code'] == 'INVALID_INPUT'
     assert not provider
+
+
+def test_classifier_unavailable_is_controlled(monkeypatch):
+    def fail(text): raise RuntimeError('private-model-path')
+    monkeypatch.setattr('app.nlp.inference.classify', fail)
+    with TestClient(app) as client:
+        result = client.post('/api/chat', json={'message':'prazo', 'use_intent_classifier':True})
+    assert result.status_code == 503
+    assert 'private-model-path' not in result.text
+
+
+def test_optional_warmup_runs_before_health(monkeypatch):
+    calls = []
+    monkeypatch.setenv('PLN_WARMUP', '1')
+    monkeypatch.setattr('app.main.warmup_classifier', lambda: calls.append('loaded'))
+    with TestClient(app) as client:
+        assert calls == ['loaded']
+        assert client.get('/health').json() == {'status':'ok'}
+
+
+def test_invalid_audio_parameters_are_not_reported_as_missing_audio():
+    with TestClient(app) as client:
+        result = client.post('/api/audio', files={'audio':('teste.wav', _build_wav(), 'audio/wav')},
+            headers=AUTH_HEADER, data={'use_intent_classifier':'invalid'})
+    assert result.status_code == 400
+    assert result.json()['error']['code'] == 'INVALID_INPUT'

@@ -3,6 +3,16 @@
 from app.gemini.client import GeminiConfigurationError, generate_chat_response
 from app.gemini.schemas import GeminiChatRequest, GeminiChatResponse, GeminiUsage
 from app.audio.schemas import AudioIntent
+from threading import Lock
+
+_classifier_lock = Lock()
+
+
+def warmup_classifier() -> None:
+    """Prepara o modelo uma vez antes de atender usuários quando habilitado."""
+    from app.nlp.inference import get_classifier
+    with _classifier_lock:
+        get_classifier().warmup()
 
 
 def process_message(request: GeminiChatRequest) -> GeminiChatResponse:
@@ -10,7 +20,8 @@ def process_message(request: GeminiChatRequest) -> GeminiChatResponse:
     if request.use_intent_classifier:
         try:
             from app.nlp.inference import classify
-            result = classify(request.message)
+            with _classifier_lock:
+                result = classify(request.message)
         except Exception as error:
             raise GeminiConfigurationError("Classificador indisponível.") from error
         intent = AudioIntent(
