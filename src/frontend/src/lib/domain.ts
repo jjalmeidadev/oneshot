@@ -233,11 +233,13 @@ export function toIntentResult(intent: AudioIntent, flow = ''): IntentResult {
     macroConfidence: intent.confidence_macro,
     specific,
     specificConfidence: intent.confidence_specific,
-    handler: intent.handler || (specific
-      ? `handler:${specific}`
-      : routed
-        ? `fluxo genérico de ${intent.macro}`
-        : 'limitacao'),
+    handler:
+      intent.handler ||
+      (specific
+        ? `handler:${specific}`
+        : routed
+          ? `fluxo genérico de ${intent.macro}`
+          : 'limitacao'),
     flow: intent.flow ?? flow,
     alternatives: intent.alternatives ?? [],
   };

@@ -137,7 +137,10 @@ export function ResponseDetails({ message }: { message: ChatMessage | null }) {
                 />
               )}
               {metrics.sttMs !== undefined && (
-                <MetricRow label="Transcrição STT" value={formatMilliseconds(metrics.sttMs)} />
+                <MetricRow
+                  label="Transcrição STT"
+                  value={formatMilliseconds(metrics.sttMs)}
+                />
               )}
               {metrics.nlpMs !== undefined && (
                 <MetricRow label="PLN" value={formatMilliseconds(metrics.nlpMs)} />
