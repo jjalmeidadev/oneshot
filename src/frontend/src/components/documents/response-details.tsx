@@ -1,4 +1,4 @@
-import { Activity, Brain, Coins, Database } from 'lucide-react';
+import { Activity, Brain, Coins, Database, Tags } from 'lucide-react';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { Meter } from '@/components/ui/meter';
@@ -32,7 +32,7 @@ export function ResponseDetails({ message }: { message: ChatMessage | null }) {
     );
   }
 
-  const { metrics, intent } = message;
+  const { metrics, intent, entities } = message;
 
   return (
     <div className="space-y-4 px-3 py-3">
@@ -89,6 +89,30 @@ export function ResponseDetails({ message }: { message: ChatMessage | null }) {
         </section>
       )}
 
+      {entities && entities.length > 0 && (
+        <section>
+          <SectionTitle icon={Tags}>Entidades extraídas</SectionTitle>
+          <div className="rounded-lg border border-border bg-surface p-2.5">
+            <ul className="space-y-1.5">
+              {entities.map((entity) => (
+                <li
+                  key={`${entity.type}:${entity.start}:${entity.end}`}
+                  className="flex items-start justify-between gap-2 text-2xs"
+                >
+                  <span className="min-w-0">
+                    <span className="font-medium text-fg">{entity.value}</span>
+                    <span className="pl-1 text-fg-subtle">({entity.text})</span>
+                  </span>
+                  <span className="shrink-0 rounded-full bg-muted px-1.5 py-0.5 font-mono text-[10px] leading-none text-fg-muted">
+                    {entity.ambiguous ? `${entity.type}*` : entity.type}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
       {metrics ? (
         <>
           <section>
@@ -106,6 +130,30 @@ export function ResponseDetails({ message }: { message: ChatMessage | null }) {
                 label="Total, medido no navegador"
                 value={formatMilliseconds(metrics.roundTripMs)}
               />
+              {metrics.validationMs !== undefined && (
+                <MetricRow
+                  label="Validação do áudio"
+                  value={formatMilliseconds(metrics.validationMs)}
+                />
+              )}
+              {metrics.sttMs !== undefined && (
+                <MetricRow label="Transcrição STT" value={formatMilliseconds(metrics.sttMs)} />
+              )}
+              {metrics.nlpMs !== undefined && (
+                <MetricRow label="PLN" value={formatMilliseconds(metrics.nlpMs)} />
+              )}
+              {metrics.routeMs !== undefined && (
+                <MetricRow
+                  label="Roteamento"
+                  value={formatMilliseconds(metrics.routeMs)}
+                />
+              )}
+              {metrics.backendTotalMs !== undefined && (
+                <MetricRow
+                  label="Total no backend"
+                  value={formatMilliseconds(metrics.backendTotalMs)}
+                />
+              )}
               <div className="pt-2">
                 <Meter
                   value={metrics.roundTripMs / RESPONSE_BUDGET_MS}

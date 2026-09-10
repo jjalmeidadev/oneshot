@@ -21,8 +21,8 @@ import { cn } from '@/lib/utils';
  * Desligado, a pergunta vai direto para `POST /api/chat`, que so faz a
  * recuperacao no RAG e chama o Gemini.
  *
- * O estado ainda nao viaja na requisicao: `GeminiChatRequest` nao tem campo
- * para ele. Ver README, "Ponto de integracao 2".
+ * O estado viaja como `use_intent_classifier` nas rotas de texto e audio.
+ * Desligar o controle e um opt-out explicito do pipeline de PLN.
  */
 export function IntentToggle({
   enabled,

@@ -14,6 +14,7 @@ import {
   uploadAudio,
   toDisplayMessage,
   CHAT_MESSAGE_MAX_LENGTH,
+  type AudioPipelineMetrics,
 } from '@/lib/api';
 import { toAssistantMessage } from '@/lib/domain';
 type ChatStatus = 'idle' | 'sending' | 'error';
@@ -293,6 +294,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
       try {
         let response;
         let transcription;
+        let pipelineMetrics: AudioPipelineMetrics | undefined;
         const text = typeof input === 'string' ? input.trim() : '';
         if (typeof input === 'string') {
           dispatch({
@@ -327,6 +329,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
             throw new Error('Incomplete pipeline');
           response = result.chat;
           transcription = result.transcription;
+          pipelineMetrics = result.pipeline_metrics;
         }
         if (controller.signal.aborted || pending.current !== controller) return false;
         if (transcription)
@@ -352,6 +355,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
           message: toAssistantMessage(response, {
             roundTripMs: performance.now() - started,
             intentLayerEnabled: state.intentLayerEnabled,
+            pipelineMetrics,
           }),
         });
         dispatch({ type: 'set-status', status: 'idle' });

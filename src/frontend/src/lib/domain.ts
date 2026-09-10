@@ -14,9 +14,11 @@ import { INTENT_MACRO_THRESHOLD, INTENT_SPECIFIC_THRESHOLD } from './api/constan
 import {
   UNDEFINED_MACRO,
   type AudioIntent,
+  type ChatPipelineMetrics,
   type ChatResponse,
   type ChatSource,
   type MacroIntent,
+  type PipelineEntity,
 } from './api/schemas';
 
 /* -------------------------------------------------------------------------
@@ -61,6 +63,16 @@ export type IntentResult = {
   alternatives: IntentAlternative[];
 };
 
+export type ExtractedEntity = {
+  type: string;
+  value: string;
+  text: string;
+  start: number;
+  end: number;
+  types: string[];
+  ambiguous: boolean;
+};
+
 /** A macrointencao passou do limiar e a solicitacao segue no pipeline. */
 export function isRouted(intent: IntentResult): boolean {
   return intent.macro !== UNDEFINED_MACRO;
@@ -97,10 +109,26 @@ export type ResponseMetrics = {
   retrievalMs: number;
   /** Tempo total medido pelo navegador, incluindo rede. */
   roundTripMs: number;
+  /** Tempo do nucleo de PLN medido pelo backend. */
+  nlpMs?: number;
+  /** Tempo de roteamento total medido em `process_message`. */
+  routeMs?: number;
+  /** Tempo de validacao local do audio, quando a entrada veio por voz. */
+  validationMs?: number;
+  /** Tempo de transcricao STT, quando a entrada veio por voz. */
+  sttMs?: number;
+  /** Tempo total do pipeline de audio no backend. */
+  backendTotalMs?: number;
   inputTokens: number;
   outputTokens: number;
   thoughtTokens: number;
   totalTokens: number;
+};
+
+type PipelineMetricsEnvelope = ChatPipelineMetrics & {
+  validation_ms?: number;
+  stt_ms?: number;
+  total_ms?: number;
 };
 
 /* -------------------------------------------------------------------------
@@ -130,6 +158,7 @@ export type ChatMessage = {
   interactionId?: string | null;
   sources?: RetrievedDocument[];
   intent?: IntentResult;
+  entities?: ExtractedEntity[];
   metrics?: ResponseMetrics;
   /** Preenchido quando a mensagem veio de audio. */
   transcription?: TranscriptionInfo;
@@ -178,6 +207,18 @@ export function toRetrievedDocument(
   };
 }
 
+export function toExtractedEntity(entity: PipelineEntity): ExtractedEntity {
+  return {
+    type: entity.type,
+    value: entity.value,
+    text: entity.text,
+    start: entity.start,
+    end: entity.end,
+    types: entity.types,
+    ambiguous: entity.ambiguous,
+  };
+}
+
 export function toIntentResult(intent: AudioIntent, flow = ''): IntentResult {
   const routed = intent.confidence_macro >= INTENT_MACRO_THRESHOLD;
   const specific =
@@ -192,21 +233,27 @@ export function toIntentResult(intent: AudioIntent, flow = ''): IntentResult {
     macroConfidence: intent.confidence_macro,
     specific,
     specificConfidence: intent.confidence_specific,
-    handler: specific
+    handler: intent.handler || (specific
       ? `handler:${specific}`
       : routed
         ? `fluxo genérico de ${intent.macro}`
-        : 'limitacao',
-    flow,
-    alternatives: [],
+        : 'limitacao'),
+    flow: intent.flow ?? flow,
+    alternatives: intent.alternatives ?? [],
   };
 }
 
 /** Monta a mensagem do assistente a partir da resposta de `POST /api/chat`. */
 export function toAssistantMessage(
   response: ChatResponse,
-  options: { roundTripMs: number; intentLayerEnabled: boolean },
+  options: {
+    roundTripMs: number;
+    intentLayerEnabled: boolean;
+    pipelineMetrics?: PipelineMetricsEnvelope;
+  },
 ): ChatMessage {
+  const pipelineMetrics: PipelineMetricsEnvelope | undefined =
+    options.pipelineMetrics ?? response.pipeline_metrics;
   return {
     id: crypto.randomUUID(),
     role: 'assistant',
@@ -217,11 +264,17 @@ export function toAssistantMessage(
     interactionId: response.interaction_id,
     sources: response.sources.map(toRetrievedDocument),
     intent: response.intent ? toIntentResult(response.intent) : undefined,
+    entities: (response.entities ?? []).map(toExtractedEntity),
     metrics: {
       model: response.model,
       latencyMs: response.latency_ms,
       retrievalMs: response.retrieval_ms,
       roundTripMs: options.roundTripMs,
+      nlpMs: pipelineMetrics?.nlp_ms,
+      routeMs: pipelineMetrics?.route_ms,
+      validationMs: pipelineMetrics?.validation_ms,
+      sttMs: pipelineMetrics?.stt_ms,
+      backendTotalMs: pipelineMetrics?.total_ms,
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,
       thoughtTokens: response.usage.thought_tokens,
