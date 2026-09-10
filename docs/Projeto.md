@@ -237,7 +237,7 @@
     - [9.3.2 Resultados](#932-resultados)
   - [9.4 Testes de Integração](#94-testes-de-integração)
     - [9.4.1 Planejamento](#941-planejamento)
-    - [9.4.2 Resultados](#942-Resultados)
+    - [9.4.2 Resultados](#942-resultados)
 - [10. Procedimentos de Implantação](#10-procedimentos-de-implantação)
   - [10.1 Implantação e Configuração do Banco de Dados](#101-implantação-e-configuração-do-banco-de-dados)
   - [10.2 Implantação do Protótipo para uso por equipe de desenvolvimento](#102-implantação-do-protótipo-para-uso-por-equipe-de-desenvolvimento)
@@ -3440,7 +3440,7 @@ app/tests/test_sharepoint_rag.py::test_builds_prompt_with_source_labels_and_disc
 158 passed, 11 warnings in 15.69s
 ```
 
-**Verificação atual após a integração da interface.** A execução local em 10 de setembro de 2026 aprovou 171 testes do back-end, 46 testes unitários do front-end e 8 testes de navegador — quatro cenários em desktop e os mesmos quatro em celular. Também passaram lint sem avisos, verificação de formatação e build de produção. A cobertura unitária do front-end foi de 87,10% das linhas, 84,33% das instruções, 73,12% das ramificações e 83,83% das funções. Os comandos, a matriz por comportamento e os limites da evidência estão em `src/frontend/TESTES.md`.
+**Verificação atual após a integração da interface.** A execução local em 10 de setembro de 2026 aprovou 171 testes do back-end, 46 testes unitários do front-end e 8 testes de navegador — quatro cenários em desktop e os mesmos quatro em celular. Também passaram lint sem avisos, verificação de formatação e build de produção. O merge da integração ponta a ponta acrescentou quatro testes de rota depois dessa execução, levando o back-end a 175 testes, conforme a Seção 8.11.7. A cobertura unitária do front-end foi de 87,10% das linhas, 84,33% das instruções, 73,12% das ramificações e 83,83% das funções. Os comandos, a matriz por comportamento e os limites da evidência estão em `src/frontend/TESTES.md`.
 
 **Cobertura ainda não atingida.** O teste de navegador atravessa front-end, FastAPI, validação WAV e pipeline, mas substitui Azure, Gemini e classificação nas fronteiras externas. Continuam sem evidência local as chamadas reais aos provedores, autenticação Entra ID, SharePoint corporativo, persistência PostgreSQL, latência de produção e validação manual completa com tecnologia assistiva. Os resultados determinísticos não devem ser usados como aprovação desses itens.
 
@@ -4719,18 +4719,20 @@ A diferença entre as duas seções é a diferença entre o notebook e o serviç
 
 ### 8.11.1 Estrutura do módulo e responsabilidades
 
-O núcleo é composto por quatro módulos, encadeados na ordem em que a solicitação atravessa o pipeline:
+O núcleo é composto por quatro módulos de análise, mais dois módulos de fronteira acrescentados quando o pipeline passou a ser alcançado por HTTP:
 
 ```text
-solicitação em texto
-      │
-      ├─▶ preprocessing.tokenize ......... normaliza, tokeniza e reduz a radical
-      ├─▶ entities.extract_entities ...... projeto, período, indicador, documento…
-      └─▶ inference.classify ............. macrointenção + intenção + confianças
-                     │
-                     ├─▶ handler específico            (intenção acima do limiar)
-                     ├─▶ fluxo genérico da macro       (intenção abaixo do limiar)
-                     └─▶ resposta de limitação (RF08)  (macro abaixo do limiar)
+POST /api/chat  ──┐
+                  ├─▶ pipeline.process_message ── orquestra e decide a rota
+POST /api/audio ──┘             │
+   (texto vindo do STT)         ├─▶ inference.classify ...... macrointenção + intenção
+                                │      └─ preprocessing ..... tokeniza e reduz a radical
+                                ├─▶ entities.extract_entities  projeto, período, indicador…
+                                │
+                                ├─▶ handler específico         (intenção acima do limiar)
+                                ├─▶ fluxo genérico da macro    (intenção abaixo do limiar)
+                                └─▶ resposta controlada        (fora de escopo, ou macro
+                                                                abaixo do limiar)
 ```
 
 | Arquivo | Linhas | Responsabilidade |
@@ -4739,11 +4741,17 @@ solicitação em texto
 | `app/nlp/entities.py` | 207 | Identificação dos elementos do domínio no texto cru, por léxico e por padrão |
 | `app/nlp/classifier.py` | 171 | Definição do classificador hierárquico e carregamento validado do artefato treinado |
 | `app/nlp/inference.py` | 339 | Vetorização de inferência, aplicação dos limiares e decisão de roteamento |
+| `app/nlp/schemas.py` | 38 | Contratos Pydantic da saída pública: intenção, entidade e métricas de etapa |
+| `app/pipeline.py` | 102 | Orquestração: classifica, extrai entidades e decide entre resposta controlada e geração |
 | `app/nlp/data/lexico_dominio.json` | — | Vocabulário do portfólio: 108 termos em 12 tipos, substituível quando houver base real |
 
 **A divisão de responsabilidade entre os dois analisadores é deliberada.** O classificador decide **o que** foi pedido; a extração de entidades decide **sobre o que**. "Qual o status da Linha 2-Verde?" e "Qual o status da Linha 15-Prata?" têm a mesma intenção e entidades diferentes; "Qual o status da Linha 2-Verde?" e "Qual o orçamento da Linha 2-Verde?" têm a mesma entidade e intenções diferentes. Separar as duas evita que o catálogo de intenções cresça por combinação.
 
 **Os artefatos treinados não são duplicados no backend.** Eles continuam em `src/notebooks/artefatos/`, e `app/nlp/classifier.py` os referencia por caminho relativo. O modelo tem 13,2 MB e o Word2Vec 922 KB; manter uma segunda cópia dentro do pacote criaria a possibilidade de o serviço rodar com um artefato diferente do que o notebook mediu.
+
+**A orquestração fica fora do núcleo, e isso é proposital.** `app/pipeline.py` é o único módulo que conhece ao mesmo tempo o classificador e o provedor gerador; `app/main.py` não reproduz regra nenhuma de PLN, apenas converte as falhas previstas em respostas HTTP. Os módulos de `app/nlp/` continuam sem saber que existe uma API, o que preserva a separação entre interface, lógica e dados exigida pelo RNF10 e mantém o núcleo exercitável fora do serviço, como na Seção 8.11.6.
+
+**O carregamento e a classificação são serializados por um lock de processo.** `app/pipeline.py` mantém um `Lock` global que protege tanto o aquecimento quanto cada chamada a `classify`. Ele evita que duas requisições simultâneas disparem carregamentos concorrentes dos três artefatos na primeira chamada. O efeito colateral é que as classificações passam a ser sequenciais mesmo com o servidor atendendo em paralelo; a consequência para a vazão está medida na Seção 8.11.8.
 
 ### 8.11.2 Bibliotecas, frameworks e dependências de execução
 
@@ -4869,16 +4877,16 @@ Duas propriedades derivadas resumem a decisão para quem consome: `roteada` indi
 | Macro ≥ 0,550 e confiança da intenção < 0,700 | Fluxo genérico da macrointenção | `fluxo genérico de <macro>` |
 | Macro ≥ 0,550 e intenção ≥ 0,700 | Handler específico do catálogo | `handler:<intenção>` |
 
-A macrointenção `FORA_DE_ESCOPO` nunca aciona handler específico, ainda que a confiança seja alta: o catálogo a associa à rota "Resposta padrão de limitação (RF08)", e o campo `fluxo` da saída carrega essa rota. O campo `resposta_sugerida`, porém, só é preenchido quando a **macrointenção** fica abaixo do limiar — isto é, quando o pipeline não sabe sequer a categoria do pedido. Quem consome a classificação precisa tratar os dois casos: o texto pronto de limitação e a rota de limitação anunciada em `fluxo`.
+A macrointenção `FORA_DE_ESCOPO` nunca aciona handler específico, ainda que a confiança seja alta: o catálogo a associa à rota "Resposta padrão de limitação (RF08)", e o campo `fluxo` da saída carrega essa rota. O campo `resposta_sugerida`, porém, só é preenchido quando a **macrointenção** fica abaixo do limiar — isto é, quando o pipeline não sabe sequer a categoria do pedido. Quem consome a classificação precisa tratar os dois casos: o texto pronto de limitação e a rota de limitação anunciada em `fluxo`. É o que `app/pipeline.py` faz: quando a solicitação não é roteada **ou** a macrointenção é `FORA_DE_ESCOPO`, ele devolve `resposta_sugerida` se houver e, quando não houver, um texto de limitação próprio — sem chamar o provedor gerador em nenhum dos dois ramos.
 
 **A saída nunca anuncia uma macrointenção e um handler de outra.** O limiar de 0,700 já garante isso por construção, porque a probabilidade da intenção é conjunta e acima de 0,5 as duas coincidem; mesmo assim a verificação é explícita no código, para que recalibrar o limiar para baixo não quebre o contrato em silêncio. Um teste percorre todo o conjunto de teste confirmando a coerência.
 
-**O carregamento é preguiçoso e a API deve forçá-lo na subida.** Adiar a carga serve aos testes, mas em produção faria a primeira pessoa a usar o agente pagar o carregamento inteiro dentro da própria requisição.
+**O carregamento é preguiçoso, e a API força a carga na subida quando configurada para isso.** Adiar a carga serve aos testes, mas em produção faria a primeira pessoa a usar o agente pagar o carregamento inteiro dentro da própria requisição. O `lifespan` do FastAPI lê a variável `PLN_WARMUP`: com `1`, o classificador é carregado antes de o serviço aceitar requisições; com `0`, que é o padrão, a carga acontece na primeira classificação. A Seção 8.5 descreve a configuração pelo lado da aplicação.
 
 ```python
 from app.nlp.inference import get_classifier, classify
 
-get_classifier().warmup()          # chamada na subida da aplicação
+get_classifier().warmup()          # o que o lifespan faz com PLN_WARMUP=1
 
 resultado = classify("qual é o status da extensão da Linha 5-Lilás?")
 resultado.macrointencao            # 'CONSULTA'
@@ -4955,7 +4963,7 @@ O terceiro delimita o alcance do mecanismo de contenção: **os dois limiares n�
 
 ### 8.11.7 Testes automatizados
 
-A suíte do núcleo de PLN tem **87 testes**, dos 158 do backend. A suíte inteira roda em 15,7 segundos, dos quais 13,4 são dos testes de inferência: eles carregam os três artefatos reais, inclusive o encoder, e classificam o conjunto de teste completo. Os outros 69 testes de PLN rodam em 1,7 segundo.
+A suíte do núcleo de PLN tem **87 testes**, e os 15 testes da rota HTTP acrescentados com a integração levam a **102 testes que exercitam o classificador**, dos 175 do backend. A suíte inteira roda em 15,8 segundos, dos quais 13,4 são dos testes de inferência: eles carregam os três artefatos reais, inclusive o encoder, e classificam o conjunto de teste completo. Os outros 69 testes de PLN rodam em 1,7 segundo.
 
 | Arquivo | Testes | O que verifica |
 | --- | ---: | --- |
@@ -4963,6 +4971,7 @@ A suíte do núcleo de PLN tem **87 testes**, dos 158 do backend. A suíte intei
 | `test_nlp_entities.py` | 30 | Casamento por léxico e por padrão, insensibilidade a caixa e acento, resolução de sobreposição pelo termo mais longo, tipos ambíguos e posições no texto original |
 | `test_nlp_classifier.py` | 19 | Carregamento e validação do artefato, recusa de artefato incompleto, comportamento do classificador hierárquico e a exigência de que ele carregue **fora** do notebook |
 | `test_nlp_inference.py` | 18 | Classificação ponta a ponta, os três caminhos de roteamento, a coerência entre macrointenção e handler, a fidelidade às métricas do benchmark e a ausência de `torch` |
+| `test_pipeline_api.py` | 15 | Contrato real de `POST /api/chat` e `POST /api/audio` com o classificador substituído por um duplo: intenção e entidades no corpo da resposta, resposta controlada sem chamar o provedor gerador, opt-out por `use_intent_classifier` e tradução das falhas em código HTTP |
 
 **Quatro testes fazem a documentação e o código responderem um pelo outro.** Eles recalculam sobre o conjunto de teste os números registrados na Seção 8.10.3 e reprovam se houver divergência maior que 0,0002:
 
@@ -4985,10 +4994,12 @@ cd src/backend
 ```
 
 ```text
-158 passed, 11 warnings in 15.69s
+175 passed, 11 warnings in 15.76s
 ```
 
 Quando `requirements-pln.txt` não está instalado, os 18 testes de inferência são pulados com a razão declarada (`instale requirements-pln.txt`) e os outros 69 continuam rodando: o pré-processamento, a extração de entidades e o carregamento do artefato não dependem do encoder nem do Word2Vec.
+
+**Os testes de rota não carregam o modelo.** `test_pipeline_api.py` substitui tanto o classificador quanto o provedor gerador por duplos, de modo que o que fica sob teste é o contrato da API — os campos devolvidos, o código HTTP de cada falha prevista e a decisão de não chamar o gerador em solicitação fora de escopo. A fidelidade do modelo continua sendo responsabilidade dos testes de inferência, que carregam os artefatos reais.
 
 ### 8.11.8 Desempenho medido
 
@@ -5006,9 +5017,25 @@ As duas últimas linhas são execução única, e não mediana de 200. O pior ca
 
 O tempo é dominado pelo encoder BERT: o pré-processamento e a extração de entidades juntos custam cerca de 1% da classificação. O ganho da vetorização em lote — de 4,34 ms para 0,76 ms por texto — indica que a avaliação do conjunto de teste inteiro deve usar `vectorize` com a lista completa, e não um laço de `classify`, como a suíte já faz.
 
-**A folga em relação ao RNF05 é ampla, mas o requisito não é sobre esta etapa.** O RNF05 dá 10 segundos para uma consulta simples ponta a ponta, medidos entre o recebimento pela API e o retorno da resposta estruturada. A classificação consome cerca de 4 ms desse orçamento, contra 6 segundos reservados à transcrição na Seção 8.7 e o tempo ainda não medido da recuperação e da geração da resposta. A conclusão que a medição autoriza é estreita: o classificador **não** é o gargalo do pipeline. A verificação do RNF05 depende do fluxo completo e é entrega da Seção 9.2.
+**A folga em relação ao RNF05 é ampla, mas o requisito não é sobre esta etapa.** O RNF05 dá 10 segundos para uma consulta simples ponta a ponta, medidos entre o recebimento pela API e o retorno da resposta estruturada. A classificação consome cerca de 4 ms desse orçamento, contra 6 segundos reservados à transcrição na Seção 8.7 e o tempo da recuperação e da geração da resposta. A conclusão que a medição autoriza é estreita: o classificador **não** é o gargalo do pipeline.
 
-A carga de 0,8 segundo acontece uma vez por processo e deve ser paga na subida da aplicação, por `warmup()`, e não dentro da primeira requisição.
+Com a integração da Seção 8.11.9, a medição ponta a ponta deixou de depender de instrumentação nova: as duas rotas devolvem `nlp_ms` e `route_ms`, e a rota de áudio acrescenta `validation_ms`, `stt_ms` e `total_ms`. A verificação formal do RNF05 continua sendo entrega da Seção 9.2, agora apoiada nesses campos.
+
+A carga de 0,8 segundo acontece uma vez por processo. Com `PLN_WARMUP=1` ela é paga na subida da aplicação, e não dentro da primeira requisição.
+
+**O lock de processo elimina o ganho de concorrência.** `app/pipeline.py` protege cada chamada a `classify` com um `Lock` global, o que impede carregamentos concorrentes dos artefatos mas também serializa as classificações. Medindo 16 solicitações no mesmo ambiente da tabela acima, com os artefatos já carregados:
+
+| Cenário | Total | Por solicitação |
+| --- | ---: | ---: |
+| Sequencial, uma thread | 70,7 ms | 4,42 ms |
+| 4 threads, sem o lock | 34,8 ms | 2,17 ms |
+| 4 threads, com o lock atual | 74,8 ms | 4,68 ms |
+| 8 threads, sem o lock | 30,7 ms | 1,92 ms |
+| 8 threads, com o lock atual | 83,4 ms | 5,21 ms |
+
+Sem o lock, quatro threads dobram a vazão e oito chegam a 2,3 vezes — sinal de que a parte pesada da inferência roda fora do GIL, no ONNX Runtime e nas rotinas de álgebra linear. Com o lock, a vazão não sobe em nenhuma das duas configurações e fica marginalmente pior que a execução sequencial, pelo custo de contenção.
+
+O lock protege um cenário real: a carga preguiçosa dos três artefatos não é reentrante, e duas requisições simultâneas na primeira chamada disparariam dois carregamentos. Mas ele é mais largo do que o necessário — bastaria proteger o carregamento, e não cada inferência. Com `PLN_WARMUP=1` os artefatos já estão carregados quando a primeira requisição chega, de modo que a serialização passa a custar vazão sem proteger nada. Estreitar o lock é otimização candidata para a Sprint 4, e não altera nenhum resultado documentado nas Seções 8.10 e 8.11.
 
 ### 8.11.9 Situação da integração
 
