@@ -9,7 +9,7 @@ function AnimatedNavLink({ label, href, onSelect }: AnimatedNavLinkProps) {
         <a
             href={href}
             onClick={onSelect}
-            className="group relative cursor-pointer text-sm font-medium text-white/60 transition-colors hover:text-white"
+            className="group relative cursor-pointer text-xs font-medium text-white/60 transition-colors hover:text-white md:text-sm"
         >
             {label}
 

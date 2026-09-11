@@ -19,11 +19,15 @@ import ChatFragments from './components/ui/chat-fragments'
 import { useChatSectionsTransition } from './lib/chatTransition'
 import { useScrollTriggerRefresh } from './lib/useScrollTriggerRefresh'
 import { useScrollSpeedLimit } from './lib/useScrollSpeedLimit'
+import { useCoarsePointer } from './lib/useCoarsePointer'
 
 function App() {
   useChatSectionsTransition()
   useScrollTriggerRefresh()
   useScrollSpeedLimit('[data-choreography-zone]')
+  // As camadas decorativas são calibradas para tela larga; no celular elas
+  // saem de proporção. O conteúdo não depende de nenhuma delas.
+  const enfeites = !useCoarsePointer()
 
   return (
     // O provedor entra na sala ao vivo uma vez e empresta o id da sessão
@@ -50,10 +54,10 @@ function App() {
           seções de conversa estão em tela, com borda limpa (sem gradiente). */}
       <div data-choreography-zone className="relative isolate bg-neutral-800">
         {/* Silhuetas dos documentos do portfólio, ao fundo das conversas. */}
-        <GhostDocuments />
+        {enfeites && <GhostDocuments />}
         {/* Os documentos giram e atravessam a tela na virada do chat 1 para
             o chat 2, indo parar atrás da janela que chega pela direita. */}
-        <DocumentCarousel />
+        {enfeites && <DocumentCarousel />}
         <ChatSection />
         <ChatSwapSection />
         <TrySection />
@@ -65,15 +69,15 @@ function App() {
       {/* Fecha o arco dos documentos: eles saem do chat e voam para os
           cards das integrações. Montado antes da seção para passar por trás
           dos cards, não por cima. */}
-      <DocumentDispatch />
+      {enfeites && <DocumentDispatch />}
       {/* Logo depois dos documentos: a própria janela se parte e os cacos
           viram os blocos das integrações. */}
-      <ChatFragments />
+      {enfeites && <ChatFragments />}
 
       <IntegrationSection />
       <TeamSection />
       {/* Os avatares do time viajam até virar as bolinhas do rodapé. */}
-      <AvatarHandoff />
+      {enfeites && <AvatarHandoff />}
       <FooterSection />
     </div>
     </LiveSessionProvider>

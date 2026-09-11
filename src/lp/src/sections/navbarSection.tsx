@@ -97,7 +97,7 @@ function NavbarSection() {
     return (
         <div
             className={cn(
-                "fixed inset-x-0 top-4 z-50 grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 md:px-8",
+                "fixed inset-x-0 top-4 z-50 grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 md:gap-3 md:px-8",
                 hidden && "pointer-events-none  opacity-0",
             )}
             // Fade puro: opacidade e o mínimo de deslocamento correm juntos e
@@ -117,11 +117,11 @@ function NavbarSection() {
                 <img
                     src="/inteli-logo.png"
                     alt="Inteli"
-                    className="h-7 w-auto brightness-0 invert"
+                    className="h-6 w-auto brightness-0 invert md:h-7"
                 />
             </a>
 
-            <nav className={cn(shell, "justify-self-center gap-8 px-8 py-4")}>
+            <nav className={cn(shell, "justify-self-center gap-3 px-3 py-2 md:gap-8 md:px-8 md:py-4")}>
                 {LINKS.map((link) => (
                     <AnimatedNavLink
                         key={link.label}
@@ -136,7 +136,9 @@ function NavbarSection() {
                 href="#topo"
                 onClick={goTo(null)}
                 data-brand-wordmark
-                className="justify-self-end text-2xl leading-7 font-medium tracking-tight text-white transition-opacity duration-300 hover:opacity-70"
+                // Numa tela estreita as três colunas não cabem: a marca sai e sobram o
+                // logo do Inteli e os links, que é o que serve para navegar.
+                className="hidden justify-self-end text-2xl leading-7 font-medium tracking-tight text-white transition-opacity duration-300 hover:opacity-70 md:block"
             >
                 OneShot
             </a>
