@@ -342,6 +342,33 @@ A inferencia reproduz os numeros da Secao 8.10.3 sobre o conjunto de teste —
 acuracia 0,7383 e F1-macro 0,7401 na intencao especifica — e os testes falham se
 divergirem.
 
+### Avaliacao automatizada do RNF06
+
+A medicao versionada esta em
+`src/notebooks/artefatos/avaliacao_classificador_intencoes.json` e e gerada pelo
+teste `app/tests/test_nlp_inference.py`, usando o classificador real de
+`src/backend/app/nlp/`. O protocolo filtra exclusivamente as linhas
+`split == teste` de `src/notebooks/artefatos/dataset_intencoes.csv`, sem
+retreinar o modelo, totalizando 1.135 solicitacoes sinteticas.
+
+Resultado atual para a intencao especifica: acuracia 0,7383 e F1 macro 0,7401. O JSON tambem publica precisao, recall e F1 por
+classe, matriz de confusao e classes com pior desempenho.
+
+As cinco classes mais fracas nesta medicao sao:
+
+| Classe | Precisao | Recall | F1 | Suporte |
+| --- | ---: | ---: | ---: | ---: |
+| `analise_tendencia_desempenho` | 0,3846 | 0,2439 | 0,2985 | 41 |
+| `transacao_exportar_dados` | 0,4815 | 0,3514 | 0,4062 | 37 |
+| `consulta_documentos_fonte` | 0,9231 | 0,3000 | 0,4528 | 40 |
+| `consulta_pendencias_projeto` | 0,8125 | 0,3714 | 0,5098 | 35 |
+| `consulta_cronograma_prazo` | 0,4561 | 0,6341 | 0,5306 | 41 |
+
+Limitacoes registradas: o conjunto ainda e sintetico, sem validacao com
+solicitacoes reais do dominio; a medicao considera a intencao especifica prevista
+pelo modelo antes dos limiares de roteamento; e classes com baixo suporte ou
+fronteiras proximas entre consulta e transacao concentram parte dos erros.
+
 ## Testes
 
 ```powershell

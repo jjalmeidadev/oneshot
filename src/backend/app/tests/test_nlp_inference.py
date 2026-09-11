@@ -5,6 +5,7 @@ primeira execução. São marcados como lentos e compartilham uma única instân
 """
 
 import csv
+import json
 import warnings
 from pathlib import Path
 
@@ -26,6 +27,8 @@ DATASET = (
     / "artefatos"
     / "dataset_intencoes.csv"
 )
+REPORT_PATH = DATASET.with_name("avaliacao_classificador_intencoes.json")
+RNF06_F1_MACRO_TARGET = 0.80
 
 # A representacao vencedora combina Word2Vec e BERT, que vivem fora do joblib.
 # Sem as dependencias de requirements-pln.txt nao ha o que exercitar.
@@ -47,6 +50,89 @@ def classificador() -> ClassificadorDeIntencoes:
 def conjunto_de_teste() -> list[dict]:
     with DATASET.open(encoding="utf-8") as arquivo:
         return [linha for linha in csv.DictReader(arquivo) if linha["split"] == "teste"]
+
+
+def _round4(valor: float) -> float:
+    return round(float(valor), 4)
+
+
+def _write_json_if_changed(path: Path, payload: dict) -> None:
+    conteudo = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    if not path.exists() or path.read_text(encoding="utf-8") != conteudo:
+        path.write_text(conteudo, encoding="utf-8")
+
+
+def _build_evaluation_report(classificador, conjunto_de_teste, predicoes) -> dict:
+    from sklearn.metrics import confusion_matrix, precision_recall_fscore_support
+
+    esperadas = predicoes["esperadas"]
+    previstas = predicoes["previstas"]
+    classes = classificador.artefato.intencoes
+    precisao, recall, f1, suporte = precision_recall_fscore_support(
+        esperadas,
+        previstas,
+        labels=classes,
+        zero_division=0,
+    )
+
+    metricas_por_classe = {
+        classe: {
+            "precisao": _round4(precisao[indice]),
+            "recall": _round4(recall[indice]),
+            "f1": _round4(f1[indice]),
+            "suporte": int(suporte[indice]),
+        }
+        for indice, classe in enumerate(classes)
+    }
+    piores_classes = sorted(
+        (
+            {"classe": classe, **metricas}
+            for classe, metricas in metricas_por_classe.items()
+        ),
+        key=lambda item: (item["f1"], item["recall"], item["precisao"], item["classe"]),
+    )[:5]
+
+    f1_macro = _round4(predicoes["f1"])
+    meta_atingida = f1_macro >= RNF06_F1_MACRO_TARGET
+    return {
+        "RNF06": {
+            "meta_f1_macro_intencao_especifica": RNF06_F1_MACRO_TARGET,
+            "f1_macro_intencao_especifica": f1_macro,
+            "aderente": meta_atingida,
+            "status": "aderente" if meta_atingida else "nao_aderente",
+            "conclusao": (
+                "RNF06 atendido para a intencao especifica."
+                if meta_atingida
+                else "RNF06 nao atendido: F1 macro da intencao especifica abaixo de 0,80."
+            ),
+        },
+        "protocolo": {
+            "dataset": "src/notebooks/artefatos/dataset_intencoes.csv",
+            "filtro": "split == teste",
+            "tamanho_teste": len(conjunto_de_teste),
+            "classificador": "src/backend/app/nlp/",
+            "sem_retreino": True,
+        },
+        "metricas_globais": {
+            "acuracia_intencao_especifica": _round4(predicoes["acuracia"]),
+            "f1_macro_intencao_especifica": f1_macro,
+        },
+        "metricas_por_classe": metricas_por_classe,
+        "matriz_confusao": {
+            "labels": classes,
+            "valores": confusion_matrix(
+                esperadas,
+                previstas,
+                labels=classes,
+            ).astype(int).tolist(),
+        },
+        "piores_classes": piores_classes,
+        "limitacoes": [
+            "Conjunto sintetico, ainda sem validacao com solicitacoes reais do dominio.",
+            "Medicao considera somente a intencao especifica prevista pelo modelo, antes dos limiares de roteamento.",
+            "Classes com baixo suporte e fronteiras entre consulta e transacao concentram parte dos erros.",
+        ],
+    }
 
 
 class TestClassificacaoDeSolicitacoes:
@@ -151,11 +237,20 @@ def predicoes(classificador, conjunto_de_teste):
     return {
         "acuracia": accuracy_score(esperadas, previstas),
         "f1": f1_score(esperadas, previstas, average="macro", zero_division=0),
+        "esperadas": esperadas,
+        "previstas": previstas,
         "confianca_macro": probabilidades_macro.max(axis=1),
         "confianca_intencao": probabilidades.max(axis=1),
         "acerto": previstas == esperadas,
         "atributos": atributos,
     }
+
+
+@pytest.fixture(scope="module")
+def relatorio_avaliacao(classificador, conjunto_de_teste, predicoes):
+    relatorio = _build_evaluation_report(classificador, conjunto_de_teste, predicoes)
+    _write_json_if_changed(REPORT_PATH, relatorio)
+    return relatorio
 
 
 class TestFidelidadeAoBenchmark:
@@ -168,11 +263,33 @@ class TestFidelidadeAoBenchmark:
 
         assert predicoes["atributos"].shape[1] == esperada
 
+    def test_medicao_usa_somente_split_de_teste(self, conjunto_de_teste) -> None:
+        assert conjunto_de_teste
+        assert {linha["split"] for linha in conjunto_de_teste} == {"teste"}
+
     def test_acuracia_da_intencao_no_teste(self, predicoes) -> None:
         assert predicoes["acuracia"] == pytest.approx(0.7383, abs=0.0002)
 
     def test_f1_macro_da_intencao_no_teste(self, predicoes) -> None:
         assert predicoes["f1"] == pytest.approx(0.7401, abs=0.0002)
+
+    def test_relatorio_rnf06_registra_nao_aderencia(
+        self, relatorio_avaliacao
+    ) -> None:
+        assert relatorio_avaliacao["RNF06"] == {
+            "meta_f1_macro_intencao_especifica": 0.80,
+            "f1_macro_intencao_especifica": 0.7401,
+            "aderente": False,
+            "status": "nao_aderente",
+            "conclusao": (
+                "RNF06 nao atendido: F1 macro da intencao especifica abaixo de 0,80."
+            ),
+        }
+        assert relatorio_avaliacao["protocolo"]["filtro"] == "split == teste"
+        assert relatorio_avaliacao["protocolo"]["tamanho_teste"] == 1135
+        assert len(relatorio_avaliacao["matriz_confusao"]["labels"]) == 31
+        assert len(relatorio_avaliacao["metricas_por_classe"]) == 31
+        assert REPORT_PATH.exists()
 
     def test_efeito_dos_limiares_reproduz_a_documentacao(
         self, classificador, predicoes
