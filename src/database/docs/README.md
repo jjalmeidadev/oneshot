@@ -9,6 +9,7 @@ Os scripts atuais sao:
 - `../sql/01_create_database.sql`: cria o baseline fisico em PostgreSQL 14+, ja alinhado ao inventario de listas do parceiro;
 - `../sql/02_initial_data.sql`: insere uma carga sintetica minima para exercitar subportfolio, projeto, TAP, beneficios, avancos, entregas, riscos e catalogo de intencoes;
 - `../sql/03_rollback_data.sql`: desfaz o baseline em ordem reversa de dependencia, para uso controlado em desenvolvimento/PoC.
+- `../sql/04_rag_synthetic_data.sql`: carrega em `project_artifacts` e `source_extracts` os itens ficticios dos JSONs usados pelo RAG local em `src/backend/app/rag/data/sharepoint`.
 
 ## Banco-alvo
 
@@ -73,6 +74,21 @@ Em um banco PostgreSQL de desenvolvimento:
 ```bash
 psql "$DATABASE_URL" -f src/database/sql/01_create_database.sql
 psql "$DATABASE_URL" -f src/database/sql/02_initial_data.sql
+psql "$DATABASE_URL" -f src/database/sql/04_rag_synthetic_data.sql
+```
+
+A carga `04_rag_synthetic_data.sql` deve ser executada depois da carga inicial,
+pois reutiliza o projeto sintetico `PRJ-0442` quando um item de origem precisa de
+contexto de projeto. Ela e idempotente: `project_artifacts` usa
+`partner_source_id` com `ON CONFLICT`, e `source_extracts` evita duplicacao pelo
+par `artifact_id` + `source_locator`.
+
+Consultas simples de conferencia:
+
+```bash
+psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM public.projects;"
+psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM public.project_artifacts WHERE metadata ->> 'source_file' IN ('base_atendimento.json', 'comunicados_servico.json', 'procedimentos_operacionais.json');"
+psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM public.source_extracts WHERE metadata ->> 'source_file' IN ('base_atendimento.json', 'comunicados_servico.json', 'procedimentos_operacionais.json');"
 ```
 
 Rollback completo da PoC:

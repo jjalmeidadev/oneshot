@@ -114,10 +114,16 @@ def classificacao_fixa(
 @pytest.fixture(autouse=True)
 def reset_concurrency_control(monkeypatch: pytest.MonkeyPatch) -> None:
     from app.gemini.schemas import GeminiChatResponse, GeminiUsage
-    monkeypatch.setattr("app.pipeline.generate_chat_response", lambda request: GeminiChatResponse(
-        text="Resposta fundamentada de teste", model="teste", interaction_id="interaction-teste",
-        latency_ms=1, usage=GeminiUsage(),
-    ))
+    monkeypatch.setattr(
+        "app.pipeline.generate_chat_response",
+        lambda request, intent=None, entities=None: GeminiChatResponse(
+            text="Resposta fundamentada de teste",
+            model="teste",
+            interaction_id="interaction-teste",
+            latency_ms=1,
+            usage=GeminiUsage(),
+        ),
+    )
     monkeypatch.setattr("app.nlp.inference.classify", lambda text: classificacao_fixa())
     security._active_identities.clear()
     monkeypatch.delenv(transcription.AZURE_SPEECH_RESOURCE_ENV, raising=False)
