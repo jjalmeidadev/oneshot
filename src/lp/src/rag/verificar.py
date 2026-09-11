@@ -9,12 +9,37 @@ exatamente o que falta.
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
 
 RAG_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(RAG_DIR))
+
+
+def _carregar_env() -> None:
+    """Lê o `backend/.env`, como o serviço faz ao subir.
+
+    Sem isto o verificador acusava a chave como ausente mesmo com ela
+    configurada — e um verificador que grita sem motivo é pior que nenhum,
+    porque na próxima vez o vermelho de verdade é ignorado.
+    """
+
+    arquivo = RAG_DIR / "backend" / ".env"
+    if not arquivo.exists():
+        return
+    for linha in arquivo.read_text(encoding="utf-8").splitlines():
+        linha = linha.strip()
+        if not linha or linha.startswith("#") or "=" not in linha:
+            continue
+        chave, _, valor = linha.partition("=")
+        # `setdefault`: o que já veio do ambiente tem precedência sobre o
+        # arquivo, que é a mesma ordem que o python-dotenv usa.
+        os.environ.setdefault(chave.strip(), valor.strip().strip('"').strip("'"))
+
+
+_carregar_env()
 
 OK = "  ok  "
 FALHA = " FALHA"
@@ -96,9 +121,14 @@ def main() -> int:
 
     print("\n== Configuração ==")
     r.checar(
-        "a chave do Gemini está no ambiente",
+        "a chave do Gemini está configurada",
         bool(settings.api_key),
-        "o backend publicado precisa de GEMINI_API_KEY nas variáveis do host",
+        "preencha GEMINI_API_KEY em backend/.env (e nas variáveis do host, ao publicar)",
+    )
+    r.checar(
+        "o modelo está ligado ao backend",
+        os.getenv("RAG_MODEL_BACKEND", "").strip().lower() == "local",
+        "defina RAG_MODEL_BACKEND=local em backend/.env, senão o chat responde 503",
     )
 
     print()

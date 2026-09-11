@@ -167,7 +167,16 @@
     - [8.3.2 Sprint 4](#832-sprint-4)
     - [8.3.3 Sprint 5](#833-sprint-5)
   - [8.4 Testes Unitários e de Integração](#84-testes-unitários-e-de-integração)
-  - [8.5 Documentações automáticas](#85-documentações-automáticas)
+  - [8.5 Documentação de front-end e back-end](#85-documentação-de-front-end-e-back-end)
+    - [8.5.1 Escopo e estado da implementação](#851-escopo-e-estado-da-implementação)
+    - [8.5.2 Arquitetura executável](#852-arquitetura-executável)
+    - [8.5.3 Documentação automática da API](#853-documentação-automática-da-api)
+    - [8.5.4 APIs consumidas pelo front-end](#854-apis-consumidas-pelo-front-end)
+    - [8.5.5 Integrações e limites operacionais](#855-integrações-e-limites-operacionais)
+    - [8.5.6 Banco de dados: artefato disponível e integração pendente](#856-banco-de-dados-artefato-disponível-e-integração-pendente)
+    - [8.5.7 Front-end: componentes e comportamento](#857-front-end-componentes-e-comportamento)
+    - [8.5.8 Back-end: ciclo de processamento](#858-back-end-ciclo-de-processamento)
+    - [8.5.9 Execução e verificação reproduzíveis](#859-execução-e-verificação-reproduzíveis)
   - [8.6 Requisitos das APIs de voz (STT/TTS)](#86-requisitos-das-apis-de-voz-stttts)
     - [8.6.1 Objetivo e delimitação](#861-objetivo-e-delimitação)
     - [8.6.2 Entradas, saídas e formatos](#862-entradas-saídas-e-formatos)
@@ -196,16 +205,39 @@
     - [8.10.3 Configuração e resultados atuais](#8103-configuração-e-resultados-atuais)
     - [8.10.4 Bibliotecas, configuração e exemplos de código](#8104-bibliotecas-configuração-e-exemplos-de-código)
     - [8.10.5 Limitações e próximos passos](#8105-limitações-e-próximos-passos)
+    - [8.10.6 Revisão da decisão após a implementação](#8106-revisão-da-decisão-após-a-implementação)
+  - [8.11 Implementação do núcleo de PLN](#811-implementação-do-núcleo-de-pln)
+    - [8.11.1 Estrutura do módulo e responsabilidades](#8111-estrutura-do-módulo-e-responsabilidades)
+    - [8.11.2 Bibliotecas, frameworks e dependências de execução](#8112-bibliotecas-frameworks-e-dependências-de-execução)
+    - [8.11.3 Pré-processamento e extração de entidades](#8113-pré-processamento-e-extração-de-entidades)
+    - [8.11.4 Carregamento do artefato treinado](#8114-carregamento-do-artefato-treinado)
+    - [8.11.5 Inferência e roteamento por limiares](#8115-inferência-e-roteamento-por-limiares)
+    - [8.11.6 Exemplos de execução: casos de sucesso e de falha](#8116-exemplos-de-execução-casos-de-sucesso-e-de-falha)
+    - [8.11.7 Testes automatizados](#8117-testes-automatizados)
+    - [8.11.8 Desempenho medido](#8118-desempenho-medido)
+    - [8.11.9 Situação da integração](#8119-situação-da-integração)
+  - [8.12 Histórico da integração da interface web](#812-histórico-da-integração-da-interface-web)
 - [9. Planejamento e Execução de Testes](#9-planejamento-e-execução-de-testes)
   - [9.1 Testes Funcionais](#91-testes-funcionais)
-    - [9.1.1 Planejamento](#911-planejamento)
-    - [9.1.2 Resultados](#912-resultados)
+    - [9.1.1 Estratégia e preparação](#911-estratégia-e-preparação)
+    - [9.1.2 Matriz de rastreabilidade](#912-matriz-de-rastreabilidade)
+    - [9.1.3 Casos de teste](#913-casos-de-teste)
+    - [9.1.4 Abrangência e limitações](#914-abrangência-e-limitações)
+    - [9.1.5 Resultados](#915-resultados)
   - [9.2 Testes de RNFs](#92-testes-de-rnfs)
     - [9.2.1 Planejamento](#921-planejamento)
-    - [9.2.2 Resultados](#922-resultados)
+    - [9.2.2 Matriz de rastreabilidade e critérios](#922-matriz-de-rastreabilidade-e-critérios)
+    - [9.2.3 Casos positivos e negativos](#923-casos-positivos-e-negativos)
+    - [9.2.4 Teste obrigatório de desempenho do RNF05](#924-teste-obrigatório-de-desempenho-do-rnf05)
+    - [9.2.5 Instruções gerais de execução e evidências](#925-instruções-gerais-de-execução-e-evidências)
+    - [9.2.6 Abrangência e limitações](#926-abrangência-e-limitações)
+    - [9.2.7 Resultados](#927-resultados)
   - [9.3 Testes de Usabilidade](#93-testes-de-usabilidade)
-    - [9.3.1 Planejamento](#931-planejamento)
+    - [9.3.1 Planejamento dos testes de usabilidade](#931-planejamento-dos-testes-de-usabilidade)
     - [9.3.2 Resultados](#932-resultados)
+  - [9.4 Testes de Integração](#94-testes-de-integração)
+    - [9.4.1 Planejamento](#941-planejamento)
+    - [9.4.2 Resultados](#942-resultados)
 - [10. Procedimentos de Implantação](#10-procedimentos-de-implantação)
   - [10.1 Implantação e Configuração do Banco de Dados](#101-implantação-e-configuração-do-banco-de-dados)
   - [10.2 Implantação do Protótipo para uso por equipe de desenvolvimento](#102-implantação-do-protótipo-para-uso-por-equipe-de-desenvolvimento)
@@ -464,6 +496,18 @@ O desenvolvimento da solução envolve responsabilidades compartilhadas entre os
 
 Quando uma responsabilidade da coluna do Metrô não é cumprida no prazo acordado, a equipe registra o bloqueio na issue correspondente e comunica o impacto sobre a sprint, conforme o mecanismo de acompanhamento de riscos descrito no documento de gestão de projeto.
 
+#### Consolidação dos objetivos por métrica
+
+Para reduzir ambiguidades entre objetivo estratégico, indicador e validação do MVP, os objetivos foram consolidados na matriz abaixo.
+
+| Objetivo | Métrica de acompanhamento | Meta inicial do MVP | Forma de verificação | Relação com o escopo |
+| --- | --- | --- | --- | --- |
+| Reduzir esforço de localização de informações | Tempo médio para encontrar uma informação de projeto | Redução esperada de 50% em cenário controlado | Comparação entre busca manual e consulta ao agente usando os mesmos casos sintéticos | Consulta de informações dos projetos |
+| Aumentar confiabilidade das respostas | Percentual de respostas fundamentadas em fontes disponíveis | 100% das respostas do escopo devem indicar base documental ou limitação | Testes com perguntas de consulta, comparação e ausência de informação | Respostas estruturadas e fundamentadas |
+| Melhorar autonomia dos usuários | Percentual de solicitações compreendidas sem sintaxe técnica | Pelo menos 80% das solicitações em português devem ser compreendidas ou orientadas para reformulação | Casos de teste com variações de linguagem natural | Entrada textual e interpretação de intenção |
+| Apoiar decisões do PMO | Capacidade de comparar projetos, riscos, marcos e indicadores | Consultas analíticas demonstráveis com dados sintéticos | Cenários de comparação entre dois ou mais projetos | Fluxos de consulta e análise comparativa |
+| Preservar governança e confidencialidade | Uso de dados sintéticos/anonimizados e rastreio das interações | 100% da prova de conceito sem dados sensíveis reais | Auditoria da base utilizada e dos registros gerados pelo pipeline | Segurança, rastreabilidade e aderência tecnológica |
+
 ---
 
 As capacidades da Seção 2.4.3, as metas da Seção 2.4.4 e a divisão de responsabilidades da Seção 2.4.5 formam o contrato de escopo deste projeto: o que o agente faz, como saberemos se funcionou e de quem depende cada parte. As seções seguintes detalham para quem o produto é construído (2.5), sobre qual processo de negócio ele atua (2.6) e quais riscos podem comprometer essa entrega (2.7).
@@ -624,6 +668,7 @@ A comparação evidenciada na imagem da cadeia, mostra que a proposta **não alt
 
 Assim, a Cadeia de Valor complementa os fluxos **AS-IS** e **TO-BE**, demonstrando de forma visual e operacional **onde o agente agrega valor ao processo e quais atividades são impactadas pela sua utilização**.
 
+---
 
 
 ---
@@ -1943,7 +1988,10 @@ Dois requisitos do TAPI atravessam todas as camadas anteriores e por isso são t
 | **Visual Studio Code** | Ambiente de desenvolvimento, com extensões de Python, Jupyter e Markdown. |
 | **Draw.io / Mermaid / PlantUML** | Diagramas UML (componentes e pacotes), BPMN e diagramas de sequência da documentação. |
 | **Figma** | Prototipação das interfaces conversacionais e dos fluxos de interação. |
-| **pytest** | Testes automatizados do pipeline de PLN e da API. |
+| **pytest** | Biblioteca principal para testes automatizados do pipeline de PLN, das regras de recuperação de contexto e da API FastAPI. |
+| **FastAPI TestClient / httpx** | Execução de testes funcionais e de integração contra os endpoints HTTP da API sem necessidade de subir um servidor externo, preservando o contrato OpenAPI gerado pelo próprio FastAPI. |
+| **Locust** | Testes de desempenho e carga sobre endpoints HTTP da prova de conceito, com cenários escritos em Python e coleta de latência, vazão e taxa de erro. |
+| **Microsoft Forms** | Coleta estruturada do questionário SUS e dos comentários qualitativos dos participantes dos testes de usabilidade, mantendo aderência ao ecossistema Microsoft priorizado pelo parceiro. |
 | **scikit-learn (metrics)** | Avaliação do desempenho do núcleo de PLN: acurácia, precisão, revocação e F1 macro para a classificação de intenções, matriz de confusão e métricas de acerto para a consulta de fontes. |
 | **Markdown** | Formato de toda a documentação do repositório. |
 
@@ -2026,7 +2074,7 @@ A decisão de não construir cliente próprio é o que torna o suporte a mobile 
 |---|---|---|
 | Canal | Microsoft Teams, Copilot Studio | Interface conversacional e orquestração de tópicos |
 | API da aplicação | Python 3.11, FastAPI, Uvicorn | Endpoint HTTP/JSON, validação de entrada e roteamento |
-| Núcleo de PLN | scikit-learn, gensim, sentence-transformers, nltk, joblib | Classificação de intenção em dois níveis, conforme a Seção 8.10 |
+| Núcleo de PLN | scikit-learn, gensim, ONNX Runtime, nltk, joblib | Classificação de intenção em dois níveis, conforme as Seções 8.10 e 8.11 |
 | Recuperação | Índice vetorial e catálogo local de fontes | Seleção dos trechos que compõem o contexto |
 | Voz | Azure AI Speech | Transcrição de entrada e síntese prevista, Seções 8.8 e 8.9 |
 | Dados | PostgreSQL gerenciado, Supabase Storage | Persistência do modelo físico da Seção 4.4 |
@@ -2513,17 +2561,19 @@ O objetivo da modelagem é representar, de forma simples e implementável, os da
 
 ## 4.1 Especificação da Base de Dados
 
-A base de dados do MVP foi desenhada para funcionar como uma camada intermediária entre o agente conversacional, o núcleo de PLN, o Copilot Studio, os fluxos do Power Automate e as fontes simuladas do SharePoint. Como o projeto utiliza dados sintéticos, a modelagem não replica dados reais do Metrô; ela replica a estrutura necessária para representar projetos, subportfólios, artefatos documentais, cronogramas, atualizações de status, riscos, mudanças, intenções e registros de auditoria.
+A base de dados do MVP foi desenhada para funcionar como uma camada intermediária entre o agente conversacional, o núcleo de PLN, o Copilot Studio, os fluxos do Power Automate e as fontes simuladas do SharePoint. Como o projeto utiliza dados sintéticos, a modelagem não replica dados reais do Metrô; ela replica a estrutura necessária para representar projetos, subportfólios, artefatos documentais, cronogramas, avanços físico-econômicos, entregas, marcos, termos de abertura, termos de encerramento, riscos, mudanças, intenções e registros de auditoria.
 
-A decisão de modelagem adotada foi reduzir a complexidade para um MVP, evitando uma tabela para cada página, lista ou biblioteca do SharePoint. Em vez disso, documentos, links, listas, prompts, normativos e planilhas são representados pela tabela `project_artifacts`. Quando o artefato for uma planilha de cronograma vinculada em uma lista do SharePoint, seus metadados ficam registrados em `project_artifacts` e suas linhas relevantes são extraídas para `schedule_items`.
+A decisão de modelagem adotada foi reduzir a complexidade para um MVP, evitando uma tabela para cada página, lista ou biblioteca do SharePoint. Em vez disso, documentos, links, anexos, prompts, normativos e planilhas são representados pela tabela `project_artifacts`. Quando uma lista do parceiro possui ciclo de vida e campos estruturados relevantes para consulta, ela é representada por uma tabela própria, como `project_progress_updates`, `project_deliverables_milestones`, `project_charters` ou `project_closure_terms`. Quando a origem é apenas documental ou um anexo de suporte, ela permanece como artefato consultável.
 
-Essa abordagem contempla o funcionamento observado no ambiente do parceiro: algumas listas do SharePoint apresentam linhas com links para arquivos Excel, especialmente cronogramas. No MVP, o link da planilha é armazenado em `project_artifacts.sharepoint_url`; a aba e o intervalo de leitura são indicados por `excel_sheet_name` e `excel_table_or_range`; e cada linha relevante do cronograma é normalizada em `schedule_items`, preservando a origem por meio de campos como `source_sheet_name`, `source_row_number` e `source_cell_range`.
+Essa abordagem contempla o funcionamento observado no ambiente do parceiro: algumas listas do SharePoint apresentam linhas com links ou anexos para arquivos Excel, especialmente cronogramas. No MVP, o link ou anexo da planilha é armazenado em `project_artifacts.sharepoint_url`, `attachment_name` e `attachment_url`; a aba e o intervalo de leitura são indicados por `excel_sheet_name` e `excel_table_or_range`; e cada linha relevante do cronograma é normalizada em `schedule_items`, preservando a origem por meio de campos como `source_sheet_name`, `source_row_number` e `source_cell_range`.
+
+Riscos/problemas e mudanças aparecem em duas granularidades no inventário do parceiro: projeto e subportfólio. Para evitar duplicação desnecessária, o modelo adota `scope_type` em `risk_issue_items` e `change_records`, com restrições que obrigam o preenchimento de exatamente um alvo: `project_id` quando o escopo é projeto, ou `subportfolio_id` quando o escopo é subportfólio. O histórico dos riscos e problemas foi separado em `risk_issue_history`, preservando a evolução de status e criticidade ao longo do tempo.
 
 O modelo também suporta a avaliação do núcleo de PLN implementado no notebook `src/notebooks/classificador_intencoes_metro.ipynb`. Esse notebook trabalha com um catálogo hierárquico de intenções em dois níveis: `macrointencao` (`CONSULTA`, `TRANSACAO`, `ALERTA` e `FORA_DE_ESCOPO`) e intenção específica, totalizando 31 classes na execução de referência. Por isso, a tabela `intent_catalog` registra tanto a macrointenção quanto a intenção específica, o fluxo associado, o handler previsto e os limiares de confiança usados para decidir entre roteamento, acionamento de handler específico ou resposta de limitação.
 
 A tabela `intent_test_cases` armazena exemplos rotulados derivados dos templates do notebook, preservando `template_id`, variação superficial, texto normalizado e split (`treino`, `validacao`, `teste`). Isso mantém a rastreabilidade do protocolo sem vazamento usado no classificador, em que a divisão é feita por template e não por frase. As interações reais ou simuladas são registradas em `ai_interactions`, incluindo macrointenção prevista, confiança da macro, intenção específica prevista, confiança da intenção, handler selecionado, alternativas top-k e eventual resposta de limitação. As fontes consultadas são rastreadas por `consulted_sources`, permitindo verificar quais documentos, extratos, planilhas ou linhas foram usados para compor o retorno ao usuário.
 
-O modelo físico inicial está implementado em [`src/database/sql/01_create_database.sql`](../src/database/sql/01_create_database.sql). A documentação operacional dos artefatos de banco, incluindo o papel futuro dos scripts de inserção e rollback, está registrada em [`src/database/docs/README.md`](../src/database/docs/README.md).
+O modelo físico inicial está implementado em [`src/database/sql/01_create_database.sql`](../src/database/sql/01_create_database.sql). A documentação operacional dos artefatos de banco, incluindo carga inicial sintética e rollback controlado, está registrada em [`src/database/docs/README.md`](../src/database/docs/README.md).
 
 ## 4.2 Modelo Conceitual de Dados
 
@@ -2534,13 +2584,20 @@ As principais entidades conceituais do MVP são:
 | Entidade | Descrição de negócio |
 |---|---|
 | Subportfólio | Categoria estratégica que agrupa projetos do portfólio, como Turnaround, Expansão da Rede Metrô e Gestão e Finanças. |
+| Situação de Subportfólio | Registro periódico da situação de um subportfólio, com data de referência, item, situação e ano. |
 | Projeto | Iniciativa acompanhada pelo PMO, associada a um subportfólio e composta por documentos, cronograma, status, riscos e mudanças. |
 | Artefato do Projeto | Fonte de informação vinculada ao projeto, podendo ser TAP, cronograma, relatório, planilha, lista SharePoint, prompt ou normativo. |
 | Extrato de Fonte | Parte extraída de um documento, lista ou planilha para consulta, referência e montagem de contexto controlado no Copilot. |
 | Item de Cronograma | Linha estruturada extraída de um cronograma, inclusive quando a origem for uma planilha Excel vinculada no SharePoint. |
+| Avanço do Projeto | Medição periódica de avanço físico e econômico previsto e realizado. |
+| Entrega ou Marco | Entrega, marco ou etapa relevante do projeto, com datas prevista e realizada e status de acompanhamento. |
 | Atualização de Status | Registro de avanço, situação, impedimentos, próximos passos e resumo executivo de um projeto. |
-| Risco ou Problema | Evento de risco ou problema materializado que afeta um projeto. |
-| Mudança | Registro de alteração de prazo, escopo, custo, prioridade ou outro aspecto relevante do projeto. |
+| Termo de Abertura | Registro estruturado do TAP, incluindo liderança, equipe, objetivo, justificativa, escopo, benefícios, premissas, restrições, custos, revisão e situação de liberação. |
+| Termo de Encerramento | Registro estruturado do encerramento do projeto, com situação, justificativa, pendências, custo realizado e data de encerramento. |
+| Benefício | Benefício esperado ou detalhado para o projeto, ligado ao TAP ou ao Mapa de Benefícios. |
+| Risco ou Problema | Evento de risco ou problema materializado que afeta um projeto ou subportfólio. |
+| Histórico de Risco ou Problema | Evolução temporal de status, criticidade e comentários de um risco ou problema. |
+| Mudança | Registro de alteração de prazo, escopo, custo, prioridade ou outro aspecto relevante de projeto ou subportfólio. |
 | Usuário | Pessoa que interage com o agente, vinculada a um perfil como Diretoria, PMO, Líder de Subportfólio ou Equipe de Projeto. |
 | Regra de Acesso | Definição conceitual de quais informações um usuário ou perfil pode consultar, alterar ou exportar. |
 | Intenção | Necessidade identificada pelo núcleo de PLN, organizada em macrointenção e intenção específica conforme o notebook do classificador. |
@@ -2568,18 +2625,25 @@ java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/modelo-conce
 
 O modelo lógico detalha o modelo conceitual em formato de tabelas, atributos principais, chaves primárias e chaves estrangeiras. Ele ainda não representa o código final do banco, mas define a estrutura lógica que deve ser implementada.
 
-Para manter o escopo adequado ao MVP, a modelagem lógica foi consolidada em 18 tabelas:
+Para manter o escopo adequado ao MVP e incorporar o inventário do parceiro, a modelagem lógica foi consolidada em 25 tabelas:
 
 | Tabela | PK | FKs principais | Finalidade |
 |---|---|---|---|
-| subportfolios | id | - | Armazena os subportfólios estratégicos. |
-| projects | id | subportfolio_id → subportfolios.id | Armazena os projetos do portfólio. |
-| project_artifacts | id | project_id → projects.id | Representa documentos, listas, links, planilhas, prompts e normativos vindos do SharePoint ou da massa sintética. |
+| subportfolios | id | - | Armazena os subportfólios estratégicos, responsáveis, aprovadores, apoio e identificador de origem do parceiro. |
+| subportfolio_status_updates | id | subportfolio_id → subportfolios.id | Armazena a situação periódica do subportfólio por data de referência, item, situação e ano. |
+| projects | id | subportfolio_id → subportfolios.id | Armazena os projetos do portfólio, incluindo status programa/projeto e identificador de origem. |
+| project_artifacts | id | project_id → projects.id | Representa documentos, listas, links, anexos, planilhas, prompts e normativos vindos do SharePoint ou da massa sintética. |
 | source_extracts | id | artifact_id → project_artifacts.id, project_id → projects.id | Armazena extratos consultáveis de documentos, listas e planilhas para composição de contexto no Copilot e rastreabilidade de fontes. |
 | schedule_items | id | project_id → projects.id, artifact_id → project_artifacts.id, parent_item_id → schedule_items.id | Armazena linhas estruturadas de cronograma, inclusive extraídas de Excel. |
+| project_progress_updates | id | project_id → projects.id | Armazena avanço físico e econômico previsto e realizado por data de referência. |
 | project_status_updates | id | project_id → projects.id, artifact_id → project_artifacts.id | Armazena avanço, situação e resumo de status dos projetos. |
-| risk_issue_items | id | project_id → projects.id, source_artifact_id → project_artifacts.id | Armazena riscos e problemas em uma estrutura unificada. |
-| change_records | id | project_id → projects.id, source_artifact_id → project_artifacts.id | Armazena registros de mudanças. |
+| project_deliverables_milestones | id | project_id → projects.id | Armazena entregas e marcos com descrição, datas prevista e realizada e status. |
+| project_charters | id | project_id → projects.id, subportfolio_id → subportfolios.id, artifact_id → project_artifacts.id | Armazena o Termo de Abertura do Projeto de forma estruturada. |
+| project_closure_terms | id | project_id → projects.id, artifact_id → project_artifacts.id | Armazena o Termo de Encerramento do Projeto. |
+| project_benefits | id | project_id → projects.id, charter_id → project_charters.id, source_artifact_id → project_artifacts.id | Armazena benefícios esperados ou detalhados para o projeto. |
+| risk_issue_items | id | project_id → projects.id ou subportfolio_id → subportfolios.id, source_artifact_id → project_artifacts.id | Armazena riscos e problemas em estrutura unificada por escopo. |
+| risk_issue_history | id | risk_issue_id → risk_issue_items.id | Armazena histórico de status, criticidade e comentários de riscos e problemas. |
+| change_records | id | project_id → projects.id ou subportfolio_id → subportfolios.id, source_artifact_id → project_artifacts.id | Armazena registros de mudanças de projeto ou subportfólio. |
 | users | id | - | Armazena usuários simulados ou autenticados via Entra ID em evolução futura. |
 | access_rules | id | user_id → users.id, subportfolio_id → subportfolios.id, project_id → projects.id | Armazena regras de acesso por usuário, perfil e escopo. |
 | intent_catalog | id | - | Armazena macrointenção, intenção específica, fluxo, handler e limiares do classificador. |
@@ -2606,7 +2670,16 @@ java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/modelo-logic
 As principais regras de integridade do modelo lógico são:
 
 - todo projeto deve pertencer a um subportfólio;
+- toda situação de subportfólio deve apontar para um subportfólio e uma data de referência;
+- todo avanço físico/econômico deve apontar para um projeto e uma data de referência;
+- toda entrega ou marco deve apontar para um projeto;
 - todo cronograma extraído deve apontar para um projeto e, quando houver origem documental, para um artefato de origem;
+- todo TAP estruturado deve apontar para um projeto e pode apontar para o artefato documental que originou seus campos;
+- todo termo de encerramento deve apontar para um projeto e pode apontar para o artefato documental correspondente;
+- todo benefício deve apontar para um projeto e pode apontar para o TAP ou artefato que o fundamenta;
+- todo risco/problema deve ter escopo exclusivo: projeto ou subportfólio, nunca ambos ao mesmo tempo;
+- todo registro de mudança deve ter escopo exclusivo: projeto ou subportfólio, nunca ambos ao mesmo tempo;
+- todo histórico de risco/problema deve apontar para o risco/problema original;
 - todo extrato consultável deve apontar para um artefato e pode apontar para um projeto quando o conteúdo for específico de uma iniciativa;
 - toda resposta que utilizar informação documental, lista ou planilha deve possuir ao menos uma fonte em consulted_sources;
 - toda interação deve registrar a intenção classificada ou o motivo de falha/fora de escopo;
@@ -2628,12 +2701,17 @@ A documentação técnica dos scripts de banco está em:
 
 - [`src/database/docs/README.md`](../src/database/docs/README.md)
 
-Essa documentação serve como ponto de entrada para os scripts de banco da solução. Além do script de criação, ela foi preparada para contemplar futuramente o script de inserção de dados sintéticos e o script de rollback.
+Essa documentação serve como ponto de entrada para os scripts de banco da solução. Além do script de criação, os arquivos de carga inicial sintética e rollback controlado também estão versionados em `src/database/sql`.
 
 O modelo físico adota as seguintes decisões:
 
 - uso de `UUID` como chave primária nas tabelas;
+- preservação dos identificadores textuais vindos das listas do parceiro em `partner_source_id`, sem substituir a chave técnica interna;
+- unicidade parcial de `partner_source_id` nas tabelas alimentadas por listas e anexos do parceiro, permitindo cargas idempotentes quando houver ID externo e mantendo flexibilidade para registros sem origem sincronizada;
 - uso de `JSONB` para metadados flexíveis, como atributos vindos do SharePoint, entidades extraídas pelo PLN e payloads de auditoria;
+- tabelas específicas para listas estruturadas do parceiro que possuem uso efetivo no MVP, como situação de subportfólio, avanço, entregas e marcos, TAP, termo de encerramento e benefícios;
+- uso de `scope_type` em `risk_issue_items` e `change_records` para representar registros de projeto e de subportfólio em uma estrutura única, com restrições que impedem alvo ambíguo;
+- separação do histórico de riscos/problemas em `risk_issue_history`, preservando a evolução temporal sem sobrescrever o registro principal;
 - armazenamento dos campos produzidos pelo classificador do notebook, incluindo `macro_intent`, `specific_intent`, confiança de macrointenção, confiança de intenção específica, handler, alternativas e resposta de limitação;
 - preservação de `template_id`, texto normalizado e split agrupado em `intent_test_cases`, em alinhamento com o protocolo de avaliação sem vazamento do notebook;
 - uso de `CHECK CONSTRAINTS` para domínios controlados, como status de projeto, tipo de artefato, tipo de fonte e perfil de usuário;
@@ -2649,7 +2727,7 @@ O tratamento das planilhas Excel vinculadas em listas do SharePoint também foi 
 
 Esta seção **evolui** a modelagem estática apresentada na Seção 3.1.2, e não a substitui. Aquela modelagem, produzida na Sprint 1, representa o pipeline de processamento: como uma `Solicitacao` percorre classificação, roteamento e geração de resposta. Ela permanece válida e continua sendo a referência da rastreabilidade da Seção 3.1.4.
 
-O que a Sprint 2 acrescentou foi a camada que faltava: o **domínio persistido**. A modelagem de dados das Seções 4.2 a 4.4 introduziu as entidades do portfólio, do conhecimento consultável e da auditoria, que a modelagem inicial não precisava representar porque ainda não havia banco. O diagrama abaixo une as duas camadas e explicita onde elas se tocam.
+O que a Sprint 2 acrescentou foi a camada que faltava: o **domínio persistido**. Com o inventário de listas do parceiro, essa camada foi refinada para representar também situação de subportfólio, avanço físico-econômico, entregas, marcos, termos de abertura, termos de encerramento, benefícios e histórico de riscos/problemas. O diagrama abaixo une o pipeline de processamento, o conhecimento consultável, a auditoria e o domínio persistido.
 
 ### 5.1.1 Modelo consolidado
 
@@ -2678,7 +2756,7 @@ plantuml -charset UTF-8 -tpng -o ../img docs/diagrams/classes-consolidado.puml
 | `EntidadeExtraida` | Mantida na Seção 3.1.2 | Existe no pipeline, mas não é persistida no MVP; não aparece no modelo de dados |
 | `SugestaoProativa`, `ConfiguracaoProatividade` | Mantidas na Seção 3.1.2 | Sustentam RF09 e RF10, cujo escopo está declarado na Seção 3.1.5 |
 | — | `Interacao`, `Conversa`, `Usuario`, `RegraAcesso`, `FonteConsultada`, `EventoAuditoria`, `SolicitacaoForaDeEscopo` | Novas. Vieram do modelo de dados: sem persistência, a Sprint 1 não precisava representá-las |
-| — | `Subportfolio`, `Projeto`, `ItemCronograma`, `RiscoProblema` | Novas. Domínio do portfólio, introduzido com o modelo conceitual da Seção 4.2 |
+| — | `Subportfolio`, `SituacaoSubportfolio`, `Projeto`, `AvancoProjeto`, `EntregaMarco`, `ItemCronograma`, `TermoAbertura`, `TermoEncerramento`, `Beneficio`, `RiscoProblema`, `HistoricoRiscoProblema`, `Mudanca` | Novas ou refinadas. Representam o domínio do portfólio após o alinhamento com as listas do parceiro |
 
 ### 5.1.3 Decisões refletidas no diagrama
 
@@ -2686,6 +2764,8 @@ plantuml -charset UTF-8 -tpng -o ../img docs/diagrams/classes-consolidado.puml
 - **`FonteConsultada` liga a resposta ao `TrechoRecuperado`, e não ao `Artefato`.** A rastreabilidade exigida pelo RNF03 precisa apontar o trecho utilizado, não apenas o documento de origem.
 - **`Intencao` carrega os limiares e as confianças.** Os valores de 0,550 e 0,700 definidos na Seção 8.10.3 pertencem ao catálogo, não ao código, de modo que possam ser ajustados sem nova implantação, à medida que novas execuções do benchmark recalibrem os limiares. `acimaDoLimiar()` é o que decide se um handler é acionado.
 - **`RegraAcesso` é classe, e não atributo de `Usuario`.** O mesmo usuário pode ter níveis diferentes por subportfólio ou por projeto, o que o RNF02 exige e um atributo simples não representaria.
+- **`RiscoProblema` e `Mudanca` têm escopo explícito.** Como o parceiro mantém registros em nível de projeto e de subportfólio, o modelo persistido usa `scope_type` e constraints para impedir que um mesmo registro aponte simultaneamente para os dois níveis.
+- **`TermoAbertura`, `TermoEncerramento` e `Beneficio` são entidades estruturadas.** Esses dados poderiam existir apenas como artefatos, mas possuem campos consultáveis no MVP e alimentam diretamente respostas sobre escopo, justificativa, custos, benefícios e encerramento.
 - **`ItemCronograma.somaDosPesosFecha()` está no domínio.** A validação de que os pesos fecham em 100%, prevista na Seção 2.4.3, é regra de negócio e não de interface.
 - **`SolicitacaoForaDeEscopo` é entidade própria.** Registrar o que o agente não soube responder é insumo para evoluir o catálogo, e não um estado descartável da interação.
 
@@ -2696,8 +2776,16 @@ A relação com as tabelas da Seção 4.3 não é de um para um. `Resposta`, por
 | Classe | Tabelas correspondentes |
 |---|---|
 | `Subportfolio`, `Projeto` | `subportfolios`, `projects` |
+| `SituacaoSubportfolio` | `subportfolio_status_updates` |
+| `AvancoProjeto` | `project_progress_updates` |
+| `EntregaMarco` | `project_deliverables_milestones` |
 | `Artefato`, `TrechoRecuperado` | `project_artifacts`, `source_extracts` |
-| `ItemCronograma`, `RiscoProblema` | `schedule_items`, `risk_issue_items` |
+| `ItemCronograma` | `schedule_items` |
+| `TermoAbertura` | `project_charters` |
+| `TermoEncerramento` | `project_closure_terms` |
+| `Beneficio` | `project_benefits` |
+| `RiscoProblema`, `HistoricoRiscoProblema` | `risk_issue_items`, `risk_issue_history` |
+| `Mudanca` | `change_records` |
 | `Usuario`, `RegraAcesso` | `users`, `access_rules` |
 | `Intencao` | `intent_catalog`, `prompt_templates` |
 | `Conversa`, `Interacao`, `Resposta` | `ai_conversations`, `ai_interactions` |
@@ -2705,7 +2793,7 @@ A relação com as tabelas da Seção 4.3 não é de um para um. `Resposta`, por
 | `EventoAuditoria` | `audit_events` |
 | `SolicitacaoForaDeEscopo` | `out_of_scope_requests` |
 
-As tabelas `project_status_updates`, `change_records` e `intent_test_cases` não aparecem como classes: as duas primeiras são registro histórico consultado por relatório, e a terceira pertence ao ciclo de avaliação do classificador descrito na Seção 8.10.1, não ao runtime.
+As tabelas `project_status_updates` e `intent_test_cases` não aparecem como classes próprias: a primeira é um registro narrativo de acompanhamento consultado por relatório, enquanto a segunda pertence ao ciclo de avaliação do classificador descrito na Seção 8.10.1, não ao runtime conversacional.
 
 ## 5.2 Diagrama de Componentes da UML
 
@@ -3200,13 +3288,20 @@ Será desenvolvido na Sprint 5.
 
 ## 8.1 Arquitetura de Codificação e Estrutura de Diretórios
 
-O código-fonte fica em `src/`, separado por responsabilidade. A divisão segue as camadas do diagrama de componentes da Seção 5.2: o canal e a interface ficam no `frontend`, a orquestração e as integrações no `backend`, o núcleo de PLN em `notebooks` e o esquema de dados em `database`.
+O código-fonte fica em `src/`, separado por responsabilidade. A divisão segue as camadas do diagrama de componentes da Seção 5.2: o canal e a interface ficam no `frontend`, a orquestração, as integrações e o núcleo de PLN no `backend`, o esquema de dados em `database` e os experimentos que produziram os artefatos treinados em `notebooks`.
 
 ```text
 src/
 ├── backend/                    API FastAPI — orquestração e integrações
 │   ├── app/
-│   │   ├── main.py             rotas /health e /api/chat
+│   │   ├── main.py             rotas /health, /api/chat e /api/audio
+│   │   ├── audio/              recebimento, validação e transcrição (Seção 8.7)
+│   │   ├── nlp/                núcleo de PLN (Seção 8.11)
+│   │   │   ├── preprocessing.py  normalização, tokenização e stemming
+│   │   │   ├── entities.py       extração das entidades do domínio
+│   │   │   ├── classifier.py     classificador hierárquico e carga do artefato
+│   │   │   ├── inference.py      vetorização, limiares e roteamento
+│   │   │   └── data/             léxico do portfólio, substituível
 │   │   ├── gemini/             cliente do provedor de LLM
 │   │   │   ├── client.py       chamada, retry com backoff e mapeamento de erro
 │   │   │   └── schemas.py      contratos de entrada e saída (Pydantic)
@@ -3215,6 +3310,7 @@ src/
 │   │   │   └── data/sharepoint/ exports JSON simulados de listas do SharePoint
 │   │   └── tests/              testes automatizados (Seção 8.4)
 │   ├── requirements.txt
+│   ├── requirements-pln.txt    dependências só da inferência (Seção 8.11.2)
 │   └── .env.example            variáveis esperadas, sem segredos
 ├── frontend/                   interface React + TypeScript (Vite)
 │   ├── src/
@@ -3226,8 +3322,10 @@ src/
 ├── database/
 │   ├── sql/                    criação, carga inicial e rollback
 │   └── docs/                   documentação dos scripts
-└── notebooks/                  núcleo de PLN
-    ├── classificador_intencoes_metro.ipynb
+└── notebooks/                  experimentos e artefatos treinados
+    ├── classificador_intencoes_metro.ipynb   benchmark do algoritmo (Seção 8.10)
+    ├── preprocessamento_entidades.ipynb      medição do pré-processamento e das entidades
+    ├── migrar_artefato_classificador.py      reaponta o artefato para o pacote (Seção 8.11.4)
     └── artefatos/              dataset, catálogo, modelo e métricas da execução
 ```
 
@@ -3237,7 +3335,9 @@ Três convenções sustentam essa organização.
 
 **O contrato é declarado uma vez e replicado.** Os tipos de `app/gemini/schemas.py` têm correspondência direta em `frontend/src/lib/gemini-api.ts`. Quando um campo muda no backend, o `tsc --noEmit` do frontend acusa a divergência no build.
 
-**Dado sintético fica junto do código que o consome.** Os exports simulados de listas do SharePoint ficam em `app/rag/data/sharepoint/`, e não em uma base externa, para que a bancada de teste rode sem provisionamento. O diretório é substituível por variável de ambiente (`SHAREPOINT_MOCK_DATA_DIR`) quando houver fonte real.
+**Dado sintético fica junto do código que o consome.** Os exports simulados de listas do SharePoint ficam em `app/rag/data/sharepoint/`, e não em uma base externa, para que a bancada de teste rode sem provisionamento. O diretório é substituível por variável de ambiente (`SHAREPOINT_MOCK_DATA_DIR`) quando houver fonte real. O léxico do domínio em `app/nlp/data/` segue a mesma regra e será gerado a partir da base real do portfólio quando ela existir, sem alteração de código.
+
+**Modelo treinado não é código.** Os artefatos do classificador permanecem em `src/notebooks/artefatos/` e são referenciados pelo pacote `app/nlp/`, em vez de copiados para dentro dele. Uma segunda cópia abriria a possibilidade de o serviço rodar com um artefato diferente do que o benchmark da Seção 8.10 mediu.
 
 ## 8.2 Modelo de Recomendação
 
@@ -3287,7 +3387,9 @@ Ao final da Sprint 5, a entrega esperada é uma solução integrada, demonstráv
 
 ## 8.4 Testes Unitários e de Integração
 
-A Sprint 2 entregou a primeira bateria de testes automatizados do projeto, cobrindo a bancada de teste do caminho de consulta: recuperação de contexto e chamada ao provedor de LLM. O plano completo de testes sistêmicos — funcionais, de RNFs, de integração e de usabilidade — é entrega da Sprint 3 e será registrado na Seção 9.
+A Sprint 2 entregou a primeira bateria de testes automatizados do projeto, cobrindo a bancada de teste do caminho de consulta: recuperação de contexto e chamada ao provedor de LLM. A Sprint 3 ampliou a suíte com os testes da API de áudio da Seção 8.7, do núcleo de PLN da Seção 8.11, do pipeline HTTP e da interface integrada. O plano completo de testes sistêmicos — funcionais, de RNFs, de integração e de usabilidade — está na Seção 9.
+
+A tabela abaixo registra a bateria original da Sprint 2, mantida como referência do que cobria o caminho de consulta.
 
 **Estratégia adotada.** Os testes isolam a fronteira de rede. A chamada HTTP ao provedor é substituída por um duplo de teste que injeta a resposta ou o erro desejado, de modo que a suíte roda sem chave de API, sem acesso à internet e de forma determinística. O que está sob teste é o código do projeto — mapeamento de contrato, política de retry, tratamento de erro e regra de recuperação —, e não a disponibilidade do serviço externo.
 
@@ -3315,7 +3417,7 @@ python -m venv .venv
 .venv/bin/python -m pytest app/tests -v
 ```
 
-**Resultado da última execução:** 10 testes, 10 aprovados, em 0,21 s.
+**Resultado da execução dessa bateria:** 10 testes, 10 aprovados, em 0,21 s.
 
 ```text
 app/tests/test_gemini_client.py::test_generate_chat_response_maps_text_context_and_usage PASSED
@@ -3332,32 +3434,226 @@ app/tests/test_sharepoint_rag.py::test_builds_prompt_with_source_labels_and_disc
 ============================== 10 passed in 0.21s ==============================
 ```
 
-**Verificação do frontend.** O build executa `tsc --noEmit` antes do empacotamento, o que valida a aderência ao contrato do backend, e o lint roda com `--max-warnings=0`. Ambos passam sem erro nem aviso. Testes unitários por componente e automação de testes de interface são entrega da Sprint 5, conforme a Seção 8.3.3.
+**Registro histórico da primeira suíte completa da Sprint 3:** 158 testes, 158 aprovados, em 15,69 s. Os 148 acrescentados desde a bateria original cobriam a API de áudio, o pré-processamento, a extração de entidades, o carregamento do artefato e a inferência.
 
-**Cobertura ainda não atingida.** Não há teste do endpoint HTTP de ponta a ponta, nem teste de integração com serviço externo real, nem teste do pipeline de PLN dentro do serviço. Os três dependem de itens da Sprint 3 — endpoint de áudio, credencial do Azure AI Speech e carregamento do classificador no backend — e estão registrados no backlog da Seção 6.2 do `GestaoProjeto.md`.
+```text
+158 passed, 11 warnings in 15.69s
+```
 
-## 8.5 Documentações automáticas
+**Verificação atual após a integração da interface.** A execução local em 10 de setembro de 2026 aprovou 171 testes do back-end, 46 testes unitários do front-end e 8 testes de navegador — quatro cenários em desktop e os mesmos quatro em celular. Também passaram lint sem avisos, verificação de formatação e build de produção. O merge da integração ponta a ponta acrescentou quatro testes de rota depois dessa execução, levando o back-end a 175 testes, conforme a Seção 8.11.7. A cobertura unitária do front-end foi de 87,10% das linhas, 84,33% das instruções, 73,12% das ramificações e 83,83% das funções. Os comandos, a matriz por comportamento e os limites da evidência estão em `src/frontend/TESTES.md`.
 
-O backend é implementado em FastAPI, que gera a especificação OpenAPI a partir dos modelos Pydantic declarados em `app/gemini/schemas.py`. Nenhuma anotação adicional é necessária: os contratos usados em tempo de execução são a mesma fonte que produz a documentação, o que impede que ela divirja do código.
+**Cobertura ainda não atingida.** O teste de navegador atravessa front-end, FastAPI, validação WAV e pipeline, mas substitui Azure, Gemini e classificação nas fronteiras externas. Continuam sem evidência local as chamadas reais aos provedores, autenticação Entra ID, SharePoint corporativo, persistência PostgreSQL, latência de produção e validação manual completa com tecnologia assistiva. Os resultados determinísticos não devem ser usados como aprovação desses itens.
 
-Com o servidor em execução, ficam disponíveis:
+## 8.5 Documentação de front-end e back-end
+
+### 8.5.1 Escopo e estado da implementação
+
+Esta seção descreve a aplicação **que pode ser executada a partir deste repositório**: a bancada web em React, a API FastAPI, o pipeline de classificação e resposta, as integrações externas e o modelo PostgreSQL. O objetivo é permitir que outra pessoa localize cada responsabilidade, reproduza o fluxo e diferencie código operacional de artefatos preparados para etapas futuras.
+
+Para evitar duplicação, os detalhes especializados continuam nas seções já existentes: o modelo de dados está na Seção 4; a arquitetura de implantação, na Seção 6; os contratos e decisões de voz, nas Seções 8.6 a 8.9; o classificador de intenções, nas Seções 8.10 e 8.11; e os testes sistêmicos, na Seção 9. Aqui são registradas as conexões entre esses elementos, o estado real de implementação e os caminhos de reprodução.
+
+O fluxo implementado até esta versão é:
+
+```text
+Navegador React
+  ├─ texto ───────────────► POST /api/chat ─┐
+  └─ WAV + Bearer token ──► POST /api/audio ├─► pipeline.py
+                                  │          │    ├─ classificador local opcional
+                                  └─ Azure STT    ├─ recuperação em JSONs SharePoint simulados
+                                                 └─ Gemini para geração da resposta
+                                                        │
+                                                        ▼
+                                resposta + intenção + fontes + métricas
+```
+
+O `GET /health` verifica se o processo FastAPI terminou de iniciar. O caminho de texto e o caminho posterior à transcrição de áudio convergem em `app/pipeline.py`, portanto classificação, recuperação de contexto e geração não possuem implementações paralelas. O front-end transforma o contrato HTTP em mensagens, fontes, indicadores de intenção e estados de carregamento, mas não acessa Azure ou Gemini diretamente e não recebe suas credenciais.
+
+Não estão conectados ao fluxo em execução: o PostgreSQL, o Microsoft Entra ID, o SharePoint corporativo, o Microsoft Teams, o Copilot Studio, o Power Automate e a execução de transações. O repositório contém o esquema PostgreSQL e dados sintéticos reprodutíveis, enquanto o RAG usa exports JSON locais que simulam listas do SharePoint. Conversas, token da bancada e preferências de resposta permanecem na sessão do navegador; somente o tema pode ser persistido localmente.
+
+### 8.5.2 Arquitetura executável
+
+A visão completa de diretórios está na Seção 8.1. Para acompanhar uma requisição, os pontos de entrada e fronteiras efetivamente usados são:
+
+| Camada | Ponto de entrada | Responsabilidade no fluxo atual |
+| --- | --- | --- |
+| Interface | `src/frontend/src/App.tsx` | Instala os provedores de tema e conversa e monta a aplicação. |
+| Estado do front-end | `src/frontend/src/state/chat-store.tsx` | Mantém conversas em memória, encadeia `previous_interaction_id`, cancela requisições e impede que respostas tardias contaminem outra conversa. |
+| Cliente HTTP | `src/frontend/src/lib/api/` | Serializa JSON ou multipart, aplica prazo máximo, interpreta schemas e converte erros em mensagens seguras. |
+| API | `src/backend/app/main.py` | Expõe saúde, chat e áudio; valida o contrato externo e normaliza erros. |
+| Orquestração | `src/backend/app/pipeline.py` | Executa classificação opcional, resposta controlada fora de escopo e geração fundamentada. |
+| Voz | `src/backend/app/audio/` | Autentica a identidade simulada, limita concorrência, valida WAV e chama o Azure Speech-to-Text. |
+| Recuperação | `src/backend/app/rag/sharepoint.py` | Carrega exports JSON, ranqueia trechos e monta contexto com fontes declaradas. |
+| Geração | `src/backend/app/gemini/` | Chama o Gemini com timeout e retentativas e mapeia texto, uso, latência e fontes. |
+| PLN | `src/backend/app/nlp/` | Carrega artefatos treinados, extrai entidades e classifica macrointenção e intenção específica. |
+| Dados preparados | `src/database/sql/` | Cria, popula e reverte o modelo PostgreSQL ainda não conectado à API. |
+
+Os componentes visuais não chamam `fetch` diretamente; eles acionam operações do estado, que delega ao cliente de `lib/api/`. No back-end, `main.py` não reproduz regras do classificador ou do RAG: encaminha a entrada ao pipeline e converte apenas as falhas previstas em respostas HTTP. Essa separação permite testar a interface, os contratos e cada integração com duplos determinísticos.
+
+### 8.5.3 Documentação automática da API
+
+O FastAPI gera a especificação OpenAPI a partir das rotas de `app/main.py` e dos modelos Pydantic de `app/gemini/schemas.py`, `app/audio/schemas.py` e `app/nlp/schemas.py`. Assim, os contratos validados em execução também alimentam a referência automática.
+
+Com o servidor local na porta padrão, ficam disponíveis:
 
 | Recurso | Endereço local | Conteúdo |
 | --- | --- | --- |
-| Swagger UI | `http://127.0.0.1:8000/docs` | Documentação navegável, com formulário para executar as rotas. |
-| ReDoc | `http://127.0.0.1:8000/redoc` | Referência em formato de leitura, adequada para consulta. |
-| Especificação OpenAPI | `http://127.0.0.1:8000/openapi.json` | Contrato em JSON, utilizável para gerar clientes ou testes de contrato. |
+| Swagger UI | `http://127.0.0.1:8000/docs` | Referência navegável e formulários para executar as rotas. |
+| ReDoc | `http://127.0.0.1:8000/redoc` | Contratos em formato de leitura. |
+| OpenAPI JSON | `http://127.0.0.1:8000/openapi.json` | Especificação utilizável por clientes e testes de contrato. |
 
-Para subir o servidor:
+O título, a descrição e a versão exibidos são definidos na instância `FastAPI` em `app/main.py`. A referência automática demonstra o contrato exposto, mas não substitui as condições de operação registradas a seguir: o teste interativo de áudio exige um token simulado e credenciais válidas do Azure, enquanto o chat que chega ao Gemini requer a respectiva chave.
 
-```bash
-cd src/backend
-.venv/bin/python -m uvicorn app.main:app --reload
+### 8.5.4 APIs consumidas pelo front-end
+
+O front-end consome somente três rotas de mesma origem. Em desenvolvimento, o Vite encaminha `/api` e `/health` para o FastAPI; no build publicado, o servidor responsável pelos arquivos estáticos deve oferecer o mesmo encaminhamento. A variável `API_PROXY_TARGET` muda o destino apenas no servidor de desenvolvimento e nos testes.
+
+| Método e rota | Entrada | Saída utilizada pela interface | Observações de reprodução |
+| --- | --- | --- | --- |
+| `GET /health` | Sem corpo ou autenticação. | `{"status":"ok"}`. | Confirma a inicialização do processo; não testa Azure, Gemini ou a disponibilidade dos dados. |
+| `POST /api/chat` | JSON com `message` (1 a 20.000 caracteres), `previous_interaction_id` opcional e `use_intent_classifier` booleano. | Texto, ID da interação, modelo, latências, consumo, intenção opcional e lista de fontes. | Não exige Bearer token na versão atual. O ID anterior mantém o encadeamento lógico da conversa. |
+| `POST /api/audio` | Multipart com arquivo `audio`; `conversation_id`, `language`, `previous_interaction_id` e `use_intent_classifier` opcionais; cabeçalho `Authorization: Bearer <token>`. | Transcrição, conversa, interação, intenção, resposta resumida, resposta completa em `chat` e `pipeline_status`. | O navegador envia WAV PCM mono, 16 bits e 16 kHz. O back-end revalida o conteúdo e aceita uma requisição simultânea por identidade. |
+
+Uma chamada textual pode ser reproduzida sem o front-end, depois de iniciar o FastAPI e configurar o Gemini:
+
+```powershell
+$body = @{
+  message = "Qual é o status do projeto de sinalização?"
+  previous_interaction_id = $null
+  use_intent_classifier = $false
+} | ConvertTo-Json
+
+$response = Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/chat `
+  -ContentType "application/json" `
+  -Body $body
+
+$response | Select-Object text, interaction_id, model, latency_ms, retrieval_ms
+$response.sources | Select-Object id, title, list_name, web_url, score
 ```
 
-O título, a descrição e a versão exibidos são os declarados na instância `FastAPI` em `app/main.py`. Quando o endpoint de áudio da Seção 8.7 for implementado na Sprint 3, ele passará a aparecer automaticamente nas três interfaces, sem edição manual de documentação.
+O resultado esperado é um objeto com `text`, métricas e `sources`; a lista pode estar vazia quando nenhum trecho ultrapassa o critério de relevância. Para testar o encadeamento, envie o `interaction_id` recebido como `previous_interaction_id` na chamada seguinte. O multipart de áudio já possui exemplo completo na Seção 8.7.4 e pode ser exercitado sem montar o corpo manualmente pelo Swagger UI.
 
-No frontend não há geração automática de documentação: a descrição de estrutura, componentes e instruções de uso é entrega da Sprint 3, registrada no backlog da Seção 6.2 do `GestaoProjeto.md`.
+No chat, `use_intent_classifier=false` encaminha a mensagem diretamente à recuperação e à geração. Quando o campo é `true`, o pipeline classifica primeiro: solicitações fora de escopo ou abaixo dos limiares recebem uma resposta controlada sem chamada ao Gemini; solicitações roteadas seguem para o mesmo caminho RAG. A resposta pode, portanto, não possuir `interaction_id`, e o front-end mantém nesse caso o último ID válido da conversa.
+
+No áudio, a ordem é validação, transcrição no Azure e chamada ao mesmo `process_message` usado pelo chat. `conversation_id` identifica a conversa da interface, enquanto `interaction_id` vem do processamento textual. O objeto legado `answer` oferece texto e referências resumidas; `chat` preserva o contrato completo do endpoint textual, inclusive métricas, trecho recuperado e metadados das fontes.
+
+As fontes completas contêm identificador, título, lista de origem, URL, data de alteração, pontuação e trecho opcional. A interface não cria referências quando a API devolve uma lista vazia. Os detalhes do multipart, limites de áudio e códigos específicos estão nas Seções 8.7 e 8.8, evitando repetir aqui a especificação de voz.
+
+O cliente aplica limite de 120 segundos e permite cancelamento por `AbortController`. Cancelar interrompe a espera no navegador e impede que uma resposta tardia altere o estado atual; isso não garante o cancelamento de uma chamada que o back-end ou um provedor já tenha recebido. Erros conhecidos de validação, autenticação, limite, concorrência, provedor e rede são convertidos em mensagens próprias. HTML de proxy, traceback e mensagens privadas dos provedores não são exibidos à pessoa usuária.
+
+### 8.5.5 Integrações e limites operacionais
+
+| Integração | Implementação atual | Configuração ou fonte | Limite conhecido |
+| --- | --- | --- | --- |
+| Azure AI Speech | `audio/transcription.py` envia o WAV validado para transcrição `pt-BR`, com timeout e retentativas. | `AZURE_SPEECH_RESOURCE` ou `AZURE_SPEECH_ENDPOINT`, `AZURE_SPEECH_KEY`, timeout e número de tentativas no `.env` do back-end. | Exige credencial e rede; a suíte padrão substitui a fronteira HTTP por duplo. |
+| Gemini | `gemini/client.py` gera a resposta a partir da pergunta e do contexto recuperado, com timeout e backoff. | `GEMINI_API_KEY`, modelo, limite de saída, nível de raciocínio, timeout e retentativas. | Sem chave, o chat que precisa de geração devolve indisponibilidade controlada. |
+| RAG de SharePoint simulado | `rag/sharepoint.py` pesquisa exports JSON versionados e inclui rótulos de fonte no prompt. | `rag/data/sharepoint/` ou `SHAREPOINT_MOCK_DATA_DIR`. | Não acessa o tenant corporativo nem sincroniza alterações do SharePoint. |
+| Classificador local | `nlp/` carrega o `joblib`, Word2Vec e encoder ONNX; `PLN_WARMUP=1` antecipa a carga. | Artefatos em `src/notebooks/artefatos/`; encoder obtido do repositório de modelo indicado na Seção 8.11. | A primeira instalação/carga pode exigir internet e cache local; não executa transações. |
+| Identidade do áudio | `audio/security.py` resolve o Bearer token por um mapa simulado e limita uma transcrição ativa por identidade. | `AUDIO_SIMULATED_IDENTITIES`, por exemplo `token-local=usuario-local`. | Não valida JWT do Entra ID e não aplica as regras da tabela `access_rules`. |
+
+O SharePoint corporativo, Entra ID, Teams, Copilot Studio e Power Automate aparecem nos desenhos e no modelo-alvo, mas não possuem adaptador ativo nesta versão. Em particular, classificar uma solicitação como transacional não executa escrita externa: o resultado apenas descreve a intenção. Essa distinção evita interpretar a bancada como um canal de produção ou como evidência de autorização corporativa.
+
+### 8.5.6 Banco de dados: artefato disponível e integração pendente
+
+O modelo físico descrito na Seção 4.3 está implementado em `src/database/sql/01_create_database.sql` para PostgreSQL 14 ou superior, inclusive Supabase PostgreSQL. São 25 tabelas com UUIDs gerados por `pgcrypto`, chaves estrangeiras, restrições de domínio, índices para os caminhos previstos e `JSONB` para metadados cuja estrutura ainda pode evoluir. A relação completa de tabelas e as decisões de modelagem permanecem em `src/database/docs/README.md` para não repetir o dicionário da Seção 4.
+
+Os três scripts têm responsabilidades separadas e ordem explícita:
+
+1. `01_create_database.sql` cria extensões, tabelas, restrições, índices, gatilhos de `updated_at` e comentários;
+2. `02_initial_data.sql` insere um subportfólio e um projeto sintéticos, artefato, TAP, benefício, avanço, marco, risco e catálogo mínimo de intenções;
+3. `03_rollback_data.sql` remove o baseline em ordem reversa de dependência e deve ser usado somente em ambiente descartável ou depois de backup.
+
+Com um PostgreSQL acessível e `psql` no `PATH`, a criação e a carga podem ser reproduzidas da raiz do repositório:
+
+```powershell
+$env:DATABASE_URL = "postgresql://usuario:senha@localhost:5432/metro_poc"
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/01_create_database.sql
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/02_initial_data.sql
+```
+
+Em um banco vazio dedicado à PoC, confirme o baseline e a carga sem depender de uma ferramenta gráfica:
+
+```powershell
+psql "$env:DATABASE_URL" -c "SELECT COUNT(*) AS tabelas_public FROM pg_tables WHERE schemaname = 'public';"
+psql "$env:DATABASE_URL" -c "SELECT code, title, status FROM public.projects WHERE code = 'PRJ-0442';"
+psql "$env:DATABASE_URL" -c "SELECT macro_intent, COUNT(*) FROM public.intent_catalog GROUP BY macro_intent ORDER BY macro_intent;"
+```
+
+O primeiro comando deve informar 25 tabelas em um schema `public` inicialmente vazio. O segundo deve devolver o projeto sintético `PRJ-0442`, e o terceiro deve listar as macrointenções da carga mínima. Falha em qualquer uma dessas consultas indica que criação e carga não terminaram conforme o esperado; não avance para uma integração antes de corrigir o primeiro erro reportado por `ON_ERROR_STOP`.
+
+A opção `ON_ERROR_STOP` faz o processo terminar na primeira falha em vez de continuar com uma instalação parcial. A carga usa conflitos controlados e verificações de existência para que uma nova execução atualize ou preserve os registros sintéticos esperados, em vez de duplicá-los.
+
+O banco é, nesta versão, um **artefato executável isolado**: o back-end não lê `DATABASE_URL`, não abre conexão PostgreSQL e não persiste conversas, interações, fontes ou auditoria. Também não há migração automatizada nem integração Supabase ativa. Até que um adaptador seja implementado, a resposta do agente vem dos JSONs simulados do SharePoint, e a interface mantém o histórico apenas em memória. Essa fronteira é importante para reproduzir o que existe sem pressupor uma persistência ainda não entregue.
+
+### 8.5.7 Front-end: componentes e comportamento
+
+A bancada usa React 19, TypeScript e Vite. `App.tsx` instala `ThemeProvider` e `ChatProvider`; `AppShell` organiza a barra de conversas, o chat e o painel de documentos. A implementação detalhada de cada componente está em `src/frontend/README.md`; o mapa abaixo registra como as pastas colaboram sem repetir a lista de arquivos da Seção 8.1.
+
+| Área | Responsabilidade observável |
+| --- | --- |
+| `components/sidebar/` | Criação, busca, seleção e exclusão de conversas da sessão, além do token simulado usado somente no áudio. |
+| `components/chat/` | Estado vazio, histórico de mensagens, Markdown seguro, classificação, fontes e indicação de processamento. |
+| `components/composer/` | Entrada de texto, alternância da validação de intenção, captura, prévia, descarte e envio de áudio. |
+| `components/documents/` | Lista de fontes, trecho recuperado, link original e métricas da resposta selecionada. |
+| `components/layout/` e `components/ui/` | Layout responsivo, tema, diálogos, abas e controles acessíveis reutilizáveis. |
+| `hooks/`, `lib/` e `state/` | Microfone, conversão WAV, domínio, cliente HTTP, reducer, concorrência e cancelamento. |
+
+A rastreabilidade entre ação, estado e contrato ajuda a localizar uma alteração sem percorrer toda a árvore:
+
+| Ação na interface | Operação de estado | Fronteira chamada | Resultado renderizado |
+| --- | --- | --- | --- |
+| Enviar texto | `sendMessage` delega ao fluxo comum `send` | `sendChatMessage` em `lib/api/chat.ts` | Mensagem da pessoa, resposta, intenção, fontes e métricas. |
+| Enviar gravação | `sendAudio` delega ao mesmo `send` | `uploadAudio` em `lib/api/audio.ts` | Transcrição como entrada e `chat` como resposta do agente. |
+| Interromper | `stop` aborta o controlador pendente | `AbortSignal` recebido pelo cliente comum | O indicador termina e nenhuma resposta tardia é aplicada. |
+| Trocar ou excluir conversa | `selectConversation` ou `deleteConversation` despacha no reducer | Nenhuma chamada HTTP | Histórico, fontes e documento selecionado mudam apenas na sessão. |
+| Abrir uma fonte | seleção derivada de `activeSources` | Nenhuma nova chamada HTTP | `DocumentViewer` mostra metadados e o trecho já devolvido pela API. |
+
+Essa cadeia também define onde testar: componentes verificam a apresentação, a store verifica concorrência e associação à conversa, o cliente verifica serialização e erros, e o Playwright atravessa as quatro camadas pelo comportamento observável.
+
+O envio por texto aceita uma sugestão ou mensagem digitada, usa `Enter` para enviar e `Shift+Enter` para nova linha. O envio por voz requer o token da bancada, permissão do microfone, conclusão da gravação e confirmação da prévia. A captura para em 60 segundos; o navegador converte o sinal para o formato aceito antes do upload. Durante qualquer chamada, a interface bloqueia duplicidade e oferece interrupção.
+
+Cada conversa mantém seu último `interaction_id`, mensagens, fontes e preferências enquanto a página permanece aberta. Criar ou selecionar outra conversa cancela a espera corrente, e o identificador interno da requisição impede que um retorno atrasado seja inserido no destino errado. A busca e a exclusão alteram apenas o estado local. Recarregar a página remove histórico e token; o tema é a única preferência com persistência prevista.
+
+No desktop, as três áreas ficam lado a lado. Abaixo de 1024 px, conversas e documentos abrem em diálogos que podem ser fechados com `Escape`. Estados de carregamento e mudanças relevantes possuem anúncios para tecnologias assistivas, os controles têm nomes acessíveis e o foco retorna ao contexto apropriado ao fechar um diálogo. Essas propriedades fazem parte dos testes descritos em `src/frontend/TESTES.md`, não apenas do desenho visual.
+
+### 8.5.8 Back-end: ciclo de processamento
+
+O back-end usa FastAPI e Pydantic. Na inicialização, `lifespan` lê `PLN_WARMUP`: quando igual a `1`, o classificador é carregado em uma thread antes de o serviço aceitar consultas; quando igual a `0`, a carga ocorre na primeira classificação. O carregamento é protegido por lock para evitar inicializações concorrentes.
+
+Em `POST /api/chat`, Pydantic remove espaços externos e rejeita mensagem vazia ou acima de 20.000 caracteres. `process_message` classifica somente quando solicitado. Uma classificação não roteável encerra o fluxo com uma resposta local e segura; as demais entradas seguem para recuperação de contexto e Gemini. Erros de configuração ou do provedor são convertidos em indisponibilidade ou falha controlada, sem expor detalhes internos.
+
+Em `POST /api/audio`, a identidade simulada é resolvida antes da leitura. O arquivo é lido em blocos de 64 KiB e interrompido assim que ultrapassa o teto, evitando manter em memória um upload que será recusado. Depois da validação e do Azure STT, a transcrição é entregue ao mesmo pipeline do chat por meio de uma thread, para não bloquear o laço assíncrono. A resposta combina o resultado de voz com o contrato completo do chat.
+
+O RAG carrega dados sintéticos substituíveis por diretório, pontua a correspondência e injeta somente resultados relevantes com identificação da fonte. O cliente Gemini controla timeout e retentativas de falhas transitórias. Nenhuma dessas etapas grava no banco; logs de auditoria, persistência e autorização por perfil continuam como fronteiras de implementação futuras.
+
+Para isolar uma falha sem confundir disponibilidade do processo com disponibilidade dos provedores, use os checkpoints na ordem:
+
+| Checkpoint | O que comprova | O que ainda não comprova |
+| --- | --- | --- |
+| `GET /health` | FastAPI terminou a inicialização; com `PLN_WARMUP=1`, a carga inicial do classificador também terminou. | Credenciais, cota ou rede de Azure e Gemini. |
+| `POST /api/chat` com classificador desligado | Validação JSON, RAG local, montagem do prompt e fronteira Gemini. | Encoder e limiares do classificador. |
+| `POST /api/chat` com classificador ligado | Carga do modelo, inferência, limiares e roteamento antes da geração. | Captura, WAV e Azure STT. |
+| `POST /api/audio` | Identidade simulada, concorrência, leitura limitada, validação WAV, Azure STT e reutilização do pipeline. | Autenticação Entra ID e persistência. |
+| Resposta com `sources` | Recuperação dos JSONs, metadados e propagação até o contrato. | Consulta ao SharePoint corporativo. |
+
+Se um checkpoint falhar, teste primeiro o anterior e consulte o corpo controlado da resposta. Os testes determinísticos reproduzem cada fronteira com duplos; uma validação do provedor real deve ser executada separadamente, pois depende de credenciais, rede, cota e região.
+
+### 8.5.9 Execução e verificação reproduzíveis
+
+O passo a passo completo, incluindo pré-requisitos, configuração sem credenciais versionadas, inicialização dos dois serviços, banco opcional, teste manual e solução de problemas, está em `docs/Manual-instalacao.md`. A sequência mínima parte da raiz:
+
+```powershell
+python -m venv .venv
+.venv/Scripts/python.exe -m pip install -r src/backend/requirements.txt -r src/backend/requirements-pln.txt
+Copy-Item src/backend/.env.example src/backend/.env
+Set-Location src/frontend
+npm ci
+```
+
+Depois de preencher o `.env` local, o back-end deve ser iniciado na porta 8000 e o Vite na 5173, em terminais separados. `GET /health` deve devolver `status=ok` antes do uso. A referência automática fica em `/docs`; a interface, em `http://localhost:5173`.
+
+As verificações locais são `pytest` para o back-end e, no front-end, lint, formatação, cobertura, build e Playwright. Os comandos e resultados de referência estão em `src/frontend/TESTES.md`. Os testes automatizados substituem Azure e Gemini por duplos na fronteira de rede; por isso são reproduzíveis sem credenciais, mas não comprovam integrações corporativas nem os RNFs dependentes do ambiente de produção.
 
 ## 8.6 Requisitos das APIs de voz (STT/TTS)
 
@@ -3418,7 +3714,7 @@ O caminho de uma solicitação por voz é o seguinte:
 
 1. o canal envia o áudio à API da aplicação;
 2. a API valida formato, duração e tamanho antes de qualquer chamada externa;
-3. o áudio aprovado é encaminhado ao serviço de Speech-to-Text descrito na Seção 8.8;
+3. quando a integração estiver habilitada, o áudio aprovado é encaminhado ao serviço de Speech-to-Text descrito na Seção 8.8;
 4. a transcrição retorna à API, que a submete ao pipeline de PLN da Seção 8.10;
 5. a resposta segue o mesmo formato das solicitações textuais, conforme o RF08.
 
@@ -3447,7 +3743,10 @@ Os limites derivam do endpoint de áudio curto do provedor selecionado na Seçã
 
 ### 8.7.4 Requisição
 
-O envio é `multipart/form-data`, com o arquivo no campo `audio`.
+O envio é `multipart/form-data`, com o arquivo no campo `audio`. O cabeçalho
+`Authorization` deve usar o esquema `Bearer`; a ausência do token, um esquema
+distinto ou token não reconhecido no mapa de identidades simulado resulta em
+`401 Unauthorized`.
 
 ```http
 POST /api/audio HTTP/1.1
@@ -3459,9 +3758,11 @@ Content-Length: <TAMANHO>
 
 | Campo | Obrigatório | Descrição |
 |---|:---:|---|
-| `audio` | Sim | Arquivo de áudio no formato aceito. |
-| `conversation_id` | Não | Identificador da conversa, quando a solicitação continuar uma interação existente. |
-| `language` | Não | Idioma da gravação. Assume `pt-BR` quando ausente. |
+| `audio` | Sim | Arquivo binário de áudio. A extensão e o `Content-Type` informado no formulário não substituem a validação do conteúdo do arquivo. |
+| `conversation_id` | Não | Texto que identifica uma conversa existente. É devolvido sem alteração; se ausente, a API gera um UUID. |
+| `language` | Não | Idioma enviado ao Azure Speech-to-Text. O padrão é `pt-BR`. |
+| `previous_interaction_id` | Não | Identificador da interação anterior para preservar o contexto lógico do chat. |
+| `use_intent_classifier` | Não | Booleano que habilita a classificação local antes da geração; o padrão é `false`. |
 
 Exemplo com cURL:
 
@@ -3470,46 +3771,137 @@ curl --request POST \
   --url https://<HOST-DA-APLICACAO>/api/audio \
   --header 'Authorization: Bearer <TOKEN>' \
   --form 'audio=@pergunta.wav;type=audio/wav' \
-  --form 'conversation_id=1f5c9a24-1c2e-4a8f-9a3e-2b6d8c0f1a77'
+  --form 'conversation_id=1f5c9a24-1c2e-4a8f-9a3e-2b6d8c0f1a77' \
+  --form 'use_intent_classifier=true'
 ```
 
 ### 8.7.5 Resposta de sucesso
 
-`200 OK`, com a transcrição e o resultado do pipeline no mesmo formato das solicitações textuais.
+`200 OK`. O endpoint valida o arquivo, executa a transcrição e encaminha o
+texto reconhecido ao mesmo pipeline de PLN usado por `POST /api/chat`. A
+resposta aprovada traz `pipeline_status: "completed"`, intenção estruturada,
+entidades extraídas e métricas do percurso de áudio e PLN, mantendo RNF05
+rastreável no contrato HTTP e RNF11 com mensagens controladas para entradas sem
+rota segura.
 
 ```json
 {
   "conversation_id": "1f5c9a24-1c2e-4a8f-9a3e-2b6d8c0f1a77",
   "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
   "transcription": {
-    "text": "qual o prazo do projeto de modernização da linha 1",
-    "confidence": 0.94,
+    "text": "qual e o prazo do projeto XPTO?",
+    "confidence": 0.92,
     "duration_seconds": 4.8
   },
   "intent": {
     "macro": "CONSULTA",
-    "specific": "consulta_prazo_projeto",
-    "confidence_macro": 0.97,
-    "confidence_specific": 0.89
+    "specific": "consulta_prazo",
+    "confidence_macro": 0.98,
+    "confidence_specific": 0.86,
+    "flow": "consulta_documental",
+    "handler": "consultar_prazo",
+    "alternatives": [
+      { "specific": "consulta_status", "confidence": 0.09 }
+    ]
+  },
+  "entities": [
+    {
+      "type": "projeto",
+      "value": "XPTO",
+      "text": "projeto XPTO",
+      "start": 17,
+      "end": 29,
+      "types": ["projeto"],
+      "ambiguous": false
+    }
+  ],
+  "pipeline_metrics": {
+    "validation_ms": 3,
+    "stt_ms": 410,
+    "nlp_ms": 8,
+    "route_ms": 35,
+    "total_ms": 456
+  },
+  "chat": {
+    "text": "O prazo do projeto XPTO consta nas fontes recuperadas para esta consulta.",
+    "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
+    "intent": {
+      "macro": "CONSULTA",
+      "specific": "consulta_prazo",
+      "confidence_macro": 0.98,
+      "confidence_specific": 0.86,
+      "flow": "consulta_documental",
+      "handler": "consultar_prazo",
+      "alternatives": [
+        { "specific": "consulta_status", "confidence": 0.09 }
+      ]
+    },
+    "entities": [
+      {
+        "type": "projeto",
+        "value": "XPTO",
+        "text": "projeto XPTO",
+        "start": 17,
+        "end": 29,
+        "types": ["projeto"],
+        "ambiguous": false
+      }
+    ],
+    "pipeline_metrics": {
+      "nlp_ms": 8,
+      "route_ms": 35
+    },
+    "sources": []
   },
   "answer": {
-    "text": "O prazo vigente do projeto é 30/06/2027.",
+    "text": "O projeto está em andamento.",
     "sources": [
-      { "artifact": "TAP-Linha1-Modernizacao.docx", "section": "4. Cronograma" }
+      { "artifact": "Status do projeto", "section": "base_atendimento" }
     ]
-  }
+  },
+  "chat": {
+    "text": "O projeto está em andamento.",
+    "model": "gemini-3.7-flash",
+    "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
+    "latency_ms": 840,
+    "retrieval_ms": 12,
+    "usage": { "input_tokens": 120, "output_tokens": 34, "thought_tokens": 0, "total_tokens": 154 },
+    "sources": [
+      {
+        "id": "status-projeto-01",
+        "title": "Status do projeto",
+        "list_name": "base_atendimento",
+        "web_url": "https://mock.sharepoint.local/status-projeto-01",
+        "last_modified": "2026-08-26T12:00:00Z",
+        "score": 4.2,
+        "excerpt": "Projeto em andamento."
+      }
+    ],
+    "intent": {
+      "macro": "CONSULTA",
+      "specific": "consulta_status_projeto",
+      "confidence_macro": 0.97,
+      "confidence_specific": 0.91
+    }
+  },
+  "pipeline_status": "completed"
 }
 ```
 
 | Campo | Tipo | Descrição |
 |---|---|---|
-| `conversation_id` | `uuid` | Sessão conversacional, registrada em `ai_conversations`. |
-| `interaction_id` | `uuid` | Interação registrada em `ai_interactions`, para rastreabilidade. |
-| `transcription.text` | `string` | Texto reconhecido pelo serviço de Speech-to-Text. |
-| `transcription.confidence` | `float` | Confiança do reconhecimento, de 0 a 1. |
-| `intent.macro` | `string` | `CONSULTA`, `TRANSACAO`, `ALERTA` ou `FORA_DE_ESCOPO`. |
-| `intent.confidence_macro` | `float` | Confiança da macrointenção, comparada ao limiar vigente no catálogo (0,550 na execução de referência da Seção 8.10.3). |
-| `answer.sources` | `array` | Fontes consultadas, registradas em `consulted_sources`. |
+| `conversation_id` | `string` | Valor recebido no formulário ou UUID gerado pela API se o campo não foi enviado. |
+| `interaction_id` | `string` | UUID gerado para a interação. |
+| `transcription.text` | `string` | Texto reconhecido pelo STT e enviado ao pipeline de PLN. |
+| `transcription.confidence` | `float` | Confiança retornada pelo provedor de transcrição. |
+| `transcription.duration_seconds` | `float` | Duração extraída do arquivo e arredondada para duas casas decimais. |
+| `intent` | `object` | Intenção rica derivada da transcrição: `macro`, `specific`, confianças, `flow`, `handler` e `alternatives`. |
+| `entities` | `array` | Entidades extraídas da transcrição, com tipo, valor, texto original, posição e ambiguidade. |
+| `pipeline_metrics` | `object` | Tempos em milissegundos de validação, STT, PLN, roteamento e fluxo total, usados para acompanhar o RNF05. |
+| `chat` | `object` | Resposta textual completa no mesmo contrato de `POST /api/chat`, incluindo `intent`, `entities`, fontes e métricas do pipeline. |
+| `answer.text` | `string` | Espelho compatível do texto de resposta usado pelo frontend atual. |
+| `answer.sources` | `array` | Fontes resumidas preservadas por compatibilidade. |
+| `pipeline_status` | `string` | `completed` quando validação, STT e pipeline de chat terminam com resposta controlada. |
 
 ### 8.7.6 Códigos de resposta e tratamento de erro
 
@@ -3532,18 +3924,33 @@ O corpo de erro segue estrutura única, para que o canal possa exibir a mensagem
 | `400 Bad Request` | `AUDIO_FORMAT_UNSUPPORTED` | Contêiner, codec, taxa de amostragem ou número de canais fora do previsto. |
 | `400 Bad Request` | `AUDIO_TOO_LONG` | Gravação acima de 60 segundos. |
 | `401 Unauthorized` | `UNAUTHENTICATED` | Token ausente, inválido ou expirado. |
-| `403 Forbidden` | `OUT_OF_SCOPE_FOR_PROFILE` | Usuário sem permissão para o escopo solicitado, conforme `access_rules`. |
 | `413 Payload Too Large` | `AUDIO_TOO_LARGE` | Arquivo acima de 2 MB. |
 | `422 Unprocessable Entity` | `NO_SPEECH_DETECTED` | Áudio válido, mas sem fala reconhecível. |
-| `429 Too Many Requests` | `RATE_LIMITED` | Requisição simultânea ou franquia do provedor excedida. |
+| `429 Too Many Requests` | `RATE_LIMITED` | Já existe uma requisição de áudio em processamento para o mesmo usuário. |
 | `502 Bad Gateway` | `STT_PROVIDER_ERROR` | Falha na chamada ao serviço de transcrição. |
 | `503 Service Unavailable` | `STT_PROVIDER_UNAVAILABLE` | Serviço de transcrição indisponível; aplica-se o fallback da Seção 6.2.5. |
 
-As respostas `422` e `502` são registradas em `audit_events`, porque distinguem falha do usuário de falha do provedor e essa diferença orienta o tratamento na Sprint 3.
+O código `403 OUT_OF_SCOPE_FOR_PROFILE`, previsto para a autorização por
+`access_rules`, ainda não é retornado por esta rota: essa verificação depende
+da persistência e será acrescentada em tarefa própria. Os erros do endpoint
+usam sempre o envelope acima; o campo opcional `detail` contém somente dados
+seguros da própria requisição, como tipo de mídia recebido, duração ou limite
+de tamanho, e nunca detalhes internos do servidor.
 
 ### 8.7.7 Situação de implementação
 
-A especificação acima é o contrato acordado para a Sprint 3, quando o barema exige a implementação do endpoint. Na Sprint 2 o backend expõe apenas `/health` e a rota textual; nenhum endpoint recebe áudio ainda. Os limites declarados aqui são os que a implementação deve validar.
+O endpoint está implementado em `src/backend/app/main.py` e pode ser consultado
+também pela documentação interativa do FastAPI (`/docs`). Ele valida o
+`Authorization: Bearer <TOKEN>`, aceita uma solicitação em processamento por
+usuário e realiza todas as validações locais antes de qualquer integração
+externa. Na prova de conceito, quando a variável `AUDIO_SIMULATED_IDENTITIES`
+não é configurada, qualquer token Bearer não vazio identifica o usuário de
+forma estável; quando ela é configurada, apenas os tokens mapeados são aceitos.
+
+O upload, a validação, a transcrição, o encaminhamento ao pipeline de PLN e os
+retornos de erro desta seção estão concluídos para a prova de conceito. A
+autorização de escopo corporativa e a persistência continuam fora desta entrega;
+respostas aprovadas retornam `pipeline_status` igual a `completed`.
 
 ## 8.8 Speech-to-Text
 
@@ -3623,10 +4030,13 @@ Para o desenvolvimento inicial será utilizada a **API REST do Azure AI Speech p
 | Finalidade | Método HTTP | Endpoint | Uso no projeto |
 |---|---|---|---|
 | Converter áudio curto em texto | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/stt/speech/recognition/conversation/cognitiveservices/v1` | Endpoint principal do desenvolvimento inicial. |
+| Converter áudio curto por host regional | `POST` | `https://<REGIAO>.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1` | Alternativa equivalente quando o ambiente informa a região do recurso. |
 | Obter token temporário | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/sts/v1.0/issueToken` | Opcional; troca a chave do recurso por um token válido por 10 minutos. |
 | Transcrever arquivo com a API rápida | `POST` | `https://<NOME-DO-RECURSO>.cognitiveservices.azure.com/speechtotext/transcriptions:transcribe?api-version=2025-10-15` | Disponível no nível Standard (S0) para uma futura ampliação dos limites. |
 
 O endpoint de áudio curto é o único necessário para a funcionalidade atual. O endpoint de token é utilizado somente quando a aplicação opta por não enviar a chave diretamente em cada requisição. A transcrição rápida não está disponível no nível Free (F0), por isso não é adotada no desenvolvimento inicial.
+
+No ambiente de desenvolvimento, a configuração fica em `src/backend/.env`. `AZURE_SPEECH_RESOURCE` guarda o nome do recurso Speech e `AZURE_SPEECH_KEY` guarda a chave usada no cabeçalho `Ocp-Apim-Subscription-Key`. `AZURE_SPEECH_ENDPOINT` é opcional e registra o endpoint exibido no portal Azure; quando ele vier no formato regional `https://<REGIAO>.api.cognitive.microsoft.com/`, a aplicação converte internamente para o host `https://<REGIAO>.stt.speech.microsoft.com`, que é o formato usado pela API de reconhecimento de fala. `AZURE_SPEECH_TIMEOUT_SECONDS` define o limite de espera da chamada ao provedor, com padrão de 6 segundos, e `AZURE_SPEECH_MAX_ATTEMPTS` define quantas tentativas são feitas diante de falha transitória, com padrão de duas. Os dois valores acompanham o orçamento do RNF05, que concede 10 segundos para uma consulta simples ponta a ponta e do qual a transcrição é apenas a primeira etapa.
 
 #### Requisição de transcrição
 
@@ -3681,7 +4091,7 @@ curl --location --request POST \
   --data-binary "@pergunta.wav"
 ```
 
-As variáveis `AZURE_SPEECH_RESOURCE` e `AZURE_SPEECH_KEY` devem ser configuradas no ambiente de execução. A chave não deve ser escrita no código-fonte nem versionada no repositório.
+As variáveis `AZURE_SPEECH_RESOURCE` e `AZURE_SPEECH_KEY` devem ser configuradas no ambiente de execução. A chave não deve ser escrita no código-fonte nem versionada no repositório. Quando `AZURE_SPEECH_ENDPOINT` estiver preenchida com o endpoint regional do portal, o exemplo acima continua equivalente: a aplicação deriva a URL final antes de chamar o provedor.
 
 #### Resposta de sucesso
 
@@ -3988,6 +4398,8 @@ Esta seção registra a escolha atual do pipeline de Processamento de Linguagem 
 
 Embora seja referido de forma abreviada como “modelo híbrido”, o componente é tecnicamente um pipeline: a representação híbrida — TF-IDF de palavras e de caracteres reduzidos por SVD, Word2Vec treinado no corpus do projeto e embeddings BERT congelados — gera os atributos de entrada, e classificadores lineares realizam a previsão em dois níveis, macrointenção e intenção específica.
 
+Esta seção trata da **escolha**: como as alternativas foram comparadas, qual venceu e o que a medição sustenta. A **implementação** dessa escolha no serviço — módulos, dependências de execução, exemplos de entrada e saída e testes automatizados — está na Seção 8.11. A Seção 8.10.6 registra o que a implementação confirmou e o que ela mudou na decisão original.
+
 ### 8.10.1 Objetivo e protocolo de avaliação
 
 O classificador organiza os pedidos em quatro macrointenções (`CONSULTA`, `TRANSACAO`, `ALERTA` e `FORA_DE_ESCOPO`) e 31 intenções específicas. A macrointenção determina o fluxo geral do agente, enquanto a intenção específica identifica o handler mais adequado.
@@ -4097,7 +4509,7 @@ A execução de referência gerou o classificador serializado (13.472 KB), o mod
 
 O pipeline é implementado em Python no notebook [`src/notebooks/classificador_intencoes_metro.ipynb`](../src/notebooks/classificador_intencoes_metro.ipynb), e os artefatos da execução de referência estão em `src/notebooks/artefatos/`.
 
-**Bibliotecas utilizadas**
+**Bibliotecas utilizadas no treinamento e no benchmark**
 
 | Biblioteca | Papel no pipeline |
 |---|---|
@@ -4109,6 +4521,8 @@ O pipeline é implementado em Python no notebook [`src/notebooks/classificador_i
 | `pandas` e `numpy` | Manipulação do conjunto de dados e das matrizes de atributos |
 | `scipy` | Empilhamento de matrizes esparsas na composição das representações híbridas |
 | `joblib` | Serialização do classificador e dos transformadores ajustados |
+
+O ambiente de **inferência** não repete essa lista. Ele dispensa `torch`, `transformers` e `sentence-transformers`, substituídos pelo ONNX Runtime na execução do encoder, conforme a revisão registrada na Seção 8.10.6. As dependências efetivamente instaladas no backend estão na Seção 8.11.2.
 
 **Passos de configuração**
 
@@ -4258,7 +4672,7 @@ Os números atuais devem ser interpretados com as seguintes ressalvas:
 - o limiar de macrointenção não alcançou o alvo de 97% de acurácia entre os aceitos, ficando em 93,2%;
 - os limiares priorizam segurança e custam cobertura: 26,9% dos pedidos do teste são tratados pelo fluxo genérico em vez de um handler específico;
 - o desempenho agregado oculta intenções individuais fracas — `analise_tendencia_desempenho`, por exemplo, tem F1 de 0,299 no teste, e `alerta_estouro_orcamento` tem recall de 0,548 apesar de precisão 1,000;
-- a inferência depende do carregamento coordenado de três artefatos — o `joblib`, o Word2Vec e o encoder BERT —, aspecto que deverá ser formalizado no serviço de produção.
+- a inferência depende do carregamento coordenado de três artefatos — o `joblib`, o Word2Vec e o encoder BERT —, aspecto formalizado na Sprint 3 em `src/backend/app/nlp/inference.py` e descrito na Seção 8.11.4.
 
 Como próximos passos, o grupo deve coletar solicitações reais com usuários do domínio, manter um conjunto externo de teste, revisar as classes com maior confusão — em especial a fronteira entre consulta e transação evidenciada no exemplo de erro da Seção 8.10.4 —, avaliar o fine-tuning do BERTimbau e medir cobertura e acurácia após a aplicação dos limiares. Até essa validação, o híbrido completo deve ser entendido como o **vencedor do benchmark atual** e a escolha do grupo para o MVP, não como um modelo validado para produção.
 
@@ -4266,39 +4680,781 @@ Como próximos passos, o grupo deve coletar solicitações reais com usuários d
 
 A célula do Word2Vec emite em `stderr` a linha `Exception ignored in: 'gensim.models.word2vec_inner.our_dot_float'`. É um aviso conhecido da rotina compilada do `gensim` em combinação com a versão do NumPy do ambiente, e não interrompe o treinamento: o vocabulário é construído com os 577 termos do treino e os vetores são gerados nas dimensões esperadas, conforme a saída da própria célula. O aviso está preservado na execução versionada em vez de suprimido, para que o registro corresponda ao que a execução produziu.
 
+### 8.10.6 Revisão da decisão após a implementação
+
+A Sprint 2 escolheu o algoritmo dentro do notebook. A Sprint 3 levou essa escolha para um serviço importável, com testes automatizados, e essa foi a primeira ocasião em que a decisão foi exercida fora do ambiente que a produziu. A revisão abaixo registra o que se manteve, o que mudou e o que o artefato treinado exigiu para funcionar fora do notebook.
+
+**O que se manteve.** Nada da decisão registrada nas Seções 8.10.2 e 8.10.3 foi revertido. O serviço usa a mesma `config_22` de pré-processamento, a mesma representação híbrida de quatro blocos, a mesma arquitetura hierárquica, o mesmo classificador de regressão logística e os mesmos limiares de 0,550 e 0,700. Não houve retreinamento: os pesos em produção são os que produziram as métricas da Seção 8.10.3.
+
+A conservação é verificável, e não declarada. A suíte de testes recalcula as métricas sobre o conjunto de teste a cada execução e reprova se a acurácia da intenção específica sair de 0,7383 ou o F1-macro sair de 0,7401, com tolerância de 0,0002. O mesmo vale para o efeito dos limiares: 14 solicitações abaixo do limiar de macrointenção, 305 no fluxo genérico e 0,8775 de acurácia entre as aceitas. A verificação está descrita na Seção 8.11.7.
+
+**O que mudou: o motor de execução do encoder BERT.** O benchmark extraiu os embeddings com `sentence-transformers`, que carrega o modelo em PyTorch. O serviço executa o mesmo modelo em **ONNX Runtime**, a partir do grafo publicado no próprio repositório do modelo no Hugging Face. A troca não altera o algoritmo, a representação nem os pesos: os embeddings coincidem com os do `sentence-transformers` até uma diferença máxima de 2,4 × 10⁻⁷, e as métricas do conjunto de teste ficam inalteradas.
+
+O que muda é o custo de operar a escolha, medido durante a implementação:
+
+| | PyTorch (`sentence-transformers`) | ONNX Runtime |
+| --- | ---: | ---: |
+| Tamanho do ambiente instalado | 1,1 GB | **427 MB** |
+| Carga do encoder | 6,10 s | **0,33 s** |
+| Latência por requisição | 6 ms | **2 ms** |
+| Pico de memória | **1.118 MB** | 1.355 MB |
+
+O ganho em disco e em tempo de carga vem de dispensar `torch` e `transformers`, que somavam 780 MB do ambiente. O custo é memória: o grafo em ponto flutuante de 32 bits ocupa cerca de 240 MB a mais em tempo de execução. No deploy em Linux a troca evita ainda uma armadilha conhecida, já que o `pip install torch` padrão baixa a variante com CUDA, de cerca de 2,5 GB, irrelevante para uma inferência em CPU.
+
+A variante quantizada em int8 reduziria o grafo de 449 MB para 113 MB, mas custa 0,35 ponto de acurácia e desloca o efeito dos limiares calibrados na validação. Como isso quebraria a reprodução exata dos números da Seção 8.10.3, a versão em ponto flutuante foi mantida — a compressão é uma otimização legítima, mas exigiria recalibrar os limiares e reescrever esta seção.
+
+**O que o artefato exigiu.** O `joblib` produzido pelo notebook não carregava fora dele. A função *analyzer* do TF-IDF e a classe do classificador hierárquico eram definidas no topo do notebook, e a serialização gravou referências a `__main__.identidade` e `__main__.ClassificadorHierarquico`; de qualquer módulo importável, `joblib.load` falhava com `AttributeError`. As duas definições passaram a viver em `src/backend/app/nlp/classifier.py`, e um script reaponta o artefato para lá sem retreinar. O procedimento está na Seção 8.11.4.
+
+A implementação também tornou explícita uma dependência que o notebook não precisava declarar: o artefato foi serializado com **scikit-learn 1.6.1**, e carregá-lo com outra versão faz a própria biblioteca advertir que o resultado pode ser inválido. A versão está fixada no `requirements.txt` do backend e o script de migração recusa executar fora dela.
+
+Há ainda uma divergência de ambiente entre treino e serviço que convém registrar: a execução de referência do notebook usou Python 3.9, enquanto o serviço exige **Python 3.13 ou anterior**, porque o `gensim` ainda não publica wheel para o 3.14 e a compilação a partir do fonte falha. As duas faixas são compatíveis com os artefatos versionados, mas a restrição superior é real e vale para qualquer ambiente que execute a inferência.
+
+**O que a revisão não muda.** A conclusão do benchmark continua a mesma, com as mesmas ressalvas: a margem sobre o Híbrido W2V+BERT permanece estreita, o conjunto continua sintético e o F1-macro de 0,7401 na intenção específica continua **abaixo** do mínimo de 0,80 exigido pelo RNF06. A implementação não fecha essa lacuna — ela apenas a torna operacional, ao converter a incerteza em fluxo genérico em vez de handler errado. Fechar a lacuna depende dos próximos passos já listados na Seção 8.10.5, e permanece em aberto.
+
+## 8.11 Implementação do núcleo de PLN
+
+A Seção 8.10 registra **qual** algoritmo foi escolhido e por quê. Esta registra o **código que o executa**: onde ele vive, de que bibliotecas depende, o que entra, o que sai e quais testes impedem que o comportamento se afaste do benchmark.
+
+A diferença entre as duas seções é a diferença entre o notebook e o serviço. O benchmark da Sprint 2 rodava dentro de `classificador_intencoes_metro.ipynb`, e o modelo treinado só era utilizável de dentro dele. Na Sprint 3 o núcleo virou um pacote Python importável pela API, em `src/backend/app/nlp/`, com uma suíte automatizada que reprova quando as métricas divergem das registradas na Seção 8.10.3. Essa separação entre interface, lógica e dados é o que o RNF10 exige, e é o que permite que a mesma decisão seja exercida em uma requisição HTTP e em uma célula de notebook sem duplicar código.
+
+### 8.11.1 Estrutura do módulo e responsabilidades
+
+O núcleo é composto por quatro módulos de análise, mais dois módulos de fronteira acrescentados quando o pipeline passou a ser alcançado por HTTP:
+
+```text
+POST /api/chat  ──┐
+                  ├─▶ pipeline.process_message ── orquestra e decide a rota
+POST /api/audio ──┘             │
+   (texto vindo do STT)         ├─▶ inference.classify ...... macrointenção + intenção
+                                │      └─ preprocessing ..... tokeniza e reduz a radical
+                                ├─▶ entities.extract_entities  projeto, período, indicador…
+                                │
+                                ├─▶ handler específico         (intenção acima do limiar)
+                                ├─▶ fluxo genérico da macro    (intenção abaixo do limiar)
+                                └─▶ resposta controlada        (fora de escopo, ou macro
+                                                                abaixo do limiar)
+```
+
+| Arquivo | Linhas | Responsabilidade |
+| --- | ---: | --- |
+| `app/nlp/preprocessing.py` | 179 | Caixa, tokenização, remoção de pontuação e stemming, na `config_22` da Seção 8.10.3 |
+| `app/nlp/entities.py` | 207 | Identificação dos elementos do domínio no texto cru, por léxico e por padrão |
+| `app/nlp/classifier.py` | 171 | Definição do classificador hierárquico e carregamento validado do artefato treinado |
+| `app/nlp/inference.py` | 339 | Vetorização de inferência, aplicação dos limiares e decisão de roteamento |
+| `app/nlp/schemas.py` | 38 | Contratos Pydantic da saída pública: intenção, entidade e métricas de etapa |
+| `app/pipeline.py` | 102 | Orquestração: classifica, extrai entidades e decide entre resposta controlada e geração |
+| `app/nlp/data/lexico_dominio.json` | — | Vocabulário do portfólio: 108 termos em 12 tipos, substituível quando houver base real |
+
+**A divisão de responsabilidade entre os dois analisadores é deliberada.** O classificador decide **o que** foi pedido; a extração de entidades decide **sobre o que**. "Qual o status da Linha 2-Verde?" e "Qual o status da Linha 15-Prata?" têm a mesma intenção e entidades diferentes; "Qual o status da Linha 2-Verde?" e "Qual o orçamento da Linha 2-Verde?" têm a mesma entidade e intenções diferentes. Separar as duas evita que o catálogo de intenções cresça por combinação.
+
+**Os artefatos treinados não são duplicados no backend.** Eles continuam em `src/notebooks/artefatos/`, e `app/nlp/classifier.py` os referencia por caminho relativo. O modelo tem 13,2 MB e o Word2Vec 922 KB; manter uma segunda cópia dentro do pacote criaria a possibilidade de o serviço rodar com um artefato diferente do que o notebook mediu.
+
+**A orquestração fica fora do núcleo, e isso é proposital.** `app/pipeline.py` é o único módulo que conhece ao mesmo tempo o classificador e o provedor gerador; `app/main.py` não reproduz regra nenhuma de PLN, apenas converte as falhas previstas em respostas HTTP. Os módulos de `app/nlp/` continuam sem saber que existe uma API, o que preserva a separação entre interface, lógica e dados exigida pelo RNF10 e mantém o núcleo exercitável fora do serviço, como na Seção 8.11.6.
+
+**O carregamento e a classificação são serializados por um lock de processo.** `app/pipeline.py` mantém um `Lock` global que protege tanto o aquecimento quanto cada chamada a `classify`. Ele evita que duas requisições simultâneas disparem carregamentos concorrentes dos três artefatos na primeira chamada. O efeito colateral é que as classificações passam a ser sequenciais mesmo com o servidor atendendo em paralelo; a consequência para a vazão está medida na Seção 8.11.8.
+
+### 8.11.2 Bibliotecas, frameworks e dependências de execução
+
+As dependências do backend estão separadas em dois arquivos, e a separação tem uma razão operacional: quem trabalha apenas na API de áudio da Seção 8.7 não precisa baixar o encoder BERT nem o Word2Vec.
+
+| Arquivo | Conteúdo | Quando é necessário |
+| --- | --- | --- |
+| `requirements.txt` | FastAPI, Uvicorn, Pydantic, `httpx`, `scikit-learn`, `nltk`, `numpy`, `joblib`, `pytest` | Sempre — inclui o pré-processamento e a extração de entidades |
+| `requirements-pln.txt` | `gensim`, `onnxruntime`, `tokenizers`, `huggingface_hub` | Somente para a inferência do classificador |
+
+| Biblioteca | Versão fixada | Papel na inferência |
+| --- | --- | --- |
+| `scikit-learn` | 1.6.1 | Vetorizadores TF-IDF, reduções SVD, escaladores e o classificador serializados no artefato |
+| `nltk` | 3.10.3 | Stemming Snowball em português, algorítmico e sem corpus baixado |
+| `numpy` | 2.5.2 | Composição da matriz de atributos e agregação dos vetores |
+| `joblib` | 1.6.0 | Desserialização do artefato treinado |
+| `gensim` | 4.4.0 | Carregamento do Word2Vec treinado no corpus do projeto |
+| `onnxruntime` | 1.29.0 | Execução do grafo do encoder BERT em CPU |
+| `tokenizers` | 0.23.2 | Tokenização do encoder, independente de `transformers` |
+| `huggingface_hub` | 1.30.0 | Download do grafo ONNX e do tokenizador na primeira execução, com cache local |
+
+**Nem `torch` nem `transformers` são instalados.** O encoder roda em ONNX Runtime, pelo motivo e com as medições registradas na Seção 8.10.6. Um teste automatizado verifica que os dois módulos permanecem ausentes de `sys.modules` depois de uma classificação completa, de modo que uma dependência reintroduzida por engano seja detectada pela suíte e não pelo tamanho da imagem em produção.
+
+**O ambiente exige Python 3.13 ou anterior.** O `gensim` ainda não publica *wheel* para o 3.14 e a compilação a partir do fonte falha. A restrição vale para qualquer ambiente que execute a inferência, inclusive o de implantação previsto na Seção 6.2.
+
+```bash
+cd src/backend
+python3.13 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m pip install -r requirements-pln.txt
+```
+
+Sem o segundo arquivo, o módulo continua importável e os testes de inferência são **pulados com a razão declarada**, em vez de falharem — a suíte distingue "não instalado" de "quebrado".
+
+### 8.11.3 Pré-processamento e extração de entidades
+
+**A `config_22` é um contrato, não uma preferência.** Os vetorizadores TF-IDF serializados no artefato foram ajustados sobre os tokens que `preprocess_text` produz. Alterar tokenização, caixa ou stemming não degrada o modelo aos poucos: invalida-o, porque os atributos deixam de ser os que ele viu no treino. A função é a mesma do benchmark, portada para módulo importável, e o notebook `preprocessamento_entidades.ipynb` compara as duas implementações sobre as 5.353 frases do conjunto sintético e falha se houver divergência.
+
+```python
+from app.nlp.preprocessing import tokenize
+
+tokenize("qual é o status da extensão da Linha 5-Lilás?")
+# ['qual', 'é', 'o', 'status', 'da', 'extensã', 'da', 'linh', '5', 'lilás']
+```
+
+As stopwords são preservadas de propósito: "qual", "quando", "quanto" e "quem" distinguem tipos de solicitação, e a grade de configurações confirmou o efeito — as quatro melhores médias por família mantêm stopwords e as quatro piores as removem.
+
+**A extração de entidades roda sobre o texto cru, não sobre os tokens.** O tokenizador da `config_22` quebra em `[^\W_]+`, o que separaria `PRJ-2031` em `PRJ` e `2031` e destruiria justamente a forma que identifica o projeto. Duas fontes se combinam: um léxico com o vocabulário conhecido do portfólio e expressões regulares para valores que não cabem em lista fechada — código de projeto, percentual, prazo em dias e data. Quando dois termos se sobrepõem, vence o mais longo, de modo que em "extensão da Linha 5-Lilás" a entidade é o projeto inteiro e não a linha isolada.
+
+```python
+from app.nlp.entities import extract_entities
+
+[(e.tipo, e.valor) for e in
+ extract_entities("compare o Linha 2-Verde e o Linha 15-Prata por aderência ao cronograma")]
+# [('projeto', 'Linha 2-Verde'), ('projeto', 'Linha 15-Prata'),
+#  ('indicador', 'aderência ao cronograma')]
+```
+
+O casamento ignora caixa e acento, porque o canal recebe texto digitado, e devolve sempre o valor canônico do catálogo: `QUAL O ORCAMENTO DA LINHA 4-AMARELA` produz a entidade `Linha 4-Amarela`, com a grafia do léxico.
+
+**Termos ambíguos não são arbitrados pelo extrator.** "Aderência ao cronograma" é ao mesmo tempo critério de comparação e indicador de desempenho, e qual dos dois vale depende da intenção — que o extrator não conhece. A entidade expõe `tipos` com todos os candidatos e a propriedade `ambigua`, e quem já conhece a intenção escolhe. O campo `tipo` guarda o mais provável por precedência, para o consumidor que não quer tratar a ambiguidade.
+
+Medida contra o gabarito reconstruído da geração do conjunto sintético, a extração obteve **precisão 0,996, revocação 0,999 e F1 0,998** sobre 7.000 entidades em 5.353 frases, com 25 falsos positivos e 5 falsos negativos remanescentes. O número é alto porque o conjunto é sintético e o léxico foi derivado do mesmo dicionário que gerou as frases; a Seção 8.11.6 mostra o que acontece quando o termo está fora dele.
+
+### 8.11.4 Carregamento do artefato treinado
+
+A inferência depende de três artefatos, e apenas o primeiro está no `joblib`:
+
+| Artefato | Origem | Tamanho | O que contém |
+| --- | --- | ---: | --- |
+| `classificador_intencoes.joblib` | Notebook do benchmark | 13,2 MB | Vetorizadores TF-IDF, reduções SVD, escaladores, classificador hierárquico, limiares e mapa de intenção para macrointenção |
+| `word2vec_portfolio.model` | Notebook do benchmark | 922 KB | Word2Vec treinado apenas com o conjunto de treino, 577 termos em 200 dimensões |
+| Grafo ONNX do encoder | Hugging Face, baixado na primeira execução | 449 MB | `paraphrase-multilingual-MiniLM-L12-v2` exportado para ONNX, com o tokenizador |
+
+**O artefato precisou ser migrado para carregar fora do notebook.** Pelo motivo descrito na Seção 8.10.6, o `joblib` gravado pelo notebook referenciava `__main__.identidade` e `__main__.ClassificadorHierarquico`. As duas definições passaram a viver em `app/nlp/classifier.py`, e um script reaponta o artefato para lá:
+
+```bash
+cd src/backend
+.venv/bin/python ../notebooks/migrar_artefato_classificador.py            # reescreve
+.venv/bin/python ../notebooks/migrar_artefato_classificador.py --verificar # só confere
+```
+
+O script **não retreina**: os pesos, os vetorizadores e os limiares continuam sendo os que produziram as métricas da Seção 8.10.3. O artefato versionado no repositório já está migrado; o script serve para qualquer artefato novo que saia do notebook.
+
+**O carregamento valida o artefato antes de usá-lo.** `load_artifact` confere que as doze chaves esperadas estão presentes e levanta `ValueError` nomeando as ausentes, em vez de deixar a falta aparecer como `KeyError` no meio de uma inferência. Um artefato inexistente levanta `FileNotFoundError` com a instrução de executar o script de migração.
+
+```python
+from app.nlp.classifier import load_artifact
+
+artefato = load_artifact()
+artefato.limiar_macro, artefato.limiar_intencao
+# (0.5500000000000003, 0.7000000000000003)
+len(artefato.intencoes)        # 31
+len(artefato.macrointencoes)   # 4
+```
+
+O resíduo nas casas decimais dos limiares é o rastro da varredura que os calibrou na validação: eles são o resultado de uma soma incremental, e não valores digitados. As comparações do roteamento usam o número armazenado, de modo que o resíduo não altera decisão alguma; a Seção 8.10.3 os arredonda para 0,550 e 0,700 por legibilidade.
+
+### 8.11.5 Inferência e roteamento por limiares
+
+`app.nlp.inference` recebe a solicitação em texto e devolve uma `Classificacao`. O contrato de saída é o seguinte:
+
+| Campo | Tipo | Conteúdo |
+| --- | --- | --- |
+| `macrointencao` | `str` | `CONSULTA`, `TRANSACAO`, `ALERTA`, `FORA_DE_ESCOPO` ou `INDEFINIDA` |
+| `confianca_macro` | `float` | Probabilidade da macrointenção prevista |
+| `intencao` | `str \| None` | Intenção específica, ou `None` quando abaixo do limiar |
+| `confianca_intencao` | `float` | Probabilidade conjunta P(macro) × P(intenção \| macro) |
+| `fluxo` | `str` | Rota do catálogo correspondente à macrointenção |
+| `handler` | `str` | `handler:<intenção>`, `fluxo genérico de <macro>` ou `limitacao` |
+| `alternativas` | `list[tuple]` | As `top_k` intenções mais prováveis com suas confianças |
+| `resposta_sugerida` | `str \| None` | Texto de limitação, preenchido apenas quando a macrointenção fica abaixo do limiar |
+
+Duas propriedades derivadas resumem a decisão para quem consome: `roteada` indica que a solicitação segue no pipeline, e `handler_especifico` indica que um handler dedicado pode ser acionado.
+
+**A vetorização de inferência reaplica exatamente as transformações ajustadas no treino, na ordem em que foram compostas.** Qualquer divergência — outra tokenização, outra ordem de blocos, normalização ausente — produziria atributos que o modelo nunca viu, e o erro seria silencioso: o modelo devolveria um rótulo, apenas o rótulo errado. O TF-IDF de caracteres e o encoder BERT recebem o texto cru; os demais blocos recebem os tokens da `config_22`.
+
+**Os dois limiares definem três rotas**, conforme os valores calibrados na validação e registrados na Seção 8.10.3:
+
+| Condição | Rota | `handler` |
+| --- | --- | --- |
+| Confiança da macro < 0,550 | Resposta controlada de limitação (RF08/RNF11) | `limitacao` |
+| Macro ≥ 0,550 e confiança da intenção < 0,700 | Fluxo genérico da macrointenção | `fluxo genérico de <macro>` |
+| Macro ≥ 0,550 e intenção ≥ 0,700 | Handler específico do catálogo | `handler:<intenção>` |
+
+A macrointenção `FORA_DE_ESCOPO` nunca aciona handler específico, ainda que a confiança seja alta: o catálogo a associa à rota "Resposta padrão de limitação (RF08)", e o campo `fluxo` da saída carrega essa rota. O campo `resposta_sugerida`, porém, só é preenchido quando a **macrointenção** fica abaixo do limiar — isto é, quando o pipeline não sabe sequer a categoria do pedido. Quem consome a classificação precisa tratar os dois casos: o texto pronto de limitação e a rota de limitação anunciada em `fluxo`. É o que `app/pipeline.py` faz: quando a solicitação não é roteada **ou** a macrointenção é `FORA_DE_ESCOPO`, ele devolve `resposta_sugerida` se houver e, quando não houver, um texto de limitação próprio — sem chamar o provedor gerador em nenhum dos dois ramos.
+
+**A saída nunca anuncia uma macrointenção e um handler de outra.** O limiar de 0,700 já garante isso por construção, porque a probabilidade da intenção é conjunta e acima de 0,5 as duas coincidem; mesmo assim a verificação é explícita no código, para que recalibrar o limiar para baixo não quebre o contrato em silêncio. Um teste percorre todo o conjunto de teste confirmando a coerência.
+
+**O carregamento é preguiçoso, e a API força a carga na subida quando configurada para isso.** Adiar a carga serve aos testes, mas em produção faria a primeira pessoa a usar o agente pagar o carregamento inteiro dentro da própria requisição. O `lifespan` do FastAPI lê a variável `PLN_WARMUP`: com `1`, o classificador é carregado antes de o serviço aceitar requisições; com `0`, que é o padrão, a carga acontece na primeira classificação. A Seção 8.5 descreve a configuração pelo lado da aplicação.
+
+```python
+from app.nlp.inference import get_classifier, classify
+
+get_classifier().warmup()          # o que o lifespan faz com PLN_WARMUP=1
+
+resultado = classify("qual é o status da extensão da Linha 5-Lilás?")
+resultado.macrointencao            # 'CONSULTA'
+resultado.intencao                 # 'consulta_status_projeto'
+resultado.handler                  # 'handler:consulta_status_projeto'
+```
+
+`get_classifier` devolve uma instância compartilhada, para que os três artefatos sejam carregados uma única vez no processo.
+
+### 8.11.6 Exemplos de execução: casos de sucesso e de falha
+
+Os resultados abaixo vêm de uma execução real do módulo sobre o artefato versionado, em 8 de setembro de 2026. As confianças são as devolvidas pelo próprio pipeline e não foram arredondadas para favorecer a leitura.
+
+**Casos em que o pipeline aciona um handler específico.**
+
+| Entrada | Entidades extraídas | Macrointenção | Intenção | Conf. | Encaminhamento |
+| --- | --- | --- | --- | ---: | --- |
+| "qual é o status da extensão da Linha 5-Lilás?" | `projeto: extensão da Linha 5-Lilás` | `CONSULTA` (0,9998) | `consulta_status_projeto` | 0,9944 | `handler:consulta_status_projeto` |
+| "compare o Linha 2-Verde e o Linha 15-Prata por aderência ao cronograma" | `projeto: Linha 2-Verde`, `projeto: Linha 15-Prata`, `indicador: aderência ao cronograma` | `CONSULTA` (0,9992) | `comparacao_entre_projetos` | 0,9981 | `handler:comparacao_entre_projetos` |
+| "me avisa se o projeto de sinalização atrasar mais de 7 dias" | `prazo_dias: 7 dias` | `ALERTA` (1,0000) | `alerta_prazo_atraso` | 1,0000 | `handler:alerta_prazo_atraso` |
+| "gera um relatório executivo do subportfólio de modernização" | `subportfolio: subportfólio de Modernização` | `TRANSACAO` (1,0000) | `transacao_gerar_relatorio` | 0,9999 | `handler:transacao_gerar_relatorio` |
+| "qual o statuss do projeto de bilhetgem eletronica?" | — | `CONSULTA` (0,9999) | `consulta_status_projeto` | 0,9960 | `handler:consulta_status_projeto` |
+
+O último caso é o argumento empírico a favor da representação híbrida da Seção 8.10.2. "Statuss" e "bilhetgem" não existem no vocabulário do Word2Vec nem no TF-IDF de palavras, e ainda assim a classificação é correta com 0,996 de confiança: o TF-IDF de caracteres modela a grafia e sobrevive ao erro de digitação. Nenhum bloco isolado daria esse resultado.
+
+**Casos em que os limiares contêm a decisão.** Aqui o pipeline reconhece que não sabe o suficiente e recusa acionar um handler:
+
+| Entrada | Macrointenção | Conf. macro | Melhor intenção | Conf. | Encaminhamento |
+| --- | --- | ---: | --- | ---: | --- |
+| "atualiza o mapa de benefícios do PRJ-2031 com o novo indicador" | `TRANSACAO` | 0,9744 | `transacao_atualizar_status` | 0,6700 | fluxo genérico de `TRANSACAO` |
+| "há bloqueios registrados no Linha 15-Prata?" | `CONSULTA` | 0,5888 | `transacao_registrar_pendencia` | 0,3817 | fluxo genérico de `CONSULTA` |
+| "qual a previsão do tempo para amanhã?" | `FORA_DE_ESCOPO` | 1,0000 | `fora_escopo_externo` | 0,9993 | Resposta padrão de limitação (RF08) |
+| "bom dia, tudo certo?" | `FORA_DE_ESCOPO` | 1,0000 | `fora_escopo_social` | 0,9999 | Resposta padrão de limitação (RF08) |
+
+A primeira linha mostra o limiar operando com margem estreita e a favor da segurança: 0,67 contra o limiar de 0,70. A intenção mais provável era plausível, mas o pipeline preferiu o fluxo genérico da macrointenção a acionar uma transação de atualização com um terço de dúvida — comportamento exigido pelo RNF04 e pelo RNF11, já que uma transação errada altera dados.
+
+A saída completa do pipeline para dois desses casos, com as entidades reduzidas ao par `(tipo, valor)` e a lista de alternativas quebrada em duas linhas por largura:
+
+```text
+ENTRADA   : atualiza o mapa de benefícios do PRJ-2031 com o novo indicador
+TOKENS    : ['atualiz', 'o', 'map', 'de', 'benefíci', 'do', 'prj', '2031', 'com', 'o', 'nov', 'indic']
+ENTIDADES : [('documento', 'mapa de benefícios'), ('projeto', 'PRJ-2031')]
+MACRO     : TRANSACAO (0.9744)
+INTENCAO  : None (0.67)
+HANDLER   : fluxo genérico de TRANSACAO
+FLUXO     : Executor de Transação -> Confirmação -> Registro
+ALTERNAT. : [('transacao_atualizar_status', 0.67), ('transacao_cadastrar_projeto', 0.1448),
+             ('transacao_solicitar_atualizacao', 0.0568)]
+
+ENTRADA   : há bloqueios registrados no Linha 15-Prata?
+TOKENS    : ['há', 'bloquei', 'registr', 'no', 'linh', '15', 'prat']
+ENTIDADES : [('projeto', 'Linha 15-Prata')]
+MACRO     : CONSULTA (0.5888)
+INTENCAO  : None (0.3817)
+HANDLER   : fluxo genérico de CONSULTA
+FLUXO     : RecuperadorInformacao -> Estruturador de Resposta
+ALTERNAT. : [('transacao_registrar_pendencia', 0.3817), ('consulta_status_projeto', 0.2968),
+             ('consulta_escopo_tap', 0.2441)]
+```
+
+**Casos de falha.** Os três abaixo são erros reais do pipeline, registrados porque delimitam o que a implementação atual não resolve.
+
+| Entrada | O que o pipeline devolveu | Por que é falha |
+| --- | --- | --- |
+| "quanto já foi gasto na obra da Linha 6-Laranja?" | Intenção `consulta_orcamento_custo` correta, com 0,9981 — mas **nenhuma entidade extraída** | "Linha 6-Laranja" não está no léxico. O pipeline sabe *o que* foi pedido e não sabe *sobre o que*; a recuperação de informação não teria como filtrar o projeto |
+| "prorroga o prazo do PRJ-0442 até março" | `CONSULTA` / `consulta_cronograma_prazo` com 0,7321, **acima** do limiar de 0,700 | É um pedido de alteração, e deveria ser `TRANSACAO` / `transacao_atualizar_cronograma`, que aparece como segunda alternativa com 0,1417. O handler **seria acionado**: o limiar não protege este caso |
+| "e ai?" | `CONSULTA` com 0,9815 de confiança de macrointenção | Deveria ser `FORA_DE_ESCOPO`. O erro é contido pelo limiar de intenção (0,425 leva ao fluxo genérico), mas o **limiar de macrointenção não o detecta** — a categoria errada foi prevista com alta confiança |
+
+O primeiro caso é a limitação do léxico fechado, já registrada na Seção 8.11.3: um projeto fora de `lexico_dominio.json` só é reconhecido se tiver forma de código, como `PRJ-2031`. Quando a base real do portfólio estiver disponível, o arquivo passa a ser gerado a partir dela e o código não muda.
+
+O segundo é a fronteira entre consulta e transação, que o F1-macro de 0,7401 na intenção específica resume e que a Seção 8.10.5 aponta como classe a revisar. É também a demonstração de que os limiares reduzem o dano, mas não o eliminam.
+
+O terceiro delimita o alcance do mecanismo de contenção: **os dois limiares não são equivalentes em proteção**. O de intenção específica cobre a escolha do handler; o de macrointenção só age quando o modelo está incerto sobre a categoria, e não quando ele está confiante e errado. Uma saudação curta classificada como consulta com 0,98 atravessa o primeiro filtro. O impacto prático é limitado — a solicitação cai no fluxo genérico de `CONSULTA` em vez de receber a resposta de limitação —, mas a resposta ao usuário fica menos adequada do que deveria, e o caso é candidato natural ao conjunto de solicitações reais previsto na Seção 8.10.5.
+
+### 8.11.7 Testes automatizados
+
+A suíte do núcleo de PLN tem **87 testes**, e os 15 testes da rota HTTP acrescentados com a integração levam a **102 testes que exercitam o classificador**, dos 175 do backend. A suíte inteira roda em 15,8 segundos, dos quais 13,4 são dos testes de inferência: eles carregam os três artefatos reais, inclusive o encoder, e classificam o conjunto de teste completo. Os outros 69 testes de PLN rodam em 1,7 segundo.
+
+| Arquivo | Testes | O que verifica |
+| --- | ---: | --- |
+| `test_nlp_preprocessing.py` | 20 | Cada opção da grade de pré-processamento, a `config_22` selecionada, a preservação de stopwords e a estabilidade dos tokens que o artefato espera |
+| `test_nlp_entities.py` | 30 | Casamento por léxico e por padrão, insensibilidade a caixa e acento, resolução de sobreposição pelo termo mais longo, tipos ambíguos e posições no texto original |
+| `test_nlp_classifier.py` | 19 | Carregamento e validação do artefato, recusa de artefato incompleto, comportamento do classificador hierárquico e a exigência de que ele carregue **fora** do notebook |
+| `test_nlp_inference.py` | 18 | Classificação ponta a ponta, os três caminhos de roteamento, a coerência entre macrointenção e handler, a fidelidade às métricas do benchmark e a ausência de `torch` |
+| `test_pipeline_api.py` | 15 | Contrato real de `POST /api/chat` e `POST /api/audio` com o classificador substituído por um duplo: intenção e entidades no corpo da resposta, resposta controlada sem chamar o provedor gerador, opt-out por `use_intent_classifier` e tradução das falhas em código HTTP |
+
+**Quatro testes fazem a documentação e o código responderem um pelo outro.** Eles recalculam sobre o conjunto de teste os números registrados na Seção 8.10.3 e reprovam se houver divergência maior que 0,0002:
+
+| Teste | Valor exigido |
+| --- | --- |
+| `test_acuracia_da_intencao_no_teste` | 0,7383 |
+| `test_f1_macro_da_intencao_no_teste` | 0,7401 |
+| `test_efeito_dos_limiares_reproduz_a_documentacao` | 14 solicitações abaixo do limiar de macro, 305 no fluxo genérico, 0,8775 de acurácia entre as aceitas |
+| `test_limiares_sao_os_calibrados_na_validacao` | 0,550 e 0,700 |
+
+Sem eles, uma troca de artefato, uma alteração no pré-processamento ou uma atualização de biblioteca poderia mudar o comportamento do serviço sem que nada na suíte acusasse — e a Seção 8.10 passaria a descrever um modelo que não é mais o que roda.
+
+Três testes protegem decisões de implementação que não aparecem em métrica: `test_o_encoder_roda_sem_pytorch` verifica que `torch` e `transformers` continuam ausentes de `sys.modules` depois de uma classificação; `test_macro_e_intencao_nunca_saem_incoerentes` percorre todo o conjunto de teste confirmando que a saída jamais anuncia uma macrointenção e um handler de outra; e `test_bloco_desconhecido_e_recusado` garante que um bloco de representação não previsto falhe de forma explícita, em vez de produzir uma matriz de atributos silenciosamente errada.
+
+**Execução.**
+
+```bash
+cd src/backend
+.venv/bin/python -m pytest app/tests -q
+```
+
+```text
+175 passed, 11 warnings in 15.76s
+```
+
+Quando `requirements-pln.txt` não está instalado, os 18 testes de inferência são pulados com a razão declarada (`instale requirements-pln.txt`) e os outros 69 continuam rodando: o pré-processamento, a extração de entidades e o carregamento do artefato não dependem do encoder nem do Word2Vec.
+
+**Os testes de rota não carregam o modelo.** `test_pipeline_api.py` substitui tanto o classificador quanto o provedor gerador por duplos, de modo que o que fica sob teste é o contrato da API — os campos devolvidos, o código HTTP de cada falha prevista e a decisão de não chamar o gerador em solicitação fora de escopo. A fidelidade do modelo continua sendo responsabilidade dos testes de inferência, que carregam os artefatos reais.
+
+### 8.11.8 Desempenho medido
+
+Medição na execução de referência, em macOS 26.6 sobre Apple Silicon, com Python 3.13.15, mediana de 200 repetições:
+
+| Etapa | Mediana | Pior caso |
+| --- | ---: | ---: |
+| Pré-processamento (`tokenize`) | 0,04 ms | 0,12 ms |
+| Extração de entidades | 0,01 ms | 1,10 ms |
+| Classificação completa (`classify`) | 4,34 ms | 7,22 ms |
+| Vetorização em lote de 64 textos | 0,76 ms por texto | — |
+| Carga dos três artefatos (`warmup`) | 0,8 s | — |
+
+As duas últimas linhas são execução única, e não mediana de 200. O pior caso da extração de entidades é a primeira chamada, que carrega o léxico do disco; a partir da segunda o custo é o da mediana.
+
+O tempo é dominado pelo encoder BERT: o pré-processamento e a extração de entidades juntos custam cerca de 1% da classificação. O ganho da vetorização em lote — de 4,34 ms para 0,76 ms por texto — indica que a avaliação do conjunto de teste inteiro deve usar `vectorize` com a lista completa, e não um laço de `classify`, como a suíte já faz.
+
+**A folga em relação ao RNF05 é ampla, mas o requisito não é sobre esta etapa.** O RNF05 dá 10 segundos para uma consulta simples ponta a ponta, medidos entre o recebimento pela API e o retorno da resposta estruturada. A classificação consome cerca de 4 ms desse orçamento, contra 6 segundos reservados à transcrição na Seção 8.7 e o tempo da recuperação e da geração da resposta. A conclusão que a medição autoriza é estreita: o classificador **não** é o gargalo do pipeline.
+
+Com a integração da Seção 8.11.9, a medição ponta a ponta deixou de depender de instrumentação nova: as duas rotas devolvem `nlp_ms` e `route_ms`, e a rota de áudio acrescenta `validation_ms`, `stt_ms` e `total_ms`. A verificação formal do RNF05 continua sendo entrega da Seção 9.2, agora apoiada nesses campos.
+
+A carga de 0,8 segundo acontece uma vez por processo. Com `PLN_WARMUP=1` ela é paga na subida da aplicação, e não dentro da primeira requisição.
+
+**O lock de processo elimina o ganho de concorrência.** `app/pipeline.py` protege cada chamada a `classify` com um `Lock` global, o que impede carregamentos concorrentes dos artefatos mas também serializa as classificações. Medindo 16 solicitações no mesmo ambiente da tabela acima, com os artefatos já carregados:
+
+| Cenário | Total | Por solicitação |
+| --- | ---: | ---: |
+| Sequencial, uma thread | 70,7 ms | 4,42 ms |
+| 4 threads, sem o lock | 34,8 ms | 2,17 ms |
+| 4 threads, com o lock atual | 74,8 ms | 4,68 ms |
+| 8 threads, sem o lock | 30,7 ms | 1,92 ms |
+| 8 threads, com o lock atual | 83,4 ms | 5,21 ms |
+
+Sem o lock, quatro threads dobram a vazão e oito chegam a 2,3 vezes — sinal de que a parte pesada da inferência roda fora do GIL, no ONNX Runtime e nas rotinas de álgebra linear. Com o lock, a vazão não sobe em nenhuma das duas configurações e fica marginalmente pior que a execução sequencial, pelo custo de contenção.
+
+O lock protege um cenário real: a carga preguiçosa dos três artefatos não é reentrante, e duas requisições simultâneas na primeira chamada disparariam dois carregamentos. Mas ele é mais largo do que o necessário — bastaria proteger o carregamento, e não cada inferência. Com `PLN_WARMUP=1` os artefatos já estão carregados quando a primeira requisição chega, de modo que a serialização passa a custar vazão sem proteger nada. Estreitar o lock é otimização candidata para a Sprint 4, e não altera nenhum resultado documentado nas Seções 8.10 e 8.11.
+
+### 8.11.9 Situação da integração
+
+| Etapa | Situação | Onde está |
+| --- | --- | --- |
+| Pré-processamento textual | Implementado e testado | `app/nlp/preprocessing.py` |
+| Extração de entidades do domínio | Implementado e testado | `app/nlp/entities.py` |
+| Carregamento do artefato treinado | Implementado e testado | `app/nlp/classifier.py` |
+| Classificação e roteamento por limiares | Implementado e testado | `app/nlp/inference.py` |
+| Exposição do pipeline em rota HTTP | Implementada | `POST /api/chat` e `POST /api/audio` em `app/main.py` e `app/pipeline.py` |
+| Persistência da intenção e das entidades | **Não implementada** | Depende do esquema da Seção 4 e das tabelas de rastreabilidade do RNF03 |
+
+O núcleo é importável, exercitável e agora alcançado pelas rotas HTTP. Em
+`POST /api/chat`, a classificação é o padrão quando `use_intent_classifier` está
+ausente ou `true`; `false` permanece como opt-out explícito da bancada web. Em
+`POST /api/audio`, a transcrição segue para o mesmo pipeline textual. As duas
+rotas devolvem intenção rica, entidades e métricas (`nlp_ms`, `route_ms`; no
+áudio também `validation_ms`, `stt_ms` e `total_ms`), o que viabiliza a medição
+incremental do RNF05. Solicitações fora de escopo, indefinidas ou sem rota segura
+recebem mensagem controlada sem chamada ao provedor gerador, preservando RNF11.
+Persistência da trilha exigida pelo RNF03 e autorização por perfil continuam
+pendentes das entregas específicas.
+
+Exemplo resumido do contrato textual exposto por `POST /api/chat`:
+
+```json
+{
+  "text": "O prazo do projeto XPTO consta nas fontes recuperadas para esta consulta.",
+  "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
+  "intent": {
+    "macro": "CONSULTA",
+    "specific": "consulta_prazo",
+    "confidence_macro": 0.98,
+    "confidence_specific": 0.86,
+    "flow": "consulta_documental",
+    "handler": "consultar_prazo",
+    "alternatives": [
+      { "specific": "consulta_status", "confidence": 0.09 }
+    ]
+  },
+  "entities": [
+    {
+      "type": "projeto",
+      "value": "XPTO",
+      "text": "projeto XPTO",
+      "start": 17,
+      "end": 29,
+      "types": ["projeto"],
+      "ambiguous": false
+    }
+  ],
+  "pipeline_metrics": {
+    "nlp_ms": 8,
+    "route_ms": 35
+  },
+  "sources": []
+}
+```
+
+A Seção 8.4 registra a cobertura de teste correspondente e o que continua descoberto.
+
+## 8.12 Histórico da integração da interface web
+
+A issue #131 conectou a bancada React aos endpoints de texto e áudio, unificou ambos no pipeline de resposta e acrescentou os testes de componentes, contratos e navegador. A documentação operacional consolidada está na Seção 8.5 e no `src/frontend/README.md`; as evidências permanecem em `src/frontend/TESTES.md`. Esta nota histórica é mantida para rastreabilidade da entrega, sem repetir contratos, componentes ou instruções de execução.
+
+
 # 9. Planejamento e Execução de Testes
 
 O planejamento dos testes sistêmicos é entrega da Sprint 3, e a execução ocorre na Sprint 4, conforme as Seções 8.3.1 e 8.3.2. As tasks correspondentes já estão detalhadas, estimadas e sequenciadas no backlog da Seção 6.2 do `GestaoProjeto.md`.
 
 Os testes automatizados já existentes nesta sprint — da bancada de teste do caminho de consulta — estão documentados na Seção 8.4.
 
+Antes da escrita dos planos específicos, o projeto fixa o ferramental de teste a ser utilizado. Essa definição evita que os planos descrevam formas de execução incompatíveis com a stack registrada na Seção 3.4 e com a estrutura atual do repositório, composta por backend em Python/FastAPI, bancada web em React para validação do fluxo de consulta, scripts SQL PostgreSQL e notebook de avaliação do classificador de intenções.
+
+| Tipo de teste | Ferramenta ou biblioteca adotada | Aplicação no projeto | Justificativa |
+|---|---|---|---|
+| Testes funcionais | `pytest` com `fastapi.testclient.TestClient` | Validar endpoints da API, respostas HTTP, contratos de entrada e saída, tratamento de erros e comportamento esperado dos fluxos principais do MVP. | O backend já utiliza Python e FastAPI, e a suíte existente usa `pytest`. O `TestClient` permite exercitar a aplicação FastAPI diretamente, com chamadas equivalentes a requisições HTTP, mantendo os testes automatizados, rápidos e reprodutíveis. |
+| Testes de integração | `pytest`, `TestClient` e duplos de teste para fronteiras externas | Verificar a integração entre API, camada Gemini, recuperação de contexto em dados simulados do SharePoint e regras de composição da resposta, sem depender de chave externa ou internet durante a execução padrão. | A estratégia já adotada na Seção 8.4 isola chamadas de rede e testa o código do projeto. Isso protege a reprodutibilidade, respeita o uso de dados sintéticos e evita que falhas de serviços externos sejam confundidas com falhas da aplicação. |
+| Testes de desempenho | `Locust` | Simular usuários concorrentes acessando os endpoints HTTP da prova de conceito, especialmente o fluxo de chat/consulta, registrando tempo de resposta, taxa de erro e comportamento sob carga controlada. | O Locust é compatível com a stack Python, descreve cenários em código e é adequado para APIs HTTP. A escolha permite reaproveitar conhecimento da equipe, versionar cenários no repositório e comparar execuções entre sprints. |
+| Testes de usabilidade | Microsoft Forms | Coletar respostas do questionário SUS, percepção dos participantes e comentários qualitativos após a execução dos roteiros de teste. | A solução prioriza o ecossistema Microsoft do parceiro. O Forms permite distribuição por link ou Teams, controle de respondentes quando necessário e consolidação simples das respostas para análise posterior. |
+
+As ferramentas escolhidas também respeitam os requisitos não funcionais já definidos: os testes automatizados devem usar dados sintéticos ou anonimizados, a validação funcional deve preservar rastreabilidade entre cenário e requisito, e os testes de desempenho devem registrar evidências objetivas de latência e falha. Chamadas a provedores externos, quando indispensáveis para uma validação específica, devem ser tratadas como execução controlada, separada da suíte determinística padrão.
+
 ## 9.1 Testes Funcionais
 
-### 9.1.1 Planejamento
+O plano de testes funcionais valida o comportamento observável definido pelos critérios de aceitação da Seção 3.1. A cobertura contempla RF01 a RF10: RF01 a RF08 formam o núcleo do MVP e devem ser executados sobre a versão entregue; RF09 e RF10 representam a evolução pós-MVP, mas permanecem planejados e rastreáveis para que sua implementação futura já tenha critérios objetivos. Enquanto essa evolução não estiver disponível, seus casos devem ser registrados como **bloqueados por funcionalidade não implementada**, nunca como aprovados sem execução. Cada requisito possui ao menos um cenário positivo, que confirma o fluxo esperado, e um cenário negativo, que exercita entrada inválida, ausência de dados, estado desabilitado ou rota não suportada.
 
-Será desenvolvido na Sprint 3, derivado de RF01 a RF10, com cenários positivos e negativos por requisito.
+### 9.1.1 Estratégia e preparação
 
-### 9.1.2 Resultados
+Os testes são de sistema, orientados a cenários e executados pela interface disponível ou, quando aplicável, pela API do backend. Cada caso declara propósito, entrada e execução específica e resultado esperado; essas informações complementam o procedimento comum abaixo e devem ser seguidas na ordem apresentada. A evidência de cada execução deve registrar o identificador do caso, data, responsável, versão ou *commit* testado, ambiente, entrada utilizada, saída obtida, resultado (aprovado, reprovado ou bloqueado) e captura de tela ou registro da requisição. Os dados de teste devem permanecer sintéticos ou anonimizados, em conformidade com o RNF01.
 
-Será executado na Sprint 4.
+**Ferramentas e massa de teste:** o backend é iniciado com FastAPI/Uvicorn e seus testes de regressão são executados com `pytest`; a interface é iniciada com Vite (`npm run dev`) e verificada antes da execução com `npm run lint` e `npm run build`. Os testes funcionais usam uma massa controlada, com os projetos sintéticos `XPTO` e `ABC`, seus prazos, riscos e status, e sem os atributos de patrocinador e custo final. A massa também deve conter uma intenção com fluxo automatizado e uma intenção do escopo sem automação. Essa massa é pré-requisito do plano: os JSONs atualmente versionados no backend representam atendimento ao passageiro e não substituem os dados de portfólio exigidos por estes casos.
+
+**Pré-condições comuns:** ambiente do MVP em execução; massa de projetos acima carregada; catálogo de intenções e rotas configurado; e acesso à interface ou à documentação da API. Para casos que usam uma rota automatizada, deve haver uma intenção de teste cadastrada com essa rota. Para os demais, deve haver uma intenção do escopo sem automação, capaz de receber contexto estruturado.
+
+**Procedimento comum de execução:** (1) registrar o *commit* e o ambiente sob teste; (2) em `src/backend`, instalar as dependências de `requirements.txt` e executar `python -m pytest app/tests`; (3) iniciar a API FastAPI e a interface conforme a Seção 6.2.8 e, em `src/frontend`, executar `npm run lint` e `npm run build`; (4) selecionar ou autenticar o perfil de teste, se a versão em validação o exigir; (5) restaurar a massa sintética conhecida; (6) executar exatamente a entrada e as verificações do caso; (7) comparar resposta, código HTTP e registros internos com o resultado esperado; e (8) salvar a evidência identificada pelo ID do caso. Uma execução é aprovada somente quando todos os resultados esperados forem observados; qualquer divergência reprova o caso e deve ser registrada sem alterar a expectativa retrospectivamente.
+
+### 9.1.2 Matriz de rastreabilidade
+
+| Requisito | Critérios de aceitação verificados | Casos de teste |
+|---|---|---|
+| RF01 | CA01.1 texto em linguagem natural; CA01.2 áudio convertido em texto; CA01.3 sem sintaxe técnica; CA01.4 encaminhamento ao PLN | CT-RF01-01, CT-RF01-02 |
+| RF02 | CA02.1 processamento semântico; CA02.2 identificação da intenção primária; CA02.3 encaminhamento para classificação | CT-RF02-01, CT-RF02-02 |
+| RF03 | CA03.1 associação ao catálogo; CA03.2 categorias consulta/transação/alerta; CA03.3 indicação de fluxo; CA03.4 tratamento fora de escopo | CT-RF03-01, CT-RF03-02 |
+| RF04 | CA04.1 consulta a dados sintéticos; CA04.2 recuperação relevante; CA04.3 uso como contexto | CT-RF04-01, CT-RF04-02 |
+| RF05 | CA05.1 resposta a consulta; CA05.2 considera projeto/contexto; CA05.3 usa informação recuperada; CA05.4 declara indisponibilidade | CT-RF05-01, CT-RF05-02 |
+| RF06 | CA06.1 identifica análise/comparação; CA06.2 compara dois ou mais projetos; CA06.3 considera critérios solicitados; CA06.4 fundamenta nos dados | CT-RF06-01, CT-RF06-02 |
+| RF07 | CA07.1 envia intenção/parâmetros ao fluxo; CA07.2 não usa LLM no fluxo; CA07.3 envia somente intenção/contexto validado ao LLM; CA07.4 demonstra ambas as rotas | CT-RF07-01, CT-RF07-02 |
+| RF08 | CA08.1 retorno do fluxo/estado; CA08.2 LLM limitado ao contexto validado; CA08.3 não inventa fatos; CA08.4 declara insuficiência; CA08.5 estrutura/referências; CA08.6 separa fatos de interpretação | CT-RF08-01, CT-RF08-02 |
+| RF09 | CA09.1 somente intenção sem automação e proatividade ativa; CA09.2 intenção secundária compatível; CA09.3 sugestão separada e opcional; CA09.4 confirmação antes da execução; CA09.5 recusa preserva resposta; CA09.6 ausência de sugestão compatível | CT-RF09-01, CT-RF09-02 |
+| RF10 | CA10.1 controle ativado/desativado; CA10.2 estado vale nas interações seguintes; CA10.3 desativado não sugere; CA10.4 intenção primária permanece funcional | CT-RF10-01, CT-RF10-02 |
+
+### 9.1.3 Casos de teste
+
+#### RF01 — Entrada de comandos em linguagem natural
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF01-01 | Positivo | Confirmar que entradas textual e em áudio, em linguagem natural e sem sintaxe técnica, entram no pipeline. | Enviar `Qual é o prazo do projeto XPTO?`; em seguida, enviar áudio com a mesma frase e verificar a transcrição antes do processamento. | Ambas as entradas são aceitas, preservam o texto (original ou transcrito) e são encaminhadas ao PLN; não é exigida sintaxe de consulta. |
+| CT-RF01-02 | Negativo | Confirmar tratamento de entrada vazia ou composta apenas por espaços. | Após o procedimento comum, enviar campo vazio ou `   `. | A solicitação não é encaminhada ao PLN; o sistema informa que é necessário fornecer uma pergunta ou comando válido. |
+
+#### RF02 — Identificação semântica da intenção
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF02-01 | Positivo | Verificar a identificação da intenção primária de uma consulta de projeto. | Enviar: `Mostre o status do projeto XPTO`. Inspecionar a resposta e o registro do pipeline. | A intenção primária de consulta de status é identificada e encaminhada para a classificação no catálogo. |
+| CT-RF02-02 | Negativo | Verificar que texto ambíguo ou sem objetivo de negócio não recebe uma intenção de domínio indevida. | Enviar: `bom dia, tudo certo?`. | O sistema não atribui uma intenção de projeto como fato; encaminha para tratamento de fora de escopo ou orienta a reformulação. |
+
+#### RF03 — Classificação e associação ao catálogo
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF03-01 | Positivo | Confirmar associação ao catálogo, suas categorias mínimas e a informação de rota. | No catálogo, verificar uma entrada de consulta, uma de transação e uma de alerta; enviar para cada uma sua frase de teste cadastrada e consultar o registro de classificação. | Cada registro contém intenção, categoria correta e indicação de existência de fluxo automatizado; o catálogo possui as três categorias. |
+| CT-RF03-02 | Negativo | Confirmar o limite explícito para intenção não suportada. | Enviar: `Reserve uma sala de reunião para amanhã`. | Não é criada associação fictícia ao catálogo; o sistema informa que a solicitação está fora do escopo ou pede reformulação. |
+
+#### RF04 — Recuperação de informações
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF04-01 | Positivo | Verificar a recuperação de conteúdo relevante da base sintética. | Enviar: `Qual é o prazo do projeto XPTO?` e consultar as fontes ou trechos associados à resposta. | O pipeline consulta a base sintética, recupera trecho relacionado ao projeto XPTO e o disponibiliza como contexto da resposta. |
+| CT-RF04-02 | Negativo | Verificar que uma chave de projeto inexistente não produz recuperação inventada. | Enviar: `Qual é o prazo do projeto INEXISTENTE-999?`. | Nenhuma informação não relacionada é apresentada como se fosse do projeto solicitado; a ausência de dados é registrada e comunicada. |
+
+#### RF05 — Consulta de informações dos projetos
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF05-01 | Positivo | Confirmar resposta a uma consulta simples usando o contexto do projeto pedido. | Enviar: `Qual é o status do projeto XPTO?`. | A resposta apresenta o status disponível para XPTO e faz referência ao contexto ou fonte recuperada. |
+| CT-RF05-02 | Negativo | Confirmar declaração explícita quando o dado solicitado não existe na base. | Enviar uma consulta válida sobre atributo não cadastrado, por exemplo `Quem é o patrocinador do projeto XPTO?`, quando esse atributo não estiver na massa. | O sistema informa a indisponibilidade da informação; não completa a resposta com suposição. |
+
+#### RF06 — Análise e comparação de projetos
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF06-01 | Positivo | Verificar comparação fundamentada de dois projetos segundo critérios pedidos. | Enviar: `Compare os prazos e riscos dos projetos XPTO e ABC`. | A resposta distingue os dois projetos, aborda prazo e risco e aponta os dados ou fontes que sustentam a comparação. |
+| CT-RF06-02 | Negativo | Verificar tratamento quando um participante da comparação não existe ou não contém o critério solicitado. | Enviar: `Compare os riscos dos projetos XPTO e INEXISTENTE-999`. | O sistema não cria comparação parcial enganosa; identifica qual dado está ausente e limita a conclusão. |
+
+#### RF07 — Roteamento híbrido das intenções
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF07-01 | Positivo | Confirmar que intenção com fluxo automatizado usa a rota direta, sem LLM. | Selecionar no catálogo a entrada automatizada da massa e enviar sua frase de teste cadastrada; inspecionar o registro de roteamento e o resultado da ação simulada. | A rota automatizada recebe a intenção e os parâmetros estruturados, devolve seu estado de conclusão e o registro não contém chamada ao LLM. |
+| CT-RF07-02 | Negativo | Confirmar que intenção válida sem automação não é enviada ao fluxo automatizado nem recebe contexto não validado. | Enviar uma consulta do escopo cadastrada sem automação, como `Qual é o prazo do projeto XPTO?`, e inspecionar o registro. | O sistema envia ao LLM somente a intenção e o contexto estruturado recuperado; não executa fluxo automatizado. |
+
+#### RF08 — Respostas estruturadas e fundamentadas
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF08-01 | Positivo | Verificar estrutura e fundamentação dos retornos do LLM e do fluxo automatizado. | Executar CT-RF06-01 e CT-RF07-01; avaliar o retorno completo, suas fontes e o estado da ação simulada. | O retorno do fluxo informa a ação e seu estado; o retorno do LLM usa somente o contexto recuperado, separa dados de interpretação e preserva as referências disponíveis. |
+| CT-RF08-02 | Negativo | Verificar que informação sem suporte não é apresentada como fato. | Enviar: `Qual será o custo final do projeto XPTO?` quando a base não possuir previsão de custo final. | A resposta informa insuficiência de dados ou impossibilidade de concluir; não cria valor, fonte ou certeza inexistentes. |
+
+#### RF09 — Sugestão proativa de intenção secundária
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF09-01 | Positivo | Confirmar que uma consulta sem fluxo automatizado pode gerar uma sugestão opcional compatível, sem retirar do usuário o controle da execução. | Ativar a proatividade; enviar `Qual é o status do projeto XPTO?` usando uma intenção primária do catálogo sem automação e com intenção secundária compatível; registrar a resposta antes de confirmar a sugestão; então selecionar a confirmação. | A resposta principal é concluída normalmente; a sugestão aparece em bloco separado, identificada como opcional e vinculada a uma intenção cadastrada; nenhuma ação secundária ocorre antes da confirmação; depois dela, somente a intenção sugerida é encaminhada à rota prevista. |
+| CT-RF09-02 | Negativo | Verificar que o sistema não inventa nem executa sugestão quando falta condição para oferecê-la. | Com a proatividade ativa, executar duas variações: (a) usar uma intenção sem secundária compatível; (b) usar uma intenção com sugestão e selecionar a recusa. Comparar resposta e registros de roteamento. | Na variação (a), somente a resposta principal é devolvida e nenhuma sugestão fictícia é criada; na (b), a recusa encerra a sugestão sem executar a intenção secundária e sem alterar a resposta principal. |
+
+#### RF10 — Controle da proatividade
+
+| ID | Cenário | Propósito | Entrada e execução específica | Resultado esperado |
+|---|---|---|---|---|
+| CT-RF10-01 | Positivo | Confirmar que o controle de proatividade altera o comportamento das interações posteriores. | Abrir a configuração; registrar o estado inicial; ativar a proatividade; iniciar nova consulta elegível à sugestão do CT-RF09-01; desativar a opção e repetir a mesma consulta em uma nova interação. | O controle exibe os dois estados e persiste a escolha; com a opção ativa, a sugestão compatível é exibida; após desativá-la, a nova interação mantém a resposta primária, mas não apresenta sugestão. |
+| CT-RF10-02 | Negativo | Confirmar que desativar sugestões não desativa nem degrada o processamento principal. | Manter a proatividade desativada e executar uma consulta simples, uma comparação e uma solicitação fora do escopo. Inspecionar intenção, rota e resposta de cada execução. | As intenções primárias continuam sendo identificadas, roteadas e respondidas conforme RF02 a RF08; nenhuma sugestão do RF09 aparece e o estado desativado não provoca erro nem altera o tratamento de fora do escopo. |
+
+### 9.1.4 Abrangência e limitações
+
+O plano cobre os dez requisitos funcionais e os três regimes principais do produto: entrada e entendimento (RF01 a RF03), recuperação e resposta fundamentada (RF04 a RF08) e proatividade controlada (RF09 e RF10). A combinação de um caso positivo e um negativo por requisito produz vinte casos rastreáveis. Os positivos percorrem texto, áudio, consulta, comparação, fluxo automatizado, rota com LLM e sugestão opcional. Os negativos concentram-se nas fronteiras de maior risco: entrada vazia ou ambígua, intenção fora do catálogo, projeto ou atributo inexistente, contexto não validado, resposta sem fundamento, sugestão incompatível, recusa e proatividade desativada.
+
+A abrangência é adequada ao planejamento sistêmico porque cada critério de aceitação da Seção 3.1 aparece na matriz e é observado em pelo menos um resultado esperado. Ela não pretende substituir testes unitários de todas as funções nem combinações exaustivas de frases, perfis e documentos. Variações linguísticas e métricas quantitativas do classificador pertencem aos RNF06 e RNF07; desempenho, segurança, acessibilidade, usabilidade e confiabilidade quantitativa pertencem às Seções 9.2 e 9.3.
+
+RF09 e RF10 ficam fora da implementação obrigatória do MVP, mas não ficam fora do plano: seus quatro casos permanecem com resultado esperado explícito e serão marcados como bloqueados até a funcionalidade existir. A validação de voz do RF01 depende da disponibilidade do endpoint de áudio especificado na Seção 8.7. Enquanto ele não estiver implementado, o subcenário de áudio do CT-RF01-01 também fica bloqueado e deve ser registrado como tal; a aprovação integral de RF01 requer execução posterior, com a mesma expectativa de encaminhamento após transcrição.
+
+### 9.1.5 Resultados
+
+Os casos acima constituem o plano da Sprint 3. A execução e o registro dos resultados ocorrerão na Sprint 4. Esta subseção deve ser atualizada com a data da execução, a versão testada, o responsável, o resultado de cada caso e os links para suas evidências. Casos ainda indisponíveis devem aparecer como bloqueados, com a dependência identificada, em vez de serem omitidos ou aprovados por planejamento.
 
 ## 9.2 Testes de RNFs
 
 ### 9.2.1 Planejamento
 
-Será desenvolvido na Sprint 3, incluindo obrigatoriamente os testes de desempenho, com meta, ferramenta e critério de aprovação declarados.
+Este plano transforma os critérios mensuráveis da Seção 3.2 em 24 casos rastreáveis: um cenário positivo e um negativo para cada RNF01 a RNF12. O cenário positivo demonstra o atributo de qualidade nas condições previstas; o negativo introduz uma violação ou falha controlada e verifica se o sistema a impede, detecta ou comunica. A execução padrão usa `pytest` e `TestClient`/`httpx`, com duplos nas fronteiras externas; o desempenho, obrigatório neste plano, é medido com `Locust`. Para o RNF06, `scikit-learn` mede F1 macro e *recall* do núcleo de PLN.
 
-### 9.2.2 Resultados
+Os dados, prompts, perfis e fontes devem ser sintéticos ou anonimizados. Cada execução registra ID, data, responsável, *commit*, ambiente, massa, entrada, saída, resultado (aprovado, reprovado ou bloqueado) e caminho da evidência, sem incluir chaves, tokens ou conteúdo sensível. Antes de executar, a equipe deve congelar a massa e os critérios: resultados observados não podem ser usados para flexibilizar a meta depois da medição.
 
-Será executado na Sprint 4.
+**Pré-condições comuns:** API iniciada; massa sintética versionada; duplos das integrações externas configurados; dois perfis simulados com permissões distintas; catálogo de intenções disponível; diretório de evidências identificado pela sprint e pelo *commit*; relógio do ambiente sincronizado. Dependências exclusivas de Teams, SharePoint, Entra ID ou Azure são simuladas na bancada e registradas como pendentes de homologação no ambiente do parceiro.
+
+### 9.2.2 Matriz de rastreabilidade e critérios
+
+| RNF | Propósito e critério objetivo de aprovação | Casos | Ferramenta e evidência mínima |
+|---|---|---|---|
+| RNF01 | Impedir exposição: 100% da massa é sintética/anonimizada e nenhum dado marcado como sensível chega a serviço não homologado. | CT-RNF01-P, CT-RNF01-N | `pytest`, inventário da massa e payload capturado pelo duplo de rede. |
+| RNF02 | Respeitar permissões: 100% das respostas de cada perfil contêm somente recursos autorizados. | CT-RNF02-P, CT-RNF02-N | `pytest`/`TestClient` e matriz perfil × recurso. |
+| RNF03 | Auditar interações: 100% dos casos registram perfil, horário, intenção, fontes e resposta ou falha. | CT-RNF03-P, CT-RNF03-N | `pytest` e registro estruturado persistido. |
+| RNF04 | Obter pelo menos 90% de respostas fundamentadas e no máximo 5% de alucinação na amostra congelada. | CT-RNF04-P, CT-RNF04-N | Planilha cega, respostas e fontes da amostra. |
+| RNF05 | Manter P95 de consulta simples em até 10 s e de comparação em até 20 s, sem erro HTTP ou de contrato na carga definida. | CT-RNF05-P, CT-RNF05-N | `Locust`, CSV/HTML, log da API e configuração do ambiente. |
+| RNF06 | Atingir F1 macro ≥ 0,80 na classificação de intenções e *recall* ≥ 0,80 na recuperação. | CT-RNF06-P, CT-RNF06-N | `scikit-learn`, notebook executado e `metricas.json`. |
+| RNF07 | Compreender ou orientar a reformulação em pelo menos 80% das formulações em português da amostra. | CT-RNF07-P, CT-RNF07-N | `pytest`, roteiro de usuários e planilha consolidada. |
+| RNF08 | Manter Teams como canal previsto, contrato OpenAPI válido e componentes compatíveis com o ecossistema Microsoft. | CT-RNF08-P, CT-RNF08-N | `/openapi.json`, checklist arquitetural e relatório de validação. |
+| RNF09 | Executar o núcleo com dados estruturados sem depender da plataforma final ou de uma fonte concreta. | CT-RNF09-P, CT-RNF09-N | `pytest` do RAG, configuração da fonte e log de execução local. |
+| RNF10 | Preservar separação entre interface, negócio e dados, API documentada, testes e instruções reproduzíveis. | CT-RNF10-P, CT-RNF10-N | Testes de importação, checklist de estrutura e documentação. |
+| RNF11 | Tratar 100% das falhas previstas com resposta controlada, sem *stack trace*, segredo ou corpo bruto do provedor. | CT-RNF11-P, CT-RNF11-N | `pytest`/`TestClient`, respostas HTTP e logs sanitizados. |
+| RNF12 | Representar projetos, subportfólios, marcos, riscos, indicadores e documentos na massa sintética. | CT-RNF12-P, CT-RNF12-N | Validador de esquema e relatório de cobertura da massa. |
+
+### 9.2.3 Casos positivos e negativos
+
+| Casos | Propósito | Instruções de execução | Resultado esperado e evidência |
+|---|---|---|---|
+| CT-RNF01-P / CT-RNF01-N | Verificar confidencialidade tanto no uso normal quanto diante de dado proibido. | **P:** percorrer os arquivos da massa, registrar origem e classificação e executar uma consulta com o duplo de rede capturando o payload. **N:** inserir em uma cópia temporária um marcador inequivocamente classificado como sensível e repetir o envio. | **P:** inventário 100% sintético/anonimizado e payload apenas com dados permitidos. **N:** validação bloqueia o processamento antes da fronteira externa; a evidência contém o relatório e a contagem zero de chamadas externas. |
+| CT-RNF02-P / CT-RNF02-N | Confirmar isolamento por perfil e negação segura. | **P:** autenticar o perfil A, consultar um recurso permitido e comparar os campos retornados com a matriz de acesso. **N:** com o perfil B sem permissão, repetir a mesma consulta e inspecionar corpo, metadados e logs. | **P:** somente o escopo autorizado aparece. **N:** resposta de negação controlada, sem conteúdo nem metadados protegidos; anexar requisições e matriz preenchida. |
+| CT-RNF03-P / CT-RNF03-N | Demonstrar rastreabilidade em sucesso e falha. | **P:** executar uma consulta válida e buscar o registro pelo identificador da interação. **N:** configurar o duplo de recuperação para falhar, repetir a consulta e buscar o registro correspondente. | Os dois registros contêm perfil, carimbo de tempo, intenção, fontes disponíveis e resposta ou estado de falha; anexar os registros sanitizados e seus IDs. |
+| CT-RNF04-P / CT-RNF04-N | Medir fundamentação e alucinação sem seleção oportunista de exemplos. | Congelar amostra com no mínimo 20 perguntas rotuladas. **P:** executar perguntas cujas respostas existem e conferir cada afirmação contra a fonte. **N:** executar perguntas com atributo ausente e marcar qualquer afirmação sem fonte como alucinação. | Planilha informa numerador, denominador e exemplos divergentes; aprovação exige ≥90% fundamentadas e ≤5% de alucinação no conjunto completo. |
+| CT-RNF05-P / CT-RNF05-N | Medir desempenho conversacional e provar que violações são detectadas. | Executar as duas rodadas Locust descritas na Seção 9.2.4. Na negativa, o duplo do provedor adiciona atraso superior ao teto em uma rota identificada, sem alterar as demais. | A positiva atende aos dois P95 e tem zero erro; a negativa é marcada como falha e preserva latência, rota e resposta observadas no CSV/HTML. |
+| CT-RNF06-P / CT-RNF06-N | Avaliar qualidade do PLN contra limiares reproduzíveis. | **P:** executar integralmente `src/notebooks/classificador_intencoes_metro.ipynb` com o conjunto de teste fechado e calcular F1 macro e *recall*. **N:** avaliar separadamente classes e termos ausentes ou fracos, sem treiná-los novamente, e aplicar os mesmos limiares. | `metricas.json` e notebook registram valores e versão da massa; qualquer métrica abaixo de 0,80 reprova o requisito e identifica as classes afetadas. |
+| CT-RNF07-P / CT-RNF07-N | Verificar interação em português natural e orientação de reformulação. | Congelar ao menos 20 formulações. **P:** participantes enviam frases naturais válidas sem conhecer nomes internos. **N:** enviar frases ambíguas, com sinônimos não cadastrados e erros leves; registrar se houve compreensão ou orientação útil. | Pelo menos 80% do conjunto total é compreendido ou recebe reformulação acionável; anexar roteiro, respostas anonimizadas e cálculo. |
+| CT-RNF08-P / CT-RNF08-N | Conferir aderência aos contratos e ao ecossistema definido. | **P:** iniciar a API, abrir `/openapi.json` e confrontar canal, conector e componentes com a arquitetura. **N:** validar uma cópia do contrato com operação obrigatória removida ou tipo incompatível. | Contrato real é válido e a arquitetura mantém Teams/Copilot/SharePoint/Azure previstos; a cópia alterada reprova no checklist, sem substituir o contrato versionado. |
+| CT-RNF09-P / CT-RNF09-N | Provar portabilidade da origem de dados. | **P:** apontar a configuração para um diretório sintético alternativo e executar a mesma consulta localmente. **N:** apontar para arquivo ausente e depois para formato inválido, observando inicialização e resposta. | A troca válida não exige alteração no núcleo; origens inválidas geram falha explícita e localizada, sem acoplamento à interface ou à fonte concreta. |
+| CT-RNF10-P / CT-RNF10-N | Verificar manutenibilidade por evidências estruturais e reprodução. | **P:** seguir o README em ambiente limpo, executar testes e conferir limites entre interface, negócio e dados. **N:** aplicar o checklist a uma cópia com instrução obrigatória removida ou dependência direta de acesso externo introduzida na rota. | A estrutura real passa nos itens objetivos; a violação controlada é detectada pelo teste de importação ou checklist. Anexar comandos, árvore relevante e resultado. |
+| CT-RNF11-P / CT-RNF11-N | Garantir respostas controladas para falhas previstas e inesperadas. | **P:** parametrizar falha de classificação, ausência de resultado, indisponibilidade da fonte e *timeout*. **N:** fazer o duplo retornar exceção inesperada e payload inválido; inspecionar resposta e logs. | Todos os casos retornam código e mensagem definidos, preservam auditoria e não expõem *stack trace*, segredo ou corpo bruto do provedor. |
+| CT-RNF12-P / CT-RNF12-N | Medir completude da massa sintética. | **P:** executar o validador sobre a massa congelada e contar projetos, subportfólios, marcos, riscos, indicadores e documentos. **N:** remover cada categoria, uma por vez, em cópias temporárias e repetir a validação. | A massa oficial contém todas as categorias; cada cópia incompleta é reprovada com a categoria ausente identificada. Anexar relatório e versão da massa. |
+
+### 9.2.4 Teste obrigatório de desempenho do RNF05
+
+O relógio começa no recebimento do `POST /api/chat` pela API e termina na devolução do JSON estruturado. A medição inclui classificação, recuperação, cache e chamada ao provedor em *cache miss*, mas exclui renderização do frontend, digitação, STT e TTS. O arquivo de cenário a ser versionado antes da execução é `src/backend/app/tests/performance/locustfile.py`; ele deve produzir 75% de consultas simples e 25% de comparações entre pelo menos dois projetos, com espera aleatória de 1 a 3 segundos.
+
+Antes de medir, registrar CPU, memória, sistema operacional, versão do Python, *commit*, configuração da API e modalidade de cache. Reiniciar a API e aquecer uma vez cada prompt. Cache frio e quente são rodadas diferentes e nunca devem ser misturados no mesmo resultado. Chamadas reais ao provedor só podem ocorrer em ambiente autorizado; na CI, usam-se duplos determinísticos.
+
+A partir de `src/backend`, com API e Locust instalados no ambiente de teste, executar:
+
+```powershell
+locust -f app/tests/performance/locustfile.py --host http://127.0.0.1:8000 --headless -u 1 -r 1 -t 5m --csv evidencias/rnf05-baseline
+locust -f app/tests/performance/locustfile.py --host http://127.0.0.1:8000 --headless -u 5 -r 1 -t 5m --csv evidencias/rnf05-carga
+```
+
+A primeira rodada estabelece a linha de base com um usuário; a segunda mede cinco usuários simultâneos. Separar no relatório consultas simples e comparativas. O RNF05 é aprovado somente se, nas duas rodadas, houver zero erro HTTP/contrato, P95 simples ≤10 s e P95 comparativo ≤20 s. Registrar também média, mediana, P90, P99, RPS e quantidade de amostras para diagnóstico, mas nenhum desses valores substitui o P95 como critério. No CT-RNF05-N, o atraso injetado deve fazer o Locust registrar a violação; se o relatório permanecer aprovado, o próprio teste de desempenho está incorreto.
+
+### 9.2.5 Instruções gerais de execução e evidências
+
+1. Criar o diretório de evidências da execução, nomeado com sprint e *commit*, sem adicionar credenciais ou dados pessoais.
+2. Em `src/backend`, criar ou ativar o ambiente virtual, instalar `requirements.txt` e executar `.venv\\Scripts\\python.exe -m pytest app/tests -q` no Windows ou `python -m pytest app/tests -q` nos demais ambientes.
+3. Iniciar a API com `python -m uvicorn app.main:app`, confirmar `GET /health` e salvar o contrato de `http://127.0.0.1:8000/openapi.json`.
+4. Executar CT-RNF01 a CT-RNF04 e CT-RNF09 a CT-RNF12 com duplos de rede e massa restaurada antes de cada cenário negativo.
+5. Executar o RNF05 conforme a Seção 9.2.4 e anexar todos os CSVs, o relatório e a configuração. Não executar carga contra ambiente compartilhado sem autorização.
+6. Para RNF06, executar o notebook `src/notebooks/classificador_intencoes_metro.ipynb` do início ao fim e salvar as métricas versionadas. Para RNF07, aplicar o roteiro e consolidar as respostas anonimizadas.
+7. Preencher a matriz de resultados com aprovado, reprovado ou bloqueado e vincular cada evidência ao ID do caso. Não declarar RNF aprovado por planejamento: aprovação exige execução e evidência.
+
+### 9.2.6 Abrangência e limitações
+
+A abrangência cobre os doze RNFs e as duas direções de comportamento exigidas pelo barema. Os positivos demonstram confidencialidade, autorização, auditoria, fundamentação, desempenho, qualidade do PLN, linguagem natural, aderência tecnológica, portabilidade, manutenção, tratamento de falhas e completude dos dados. Os negativos foram escolhidos a partir das fronteiras de maior risco: vazamento, acesso indevido, perda de auditoria, alucinação, latência, classe fraca, ambiguidade, contrato incompatível, fonte inválida, acoplamento, exceção inesperada e massa incompleta. Essa seleção oferece cobertura sistêmica e rastreável, mas não é uma enumeração de todas as combinações de perfil, documento, intenção e infraestrutura.
+
+Permissões corporativas, Teams, SharePoint real, Entra ID, Azure e transcrição não estão disponíveis na bancada local e, portanto, são simulados; a homologação final depende do ambiente do parceiro. O teste de carga planejado mede o ambiente descrito e não permite extrapolar capacidade de produção. Os resultados permanecem pendentes da Sprint 4 e devem ser preenchidos com evidências observadas, nunca com estimativas.
+
+### 9.2.7 Resultados
+
+A execução ocorrerá na Sprint 4. Para cada CT-RNF, registrar data, *commit*, ambiente, responsável, resultado, métricas aplicáveis, falha encontrada e link da evidência. Casos bloqueados devem identificar a dependência e o plano de desbloqueio.
 
 ## 9.3 Testes de Usabilidade
 
-### 9.3.1 Planejamento
+Os testes de usabilidade têm como objetivo avaliar se o Agente de Gestão de Portfólio pode ser utilizado por pessoas externas à equipe de desenvolvimento para consultar, interpretar e validar informações de projetos por meio de uma interação conversacional. A avaliação concentra-se na experiência do usuário durante os fluxos centrais do MVP: entrada em linguagem natural, consulta de informações, análise comparativa entre projetos, tratamento de informação ausente ou fora de escopo, sugestão proativa e entrada por voz.
 
-Será desenvolvido na Sprint 3: roteiro com cenários, perfis dos cinco participantes externos e questionário SUS.
+A estratégia combina observação moderada de tarefas com aplicação do questionário SUS (*System Usability Scale*) adaptado ao contexto do projeto. A observação será registrada na planilha "Oneshot - Testes de Usabilidade - Agente de Gestão de Portifólio", criada no modelo de testes de usabilidade utilizado pelo grupo, com campos para resultado geral da tarefa, resultado por etapa e ocorrências. O SUS será aplicado por meio de formulário online ao final da sessão, usando escala Likert de 1 a 5, em que 1 significa "Discordo Completamente" e 5 significa "Concordo Completamente".
+
+### 9.3.1 Planejamento dos testes de usabilidade
+
+O planejamento prevê a realização dos testes com pelo menos cinco usuários externos à turma. A planilha de registro foi estruturada para até seis participantes, permitindo incluir um usuário adicional caso haja disponibilidade. A seleção dos participantes deve buscar diversidade de perfil, familiaridade tecnológica e relação com gestão de projetos, para evitar que a avaliação reflita apenas a experiência de usuários com alta proximidade com o tema ou com ferramentas digitais.
+
+A planilha de execução funciona como instrumento de campo para o moderador e os observadores. A aba "Registro dos testes" organiza os cenários em blocos sequenciais, mantendo o mesmo padrão visual do modelo do grupo: título da tarefa, descrição da atividade, resultado geral, cinco etapas observáveis e campo de observações por usuário. A aba "Ocorrências" concentra problemas identificados durante as sessões, incluindo tarefa relacionada, severidade, resumo do ocorrido, potenciais melhorias e participante afetado. Dessa forma, o artefato permite registrar tanto o desempenho objetivo em cada etapa quanto evidências qualitativas de dificuldade, dúvida, hesitação, necessidade de ajuda ou quebra de confiança.
+
+As Figuras 27 a 31 apresentam os principais recortes da planilha criada para conduzir e registrar os testes. Esses prints documentam como o roteiro foi operacionalizado em tarefas observáveis, permitindo que diferentes avaliadores registrem os resultados de forma padronizada.
+
+<div align="center">
+  <img src="img/testes-usabilidade-p1e2.png" alt="Planilha de testes de usabilidade com os cenários 1 e 2" width="900">
+  <p><strong>Figura 27</strong> - Registro dos cenários 1 e 2 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+</div>
+
+A Figura 27 apresenta os dois primeiros cenários do roteiro: entrada em linguagem natural e consulta de status ou prazo. Esses cenários validam se o usuário consegue iniciar a interação com o agente sem comandos técnicos e se consegue interpretar uma resposta objetiva, incluindo a verificação da fonte indicada.
+
+<div align="center">
+  <img src="img/testes-usabilidade-p3e4.png" alt="Planilha de testes de usabilidade com os cenários 3 e 4" width="900">
+  <p><strong>Figura 28</strong> - Registro dos cenários 3 e 4 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+</div>
+
+A Figura 28 mostra os cenários voltados à consulta de riscos e à análise comparativa entre projetos. Nessa parte do teste, o observador registra se o participante consegue escolher o tema da consulta, compreender as informações retornadas, pedir detalhes quando necessário e avaliar se a comparação apresentada apoia a tomada de decisão.
+
+<div align="center">
+  <img src="img/testes-usabilidade-p5e6.png" alt="Planilha de testes de usabilidade com os cenários 5 e 6" width="900">
+  <p><strong>Figura 29</strong> - Registro dos cenários 5 e 6 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+</div>
+
+A Figura 29 registra os cenários de informação ausente ou fora de escopo e de sugestão proativa. Esses testes são importantes para avaliar confiança e controle: o agente deve declarar limites quando não houver informação suficiente e, quando sugerir um próximo passo, deve deixar claro que a ação depende da confirmação do usuário.
+
+<div align="center">
+  <img src="img/testes-usabilidade-p7.png" alt="Planilha de testes de usabilidade com o cenário 7" width="900">
+  <p><strong>Figura 30</strong> - Registro do cenário 7 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+</div>
+
+A Figura 30 apresenta o cenário de entrada por voz. O objetivo desse bloco é observar se o participante consegue acionar a entrada por áudio, formular uma pergunta curta, conferir a transcrição e obter uma resposta coerente, mantendo o mesmo fluxo previsto para solicitações textuais.
+
+<div align="center">
+  <img src="img/testes-usabilidade-ocorrencias.png" alt="Planilha de ocorrências dos testes de usabilidade" width="900">
+  <p><strong>Figura 31</strong> - Aba de ocorrências dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+</div>
+
+A Figura 31 apresenta a aba de ocorrências, usada para consolidar problemas identificados durante as sessões. O registro separado por tarefa, severidade, descrição do ocorrido, melhoria potencial e participante afetado permite priorizar correções após os testes, distinguindo falhas críticas de ajustes menores de clareza ou interface.
+
+Os perfis desejados são:
+
+| Perfil de participante | Justificativa de inclusão |
+|---|---|
+| Usuário com experiência em gestão de projetos | Avaliar se as respostas do agente apoiam consultas reais sobre status, prazos, riscos e marcos. |
+| Usuário com experiência em análise ou acompanhamento de indicadores | Avaliar se as respostas e comparações são compreensíveis para tomada de decisão. |
+| Usuário com familiaridade com ferramentas Microsoft, como Teams ou SharePoint | Avaliar se o canal de interação está aderente ao ambiente corporativo previsto. |
+| Usuário com baixa familiaridade com agentes conversacionais | Avaliar se a linguagem natural reduz a necessidade de treinamento ou comandos técnicos. |
+| Usuário sem vínculo com a equipe desenvolvedora | Reduzir viés de confirmação e observar dúvidas espontâneas durante o uso. |
+
+Antes do início da sessão, o moderador deve apresentar brevemente o contexto do teste, reforçando que o objetivo é avaliar o sistema, não o participante. O usuário deve ser orientado a verbalizar dúvidas, expectativas e dificuldades durante a execução das tarefas. Cada sessão seguirá o mesmo roteiro, permitindo comparação entre participantes.
+
+O roteiro operacional está dividido nos seguintes cenários:
+
+| Cenário | Objetivo de usabilidade | Etapas observadas | Requisitos relacionados |
+|---|---|---|---|
+| Entrada em linguagem natural | Verificar se o participante consegue iniciar a interação sem comandos técnicos. | Abrir a interface do agente; formular pergunta sem comando técnico; enviar a pergunta; ler a resposta; dizer se a resposta atende. | RF01, RF02, RF03, RNF07 |
+| Consulta de status e prazo | Avaliar clareza e suficiência de uma resposta objetiva sobre projeto. | Identificar o projeto; perguntar status ou prazo; localizar dado principal; verificar fonte indicada; avaliar suficiência da resposta. | RF04, RF05, RF08, RNF04 |
+| Consulta de riscos e informações do projeto | Avaliar a qualidade das respostas sobre riscos, avanço, marcos ou indicadores. | Escolher tema da consulta; enviar pergunta ao agente; identificar informações retornadas; pedir detalhe se necessário; avaliar clareza da resposta. | RF04, RF05, RF08, RNF04 |
+| Análise e comparação entre projetos | Avaliar se o agente apoia comparações entre iniciativas do portfólio. | Escolher dois projetos; definir critério de comparação; enviar pedido ao agente; interpretar comparação; avaliar apoio à decisão. | RF04, RF06, RF08 |
+| Informação ausente ou fora de escopo | Verificar se o agente declara limites em vez de inventar respostas. | Formular pergunta limite; enviar ao agente; identificar mensagem de limite; entender orientação recebida; avaliar confiança na resposta. | RF03, RF08, RNF04, RNF11 |
+| Sugestão proativa e controle do usuário | Avaliar se a sugestão opcional é compreensível e mantém o controle com o usuário. | Realizar consulta válida; ler sugestão opcional; aceitar ou recusar sugestão; confirmar controle da ação; avaliar utilidade da sugestão. | RF07, RF09, RF10 |
+| Entrada por voz | Avaliar se a modalidade de áudio preserva a intenção do usuário quando disponível no protótipo. | Acionar entrada por voz; falar pergunta curta; conferir transcrição; enviar solicitação; avaliar resposta recebida. | RF01, RNF07, Seções 5.3.4 e 8.7 |
+
+Durante cada tarefa, o observador registrará na planilha:
+
+- resultado geral da tarefa: sucesso, conseguiu com dificuldade, não conseguiu ou não testado;
+- resultado de cada etapa do fluxo;
+- comentários espontâneos do participante;
+- dúvidas, hesitações, reformulações de pergunta e necessidade de ajuda;
+- ocorrências com severidade alta, média, baixa ou cosmética;
+- potenciais melhorias relacionadas à interface, clareza das respostas, precisão percebida, indicação de fonte, tratamento de limites e controle da proatividade.
+
+Após a execução das tarefas, o participante responderá ao SUS adaptado no formulário online disponível em: https://docs.google.com/forms/d/e/1FAIpQLSev4yrWdqAepCaFaPPoLvj9v6dCIkwuLT7wBWMbkcO4w5_Ehw/viewform. O questionário contém 10 perguntas alternadas entre formulações positivas e negativas, seguindo a estrutura do SUS de John Brooke (1986), adaptadas ao contexto do Agente de Gestão de Portfólio. As perguntas avaliam facilidade de uso, complexidade percebida, integração das funcionalidades, necessidade de suporte, clareza das respostas, confiança, rapidez de aprendizagem e aderência do agente às necessidades do projeto.
+
+O cálculo do SUS seguirá o método tradicional: para itens positivos, subtrai-se 1 da nota atribuída; para itens negativos, subtrai-se a nota de 5. A soma dos valores ajustados é multiplicada por 2,5, resultando em uma pontuação de 0 a 100. Além da pontuação final, os comentários qualitativos e as ocorrências observadas serão usados para priorizar melhorias no agente.
 
 ### 9.3.2 Resultados
+
+Os resultados dos testes de usabilidade ainda não foram consolidados. Após a execução com os participantes externos, esta seção deverá apresentar:
+
+- quantidade de participantes e descrição dos perfis avaliados;
+- taxa de sucesso, dificuldade e falha por cenário;
+- principais ocorrências observadas e sua severidade;
+- pontuação SUS individual e média geral;
+- síntese dos comentários qualitativos dos participantes;
+- melhorias priorizadas para a evolução do agente.
+
+Os dados brutos serão registrados na planilha "Oneshot - Testes de Usabilidade - Agente de Gestão de Portifólio", que organiza cada cenário em etapas observáveis e mantém uma aba específica para ocorrências. O formulário SUS será utilizado como fonte complementar para medir a percepção geral de usabilidade após a experiência prática com o agente. A consolidação final deverá cruzar os registros da planilha com as respostas do SUS, permitindo identificar quais cenários tiveram maior taxa de sucesso, quais etapas concentraram dificuldades e quais problemas devem ser priorizados na evolução do agente.
+
+---
+
+## 9.4 Testes de Integração
+
+### 9.4.1 Planejamento
+
+O plano de testes de integração com o módulo de VHS será desenvolvido na Sprint 3, cobrindo a fronteira entre `app.audio.transcription` e o provedor externo de Speech-to-Text (Azure AI Speech, Seção 8.8). O objetivo é comprovar que os componentes se comunicam de forma verificável e que o VHS evita chamadas repetidas ao provedor externo para uma mesma requisição, sem que a suíte padrão dependa do serviço real estar disponível a cada execução — o mesmo princípio já adotado para Gemini e SharePoint na Seção 8.4, aplicado agora à integração de voz.
+
+Das três integrações externas mencionadas no item 3 do artefato — Speech-to-Text, banco de dados e canal do Copilot Studio —, este plano cobre apenas a primeira. É a única que hoje conta com mecanismo de cache obrigatório e a única cuja integração está prevista no backlog da Sprint 3/4; banco e Copilot Studio ainda não têm client implementado no backend, e o planejamento dos testes correspondentes fica para quando essa integração existir.
+
+#### Mecanismo de cache do VHS
+
+O VHS funciona no modelo de cassete: na primeira vez que um áudio é enviado (cache *miss*), o módulo chama o provedor externo normalmente, grava a resposta recebida associada a uma chave, e devolve essa resposta ao chamador. Em qualquer requisição seguinte cuja chave já exista no cache (cache *hit*), o VHS devolve a resposta gravada diretamente, sem realizar nova chamada ao provedor externo — é essa ausência de nova chamada, e não apenas a igualdade das respostas, que os testes precisam comprovar.
+
+A chave de cache identifica o conteúdo a ser transcrito — um hash do áudio combinado ao idioma — e não metadados de sessão como `conversation_id`: dois usuários enviando o mesmo áudio compartilham o cache, e o mesmo usuário enviando áudios diferentes não reaproveita uma resposta que não corresponde ao novo conteúdo. Respostas de erro do provedor (falha de conexão ou indisponibilidade) não são gravadas como cassete: cada nova tentativa após um erro deve acionar o provedor de novo, e não repetir a falha a partir do cache.
+
+#### Ferramentas e instruções de execução
+
+A execução automatizada segue `pytest` com `fastapi.testclient.TestClient`, na mesma linha já adotada para os testes de integração existentes (Seção 8.4). O provedor externo é sempre substituído por um duplo de teste (`monkeypatch` sobre o ponto de chamada em `app.audio.transcription`) que conta quantas vezes foi efetivamente invocado; nenhum teste desta suíte realiza chamada de rede real ao Azure AI Speech.
+
+Execução prevista: `pytest src/backend/app/tests/test_vhs_integration.py -v`, a partir de `src/backend`, com o ambiente virtual do projeto ativo (conforme `Manual-instalacao.md`). Cada teste deve iniciar com o cache do VHS vazio, usando uma fixture de limpeza equivalente a `reset_concurrency_control` de `test_audio_upload.py`, para que a ordem de execução não influencie o resultado.
+
+#### Cenários de teste (positivos e negativos)
+
+| Cenário | Tipo | Resultado esperado |
+|---|:---:|---|
+| Primeira requisição para um áudio novo | Positivo (comunicação) | Provedor chamado 1 vez; resposta registrada no cache |
+| Requisição repetida com o mesmo áudio | Positivo (cache) | Provedor **não** é chamado de novo; resposta idêntica à primeira; contador de chamadas ao duplo permanece em 1 |
+| Requisição com áudio diferente | Positivo (chave de cache) | Provedor chamado novamente, sem colisão de chave |
+| Cache expirado (TTL vencido) | Positivo (expiração) | Provedor chamado novamente após o TTL; antes do TTL, não |
+| Erro de conexão do provedor (`SttProviderError`) | Negativo (falha externa) | Endpoint responde 502 `STT_PROVIDER_ERROR`; erro não é cacheado; nova tentativa do mesmo áudio chama o provedor de novo |
+| Provedor indisponível (`SttProviderUnavailable`) | Negativo (indisponibilidade) | Endpoint responde 503 `STT_PROVIDER_UNAVAILABLE`; erro não é cacheado |
+| Recuperação após falha anterior no mesmo áudio | Negativo → Positivo | Requisição seguinte chama o provedor normalmente (falha não fica presa no cache) e, a partir daí, passa a cachear a resposta com sucesso |
+
+#### Comportamento esperado diante de erro externo
+
+Diante de qualquer falha do provedor de STT, o comportamento esperado do sistema é: (1) o endpoint mapeia a exceção para o código HTTP já definido no contrato (502 para `SttProviderError`, 503 para `SttProviderUnavailable`); (2) a mensagem de erro devolvida ao cliente não expõe detalhe técnico interno da falha, seguindo o mesmo padrão de mensagens controladas já testado em `TestControlledErrorMessages`; (3) o VHS não grava a falha como se fosse uma resposta válida, para que o sistema volte a tentar o provedor real na próxima requisição em vez de repetir um erro obsoleto indefinidamente.
+
+#### Validação dos resultados
+
+A evidência de que o cache está funcionando é o contador de chamadas do duplo de teste: um cenário de cache hit só passa se esse contador permanecer em 1 após duas ou mais requisições do mesmo áudio. A evidência de que erros não são cacheados é o mesmo contador voltando a incrementar em uma nova tentativa após uma falha. Os resultados da execução (saída do `pytest`, com contagem de testes passando/falhando) devem ser anexados como evidência na issue de execução da Sprint 4, junto com o relatório de cobertura, se disponível.
+
+A execução real desta suíte depende da integração com o Azure AI Speech sair do estágio de stub em que se encontra hoje (task 11 do backlog). Isso está alinhado com a Seção 6.2 do `GestaoProjeto.md`, que trata o planejamento de testes como frente independente da cadeia crítica de implementação: o plano pode ser escrito e a suíte pode rodar com o duplo de teste desde já, e só troca de alvo real quando o provedor estiver integrado.
+
+### 9.4.2 Resultados
 
 Será executado na Sprint 4.
 
@@ -4308,7 +5464,7 @@ O processo de implantação proposto, as variáveis de ambiente previstas, os co
 
 ## 10.1 Implantação e Configuração do Banco de Dados
 
-Os scripts de criação, carga inicial e rollback já estão versionados em [`src/database/sql`](../src/database/sql) e descritos na Seção 4.4. O registro da execução em ambiente de nuvem será feito na Sprint 4.
+O script de criação do modelo físico está versionado em [`src/database/sql/01_create_database.sql`](../src/database/sql/01_create_database.sql) e descrito na Seção 4.4. Os scripts de carga inicial e de rollback estão previstos no mesmo diretório e serão preenchidos junto com a massa sintética, conforme registrado em [`src/database/docs/README.md`](../src/database/docs/README.md). O registro da execução em ambiente de nuvem será feito na Sprint 4.
 
 ## 10.2 Implantação do Protótipo para uso por equipe de desenvolvimento
 
