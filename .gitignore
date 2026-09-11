@@ -1,3 +1,4 @@
+.src/frontend
 # --- Python (backend) ---
 __pycache__/
 *.py[cod]
@@ -23,6 +24,9 @@ dev-server.log
 npm-debug.log*
 yarn-error.log*
 
+# Copia de seguranca gerada pela migracao do artefato do classificador
+*.joblib.notebook
+
 # --- Jupyter ---
 .ipynb_checkpoints/
 
@@ -31,3 +35,39 @@ yarn-error.log*
 Thumbs.db
 .idea/
 *.swp
+
+# Environment & Secrets (AIOX)
+.env.local
+.env.*.local
+*.key
+*.pem
+!.env.example
+!**/.env.example
+
+
+# Dependencies (AIOX)
+node_modules
+
+# Build & Logs (AIOX)
+*.log
+logs/
+tmp/
+
+# AIOX Local (AIOX)
+.aiox-core/local/
+.claude/settings.local.json
+.aiox/install-log.txt
+.aiox-core
+.claude
+.codex
+.gemini
+.antigravity
+.cursor
+.github
+.kimi
+.agent
+AGENTS.md
+# Evidências locais dos testes automatizados
+src/frontend/coverage/
+src/frontend/playwright-report/
+src/frontend/test-results/

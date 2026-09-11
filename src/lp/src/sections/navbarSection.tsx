@@ -1,0 +1,149 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import AnimatedNavLink from "@/components/navbar/navbar";
+import { cn } from "@/lib/utils";
+import { beginProgrammaticScroll } from "@/lib/scrollHold";
+import { RELEASE_HOLDS_EVENT } from "@/lib/useScrollReveal";
+import { GLASS } from "@/lib/styles";
+
+/** `target: null` = topo da página; senão, o seletor da seção de destino. */
+const LINKS = [
+    { label: "Home", href: "#topo", target: null },
+    { label: "Modelo", href: "#modelo", target: "#modelo" },
+    { label: "Integração", href: "#integracao", target: "#integracao" },
+    { label: "Time", href: "#time", target: "#time" },
+];
+
+/** Ignore scroll jitter below this many pixels. */
+const DIRECTION_THRESHOLD = 6;
+/** Near the top of the page the navbar is always available. */
+const TOP_ZONE = 80;
+
+function NavbarSection() {
+    const [visible, setVisible] = useState(true);
+    const [overTakeover, setOverTakeover] = useState(false);
+    const lastYRef = useRef(0);
+
+    // Only shows up when the page is scrolled back up (or when the visitor is
+    // at the very top) — scrolling down tucks it away.
+    useEffect(() => {
+        lastYRef.current = window.scrollY;
+
+        const onScroll = () => {
+            const y = window.scrollY;
+            const delta = y - lastYRef.current;
+            if (Math.abs(delta) < DIRECTION_THRESHOLD) return;
+            lastYRef.current = y;
+            setVisible(y <= TOP_ZONE || delta < 0);
+        };
+
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => window.removeEventListener("scroll", onScroll);
+    }, []);
+
+    // The "Converse com o OneShot" section takes the whole screen, so the
+    // navbar stays out of the way there whichever way the page is moving.
+    useEffect(() => {
+        const target = document.querySelector("[data-try-section]");
+        if (!target) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setOverTakeover(entry.isIntersecting && entry.intersectionRatio >= 0.35);
+            },
+            { threshold: [0, 0.2, 0.35, 0.6, 1] },
+        );
+        observer.observe(target);
+        return () => observer.disconnect();
+    }, []);
+
+    // Navegação por JS em vez do salto nativo da âncora: assim o percurso é
+    // suave sem precisar de `scroll-behavior: smooth` global, que tornaria
+    // suaves também as correções instantâneas de scroll das seções de chat.
+    const goTo = useCallback(
+        (selector: string | null) => (event: React.MouseEvent<HTMLAnchorElement>) => {
+            event.preventDefault();
+            beginProgrammaticScroll(1600);
+
+            const destination = selector
+                ? document.querySelector<HTMLElement>(selector)
+                : null;
+            if (selector && !destination) return;
+            const targetY = destination
+                ? window.scrollY + destination.getBoundingClientRect().top
+                : 0;
+
+            // As seções de conversa seguram a página até a conversa terminar.
+            // Num clique de navegação isso vira uma armadilha: elas largam na
+            // hora — e, se o destino fica depois delas, a conversa é dada por
+            // concluída em vez de recomeçar mais tarde do zero.
+            const chatStart = document.querySelector<HTMLElement>("[data-chat-section]");
+            const chatY = chatStart
+                ? window.scrollY + chatStart.getBoundingClientRect().top
+                : Number.POSITIVE_INFINITY;
+            window.dispatchEvent(
+                new CustomEvent(RELEASE_HOLDS_EVENT, {
+                    detail: { complete: targetY > chatY },
+                }),
+            );
+
+            window.scrollTo({ top: targetY, behavior: "smooth" });
+        },
+        [],
+    );
+
+    const hidden = overTakeover || !visible;
+    const shell = cn("flex items-center", GLASS);
+
+    return (
+        <div
+            className={cn(
+                "fixed inset-x-0 top-4 z-50 grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 md:gap-3 md:px-8",
+                hidden && "pointer-events-none  opacity-0",
+            )}
+            // Fade puro: opacidade e o mínimo de deslocamento correm juntos e
+            // na mesma curva. Sequenciar os dois fazia a barra saltar para
+            // cima no fim do fade, que era justamente o que se queria evitar.
+            style={{ transition: "opacity 450ms ease-out, transform 450ms ease-out" }}
+            aria-hidden={hidden}
+        >
+            {/* Logo do Inteli e wordmark do OneShot ficam soltos nas pontas,
+                sem casca de vidro — só a marca, na mesma altura visual (28px). */}
+            <a
+                href="#topo"
+                onClick={goTo(null)}
+                aria-label="Inteli — topo da página"
+                className="justify-self-start"
+            >
+                <img
+                    src="/inteli-logo.png"
+                    alt="Inteli"
+                    className="h-5 w-auto brightness-0 invert md:h-7"
+                />
+            </a>
+
+            <nav className={cn(shell, "justify-self-center gap-2.5 px-2.5 py-2 md:gap-8 md:px-8 md:py-4")}>
+                {LINKS.map((link) => (
+                    <AnimatedNavLink
+                        key={link.label}
+                        label={link.label}
+                        href={link.href}
+                        onSelect={goTo(link.target)}
+                    />
+                ))}
+            </nav>
+
+            <a
+                href="#topo"
+                onClick={goTo(null)}
+                data-brand-wordmark
+                // A marca acompanha em tela estreita, em corpo menor: as três colunas
+                // só cabem em 390px se cada uma ceder um pouco.
+                className="justify-self-end text-base leading-tight font-medium tracking-tight text-white transition-opacity duration-300 hover:opacity-70 md:text-2xl md:leading-7"
+            >
+                OneShot
+            </a>
+        </div>
+    );
+}
+
+export default NavbarSection;

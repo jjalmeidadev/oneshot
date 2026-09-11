@@ -1,0 +1,45 @@
+@import 'tailwindcss';
+
+/* Inter é variável (100–900), então tem um Thin real — sem Thin disponível o
+   navegador apenas sintetizaria um peso mais fino. */
+@theme {
+  --font-sans:
+    'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Esconde a barra de rolagem da página (a rolagem continua funcionando por
+   roda, teclado e toque). Só o documento é afetado: containers internos com
+   scroll próprio, como a lista de mensagens do chat, seguem com a sua. */
+html {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Edge legado */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  /* Thin como peso padrão de toda a página; utilitários font-medium /
+     font-bold nos títulos continuam sobrescrevendo onde foram aplicados. */
+  font-weight: 100;
+}
+
+/* Numa tela estreita, qualquer elemento que passe da largura vira rolagem
+   lateral e a possibilidade de "afastar" o zoom, o que desmonta o layout
+   inteiro. A página nunca rola na horizontal. */
+html,
+body {
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+}

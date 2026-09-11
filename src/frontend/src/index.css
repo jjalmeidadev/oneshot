@@ -2,36 +2,158 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Tokens de cor da interface do agente.
+ *
+ * A paleta parte do azul institucional do Metro de Sao Paulo (#2864a4) e e
+ * declarada duas vezes: em `:root` para o tema claro e em `.dark` para o
+ * escuro. Nenhum componente usa cor literal — todos consomem as variaveis
+ * atraves das classes do Tailwind mapeadas em `tailwind.config.ts`.
+ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #123f68;
-  --border: #d9e7f5;
-  --input: #d9e7f5;
-  --ring: #2864a4;
+  color-scheme: light;
+
+  --bg-app: #eef3f9;
+  --bg-surface: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-muted: #f2f6fb;
+  --bg-subtle: #e7eff8;
+
+  --border: #d7e3f0;
+  --border-strong: #bcd0e4;
+
+  --fg: #0f2e4a;
+  --fg-muted: #4f6680;
+  --fg-subtle: #536e88;
+
   --primary: #2864a4;
-  --primary-foreground: #ffffff;
-  --secondary: #eff6fc;
-  --secondary-foreground: #123f68;
-  --destructive: #dc2626;
-  --destructive-foreground: #ffffff;
-  --accent: #eff6fc;
-  --accent-foreground: #123f68;
-  --muted: #f7fafc;
-  --muted-foreground: #64748b;
-  color: #123f68;
-  background: #f7fafc;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --primary-hover: #1e5490;
+  --primary-soft: #e4eefa;
+  --primary-fg: #ffffff;
+
+  --ring: #2864a4;
+
+  --success: #126448;
+  --success-soft: #e0f5ec;
+  --warning: #86520a;
+  --warning-soft: #fdf0d9;
+  --danger: #c0332c;
+  --danger-soft: #fdeae8;
+
+  --shadow-panel: 0 1px 2px rgb(15 46 74 / 0.05), 0 8px 24px -12px rgb(15 46 74 / 0.18);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --bg-app: #08131f;
+  --bg-surface: #0f1e2d;
+  --bg-elevated: #14283a;
+  --bg-muted: #132437;
+  --bg-subtle: #1a3049;
+
+  --border: #21384f;
+  --border-strong: #2e4a66;
+
+  --fg: #e8f0f8;
+  --fg-muted: #9ab0c6;
+  --fg-subtle: #9ab0c6;
+
+  --primary: #79b9f2;
+  --primary-hover: #9acbf7;
+  --primary-soft: #14314c;
+  --primary-fg: #04121f;
+
+  --ring: #4f9ae0;
+
+  --success: #45c79a;
+  --success-soft: #0f2e26;
+  --warning: #e0aa4f;
+  --warning-soft: #33280f;
+  --danger: #f0796f;
+  --danger-soft: #3a1c1a;
+
+  --shadow-panel: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
 }
 
 * {
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
-  min-width: 320px;
-  min-height: 100vh;
   margin: 0;
+  min-width: 320px;
+  background: var(--bg-app);
+  color: var(--fg);
+  font-family: Inter, 'Segoe UI', system-ui, Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Barra de rolagem discreta, para os tres paineis nao competirem visualmente. */
+.scrollbar-slim {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.scrollbar-slim::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-slim::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-slim::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  background-color: var(--border-strong);
+  border-radius: 9999px;
+}
+
+@keyframes pulse-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 1.2s infinite ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -39,13 +39,10 @@ O repositório do projeto segue a seguinte organização:
  ┃ ┗ 📂 merge_request_templates       modelos de merge request do projeto
  ┃   ┗ 📄 Default.md                  template padrão para merge requests
  ┣ 📂 docs                            documentação principal do projeto
- ┃ ┣ 📂 diagrams                      diagramas editáveis e arquivos de modelagem
- ┃ ┃ ┣ 📄 analise-swot.pptx           matriz SWOT em formato editável
- ┃ ┃ ┣ 📄 componentes-metro-5.2.puml  diagrama de componentes atualizado em PlantUML
- ┃ ┃ ┗ 📄 componentes-mvp.puml        diagrama de componentes do MVP em PlantUML
+ ┃ ┣ 📂 diagrams                      fontes editáveis dos diagramas em PlantUML
  ┃ ┣ 📂 img                           imagens, diagramas, personas, jornadas e materiais visuais
- ┃ ┣ 📄 GestaoConfiguracao.md         políticas de versionamento, branches e configuração
- ┃ ┣ 📄 GestaoProjeto.md              planejamento, retrospectivas e acompanhamento do projeto
+ ┃ ┣ 📄 GestaoConfiguracao.md         GitFlow, políticas de branch, hooks e versionamento
+ ┃ ┣ 📄 GestaoProjeto.md              sprints, riscos, papéis, contrato e planejamento
  ┃ ┣ 📄 GuiaPadroesDesenvolvimento.md padrões e convenções de desenvolvimento da equipe
  ┃ ┣ 📄 Index.md                      índice de navegação da documentação
  ┃ ┣ 📄 Manual-instalacao.md          instruções de instalação e execução da solução
@@ -56,12 +53,35 @@ O repositório do projeto segue a seguinte organização:
  ┃ ┣ 📄 install-hooks.ps1             instalação dos hooks em ambiente Windows
  ┃ ┗ 📄 install-hooks.sh              instalação dos hooks em ambiente Unix/Linux
  ┣ 📂 src                             código-fonte e artefatos técnicos da solução
- ┃ ┣ 📂 database                      scripts de banco de dados
- ┃ ┃ ┣ 📄 01_create_database.sql      criação da estrutura inicial do banco
- ┃ ┃ ┗ 📄 02_initial_data.sql         carga inicial de dados sintéticos
- ┃ ┗ 📂 notebooks                     notebooks de experimentação e validação técnica
- ┃   ┗ 📄 classificador_intencoes_metro.ipynb notebook do classificador de intenções
+ ┃ ┣ 📂 backend                       API FastAPI: áudio, PLN, RAG, banco e integrações
+ ┃ ┃ ┣ 📂 app
+ ┃ ┃ ┃ ┣ 📂 audio                     recebimento, validação e transcrição do áudio
+ ┃ ┃ ┃ ┣ 📂 database                  conexão PostgreSQL/Supabase e trilha do RNF03
+ ┃ ┃ ┃ ┣ 📂 gemini                    cliente do provedor de LLM
+ ┃ ┃ ┃ ┣ 📂 nlp                       núcleo de PLN: pré-processamento, entidades e inferência
+ ┃ ┃ ┃ ┣ 📂 rag                       recuperação de contexto em JSON e no banco
+ ┃ ┃ ┃ ┣ 📂 tests                     testes automatizados do backend
+ ┃ ┃ ┃ ┣ 📄 main.py                   rotas /health, /api/chat e /api/audio
+ ┃ ┃ ┃ ┗ 📄 pipeline.py               orquestração da classificação, resposta e rastreabilidade
+ ┃ ┃ ┣ 📄 requirements.txt            dependências da API
+ ┃ ┃ ┗ 📄 requirements-pln.txt        dependências da inferência do classificador
+ ┃ ┣ 📂 frontend                      bancada web em React, TypeScript e Vite
+ ┃ ┃ ┣ 📂 e2e                         testes de navegador com Playwright
+ ┃ ┃ ┣ 📂 src                         componentes, hooks, estado e cliente HTTP
+ ┃ ┃ ┗ 📄 TESTES.md                   matriz e evidências dos testes da interface
+ ┃ ┣ 📂 database                      scripts e documentação do banco de dados
+ ┃ ┃ ┣ 📂 docs                        dicionário de dados e decisões de modelagem
+ ┃ ┃ ┗ 📂 sql
+ ┃ ┃   ┣ 📄 01_create_database.sql    criação da estrutura do banco
+ ┃ ┃   ┣ 📄 02_initial_data.sql       carga inicial de dados sintéticos
+ ┃ ┃   ┣ 📄 03_rollback_data.sql      rollback controlado do baseline
+ ┃ ┃   ┗ 📄 04_rag_synthetic_data.sql carga dos extratos consultáveis pelo RAG
+ ┃ ┗ 📂 notebooks                     notebooks de experimentação e artefatos treinados
+ ┃   ┣ 📂 artefatos                   dataset, catálogo, modelo e métricas da execução
+ ┃   ┣ 📄 classificador_intencoes_metro.ipynb  benchmark do classificador de intenções
+ ┃   ┗ 📄 preprocessamento_entidades.ipynb     medição do pré-processamento e das entidades
  ┣ 📄 .gitignore                      arquivos e pastas ignorados pelo Git
+ ┣ 📄 .gitlab-ci.yml                  pipeline de testes do backend e do frontend
  ┗ 📄 README.md                       visão geral do projeto
 ```
 

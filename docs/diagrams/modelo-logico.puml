@@ -15,28 +15,61 @@ left to right direction
 
 entity subportfolios {
   **id** : uuid <<PK>>
+  partner_source_id : string
   code : string
-  name : string
-  description : text
-  strategic_objective : text
+  title : string
+  responsible_name : string
+  gpm_member_name : string
+  approver_name : string
+  support_name : string
+}
+entity subportfolio_status_updates {
+  **id** : uuid <<PK>>
+  subportfolio_id : uuid <<FK>>
+  partner_source_id : string
+  item : string
+  reference_date : date
+  situation : string
+  year_label : string
 }
 entity projects {
   **id** : uuid <<PK>>
   subportfolio_id : uuid <<FK>>
+  partner_source_id : string
   code : string
-  name : string
-  description : text
+  title : string
+  program_project_status : string
   status : string
-  current_phase : string
-  planned_end_date : date
-  sharepoint_site_url : string
+}
+entity project_progress_updates {
+  **id** : uuid <<PK>>
+  project_id : uuid <<FK>>
+  partner_source_id : string
+  reference_date : date
+  planned_physical : decimal
+  actual_physical : decimal
+  planned_economic : decimal
+  actual_economic : decimal
+  situation : string
+  year_label : string
+}
+entity project_deliverables_milestones {
+  **id** : uuid <<PK>>
+  project_id : uuid <<FK>>
+  description : text
+  planned_date : date
+  completed_date : date
+  status : string
 }
 entity project_artifacts {
   **id** : uuid <<PK>>
   project_id : uuid <<FK>>
+  partner_source_id : string
   artifact_type : string
   title : string
   sharepoint_url : string
+  attachment_name : string
+  attachment_url : string
   excel_sheet_name : string
   excel_table_or_range : string
   confidentiality_level : string
@@ -68,30 +101,84 @@ entity schedule_items {
   status : string
   source_row_number : int
 }
-entity project_status_updates {
-  **id** : uuid <<PK>>
-  project_id : uuid <<FK>>
-  artifact_id : uuid <<FK>>
-  reference_date : date
-  overall_status : string
-  progress_percent : decimal
-  executive_summary : text
-}
 entity risk_issue_items {
   **id** : uuid <<PK>>
+  scope_type : string
   project_id : uuid <<FK>>
-  source_artifact_id : uuid <<FK>>
-  item_type : string
-  title : string
-  severity : string
+  subportfolio_id : uuid <<FK>>
+  partner_source_id : string
+  item : string
+  updated_on : date
+  criticality : string
+  risk_or_issue_text : text
+  action_plan : text
+  planned_resolution_date : date
+  should_escalate : boolean
   status : string
+}
+entity risk_issue_history {
+  **id** : uuid <<PK>>
+  risk_issue_id : uuid <<FK>>
+  reference_date : date
+  previous_status : string
+  new_status : string
+  previous_criticality : string
+  new_criticality : string
+  comment_text : text
 }
 entity change_records {
   **id** : uuid <<PK>>
+  scope_type : string
   project_id : uuid <<FK>>
-  source_artifact_id : uuid <<FK>>
-  change_type : string
+  subportfolio_id : uuid <<FK>>
+  partner_source_id : string
+  title : string
+  registration_date : date
+  approval_date : date
+  source_label : string
+  reason : text
+  non_approval_impact : text
+  approval_impact : text
   status : string
+}
+entity project_charters {
+  **id** : uuid <<PK>>
+  project_id : uuid <<FK>>
+  subportfolio_id : uuid <<FK>>
+  artifact_id : uuid <<FK>>
+  partner_source_id : string
+  leader_name : string
+  team_text : text
+  objective : text
+  scope_text : text
+  non_scope_text : text
+  expected_benefits : text
+  start_date : date
+  end_date : date
+  cost_brl : decimal
+  revision_number : int
+  tap_situation : string
+  release_status : string
+}
+entity project_closure_terms {
+  **id** : uuid <<PK>>
+  project_id : uuid <<FK>>
+  artifact_id : uuid <<FK>>
+  partner_source_id : string
+  closure_status : string
+  closure_reason : text
+  remaining_scope_or_pending_items : text
+  actual_cost_brl : decimal
+  closure_date : date
+}
+entity project_benefits {
+  **id** : uuid <<PK>>
+  project_id : uuid <<FK>>
+  charter_id : uuid <<FK>>
+  description : text
+  benefit_type : string
+  expected_value : string
+  measurement_indicator : string
 }
 entity users {
   **id** : uuid <<PK>>
@@ -193,19 +280,28 @@ entity intent_test_cases {
   dataset_split : string
   leakage_group : string
 }
+
 subportfolios "1" -- "0..*" projects : possui
+subportfolios "1" -- "0..*" subportfolio_status_updates : acompanha
+subportfolios "1" -- "0..*" risk_issue_items : monitora
+subportfolios "1" -- "0..*" change_records : controla
+projects "1" -- "0..*" project_progress_updates : mede
+projects "1" -- "0..*" project_deliverables_milestones : acompanha
 projects "1" -- "0..*" project_artifacts : possui
 projects "1" -- "0..*" source_extracts : contextualiza
 project_artifacts "1" -- "0..*" source_extracts : gera
 projects "1" -- "0..*" schedule_items : possui
 project_artifacts "1" -- "0..*" schedule_items : origina
 schedule_items "1" -- "0..*" schedule_items : detalha
-projects "1" -- "0..*" project_status_updates : acompanha
-project_artifacts "1" -- "0..*" project_status_updates : fundamenta
 projects "1" -- "0..*" risk_issue_items : monitora
-project_artifacts "1" -- "0..*" risk_issue_items : fundamenta
+risk_issue_items "1" -- "0..*" risk_issue_history : versiona
 projects "1" -- "0..*" change_records : controla
-project_artifacts "1" -- "0..*" change_records : fundamenta
+projects "1" -- "0..*" project_charters : formaliza
+project_artifacts "1" -- "0..*" project_charters : estrutura
+projects "1" -- "0..*" project_closure_terms : encerra
+project_artifacts "1" -- "0..*" project_closure_terms : estrutura
+projects "1" -- "0..*" project_benefits : declara
+project_charters "1" -- "0..*" project_benefits : detalha
 users "1" -- "0..*" access_rules : possui
 users "1" -- "0..*" ai_conversations : inicia
 users "1" -- "0..*" ai_interactions : realiza

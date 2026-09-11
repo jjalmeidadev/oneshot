@@ -47,6 +47,11 @@ class SharePointDocument:
     web_url: str
     last_modified: str
     search_text: str
+    artifact_id: str | None = None
+    extract_id: str | None = None
+    project_id: str | None = None
+    source_locator: str | None = None
+    fallback: bool = True
 
 
 @dataclass(frozen=True)
