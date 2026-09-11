@@ -1,9 +1,15 @@
-"""Entrada comum de texto e transcricao para classificacao e resposta RAG."""
+"""Entrada comum de texto e transcricao para classificacao, resposta e tracing."""
 
+import logging
 from threading import Lock
 from time import perf_counter
 
-from app.gemini.client import GeminiConfigurationError, generate_chat_response
+from app.database.tracing import TraceabilityError, trace_interaction
+from app.gemini.client import (
+    GeminiAPIError,
+    GeminiConfigurationError,
+    generate_chat_response,
+)
 from app.gemini.schemas import GeminiChatRequest, GeminiChatResponse, GeminiUsage
 from app.nlp.entities import Entidade, extract_entities
 from app.nlp.schemas import (
@@ -14,6 +20,7 @@ from app.nlp.schemas import (
 )
 
 _classifier_lock = Lock()
+logger = logging.getLogger(__name__)
 
 
 def warmup_classifier() -> None:
@@ -43,10 +50,11 @@ def process_message(request: GeminiChatRequest) -> GeminiChatResponse:
             ]
             nlp_ms = _elapsed_ms(nlp_started_at)
         except Exception as error:
-            raise GeminiConfigurationError("Classificador indisponível.") from error
+            raise GeminiConfigurationError("Classificador indisponivel.") from error
+
         intent = _public_intent(result)
         if not result.roteada or result.macrointencao == "FORA_DE_ESCOPO":
-            return GeminiChatResponse(
+            response = GeminiChatResponse(
                 text=result.resposta_sugerida
                 or "Posso ajudar com informações do portfólio. Reformule sua pergunta indicando um projeto ou documento.",
                 model="classificador-local",
@@ -59,13 +67,40 @@ def process_message(request: GeminiChatRequest) -> GeminiChatResponse:
                     route_ms=_elapsed_ms(route_started_at),
                 ),
             )
+            _trace_safely(
+                request=request,
+                response=response,
+                intent=intent,
+                entities=entities,
+                processing_ms=_elapsed_ms(route_started_at),
+            )
+            return response
 
-    response = generate_chat_response(request)
+    try:
+        response = generate_chat_response(request, intent=intent, entities=entities)
+    except (GeminiConfigurationError, GeminiAPIError) as error:
+        _trace_safely(
+            request=request,
+            response=None,
+            intent=intent,
+            entities=entities,
+            processing_ms=_elapsed_ms(route_started_at),
+            error_message=str(error),
+        )
+        raise
+
     response.intent = intent
     response.entities = entities
     response.pipeline_metrics = ChatPipelineMetrics(
         nlp_ms=nlp_ms,
         route_ms=_elapsed_ms(route_started_at),
+    )
+    _trace_safely(
+        request=request,
+        response=response,
+        intent=intent,
+        entities=entities,
+        processing_ms=response.pipeline_metrics.route_ms,
     )
     return response
 
@@ -100,3 +135,25 @@ def _public_intent(result: object) -> AudioIntent:
 
 def _elapsed_ms(started_at: float) -> int:
     return round((perf_counter() - started_at) * 1000)
+
+
+def _trace_safely(
+    *,
+    request: GeminiChatRequest,
+    response: GeminiChatResponse | None,
+    intent: AudioIntent | None,
+    entities: list[PublicEntity],
+    processing_ms: int,
+    error_message: str | None = None,
+) -> None:
+    try:
+        trace_interaction(
+            request=request,
+            response=response,
+            intent=intent,
+            entities=entities,
+            processing_ms=processing_ms,
+            error_message=error_message,
+        )
+    except TraceabilityError:
+        logger.warning("Falha controlada ao registrar rastreabilidade RNF03.")

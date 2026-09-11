@@ -10,11 +10,26 @@ from app.audio import transcription
 from test_audio_upload import _build_wav, AUTH_HEADER, transcricao_fixa
 
 
+@pytest.fixture(autouse=True)
+def disable_traceability(monkeypatch):
+    monkeypatch.setattr("app.pipeline.trace_interaction", lambda **_kwargs: None)
+
+
+class ProviderCall:
+    def __init__(self, request, intent=None, entities=None):
+        self.request = request
+        self.intent = intent
+        self.entities = entities or []
+
+    def __getattr__(self, name):
+        return getattr(self.request, name)
+
+
 @pytest.fixture
 def provider(monkeypatch):
     calls = []
-    def generate(request):
-        calls.append(request)
+    def generate(request, intent=None, entities=None):
+        calls.append(ProviderCall(request, intent=intent, entities=entities))
         return GeminiChatResponse(text="Resposta [Fonte 1]", model="teste", interaction_id="next-id",
             latency_ms=4, usage=GeminiUsage(input_tokens=2, output_tokens=3, total_tokens=5),
             sources=[dict(id="lista:1", title="Projeto", list_name="Projetos", web_url="https://example.org/projeto",
@@ -68,6 +83,8 @@ def test_text_without_toggle_classifies_by_default_and_returns_entities(provider
     assert data['intent']['alternatives'][0]['intent'] == 'consulta_status_projeto'
     assert data['entities'][0]['type'] == 'projeto'
     assert data['entities'][0]['value'] == 'Linha 15-Prata'
+    assert provider[0].intent.specific == 'consulta_status_projeto'
+    assert provider[0].entities[0].value == 'Linha 15-Prata'
     assert data['pipeline_metrics']['nlp_ms'] >= 0
     assert data['pipeline_metrics']['route_ms'] >= data['pipeline_metrics']['nlp_ms']
 
@@ -139,7 +156,7 @@ def test_audio_completes_same_pipeline_and_context(monkeypatch, provider):
 
 @pytest.mark.parametrize('error,status', [(GeminiConfigurationError('secret-internal'),503), (GeminiAPIError('secret-internal'),502)])
 def test_provider_failure_is_controlled(monkeypatch, error, status):
-    def fail(request): raise error
+    def fail(request, intent=None, entities=None): raise error
     monkeypatch.setattr('app.pipeline.generate_chat_response', fail)
     with TestClient(app) as client:
         result = client.post('/api/chat', json={'message': 'prazo', 'use_intent_classifier': False})

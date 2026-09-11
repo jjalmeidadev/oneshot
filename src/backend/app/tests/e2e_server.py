@@ -16,7 +16,7 @@ from app.nlp import inference
 os.environ['AUDIO_SIMULATED_IDENTITIES'] = 'e2e-token=e2e-user'
 
 
-def generate(request):
+def generate(request, intent=None, entities=None):
     if request.message == 'falha':
         raise GeminiAPIError('detalhe privado do provedor', status_code=503)
     if request.message == 'demorada':

@@ -10,7 +10,10 @@ from app.gemini.schemas import (
     GeminiSource,
     GeminiUsage,
 )
-from app.rag.sharepoint import build_rag_input, retrieve_sharepoint_context
+from app.database.connection import DatabaseConfigurationError, DatabaseConnectionError
+from app.nlp.schemas import AudioIntent, PublicEntity
+from app.rag.database import retrieve_context
+from app.rag.sharepoint import build_rag_input
 
 GEMINI_INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions"
 DEFAULT_MODEL = "gemini-3.7-flash"
@@ -32,7 +35,11 @@ class GeminiAPIError(RuntimeError):
         self.status_code = status_code
 
 
-def generate_chat_response(request: GeminiChatRequest) -> GeminiChatResponse:
+def generate_chat_response(
+    request: GeminiChatRequest,
+    intent: AudioIntent | None = None,
+    entities: list[PublicEntity] | None = None,
+) -> GeminiChatResponse:
     api_key = os.getenv("GEMINI_API_KEY", "").strip()
     if not api_key:
         raise GeminiConfigurationError(
@@ -40,8 +47,31 @@ def generate_chat_response(request: GeminiChatRequest) -> GeminiChatResponse:
         )
 
     retrieval_started_at = perf_counter()
-    retrieved_documents = retrieve_sharepoint_context(request.message)
+    try:
+        retrieved_documents = retrieve_context(
+            request.message,
+            intent=intent,
+            entities=entities or [],
+        )
+    except (DatabaseConfigurationError, DatabaseConnectionError) as error:
+        raise GeminiAPIError(
+            "Nao foi possivel recuperar contexto no banco de dados.",
+            status_code=503,
+        ) from error
     retrieval_ms = round((perf_counter() - retrieval_started_at) * 1000)
+
+    if _requires_context(intent) and not retrieved_documents:
+        return GeminiChatResponse(
+            text=(
+                "Nao encontrei fontes suficientes para responder com seguranca. "
+                "Informe outro projeto, linha ou criterio de consulta."
+            ),
+            model="rag-retriever",
+            latency_ms=0,
+            retrieval_ms=retrieval_ms,
+            usage=GeminiUsage(),
+            sources=[],
+        )
 
     model = os.getenv("GEMINI_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
     payload: dict[str, object] = {
@@ -98,6 +128,10 @@ def generate_chat_response(request: GeminiChatRequest) -> GeminiChatResponse:
                 excerpt=result.document.content,
             )
             for result in retrieved_documents
+        ],
+        trace_sources=[
+            _trace_source_payload(result, citation_order=index)
+            for index, result in enumerate(retrieved_documents, start=1)
         ],
     )
 
@@ -208,3 +242,27 @@ def _bounded_int_env(name: str, default: int, minimum: int, maximum: int) -> int
 
 def _as_int(value: object) -> int:
     return value if isinstance(value, int) else 0
+
+
+def _requires_context(intent: AudioIntent | None) -> bool:
+    return bool(intent and intent.macro == "CONSULTA" and intent.specific)
+
+
+def _trace_source_payload(result: object, citation_order: int) -> dict:
+    document = result.document
+    return {
+        "artifact_id": document.artifact_id,
+        "extract_id": document.extract_id,
+        "project_id": document.project_id,
+        "source_type": "lista_sharepoint",
+        "source_title": document.title,
+        "source_url": document.web_url,
+        "source_locator": document.source_locator,
+        "relevance_score": min(max(float(result.score or 0) / 10, 0), 1),
+        "citation_order": citation_order,
+        "metadata": {
+            "fallback": document.fallback,
+            "source_id": document.source_id,
+            "list_name": document.list_name,
+        },
+    }

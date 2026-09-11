@@ -41,6 +41,7 @@ class GeminiChatResponse(BaseModel):
     retrieval_ms: int = 0
     usage: GeminiUsage
     sources: list[GeminiSource] = Field(default_factory=list)
+    trace_sources: list[dict] = Field(default_factory=list, exclude=True)
     intent: AudioIntent | None = None
     entities: list[PublicEntity] = Field(default_factory=list)
     pipeline_metrics: ChatPipelineMetrics = Field(default_factory=ChatPipelineMetrics)
