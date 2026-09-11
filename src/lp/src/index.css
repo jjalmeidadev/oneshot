@@ -34,3 +34,12 @@ body {
      font-bold nos títulos continuam sobrescrevendo onde foram aplicados. */
   font-weight: 100;
 }
+
+/* Numa tela estreita, qualquer elemento que passe da largura vira rolagem
+   lateral e a possibilidade de "afastar" o zoom, o que desmonta o layout
+   inteiro. A página nunca rola na horizontal. */
+html,
+body {
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+}

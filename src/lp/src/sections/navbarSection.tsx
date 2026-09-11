@@ -117,11 +117,11 @@ function NavbarSection() {
                 <img
                     src="/inteli-logo.png"
                     alt="Inteli"
-                    className="h-6 w-auto brightness-0 invert md:h-7"
+                    className="h-5 w-auto brightness-0 invert md:h-7"
                 />
             </a>
 
-            <nav className={cn(shell, "justify-self-center gap-3 px-3 py-2 md:gap-8 md:px-8 md:py-4")}>
+            <nav className={cn(shell, "justify-self-center gap-2.5 px-2.5 py-2 md:gap-8 md:px-8 md:py-4")}>
                 {LINKS.map((link) => (
                     <AnimatedNavLink
                         key={link.label}
@@ -136,9 +136,9 @@ function NavbarSection() {
                 href="#topo"
                 onClick={goTo(null)}
                 data-brand-wordmark
-                // Numa tela estreita as três colunas não cabem: a marca sai e sobram o
-                // logo do Inteli e os links, que é o que serve para navegar.
-                className="hidden justify-self-end text-2xl leading-7 font-medium tracking-tight text-white transition-opacity duration-300 hover:opacity-70 md:block"
+                // A marca acompanha em tela estreita, em corpo menor: as três colunas
+                // só cabem em 390px se cada uma ceder um pouco.
+                className="justify-self-end text-base leading-tight font-medium tracking-tight text-white transition-opacity duration-300 hover:opacity-70 md:text-2xl md:leading-7"
             >
                 OneShot
             </a>

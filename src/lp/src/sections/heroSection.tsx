@@ -76,7 +76,7 @@ function HeroSection() {
         >
             <h1
                 data-hero-title
-                className="flex min-h-[2.9em] items-center text-4xl font-bold text-white sm:text-5xl lg:text-6xl"
+                className="flex w-full min-h-[2.2em] items-center justify-center text-3xl font-bold text-white sm:min-h-[2.9em] sm:text-5xl lg:text-6xl"
             >
                 {ready && (
                     <HandwritingText

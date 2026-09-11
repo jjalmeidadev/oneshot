@@ -222,6 +222,11 @@ export function HandwritingText({
       style={{
         height,
         width: `calc(${height} * ${(geom.w / geom.h).toFixed(4)})`,
+        // O desenho é um traço só: ele não quebra linha como texto quebraria.
+        // Numa tela estreita a largura calculada passa de 800px, então o teto
+        // é a largura disponível — o `viewBox` cuida de encolher mantendo a
+        // proporção. Em tela larga isto nunca morde.
+        maxWidth: "100%",
         overflow: "visible",
       }}
     >
