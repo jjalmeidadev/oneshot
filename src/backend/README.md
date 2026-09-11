@@ -13,6 +13,22 @@ de 2, 4 e 8 segundos. Esses valores podem ser ajustados em `.env` por meio de
 `GEMINI_THINKING_LEVEL`, `GEMINI_MAX_OUTPUT_TOKENS`, `GEMINI_MAX_RETRIES`,
 `GEMINI_RETRY_BASE_DELAY_SECONDS` e `GEMINI_REQUEST_TIMEOUT_SECONDS`.
 
+Para validar a conectividade com o banco Supabase/PostgreSQL do projeto Oneshot,
+configure `DATABASE_URL` ou `SUPABASE_DATABASE_URL` em `src/backend/.env`. A URL
+deve vir do painel **Connect** do Supabase e manter credenciais apenas no ambiente
+local. Em producao, prefira conexao direta ou pooler de sessao para backend
+persistente e inclua `sslmode=require`.
+
+Com a URL do banco configurada, o RAG consulta `source_extracts` e
+`project_artifacts`, usando `projects` quando houver vinculo. A busca considera
+texto da pergunta, macro/intencao especifica e entidades extraidas pelo PLN,
+especialmente projeto ou linha. Sem URL de banco, o backend preserva o fallback
+local nos JSONs simulados de `app/rag/data/sharepoint`.
+
+Quando uma consulta classificada como `CONSULTA` nao recupera fontes suficientes,
+a API responde explicitamente que nao encontrou contexto seguro, sem inventar
+informacao.
+
 Para transcrever audio, configure tambem o recurso Azure AI Speech homologado
 para o ambiente. O portal Azure exibe o nome do recurso e, em alguns casos, um
 endpoint regional no formato `https://<regiao>.api.cognitive.microsoft.com/`; a
@@ -26,6 +42,8 @@ de STT usado pela API de audio curto.
 | `AZURE_SPEECH_KEY` | Chave do recurso Azure AI Speech, mantida somente no `.env` local. |
 | `AZURE_SPEECH_TIMEOUT_SECONDS` | Tempo maximo da chamada ao provedor, padrao 6 s; o backend limita o valor entre 1 e 120 segundos. |
 | `AZURE_SPEECH_MAX_ATTEMPTS` | Tentativas totais em falha transitoria, padrao 2; o backend limita entre 1 e 5. |
+| `DATABASE_URL` | String PostgreSQL principal para o Supabase/PostgreSQL, com SSL exigido quando aplicavel. |
+| `SUPABASE_DATABASE_URL` | Alias aceito quando o ambiente separa explicitamente a URL do Supabase. |
 
 ```powershell
 cd src/backend
