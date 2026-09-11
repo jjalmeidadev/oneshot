@@ -1,0 +1,9 @@
+fastapi==0.141.1
+uvicorn[standard]==0.52.3
+python-dotenv>=1.1,<2
+httpx>=0.28,<1
+pytest==9.1.1
+
+# O modelo RAG roda dentro deste processo (RAG_MODEL_BACKEND=local),
+# então as dependências dele entram junto.
+-r ../model/requirements.txt

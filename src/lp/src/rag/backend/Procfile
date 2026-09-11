@@ -1,0 +1,9 @@
+# Comando de inicialização para hosts que leem Procfile (Render, Railway).
+#
+# Três detalhes importam:
+#   --host 0.0.0.0  o host precisa alcançar o processo de fora do contêiner;
+#   $PORT           a porta é escolhida pelo provedor, nunca fixada aqui;
+#   --workers 1     a sala vive na memória do processo. Com mais de um worker,
+#                   cada um teria a sua própria sala e as pessoas parariam de
+#                   se enxergar. Ver "Escala" no README.
+web: uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1

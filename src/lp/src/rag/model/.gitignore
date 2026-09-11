@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# O cache de embeddings é economia de tempo, não artefato do projeto: ele é
+# reconstruído sozinho e não precisa viajar no repositório.
+artifacts/embedding-cache.*

@@ -14,20 +14,35 @@ hide circle
 left to right direction
 
 SUBPORTFOLIO "1" -- "0..*" PROJETO : agrupa
+SUBPORTFOLIO "1" -- "0..*" SITUACAO_SUBPORTFOLIO : registra
+SUBPORTFOLIO "1" -- "0..*" RISCO_OU_PROBLEMA : monitora
+SUBPORTFOLIO "1" -- "0..*" MUDANCA : controla
+
 PROJETO "1" -- "0..*" ARTEFATO_DO_PROJETO : possui
-ARTEFATO_DO_PROJETO "1" -- "0..*" EXTRATO_DE_FONTE : gera
-ARTEFATO_DO_PROJETO "1" -- "0..*" ITEM_DE_CRONOGRAMA : origina
-PROJETO "1" -- "0..*" ATUALIZACAO_DE_STATUS : registra
+PROJETO "1" -- "0..*" AVANCO_DO_PROJETO : mede
+PROJETO "1" -- "0..*" ENTREGA_OU_MARCO : acompanha
+PROJETO "1" -- "0..*" ITEM_DE_CRONOGRAMA : detalha
 PROJETO "1" -- "0..*" RISCO_OU_PROBLEMA : monitora
 PROJETO "1" -- "0..*" MUDANCA : controla
+PROJETO "1" -- "0..*" BENEFICIO : declara
+PROJETO "1" -- "0..*" TERMO_DE_ABERTURA : formaliza
+PROJETO "1" -- "0..*" TERMO_DE_ENCERRAMENTO : encerra
+
+ARTEFATO_DO_PROJETO "1" -- "0..*" EXTRATO_DE_FONTE : gera
+ARTEFATO_DO_PROJETO "1" -- "0..*" ITEM_DE_CRONOGRAMA : origina
+ARTEFATO_DO_PROJETO "1" -- "0..*" TERMO_DE_ABERTURA : estrutura
+ARTEFATO_DO_PROJETO "1" -- "0..*" TERMO_DE_ENCERRAMENTO : estrutura
+
+RISCO_OU_PROBLEMA "1" -- "0..*" HISTORICO_RISCO_PROBLEMA : versiona
+
 USUARIO "1" -- "0..*" CONVERSA : inicia
+USUARIO "1" -- "0..*" REGRA_DE_ACESSO : possui
 CONVERSA "1" -- "0..*" INTERACAO : contem
 INTENCAO "1" -- "0..*" INTERACAO : classifica
+INTENCAO "1" -- "0..*" TEMPLATE_DE_PROMPT : orienta
+INTENCAO "1" -- "0..*" CASO_DE_TESTE_DE_INTENCAO : valida
 INTERACAO "1" -- "0..*" FONTE_CONSULTADA : utiliza
 EXTRATO_DE_FONTE "1" -- "0..*" FONTE_CONSULTADA : referencia
 INTERACAO "1" -- "0..*" EVENTO_DE_AUDITORIA : gera
 INTERACAO "1" -- "0..1" SOLICITACAO_FORA_DE_ESCOPO : pode_gerar
-USUARIO "1" -- "0..*" REGRA_DE_ACESSO : possui
-INTENCAO "1" -- "0..*" TEMPLATE_DE_PROMPT : orienta
-INTENCAO "1" -- "0..*" CASO_DE_TESTE_DE_INTENCAO : valida
 @enduml
