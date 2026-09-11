@@ -63,9 +63,18 @@ export function useScrollReveal(sectionSelector: string) {
         const section = document.querySelector<HTMLElement>(sectionSelector);
         if (!section) return;
 
-        // Page loaded already inside (or past) the section: no hold, just
-        // play the conversation out.
-        if (section.getBoundingClientRect().top <= 1) {
+        // Em tela de toque a página nunca é segurada. A coreografia foi
+        // pensada para a roda do mouse, onde cada "marcha" revela uma
+        // mensagem; no celular, uma página que se recusa a rolar é
+        // indistinguível de uma página travada — e o visitante desiste antes
+        // de achar o botão de pular. Aqui a conversa aparece inteira e a
+        // rolagem continua sendo a nativa do sistema.
+        const touchDevice =
+            typeof window.matchMedia === "function" &&
+            window.matchMedia("(pointer: coarse)").matches;
+
+        // Mesmo caminho de quando a página carrega já dentro da seção.
+        if (touchDevice || section.getBoundingClientRect().top <= 1) {
             startedRef.current = true;
             setActive(true);
             setStep(Number.MAX_SAFE_INTEGER);

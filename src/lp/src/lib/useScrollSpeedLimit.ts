@@ -22,6 +22,16 @@ const MAX_STEP = 160;
  */
 export function useScrollSpeedLimit(zoneSelector: string) {
     useEffect(() => {
+        // O teto de velocidade existe para domar a inércia do trackpad. No
+        // celular ele brigaria com a rolagem por impulso do próprio sistema,
+        // que é justamente como se rola um telefone.
+        if (
+            typeof window.matchMedia === "function" &&
+            window.matchMedia("(pointer: coarse)").matches
+        ) {
+            return;
+        }
+
         const zone = document.querySelector<HTMLElement>(zoneSelector);
         if (!zone) return;
 
