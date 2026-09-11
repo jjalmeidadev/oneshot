@@ -1,5 +1,5 @@
 import ChatMessages from "@/components/chat/chat-messages";
-import { SOURCE_MESSAGES } from "@/components/chat/messages";
+import { MOBILE_INTRO_MESSAGES } from "@/components/chat/messages";
 import JoinQr from "@/components/live/join-qr";
 import LivePresenceCard from "@/components/live/live-presence-card";
 import { HAS_LIVE_BACKEND } from "@/lib/liveBackend";
@@ -68,7 +68,7 @@ export default function TrySection() {
                     <div className="flex h-[70vh] w-full max-w-2xl">
                         <ChatMessages
                             className="h-full w-full"
-                            messages={SOURCE_MESSAGES}
+                            messages={MOBILE_INTRO_MESSAGES}
                             autoPlay={false}
                             compact
                             interactive

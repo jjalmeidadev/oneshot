@@ -54,3 +54,21 @@ export const SOURCE_MESSAGES: ChatMessage[] = [
             "Toda resposta vem com a fonte junto: é só abrir a pasta e ir direto ao documento original.",
     },
 ];
+
+/**
+ * Conversa do celular: uma única mensagem, convidando à pergunta.
+ *
+ * No telefone a seção de teste é a única de chat que existe, e ela serve para
+ * o visitante perguntar — não para assistir a um diálogo pronto. A conversa
+ * roteirizada acima faz sentido no desktop, onde ela é revelada pela rolagem
+ * como parte da apresentação; aqui ela só ocuparia a tela e empurraria o
+ * campo para fora.
+ */
+export const MOBILE_INTRO_MESSAGES: ChatMessage[] = [
+    {
+        id: "mobile-intro",
+        sender: "assistant",
+        content:
+            "Faça uma pergunta sobre o projeto. Eu respondo a partir da documentação do OneShot e mostro de onde veio cada informação.",
+    },
+];
