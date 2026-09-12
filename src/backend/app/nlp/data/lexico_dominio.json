@@ -1,0 +1,173 @@
+{
+  "_fonte": "Vocabulario do dominio derivado do dicionario SLOTS de src/notebooks/classificador_intencoes_metro.ipynb, usado para gerar o conjunto sintetico dataset_intencoes.csv. Atualizar aqui quando o catalogo do portfolio mudar; o codigo nao precisa ser alterado. Acrescidos os tipos de documento nomeados no escopo macro do TAPI que o conjunto sintetico nao cobre: o Mapa de Beneficios, documento piloto das transacoes do agente segundo a Secao 2.7 do Projeto.md, e o normativo, previsto em project_artifacts.artifact_type.",
+  "tipos": {
+    "projeto": {
+      "descricao": "Projeto, programa ou obra do portfolio.",
+      "termos": [
+        "Estação Santa Marina",
+        "Estação Vila Sônia",
+        "Linha 15-Prata",
+        "Linha 17-Ouro",
+        "Linha 2-Verde",
+        "Linha 4-Amarela",
+        "PRJ-0442",
+        "PRJ-1187",
+        "PRJ-2031",
+        "Pátio Oratório",
+        "extensão da Linha 5-Lilás",
+        "implantação do portal do passageiro",
+        "modernização da Linha 3-Vermelha",
+        "modernização do CCO",
+        "programa de acessibilidade",
+        "programa de eficiência energética",
+        "programa de manutenção preditiva",
+        "programa de segurança patrimonial",
+        "projeto XPTO-104",
+        "projeto de bilhetagem eletrônica",
+        "projeto de renovação de frota",
+        "projeto de sinalização CBTC",
+        "projeto de telecomunicações",
+        "reforma da Estação Santana"
+      ]
+    },
+    "subportfolio": {
+      "descricao": "Subportfolio ou carteira que agrupa projetos.",
+      "termos": [
+        "carteira de obras civis",
+        "subportfólio de Acessibilidade",
+        "subportfólio de Expansão",
+        "subportfólio de Manutenção",
+        "subportfólio de Modernização",
+        "subportfólio de Segurança Operacional",
+        "subportfólio de Sustentabilidade",
+        "subportfólio de Tecnologia da Informação"
+      ]
+    },
+    "periodo": {
+      "descricao": "Recorte temporal da solicitacao.",
+      "termos": [
+        "desde janeiro",
+        "em 2026",
+        "na semana passada",
+        "neste mês",
+        "no acumulado do ano",
+        "no exercício atual",
+        "no primeiro semestre",
+        "no último trimestre",
+        "nos últimos seis meses"
+      ]
+    },
+    "responsavel": {
+      "descricao": "Pessoa, area ou papel responsavel.",
+      "termos": [
+        "Carlos",
+        "Mariana",
+        "Roberto",
+        "a GTI",
+        "a Gerência de Expansão",
+        "a diretoria de operações",
+        "a equipe de engenharia",
+        "o PMO",
+        "o gerente do projeto",
+        "o patrocinador"
+      ]
+    },
+    "documento": {
+      "descricao": "Artefato ou documento do ciclo de vida do projeto.",
+      "termos": [
+        "TAP",
+        "Termo de Abertura do Projeto",
+        "ata da última reunião",
+        "balanço do portfólio",
+        "cronograma físico-financeiro",
+        "mapa de benefícios",
+        "matriz de riscos",
+        "normativo",
+        "planilha de marcos",
+        "relatório anual de fechamento",
+        "relatório de acompanhamento"
+      ]
+    },
+    "criterio": {
+      "descricao": "Criterio de comparacao ou ordenacao.",
+      "termos": [
+        "aderência ao cronograma",
+        "avanço físico",
+        "criticidade",
+        "custo",
+        "execução orçamentária",
+        "nível de risco",
+        "prazo",
+        "quantidade de pendências"
+      ]
+    },
+    "indicador": {
+      "descricao": "Indicador de desempenho do portfolio.",
+      "termos": [
+        "CPI",
+        "SPI",
+        "aderência ao cronograma",
+        "curva S",
+        "percentual de conclusão",
+        "índice de desvio de custo",
+        "índice de execução orçamentária"
+      ]
+    },
+    "status": {
+      "descricao": "Situacao declarada de um projeto.",
+      "termos": [
+        "aguardando aprovação",
+        "cancelado",
+        "concluído",
+        "em andamento",
+        "em homologação",
+        "em planejamento",
+        "paralisado"
+      ]
+    },
+    "risco": {
+      "descricao": "Risco registrado na matriz.",
+      "termos": [
+        "atraso na desapropriação",
+        "estouro de orçamento",
+        "falta de mão de obra especializada",
+        "indisponibilidade de fornecedor",
+        "risco ambiental",
+        "risco de integração de sistemas",
+        "risco regulatório"
+      ]
+    },
+    "frequencia": {
+      "descricao": "Periodicidade de um alerta ou lembrete.",
+      "termos": [
+        "a cada quinze dias",
+        "diariamente",
+        "mensalmente",
+        "semanalmente",
+        "toda segunda-feira",
+        "toda sexta no fim do dia",
+        "todo dia 1º"
+      ]
+    },
+    "canal": {
+      "descricao": "Canal de entrega de uma notificacao.",
+      "termos": [
+        "aqui no chat",
+        "no Teams",
+        "por e-mail",
+        "por notificação"
+      ]
+    },
+    "data": {
+      "descricao": "Data ou marco temporal absoluto.",
+      "termos": [
+        "15/09/2026",
+        "30/06/2026",
+        "31/03/2027",
+        "a próxima quinzena",
+        "dezembro de 2026",
+        "o fim do trimestre"
+      ]
+    }
+  }
+}

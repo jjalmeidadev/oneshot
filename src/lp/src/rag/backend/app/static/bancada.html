@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Bancada — sala ao vivo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='%2334d399'/%3E%3C/svg%3E" />
+<style>
+  :root {
+    --bg: #0a0a0b;
+    --panel: rgba(255, 255, 255, 0.04);
+    --line: rgba(255, 255, 255, 0.10);
+    --text: #f4f4f5;
+    --muted: rgba(244, 244, 245, 0.55);
+    --faint: rgba(244, 244, 245, 0.35);
+    --accent: #818cf8;
+    --ok: #34d399;
+    --warn: #fbbf24;
+    --bad: #f87171;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; padding-bottom: 40px; }
+
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 16px; }
+  h1 { font-size: 16px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+  .tag {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--faint); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px;
+  }
+  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); margin-left: auto; }
+  .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--faint); flex: none; }
+  .dot.ws { background: var(--ok); box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15); }
+  .dot.poll { background: var(--warn); box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15); }
+  .dot.off { background: var(--bad); box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15); }
+
+  .grid { display: grid; gap: 14px; grid-template-columns: 1fr; }
+  @media (min-width: 860px) { .grid { grid-template-columns: 1fr 1fr; } }
+
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .card > h2 {
+    margin: 0; padding: 12px 14px; border-bottom: 1px solid var(--line);
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card > h2 .count { margin-left: auto; letter-spacing: 0; text-transform: none; font-weight: 400; color: var(--faint); }
+  .body { padding: 14px; }
+
+  input, button, textarea {
+    font: inherit; color: inherit; border-radius: 10px; border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.05); padding: 10px 12px;
+  }
+  input, textarea { width: 100%; }
+  input:focus, textarea:focus { outline: 2px solid rgba(129, 140, 248, 0.5); outline-offset: 1px; }
+  button {
+    cursor: pointer; background: linear-gradient(to right, #4f46e5, #7c3aed); border: none;
+    font-weight: 600; padding: 10px 16px; white-space: nowrap;
+  }
+  button:disabled { opacity: 0.45; cursor: default; }
+  button.ghost { background: rgba(255, 255, 255, 0.06); border: 1px solid var(--line); font-weight: 400; }
+  .row { display: flex; gap: 8px; align-items: center; }
+
+  .msg { border-radius: 12px; padding: 8px 12px; margin-bottom: 8px; max-width: 90%; font-size: 14px; }
+  .msg.user { margin-left: auto; background: linear-gradient(to right, #4f46e5, #7c3aed); }
+  .msg.assistant { background: rgba(255, 255, 255, 0.07); border: 1px solid var(--line); }
+  .msg.error { background: rgba(248, 113, 113, 0.12); border: 1px solid rgba(248, 113, 113, 0.35); color: #fecaca; }
+  .msg .who { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.65; margin-bottom: 2px; }
+
+  .person { border: 1px solid var(--line); background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+  .person .top { display: flex; align-items: center; gap: 8px; }
+  .person .name { font-weight: 500; }
+  .person .self { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; background: rgba(129, 140, 248, 0.2); color: #c7d2fe; border-radius: 999px; padding: 2px 7px; }
+  .person .status { margin-left: auto; font-size: 12px; color: var(--faint); }
+  .person .last { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .person .last b { font-weight: 500; color: var(--faint); }
+
+  .empty { color: var(--faint); font-size: 14px; text-align: center; padding: 22px 8px; }
+
+  .log { font: 12px/1.7 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--faint); max-height: 190px; overflow-y: auto; }
+  .log div { white-space: pre-wrap; word-break: break-word; }
+  .log .t { color: rgba(244, 244, 245, 0.25); }
+
+  .note { font-size: 12px; color: var(--faint); margin-top: 10px; }
+  code { background: rgba(255,255,255,0.07); border-radius: 5px; padding: 1px 5px; font-size: 0.92em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Bancada — sala ao vivo</h1>
+    <span class="tag">não é a landing page</span>
+    <span class="badge"><span id="dot" class="dot off"></span><span id="transport">desconectado</span></span>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Você <span class="count" id="euNome"></span></h2>
+      <div class="body">
+        <div id="entrada">
+          <div class="row">
+            <input id="nome" placeholder="Seu nome neste teste" autocomplete="off" />
+            <button id="entrar">Entrar</button>
+          </div>
+          <p class="note">Abra este mesmo endereço em outro dispositivo para ver os dois na sala.</p>
+        </div>
+
+        <div id="conversa" hidden>
+          <div id="minhasMensagens"></div>
+          <div class="row" style="margin-top: 10px">
+            <input id="pergunta" placeholder="Escreva uma pergunta…" autocomplete="off" />
+            <button id="enviar">Enviar</button>
+          </div>
+          <p class="note">
+            O modelo RAG ainda não existe: a pergunta aparece ao vivo para todo mundo e a
+            resposta volta <code>503</code>. É o comportamento esperado hoje.
+          </p>
+          <div class="row" style="margin-top: 10px">
+            <button class="ghost" id="sair">Sair da sala</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Sala ao vivo <span class="count" id="quantos">0 pessoas</span></h2>
+      <div class="body" id="sala"><p class="empty">Ninguém na sala ainda.</p></div>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top: 14px">
+    <h2>Eventos</h2>
+    <div class="body"><div class="log" id="log"></div></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // A página é servida pelo próprio backend, então tudo é mesma origem: o
+  // celular só precisa abrir esta URL, sem configurar endereço nenhum.
+  var API = "";
+  var WS_URL = location.origin.replace(/^http/, "ws") + "/ws/live";
+
+  var HEARTBEAT = 30000;   // TTL padrão do servidor é 90s.
+  var POLL = 2500;
+  var RECONNECT = 3000;
+  var DIGITANDO_OCIOSO = 1800;
+
+  var eu = null;           // { id, name, color }
+  var socket = null;
+  var pollTimer = null;
+  var beatTimer = null;
+  var reconnectTimer = null;
+  var digitandoTimer = null;
+  var digitando = false;
+  var sessoes = [];
+  var minhas = [];         // o que eu mandei/recebi, só nesta aba
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  function escapar(texto) {
+    return String(texto).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function registrar(mensagem) {
+    var agora = new Date().toTimeString().slice(0, 8);
+    var linha = document.createElement("div");
+    linha.innerHTML = '<span class="t">' + agora + "</span>  " + escapar(mensagem);
+    var log = $("log");
+    log.insertBefore(linha, log.firstChild);
+    while (log.childNodes.length > 60) log.removeChild(log.lastChild);
+  }
+
+  function transporte(tipo, rotulo) {
+    $("dot").className = "dot " + tipo;
+    $("transport").textContent = rotulo;
+  }
+
+  async function pedir(caminho, opcoes) {
+    var resposta = await fetch(API + caminho, opcoes);
+    var corpo = null;
+    try { corpo = await resposta.json(); } catch (e) { corpo = null; }
+    return { ok: resposta.ok, status: resposta.status, corpo: corpo };
+  }
+
+  // --- Sala ---------------------------------------------------------------
+
+  async function entrar(nome) {
+    var r = await pedir("/api/live/sessions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: nome || null })
+    });
+    if (!r.ok) {
+      registrar("não consegui entrar (" + r.status + "): " + ((r.corpo && r.corpo.detail) || ""));
+      return false;
+    }
+    eu = r.corpo;
+    try { localStorage.setItem("bancada:nome", eu.name); } catch (e) {}
+    registrar("entrei na sala como " + eu.name + " (id " + eu.id + ")");
+    $("entrada").hidden = true;
+    $("conversa").hidden = false;
+    $("euNome").textContent = eu.name;
+    $("pergunta").focus();
+    return true;
+  }
+
+  async function bater(status) {
+    if (!eu) return;
+    var r = await pedir("/api/live/sessions/" + eu.id + "/heartbeat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: status || null })
+    });
+    // A sessão expira se o aparelho dorme e o navegador congela os timers.
+    // Reentrar é o certo aqui — some da sala e volta, em vez de travar.
+    if (r.status === 404) {
+      registrar("minha sessão tinha expirado; entrando de novo");
+      var nome = eu.name;
+      eu = null;
+      await entrar(nome);
+    }
+  }
+
+  async function sair() {
+    if (!eu) return;
+    var id = eu.id;
+    eu = null;
+    clearInterval(beatTimer);
+    try {
+      await fetch(API + "/api/live/sessions/" + id, { method: "DELETE", keepalive: true });
+    } catch (e) {}
+    registrar("saí da sala");
+    $("entrada").hidden = false;
+    $("conversa").hidden = true;
+    $("euNome").textContent = "";
+    minhas = [];
+    desenharConversa();
+  }
+
+  async function perguntar(texto) {
+    minhas.push({ role: "user", content: texto });
+    desenharConversa();
+
+    var r = await pedir("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: eu ? eu.id : null, message: texto })
+    });
+
+    if (r.ok) {
+      minhas.push({ role: "assistant", content: r.corpo.text });
+      registrar("resposta do modelo em " + r.corpo.latency_ms + "ms");
+    } else {
+      var detalhe = (r.corpo && r.corpo.detail) || "falha na chamada";
+      minhas.push({ role: "error", content: detalhe });
+      registrar("chat respondeu " + r.status);
+      // 404: a sessão expirou entre o envio e a chegada.
+      if (r.status === 404 && eu) { var nome = eu.name; eu = null; await entrar(nome); }
+    }
+    desenharConversa();
+  }
+
+  // --- Transporte ---------------------------------------------------------
+
+  function aplicar(lista) {
+    sessoes = lista || [];
+    desenharSala();
+  }
+
+  async function puxar() {
+    try {
+      var r = await pedir("/api/live/sessions", { cache: "no-store" });
+      if (r.ok) aplicar(r.corpo.sessions);
+    } catch (e) {
+      transporte("off", "sem conexão");
+    }
+  }
+
+  function ligarPolling(motivo) {
+    if (pollTimer !== null) return;
+    transporte("poll", "polling (2,5s)");
+    if (motivo) registrar("polling ligado: " + motivo);
+    puxar();
+    pollTimer = setInterval(puxar, POLL);
+  }
+
+  function desligarPolling() {
+    if (pollTimer === null) return;
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+
+  function conectar() {
+    try {
+      socket = new WebSocket(WS_URL);
+    } catch (e) {
+      ligarPolling("WebSocket não pôde ser criado");
+      return;
+    }
+
+    socket.onopen = function () {
+      desligarPolling();
+      transporte("ws", "WebSocket aberto");
+      registrar("WebSocket conectado");
+    };
+
+    socket.onmessage = function (evento) {
+      try {
+        var dados = JSON.parse(evento.data);
+        aplicar(dados.sessions);
+      } catch (e) {}
+    };
+
+    socket.onclose = function () {
+      socket = null;
+      ligarPolling("o WebSocket caiu");
+      registrar("WebSocket fechou; tentando de novo em 3s");
+      reconnectTimer = setTimeout(conectar, RECONNECT);
+    };
+  }
+
+  // --- Desenho ------------------------------------------------------------
+
+  function quandoFoi(sessao) {
+    if (sessao.status === "typing") return "digitando…";
+    if (sessao.status === "thinking") return "aguardando resposta…";
+    var s = Math.max(0, Math.round((Date.now() - sessao.lastSeen) / 1000));
+    if (s < 5) return "agora mesmo";
+    if (s < 60) return "há " + s + "s";
+    return "há " + Math.round(s / 60) + "min";
+  }
+
+  function desenharSala() {
+    var alvo = $("sala");
+    $("quantos").textContent = sessoes.length + (sessoes.length === 1 ? " pessoa" : " pessoas");
+
+    if (sessoes.length === 0) {
+      alvo.innerHTML = '<p class="empty">Ninguém na sala ainda.</p>';
+      return;
+    }
+
+    alvo.innerHTML = sessoes.map(function (s) {
+      var ultima = s.messages[s.messages.length - 1];
+      var sou = eu && s.id === eu.id;
+      return '<div class="person">' +
+        '<div class="top">' +
+          '<span class="dot" style="background:' + escapar(s.color) + '"></span>' +
+          '<span class="name">' + escapar(s.name) + "</span>" +
+          (sou ? '<span class="self">você</span>' : "") +
+          '<span class="status">' + escapar(quandoFoi(s)) + "</span>" +
+        "</div>" +
+        (ultima
+          ? '<div class="last"><b>' + (ultima.role === "user" ? "Perguntou:" : "Resposta:") +
+            "</b> " + escapar(ultima.content) + "</div>"
+          : "") +
+      "</div>";
+    }).join("");
+  }
+
+  function desenharConversa() {
+    $("minhasMensagens").innerHTML = minhas.length === 0
+      ? '<p class="empty">Mande uma pergunta para ela aparecer na sala.</p>'
+      : minhas.map(function (m) {
+          var quem = m.role === "user" ? "você" : m.role === "assistant" ? "agente" : "erro";
+          return '<div class="msg ' + m.role + '"><span class="who">' + quem + "</span>" +
+                 escapar(m.content) + "</div>";
+        }).join("");
+  }
+
+  // --- Ligação da interface ------------------------------------------------
+
+  $("entrar").addEventListener("click", async function () {
+    var nome = $("nome").value.trim();
+    if (!(await entrar(nome))) return;
+    clearInterval(beatTimer);
+    beatTimer = setInterval(function () { bater(null); }, HEARTBEAT);
+  });
+
+  $("nome").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") $("entrar").click();
+  });
+
+  $("sair").addEventListener("click", sair);
+
+  $("enviar").addEventListener("click", function () {
+    var campo = $("pergunta");
+    var texto = campo.value.trim();
+    if (!texto) return;
+    campo.value = "";
+    digitando = false;
+    perguntar(texto);
+  });
+
+  $("pergunta").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") $("enviar").click();
+  });
+
+  // Digitar em um aparelho acende "digitando…" no painel dos outros.
+  $("pergunta").addEventListener("input", function () {
+    if (!eu) return;
+    if (!digitando) { digitando = true; bater("typing"); }
+    clearTimeout(digitandoTimer);
+    digitandoTimer = setTimeout(function () { digitando = false; bater("idle"); }, DIGITANDO_OCIOSO);
+  });
+
+  // Celular que volta do bloqueio: dá sinal de vida na hora, sem esperar o ciclo.
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") {
+      registrar("aba voltou a ficar visível");
+      bater(null);
+      if (!socket) { desligarPolling(); ligarPolling("retomando após voltar"); conectar(); }
+    }
+  });
+
+  window.addEventListener("pagehide", function () {
+    if (!eu) return;
+    try {
+      fetch(API + "/api/live/sessions/" + eu.id, { method: "DELETE", keepalive: true });
+    } catch (e) {}
+  });
+
+  try {
+    var salvo = localStorage.getItem("bancada:nome");
+    if (salvo) $("nome").value = salvo;
+  } catch (e) {}
+  if (!$("nome").value) {
+    $("nome").value = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? "Celular" : "Computador";
+  }
+
+  // O relógio de "há 12s" precisa andar mesmo sem chegar evento novo.
+  setInterval(desenharSala, 1000);
+
+  desenharConversa();
+  ligarPolling("carregando a sala");
+  conectar();
+})();
+</script>
+</body>
+</html>

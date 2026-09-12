@@ -1,0 +1,23 @@
+# Dependencias do nucleo de PLN (Secao 8.10.4 do Projeto.md).
+#
+# Requer Python 3.13 ou anterior: o gensim ainda nao publica wheel para o
+# 3.14 e a compilacao a partir do fonte falha. As demais bibliotecas, torch
+# e sentence-transformers inclusive, ja funcionam no 3.14.
+# O que o backend usa em tempo de execucao esta em src/backend: nltk,
+# scikit-learn, numpy e joblib em requirements.txt; gensim, onnxruntime e
+# tokenizers em requirements-pln.txt. Este arquivo cobre a experimentacao e o
+# treino nos notebooks, que ainda usam torch e sentence-transformers.
+gensim
+joblib
+jupyter
+matplotlib
+nltk==3.10.3
+numpy
+pandas
+# Versao com que o artefato do classificador foi serializado. Carregar o
+# joblib com outra versao faz o scikit-learn advertir que o resultado pode
+# ser invalido.
+scikit-learn==1.6.1
+scipy
+sentence-transformers
+torch
