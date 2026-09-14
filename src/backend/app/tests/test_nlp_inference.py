@@ -6,6 +6,7 @@ primeira execução. São marcados como lentos e compartilham uma única instân
 
 import csv
 import json
+import sys
 import warnings
 from pathlib import Path
 
@@ -13,7 +14,13 @@ import numpy as np
 import pytest
 
 from app.nlp.inference import (
+    BERT_MODEL_ENV,
+    BERT_REVISION_ENV,
+    DEFAULT_BERT_MODEL,
+    DEFAULT_BERT_REVISION,
     LIMITATION_ANSWER,
+    ONNX_GRAPH_FILE,
+    TOKENIZER_FILE,
     UNDEFINED_MACRO,
     ClassificadorDeIntencoes,
     Classificacao,
@@ -307,6 +314,62 @@ class TestFidelidadeAoBenchmark:
 
 
 class TestCarregamentoDosArtefatos:
+    @pytest.mark.parametrize(
+        "model,revision",
+        [
+            (DEFAULT_BERT_MODEL, DEFAULT_BERT_REVISION),
+            ("organizacao/modelo-controlado", "revision-controlada"),
+        ],
+    )
+    def test_encoder_baixa_grafo_e_tokenizador_da_mesma_revisao(
+        self,
+        monkeypatch,
+        model,
+        revision,
+    ) -> None:
+        downloads = []
+
+        def fake_download(*, repo_id, filename, revision):
+            downloads.append((repo_id, filename, revision))
+            return filename
+
+        class FakeSession:
+            def __init__(self, path, providers):
+                self.path = path
+                self.providers = providers
+
+            def get_inputs(self):
+                return []
+
+        class FakeTokenizer:
+            @classmethod
+            def from_file(cls, path):
+                return cls()
+
+            def enable_padding(self, **_kwargs):
+                pass
+
+            def enable_truncation(self, **_kwargs):
+                pass
+
+        monkeypatch.setattr("huggingface_hub.hf_hub_download", fake_download)
+        monkeypatch.setattr("onnxruntime.InferenceSession", FakeSession)
+        monkeypatch.setattr("tokenizers.Tokenizer", FakeTokenizer)
+        if model == DEFAULT_BERT_MODEL:
+            monkeypatch.delenv(BERT_MODEL_ENV, raising=False)
+            monkeypatch.delenv(BERT_REVISION_ENV, raising=False)
+        else:
+            monkeypatch.setenv(BERT_MODEL_ENV, model)
+            monkeypatch.setenv(BERT_REVISION_ENV, revision)
+
+        classificador = ClassificadorDeIntencoes()
+
+        assert classificador._bert[0].path == ONNX_GRAPH_FILE
+        assert downloads == [
+            (model, ONNX_GRAPH_FILE, revision),
+            (model, TOKENIZER_FILE, revision),
+        ]
+
     def test_word2vec_traz_o_vocabulario_do_corpus(self, classificador) -> None:
         assert len(classificador.word2vec.wv) == 577
         assert classificador.word2vec.wv.vector_size == 200
@@ -321,8 +384,6 @@ class TestCarregamentoDosArtefatos:
 
     def test_o_encoder_roda_sem_pytorch(self, classificador) -> None:
         """A inferencia nao deve arrastar torch nem transformers."""
-
-        import sys
 
         classificador.classify("qual o prazo do Linha 2-Verde?")
 

@@ -175,11 +175,17 @@ def test_invalid_text_is_rejected(message, provider):
 
 def test_classifier_unavailable_is_controlled(monkeypatch):
     def fail(text): raise RuntimeError('private-model-path')
+    provider_calls = []
     monkeypatch.setattr('app.nlp.inference.classify', fail)
+    monkeypatch.setattr(
+        'app.pipeline.generate_chat_response',
+        lambda *_args, **_kwargs: provider_calls.append(True),
+    )
     with TestClient(app) as client:
         result = client.post('/api/chat', json={'message':'prazo'})
     assert result.status_code == 503
     assert 'private-model-path' not in result.text
+    assert provider_calls == []
 
 
 def test_optional_warmup_runs_before_health(monkeypatch):

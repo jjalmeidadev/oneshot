@@ -7,6 +7,7 @@ from app.database.tracing import TraceabilityError, trace_interaction
 from app.gemini.client import GeminiAPIError
 from app.gemini.schemas import GeminiChatRequest, GeminiChatResponse, GeminiUsage
 from app.main import app
+from app.nlp.inference import get_classifier
 from app.nlp.schemas import AudioIntent, IntentAlternative, PublicEntity
 
 
@@ -121,6 +122,73 @@ def _response_with_db_source() -> GeminiChatResponse:
                 "metadata": {"fallback": False, "source_id": "source"},
             }
         ],
+    )
+
+
+def test_chat_real_classifier_contract_and_minimal_persistence(monkeypatch):
+    monkeypatch.setenv("PLN_WARMUP", "0")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
+    cursor = FakeCursor(
+        fetch_values=[
+            ("intent-1",),
+            ("conversation-1",),
+            ("interaction-1",),
+        ]
+    )
+    connection = FakeConnection(cursor)
+    provider_calls = []
+
+    def fake_provider(request, intent=None, entities=None):
+        provider_calls.append((request, intent, entities))
+        return _response_with_db_source()
+
+    monkeypatch.setattr("app.pipeline.generate_chat_response", fake_provider)
+    monkeypatch.setattr(
+        "app.database.tracing.open_database_connection",
+        lambda **_kwargs: connection,
+    )
+
+    with TestClient(app) as client:
+        result = client.post(
+            "/api/chat",
+            json={
+                "message": "qual é o status da extensão da Linha 5-Lilás?",
+                "use_intent_classifier": True,
+            },
+        )
+
+    assert result.status_code == 200
+    data = result.json()
+    intent = data["intent"]
+    artifact = get_classifier().artefato
+    assert artifact.limiar_macro == pytest.approx(0.550)
+    assert artifact.limiar_intencao == pytest.approx(0.700)
+    assert intent["macro"] == "CONSULTA"
+    assert intent["specific"] == "consulta_status_projeto"
+    assert intent["confidence_macro"] >= artifact.limiar_macro
+    assert intent["confidence_specific"] >= artifact.limiar_intencao
+    assert intent["flow"] == "RecuperadorInformacao -> Estruturador de Resposta"
+    assert intent["handler"] == "handler:consulta_status_projeto"
+    assert data["pipeline_metrics"]["nlp_ms"] >= 0
+    assert data["pipeline_metrics"]["route_ms"] >= 0
+    assert provider_calls[0][1].specific == "consulta_status_projeto"
+
+    interaction_call = next(
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.ai_interactions" in query
+    )
+    assert interaction_call[4] == intent["macro"]
+    assert interaction_call[5] == intent["confidence_macro"]
+    assert interaction_call[6] == intent["specific"]
+    assert interaction_call[7] == intent["confidence_specific"]
+    assert interaction_call[8] == intent["handler"]
+    assert interaction_call[9] == "sharepoint_query"
+    assert connection.committed is True
+    assert any(
+        params[1:4] == ("pln_intent_classified", "pln", "sucesso")
+        for query, params in cursor.calls
+        if "INSERT INTO public.audit_events" in query
     )
 
 

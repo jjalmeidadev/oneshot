@@ -60,7 +60,7 @@ npm ci
 Set-Location ../..
 ```
 
-Não use `npm install` para uma reprodução limpa, pois ele pode alterar o lock. O encoder ONNX é obtido do repositório de modelo documentado na Seção 8.11 de `Projeto.md` quando o classificador é carregado pela primeira vez.
+Não use `npm install` para uma reprodução limpa, pois ele pode alterar o lock. O encoder ONNX é obtido do repositório de modelo documentado na Seção 8.11 de `Projeto.md` quando o classificador é carregado pela primeira vez. Grafo e tokenizador usam a mesma revisão imutável declarada em `PLN_BERT_REVISION`.
 
 # 4. Configuração
 
@@ -79,6 +79,8 @@ AZURE_SPEECH_RESOURCE=<nome-do-recurso>
 AZURE_SPEECH_KEY=<chave-do-azure-speech>
 AUDIO_SIMULATED_IDENTITIES=token-local=usuario-local
 PLN_WARMUP=1
+PLN_BERT_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+PLN_BERT_REVISION=e8f8c211226b894fcb81acc59f3b34ba3efd5f42
 ```
 
 Use `AZURE_SPEECH_ENDPOINT` quando o portal fornecer um endpoint regional explícito. Os timeouts, retentativas, limite de fontes e diretório alternativo de dados simulados possuem valores documentados no próprio `.env.example`.
@@ -144,7 +146,7 @@ O Playwright inicia servidores exclusivos nas portas 5174 e 8001 e usa provedore
 5. Informe `token-local` no campo de token, acione o microfone, conceda a permissão, grave uma frase, conclua e ouça a prévia. Envie o áudio; o esperado é receber a transcrição e a resposta na mesma conversa.
 6. Inicie uma solicitação e use **Interromper resposta**. O indicador deve parar e um retorno tardio não deve ser inserido na conversa.
 7. Reduza a janela abaixo de 1024 px. Conversas e documentos devem abrir em diálogos; `Escape` deve fechá-los. Alterne também os temas claro e escuro.
-8. Recarregue a página e confirme a limitação conhecida: conversas e token são apagados, pois ainda não existe persistência no back-end.
+8. Recarregue a página e confirme a limitação conhecida: conversas e token são apagados, pois o frontend ainda não reidrata o histórico, mesmo quando a trilha técnica é persistida pelo backend.
 
 Se as chaves externas não estiverem disponíveis, os passos de texto que exigem geração e o áudio real devem apresentar indisponibilidade controlada. Use `npm run test:e2e` para validar o mesmo fluxo com fronteiras determinísticas.
 
@@ -158,14 +160,14 @@ psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/01_create_databa
 psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/02_initial_data.sql
 ```
 
-O modelo e a carga sintética podem ser inspecionados independentemente, mas não alteram as respostas da API atual. `03_rollback_data.sql` remove o baseline e só deve ser aplicado em banco descartável ou após um backup.
+Com a URL configurada, a API consulta os extratos persistidos e registra a trilha mínima de conversas, classificação, rota, fontes e auditoria. Sem a URL, usa o fallback JSON local e não tenta abrir conexão. `03_rollback_data.sql` remove o baseline e só deve ser aplicado em banco descartável ou após um backup.
 
 # 9. Solução de problemas
 
 | Sintoma | Verificação e correção |
 | --- | --- |
 | `python` aponta para 3.14 | Instale Python 3.12 ou 3.13, recrie `.venv` e reinstale as dependências. |
-| Erro ao carregar o classificador | Confirme `requirements-pln.txt`, acesso ao cache/repositório do encoder e compatibilidade do artefato com scikit-learn 1.6.1. |
+| Erro ao carregar o classificador | Confirme `requirements-pln.txt`, a revisão `PLN_BERT_REVISION`, o acesso ao cache/repositório do encoder e a compatibilidade do artefato com scikit-learn 1.6.1. |
 | API não fica pronta com `PLN_WARMUP=1` | Aguarde a primeira obtenção do encoder ou use temporariamente `PLN_WARMUP=0` para isolar a inicialização. |
 | Chat devolve indisponibilidade | Confira `GEMINI_API_KEY`, acesso de rede, modelo, timeout e limite do provedor. |
 | Áudio devolve 401 | Envie o token mapeado em `AUDIO_SIMULATED_IDENTITIES`; não informe a chave do Azure na interface. |

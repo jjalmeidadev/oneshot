@@ -3468,7 +3468,7 @@ Navegador React
 
 O `GET /health` verifica se o processo FastAPI terminou de iniciar. O caminho de texto e o caminho posterior à transcrição de áudio convergem em `app/pipeline.py`, portanto classificação, recuperação de contexto e geração não possuem implementações paralelas. O front-end transforma o contrato HTTP em mensagens, fontes, indicadores de intenção e estados de carregamento, mas não acessa Azure ou Gemini diretamente e não recebe suas credenciais.
 
-Não estão conectados ao fluxo em execução: o PostgreSQL, o Microsoft Entra ID, o SharePoint corporativo, o Microsoft Teams, o Copilot Studio, o Power Automate e a execução de transações. O repositório contém o esquema PostgreSQL e dados sintéticos reprodutíveis, enquanto o RAG usa exports JSON locais que simulam listas do SharePoint. Conversas, token da bancada e preferências de resposta permanecem na sessão do navegador; somente o tema pode ser persistido localmente.
+O PostgreSQL está conectado de forma opcional ao fluxo: quando `DATABASE_URL` ou `SUPABASE_DATABASE_URL` está configurada, o backend consulta os extratos persistidos e registra conversa, interação, intenção, rota, fontes e eventos de auditoria; sem configuração, o RAG usa exports JSON locais que simulam listas do SharePoint. Ainda não estão conectados o Microsoft Entra ID, o SharePoint corporativo, o Microsoft Teams, o Copilot Studio, o Power Automate e a execução de transações. Conversas, token da bancada e preferências de resposta permanecem na sessão do navegador; somente o tema pode ser persistido localmente.
 
 ### 8.5.2 Arquitetura executável
 
@@ -3584,7 +3584,7 @@ O primeiro comando deve informar 25 tabelas em um schema `public` inicialmente v
 
 A opção `ON_ERROR_STOP` faz o processo terminar na primeira falha em vez de continuar com uma instalação parcial. A carga usa conflitos controlados e verificações de existência para que uma nova execução atualize ou preserve os registros sintéticos esperados, em vez de duplicá-los.
 
-O banco é, nesta versão, um **artefato executável isolado**: o back-end não lê `DATABASE_URL`, não abre conexão PostgreSQL e não persiste conversas, interações, fontes ou auditoria. Também não há migração automatizada nem integração Supabase ativa. Até que um adaptador seja implementado, a resposta do agente vem dos JSONs simulados do SharePoint, e a interface mantém o histórico apenas em memória. Essa fronteira é importante para reproduzir o que existe sem pressupor uma persistência ainda não entregue.
+O banco possui integração opcional no backend. Com `DATABASE_URL` ou `SUPABASE_DATABASE_URL`, a recuperação consulta os extratos PostgreSQL e a rastreabilidade persiste conversas, interações, classificação, rota, fontes e auditoria; sem URL configurada, a aplicação continua reproduzível com os JSONs simulados do SharePoint e não tenta abrir conexão. Não há migração automatizada, e a interface ainda mantém o histórico apenas em memória, sem reidratar as conversas registradas no banco.
 
 ### 8.5.7 Front-end: componentes e comportamento
 
@@ -3625,7 +3625,7 @@ Em `POST /api/chat`, Pydantic remove espaços externos e rejeita mensagem vazia 
 
 Em `POST /api/audio`, a identidade simulada é resolvida antes da leitura. O arquivo é lido em blocos de 64 KiB e interrompido assim que ultrapassa o teto, evitando manter em memória um upload que será recusado. Depois da validação e do Azure STT, a transcrição é entregue ao mesmo pipeline do chat por meio de uma thread, para não bloquear o laço assíncrono. A resposta combina o resultado de voz com o contrato completo do chat.
 
-O RAG carrega dados sintéticos substituíveis por diretório, pontua a correspondência e injeta somente resultados relevantes com identificação da fonte. O cliente Gemini controla timeout e retentativas de falhas transitórias. Nenhuma dessas etapas grava no banco; logs de auditoria, persistência e autorização por perfil continuam como fronteiras de implementação futuras.
+O RAG consulta o PostgreSQL quando configurado e usa como fallback explícito dados sintéticos substituíveis por diretório; em ambos os casos, pontua a correspondência e injeta somente resultados relevantes com identificação da fonte. O cliente Gemini controla timeout e retentativas de falhas transitórias. A rastreabilidade registra no banco o contrato de classificação, a rota, as fontes e os eventos de auditoria; autorização por perfil continua como fronteira de implementação futura.
 
 Para isolar uma falha sem confundir disponibilidade do processo com disponibilidade dos provedores, use os checkpoints na ordem:
 
@@ -3634,7 +3634,7 @@ Para isolar uma falha sem confundir disponibilidade do processo com disponibilid
 | `GET /health` | FastAPI terminou a inicialização; com `PLN_WARMUP=1`, a carga inicial do classificador também terminou. | Credenciais, cota ou rede de Azure e Gemini. |
 | `POST /api/chat` com classificador desligado | Validação JSON, RAG local, montagem do prompt e fronteira Gemini. | Encoder e limiares do classificador. |
 | `POST /api/chat` com classificador ligado | Carga do modelo, inferência, limiares e roteamento antes da geração. | Captura, WAV e Azure STT. |
-| `POST /api/audio` | Identidade simulada, concorrência, leitura limitada, validação WAV, Azure STT e reutilização do pipeline. | Autenticação Entra ID e persistência. |
+| `POST /api/audio` | Identidade simulada, concorrência, leitura limitada, validação WAV, Azure STT, reutilização do pipeline e persistência opcional da rastreabilidade. | Autenticação Entra ID e reidratação do histórico no frontend. |
 | Resposta com `sources` | Recuperação dos JSONs, metadados e propagação até o contrato. | Consulta ao SharePoint corporativo. |
 
 Se um checkpoint falhar, teste primeiro o anterior e consulte o corpo controlado da resposta. Os testes determinísticos reproduzem cada fronteira com duplos; uma validação do provedor real deve ser executada separadamente, pois depende de credenciais, rede, cota e região.
@@ -4705,7 +4705,7 @@ A variante quantizada em int8 reduziria o grafo de 449 MB para 113 MB, mas custa
 
 **O que o artefato exigiu.** O `joblib` produzido pelo notebook não carregava fora dele. A função *analyzer* do TF-IDF e a classe do classificador hierárquico eram definidas no topo do notebook, e a serialização gravou referências a `__main__.identidade` e `__main__.ClassificadorHierarquico`; de qualquer módulo importável, `joblib.load` falhava com `AttributeError`. As duas definições passaram a viver em `src/backend/app/nlp/classifier.py`, e um script reaponta o artefato para lá sem retreinar. O procedimento está na Seção 8.11.4.
 
-A implementação também tornou explícita uma dependência que o notebook não precisava declarar: o artefato foi serializado com **scikit-learn 1.6.1**, e carregá-lo com outra versão faz a própria biblioteca advertir que o resultado pode ser inválido. A versão está fixada no `requirements.txt` do backend e o script de migração recusa executar fora dela.
+A implementação também tornou explícitas duas dependências que o notebook não precisava declarar. O artefato foi serializado com **scikit-learn 1.6.1**, e carregá-lo com outra versão faz a própria biblioteca advertir que o resultado pode ser inválido. A versão está fixada no `requirements.txt` do backend e o script de migração recusa executar fora dela. O encoder e o tokenizador são obtidos do mesmo snapshot imutável `e8f8c211226b894fcb81acc59f3b34ba3efd5f42`; `PLN_BERT_REVISION` permite substituir conscientemente essa revisão sem voltar a depender do estado móvel de `main`.
 
 Há ainda uma divergência de ambiente entre treino e serviço que convém registrar: a execução de referência do notebook usou Python 3.9, enquanto o serviço exige **Python 3.13 ou anterior**, porque o `gensim` ainda não publica wheel para o 3.14 e a compilação a partir do fonte falha. As duas faixas são compatíveis com os artefatos versionados, mas a restrição superior é real e vale para qualquer ambiente que execute a inferência.
 
@@ -4963,15 +4963,16 @@ O terceiro delimita o alcance do mecanismo de contenção: **os dois limiares n�
 
 ### 8.11.7 Testes automatizados
 
-A suíte do núcleo de PLN tem **87 testes**, e os 15 testes da rota HTTP acrescentados com a integração levam a **102 testes que exercitam o classificador**, dos 175 do backend. A suíte inteira roda em 15,8 segundos, dos quais 13,4 são dos testes de inferência: eles carregam os três artefatos reais, inclusive o encoder, e classificam o conjunto de teste completo. Os outros 69 testes de PLN rodam em 1,7 segundo.
+A coleta atual registra **202 testes no backend**. O núcleo de PLN responde por **91 casos coletados**; os 15 casos de `test_pipeline_api.py` verificam rapidamente o contrato HTTP com duplos, e um cenário adicional em `test_traceability.py` atravessa `POST /api/chat` com o classificador real até a persistência mínima. Tempos variam conforme o cache do snapshot ONNX e o ambiente de execução.
 
 | Arquivo | Testes | O que verifica |
 | --- | ---: | --- |
 | `test_nlp_preprocessing.py` | 20 | Cada opção da grade de pré-processamento, a `config_22` selecionada, a preservação de stopwords e a estabilidade dos tokens que o artefato espera |
 | `test_nlp_entities.py` | 30 | Casamento por léxico e por padrão, insensibilidade a caixa e acento, resolução de sobreposição pelo termo mais longo, tipos ambíguos e posições no texto original |
 | `test_nlp_classifier.py` | 19 | Carregamento e validação do artefato, recusa de artefato incompleto, comportamento do classificador hierárquico e a exigência de que ele carregue **fora** do notebook |
-| `test_nlp_inference.py` | 18 | Classificação ponta a ponta, os três caminhos de roteamento, a coerência entre macrointenção e handler, a fidelidade às métricas do benchmark e a ausência de `torch` |
+| `test_nlp_inference.py` | 22 | Classificação ponta a ponta, os três caminhos de roteamento, a coerência entre macrointenção e handler, a fidelidade às métricas do benchmark, a ausência de `torch` e o uso da mesma revisão imutável no grafo e tokenizador |
 | `test_pipeline_api.py` | 15 | Contrato real de `POST /api/chat` e `POST /api/audio` com o classificador substituído por um duplo: intenção e entidades no corpo da resposta, resposta controlada sem chamar o provedor gerador, opt-out por `use_intent_classifier` e tradução das falhas em código HTTP |
+| `test_traceability.py` | 11 | Contrato entre HTTP, classificador real, limiares, gerador substituído na fronteira e persistência mínima, além dos cenários controlados de banco e auditoria |
 
 **Quatro testes fazem a documentação e o código responderem um pelo outro.** Eles recalculam sobre o conjunto de teste os números registrados na Seção 8.10.3 e reprovam se houver divergência maior que 0,0002:
 
@@ -4994,12 +4995,12 @@ cd src/backend
 ```
 
 ```text
-175 passed, 11 warnings in 15.76s
+202 passed, 11 warnings
 ```
 
-Quando `requirements-pln.txt` não está instalado, os 18 testes de inferência são pulados com a razão declarada (`instale requirements-pln.txt`) e os outros 69 continuam rodando: o pré-processamento, a extração de entidades e o carregamento do artefato não dependem do encoder nem do Word2Vec.
+Quando `requirements-pln.txt` não está instalado, os testes de inferência são pulados com a razão declarada (`instale requirements-pln.txt`). O job `backend-api` da CI instala os dois arquivos de dependências, executa `test_nlp_inference.py` e `test_traceability.py` e mantém cache do snapshot imutável, portanto o cenário contratual não pode passar por *skip* silencioso.
 
-**Os testes de rota não carregam o modelo.** `test_pipeline_api.py` substitui tanto o classificador quanto o provedor gerador por duplos, de modo que o que fica sob teste é o contrato da API — os campos devolvidos, o código HTTP de cada falha prevista e a decisão de não chamar o gerador em solicitação fora de escopo. A fidelidade do modelo continua sendo responsabilidade dos testes de inferência, que carregam os artefatos reais.
+**A suíte separa velocidade de evidência entre camadas.** `test_pipeline_api.py` substitui classificador e provedor gerador por duplos para verificar rapidamente campos, códigos HTTP e decisões de chamada. `test_chat_real_classifier_contract_and_minimal_persistence`, em `test_traceability.py`, não substitui `classify`: usa o artefato real, valida os limiares de 0,550 e 0,700 no contrato público e confirma a gravação mínima. Somente Gemini e o driver PostgreSQL são substituídos nas fronteiras do teste.
 
 ### 8.11.8 Desempenho medido
 
@@ -5046,7 +5047,7 @@ O lock protege um cenário real: a carga preguiçosa dos três artefatos não é
 | Carregamento do artefato treinado | Implementado e testado | `app/nlp/classifier.py` |
 | Classificação e roteamento por limiares | Implementado e testado | `app/nlp/inference.py` |
 | Exposição do pipeline em rota HTTP | Implementada | `POST /api/chat` e `POST /api/audio` em `app/main.py` e `app/pipeline.py` |
-| Persistência da intenção e das entidades | **Não implementada** | Depende do esquema da Seção 4 e das tabelas de rastreabilidade do RNF03 |
+| Persistência da classificação e da rota | Implementada e testada quando o banco está configurado | `app/database/tracing.py` grava macro, intenção, confianças, handler, rota, fontes e auditoria; entidades permanecem no payload do evento de PLN |
 
 O núcleo é importável, exercitável e agora alcançado pelas rotas HTTP. Em
 `POST /api/chat`, a classificação é o padrão quando `use_intent_classifier` está
@@ -5056,33 +5057,34 @@ rotas devolvem intenção rica, entidades e métricas (`nlp_ms`, `route_ms`; no
 áudio também `validation_ms`, `stt_ms` e `total_ms`), o que viabiliza a medição
 incremental do RNF05. Solicitações fora de escopo, indefinidas ou sem rota segura
 recebem mensagem controlada sem chamada ao provedor gerador, preservando RNF11.
-Persistência da trilha exigida pelo RNF03 e autorização por perfil continuam
-pendentes das entregas específicas.
+A persistência é ativada por `DATABASE_URL` ou `SUPABASE_DATABASE_URL`; sem uma
+dessas variáveis, a API mantém o modo local sem falhar. Autorização por perfil
+continua pendente da entrega específica.
 
 Exemplo resumido do contrato textual exposto por `POST /api/chat`:
 
 ```json
 {
-  "text": "O prazo do projeto XPTO consta nas fontes recuperadas para esta consulta.",
+  "text": "A extensão da Linha 5-Lilás está em acompanhamento [Fonte 1].",
   "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
   "intent": {
     "macro": "CONSULTA",
-    "specific": "consulta_prazo",
-    "confidence_macro": 0.98,
-    "confidence_specific": 0.86,
-    "flow": "consulta_documental",
-    "handler": "consultar_prazo",
+    "specific": "consulta_status_projeto",
+    "confidence_macro": 0.9998,
+    "confidence_specific": 0.9944,
+    "flow": "RecuperadorInformacao -> Estruturador de Resposta",
+    "handler": "handler:consulta_status_projeto",
     "alternatives": [
-      { "specific": "consulta_status", "confidence": 0.09 }
+      { "intent": "consulta_status_projeto", "confidence": 0.9944 }
     ]
   },
   "entities": [
     {
       "type": "projeto",
-      "value": "XPTO",
-      "text": "projeto XPTO",
-      "start": 17,
-      "end": 29,
+      "value": "extensão da Linha 5-Lilás",
+      "text": "extensão da Linha 5-Lilás",
+      "start": 19,
+      "end": 44,
       "types": ["projeto"],
       "ambiguous": false
     }
