@@ -1,9 +1,9 @@
 """Persistencia de rastreabilidade RNF03 para interacoes do pipeline."""
 
-from collections.abc import Callable
 import json
 import os
 import re
+from collections.abc import Callable
 from typing import Any
 
 from app.database.connection import open_database_connection
@@ -33,6 +33,10 @@ def trace_interaction(
     processing_ms: int,
     channel: str = "api",
     error_message: str | None = None,
+    external_conversation_id: str | None = None,
+    correlation_id: str | None = None,
+    route_taken: str | None = None,
+    audit_context: dict[str, object] | None = None,
     connect: Callable[..., Any] | None = None,
 ) -> str | None:
     """Grava conversa, interacao, fontes persistidas e eventos de auditoria."""
@@ -45,9 +49,16 @@ def trace_interaction(
         try:
             with connection.cursor() as cursor:
                 intent_id = _find_intent_id(cursor, intent)
-                conversation_id = _get_or_create_conversation(cursor, request, channel)
+                conversation_id = _get_or_create_conversation(
+                    cursor,
+                    request,
+                    channel,
+                    external_conversation_id=external_conversation_id,
+                )
                 status = _processing_status(intent, response, error_message)
-                limitation_response = _limitation_response(intent, response, error_message)
+                limitation_response = _limitation_response(
+                    intent, response, error_message
+                )
                 interaction_id = _insert_interaction(
                     cursor,
                     conversation_id=conversation_id,
@@ -58,6 +69,7 @@ def trace_interaction(
                     status=status,
                     limitation_response=limitation_response,
                     processing_ms=processing_ms,
+                    route_taken=route_taken,
                 )
                 _insert_consulted_sources(cursor, interaction_id, response)
                 _insert_audit_events(
@@ -69,6 +81,8 @@ def trace_interaction(
                     entities=entities,
                     status=status,
                     error_message=error_message,
+                    correlation_id=correlation_id,
+                    audit_context=audit_context,
                 )
             _commit(connection)
             return interaction_id
@@ -103,8 +117,10 @@ def _get_or_create_conversation(
     cursor: Any,
     request: GeminiChatRequest,
     channel: str,
+    *,
+    external_conversation_id: str | None = None,
 ) -> str:
-    external_id = request.previous_interaction_id
+    external_id = external_conversation_id or request.previous_interaction_id
     if external_id:
         cursor.execute(
             """
@@ -152,6 +168,7 @@ def _insert_interaction(
     status: str,
     limitation_response: str | None,
     processing_ms: int,
+    route_taken: str | None,
 ) -> str:
     cursor.execute(
         """
@@ -187,7 +204,7 @@ def _insert_interaction(
             intent.specific if intent and intent.specific else None,
             intent.confidence_specific if intent else None,
             intent.handler if intent else None,
-            _route_taken(intent, response),
+            route_taken or _route_taken(intent, response),
             _json(_alternatives(intent)),
             response.text if response else None,
             limitation_response,
@@ -254,6 +271,8 @@ def _insert_audit_events(
     entities: list[PublicEntity],
     status: str,
     error_message: str | None,
+    correlation_id: str | None,
+    audit_context: dict[str, object] | None,
 ) -> None:
     events = [
         (
@@ -309,6 +328,16 @@ def _insert_audit_events(
             )
         )
 
+    if audit_context:
+        events.append(
+            (
+                "copilot_dispatch_correlated",
+                "copilot_studio",
+                "falha" if status == "erro" else "sucesso",
+                audit_context,
+            )
+        )
+
     events.append(
         (
             "database_traceability_recorded",
@@ -326,12 +355,67 @@ def _insert_audit_events(
                 event_type,
                 component,
                 event_status,
-                event_payload
+                event_payload,
+                correlation_id
             )
-            VALUES (%s, %s, %s, %s, %s::jsonb);
+            VALUES (%s, %s, %s, %s, %s::jsonb, %s);
             """,
-            (interaction_id, event_type, component, event_status, _json(payload)),
+            (
+                interaction_id,
+                event_type,
+                component,
+                event_status,
+                _json(payload),
+                correlation_id,
+            ),
         )
+
+
+def trace_audit_event(
+    *,
+    event_type: str,
+    component: str,
+    event_status: str,
+    correlation_id: str,
+    payload: dict[str, object] | None = None,
+    connect: Callable[..., Any] | None = None,
+) -> None:
+    """Persiste um evento sem interacao, usado nas fronteiras de seguranca."""
+
+    if connect is None and not is_tracing_configured():
+        return
+
+    try:
+        connection = open_database_connection(connect=connect)
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO public.audit_events (
+                        event_type,
+                        component,
+                        event_status,
+                        event_payload,
+                        correlation_id
+                    )
+                    VALUES (%s, %s, %s, %s::jsonb, %s);
+                    """,
+                    (
+                        event_type,
+                        component,
+                        event_status,
+                        _json(payload or {}),
+                        correlation_id,
+                    ),
+                )
+            _commit(connection)
+        except Exception:
+            _rollback(connection)
+            raise
+        finally:
+            connection.close()
+    except Exception as error:
+        raise TraceabilityError(PUBLIC_TRACING_ERROR_MESSAGE) from error
 
 
 def _processing_status(

@@ -23,7 +23,7 @@ backend-api:
   script:
     - pip install -r src/backend/requirements.txt
     - cd src/backend
-    - python -m pytest app/tests/test_gemini_client.py app/tests/test_audio_upload.py app/tests/test_pipeline_api.py -q
+    - python -m pytest app/tests/test_gemini_client.py app/tests/test_audio_upload.py app/tests/test_pipeline_api.py app/tests/test_copilot_integration.py app/tests/test_traceability.py -q
 
 frontend-e2e:
   stage: test

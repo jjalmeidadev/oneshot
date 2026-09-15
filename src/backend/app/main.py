@@ -1,9 +1,8 @@
-from pathlib import Path
-from uuid import uuid4
-from contextlib import asynccontextmanager
 import os
+from contextlib import asynccontextmanager
+from pathlib import Path
 from time import perf_counter
-from starlette.concurrency import run_in_threadpool
+from uuid import uuid4
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
@@ -11,13 +10,28 @@ from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
+from starlette.middleware.cors import CORSMiddleware
 
 from app.audio.errors import AudioError, AudioMissingError, AudioTooLargeError
-from app.audio.schemas import AudioErrorResponse, AudioUploadResponse
-from app.audio.schemas import AudioAnswer, AudioAnswerSource
+from app.audio.schemas import (
+    AudioAnswer,
+    AudioAnswerSource,
+    AudioErrorResponse,
+    AudioUploadResponse,
+)
 from app.audio.security import resolve_identity, single_request_per_identity
 from app.audio.service import process_audio_upload
 from app.audio.validation import DEFAULT_MAX_SIZE_BYTES
+from app.copilot.direct_line import direct_line_trusted_origins
+from app.copilot.errors import CopilotError
+from app.copilot.routes import (
+    audit_copilot_failure,
+    correlation_id_from_request,
+)
+from app.copilot.routes import (
+    router as copilot_router,
+)
 from app.gemini.client import (
     GeminiAPIError,
     GeminiConfigurationError,
@@ -25,7 +39,6 @@ from app.gemini.client import (
 from app.gemini.schemas import GeminiChatRequest, GeminiChatResponse
 from app.nlp.schemas import AudioPipelineMetrics
 from app.pipeline import process_message, warmup_classifier
-
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
@@ -46,6 +59,7 @@ AUDIO_ERROR_RESPONSES: dict[int | str, dict] = {
     }.items()
 }
 
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     if os.getenv("PLN_WARMUP", "0") == "1":
@@ -56,9 +70,49 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(
     lifespan=lifespan,
     title="API de IA do Metro",
-    description="Chat via Gemini com recuperacao de contexto em listas simuladas do SharePoint.",
+    description="Nucleo de PLN, RAG e integracoes seguras da IA do Metro.",
     version="0.1.0",
 )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=direct_line_trusted_origins(),
+    allow_credentials=False,
+    allow_methods=["POST"],
+    allow_headers=["Authorization", "Content-Type", "X-Correlation-ID"],
+    expose_headers=["X-Correlation-ID"],
+)
+
+
+@app.middleware("http")
+async def correlate_copilot_requests(request: Request, call_next):
+    """Propaga um identificador seguro nas fronteiras do Copilot."""
+
+    is_copilot_request = request.url.path.startswith(
+        "/api/copilot/"
+    ) or request.url.path.startswith("/api/integrations/copilot/")
+    if not is_copilot_request:
+        return await call_next(request)
+
+    request.state.correlation_id = correlation_id_from_request(request)
+    response = await call_next(request)
+    response.headers["X-Correlation-ID"] = request.state.correlation_id
+    return response
+
+
+@app.exception_handler(CopilotError)
+def handle_copilot_error(request: Request, error: CopilotError) -> JSONResponse:
+    correlation_id = getattr(request.state, "correlation_id", str(uuid4()))
+    request.state.correlation_id = correlation_id
+    audit_copilot_failure(request, code=error.code, status_code=error.status_code)
+    return JSONResponse(
+        status_code=error.status_code,
+        content={
+            "error": {"code": error.code, "message": error.message},
+            "correlation_id": correlation_id,
+        },
+        headers={"WWW-Authenticate": "Bearer"} if error.status_code == 401 else None,
+    )
 
 
 @app.exception_handler(AudioError)
@@ -80,13 +134,45 @@ async def handle_request_validation_error(
     contrato multipart; as demais rotas mantem o comportamento padrao.
     """
 
+    if request.url.path.startswith("/api/copilot/") or request.url.path.startswith(
+        "/api/integrations/copilot/"
+    ):
+        correlation_id = getattr(request.state, "correlation_id", str(uuid4()))
+        request.state.correlation_id = correlation_id
+        audit_copilot_failure(request, code="INVALID_INPUT", status_code=422)
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": {
+                    "code": "INVALID_INPUT",
+                    "message": "Confira os campos enviados ao Copilot Studio.",
+                },
+                "correlation_id": correlation_id,
+            },
+        )
     if request.url.path == "/api/chat":
-        return JSONResponse(status_code=422, content={"error": {"code": "INVALID_INPUT", "message": "Informe uma mensagem de 1 a 20.000 caracteres e parâmetros válidos."}})
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": {
+                    "code": "INVALID_INPUT",
+                    "message": "Informe uma mensagem de 1 a 20.000 caracteres e parâmetros válidos.",
+                }
+            },
+        )
     if request.url.path != AUDIO_PATH:
         return await request_validation_exception_handler(request, error)
 
     if any(item["loc"][-1] != "audio" for item in error.errors()):
-        return JSONResponse(status_code=400, content={"error": {"code": "INVALID_INPUT", "message": "Confira os parâmetros enviados com o áudio."}})
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": {
+                    "code": "INVALID_INPUT",
+                    "message": "Confira os parâmetros enviados com o áudio.",
+                }
+            },
+        )
 
     missing = AudioMissingError()
     return JSONResponse(status_code=missing.status_code, content=missing.to_payload())
@@ -97,14 +183,23 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+app.include_router(copilot_router)
+
+
 @app.post("/api/chat", response_model=GeminiChatResponse)
 def create_chat_response(request: GeminiChatRequest) -> GeminiChatResponse:
     try:
         return process_message(request)
     except GeminiConfigurationError as error:
-        raise HTTPException(status_code=503, detail="O serviço de processamento está indisponível. Tente novamente em instantes.") from error
+        raise HTTPException(
+            status_code=503,
+            detail="O serviço de processamento está indisponível. Tente novamente em instantes.",
+        ) from error
     except GeminiAPIError as error:
-        raise HTTPException(status_code=error.status_code, detail="Não foi possível obter uma resposta. Tente novamente em instantes.") from error
+        raise HTTPException(
+            status_code=error.status_code,
+            detail="Não foi possível obter uma resposta. Tente novamente em instantes.",
+        ) from error
 
 
 @app.post(
@@ -136,21 +231,27 @@ async def create_audio_upload(
             data,
             language=language or DEFAULT_LANGUAGE,
         )
-        response = await run_in_threadpool(create_chat_response, GeminiChatRequest(
-            message=audio_result.transcription.text,
-            previous_interaction_id=previous_interaction_id,
-            use_intent_classifier=use_intent_classifier,
-        ))
+        response = await run_in_threadpool(
+            create_chat_response,
+            GeminiChatRequest(
+                message=audio_result.transcription.text,
+                previous_interaction_id=previous_interaction_id,
+                use_intent_classifier=use_intent_classifier,
+            ),
+        )
         return AudioUploadResponse(
             conversation_id=conversation_id or str(uuid4()),
             interaction_id=response.interaction_id,
             transcription=audio_result.transcription,
             intent=response.intent,
             entities=response.entities,
-            answer=AudioAnswer(text=response.text, sources=[
-                AudioAnswerSource(artifact=source.title, section=source.list_name)
-                for source in response.sources
-            ]),
+            answer=AudioAnswer(
+                text=response.text,
+                sources=[
+                    AudioAnswerSource(artifact=source.title, section=source.list_name)
+                    for source in response.sources
+                ],
+            ),
             chat=response,
             pipeline_status="completed",
             pipeline_metrics=AudioPipelineMetrics(

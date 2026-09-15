@@ -1,0 +1,150 @@
+swagger: "2.0"
+info:
+  title: API de PLN do Metro - Copilot Studio
+  description: >-
+    Contrato minimo do conector personalizado. Classifica a solicitacao no
+    nucleo autoral de PLN e devolve a rota aprovada ao Copilot Studio.
+  version: 1.0.0
+host: api.example.invalid
+basePath: /
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  entra_oauth:
+    type: oauth2
+    flow: accessCode
+    authorizationUrl: https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize
+    tokenUrl: https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token
+    scopes:
+      api://{backend-app-id}/copilot.invoke: Classificar e despachar solicitacoes do Copilot
+security:
+  - entra_oauth:
+      - api://{backend-app-id}/copilot.invoke
+paths:
+  /api/integrations/copilot/dispatch:
+    post:
+      operationId: dispatchCopilotRequest
+      summary: Classificar e autorizar despacho
+      description: >-
+        Executa o PLN autoral, valida o alias de modelo e devolve a rota. O
+        parametro model_route e interno ao topico; nao deve vir do texto do usuario.
+      x-ms-summary: Classificar solicitacao
+      parameters:
+        - in: header
+          name: X-Correlation-ID
+          type: string
+          maxLength: 120
+          required: false
+          description: Identificador propagado entre Copilot, backend e Power Automate.
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/CopilotDispatchRequest"
+      responses:
+        "200":
+          description: Solicitacao classificada e correlacionada.
+          schema:
+            $ref: "#/definitions/CopilotDispatchResponse"
+        "400":
+          description: Entrada insegura para despacho automatico.
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "401":
+          description: Credencial ausente, invalida ou expirada.
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "403":
+          description: Credencial valida sem o escopo exigido.
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "422":
+          description: Entrada invalida ou rota de modelo nao permitida.
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "503":
+          description: Integracao, auditoria ou rota de modelo indisponivel.
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+definitions:
+  CopilotDispatchRequest:
+    type: object
+    required:
+      - conversation_id
+      - message
+    properties:
+      request_id:
+        type: string
+        format: uuid
+      conversation_id:
+        type: string
+        minLength: 1
+        maxLength: 160
+      message:
+        type: string
+        minLength: 1
+        maxLength: 20000
+      model_route:
+        type: string
+        enum: [auto, gpt, claude]
+        default: auto
+        x-ms-visibility: internal
+  CopilotDispatchResponse:
+    type: object
+    required:
+      - correlation_id
+      - request_id
+      - execution_id
+      - status
+      - route_taken
+      - model_route
+      - intent
+      - entities
+    properties:
+      correlation_id:
+        type: string
+      request_id:
+        type: string
+        format: uuid
+      execution_id:
+        type: string
+        format: uuid
+      interaction_id:
+        type: string
+        x-nullable: true
+      status:
+        type: string
+        enum: [accepted, blocked]
+      route_taken:
+        type: string
+        enum: [copilot_topic, sharepoint_query, fora_escopo]
+      model_route:
+        type: string
+        enum: [auto, gpt, claude]
+      intent:
+        type: object
+      entities:
+        type: array
+        items:
+          type: object
+  ErrorResponse:
+    type: object
+    required:
+      - error
+      - correlation_id
+    properties:
+      error:
+        type: object
+        required: [code, message]
+        properties:
+          code:
+            type: string
+          message:
+            type: string
+      correlation_id:
+        type: string
+

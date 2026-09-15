@@ -7,6 +7,11 @@ API FastAPI do projeto, com chat via Gemini e recuperacao de contexto em listas 
 Crie `src/backend/.env` a partir de `.env.example` e informe uma chave do
 Google AI Studio em `GEMINI_API_KEY`. A chave e utilizada somente pelo backend.
 
+A fronteira segura com o Copilot Studio usa OAuth 2.0/Microsoft Entra ID,
+contrato OpenAPI dedicado e broker de tokens Direct Line. A configuracao do
+tenant, os aliases de modelo e a matriz de evidencia estao em
+[`docs/integrations/copilot-studio.md`](../../docs/integrations/copilot-studio.md).
+
 Por padrao, as respostas usam nivel de raciocinio `low` e ate 512 tokens para
 reduzir a latencia. Falhas transitorias sao repetidas ate tres vezes, com esperas
 de 2, 4 e 8 segundos. Esses valores podem ser ajustados em `.env` por meio de

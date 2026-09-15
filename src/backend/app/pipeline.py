@@ -1,6 +1,7 @@
 """Entrada comum de texto e transcricao para classificacao, resposta e tracing."""
 
 import logging
+from dataclasses import dataclass
 from threading import Lock
 from time import perf_counter
 
@@ -23,6 +24,17 @@ _classifier_lock = Lock()
 logger = logging.getLogger(__name__)
 
 
+@dataclass(frozen=True)
+class ClassificationOutcome:
+    """Resultado interno compartilhado pelas rotas de chat e Copilot."""
+
+    intent: AudioIntent
+    entities: list[PublicEntity]
+    routed: bool
+    suggested_response: str | None
+    nlp_ms: int
+
+
 def warmup_classifier() -> None:
     """Prepara o modelo uma vez antes de atender usuarios quando habilitado."""
     from app.nlp.inference import get_classifier
@@ -38,24 +50,13 @@ def process_message(request: GeminiChatRequest) -> GeminiChatResponse:
     entities: list[PublicEntity] = []
 
     if request.use_intent_classifier:
-        nlp_started_at = perf_counter()
-        try:
-            from app.nlp.inference import classify
-
-            with _classifier_lock:
-                result = classify(request.message)
-            entities = [
-                _public_entity(entity)
-                for entity in extract_entities(request.message)
-            ]
-            nlp_ms = _elapsed_ms(nlp_started_at)
-        except Exception as error:
-            raise GeminiConfigurationError("Classificador indisponivel.") from error
-
-        intent = _public_intent(result)
-        if not result.roteada or result.macrointencao == "FORA_DE_ESCOPO":
+        classification = classify_message(request.message)
+        intent = classification.intent
+        entities = classification.entities
+        nlp_ms = classification.nlp_ms
+        if not classification.routed or intent.macro == "FORA_DE_ESCOPO":
             response = GeminiChatResponse(
-                text=result.resposta_sugerida
+                text=classification.suggested_response
                 or "Posso ajudar com informações do portfólio. Reformule sua pergunta indicando um projeto ou documento.",
                 model="classificador-local",
                 latency_ms=0,
@@ -103,6 +104,28 @@ def process_message(request: GeminiChatRequest) -> GeminiChatResponse:
         processing_ms=response.pipeline_metrics.route_ms,
     )
     return response
+
+
+def classify_message(message: str) -> ClassificationOutcome:
+    """Executa o nucleo autoral de PLN sem acionar um provedor generativo."""
+
+    nlp_started_at = perf_counter()
+    try:
+        from app.nlp.inference import classify
+
+        with _classifier_lock:
+            result = classify(message)
+        entities = [_public_entity(entity) for entity in extract_entities(message)]
+    except Exception as error:
+        raise GeminiConfigurationError("Classificador indisponivel.") from error
+
+    return ClassificationOutcome(
+        intent=_public_intent(result),
+        entities=entities,
+        routed=bool(result.roteada),
+        suggested_response=getattr(result, "resposta_sugerida", None),
+        nlp_ms=_elapsed_ms(nlp_started_at),
+    )
 
 
 def _public_entity(entity: Entidade) -> PublicEntity:

@@ -3,7 +3,7 @@ from types import SimpleNamespace
 import pytest
 from fastapi.testclient import TestClient
 
-from app.database.tracing import TraceabilityError, trace_interaction
+from app.database.tracing import TraceabilityError, trace_audit_event, trace_interaction
 from app.gemini.client import GeminiAPIError
 from app.gemini.schemas import GeminiChatRequest, GeminiChatResponse, GeminiUsage
 from app.main import app
@@ -146,7 +146,9 @@ def test_trace_interaction_records_interaction_and_consulted_sources(monkeypatch
 
     assert interaction_id == "interaction-1"
     assert connection.committed is True
-    assert any("INSERT INTO public.ai_interactions" in query for query, _ in cursor.calls)
+    assert any(
+        "INSERT INTO public.ai_interactions" in query for query, _ in cursor.calls
+    )
     source_call = next(
         params
         for query, params in cursor.calls
@@ -158,7 +160,9 @@ def test_trace_interaction_records_interaction_and_consulted_sources(monkeypatch
 
 def test_trace_interaction_records_rf08_absence_as_limitation(monkeypatch):
     monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
-    cursor = FakeCursor(fetch_values=[("intent-1",), ("conversation-1",), ("interaction-1",)])
+    cursor = FakeCursor(
+        fetch_values=[("intent-1",), ("conversation-1",), ("interaction-1",)]
+    )
     connection = FakeConnection(cursor)
     response = GeminiChatResponse(
         text="Nao encontrei fontes suficientes para responder com seguranca.",
@@ -235,8 +239,34 @@ def test_trace_interaction_normalizes_macro_intent_for_database_check(
 @pytest.mark.parametrize(
     "classification,status",
     [
-        (SimpleNamespace(macrointencao="FORA_DE_ESCOPO", intencao=None, confianca_macro=0.9, confianca_intencao=0.0, fluxo="", handler="limitacao", alternativas=[], roteada=True, resposta_sugerida="Fora do escopo"), "fora_escopo"),
-        (SimpleNamespace(macrointencao="INDEFINIDA", intencao=None, confianca_macro=0.3, confianca_intencao=0.0, fluxo="", handler="limitacao", alternativas=[], roteada=False, resposta_sugerida="Reformule"), "sem_confianca"),
+        (
+            SimpleNamespace(
+                macrointencao="FORA_DE_ESCOPO",
+                intencao=None,
+                confianca_macro=0.9,
+                confianca_intencao=0.0,
+                fluxo="",
+                handler="limitacao",
+                alternativas=[],
+                roteada=True,
+                resposta_sugerida="Fora do escopo",
+            ),
+            "fora_escopo",
+        ),
+        (
+            SimpleNamespace(
+                macrointencao="INDEFINIDA",
+                intencao=None,
+                confianca_macro=0.3,
+                confianca_intencao=0.0,
+                fluxo="",
+                handler="limitacao",
+                alternativas=[],
+                roteada=False,
+                resposta_sugerida="Reformule",
+            ),
+            "sem_confianca",
+        ),
     ],
 )
 def test_chat_limited_by_classifier_traces_without_calling_provider(
@@ -330,8 +360,12 @@ def test_controlled_provider_error_is_traced_without_leaking_details(monkeypatch
 
 
 def test_traceability_error_message_is_sanitized(monkeypatch):
-    monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret-token@example/postgres")
-    cursor = FakeCursor(fetch_values=[("intent-1",), ("conversation-1",), ("interaction-1",)])
+    monkeypatch.setenv(
+        "DATABASE_URL", "postgresql://user:secret-token@example/postgres"
+    )
+    cursor = FakeCursor(
+        fetch_values=[("intent-1",), ("conversation-1",), ("interaction-1",)]
+    )
     connection = FakeConnection(cursor, fail_commit=True)
 
     with pytest.raises(TraceabilityError) as error:
@@ -347,3 +381,87 @@ def test_traceability_error_message_is_sanitized(monkeypatch):
     assert str(error.value) == "Nao foi possivel registrar a rastreabilidade."
     assert "secret-token" not in str(error.value)
     assert "stack trace" not in str(error.value)
+
+
+def test_copilot_trace_persists_external_conversation_route_and_correlation(
+    monkeypatch,
+):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
+    cursor = FakeCursor(
+        fetch_values=[
+            ("intent-1",),
+            None,
+            ("conversation-1",),
+            ("interaction-1",),
+        ]
+    )
+    connection = FakeConnection(cursor)
+
+    interaction_id = trace_interaction(
+        request=GeminiChatRequest(message="gere um relatorio"),
+        response=GeminiChatResponse(
+            text="Despacho classificado.",
+            model="copilot-router",
+            latency_ms=0,
+            usage=GeminiUsage(),
+        ),
+        intent=_intent("TRANSACAO", "transacao_gerar_relatorio"),
+        entities=[],
+        processing_ms=3,
+        channel="copilot_studio",
+        external_conversation_id="copilot-conversation-1",
+        correlation_id="correlation-1",
+        route_taken="copilot_topic",
+        audit_context={"execution_id": "execution-1", "model_route": "gpt"},
+        connect=_connect(connection),
+    )
+
+    assert interaction_id == "interaction-1"
+    conversation_insert = next(
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.ai_conversations" in query
+    )
+    assert conversation_insert[0:2] == (
+        "copilot_studio",
+        "copilot-conversation-1",
+    )
+    interaction_insert = next(
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.ai_interactions" in query
+    )
+    assert interaction_insert[9] == "copilot_topic"
+    copilot_audit = next(
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.audit_events" in query
+        and params[1] == "copilot_dispatch_correlated"
+    )
+    assert copilot_audit[-1] == "correlation-1"
+    assert "execution-1" in copilot_audit[4]
+
+
+def test_security_event_can_be_audited_without_interaction(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
+    cursor = FakeCursor()
+    connection = FakeConnection(cursor)
+
+    trace_audit_event(
+        event_type="copilot_request_rejected",
+        component="copilot_studio",
+        event_status="bloqueado",
+        correlation_id="correlation-401",
+        payload={"code": "UNAUTHENTICATED", "http_status": 401},
+        connect=_connect(connection),
+    )
+
+    assert connection.committed is True
+    params = cursor.calls[0][1]
+    assert params[0:3] == (
+        "copilot_request_rejected",
+        "copilot_studio",
+        "bloqueado",
+    )
+    assert params[-1] == "correlation-401"
+    assert "secret" not in params[3]
