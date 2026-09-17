@@ -4705,11 +4705,29 @@ A variante quantizada em int8 reduziria o grafo de 449 MB para 113 MB, mas custa
 
 **O que o artefato exigiu.** O `joblib` produzido pelo notebook não carregava fora dele. A função *analyzer* do TF-IDF e a classe do classificador hierárquico eram definidas no topo do notebook, e a serialização gravou referências a `__main__.identidade` e `__main__.ClassificadorHierarquico`; de qualquer módulo importável, `joblib.load` falhava com `AttributeError`. As duas definições passaram a viver em `src/backend/app/nlp/classifier.py`, e um script reaponta o artefato para lá sem retreinar. O procedimento está na Seção 8.11.4.
 
-A implementação também tornou explícitas duas dependências que o notebook não precisava declarar. O artefato foi serializado com **scikit-learn 1.6.1**, e carregá-lo com outra versão faz a própria biblioteca advertir que o resultado pode ser inválido. A versão está fixada no `requirements.txt` do backend e o script de migração recusa executar fora dela. O encoder e o tokenizador são obtidos do mesmo snapshot imutável `e8f8c211226b894fcb81acc59f3b34ba3efd5f42`; `PLN_BERT_REVISION` permite substituir conscientemente essa revisão sem voltar a depender do estado móvel de `main`.
+A implementação também tornou explícitas duas dependências que o notebook não precisava declarar. O artefato foi serializado com **scikit-learn 1.6.1**, e carregá-lo com outra versão faz a própria biblioteca advertir que o resultado pode ser inválido. A versão está fixada no `requirements.txt` do backend e o script de migração recusa executar fora dela. O encoder BERTimbau e o tokenizador são obtidos do mesmo snapshot imutável `94d69c95f98f7d5b2a8700c420230ae10def0baa`; `PLN_BERT_REVISION` permite substituir conscientemente essa revisão, mas o runtime exige um SHA hexadecimal completo de 40 caracteres e recusa branches ou tags mutáveis.
 
 Há ainda uma divergência de ambiente entre treino e serviço que convém registrar: a execução de referência do notebook usou Python 3.9, enquanto o serviço exige **Python 3.13 ou anterior**, porque o `gensim` ainda não publica wheel para o 3.14 e a compilação a partir do fonte falha. As duas faixas são compatíveis com os artefatos versionados, mas a restrição superior é real e vale para qualquer ambiente que execute a inferência.
 
 **O que a revisão não muda.** A conclusão do benchmark continua a mesma, com as mesmas ressalvas: a margem sobre o Híbrido W2V+BERT permanece estreita, o conjunto continua sintético e o F1-macro de 0,7401 na intenção específica continua **abaixo** do mínimo de 0,80 exigido pelo RNF06. A implementação não fecha essa lacuna — ela apenas a torna operacional, ao converter a incerteza em fluxo genérico em vez de handler errado. Fechar a lacuna depende dos próximos passos já listados na Seção 8.10.5, e permanece em aberto.
+
+### 8.10.7 Refinamento da acurácia da intenção específica — issue #251
+
+Esta subseção registra a versão 2 do classificador e **substitui, para o artefato atual**, as configurações e métricas históricas das Seções 8.10.3 e 8.10.6. O objetivo foi superar 0,80 de acurácia na intenção específica sem usar o conjunto de teste durante a seleção. Os 1.135 exemplos de teste permaneceram fechados até a escolha final; parâmetros, representações e limiares foram comparados nos 1.156 exemplos de validação.
+
+O pré-processamento escolhido é deliberadamente conservador para português: aplica Unicode NFC, minúsculas e normalização de espaços, mas **não remove acentos, a negação `não` nem stopwords**. Foram geradas 1.450 consultas sintéticas adicionais, distribuídas pelas 31 classes e usadas exclusivamente no treino. A massa base de treino tem 3.062 exemplos; validação e teste não foram ampliados nem reamostrados.
+
+| Configuração avaliada | Acurácia específica na validação | F1-macro específico na validação |
+| --- | ---: | ---: |
+| TF-IDF de palavras/caracteres + SVM hierárquica | 0,778547 | 0,771790 |
+| BERTimbau congelado + SVM hierárquica | 0,730104 | 0,728812 |
+| TF-IDF + BERTimbau + SVM calibrada hierárquica | **0,883218** | **0,881366** |
+
+A configuração final concatena TF-IDF de palavras de 1 a 2 gramas, TF-IDF de caracteres de 3 a 5 gramas e embeddings congelados do `neuralmind/bert-base-portuguese-cased`, estes com peso 2,0. O primeiro estágio e cada especialista usam `LinearSVC` com `C=1,0`, calibrada em três dobras. Os limiares definidos na validação são 0,525 para macrointenção e 0,350 para intenção específica.
+
+Somente depois da seleção o conjunto de teste foi aberto. A intenção específica atingiu **0,839648 de acurácia e 0,832724 de F1-macro**; a macrointenção atingiu **0,981498 de acurácia e 0,971470 de F1-macro**. O requisito de 0,80 foi, portanto, atendido nas duas métricas globais da intenção específica. Os números incluem todos os exemplos, antes de qualquer abstenção. Pelo roteamento, 10 exemplos ficaram abaixo do limiar macro e 63 abaixo do limiar específico.
+
+Os experimentos são reproduzíveis por `benchmark_intencoes.py`, `benchmark_bertimbau.py` e `treinar_classificador_intencoes_v2.py`. Os resultados completos, hashes, matriz de confusão e métricas por classe estão em `src/notebooks/artefatos/`. A principal limitação permanece: a base é majoritariamente sintética e requer validação externa com consultas reais. Além disso, `analise_tendencia_desempenho` continua sendo a classe mais fraca e deve orientar a próxima coleta, apesar do ganho global.
 
 ## 8.11 Implementação do núcleo de PLN
 
@@ -4963,14 +4981,14 @@ O terceiro delimita o alcance do mecanismo de contenção: **os dois limiares n�
 
 ### 8.11.7 Testes automatizados
 
-A coleta atual registra **202 testes no backend**. O núcleo de PLN responde por **91 casos coletados**; os 15 casos de `test_pipeline_api.py` verificam rapidamente o contrato HTTP com duplos, e um cenário adicional em `test_traceability.py` atravessa `POST /api/chat` com o classificador real até a persistência mínima. Tempos variam conforme o cache do snapshot ONNX e o ambiente de execução.
+A coleta atual registra **207 testes no backend**. O núcleo de PLN responde por **94 casos coletados**; os 15 casos de `test_pipeline_api.py` verificam rapidamente o contrato HTTP com duplos, e um cenário adicional em `test_traceability.py` atravessa `POST /api/chat` com o classificador real até a persistência mínima. Tempos variam conforme o cache do snapshot BERTimbau e o ambiente de execução.
 
 | Arquivo | Testes | O que verifica |
 | --- | ---: | --- |
 | `test_nlp_preprocessing.py` | 20 | Cada opção da grade de pré-processamento, a `config_22` selecionada, a preservação de stopwords e a estabilidade dos tokens que o artefato espera |
 | `test_nlp_entities.py` | 30 | Casamento por léxico e por padrão, insensibilidade a caixa e acento, resolução de sobreposição pelo termo mais longo, tipos ambíguos e posições no texto original |
 | `test_nlp_classifier.py` | 19 | Carregamento e validação do artefato, recusa de artefato incompleto, comportamento do classificador hierárquico e a exigência de que ele carregue **fora** do notebook |
-| `test_nlp_inference.py` | 22 | Classificação ponta a ponta, os três caminhos de roteamento, a coerência entre macrointenção e handler, a fidelidade às métricas do benchmark, a ausência de `torch` e o uso da mesma revisão imutável no grafo e tokenizador |
+| `test_nlp_inference.py` | 25 | Classificação ponta a ponta, os três caminhos de roteamento, a coerência entre macrointenção e handler, a fidelidade às métricas do benchmark, a preservação de acentos e negação, o uso da mesma revisão imutável no modelo BERTimbau e no tokenizador e a recusa de revisões mutáveis ou inválidas |
 | `test_pipeline_api.py` | 15 | Contrato real de `POST /api/chat` e `POST /api/audio` com o classificador substituído por um duplo: intenção e entidades no corpo da resposta, resposta controlada sem chamar o provedor gerador, opt-out por `use_intent_classifier` e tradução das falhas em código HTTP |
 | `test_traceability.py` | 11 | Contrato entre HTTP, classificador real, limiares, gerador substituído na fronteira e persistência mínima, além dos cenários controlados de banco e auditoria |
 
@@ -4995,12 +5013,12 @@ cd src/backend
 ```
 
 ```text
-202 passed, 11 warnings
+207 passed, 10 warnings in 294.69s
 ```
 
-Quando `requirements-pln.txt` não está instalado, os testes de inferência são pulados com a razão declarada (`instale requirements-pln.txt`). O job `backend-api` da CI instala os dois arquivos de dependências, executa `test_nlp_inference.py` e `test_traceability.py` e mantém cache do snapshot imutável, portanto o cenário contratual não pode passar por *skip* silencioso.
+Quando `requirements-pln.txt` não está instalado, os testes de inferência são pulados com a razão declarada (`instale requirements-pln.txt`). O job `backend-api` da CI instala os dois arquivos de dependências, importa explicitamente `torch` e `transformers` como verificação obrigatória, executa `test_nlp_inference.py` e `test_traceability.py` e mantém cache do snapshot imutável, portanto o cenário contratual não pode passar por *skip* silencioso.
 
-**A suíte separa velocidade de evidência entre camadas.** `test_pipeline_api.py` substitui classificador e provedor gerador por duplos para verificar rapidamente campos, códigos HTTP e decisões de chamada. `test_chat_real_classifier_contract_and_minimal_persistence`, em `test_traceability.py`, não substitui `classify`: usa o artefato real, valida os limiares de 0,550 e 0,700 no contrato público e confirma a gravação mínima. Somente Gemini e o driver PostgreSQL são substituídos nas fronteiras do teste.
+**A suíte separa velocidade de evidência entre camadas.** `test_pipeline_api.py` substitui classificador e provedor gerador por duplos para verificar rapidamente campos, códigos HTTP e decisões de chamada. `test_chat_real_classifier_contract_and_minimal_persistence`, em `test_traceability.py`, não substitui `classify`: usa o artefato real, valida os limiares de 0,525 e 0,350 no contrato público e confirma a gravação mínima. Somente Gemini e o driver PostgreSQL são substituídos nas fronteiras do teste.
 
 ### 8.11.8 Desempenho medido
 
@@ -5098,6 +5116,14 @@ Exemplo resumido do contrato textual exposto por `POST /api/chat`:
 ```
 
 A Seção 8.4 registra a cobertura de teste correspondente e o que continua descoberto.
+
+### 8.11.10 Atualização operacional do classificador v2 — issue #251
+
+O serviço agora consome o mesmo artefato híbrido descrito na Seção 8.10.7. `app/nlp/inference.py` aplica os dois vetorizadores TF-IDF serializados, extrai os embeddings BERTimbau com PyTorch e Transformers, concatena os três blocos e delega a decisão ao classificador hierárquico calibrado. Assim, as referências anteriores a Word2Vec, ONNX Runtime, `config_22`, regressão logística e aos limiares 0,550/0,700 descrevem somente a versão histórica.
+
+A normalização do classificador vive em `normalizar_portugues`, em `app/nlp/preprocessing.py`, separada das rotinas legadas usadas pela extração de entidades. Testes unitários asseguram que `não`, `nao` e caracteres acentuados sejam preservados; testes de integração carregam o artefato real, reproduzem as métricas da Seção 8.10.7 e conferem os limiares 0,525/0,350. As dependências adicionais estão fixadas em `requirements-pln.txt` (`torch` e `transformers`). O custo operacional aumentou em relação à versão lexical/ONNX anterior, portanto o aquecimento na inicialização continua recomendado.
+
+O artefato versionado referencia classes importáveis de `app.nlp.classifier`, sem depender de símbolos definidos em `__main__`. O comando `treinar_classificador_intencoes_v2.py --reparar-artefato` corrige essa referência quando um novo treino for produzido, sem retreinar ou alterar os pesos.
 
 ## 8.12 Histórico da integração da interface web
 

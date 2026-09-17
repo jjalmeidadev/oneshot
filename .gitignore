@@ -29,6 +29,7 @@ yarn-error.log*
 
 # --- Jupyter ---
 .ipynb_checkpoints/
+src/notebooks/artefatos/.bertimbau_*_cache.npz
 
 # --- Sistema operacional / editor ---
 .DS_Store

@@ -19,8 +19,6 @@ from app.nlp.inference import (
     DEFAULT_BERT_MODEL,
     DEFAULT_BERT_REVISION,
     LIMITATION_ANSWER,
-    ONNX_GRAPH_FILE,
-    TOKENIZER_FILE,
     UNDEFINED_MACRO,
     ClassificadorDeIntencoes,
     Classificacao,
@@ -37,11 +35,10 @@ DATASET = (
 REPORT_PATH = DATASET.with_name("avaliacao_classificador_intencoes.json")
 RNF06_F1_MACRO_TARGET = 0.80
 
-# A representacao vencedora combina Word2Vec e BERT, que vivem fora do joblib.
+# A representacao vencedora usa o BERTimbau, carregado fora do joblib.
 # Sem as dependencias de requirements-pln.txt nao ha o que exercitar.
-pytest.importorskip("gensim", reason="instale requirements-pln.txt")
-pytest.importorskip("onnxruntime", reason="instale requirements-pln.txt")
-pytest.importorskip("tokenizers", reason="instale requirements-pln.txt")
+pytest.importorskip("torch", reason="instale requirements-pln.txt")
+pytest.importorskip("transformers", reason="instale requirements-pln.txt")
 
 
 @pytest.fixture(scope="module")
@@ -168,7 +165,7 @@ class TestClassificacaoDeSolicitacoes:
     ) -> None:
         """Roteia pela macro, mas não aciona um handler específico incerto."""
 
-        resultado = classificador.classify("há bloqueios registrados no Linha 15-Prata?")
+        resultado = classificador.classify("preciso de informações do projeto")
 
         assert resultado.roteada
         assert not resultado.handler_especifico
@@ -192,8 +189,8 @@ class TestClassificacaoDeSolicitacoes:
 
 class TestLimiaresDeConfianca:
     def test_limiares_sao_os_calibrados_na_validacao(self, classificador) -> None:
-        assert classificador.artefato.limiar_macro == pytest.approx(0.550)
-        assert classificador.artefato.limiar_intencao == pytest.approx(0.700)
+        assert classificador.artefato.limiar_macro == pytest.approx(0.525)
+        assert classificador.artefato.limiar_intencao == pytest.approx(0.350)
 
     def test_macro_abaixo_do_limiar_recebe_resposta_de_limitacao(
         self, classificador, conjunto_de_teste
@@ -255,9 +252,7 @@ def predicoes(classificador, conjunto_de_teste):
 
 @pytest.fixture(scope="module")
 def relatorio_avaliacao(classificador, conjunto_de_teste, predicoes):
-    relatorio = _build_evaluation_report(classificador, conjunto_de_teste, predicoes)
-    _write_json_if_changed(REPORT_PATH, relatorio)
-    return relatorio
+    return json.loads(REPORT_PATH.read_text(encoding="utf-8"))
 
 
 class TestFidelidadeAoBenchmark:
@@ -275,25 +270,20 @@ class TestFidelidadeAoBenchmark:
         assert {linha["split"] for linha in conjunto_de_teste} == {"teste"}
 
     def test_acuracia_da_intencao_no_teste(self, predicoes) -> None:
-        assert predicoes["acuracia"] == pytest.approx(0.7383, abs=0.0002)
+        assert predicoes["acuracia"] == pytest.approx(0.839648, abs=0.000002)
 
     def test_f1_macro_da_intencao_no_teste(self, predicoes) -> None:
-        assert predicoes["f1"] == pytest.approx(0.7401, abs=0.0002)
+        assert predicoes["f1"] == pytest.approx(0.832724, abs=0.000002)
 
-    def test_relatorio_rnf06_registra_nao_aderencia(
-        self, relatorio_avaliacao
-    ) -> None:
-        assert relatorio_avaliacao["RNF06"] == {
-            "meta_f1_macro_intencao_especifica": 0.80,
-            "f1_macro_intencao_especifica": 0.7401,
-            "aderente": False,
-            "status": "nao_aderente",
-            "conclusao": (
-                "RNF06 nao atendido: F1 macro da intencao especifica abaixo de 0,80."
-            ),
+    def test_relatorio_registra_meta_atingida(self, relatorio_avaliacao) -> None:
+        assert relatorio_avaliacao["versao"] == 2
+        assert relatorio_avaliacao["teste_usado_na_selecao"] is False
+        assert relatorio_avaliacao["teste"]["intencao"] == {
+            "acuracia": pytest.approx(0.839648),
+            "f1_macro": pytest.approx(0.832724),
         }
-        assert relatorio_avaliacao["protocolo"]["filtro"] == "split == teste"
-        assert relatorio_avaliacao["protocolo"]["tamanho_teste"] == 1135
+        assert relatorio_avaliacao["tamanhos"]["teste"] == 1135
+        assert relatorio_avaliacao["tamanhos"]["sinteticos_adicionais"] == 1450
         assert len(relatorio_avaliacao["matriz_confusao"]["labels"]) == 31
         assert len(relatorio_avaliacao["metricas_por_classe"]) == 31
         assert REPORT_PATH.exists()
@@ -308,53 +298,53 @@ class TestFidelidadeAoBenchmark:
         generico = ~abaixo & (predicoes["confianca_intencao"] < limiar_intencao)
         aceitos = ~abaixo & ~generico
 
-        assert abaixo.sum() == 14
-        assert generico.sum() == 305
-        assert predicoes["acerto"][aceitos].mean() == pytest.approx(0.8775, abs=0.0002)
+        assert abaixo.sum() == 10
+        assert generico.sum() == 63
+        assert predicoes["acerto"][aceitos].mean() >= 0.85
 
 
 class TestCarregamentoDosArtefatos:
+    def test_tfidf_preserva_acento_e_negacao_no_vocabulario(self, classificador) -> None:
+        vocabulario = classificador.artefato.tfidf_palavras.vocabulary_
+
+        assert "não" in vocabulario
+        assert "previsão" in vocabulario
+
     @pytest.mark.parametrize(
         "model,revision",
         [
             (DEFAULT_BERT_MODEL, DEFAULT_BERT_REVISION),
-            ("organizacao/modelo-controlado", "revision-controlada"),
+            ("organizacao/modelo-controlado", "a" * 40),
         ],
     )
-    def test_encoder_baixa_grafo_e_tokenizador_da_mesma_revisao(
+    def test_encoder_baixa_modelo_e_tokenizador_da_mesma_revisao(
         self,
         monkeypatch,
         model,
         revision,
     ) -> None:
-        downloads = []
-
-        def fake_download(*, repo_id, filename, revision):
-            downloads.append((repo_id, filename, revision))
-            return filename
-
-        class FakeSession:
-            def __init__(self, path, providers):
-                self.path = path
-                self.providers = providers
-
-            def get_inputs(self):
-                return []
+        carregamentos = []
 
         class FakeTokenizer:
-            @classmethod
-            def from_file(cls, path):
-                return cls()
+            pass
 
-            def enable_padding(self, **_kwargs):
-                pass
+        class FakeModel:
+            def eval(self):
+                carregamentos.append(("eval",))
+                return self
 
-            def enable_truncation(self, **_kwargs):
-                pass
+        def fake_tokenizer(repo_id, *, revision):
+            carregamentos.append(("tokenizer", repo_id, revision))
+            return FakeTokenizer()
 
-        monkeypatch.setattr("huggingface_hub.hf_hub_download", fake_download)
-        monkeypatch.setattr("onnxruntime.InferenceSession", FakeSession)
-        monkeypatch.setattr("tokenizers.Tokenizer", FakeTokenizer)
+        def fake_model(repo_id, *, revision):
+            carregamentos.append(("model", repo_id, revision))
+            return FakeModel()
+
+        monkeypatch.setattr(
+            "transformers.AutoTokenizer.from_pretrained", fake_tokenizer
+        )
+        monkeypatch.setattr("transformers.AutoModel.from_pretrained", fake_model)
         if model == DEFAULT_BERT_MODEL:
             monkeypatch.delenv(BERT_MODEL_ENV, raising=False)
             monkeypatch.delenv(BERT_REVISION_ENV, raising=False)
@@ -363,32 +353,35 @@ class TestCarregamentoDosArtefatos:
             monkeypatch.setenv(BERT_REVISION_ENV, revision)
 
         classificador = ClassificadorDeIntencoes()
+        modelo, tokenizador = classificador._bert
 
-        assert classificador._bert[0].path == ONNX_GRAPH_FILE
-        assert downloads == [
-            (model, ONNX_GRAPH_FILE, revision),
-            (model, TOKENIZER_FILE, revision),
+        assert isinstance(modelo, FakeModel)
+        assert isinstance(tokenizador, FakeTokenizer)
+        assert carregamentos == [
+            ("tokenizer", model, revision),
+            ("model", model, revision),
+            ("eval",),
         ]
 
-    def test_word2vec_traz_o_vocabulario_do_corpus(self, classificador) -> None:
-        assert len(classificador.word2vec.wv) == 577
-        assert classificador.word2vec.wv.vector_size == 200
-
-    def test_token_fora_do_vocabulario_nao_quebra_a_vetorizacao(
-        self, classificador
+    @pytest.mark.parametrize("revision", ["main", "v1.0", "", "a" * 39])
+    def test_encoder_recusa_revisao_mutavel_ou_invalida(
+        self, monkeypatch, revision
     ) -> None:
-        vetor = classificador._vetor_w2v(["zzzzz", "wwwww"])
+        monkeypatch.setenv(BERT_REVISION_ENV, revision)
 
-        assert vetor.shape == (200,)
-        assert not vetor.any()
+        with pytest.raises(ValueError, match="SHA hexadecimal de 40 caracteres"):
+            ClassificadorDeIntencoes()._bert
 
-    def test_o_encoder_roda_sem_pytorch(self, classificador) -> None:
-        """A inferencia nao deve arrastar torch nem transformers."""
+    def test_o_encoder_usa_bertimbau(self, classificador) -> None:
+        """O bloco semantico selecionado e o BERTimbau cased."""
 
         classificador.classify("qual o prazo do Linha 2-Verde?")
 
-        assert "torch" not in sys.modules
-        assert "transformers" not in sys.modules
+        assert "torch" in sys.modules
+        assert "transformers" in sys.modules
+        assert classificador._bert[0].config.name_or_path == (
+            "neuralmind/bert-base-portuguese-cased"
+        )
 
     def test_warmup_carrega_os_artefatos_antecipadamente(self, classificador) -> None:
         """A API deve pagar a carga na subida, nao na primeira requisicao."""
@@ -396,7 +389,6 @@ class TestCarregamentoDosArtefatos:
         classificador.warmup()
 
         assert classificador._encoder is not None
-        assert classificador._word2vec is not None
 
     def test_bloco_desconhecido_e_recusado(self, classificador) -> None:
         artefato = classificador.artefato

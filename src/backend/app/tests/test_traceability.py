@@ -161,8 +161,8 @@ def test_chat_real_classifier_contract_and_minimal_persistence(monkeypatch):
     data = result.json()
     intent = data["intent"]
     artifact = get_classifier().artefato
-    assert artifact.limiar_macro == pytest.approx(0.550)
-    assert artifact.limiar_intencao == pytest.approx(0.700)
+    assert artifact.limiar_macro == pytest.approx(0.525)
+    assert artifact.limiar_intencao == pytest.approx(0.350)
     assert intent["macro"] == "CONSULTA"
     assert intent["specific"] == "consulta_status_projeto"
     assert intent["confidence_macro"] >= artifact.limiar_macro
