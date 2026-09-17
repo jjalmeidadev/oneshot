@@ -32,6 +32,7 @@ def trace_interaction(
     entities: list[PublicEntity],
     processing_ms: int,
     channel: str = "api",
+    external_conversation_id: str | None = None,
     error_message: str | None = None,
     connect: Callable[..., Any] | None = None,
 ) -> str | None:
@@ -45,7 +46,12 @@ def trace_interaction(
         try:
             with connection.cursor() as cursor:
                 intent_id = _find_intent_id(cursor, intent)
-                conversation_id = _get_or_create_conversation(cursor, request, channel)
+                conversation_id = _get_or_create_conversation(
+                    cursor,
+                    request,
+                    channel,
+                    external_conversation_id=external_conversation_id,
+                )
                 status = _processing_status(intent, response, error_message)
                 limitation_response = _limitation_response(intent, response, error_message)
                 interaction_id = _insert_interaction(
@@ -103,8 +109,10 @@ def _get_or_create_conversation(
     cursor: Any,
     request: GeminiChatRequest,
     channel: str,
+    *,
+    external_conversation_id: str | None = None,
 ) -> str:
-    external_id = request.previous_interaction_id
+    external_id = external_conversation_id or request.previous_interaction_id
     if external_id:
         cursor.execute(
             """

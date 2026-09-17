@@ -155,3 +155,31 @@ class SttProviderUnavailableError(AudioError):
             ),
             status_code=503,
         )
+
+
+class ProcessingProviderFailedError(AudioError):
+    """Falha controlada ao gerar a resposta depois da transcricao."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            code="PROCESSING_PROVIDER_ERROR",
+            message=(
+                "Nao foi possivel processar a transcricao agora. "
+                "Tente novamente em instantes."
+            ),
+            status_code=502,
+        )
+
+
+class ProcessingUnavailableError(AudioError):
+    """Pipeline de PLN ou geracao indisponivel depois da transcricao."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            code="PROCESSING_UNAVAILABLE",
+            message=(
+                "O servico de processamento esta indisponivel. "
+                "Tente novamente em instantes."
+            ),
+            status_code=503,
+        )

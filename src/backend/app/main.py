@@ -12,8 +12,18 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 
-from app.audio.errors import AudioError, AudioMissingError, AudioTooLargeError
-from app.audio.schemas import AudioErrorResponse, AudioUploadResponse
+from app.audio.errors import (
+    AudioError,
+    AudioMissingError,
+    AudioTooLargeError,
+    ProcessingProviderFailedError,
+    ProcessingUnavailableError,
+)
+from app.audio.schemas import (
+    MAX_CONVERSATION_ID_LENGTH,
+    AudioErrorResponse,
+    AudioUploadResponse,
+)
 from app.audio.schemas import AudioAnswer, AudioAnswerSource
 from app.audio.security import resolve_identity, single_request_per_identity
 from app.audio.service import process_audio_upload
@@ -107,6 +117,24 @@ def create_chat_response(request: GeminiChatRequest) -> GeminiChatResponse:
         raise HTTPException(status_code=error.status_code, detail="Não foi possível obter uma resposta. Tente novamente em instantes.") from error
 
 
+def create_audio_chat_response(
+    request: GeminiChatRequest,
+    conversation_id: str,
+) -> GeminiChatResponse:
+    """Executa o pipeline comum preservando o envelope de erro da rota de audio."""
+
+    try:
+        return process_message(
+            request,
+            channel="api",
+            external_conversation_id=conversation_id,
+        )
+    except GeminiConfigurationError as error:
+        raise ProcessingUnavailableError() from error
+    except GeminiAPIError as error:
+        raise ProcessingProviderFailedError() from error
+
+
 @app.post(
     AUDIO_PATH,
     response_model=AudioUploadResponse,
@@ -115,7 +143,10 @@ def create_chat_response(request: GeminiChatRequest) -> GeminiChatResponse:
 )
 async def create_audio_upload(
     audio: UploadFile | None = File(default=None),
-    conversation_id: str | None = Form(default=None),
+    conversation_id: str | None = Form(
+        default=None,
+        max_length=MAX_CONVERSATION_ID_LENGTH,
+    ),
     language: str | None = Form(default=None),
     previous_interaction_id: str | None = Form(default=None, max_length=1024),
     use_intent_classifier: bool = Form(default=True),
@@ -136,13 +167,18 @@ async def create_audio_upload(
             data,
             language=language or DEFAULT_LANGUAGE,
         )
-        response = await run_in_threadpool(create_chat_response, GeminiChatRequest(
-            message=audio_result.transcription.text,
-            previous_interaction_id=previous_interaction_id,
-            use_intent_classifier=use_intent_classifier,
-        ))
+        resolved_conversation_id = conversation_id or str(uuid4())
+        response = await run_in_threadpool(
+            create_audio_chat_response,
+            GeminiChatRequest(
+                message=audio_result.transcription.text,
+                previous_interaction_id=previous_interaction_id,
+                use_intent_classifier=use_intent_classifier,
+            ),
+            resolved_conversation_id,
+        )
         return AudioUploadResponse(
-            conversation_id=conversation_id or str(uuid4()),
+            conversation_id=resolved_conversation_id,
             interaction_id=response.interaction_id,
             transcription=audio_result.transcription,
             intent=response.intent,

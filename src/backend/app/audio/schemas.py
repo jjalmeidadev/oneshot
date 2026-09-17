@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 from app.nlp.schemas import AudioIntent, AudioPipelineMetrics, PublicEntity
 from app.gemini.schemas import GeminiChatResponse
 
+MAX_CONVERSATION_ID_LENGTH = 160
+
 
 class AudioTranscription(BaseModel):
     text: str
@@ -24,7 +26,7 @@ class AudioAnswer(BaseModel):
 
 
 class AudioUploadResponse(BaseModel):
-    conversation_id: str
+    conversation_id: str = Field(max_length=MAX_CONVERSATION_ID_LENGTH)
     interaction_id: str | None
     transcription: AudioTranscription
     intent: AudioIntent | None
