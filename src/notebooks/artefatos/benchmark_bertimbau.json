@@ -1,0 +1,753 @@
+{
+  "encoder": "neuralmind/bert-base-portuguese-cased",
+  "estrategia": "embeddings congelados com mean pooling",
+  "max_length": 64,
+  "melhor_validacao": {
+    "modelo": "hierarquico_linear_svc_calibrado_C_1",
+    "peso_bertimbau": 2.0,
+    "representacao": "tfidf_palavras_caracteres+bertimbau",
+    "segundos_treino": 4.559,
+    "validacao_intencao": {
+      "acuracia": 0.877163,
+      "f1_macro": 0.874137
+    },
+    "validacao_macro": {
+      "acuracia": 0.961938,
+      "f1_macro": 0.947733
+    }
+  },
+  "quantidade_treino": 4512,
+  "quantidade_validacao": 1156,
+  "resultados_validacao": [
+    {
+      "modelo": "hierarquico_linear_svc_calibrado_C_1",
+      "peso_bertimbau": 2.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 4.559,
+      "validacao_intencao": {
+        "acuracia": 0.877163,
+        "f1_macro": 0.874137
+      },
+      "validacao_macro": {
+        "acuracia": 0.961938,
+        "f1_macro": 0.947733
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_calibrado_C_4",
+      "peso_bertimbau": 2.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 7.116,
+      "validacao_intencao": {
+        "acuracia": 0.877163,
+        "f1_macro": 0.873742
+      },
+      "validacao_macro": {
+        "acuracia": 0.963668,
+        "f1_macro": 0.948919
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_4",
+      "peso_bertimbau": 2.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 3.362,
+      "validacao_intencao": {
+        "acuracia": 0.875433,
+        "f1_macro": 0.869985
+      },
+      "validacao_macro": {
+        "acuracia": 0.967993,
+        "f1_macro": 0.951108
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_1",
+      "peso_bertimbau": 2.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 2.085,
+      "validacao_intencao": {
+        "acuracia": 0.874567,
+        "f1_macro": 0.869377
+      },
+      "validacao_macro": {
+        "acuracia": 0.968858,
+        "f1_macro": 0.9517
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_2",
+      "peso_bertimbau": 2.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 2.609,
+      "validacao_intencao": {
+        "acuracia": 0.874567,
+        "f1_macro": 0.86902
+      },
+      "validacao_macro": {
+        "acuracia": 0.968858,
+        "f1_macro": 0.9517
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_0.5",
+      "peso_bertimbau": 2.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 1.737,
+      "validacao_intencao": {
+        "acuracia": 0.873702,
+        "f1_macro": 0.869291
+      },
+      "validacao_macro": {
+        "acuracia": 0.970588,
+        "f1_macro": 0.953645
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_calibrado_C_4",
+      "peso_bertimbau": 1.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 6.981,
+      "validacao_intencao": {
+        "acuracia": 0.864187,
+        "f1_macro": 0.858491
+      },
+      "validacao_macro": {
+        "acuracia": 0.956747,
+        "f1_macro": 0.936543
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_calibrado_C_1",
+      "peso_bertimbau": 1.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 4.584,
+      "validacao_intencao": {
+        "acuracia": 0.863322,
+        "f1_macro": 0.85774
+      },
+      "validacao_macro": {
+        "acuracia": 0.956747,
+        "f1_macro": 0.940918
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_0.5",
+      "peso_bertimbau": 1.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 1.715,
+      "validacao_intencao": {
+        "acuracia": 0.852076,
+        "f1_macro": 0.847711
+      },
+      "validacao_macro": {
+        "acuracia": 0.961938,
+        "f1_macro": 0.947457
+      }
+    },
+    {
+      "modelo": "hierarquico_regressao_logistica_C_4",
+      "peso_bertimbau": 2.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 5.625,
+      "validacao_intencao": {
+        "acuracia": 0.850346,
+        "f1_macro": 0.846486
+      },
+      "validacao_macro": {
+        "acuracia": 0.965398,
+        "f1_macro": 0.957731
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_1",
+      "peso_bertimbau": 1.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 2.185,
+      "validacao_intencao": {
+        "acuracia": 0.850346,
+        "f1_macro": 0.845834
+      },
+      "validacao_macro": {
+        "acuracia": 0.960208,
+        "f1_macro": 0.941829
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_2",
+      "peso_bertimbau": 1.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 2.599,
+      "validacao_intencao": {
+        "acuracia": 0.848616,
+        "f1_macro": 0.844264
+      },
+      "validacao_macro": {
+        "acuracia": 0.959343,
+        "f1_macro": 0.940977
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_4",
+      "peso_bertimbau": 1.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 3.216,
+      "validacao_intencao": {
+        "acuracia": 0.846021,
+        "f1_macro": 0.842185
+      },
+      "validacao_macro": {
+        "acuracia": 0.956747,
+        "f1_macro": 0.93488
+      }
+    },
+    {
+      "modelo": "hierarquico_regressao_logistica_C_2",
+      "peso_bertimbau": 2.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 5.289,
+      "validacao_intencao": {
+        "acuracia": 0.8391,
+        "f1_macro": 0.835608
+      },
+      "validacao_macro": {
+        "acuracia": 0.963668,
+        "f1_macro": 0.956297
+      }
+    },
+    {
+      "modelo": "hierarquico_regressao_logistica_C_4",
+      "peso_bertimbau": 1.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 4.766,
+      "validacao_intencao": {
+        "acuracia": 0.836505,
+        "f1_macro": 0.834466
+      },
+      "validacao_macro": {
+        "acuracia": 0.962803,
+        "f1_macro": 0.94809
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_calibrado_C_1",
+      "peso_bertimbau": 0.5,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 4.869,
+      "validacao_intencao": {
+        "acuracia": 0.833045,
+        "f1_macro": 0.829468
+      },
+      "validacao_macro": {
+        "acuracia": 0.947232,
+        "f1_macro": 0.913162
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_calibrado_C_4",
+      "peso_bertimbau": 0.5,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 7.705,
+      "validacao_intencao": {
+        "acuracia": 0.83218,
+        "f1_macro": 0.828663
+      },
+      "validacao_macro": {
+        "acuracia": 0.949827,
+        "f1_macro": 0.919501
+      }
+    },
+    {
+      "modelo": "hierarquico_regressao_logistica_C_1",
+      "peso_bertimbau": 2.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 4.99,
+      "validacao_intencao": {
+        "acuracia": 0.829585,
+        "f1_macro": 0.825713
+      },
+      "validacao_macro": {
+        "acuracia": 0.961073,
+        "f1_macro": 0.954283
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_0.5",
+      "peso_bertimbau": 0.5,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 1.918,
+      "validacao_intencao": {
+        "acuracia": 0.82699,
+        "f1_macro": 0.822372
+      },
+      "validacao_macro": {
+        "acuracia": 0.957612,
+        "f1_macro": 0.936213
+      }
+    },
+    {
+      "modelo": "hierarquico_regressao_logistica_C_2",
+      "peso_bertimbau": 1.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 4.737,
+      "validacao_intencao": {
+        "acuracia": 0.820069,
+        "f1_macro": 0.817731
+      },
+      "validacao_macro": {
+        "acuracia": 0.961073,
+        "f1_macro": 0.947216
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_1",
+      "peso_bertimbau": 0.5,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 2.241,
+      "validacao_intencao": {
+        "acuracia": 0.820069,
+        "f1_macro": 0.815492
+      },
+      "validacao_macro": {
+        "acuracia": 0.955017,
+        "f1_macro": 0.925644
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_2",
+      "peso_bertimbau": 0.5,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 2.746,
+      "validacao_intencao": {
+        "acuracia": 0.817474,
+        "f1_macro": 0.812978
+      },
+      "validacao_macro": {
+        "acuracia": 0.953287,
+        "f1_macro": 0.924188
+      }
+    },
+    {
+      "modelo": "hierarquico_regressao_logistica_C_0.5",
+      "peso_bertimbau": 2.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 4.557,
+      "validacao_intencao": {
+        "acuracia": 0.814879,
+        "f1_macro": 0.810578
+      },
+      "validacao_macro": {
+        "acuracia": 0.960208,
+        "f1_macro": 0.95749
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_calibrado_C_4",
+      "peso_bertimbau": 0.25,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 8.243,
+      "validacao_intencao": {
+        "acuracia": 0.814014,
+        "f1_macro": 0.810453
+      },
+      "validacao_macro": {
+        "acuracia": 0.949827,
+        "f1_macro": 0.919501
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_4",
+      "peso_bertimbau": 0.5,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 3.444,
+      "validacao_intencao": {
+        "acuracia": 0.814014,
+        "f1_macro": 0.810308
+      },
+      "validacao_macro": {
+        "acuracia": 0.951557,
+        "f1_macro": 0.922479
+      }
+    },
+    {
+      "modelo": "hierarquico_regressao_logistica_C_1",
+      "peso_bertimbau": 1.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 4.177,
+      "validacao_intencao": {
+        "acuracia": 0.813149,
+        "f1_macro": 0.81189
+      },
+      "validacao_macro": {
+        "acuracia": 0.957612,
+        "f1_macro": 0.944625
+      }
+    },
+    {
+      "modelo": "hierarquico_regressao_logistica_C_4",
+      "peso_bertimbau": 0.5,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 4.589,
+      "validacao_intencao": {
+        "acuracia": 0.809689,
+        "f1_macro": 0.804832
+      },
+      "validacao_macro": {
+        "acuracia": 0.951557,
+        "f1_macro": 0.9329
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_calibrado_C_1",
+      "peso_bertimbau": 0.25,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 5.473,
+      "validacao_intencao": {
+        "acuracia": 0.809689,
+        "f1_macro": 0.803924
+      },
+      "validacao_macro": {
+        "acuracia": 0.947232,
+        "f1_macro": 0.912887
+      }
+    },
+    {
+      "modelo": "hierarquico_regressao_logistica_C_0.5",
+      "peso_bertimbau": 1.0,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 3.838,
+      "validacao_intencao": {
+        "acuracia": 0.800173,
+        "f1_macro": 0.79909
+      },
+      "validacao_macro": {
+        "acuracia": 0.955882,
+        "f1_macro": 0.942933
+      }
+    },
+    {
+      "modelo": "hierarquico_regressao_logistica_C_2",
+      "peso_bertimbau": 0.5,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 4.163,
+      "validacao_intencao": {
+        "acuracia": 0.798443,
+        "f1_macro": 0.792815
+      },
+      "validacao_macro": {
+        "acuracia": 0.952422,
+        "f1_macro": 0.933495
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_0.5",
+      "peso_bertimbau": 0.25,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 1.925,
+      "validacao_intencao": {
+        "acuracia": 0.788927,
+        "f1_macro": 0.784193
+      },
+      "validacao_macro": {
+        "acuracia": 0.947232,
+        "f1_macro": 0.910815
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_1",
+      "peso_bertimbau": 0.25,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 2.547,
+      "validacao_intencao": {
+        "acuracia": 0.787197,
+        "f1_macro": 0.783584
+      },
+      "validacao_macro": {
+        "acuracia": 0.946367,
+        "f1_macro": 0.909958
+      }
+    },
+    {
+      "modelo": "hierarquico_regressao_logistica_C_1",
+      "peso_bertimbau": 0.5,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 3.953,
+      "validacao_intencao": {
+        "acuracia": 0.786332,
+        "f1_macro": 0.780409
+      },
+      "validacao_macro": {
+        "acuracia": 0.951557,
+        "f1_macro": 0.932657
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_4",
+      "peso_bertimbau": 0.25,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 3.802,
+      "validacao_intencao": {
+        "acuracia": 0.784602,
+        "f1_macro": 0.780287
+      },
+      "validacao_macro": {
+        "acuracia": 0.944637,
+        "f1_macro": 0.908246
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_2",
+      "peso_bertimbau": 0.25,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 3.042,
+      "validacao_intencao": {
+        "acuracia": 0.783737,
+        "f1_macro": 0.779778
+      },
+      "validacao_macro": {
+        "acuracia": 0.944637,
+        "f1_macro": 0.908246
+      }
+    },
+    {
+      "modelo": "hierarquico_regressao_logistica_C_4",
+      "peso_bertimbau": 0.25,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 4.648,
+      "validacao_intencao": {
+        "acuracia": 0.783737,
+        "f1_macro": 0.774317
+      },
+      "validacao_macro": {
+        "acuracia": 0.947232,
+        "f1_macro": 0.921338
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_4",
+      "representacao": "bertimbau_congelado",
+      "segundos_treino": 2.268,
+      "validacao_intencao": {
+        "acuracia": 0.780277,
+        "f1_macro": 0.782195
+      },
+      "validacao_macro": {
+        "acuracia": 0.952422,
+        "f1_macro": 0.958878
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_2",
+      "representacao": "bertimbau_congelado",
+      "segundos_treino": 2.267,
+      "validacao_intencao": {
+        "acuracia": 0.779412,
+        "f1_macro": 0.781754
+      },
+      "validacao_macro": {
+        "acuracia": 0.947232,
+        "f1_macro": 0.954476
+      }
+    },
+    {
+      "modelo": "hierarquico_regressao_logistica_C_2",
+      "peso_bertimbau": 0.25,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 4.242,
+      "validacao_intencao": {
+        "acuracia": 0.773356,
+        "f1_macro": 0.764626
+      },
+      "validacao_macro": {
+        "acuracia": 0.943772,
+        "f1_macro": 0.918411
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_1",
+      "representacao": "bertimbau_congelado",
+      "segundos_treino": 2.337,
+      "validacao_intencao": {
+        "acuracia": 0.761246,
+        "f1_macro": 0.762116
+      },
+      "validacao_macro": {
+        "acuracia": 0.941176,
+        "f1_macro": 0.950169
+      }
+    },
+    {
+      "modelo": "hierarquico_regressao_logistica_C_0.5",
+      "peso_bertimbau": 0.5,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 3.481,
+      "validacao_intencao": {
+        "acuracia": 0.759516,
+        "f1_macro": 0.751607
+      },
+      "validacao_macro": {
+        "acuracia": 0.943772,
+        "f1_macro": 0.922455
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_0.5",
+      "representacao": "bertimbau_congelado",
+      "segundos_treino": 2.305,
+      "validacao_intencao": {
+        "acuracia": 0.75519,
+        "f1_macro": 0.755651
+      },
+      "validacao_macro": {
+        "acuracia": 0.937716,
+        "f1_macro": 0.944028
+      }
+    },
+    {
+      "modelo": "linear_svc_C_1",
+      "representacao": "bertimbau_congelado",
+      "segundos_treino": 4.313,
+      "validacao_intencao": {
+        "acuracia": 0.75346,
+        "f1_macro": 0.751709
+      },
+      "validacao_macro": {
+        "acuracia": 0.91263,
+        "f1_macro": 0.921381
+      }
+    },
+    {
+      "modelo": "linear_svc_C_2",
+      "representacao": "bertimbau_congelado",
+      "segundos_treino": 4.489,
+      "validacao_intencao": {
+        "acuracia": 0.75346,
+        "f1_macro": 0.751126
+      },
+      "validacao_macro": {
+        "acuracia": 0.91609,
+        "f1_macro": 0.91872
+      }
+    },
+    {
+      "modelo": "hierarquico_regressao_logistica_C_1",
+      "peso_bertimbau": 0.25,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 4.097,
+      "validacao_intencao": {
+        "acuracia": 0.75346,
+        "f1_macro": 0.741308
+      },
+      "validacao_macro": {
+        "acuracia": 0.939446,
+        "f1_macro": 0.915057
+      }
+    },
+    {
+      "modelo": "linear_svc_C_4",
+      "representacao": "bertimbau_congelado",
+      "segundos_treino": 4.404,
+      "validacao_intencao": {
+        "acuracia": 0.745675,
+        "f1_macro": 0.744989
+      },
+      "validacao_macro": {
+        "acuracia": 0.90917,
+        "f1_macro": 0.913977
+      }
+    },
+    {
+      "modelo": "linear_svc_C_0.5",
+      "representacao": "bertimbau_congelado",
+      "segundos_treino": 4.265,
+      "validacao_intencao": {
+        "acuracia": 0.741349,
+        "f1_macro": 0.739817
+      },
+      "validacao_macro": {
+        "acuracia": 0.903979,
+        "f1_macro": 0.911731
+      }
+    },
+    {
+      "modelo": "hierarquico_regressao_logistica_C_0.5",
+      "peso_bertimbau": 0.25,
+      "representacao": "tfidf_palavras_caracteres+bertimbau",
+      "segundos_treino": 3.499,
+      "validacao_intencao": {
+        "acuracia": 0.729239,
+        "f1_macro": 0.720209
+      },
+      "validacao_macro": {
+        "acuracia": 0.930796,
+        "f1_macro": 0.907911
+      }
+    },
+    {
+      "modelo": "hierarquico_linear_svc_C_0.1",
+      "representacao": "bertimbau_congelado",
+      "segundos_treino": 2.266,
+      "validacao_intencao": {
+        "acuracia": 0.711073,
+        "f1_macro": 0.706846
+      },
+      "validacao_macro": {
+        "acuracia": 0.91782,
+        "f1_macro": 0.921241
+      }
+    },
+    {
+      "modelo": "regressao_logistica_C_2",
+      "representacao": "bertimbau_congelado",
+      "segundos_treino": 1.515,
+      "validacao_intencao": {
+        "acuracia": 0.709343,
+        "f1_macro": 0.70582
+      },
+      "validacao_macro": {
+        "acuracia": 0.908304,
+        "f1_macro": 0.907464
+      }
+    },
+    {
+      "modelo": "linear_svc_C_0.1",
+      "representacao": "bertimbau_congelado",
+      "segundos_treino": 4.537,
+      "validacao_intencao": {
+        "acuracia": 0.706747,
+        "f1_macro": 0.70178
+      },
+      "validacao_macro": {
+        "acuracia": 0.886678,
+        "f1_macro": 0.877152
+      }
+    },
+    {
+      "modelo": "regressao_logistica_C_1",
+      "representacao": "bertimbau_congelado",
+      "segundos_treino": 1.448,
+      "validacao_intencao": {
+        "acuracia": 0.686851,
+        "f1_macro": 0.682256
+      },
+      "validacao_macro": {
+        "acuracia": 0.901384,
+        "f1_macro": 0.893863
+      }
+    },
+    {
+      "modelo": "regressao_logistica_C_0.5",
+      "representacao": "bertimbau_congelado",
+      "segundos_treino": 0.961,
+      "validacao_intencao": {
+        "acuracia": 0.653979,
+        "f1_macro": 0.648193
+      },
+      "validacao_macro": {
+        "acuracia": 0.892734,
+        "f1_macro": 0.865097
+      }
+    }
+  ],
+  "teste_usado_na_selecao": false
+}

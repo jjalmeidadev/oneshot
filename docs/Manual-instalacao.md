@@ -60,7 +60,7 @@ npm ci
 Set-Location ../..
 ```
 
-Não use `npm install` para uma reprodução limpa, pois ele pode alterar o lock. O encoder ONNX é obtido do repositório de modelo documentado na Seção 8.11 de `Projeto.md` quando o classificador é carregado pela primeira vez. Grafo e tokenizador usam a mesma revisão imutável declarada em `PLN_BERT_REVISION`.
+Não use `npm install` para uma reprodução limpa, pois ele pode alterar o lock. O BERTimbau é obtido do repositório de modelo documentado na Seção 8.11 de `Projeto.md` quando o classificador é carregado pela primeira vez. Modelo e tokenizador usam a mesma revisão imutável declarada em `PLN_BERT_REVISION`; o valor deve ser o SHA hexadecimal completo, com 40 caracteres, de um commit do Hugging Face. Branches e tags mutáveis, como `main`, são recusadas na inicialização.
 
 # 4. Configuração
 
@@ -79,8 +79,8 @@ AZURE_SPEECH_RESOURCE=<nome-do-recurso>
 AZURE_SPEECH_KEY=<chave-do-azure-speech>
 AUDIO_SIMULATED_IDENTITIES=token-local=usuario-local
 PLN_WARMUP=1
-PLN_BERT_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
-PLN_BERT_REVISION=e8f8c211226b894fcb81acc59f3b34ba3efd5f42
+PLN_BERT_MODEL=neuralmind/bert-base-portuguese-cased
+PLN_BERT_REVISION=94d69c95f98f7d5b2a8700c420230ae10def0baa
 ```
 
 Use `AZURE_SPEECH_ENDPOINT` quando o portal fornecer um endpoint regional explícito. Os timeouts, retentativas, limite de fontes e diretório alternativo de dados simulados possuem valores documentados no próprio `.env.example`.

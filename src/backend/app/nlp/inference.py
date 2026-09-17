@@ -2,30 +2,21 @@
 
 Recebe uma solicitação em texto e devolve a macrointenção, a intenção
 específica e as confianças, aplicando os dois limiares calibrados na validação
-e registrados na Seção 8.10.3 do `Projeto.md`.
+e registrados na Seção 8.10.7 do `Projeto.md`.
 
 As transformações reproduzem **exatamente** as ajustadas no treino, na ordem em
 que foram compostas. Qualquer divergência — outra tokenização, outra ordem de
 blocos, normalização ausente — produz atributos que o modelo nunca viu, e o
 resultado seria silenciosamente errado em vez de falhar.
 
-A representação vencedora concatena quatro blocos: TF-IDF de palavras e de
-caracteres reduzidos por SVD, o Word2Vec treinado no corpus do projeto e os
-embeddings BERT congelados. Dois deles não estão no `joblib` e são carregados à
-parte: o Word2Vec de `word2vec_portfolio.model` e o encoder BERT, baixado do
-Hugging Face na primeira execução e mantido em cache local.
+A representação vencedora concatena TF-IDF de palavras, TF-IDF de caracteres
+e embeddings congelados do BERTimbau. O encoder
+`neuralmind/bert-base-portuguese-cased` recebe o texto cru, preservando caixa e
+acentos, e é baixado do Hugging Face na primeira execução. A combinação foi
+selecionada apenas na validação; o teste fixo foi aberto uma vez depois disso.
 
-O encoder roda em **ONNX Runtime**, e não em PyTorch. O grafo exportado é o
-publicado no próprio repositório do modelo, e os embeddings são idênticos aos
-do `sentence-transformers` — diferença máxima de 2,4e-07, com as métricas do
-conjunto de teste reproduzidas sem alteração. A troca dispensa `torch`,
-`transformers` e suas dependências: o ambiente cai de 1,1 GB para cerca de
-340 MB, o carregamento do encoder cai de 6,1 s para 0,33 s e some a armadilha
-do wheel com CUDA no deploy em Linux. Em contrapartida, o pico de memória sobe
-cerca de 240 MB.
-
-Os limiares não são detalhe de implementação. O RNF06 exige F1-macro de 0,80 e
-a intenção específica atingiu 0,7401 no teste; abaixo do limiar, a solicitação
+Os limiares não são detalhe de implementação. A intenção específica atingiu
+0,8327 de F1-macro no teste; abaixo do limiar, a solicitação
 segue para o fluxo genérico da macrointenção ou recebe resposta controlada de
 limitação, em vez de acionar um handler errado. É o comportamento conservador
 que o RNF04 e o RNF11 exigem.
@@ -35,6 +26,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
@@ -44,27 +36,19 @@ import numpy as np
 
 from app.nlp.classifier import (
     ARTIFACT_DIR,
-    WORD2VEC_PATH,
     ArtefatoClassificador,
     load_artifact,
 )
-from app.nlp.preprocessing import preprocess_text
 
 CATALOG_PATH = ARTIFACT_DIR / "catalogo_intencoes.json"
 
-DEFAULT_BERT_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+DEFAULT_BERT_MODEL = "neuralmind/bert-base-portuguese-cased"
 BERT_MODEL_ENV = "PLN_BERT_MODEL"
-DEFAULT_BERT_REVISION = "e8f8c211226b894fcb81acc59f3b34ba3efd5f42"
+DEFAULT_BERT_REVISION = "94d69c95f98f7d5b2a8700c420230ae10def0baa"
 BERT_REVISION_ENV = "PLN_BERT_REVISION"
-ONNX_GRAPH_FILE = "onnx/model.onnx"
-TOKENIZER_FILE = "tokenizer.json"
+MAX_SEQUENCE_LENGTH = 64
 
-# Identificador do preenchimento no vocabulário XLM-R usado pelo modelo. O
-# `tokenizer.json` não declara o padding, e assumir o padrão 0 produziria
-# identificadores diferentes dos que o encoder viu no treino.
-PAD_TOKEN_ID = 1
-PAD_TOKEN = "<pad>"
-MAX_SEQUENCE_LENGTH = 128
+_IMMUTABLE_REVISION_RE = re.compile(r"^[0-9a-f]{40}$")
 
 UNDEFINED_MACRO = "INDEFINIDA"
 
@@ -75,6 +59,18 @@ LIMITATION_ANSWER = (
     "portfólio. Pode reformular indicando o projeto e a informação desejada?"
 )
 LIMITATION_FLOW = "Resposta padrão de limitação (RF08)"
+
+
+def _bert_revision() -> str:
+    """Resolve somente snapshots imutáveis do Hugging Face."""
+
+    revisao = os.getenv(BERT_REVISION_ENV, DEFAULT_BERT_REVISION).strip()
+    if not _IMMUTABLE_REVISION_RE.fullmatch(revisao):
+        raise ValueError(
+            f"{BERT_REVISION_ENV} deve ser o SHA hexadecimal de 40 caracteres "
+            "de um commit imutável do Hugging Face."
+        )
+    return revisao
 
 
 @dataclass(frozen=True)
@@ -113,11 +109,7 @@ class ClassificadorDeIntencoes:
 
     def __init__(self, artefato: ArtefatoClassificador | None = None) -> None:
         self._artefato = artefato
-        self._word2vec = None
         self._encoder = None
-        self._idf: dict[str, float] | None = None
-        self._idf_padrao: float | None = None
-        self._usa_token_type_ids = False
 
     @property
     def artefato(self) -> ArtefatoClassificador:
@@ -175,82 +167,32 @@ class ClassificadorDeIntencoes:
             resposta_sugerida=None if roteia else LIMITATION_ANSWER,
         )
 
-    def vectorize(self, textos: Sequence[str]) -> np.ndarray:
+    def vectorize(self, textos: Sequence[str]) -> Any:
         """Aplica as mesmas transformações ajustadas no treino, na mesma ordem."""
 
-        from sklearn.preprocessing import normalize
-
+        from scipy import sparse
         textos = list(textos)
         artefato = self.artefato
-        tokens = [
-            preprocess_text(texto, **artefato.config_preprocessamento)
-            for texto in textos
-        ]
 
         partes = []
         for bloco in artefato.blocos_da_representacao:
-            if bloco == "svd_palavra":
-                bruto = artefato.svd_palavras.transform(
-                    artefato.tfidf_palavras.transform(tokens)
-                )
-            elif bloco == "svd_char":
-                # O TF-IDF de caracteres recebe o texto cru: ele modela a grafia,
-                # que a tokenização e o stemming justamente descartam.
-                bruto = artefato.svd_caracteres.transform(
-                    artefato.tfidf_caracteres.transform(textos)
-                )
-            elif bloco == "w2v":
-                bruto = np.vstack([self._vetor_w2v(t) for t in tokens])
-            elif bloco == "bert":
-                # O encoder recebe o texto cru: ele tem tokenizador próprio, e o
-                # stemming aplicado aos demais blocos atrapalharia.
-                bruto = self._encode(textos)
-            else:
-                raise ValueError(f"Bloco de representação desconhecido: {bloco}")
+            if bloco == "tfidf_palavra":
+                partes.append(artefato.tfidf_palavras.transform(textos))
+                continue
+            if bloco == "tfidf_char":
+                partes.append(artefato.tfidf_caracteres.transform(textos))
+                continue
+            if bloco == "bertimbau":
+                peso = float(artefato.scalers.get(bloco, 1.0))
+                partes.append(sparse.csr_matrix(self._encode(textos) * peso))
+                continue
+            raise ValueError(f"Bloco de representação desconhecido: {bloco}")
 
-            partes.append(artefato.scalers[bloco].transform(normalize(bruto)))
-
-        return np.hstack(partes) if len(partes) > 1 else partes[0]
-
-    def _vetor_w2v(self, tokens: Sequence[str]) -> np.ndarray:
-        """Média dos vetores dos tokens, ponderada pelo IDF do TF-IDF de palavras.
-
-        Token fora do vocabulário do Word2Vec é ignorado; texto sem nenhum token
-        conhecido vira o vetor nulo, como no treino.
-        """
-
-        vetores, pesos = [], []
-        for token in tokens:
-            if token in self.word2vec.wv:
-                vetores.append(self.word2vec.wv[token])
-                pesos.append(self._idf_do_token(token))
-
-        dimensao = self.word2vec.wv.vector_size
-        if not vetores:
-            return np.zeros(dimensao, dtype=np.float32)
-
-        return np.average(np.vstack(vetores), axis=0, weights=pesos).astype(np.float32)
-
-    def _idf_do_token(self, token: str) -> float:
-        if self._idf is None:
-            vetorizador = self.artefato.tfidf_palavras
-            self._idf = dict(
-                zip(vetorizador.get_feature_names_out(), vetorizador.idf_)
+        if any(sparse.issparse(parte) for parte in partes):
+            return sparse.hstack(
+                [sparse.csr_matrix(parte) for parte in partes], format="csr"
             )
-            self._idf_padrao = float(np.max(vetorizador.idf_))
-        return self._idf.get(token, self._idf_padrao)
-
-    @property
-    def word2vec(self):
-        if self._word2vec is None:
-            from gensim.models import Word2Vec
-
-            if not WORD2VEC_PATH.exists():
-                raise FileNotFoundError(
-                    f"Modelo Word2Vec não encontrado em {WORD2VEC_PATH}."
-                )
-            self._word2vec = Word2Vec.load(str(WORD2VEC_PATH))
-        return self._word2vec
+        return np.hstack(partes) if len(partes) > 1 else partes[0]
 
     def warmup(self) -> None:
         """Carrega todos os artefatos antecipadamente.
@@ -263,67 +205,49 @@ class ClassificadorDeIntencoes:
         self.classify("aquecimento do pipeline de PLN")
 
     def _encode(self, textos: Sequence[str]) -> np.ndarray:
-        """Embeddings do encoder congelado, com média ponderada pela máscara.
+        """Embeddings BERTimbau congelados, com média sobre tokens válidos."""
 
-        A média sobre os tokens válidos e a normalização reproduzem o que o
-        `sentence-transformers` faz com este modelo; o que muda é apenas o
-        motor que executa o grafo.
-        """
+        import torch
+        from sklearn.preprocessing import normalize
 
-        sessao, tokenizador = self._bert
+        modelo, tokenizador = self._bert
         lotes = []
-        for inicio in range(0, len(textos), _BATCH_SIZE):
-            codificados = tokenizador.encode_batch(
-                list(textos[inicio : inicio + _BATCH_SIZE])
-            )
-            entradas = {
-                "input_ids": np.array([c.ids for c in codificados], dtype=np.int64),
-                "attention_mask": np.array(
-                    [c.attention_mask for c in codificados], dtype=np.int64
-                ),
-            }
-            if self._usa_token_type_ids:
-                entradas["token_type_ids"] = np.zeros_like(entradas["input_ids"])
+        with torch.inference_mode():
+            for inicio in range(0, len(textos), _BATCH_SIZE):
+                entradas = tokenizador(
+                    list(textos[inicio : inicio + _BATCH_SIZE]),
+                    padding=True,
+                    truncation=True,
+                    max_length=MAX_SEQUENCE_LENGTH,
+                    return_tensors="pt",
+                )
+                estados = modelo(**entradas).last_hidden_state
+                mascara = entradas["attention_mask"].unsqueeze(-1)
+                vetores = (estados * mascara).sum(dim=1) / mascara.sum(dim=1).clamp(
+                    min=1
+                )
+                lotes.append(vetores.cpu().numpy())
 
-            estados = sessao.run(None, entradas)[0]
-            mascara = entradas["attention_mask"][..., None].astype(np.float32)
-            somas = (estados * mascara).sum(axis=1)
-            vetores = somas / np.clip(mascara.sum(axis=1), 1e-9, None)
-            lotes.append(vetores / np.linalg.norm(vetores, axis=1, keepdims=True))
-
-        return np.vstack(lotes).astype(np.float32)
+        return normalize(np.vstack(lotes)).astype(np.float32)
 
     @property
     def _bert(self):
         if self._encoder is None:
-            import onnxruntime as ort
-            from huggingface_hub import hf_hub_download
-            from tokenizers import Tokenizer
-
             repositorio = os.getenv(BERT_MODEL_ENV, DEFAULT_BERT_MODEL)
-            revisao = os.getenv(BERT_REVISION_ENV, DEFAULT_BERT_REVISION)
-            sessao = ort.InferenceSession(
-                hf_hub_download(
-                    repo_id=repositorio,
-                    filename=ONNX_GRAPH_FILE,
-                    revision=revisao,
-                ),
-                providers=["CPUExecutionProvider"],
-            )
-            tokenizador = Tokenizer.from_file(
-                hf_hub_download(
-                    repo_id=repositorio,
-                    filename=TOKENIZER_FILE,
-                    revision=revisao,
-                )
-            )
-            tokenizador.enable_padding(pad_id=PAD_TOKEN_ID, pad_token=PAD_TOKEN)
-            tokenizador.enable_truncation(max_length=MAX_SEQUENCE_LENGTH)
+            revisao = _bert_revision()
 
-            self._usa_token_type_ids = any(
-                entrada.name == "token_type_ids" for entrada in sessao.get_inputs()
+            from transformers import AutoModel, AutoTokenizer
+
+            tokenizador = AutoTokenizer.from_pretrained(
+                repositorio,
+                revision=revisao,
             )
-            self._encoder = (sessao, tokenizador)
+            modelo = AutoModel.from_pretrained(
+                repositorio,
+                revision=revisao,
+            )
+            modelo.eval()
+            self._encoder = (modelo, tokenizador)
         return self._encoder
 
 
