@@ -54,6 +54,8 @@ CATALOG_PATH = ARTIFACT_DIR / "catalogo_intencoes.json"
 
 DEFAULT_BERT_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 BERT_MODEL_ENV = "PLN_BERT_MODEL"
+DEFAULT_BERT_REVISION = "e8f8c211226b894fcb81acc59f3b34ba3efd5f42"
+BERT_REVISION_ENV = "PLN_BERT_REVISION"
 ONNX_GRAPH_FILE = "onnx/model.onnx"
 TOKENIZER_FILE = "tokenizer.json"
 
@@ -299,12 +301,21 @@ class ClassificadorDeIntencoes:
             from tokenizers import Tokenizer
 
             repositorio = os.getenv(BERT_MODEL_ENV, DEFAULT_BERT_MODEL)
+            revisao = os.getenv(BERT_REVISION_ENV, DEFAULT_BERT_REVISION)
             sessao = ort.InferenceSession(
-                hf_hub_download(repositorio, ONNX_GRAPH_FILE),
+                hf_hub_download(
+                    repo_id=repositorio,
+                    filename=ONNX_GRAPH_FILE,
+                    revision=revisao,
+                ),
                 providers=["CPUExecutionProvider"],
             )
             tokenizador = Tokenizer.from_file(
-                hf_hub_download(repositorio, TOKENIZER_FILE)
+                hf_hub_download(
+                    repo_id=repositorio,
+                    filename=TOKENIZER_FILE,
+                    revision=revisao,
+                )
             )
             tokenizador.enable_padding(pad_id=PAD_TOKEN_ID, pad_token=PAD_TOKEN)
             tokenizador.enable_truncation(max_length=MAX_SEQUENCE_LENGTH)
