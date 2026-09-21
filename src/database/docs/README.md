@@ -10,6 +10,8 @@ Os scripts atuais sao:
 - `../sql/02_initial_data.sql`: insere uma carga sintetica minima para exercitar subportfolio, projeto, TAP, beneficios, avancos, entregas, riscos e catalogo de intencoes;
 - `../sql/03_rollback_data.sql`: desfaz o baseline em ordem reversa de dependencia, para uso controlado em desenvolvimento/PoC.
 - `../sql/04_rag_synthetic_data.sql`: carrega em `project_artifacts` e `source_extracts` os itens ficticios dos JSONs usados pelo RAG local em `src/backend/app/rag/data/sharepoint`.
+- `../sql/05_add_secondary_intents.sql`: adiciona o catalogo de intencoes secundarias a bancos que ja possuem o baseline;
+- `../sql/06_verify_secondary_intents.sql`: verifica leitura, unicidade, integridade referencial e reexecucao da carga sem persistir dados de teste.
 
 ## Banco-alvo
 
@@ -26,7 +28,7 @@ O modelo fisico foi escrito para **PostgreSQL 14+** e tambem e compativel com Su
 
 ## Escopo do modelo fisico
 
-O script cria 25 tabelas:
+O script cria 26 tabelas:
 
 | Grupo | Tabelas |
 | --- | --- |
@@ -35,7 +37,7 @@ O script cria 25 tabelas:
 | Documentos estruturados do ciclo de vida | `project_charters`, `project_closure_terms`, `project_benefits` |
 | Riscos, problemas e mudancas | `risk_issue_items`, `risk_issue_history`, `change_records` |
 | Usuarios e acesso | `users`, `access_rules` |
-| Intencoes e prompts | `intent_catalog`, `prompt_templates` |
+| Intencoes e prompts | `intent_catalog`, `secondary_intents`, `prompt_templates` |
 | Conversas, fontes consultadas e auditoria | `ai_conversations`, `ai_interactions`, `consulted_sources`, `audit_events`, `out_of_scope_requests` |
 | Avaliacao do PLN | `intent_test_cases` |
 
@@ -56,6 +58,8 @@ O termo de encerramento foi modelado em `project_closure_terms`, também ligado 
 
 A tabela `project_benefits` foi adicionada porque o Mapa de Beneficios e parte central do recorte do MVP. Ela pode receber beneficios derivados do TAP ou de uma lista especifica de beneficios quando essa estrutura estiver disponivel.
 
+`secondary_intents` associa uma sugestao proativa a uma intencao especifica existente em `intent_catalog`. A chave estrangeira impede associacoes orfas, enquanto a restricao unica sobre `specific_intent_id` e `secondary_intent` torna a carga idempotente. Os campos `rag_instruction` e `display_message` separam a orientacao enviada ao RAG do texto curto apresentado na interface. A intencao secundaria complementa a consulta e nao altera a classificacao macro ou especifica original.
+
 ## Tratamento de planilhas Excel do SharePoint
 
 Algumas listas do SharePoint podem guardar apenas links ou anexos para planilhas Excel, especialmente cronogramas. O modelo trata esse caso da seguinte forma:
@@ -75,7 +79,20 @@ Em um banco PostgreSQL de desenvolvimento:
 psql "$DATABASE_URL" -f src/database/sql/01_create_database.sql
 psql "$DATABASE_URL" -f src/database/sql/02_initial_data.sql
 psql "$DATABASE_URL" -f src/database/sql/04_rag_synthetic_data.sql
+psql "$DATABASE_URL" -f src/database/sql/06_verify_secondary_intents.sql
 ```
+
+Em um banco que ja possui o baseline, execute
+`05_add_secondary_intents.sql`. A propria migracao cria a tabela e carrega de
+forma idempotente os 13 mapeamentos iniciais, sem exigir a reexecucao do
+bootstrap. A verificacao `06_verify_secondary_intents.sql` deve
+terminar sem erro e sempre executa `ROLLBACK`, inclusive para os registros de
+prova usados nos testes de FK e unicidade.
+
+Para comprovar a idempotencia da migracao, execute
+`05_add_secondary_intents.sql` uma segunda vez antes de
+`06_verify_secondary_intents.sql`. A contagem deve
+permanecer em 13 associacoes ativas, sem duplicatas ou registros orfaos.
 
 A carga `04_rag_synthetic_data.sql` deve ser executada depois da carga inicial,
 pois reutiliza o projeto sintetico `PRJ-0442` quando um item de origem precisa de

@@ -19,6 +19,7 @@ import {
   type ChatSource,
   type MacroIntent,
   type PipelineEntity,
+  type ProactiveSuggestion,
 } from './api/schemas';
 
 /* -------------------------------------------------------------------------
@@ -147,6 +148,18 @@ export type TranscriptionInfo = {
   durationSeconds: number;
 };
 
+export type ProactiveSuggestionStatus =
+  'pending' | 'accepting' | 'declining' | 'accepted' | 'declined';
+
+export type ProactiveSuggestionState = {
+  id: string;
+  intent: string;
+  description: string;
+  displayMessage: string;
+  requiresConfirmation: boolean;
+  status: ProactiveSuggestionStatus;
+};
+
 export type ChatMessage = {
   id: string;
   role: MessageRole;
@@ -166,6 +179,8 @@ export type ChatMessage = {
   error?: string;
   /** `true` quando o classificador estava ligado no envio. */
   intentLayerEnabled?: boolean;
+  /** Sugestao separada da resposta principal e vinculada a uma decisao explicita. */
+  proactiveSuggestion?: ProactiveSuggestionState;
 };
 
 export type ConversationStatus = 'ativa' | 'finalizada' | 'abandonada' | 'erro';
@@ -216,6 +231,19 @@ export function toExtractedEntity(entity: PipelineEntity): ExtractedEntity {
     end: entity.end,
     types: entity.types,
     ambiguous: entity.ambiguous,
+  };
+}
+
+export function toProactiveSuggestion(
+  suggestion: ProactiveSuggestion,
+): ProactiveSuggestionState {
+  return {
+    id: suggestion.suggestion_id,
+    intent: suggestion.intent,
+    description: suggestion.description,
+    displayMessage: suggestion.display_message,
+    requiresConfirmation: suggestion.requires_confirmation,
+    status: 'pending',
   };
 }
 
@@ -283,6 +311,9 @@ export function toAssistantMessage(
       totalTokens: response.usage.total_tokens,
     },
     intentLayerEnabled: options.intentLayerEnabled,
+    proactiveSuggestion: response.proactive_suggestion
+      ? toProactiveSuggestion(response.proactive_suggestion)
+      : undefined,
   };
 }
 

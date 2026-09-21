@@ -1465,8 +1465,8 @@ Por se tratar de uma prova de conceito em contexto acadêmico, o funcionamento d
 | RF06 | O sistema deve realizar análises e comparações entre informações de diferentes projetos quando solicitado pelo usuário.                                                                       | Consulta de informações dos projetos | Muito Alta | Não iniciado |
 | RF07 | O sistema deve encaminhar cada intenção pertencente ao escopo para a rota definida no catálogo: fluxo automatizado sem uso de LLM ou LLM com contexto estruturado e validado quando não houver automação correspondente. | Ingestão de informações dos projetos | Muito Alta | Não iniciado |
 | RF08 | O sistema deve retornar o resultado da rota executada de forma estruturada e fundamentada, preservando as referências disponíveis e indicando quando não houver informações suficientes.         | Consulta de informações dos projetos | Muito Alta | Não iniciado |
-| RF09 | Para intenções sem fluxo automatizado, o sistema deve, quando a proatividade estiver habilitada, associar uma intenção secundária compatível e apresentá-la como sugestão opcional de próximo passo, sem executá-la sem confirmação do usuário. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
-| RF10 | O sistema deve permitir ao usuário ativar ou desativar as sugestões proativas sem alterar o processamento da intenção primária.                                                                 | Edição das configurações do agente por menu | Alta | Não iniciado |
+| RF09 | Para intenções sem fluxo automatizado, o sistema deve, quando a proatividade estiver habilitada, associar uma intenção secundária compatível e apresentá-la como sugestão opcional de próximo passo, sem executá-la sem confirmação do usuário. | Consulta de informações dos projetos | Muito Alta | Implementado |
+| RF10 | O sistema deve permitir ao usuário ativar ou desativar as sugestões proativas sem alterar o processamento da intenção primária.                                                                 | Edição das configurações do agente por menu | Alta | Implementado |
 
 ### 3.1.1 User Stories dos Requisitos Funcionais
 
@@ -1775,12 +1775,12 @@ Os dez requisitos funcionais não têm o mesmo horizonte de entrega, e a distin�
 | Requisito | Escopo | Justificativa |
 |---|---|---|
 | RF01 a RF08 | **MVP** | Compõem o pipeline de consulta e resposta fundamentada, que é o recorte declarado na Seção 2.9 e sustentado pelas features da faixa Muito Alta da Seção 2.8 |
-| RF09 — Sugestão proativa de intenção secundária | **Previsto, pós-MVP** | Decorre da prototipação exploratória da Seção 3.8, cuja questão era o regime de iniciativa do agente. O comportamento proativo está no Bloco 3 da Seção 2.4.3, fora do MVP |
-| RF10 — Controle da proatividade | **Previsto, pós-MVP** | Depende da feature "Edição das configurações do agente por menu", classificada na faixa Evolução da Seção 2.8. Sem RF09 implementado, não há proatividade a controlar |
+| RF09 — Sugestão proativa de intenção secundária | **Implementado na Sprint 4** | A interface apresenta a sugestão em bloco separado e a rota dedicada executa somente a intenção vinculada após confirmação explícita; a recusa encerra a sugestão sem execução |
+| RF10 — Controle da proatividade | **Implementado na Sprint 4** | O controle da interface ativa ou desativa as sugestões sem alterar o processamento da intenção primária |
 
-A especificação de RF09 e RF10 nesta sprint é deliberada e não amplia o escopo do MVP. A prototipação exploratória produziu uma decisão de comportamento — o agente pode sugerir, mas nunca executar sem confirmação — e registrar essa decisão como requisito, com critérios de aceitação verificáveis, é o que impede que ela se perca entre sprints. A implementação segue condicionada à priorização da Seção 2.8.
+A implementação de RF09 e RF10 concretiza a decisão produzida na prototipação exploratória: o agente pode sugerir, mas nunca executar sem confirmação. A sugestão fica vinculada no backend a um identificador opaco, às fontes recuperadas e a uma intenção catalogada; a interface oferece ações explícitas de aceitar e recusar.
 
-Registra-se também uma lacuna conhecida: nenhum requisito não funcional da Seção 3.2 governa a qualidade da proatividade. O RF09 estabelece que a sugestão aparece separada da resposta principal e exige confirmação, mas não há critério mensurável para intervenção inadequada — a falha que a Seção 3.8.4 identificou como característica do regime proativo. Esse RNF deve ser especificado antes da implementação de RF09.
+Permanece como evolução de qualidade definir um critério quantitativo para intervenções proativas inadequadas. Essa lacuna não altera o contrato funcional entregue: a elegibilidade é decidida pelo catálogo e pela presença de fontes, e a geração secundária só ocorre após confirmação explícita.
 
 ## 3.2 Requisitos Não Funcionais (RNFs)
 
@@ -5149,7 +5149,7 @@ As ferramentas escolhidas também respeitam os requisitos não funcionais já de
 
 ## 9.1 Testes Funcionais
 
-O plano de testes funcionais valida o comportamento observável definido pelos critérios de aceitação da Seção 3.1. A cobertura contempla RF01 a RF10: RF01 a RF08 formam o núcleo do MVP e devem ser executados sobre a versão entregue; RF09 e RF10 representam a evolução pós-MVP, mas permanecem planejados e rastreáveis para que sua implementação futura já tenha critérios objetivos. Enquanto essa evolução não estiver disponível, seus casos devem ser registrados como **bloqueados por funcionalidade não implementada**, nunca como aprovados sem execução. Cada requisito possui ao menos um cenário positivo, que confirma o fluxo esperado, e um cenário negativo, que exercita entrada inválida, ausência de dados, estado desabilitado ou rota não suportada.
+O plano de testes funcionais valida o comportamento observável definido pelos critérios de aceitação da Seção 3.1. A cobertura contempla RF01 a RF10, incluindo a proatividade controlada de RF09 e RF10 disponível na versão entregue. Cada requisito possui ao menos um cenário positivo, que confirma o fluxo esperado, e um cenário negativo, que exercita entrada inválida, ausência de dados, estado desabilitado ou rota não suportada.
 
 ### 9.1.1 Estratégia e preparação
 
@@ -5254,7 +5254,7 @@ O plano cobre os dez requisitos funcionais e os três regimes principais do prod
 
 A abrangência é adequada ao planejamento sistêmico porque cada critério de aceitação da Seção 3.1 aparece na matriz e é observado em pelo menos um resultado esperado. Ela não pretende substituir testes unitários de todas as funções nem combinações exaustivas de frases, perfis e documentos. Variações linguísticas e métricas quantitativas do classificador pertencem aos RNF06 e RNF07; desempenho, segurança, acessibilidade, usabilidade e confiabilidade quantitativa pertencem às Seções 9.2 e 9.3.
 
-RF09 e RF10 ficam fora da implementação obrigatória do MVP, mas não ficam fora do plano: seus quatro casos permanecem com resultado esperado explícito e serão marcados como bloqueados até a funcionalidade existir. A validação de voz do RF01 depende da disponibilidade do endpoint de áudio especificado na Seção 8.7. Enquanto ele não estiver implementado, o subcenário de áudio do CT-RF01-01 também fica bloqueado e deve ser registrado como tal; a aprovação integral de RF01 requer execução posterior, com a mesma expectativa de encaminhamento após transcrição.
+RF09 e RF10 possuem implementação observável pela interface e pela rota de confirmação, portanto seus casos devem ser executados e não podem mais ser marcados como bloqueados por ausência da funcionalidade. A validação de voz do RF01 segue condicionada à disponibilidade do endpoint de áudio especificado na Seção 8.7.
 
 ### 9.1.5 Resultados
 

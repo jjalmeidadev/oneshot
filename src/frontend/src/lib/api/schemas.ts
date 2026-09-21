@@ -19,7 +19,9 @@
 /** `GeminiChatRequest`. `message` tem min_length=1 e max_length=20000. */
 export type ChatRequest = {
   message: string;
+  conversation_id?: string | null;
   use_intent_classifier?: boolean;
+  proactivity_enabled?: boolean;
   previous_interaction_id?: string | null;
 };
 
@@ -52,6 +54,27 @@ export type ChatSource = {
   excerpt?: string | null;
 };
 
+export type ProactiveSuggestion = {
+  suggestion_id: string;
+  intent: string;
+  description: string;
+  display_message: string;
+  requires_confirmation: boolean;
+};
+
+export type ProactiveDecision = 'accept' | 'decline';
+
+export type ProactiveConfirmationRequest = {
+  suggestion_id: string;
+  conversation_id: string;
+  decision: ProactiveDecision;
+};
+
+export type ProactiveConfirmationResponse = {
+  status: 'accepted' | 'declined';
+  result?: ChatResponse | null;
+};
+
 /** `GeminiChatResponse`. */
 export type ChatResponse = {
   intent?: AudioIntent | null;
@@ -64,6 +87,7 @@ export type ChatResponse = {
   retrieval_ms: number;
   usage: ChatUsage;
   sources: ChatSource[];
+  proactive_suggestion?: ProactiveSuggestion | null;
 };
 
 /* -------------------------------------------------------------------------

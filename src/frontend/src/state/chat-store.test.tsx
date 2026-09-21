@@ -12,10 +12,13 @@ describe('Estado e integração do chat', () => {
       );
     vi.stubGlobal('fetch', fetch);
     const { result } = renderHook(useChatStore, { wrapper: ChatStoreProvider });
+    act(() => result.current.setAccessToken('test'));
     expect(result.current.conversations).toHaveLength(0);
+    act(() => result.current.setProactivityEnabled(true));
     await act(async () => {
       await result.current.sendMessage('prazo');
     });
+    expect(JSON.parse(fetch.mock.calls[0][1].body).proactivity_enabled).toBe(true);
     expect(result.current.activeConversation?.messages).toHaveLength(2);
     expect(result.current.activeSources[0].excerpt).toBe(
       'Entrega prevista para dezembro.',
@@ -42,6 +45,7 @@ describe('Estado e integração do chat', () => {
     );
     vi.stubGlobal('fetch', fetch);
     const { result } = renderHook(useChatStore, { wrapper: ChatStoreProvider });
+    act(() => result.current.setAccessToken('test'));
     await act(async () => {
       expect(await result.current.sendMessage('  ')).toBe(false);
     });
@@ -136,5 +140,111 @@ describe('Estado e integração do chat', () => {
     expect(result.current.activeConversation?.messages[1].metrics?.backendTotalMs).toBe(
       12,
     );
+  });
+  it('aceita somente a sugestão vinculada e acrescenta a resposta confirmada', async () => {
+    const confirmed = {
+      ...response,
+      text: 'O gargalo documentado é o fornecedor. [Fonte 1]',
+      interaction_id: 'interaction-confirmed',
+      proactive_suggestion: null,
+    };
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify(response)))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ status: 'accepted', result: confirmed })),
+      );
+    vi.stubGlobal('fetch', fetch);
+    const { result } = renderHook(useChatStore, { wrapper: ChatStoreProvider });
+    act(() => result.current.setAccessToken('test'));
+    await act(async () => {
+      await result.current.sendMessage('status');
+    });
+    const suggestionMessage = result.current.activeConversation!.messages[1];
+    const conversationId = result.current.activeConversation!.id;
+
+    await act(async () => {
+      await result.current.resolveProactiveSuggestion(suggestionMessage.id, 'accept');
+    });
+
+    const body = JSON.parse(fetch.mock.calls[1][1].body);
+    expect(body).toEqual({
+      suggestion_id: response.proactive_suggestion!.suggestion_id,
+      conversation_id: conversationId,
+      decision: 'accept',
+    });
+    expect(body).not.toHaveProperty('message');
+    expect(fetch.mock.calls[1][1].headers.Authorization).toBe('Bearer test');
+    expect(
+      result.current.activeConversation!.messages[1].proactiveSuggestion?.status,
+    ).toBe('accepted');
+    expect(result.current.activeConversation!.messages[2].content).toBe(confirmed.text);
+    expect(result.current.activeConversation!.messages[2].interactionId).toBeNull();
+    expect(result.current.activeConversation!.lastInteractionId).toBe('interaction-1');
+  });
+  it('recusa a sugestão sem acrescentar resposta secundária', async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify(response)))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ status: 'declined', result: null })),
+      );
+    vi.stubGlobal('fetch', fetch);
+    const { result } = renderHook(useChatStore, { wrapper: ChatStoreProvider });
+    act(() => result.current.setAccessToken('test'));
+    await act(async () => {
+      await result.current.sendMessage('status');
+    });
+    const suggestionMessage = result.current.activeConversation!.messages[1];
+
+    await act(async () => {
+      await result.current.resolveProactiveSuggestion(suggestionMessage.id, 'decline');
+    });
+
+    expect(result.current.activeConversation!.messages).toHaveLength(2);
+    expect(
+      result.current.activeConversation!.messages[1].proactiveSuggestion?.status,
+    ).toBe('declined');
+  });
+  it('restaura a sugestão pendente quando a confirmação é interrompida', async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify(response)))
+      .mockImplementationOnce(
+        (_url, init: RequestInit) =>
+          new Promise<Response>((_resolve, reject) => {
+            init.signal?.addEventListener('abort', () =>
+              reject(new DOMException('aborted', 'AbortError')),
+            );
+          }),
+      );
+    vi.stubGlobal('fetch', fetch);
+    const { result } = renderHook(useChatStore, { wrapper: ChatStoreProvider });
+    act(() => result.current.setAccessToken('test'));
+    await act(async () => {
+      await result.current.sendMessage('status');
+    });
+    const suggestionMessage = result.current.activeConversation!.messages[1];
+
+    let confirmation!: Promise<boolean>;
+    act(() => {
+      confirmation = result.current.resolveProactiveSuggestion(
+        suggestionMessage.id,
+        'accept',
+      );
+    });
+    expect(
+      result.current.activeConversation!.messages[1].proactiveSuggestion?.status,
+    ).toBe('accepting');
+
+    act(() => result.current.stop());
+    await act(async () => {
+      await confirmation;
+    });
+
+    expect(
+      result.current.activeConversation!.messages[1].proactiveSuggestion?.status,
+    ).toBe('pending');
+    expect(result.current.status).toBe('idle');
   });
 });

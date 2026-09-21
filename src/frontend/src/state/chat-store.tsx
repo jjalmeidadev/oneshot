@@ -10,11 +10,13 @@ import {
 } from 'react';
 
 import {
+  confirmProactiveSuggestion,
   sendChatMessage,
   uploadAudio,
   toDisplayMessage,
   CHAT_MESSAGE_MAX_LENGTH,
   type AudioPipelineMetrics,
+  type ProactiveDecision,
 } from '@/lib/api';
 import { toAssistantMessage } from '@/lib/domain';
 type ChatStatus = 'idle' | 'sending' | 'error';
@@ -37,6 +39,8 @@ type State = {
   error: string | null;
   /** Toggle da camada validadora de intencao, acima do campo de texto. */
   intentLayerEnabled: boolean;
+  /** Sugestao secundaria fundamentada, controlada pelo usuario. */
+  proactivityEnabled: boolean;
   /** Documento aberto no painel da direita. */
   selectedDocumentId: string | null;
   /** Painel lateral fixo, em telas largas. Aberto por padrao. */
@@ -52,8 +56,15 @@ type Action =
   | { type: 'select-conversation'; id: string }
   | { type: 'delete-conversation'; id: string }
   | { type: 'append-message'; conversationId: string; message: ChatMessage }
+  | {
+      type: 'update-proactive-suggestion';
+      conversationId: string;
+      messageId: string;
+      status: NonNullable<ChatMessage['proactiveSuggestion']>['status'];
+    }
   | { type: 'set-status'; status: ChatStatus; error?: string | null }
   | { type: 'toggle-intent-layer'; enabled: boolean }
+  | { type: 'toggle-proactivity'; enabled: boolean }
   | { type: 'select-document'; id: string | null }
   | { type: 'set-document-panel'; open: boolean }
   | { type: 'set-document-sheet'; open: boolean }
@@ -135,11 +146,41 @@ function reducer(state: State, action: Action): State {
       };
     }
 
+    case 'update-proactive-suggestion':
+      return {
+        ...state,
+        conversations: state.conversations.map((conversation) =>
+          conversation.id !== action.conversationId
+            ? conversation
+            : {
+                ...conversation,
+                messages: conversation.messages.map((message) =>
+                  message.id !== action.messageId || !message.proactiveSuggestion
+                    ? message
+                    : {
+                        ...message,
+                        proactiveSuggestion: {
+                          ...message.proactiveSuggestion,
+                          status: action.status,
+                        },
+                      },
+                ),
+              },
+        ),
+      };
+
     case 'set-status':
       return { ...state, status: action.status, error: action.error ?? null };
 
     case 'toggle-intent-layer':
-      return { ...state, intentLayerEnabled: action.enabled };
+      return {
+        ...state,
+        intentLayerEnabled: action.enabled,
+        proactivityEnabled: action.enabled ? state.proactivityEnabled : false,
+      };
+
+    case 'toggle-proactivity':
+      return { ...state, proactivityEnabled: action.enabled };
 
     case 'select-document':
       return {
@@ -173,6 +214,7 @@ function initialState(): State {
     status: 'idle',
     error: null,
     intentLayerEnabled: true,
+    proactivityEnabled: false,
     selectedDocumentId: null,
     documentPanelOpen: true,
     documentSheetOpen: false,
@@ -191,6 +233,7 @@ type ChatStoreValue = {
   status: ChatStatus;
   error: string | null;
   intentLayerEnabled: boolean;
+  proactivityEnabled: boolean;
   documentPanelOpen: boolean;
   documentSheetOpen: boolean;
   sidebarOpen: boolean;
@@ -200,11 +243,16 @@ type ChatStoreValue = {
   selectedDocument: RetrievedDocument | null;
   sendMessage: (content: string) => Promise<boolean>;
   sendAudio: (audio: Blob) => Promise<boolean>;
+  resolveProactiveSuggestion: (
+    messageId: string,
+    decision: ProactiveDecision,
+  ) => Promise<boolean>;
   stop: () => void;
   newConversation: () => void;
   selectConversation: (id: string) => void;
   deleteConversation: (id: string) => void;
   setIntentLayerEnabled: (enabled: boolean) => void;
+  setProactivityEnabled: (enabled: boolean) => void;
   selectDocument: (id: string | null) => void;
   setDocumentPanelOpen: (open: boolean) => void;
   setDocumentSheetOpen: (open: boolean) => void;
@@ -219,9 +267,23 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
 
   const view = state;
   const pending = useRef<AbortController | null>(null);
+  const pendingSuggestion = useRef<{
+    conversationId: string;
+    messageId: string;
+  } | null>(null);
   const stop = useCallback(() => {
+    const suggestion = pendingSuggestion.current;
     pending.current?.abort();
     pending.current = null;
+    pendingSuggestion.current = null;
+    if (suggestion) {
+      dispatch({
+        type: 'update-proactive-suggestion',
+        conversationId: suggestion.conversationId,
+        messageId: suggestion.messageId,
+        status: 'pending',
+      });
+    }
     dispatch({ type: 'set-status', status: 'idle' });
   }, []);
   useEffect(() => () => pending.current?.abort(), []);
@@ -285,6 +347,18 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
         });
         return false;
       }
+      if (
+        typeof input === 'string' &&
+        state.proactivityEnabled &&
+        !state.accessToken.trim()
+      ) {
+        dispatch({
+          type: 'set-status',
+          status: 'error',
+          error: 'Informe o token de acesso da sessão para usar a proatividade.',
+        });
+        return false;
+      }
       const conversation = activeConversation ?? createConversation();
       if (!activeConversation) dispatch({ type: 'new-conversation', conversation });
       const controller = new AbortController();
@@ -311,8 +385,11 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
           });
           response = await sendChatMessage({
             message: text,
+            conversationId: conversation.id,
+            accessToken: state.accessToken,
             previousInteractionId: conversation.lastInteractionId,
             useIntentClassifier: state.intentLayerEnabled,
+            proactivityEnabled: state.proactivityEnabled,
             signal: controller.signal,
           });
         } else {
@@ -323,6 +400,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
             accessToken: state.accessToken,
             previousInteractionId: conversation.lastInteractionId,
             useIntentClassifier: state.intentLayerEnabled,
+            proactivityEnabled: state.proactivityEnabled,
             signal: controller.signal,
           });
           if (result.pipeline_status !== 'completed' || !result.chat)
@@ -372,10 +450,97 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
         if (pending.current === controller) pending.current = null;
       }
     },
-    [activeConversation, state.accessToken, state.intentLayerEnabled],
+    [
+      activeConversation,
+      state.accessToken,
+      state.intentLayerEnabled,
+      state.proactivityEnabled,
+    ],
   );
   const sendMessage = useCallback((content: string) => send(content), [send]);
   const sendAudio = useCallback((audio: Blob) => send(audio), [send]);
+  const resolveProactiveSuggestion = useCallback(
+    async (messageId: string, decision: ProactiveDecision): Promise<boolean> => {
+      if (pending.current || !activeConversation) return false;
+      const message = activeConversation.messages.find((item) => item.id === messageId);
+      const suggestion = message?.proactiveSuggestion;
+      if (!suggestion || suggestion.status !== 'pending') return false;
+
+      const controller = new AbortController();
+      pending.current = controller;
+      pendingSuggestion.current = {
+        conversationId: activeConversation.id,
+        messageId,
+      };
+      const started = performance.now();
+      dispatch({ type: 'set-status', status: 'sending' });
+      dispatch({
+        type: 'update-proactive-suggestion',
+        conversationId: activeConversation.id,
+        messageId,
+        status: decision === 'accept' ? 'accepting' : 'declining',
+      });
+
+      try {
+        const confirmation = await confirmProactiveSuggestion({
+          suggestionId: suggestion.id,
+          conversationId: activeConversation.id,
+          accessToken: state.accessToken,
+          decision,
+          signal: controller.signal,
+        });
+        if (controller.signal.aborted || pending.current !== controller) return false;
+
+        if (decision === 'accept') {
+          if (confirmation.status !== 'accepted' || !confirmation.result) {
+            throw new Error('Incomplete proactive confirmation');
+          }
+          dispatch({
+            type: 'append-message',
+            conversationId: activeConversation.id,
+            message: {
+              ...toAssistantMessage(confirmation.result, {
+                roundTripMs: performance.now() - started,
+                intentLayerEnabled: state.intentLayerEnabled,
+              }),
+              // A geracao proativa e uma rota isolada. A proxima pergunta deve
+              // continuar encadeada a resposta primaria da conversa.
+              interactionId: null,
+            },
+          });
+        }
+        dispatch({
+          type: 'update-proactive-suggestion',
+          conversationId: activeConversation.id,
+          messageId,
+          status: decision === 'accept' ? 'accepted' : 'declined',
+        });
+        dispatch({ type: 'set-status', status: 'idle' });
+        return true;
+      } catch (cause) {
+        if (!controller.signal.aborted && pending.current === controller) {
+          dispatch({
+            type: 'update-proactive-suggestion',
+            conversationId: activeConversation.id,
+            messageId,
+            status: 'pending',
+          });
+          dispatch({
+            type: 'set-status',
+            status: 'error',
+            error: toDisplayMessage(cause),
+          });
+        }
+        return false;
+      } finally {
+        if (pending.current === controller) {
+          pending.current = null;
+          pendingSuggestion.current = null;
+        }
+      }
+    },
+    [activeConversation, state.accessToken, state.intentLayerEnabled],
+  );
 
   const value = useMemo<ChatStoreValue>(
     () => ({
@@ -384,6 +549,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
       status: view.status,
       error: view.error,
       intentLayerEnabled: state.intentLayerEnabled,
+      proactivityEnabled: state.proactivityEnabled,
       documentPanelOpen: state.documentPanelOpen,
       documentSheetOpen: state.documentSheetOpen,
       sidebarOpen: state.sidebarOpen,
@@ -392,6 +558,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
       selectedDocument,
       sendMessage,
       sendAudio,
+      resolveProactiveSuggestion,
       stop,
       newConversation: () => {
         stop();
@@ -407,6 +574,8 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
       },
       setIntentLayerEnabled: (enabled) =>
         dispatch({ type: 'toggle-intent-layer', enabled }),
+      setProactivityEnabled: (enabled) =>
+        dispatch({ type: 'toggle-proactivity', enabled }),
       selectDocument: (id) => dispatch({ type: 'select-document', id }),
       setDocumentPanelOpen: (open) => dispatch({ type: 'set-document-panel', open }),
       setDocumentSheetOpen: (open) => dispatch({ type: 'set-document-sheet', open }),
@@ -421,12 +590,14 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
       activeSources,
       selectedDocument,
       state.intentLayerEnabled,
+      state.proactivityEnabled,
       state.documentPanelOpen,
       state.documentSheetOpen,
       state.sidebarOpen,
       state.accessToken,
       sendMessage,
       sendAudio,
+      resolveProactiveSuggestion,
       stop,
     ],
   );

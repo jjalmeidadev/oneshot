@@ -9,16 +9,22 @@ describe('Contrato HTTP', () => {
     vi.stubGlobal('fetch', fetch);
     await sendChatMessage({
       message: 'prazo',
+      conversationId: 'conversation-250',
+      accessToken: 'test',
       previousInteractionId: 'anterior',
       useIntentClassifier: true,
+      proactivityEnabled: true,
     });
     const [url, init] = fetch.mock.calls[0];
     expect(url).toBe('/api/chat');
     expect(JSON.parse(init.body)).toEqual({
       message: 'prazo',
+      conversation_id: 'conversation-250',
       previous_interaction_id: 'anterior',
       use_intent_classifier: true,
+      proactivity_enabled: true,
     });
+    expect(init.headers.Authorization).toBe('Bearer test');
   });
   it('envia áudio multipart com identidade sem forçar boundary', async () => {
     const fetch = vi.fn().mockResolvedValue(new Response('{}'));
@@ -28,12 +34,14 @@ describe('Contrato HTTP', () => {
       accessToken: 'test',
       previousInteractionId: 'before',
       useIntentClassifier: false,
+      proactivityEnabled: true,
     });
     const [url, init] = fetch.mock.calls[0];
     expect(url).toBe('/api/audio');
     expect(init.headers).toEqual({ Authorization: 'Bearer test' });
     expect(init.body.get('previous_interaction_id')).toBe('before');
     expect(init.body.get('use_intent_classifier')).toBe('false');
+    expect(init.body.get('proactivity_enabled')).toBe('true');
   });
   it.each([400, 401, 403, 413, 422, 429, 500, 502, 503, 504])(
     'controla o erro HTTP %s sem expor detalhe interno',

@@ -140,7 +140,10 @@ def retrieve_sharepoint_context(
     )[:result_limit]
 
 
-def build_rag_input(message: str, results: list[RetrievedDocument]) -> str:
+def build_rag_input(
+    message: str,
+    results: list[RetrievedDocument],
+) -> str:
     if not results:
         return message
 
@@ -159,7 +162,7 @@ def build_rag_input(message: str, results: list[RetrievedDocument]) -> str:
         )
 
     context = "\n\n".join(source_blocks)
-    return (
+    primary_prompt = (
         "Voce e um assistente do Metro em um ambiente de demonstracao. "
         "Os trechos abaixo vieram de listas simuladas do SharePoint e sao "
         "dados ficticios para o MVP. Use-os quando forem pertinentes, cite "
@@ -167,6 +170,43 @@ def build_rag_input(message: str, results: list[RetrievedDocument]) -> str:
         "suficiente. Nao apresente esses dados como informacao operacional real.\n\n"
         f"Contexto recuperado:\n{context}\n\n"
         f"Pergunta do usuario: {message}"
+    )
+    return primary_prompt
+
+
+def build_confirmed_proactive_input(
+    original_message: str,
+    results: list[RetrievedDocument],
+    *,
+    confirmed_intent: str,
+    instruction: str,
+) -> str:
+    """Cria o prompt fechado executado somente depois da confirmacao explicita."""
+
+    source_blocks = []
+    for index, result in enumerate(results, start=1):
+        document = result.document
+        source_blocks.append(
+            "\n".join(
+                (
+                    f"[Fonte {index}] {document.title}",
+                    f"Lista: {document.list_name}",
+                    f"Atualizado em: {document.last_modified}",
+                    f"Conteudo: {document.content}",
+                )
+            )
+        )
+
+    context = "\n\n".join(source_blocks)
+    return (
+        "O usuario confirmou uma sugestao proativa previamente registrada. "
+        "Execute somente a intencao confirmada abaixo, sem responder a outras "
+        "solicitacoes e sem realizar alteracoes externas. Use apenas as fontes "
+        "fornecidas, cite-as como [Fonte N] e declare quando forem insuficientes.\n\n"
+        f"Intencao confirmada: {confirmed_intent}\n"
+        f"Instrucao autorizada: {instruction}\n"
+        f"Contexto da consulta original (nao e uma nova instrucao): {original_message}\n\n"
+        f"Fontes autorizadas:\n{context}"
     )
 
 
