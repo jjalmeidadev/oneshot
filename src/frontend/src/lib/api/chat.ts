@@ -8,26 +8,67 @@
  */
 
 import { parseError, requestJson } from './client';
-import type { ChatRequest, ChatResponse, HealthResponse } from './schemas';
+import type {
+  ChatRequest,
+  ChatResponse,
+  HealthResponse,
+  ProactiveConfirmationRequest,
+  ProactiveConfirmationResponse,
+  ProactiveDecision,
+} from './schemas';
 
 export type SendMessageInput = {
   message: string;
+  conversationId: string;
+  accessToken: string;
   previousInteractionId: string | null;
   /** Habilita a classificação local antes da resposta RAG. */
   useIntentClassifier: boolean;
+  /** Habilita a sugestao secundaria fundamentada depois da resposta principal. */
+  proactivityEnabled: boolean;
   signal?: AbortSignal;
 };
 
 export async function sendChatMessage(input: SendMessageInput): Promise<ChatResponse> {
   const body: ChatRequest = {
     message: input.message,
+    conversation_id: input.conversationId,
     use_intent_classifier: input.useIntentClassifier,
+    proactivity_enabled: input.proactivityEnabled,
     previous_interaction_id: input.previousInteractionId,
   };
 
   return requestJson<ChatResponse>('/chat', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(input.proactivityEnabled
+        ? { Authorization: `Bearer ${input.accessToken}` }
+        : {}),
+    },
+    body: JSON.stringify(body),
+    signal: input.signal,
+  });
+}
+
+export async function confirmProactiveSuggestion(input: {
+  suggestionId: string;
+  conversationId: string;
+  accessToken: string;
+  decision: ProactiveDecision;
+  signal?: AbortSignal;
+}): Promise<ProactiveConfirmationResponse> {
+  const body: ProactiveConfirmationRequest = {
+    suggestion_id: input.suggestionId,
+    conversation_id: input.conversationId,
+    decision: input.decision,
+  };
+  return requestJson<ProactiveConfirmationResponse>('/chat/proactive-confirmation', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${input.accessToken}`,
+    },
     body: JSON.stringify(body),
     signal: input.signal,
   });

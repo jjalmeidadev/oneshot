@@ -1,0 +1,80 @@
+{
+  "consulta_status_projeto": {
+    "secondary_intent": "sugerir_agilizacao_projeto",
+    "description": "Identificar o principal gargalo documentado e sugerir uma acao para acelerar o projeto.",
+    "rag_instruction": "Depois da resposta principal, identifique nas fontes o principal gargalo do projeto e sugira uma unica acao objetiva para agiliza-lo. Cite a evidencia e nao invente recomendacao quando faltar suporte.",
+    "display_message": "Quer que eu identifique o principal gargalo documentado e sugira uma forma de agilizar o projeto?"
+  },
+  "consulta_cronograma_prazo": {
+    "secondary_intent": "sugerir_recuperacao_prazo",
+    "description": "Apontar a atividade mais critica ou atrasada e sugerir uma acao de recuperacao do cronograma.",
+    "rag_instruction": "Depois da resposta principal, identifique nas fontes a atividade mais critica ou atrasada e sugira uma unica acao de recuperacao do prazo. Cite a evidencia e preserve datas e responsaveis documentados.",
+    "display_message": "Quer que eu avalie o ponto mais critico do cronograma e sugira uma acao de recuperacao?"
+  },
+  "consulta_marcos_entregas": {
+    "secondary_intent": "sugerir_antecipacao_marco",
+    "description": "Identificar o proximo marco critico e sugerir uma preparacao que reduza o risco de atraso.",
+    "rag_instruction": "Depois da resposta principal, identifique nas fontes o proximo marco critico e sugira uma preparacao objetiva para reduzir o risco de atraso. Cite a evidencia documental.",
+    "display_message": "Quer que eu identifique como preparar o proximo marco critico e reduzir o risco de atraso?"
+  },
+  "consulta_orcamento_custo": {
+    "secondary_intent": "sugerir_otimizacao_custo",
+    "description": "Destacar o maior desvio financeiro documentado e sugerir uma oportunidade de contencao ou otimizacao.",
+    "rag_instruction": "Depois da resposta principal, identifique nas fontes o maior desvio financeiro documentado e sugira uma unica oportunidade de contencao ou otimizacao. Nao estime valores ausentes.",
+    "display_message": "Quer que eu analise o maior desvio documentado e sugira uma oportunidade de otimizacao de custo?"
+  },
+  "consulta_escopo_tap": {
+    "secondary_intent": "sugerir_clareza_escopo",
+    "description": "Identificar restricao, dependencia ou ambiguidade de escopo e sugerir como esclarece-la.",
+    "rag_instruction": "Depois da resposta principal, identifique nas fontes uma restricao, dependencia ou ambiguidade de escopo e sugira uma forma objetiva de esclarece-la, sem propor alteracao de escopo como fato consumado.",
+    "display_message": "Quer que eu identifique uma restricao ou ambiguidade de escopo que mereca esclarecimento?"
+  },
+  "consulta_responsavel_equipe": {
+    "secondary_intent": "sugerir_coordenacao_equipe",
+    "description": "Sugerir o responsavel ou grupo que deve participar do proximo alinhamento.",
+    "rag_instruction": "Depois da resposta principal, use apenas papeis e responsaveis presentes nas fontes para sugerir quem deve participar do proximo alinhamento e por que. Nao atribua responsabilidade inexistente.",
+    "display_message": "Quer que eu sugira quem deve participar do proximo alinhamento do projeto?"
+  },
+  "consulta_indicadores_kpi": {
+    "secondary_intent": "sugerir_melhoria_indicador",
+    "description": "Identificar o indicador mais desfavoravel e sugerir uma acao para melhora-lo.",
+    "rag_instruction": "Depois da resposta principal, identifique nas fontes o indicador mais desfavoravel e sugira uma unica acao coerente para melhora-lo. Preserve valores e periodos documentados.",
+    "display_message": "Quer que eu identifique o indicador mais desfavoravel e sugira uma acao de melhoria?"
+  },
+  "consulta_riscos_projeto": {
+    "secondary_intent": "sugerir_mitigacao_risco",
+    "description": "Priorizar o risco aberto de maior exposicao e sugerir uma medida de mitigacao.",
+    "rag_instruction": "Depois da resposta principal, priorize nas fontes o risco aberto de maior exposicao e sugira uma unica medida de mitigacao. Cite criticidade, impacto ou plano existente quando disponivel.",
+    "display_message": "Quer que eu priorize o risco mais relevante e sugira uma medida de mitigacao?"
+  },
+  "consulta_pendencias_projeto": {
+    "secondary_intent": "sugerir_resolucao_pendencia",
+    "description": "Priorizar a pendencia com maior impacto ou poder de bloqueio e sugerir o proximo passo.",
+    "rag_instruction": "Depois da resposta principal, identifique nas fontes a pendencia com maior impacto ou poder de bloqueio e sugira um unico proximo passo. Respeite responsaveis e prazos documentados.",
+    "display_message": "Quer que eu priorize a pendencia mais bloqueadora e sugira o proximo passo?"
+  },
+  "consulta_documentos_fonte": {
+    "secondary_intent": "sugerir_regularizacao_documental",
+    "description": "Identificar documentos ausentes, desatualizados ou inconsistentes e sugerir qual revisar primeiro.",
+    "rag_instruction": "Depois da resposta principal, identifique nas fontes um documento ausente, desatualizado ou inconsistente e sugira qual deve ser validado primeiro. Nao declare ausencia sem evidencia.",
+    "display_message": "Quer que eu verifique qual documento deve ser validado ou atualizado primeiro?"
+  },
+  "consulta_visao_portfolio": {
+    "secondary_intent": "sugerir_priorizacao_portfolio",
+    "description": "Identificar os projetos que mais precisam de intervencao e explicar o criterio de priorizacao.",
+    "rag_instruction": "Depois da resposta principal, identifique nas fontes o projeto que mais precisa de intervencao e sugira uma prioridade objetiva, explicando o criterio usado sem criar dados comparativos.",
+    "display_message": "Quer que eu identifique qual projeto mais precisa de intervencao e explique o criterio?"
+  },
+  "comparacao_entre_projetos": {
+    "secondary_intent": "sugerir_pratica_replicavel",
+    "description": "Encontrar uma pratica associada ao melhor desempenho e sugerir sua adaptacao ao outro projeto.",
+    "rag_instruction": "Depois da resposta principal, identifique nas fontes uma pratica associada ao projeto de melhor desempenho e sugira como adapta-la ao outro projeto. Diferencie evidencia de interpretacao.",
+    "display_message": "Quer que eu identifique uma pratica do projeto com melhor desempenho que possa ser adaptada?"
+  },
+  "analise_tendencia_desempenho": {
+    "secondary_intent": "sugerir_correcao_tendencia",
+    "description": "Identificar a tendencia desfavoravel mais relevante e sugerir uma acao corretiva antecipada.",
+    "rag_instruction": "Depois da resposta principal, identifique nas fontes a tendencia desfavoravel mais relevante e sugira uma unica acao corretiva antecipada. Declare quando o historico for insuficiente.",
+    "display_message": "Quer que eu identifique a tendencia mais preocupante e sugira uma acao corretiva?"
+  }
+}

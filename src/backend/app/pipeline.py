@@ -8,9 +8,16 @@ from app.database.tracing import TraceabilityError, trace_interaction
 from app.gemini.client import (
     GeminiAPIError,
     GeminiConfigurationError,
+    execute_proactive_confirmation,
     generate_chat_response,
 )
-from app.gemini.schemas import GeminiChatRequest, GeminiChatResponse, GeminiUsage
+from app.gemini.schemas import (
+    GeminiChatRequest,
+    GeminiChatResponse,
+    GeminiUsage,
+    ProactiveConfirmationRequest,
+    ProactiveConfirmationResponse,
+)
 from app.nlp.entities import Entidade, extract_entities
 from app.nlp.schemas import (
     AudioIntent,
@@ -31,7 +38,11 @@ def warmup_classifier() -> None:
         get_classifier().warmup()
 
 
-def process_message(request: GeminiChatRequest) -> GeminiChatResponse:
+def process_message(
+    request: GeminiChatRequest,
+    *,
+    requester_id: str | None = None,
+) -> GeminiChatResponse:
     route_started_at = perf_counter()
     intent = None
     nlp_ms = 0
@@ -73,11 +84,15 @@ def process_message(request: GeminiChatRequest) -> GeminiChatResponse:
                 intent=intent,
                 entities=entities,
                 processing_ms=_elapsed_ms(route_started_at),
+                requester_id=requester_id,
             )
             return response
 
     try:
-        response = generate_chat_response(request, intent=intent, entities=entities)
+        provider_kwargs = {"intent": intent, "entities": entities}
+        if requester_id is not None and request.proactivity_enabled:
+            provider_kwargs["requester_id"] = requester_id
+        response = generate_chat_response(request, **provider_kwargs)
     except (GeminiConfigurationError, GeminiAPIError) as error:
         _trace_safely(
             request=request,
@@ -86,6 +101,7 @@ def process_message(request: GeminiChatRequest) -> GeminiChatResponse:
             entities=entities,
             processing_ms=_elapsed_ms(route_started_at),
             error_message=str(error),
+            requester_id=requester_id,
         )
         raise
 
@@ -101,8 +117,46 @@ def process_message(request: GeminiChatRequest) -> GeminiChatResponse:
         intent=intent,
         entities=entities,
         processing_ms=response.pipeline_metrics.route_ms,
+        requester_id=requester_id,
     )
     return response
+
+
+def process_proactive_confirmation(
+    request: ProactiveConfirmationRequest,
+    *,
+    requester_id: str,
+) -> ProactiveConfirmationResponse:
+    """Confirma a sugestao e registra a resposta secundaria no RNF03."""
+
+    started_at = perf_counter()
+    execution = execute_proactive_confirmation(request, requester_id=requester_id)
+    if execution.response.result is None:
+        return execution.response
+
+    pending = execution.pending
+    intent = AudioIntent(
+        macro="CONSULTA",
+        specific=pending.secondary_intent.name,
+        confidence_macro=1.0,
+        confidence_specific=1.0,
+        flow="Confirmacao proativa",
+        handler="proactive_confirmation",
+    )
+    trace_request = GeminiChatRequest(
+        message=f"Confirmar sugestao: {pending.secondary_intent.name}",
+        conversation_id=pending.conversation_id,
+        use_intent_classifier=False,
+    )
+    _trace_safely(
+        request=trace_request,
+        response=execution.response.result,
+        intent=intent,
+        entities=[],
+        processing_ms=_elapsed_ms(started_at),
+        requester_id=requester_id,
+    )
+    return execution.response
 
 
 def _public_entity(entity: Entidade) -> PublicEntity:
@@ -145,6 +199,7 @@ def _trace_safely(
     entities: list[PublicEntity],
     processing_ms: int,
     error_message: str | None = None,
+    requester_id: str | None = None,
 ) -> None:
     try:
         trace_interaction(
@@ -154,6 +209,7 @@ def _trace_safely(
             entities=entities,
             processing_ms=processing_ms,
             error_message=error_message,
+            requester_id=requester_id,
         )
     except TraceabilityError:
         logger.warning("Falha controlada ao registrar rastreabilidade RNF03.")

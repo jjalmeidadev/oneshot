@@ -5,6 +5,7 @@ import { MessageBubble } from '@/components/chat/message-bubble';
 import { TypingIndicator } from '@/components/chat/typing-indicator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { ChatMessage } from '@/lib/domain';
+import type { ProactiveDecision } from '@/lib/api';
 
 /** Entrada discreta: a mensagem sobe alguns pixels ao aparecer. */
 const ENTRY = {
@@ -20,12 +21,17 @@ export function MessageList({
   intentLayerEnabled,
   selectedSourceId,
   onSelectSource,
+  onResolveProactiveSuggestion,
 }: {
   messages: ChatMessage[];
   isSending: boolean;
   intentLayerEnabled: boolean;
   selectedSourceId: string | null;
   onSelectSource: (id: string) => void;
+  onResolveProactiveSuggestion: (
+    messageId: string,
+    decision: ProactiveDecision,
+  ) => void;
 }) {
   const viewportRef = useRef<HTMLDivElement>(null);
 
@@ -51,6 +57,7 @@ export function MessageList({
               message={message}
               selectedSourceId={selectedSourceId}
               onSelectSource={onSelectSource}
+              onResolveProactiveSuggestion={onResolveProactiveSuggestion}
             />
           </motion.div>
         ))}

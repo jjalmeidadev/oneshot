@@ -19,6 +19,7 @@ export type UploadAudioInput = {
   audio: Blob;
   previousInteractionId?: string | null;
   useIntentClassifier?: boolean;
+  proactivityEnabled?: boolean;
   /** Nome do arquivo enviado no multipart; o backend infere o continer do conteudo. */
   filename?: string;
   conversationId?: string | null;
@@ -35,6 +36,7 @@ export async function uploadAudio(
   if (input.previousInteractionId)
     form.append('previous_interaction_id', input.previousInteractionId);
   form.append('use_intent_classifier', String(input.useIntentClassifier ?? true));
+  form.append('proactivity_enabled', String(input.proactivityEnabled ?? false));
   form.append('audio', input.audio, input.filename ?? 'gravacao.ogg');
   if (input.conversationId) {
     form.append('conversation_id', input.conversationId);

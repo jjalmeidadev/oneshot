@@ -158,9 +158,16 @@ Defina uma URL de um banco de desenvolvimento e aplique os scripts na ordem:
 $env:DATABASE_URL = "postgresql://usuario:senha@localhost:5432/metro_poc"
 psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/01_create_database.sql
 psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/02_initial_data.sql
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/06_verify_secondary_intents.sql
 ```
 
-Com a URL configurada, a API consulta os extratos persistidos e registra a trilha mínima de conversas, classificação, rota, fontes e auditoria. Sem a URL, usa o fallback JSON local e não tenta abrir conexão. `03_rollback_data.sql` remove o baseline e só deve ser aplicado em banco descartável ou após um backup.
+Para atualizar um banco que já possui o baseline, execute `05_add_secondary_intents.sql` e reexecute `02_initial_data.sql` antes da verificação. A carga associa as 13 intenções específicas de consulta a sugestões proativas sem criar duplicatas; `06_verify_secondary_intents.sql` valida leitura, FK, unicidade e reexecução dentro de uma transação descartada ao final.
+
+Depois, execute `07_add_pending_proactive_suggestions.sql` para habilitar o armazenamento compartilhado das confirmações entre workers. Em produção, `DATABASE_URL` ou `SUPABASE_DATABASE_URL` deve permanecer configurada; o fallback em memória existe apenas para desenvolvimento local com um único processo.
+
+Para reproduzir o teste de idempotência, execute `02_initial_data.sql` duas vezes consecutivas e então execute `06_verify_secondary_intents.sql`. O resultado esperado continua sendo 13 associações ativas, sem duplicatas ou registros órfãos.
+
+Com a URL configurada, a API consulta os extratos persistidos, resolve a intenção secundária no catálogo e registra a trilha mínima de conversas, classificação, rota, fontes e auditoria. Sem a URL, usa os fallbacks JSON locais e não tenta abrir conexão. `03_rollback_data.sql` remove o baseline e só deve ser aplicado em banco descartável ou após um backup.
 
 # 9. Solução de problemas
 
