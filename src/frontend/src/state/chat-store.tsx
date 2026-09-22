@@ -15,8 +15,16 @@ import {
   uploadAudio,
   toDisplayMessage,
   CHAT_MESSAGE_MAX_LENGTH,
+  answerReportWorkflow,
+  cancelReportWorkflow,
+  confirmReportWorkflow,
+  downloadReportArtifact,
+  getReportWorkflow,
+  startReportWorkflow,
   type AudioPipelineMetrics,
   type ProactiveDecision,
+  type WorkflowSessionResponse,
+  type WorkflowStep,
 } from '@/lib/api';
 import { toAssistantMessage } from '@/lib/domain';
 type ChatStatus = 'idle' | 'sending' | 'error';
@@ -69,7 +77,8 @@ type Action =
   | { type: 'set-document-panel'; open: boolean }
   | { type: 'set-document-sheet'; open: boolean }
   | { type: 'set-sidebar'; open: boolean }
-  | { type: 'set-token'; token: string };
+  | { type: 'set-token'; token: string }
+  | { type: 'update-workflow'; workflow: WorkflowSessionResponse };
 
 function createConversation(): Conversation {
   const now = new Date().toISOString();
@@ -201,6 +210,19 @@ function reducer(state: State, action: Action): State {
     case 'set-token':
       return { ...state, accessToken: action.token };
 
+    case 'update-workflow':
+      return {
+        ...state,
+        conversations: state.conversations.map((conversation) => ({
+          ...conversation,
+          messages: conversation.messages.map((message) =>
+            message.workflow?.session_id === action.workflow.session_id
+              ? { ...message, workflow: action.workflow }
+              : message,
+          ),
+        })),
+      };
+
     default:
       return state;
   }
@@ -258,6 +280,14 @@ type ChatStoreValue = {
   setDocumentSheetOpen: (open: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
   setAccessToken: (token: string) => void;
+  answerWorkflow: (
+    workflow: WorkflowSessionResponse,
+    step: WorkflowStep,
+    value: unknown,
+  ) => Promise<void>;
+  confirmWorkflow: (workflow: WorkflowSessionResponse) => Promise<void>;
+  cancelWorkflow: (workflow: WorkflowSessionResponse) => Promise<void>;
+  downloadArtifact: (workflow: WorkflowSessionResponse) => Promise<void>;
 };
 
 const ChatStoreContext = createContext<ChatStoreValue | null>(null);
@@ -271,6 +301,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
     conversationId: string;
     messageId: string;
   } | null>(null);
+  const workflowPolls = useRef(new Map<string, AbortController>());
   const stop = useCallback(() => {
     const suggestion = pendingSuggestion.current;
     pending.current?.abort();
@@ -286,7 +317,13 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
     }
     dispatch({ type: 'set-status', status: 'idle' });
   }, []);
-  useEffect(() => () => pending.current?.abort(), []);
+  useEffect(
+    () => () => {
+      pending.current?.abort();
+      workflowPolls.current.forEach((controller) => controller.abort());
+    },
+    [],
+  );
 
   const activeConversation = useMemo(
     () =>
@@ -427,14 +464,26 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
               },
             },
           });
+        const assistantMessage = toAssistantMessage(response, {
+          roundTripMs: performance.now() - started,
+          intentLayerEnabled: state.intentLayerEnabled,
+          pipelineMetrics,
+        });
+        if (response.workflow) {
+          if (!state.accessToken.trim()) {
+            throw new Error('REPORT_ACCESS_TOKEN_REQUIRED');
+          }
+          assistantMessage.workflow = await startReportWorkflow({
+            conversationId: conversation.id,
+            interactionId: response.interaction_id,
+            parameters: response.workflow.parameters,
+            accessToken: state.accessToken,
+          });
+        }
         dispatch({
           type: 'append-message',
           conversationId: conversation.id,
-          message: toAssistantMessage(response, {
-            roundTripMs: performance.now() - started,
-            intentLayerEnabled: state.intentLayerEnabled,
-            pipelineMetrics,
-          }),
+          message: assistantMessage,
         });
         dispatch({ type: 'set-status', status: 'idle' });
         return true;
@@ -542,6 +591,98 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
     [activeConversation, state.accessToken, state.intentLayerEnabled],
   );
 
+  const requireAccessToken = useCallback(() => {
+    const token = state.accessToken.trim();
+    if (!token) throw new Error('REPORT_ACCESS_TOKEN_REQUIRED');
+    return token;
+  }, [state.accessToken]);
+
+  const pollWorkflow = useCallback(async (sessionId: string, accessToken: string) => {
+    workflowPolls.current.get(sessionId)?.abort();
+    const controller = new AbortController();
+    workflowPolls.current.set(sessionId, controller);
+    try {
+      for (let attempt = 0; attempt < 80; attempt += 1) {
+        await new Promise((resolve) => window.setTimeout(resolve, 1500));
+        if (controller.signal.aborted) return;
+        const workflow = await getReportWorkflow(
+          sessionId,
+          accessToken,
+          controller.signal,
+        );
+        dispatch({ type: 'update-workflow', workflow });
+        if (workflow.status !== 'executing') return;
+      }
+      throw new Error('REPORT_PROCESSING_TIMEOUT');
+    } catch (cause) {
+      if (!controller.signal.aborted) {
+        dispatch({
+          type: 'set-status',
+          status: 'error',
+          error: toDisplayMessage(cause),
+        });
+      }
+    } finally {
+      if (workflowPolls.current.get(sessionId) === controller) {
+        workflowPolls.current.delete(sessionId);
+      }
+    }
+  }, []);
+
+  const answerWorkflow = useCallback(
+    async (workflow: WorkflowSessionResponse, step: WorkflowStep, value: unknown) => {
+      const updated = await answerReportWorkflow({
+        sessionId: workflow.session_id,
+        step,
+        value,
+        revision: workflow.revision,
+        accessToken: requireAccessToken(),
+      });
+      dispatch({ type: 'update-workflow', workflow: updated });
+    },
+    [requireAccessToken],
+  );
+
+  const confirmWorkflow = useCallback(
+    async (workflow: WorkflowSessionResponse) => {
+      const accessToken = requireAccessToken();
+      const updated = await confirmReportWorkflow({
+        sessionId: workflow.session_id,
+        revision: workflow.revision,
+        accessToken,
+      });
+      dispatch({ type: 'update-workflow', workflow: updated });
+      if (updated.status === 'executing') {
+        void pollWorkflow(updated.session_id, accessToken);
+      }
+    },
+    [pollWorkflow, requireAccessToken],
+  );
+
+  const cancelWorkflow = useCallback(
+    async (workflow: WorkflowSessionResponse) => {
+      const updated = await cancelReportWorkflow(
+        workflow.session_id,
+        requireAccessToken(),
+      );
+      dispatch({ type: 'update-workflow', workflow: updated });
+    },
+    [requireAccessToken],
+  );
+
+  const downloadArtifact = useCallback(
+    async (workflow: WorkflowSessionResponse) => {
+      const artifact = workflow.execution?.artifact;
+      if (!workflow.execution || !artifact) return;
+      await downloadReportArtifact({
+        executionId: workflow.execution.execution_id,
+        fileName: artifact.file_name,
+        accessToken: requireAccessToken(),
+      });
+    },
+    [requireAccessToken],
+  );
+
   const value = useMemo<ChatStoreValue>(
     () => ({
       conversations: view.conversations,
@@ -581,6 +722,10 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
       setDocumentSheetOpen: (open) => dispatch({ type: 'set-document-sheet', open }),
       setSidebarOpen: (open) => dispatch({ type: 'set-sidebar', open }),
       setAccessToken: (token) => dispatch({ type: 'set-token', token }),
+      answerWorkflow,
+      confirmWorkflow,
+      cancelWorkflow,
+      downloadArtifact,
     }),
     [
       view.conversations,
@@ -598,6 +743,10 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
       sendMessage,
       sendAudio,
       resolveProactiveSuggestion,
+      answerWorkflow,
+      confirmWorkflow,
+      cancelWorkflow,
+      downloadArtifact,
       stop,
     ],
   );

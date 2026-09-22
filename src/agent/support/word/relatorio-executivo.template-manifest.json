@@ -1,0 +1,41 @@
+{
+  "name": "Relatorio Executivo ONESHOT",
+  "version": "1.0.0",
+  "reference": "Anexo 2 - Balanco portfolio",
+  "required_output": "docx",
+  "optional_output": "pdf",
+  "sections": [
+    "cabecalho",
+    "sintese_executiva",
+    "situacao_indicadores",
+    "previsto_realizado",
+    "marcos_proximas_entregas",
+    "riscos_pontos_atencao",
+    "realizacoes_mudancas_decisoes",
+    "beneficios_alinhamento_estrategico",
+    "fontes_atualizacao_limitacoes"
+  ],
+  "content_controls": [
+    { "name": "ReportTitle", "type": "plain_text", "required": true },
+    { "name": "ScopeTitle", "type": "plain_text", "required": true },
+    { "name": "ReferencePeriod", "type": "plain_text", "required": true },
+    { "name": "DataReferenceAt", "type": "plain_text", "required": true },
+    { "name": "ExecutiveSummary", "type": "plain_text", "required": true, "allow_carriage_returns": true },
+    { "name": "ProjectRows", "type": "repeating_section", "required": true },
+    { "name": "MilestoneRows", "type": "repeating_section", "required": true },
+    { "name": "RiskRows", "type": "repeating_section", "required": true },
+    { "name": "ChangeRows", "type": "repeating_section", "required": true },
+    { "name": "BenefitRows", "type": "repeating_section", "required": true },
+    { "name": "SourceRows", "type": "repeating_section", "required": true },
+    { "name": "Limitations", "type": "plain_text", "required": true, "allow_carriage_returns": true },
+    { "name": "CorrelationId", "type": "plain_text", "required": true },
+    { "name": "ExecutionId", "type": "plain_text", "required": true }
+  ],
+  "constraints": {
+    "maximum_template_size_mb": 10,
+    "all_control_names_unique": true,
+    "unsupported_controls": ["rich_text", "date_picker", "check_box", "legacy_form_control"],
+    "sensitivity_label_note": "PDF conversion may be unavailable for Confidential or Highly Confidential labels."
+  }
+}
+

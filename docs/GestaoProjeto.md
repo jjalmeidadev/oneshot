@@ -964,7 +964,14 @@ Regras de entrada no board:
 | S4-19 | Automatizar informação ausente e falha de recuperação | FEATURE | M | Média | Wendel | Felipe | S4-15 e S4-16 | Cenários retornam limitação controlada, sem fato não sustentado |
 | S4-20 | Executar E2E textual com RAG e verificar sua persistência | FEATURE | G | Alta | Leonardo | Henrique | S4-12 a S4-17A e S4-19 | Cenário atravessa frontend, API, PLN, recuperação e resposta; referências do backend, conversa, fontes e auditoria são localizadas no Supabase |
 
-#### Frente D — Copilot Studio, Power Automate e webhooks essenciais
+#### Frente D — workflow web, Power Automate e webhooks essenciais
+
+> **Atualização arquitetural:** o Metrô informou que não disponibilizará acesso
+> ao Copilot Studio. As referências a tópico/conector Copilot nas tasks abaixo
+> são preservadas como histórico do planejamento original; sua implementação
+> vigente é o workflow guiado no frontend e backend. O Power Automate permanece
+> como processamento assíncrono opcional, devolvendo JSON por webhook. O DOCX é
+> gerado pelo backend, armazenado no Supabase e baixado no chat.
 
 | ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Executor | Revisor | DoR | DoD |
 | :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- |

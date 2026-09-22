@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 const python =
   process.env.E2E_PYTHON ??
   (process.platform === 'win32'
-    ? fileURLToPath(new URL('../../.venv/Scripts/python.exe', import.meta.url))
+    ? fileURLToPath(new URL('../backend/.venv/Scripts/python.exe', import.meta.url))
     : 'python');
 
 export default defineConfig({

@@ -1,0 +1,293 @@
+openapi: 3.0.3
+info:
+  title: Guided Report Generation API
+  version: 2.0.0
+  description: Contrato do tópico transacao_gerar_relatorio e do callback Power Automate.
+servers:
+  - url: https://CONFIGURE-BACKEND-HOST
+security:
+  - bearerAuth: []
+paths:
+  /api/workflow-sessions:
+    post:
+      operationId: startReportWorkflow
+      summary: Inicia o workflow guiado identificado pelo PLN.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '201':
+          description: Sessao criada com a primeira pergunta.
+  /api/workflow-sessions/{session_id}:
+    get:
+      operationId: getReportWorkflow
+      summary: Consulta pergunta, revisao e execucao vinculada.
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Estado atual do workflow. }
+  /api/workflow-sessions/{session_id}/answers:
+    post:
+      operationId: answerReportWorkflow
+      summary: Responde a etapa atual com revisao e idempotencia.
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Proxima etapa ou confirmacao. }
+        '409': { $ref: '#/components/responses/ControlledError' }
+  /api/workflow-sessions/{session_id}/confirm:
+    post:
+      operationId: confirmReportWorkflow
+      summary: Confirma e inicia a execucao do relatorio.
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '202': { description: Execucao iniciada. }
+  /api/workflow-sessions/{session_id}/cancel:
+    post:
+      operationId: cancelReportWorkflow
+      summary: Cancela uma sessao ainda nao confirmada.
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Sessao cancelada. }
+  /api/report-requests/prepare:
+    post:
+      operationId: prepareReportRequest
+      summary: Valida acesso e prepara a confirmação do relatório.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrepareReportRequest'
+      responses:
+        '200':
+          description: Solicitação pronta para confirmação.
+          content:
+            application/json:
+              schema:
+                type: object
+        '403':
+          $ref: '#/components/responses/ControlledError'
+        '422':
+          $ref: '#/components/responses/ControlledError'
+  /api/report-requests:
+    post:
+      operationId: createReportRequest
+      summary: Confirma e enfileira uma solicitação idempotente.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReportRequest'
+      responses:
+        '202':
+          description: Solicitação enfileirada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionResponse'
+        '200':
+          description: Repetição idempotente; execução existente devolvida.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionResponse'
+        '409':
+          $ref: '#/components/responses/ControlledError'
+  /api/report-requests/{execution_id}:
+    get:
+      operationId: getReportRequest
+      summary: Consulta estado e artefato.
+      parameters:
+        - in: path
+          name: execution_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Estado atual.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionResponse'
+        '404':
+          $ref: '#/components/responses/ControlledError'
+  /api/report-requests/{execution_id}/artifact:
+    get:
+      operationId: downloadReportArtifact
+      summary: Baixa o DOCX autorizado.
+      parameters:
+        - in: path
+          name: execution_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Documento Word gerado.
+          content:
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema: { type: string, format: binary }
+        '404':
+          $ref: '#/components/responses/ControlledError'
+  /api/integrations/power-automate/report-results:
+    post:
+      operationId: receiveReportCallback
+      summary: Registra retorno terminal idempotente do Power Automate.
+      security:
+        - callbackToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportCallbackRequest'
+      responses:
+        '200':
+          description: Callback registrado ou repetição idempotente aceita.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionResponse'
+        '403':
+          $ref: '#/components/responses/ControlledError'
+        '409':
+          $ref: '#/components/responses/ControlledError'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+    callbackToken:
+      type: apiKey
+      in: header
+      name: X-Callback-Token
+  responses:
+    ControlledError:
+      description: Erro público controlado.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [error]
+            properties:
+              error:
+                type: object
+                required: [code, message]
+                properties:
+                  code: { type: string }
+                  message: { type: string }
+  schemas:
+    PrepareReportRequest:
+      type: object
+      additionalProperties: false
+      required: [contract_version, conversation_id, scope, period, options]
+      properties:
+        contract_version: { type: string, enum: ['1.0'] }
+        conversation_id: { type: string, maxLength: 160 }
+        interaction_id: { type: string, maxLength: 160 }
+        correlation_id: { type: string, maxLength: 120 }
+        report_type: { type: string, enum: [executive_status] }
+        scope:
+          type: object
+          required: [type, id]
+          properties:
+            type: { type: string, enum: [project, subportfolio] }
+            id: { type: string, maxLength: 120 }
+        period:
+          type: object
+          required: [start_date, end_date]
+          properties:
+            start_date: { type: string, format: date }
+            end_date: { type: string, format: date }
+            label: { type: string, maxLength: 80 }
+        options:
+          type: object
+          required: [audience, purpose]
+          properties:
+            audience: { type: string, enum: [executive_board, pmo, project_team] }
+            purpose: { type: string, enum: [monthly_governance, decision_support, status_communication] }
+            emphasis:
+              type: array
+              items: { type: string, enum: [schedule, risks, benefits, changes, milestones] }
+            emphasis_text:
+              type: string
+              maxLength: 200
+              description: >-
+                Texto livre coletado pelo topico (Topic.EmphasisText). Quando
+                'emphasis' nao e enviado, o backend normaliza deterministicamente
+                este texto para a lista enum (sem LLM). Termos desconhecidos sao
+                ignorados; vazio significa visao geral.
+            additional_context: { type: string, maxLength: 4000 }
+            output_format: { type: string, enum: [docx] }
+    CreateReportRequest:
+      type: object
+      required: [prepared_request, confirmation_hash, idempotency_key]
+      properties:
+        prepared_request: { type: object }
+        confirmation_hash: { type: string, minLength: 64, maxLength: 64 }
+        idempotency_key: { type: string, minLength: 8, maxLength: 160 }
+    ExecutionResponse:
+      type: object
+      required: [contract_version, execution_id, correlation_id, status, status_url, created_at, updated_at]
+      properties:
+        contract_version: { type: string, enum: ['1.0'] }
+        execution_id: { type: string, format: uuid }
+        correlation_id: { type: string }
+        status: { type: string }
+        status_url: { type: string }
+        artifact: { type: object, nullable: true }
+        warnings: { type: array, items: { type: string } }
+        error: { type: object, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    ReportArtifact:
+      type: object
+      required: [artifact_id, file_name, content_type, size_bytes, sha256, download_url, storage_provider, created_at]
+      properties:
+        artifact_id: { type: string, format: uuid }
+        file_name: { type: string }
+        content_type: { type: string }
+        size_bytes: { type: integer, minimum: 0 }
+        sha256: { type: string, minLength: 64, maxLength: 64 }
+        download_url: { type: string }
+        storage_provider: { type: string, enum: [local, supabase] }
+        created_at: { type: string, format: date-time }
+    ReportCallbackRequest:
+      type: object
+      additionalProperties: false
+      required: [contract_version, callback_id, execution_id, correlation_id, flow_run_id, status]
+      properties:
+        contract_version: { type: string, enum: ['1.0'] }
+        callback_id: { type: string, minLength: 8, maxLength: 160 }
+        execution_id: { type: string, format: uuid }
+        correlation_id: { type: string, maxLength: 120 }
+        flow_run_id: { type: string, maxLength: 160 }
+        status: { type: string, enum: [completed, completed_with_warnings, failed, blocked, cancelled] }
+        result:
+          type: object
+          nullable: true
+          description: JSON estruturado; o backend gera e armazena o DOCX.
+        warnings: { type: array, items: { type: string } }
+        error_code: { type: string, maxLength: 80 }
+        error_message: { type: string, maxLength: 500 }

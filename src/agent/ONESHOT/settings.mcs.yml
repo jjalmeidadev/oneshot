@@ -1,0 +1,20 @@
+displayName: ONESHOT
+schemaName: cra5c_oneshot_LEdh0o
+accessControlPolicy: GroupMembership
+authenticationMode: Integrated
+authenticationTrigger: Always
+configuration:
+  recognizer:
+    kind: CLICopilotRecognizer
+
+  agentSettings:
+    model:
+      series: claude-opus-5
+
+    instructions: {}
+    enableMemory: true
+    web:
+      enableWebSearch: true
+
+template: cliagent-1.0.0
+language: 1033

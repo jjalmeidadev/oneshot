@@ -3,6 +3,7 @@ import { AlertTriangle, AudioLines, Sparkles, User } from 'lucide-react';
 import { IntentBadge } from '@/components/chat/intent-badge';
 import { MarkdownMessage } from '@/components/chat/markdown-message';
 import { ProactiveSuggestion } from '@/components/chat/proactive-suggestion';
+import { ReportWorkflowCard } from '@/components/chat/report-workflow-card';
 import { SourceCitations } from '@/components/chat/source-citations';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -114,7 +115,10 @@ function AssistantMessage({
             <p className="mt-1 text-xs leading-5 text-fg-muted">{message.error}</p>
           </div>
         ) : (
-          <MarkdownMessage content={message.content} />
+          <>
+            <MarkdownMessage content={message.content} />
+            {message.workflow && <ReportWorkflowCard workflow={message.workflow} />}
+          </>
         )}
 
         {message.sources && (
