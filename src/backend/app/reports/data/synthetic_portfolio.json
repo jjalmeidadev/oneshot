@@ -1,0 +1,123 @@
+{
+  "subportfolios": [
+    {
+      "id": "sp-modernizacao",
+      "code": "SP-MOD",
+      "title": "Modernização da Rede",
+      "responsible": "Gerência de Portfólio",
+      "strategic_objective": "Elevar a confiabilidade, a capacidade e a qualidade percebida da operação metroviária.",
+      "updated_at": "2026-08-31T18:00:00-03:00"
+    }
+  ],
+  "projects": [
+    {
+      "id": "prj-0442",
+      "code": "PRJ-0442",
+      "subportfolio_id": "sp-modernizacao",
+      "title": "Modernização da Linha Azul",
+      "status": "amarelo",
+      "phase": "execução",
+      "manager": "Marina Costa",
+      "planned_progress": 68.0,
+      "actual_progress": 64.5,
+      "achievements": "Conclusão dos testes de bancada e liberação do primeiro lote para instalação.",
+      "next_steps": "Concluir janela de instalação e validar operação assistida.",
+      "updated_at": "2026-08-29T16:30:00-03:00"
+    },
+    {
+      "id": "prj-0510",
+      "code": "PRJ-0510",
+      "subportfolio_id": "sp-modernizacao",
+      "title": "Renovação do Centro de Controle",
+      "status": "verde",
+      "phase": "execução",
+      "manager": "Rafael Nunes",
+      "planned_progress": 42.0,
+      "actual_progress": 43.2,
+      "achievements": "Ambiente de homologação estabilizado e treinamento da primeira turma concluído.",
+      "next_steps": "Executar ensaio integrado e consolidar plano de transição.",
+      "updated_at": "2026-08-30T11:10:00-03:00"
+    }
+  ],
+  "milestones": [
+    {
+      "project_id": "prj-0442",
+      "description": "Instalação do primeiro lote",
+      "planned_date": "2026-09-20",
+      "status": "em_andamento"
+    },
+    {
+      "project_id": "prj-0510",
+      "description": "Ensaio integrado do centro de controle",
+      "planned_date": "2026-09-28",
+      "status": "planejado"
+    }
+  ],
+  "risks": [
+    {
+      "project_id": "prj-0442",
+      "title": "Restrição de janela operacional",
+      "criticality": "alta",
+      "mitigation": "Replanejar instalação por lotes e manter janela de contingência.",
+      "owner": "Coordenação de Implantação",
+      "status": "em_tratamento"
+    },
+    {
+      "project_id": "prj-0510",
+      "title": "Disponibilidade de equipe para ensaio integrado",
+      "criticality": "média",
+      "mitigation": "Confirmar escala com duas semanas de antecedência.",
+      "owner": "Gerência de Operação",
+      "status": "aberto"
+    }
+  ],
+  "benefits": [
+    {
+      "project_id": "prj-0442",
+      "description": "Redução de falhas em equipamentos críticos",
+      "indicator": "Falhas por milhão de quilômetros",
+      "expected_value": "redução de 12%",
+      "capture_start": "2027-01"
+    },
+    {
+      "project_id": "prj-0510",
+      "description": "Maior agilidade na resposta a ocorrências",
+      "indicator": "Tempo médio de resposta operacional",
+      "expected_value": "redução de 8%",
+      "capture_start": "2027-03"
+    }
+  ],
+  "changes": [
+    {
+      "project_id": "prj-0442",
+      "title": "Reprogramação da instalação do lote 2",
+      "status": "aprovada",
+      "impact": "Postergação de 14 dias sem alteração do marco final aprovado."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Cronograma sintético do portfólio",
+      "source_type": "planilha_excel",
+      "locator": "Cronograma CP!A9:AK20",
+      "last_updated": "2026-08-30T12:00:00-03:00"
+    },
+    {
+      "title": "Mapa sintético de benefícios",
+      "source_type": "planilha_excel",
+      "locator": "Benefícios!A1:H5",
+      "last_updated": "2026-08-28T17:00:00-03:00"
+    },
+    {
+      "title": "Base sintética de riscos e situação",
+      "source_type": "lista_sharepoint",
+      "locator": "mock://portfolio/status/2026-08",
+      "last_updated": "2026-08-31T18:00:00-03:00"
+    }
+  ],
+  "limitations": [
+    "A massa utilizada é sintética e não representa o ambiente corporativo do Metrô.",
+    "Valores financeiros e benefícios realizados não estão disponíveis neste recorte.",
+    "A integração real com Power Automate, AI Builder e identidade corporativa depende de provisionamento externo."
+  ]
+}

@@ -88,6 +88,22 @@ def process_message(
             )
             return response
 
+        if result.handler == "handler:transacao_gerar_relatorio":
+            response = _report_workflow_response(
+                intent=intent,
+                entities=entities,
+                nlp_ms=nlp_ms,
+                route_started_at=route_started_at,
+            )
+            _trace_safely(
+                request=request,
+                response=response,
+                intent=intent,
+                entities=entities,
+                processing_ms=response.pipeline_metrics.route_ms,
+            )
+            return response
+
     try:
         provider_kwargs = {"intent": intent, "entities": entities}
         if requester_id is not None and request.proactivity_enabled:
@@ -157,6 +173,42 @@ def process_proactive_confirmation(
         requester_id=requester_id,
     )
     return execution.response
+
+
+def _report_workflow_response(
+    *,
+    intent: AudioIntent,
+    entities: list[PublicEntity],
+    nlp_ms: int,
+    route_started_at: float,
+) -> GeminiChatResponse:
+    """Despacha a transacao sem enviar o pedido ao provedor generativo."""
+
+    from app.reports.schemas import WorkflowDirective
+
+    scope_candidates = [
+        {"type": entity.type, "value": entity.value}
+        for entity in entities
+        if entity.type in {"projeto", "subportfolio"}
+    ]
+    return GeminiChatResponse(
+        text=(
+            "Vou conduzir a geracao do relatorio. Antes de iniciar, preciso "
+            "confirmar escopo, periodo, publico, finalidade e enfase."
+        ),
+        model="workflow-router",
+        latency_ms=0,
+        usage=GeminiUsage(),
+        intent=intent,
+        entities=entities,
+        pipeline_metrics=ChatPipelineMetrics(
+            nlp_ms=nlp_ms,
+            route_ms=_elapsed_ms(route_started_at),
+        ),
+        workflow=WorkflowDirective(
+            parameters={"scope_candidates": scope_candidates},
+        ),
+    )
 
 
 def _public_entity(entity: Entidade) -> PublicEntity:

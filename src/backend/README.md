@@ -351,6 +351,32 @@ cd src/backend
 .venv\Scripts\python.exe -m pytest app/tests
 ```
 
+O fluxo transacional de relatórios possui testes em
+`app/tests/test_reports.py`. Ele cobre o workflow guiado, identidade, escopo,
+confirmação, callback idempotente, geração do DOCX e download autenticado. O
+modo `power_automate_simulator` exercita o contrato externo sem tenant. Os
+contratos, estados, variáveis e limites da integração estão documentados em
+`../agent/support/IMPLEMENTATION.md`.
+
+A fonte de dados do relatório é selecionada por `REPORT_PORTFOLIO_SOURCE`:
+`synthetic` (padrão) lê a massa em `app/reports/data/synthetic_portfolio.json`;
+`database` lê projetos, riscos, marcos, benefícios e mudanças das tabelas reais
+(`projects`, `risk_issue_items`, `project_deliverables_milestones`,
+`project_benefits`, `change_records`, `project_status_updates`,
+`project_progress_updates`). Para o modo `database`, aplique o seed
+`../database/sql/13_seed_portfolio_report_data.sql` (massa em português) e defina
+também `REPORT_REPOSITORY_MODE=database`.
+
+Execução CLI do mesmo serviço, sem depender da interface:
+
+```powershell
+$env:REPORT_CLI_TOKEN = "token-configurado-em-REPORT_SIMULATED_IDENTITIES"
+python -m app.reports.cli --scope-type subportfolio --scope-id sp-modernizacao `
+  --start-date 2026-08-01 --end-date 2026-08-31 `
+  --audience executive_board --purpose monthly_governance `
+  --emphasis schedule --emphasis risks
+```
+
 Recorte mínimo para a integração PLN/API da task #126:
 
 ```powershell
@@ -385,7 +411,7 @@ teste deve ser convertida para WAV PCM mono a 16 kHz antes do envio ao
 
 ## Integração da bancada web (#131)
 
-`POST /api/chat` aceita `use_intent_classifier`, `proactivity_enabled`, `conversation_id`, `message` e `previous_interaction_id`. Campo `use_intent_classifier` ausente ou `true` executa classificação e extração de entidades por padrão; `false` é opt-out explícito para preservar o toggle da interface. O modo proatividade é opt-in e exige `Authorization: Bearer <token>` e `conversation_id`: quando `proactivity_enabled=true`, a classificação encontra uma intenção de consulta catalogada e há fontes recuperadas, o backend registra uma sugestão pendente vinculada à identidade e à conversa e inclui `proactive_suggestion` com `suggestion_id`. A resposta principal não recebe a instrução secundária e, portanto, permanece independente da sugestão. A resposta inclui ainda `intent` rico (`macro`, `specific`, confianças, `flow`, `handler` e `alternatives`), `entities`, `pipeline_metrics` (`nlp_ms` e `route_ms`) e `sources[].excerpt` com o trecho recuperado. Perguntas sem confiança suficiente, fora do escopo ou sem rota segura recebem resposta controlada sem chamada ao Gemini.
+`POST /api/chat` aceita `conversation_id`, `use_intent_classifier`, `message` e `previous_interaction_id`. `conversation_id` identifica a conversa; `previous_interaction_id` encadeia o provedor e não é mais reutilizado como ID externo. Campo ausente ou `true` executa classificação e extração de entidades por padrão; `false` é opt-out explícito para preservar o toggle da interface. A resposta inclui `intent` rico (`macro`, `specific`, confianças, `flow`, `handler` e `alternatives`), `entities`, `pipeline_metrics` (`nlp_ms` e `route_ms`) e `sources[].excerpt` com o trecho recuperado. Para `transacao_gerar_relatorio`, inclui `workflow` e não chama Gemini.
 
 `POST /api/chat/proactive-confirmation` aceita exclusivamente `suggestion_id`, `conversation_id` e `decision` (`accept` ou `decline`), sem campo de mensagem livre, e exige o mesmo esquema de autenticação. A confirmação só é encontrada quando UUID, identidade e conversa coincidem. `decline` consome o registro sem chamar o Gemini; `accept` reserva o registro contra execução concorrente, envia somente a instrução vinculada e as fontes armazenadas e grava solicitação, intenção, fontes, resposta e identidade na trilha RNF03. Uma sugestão expirada, já decidida ou fora do escopo do solicitante retorna `404`.
 
@@ -393,7 +419,7 @@ Com `DATABASE_URL` ou `SUPABASE_DATABASE_URL`, as sugestões pendentes são arma
 
 `POST /api/audio` aceita também os campos multipart `previous_interaction_id`, `use_intent_classifier` e `proactivity_enabled`. Depois de validar e transcrever, executa o mesmo pipeline de texto fora do laço assíncrono. Preserva `answer`, retorna `pipeline_status="completed"` e acrescenta `chat` com as fontes completas, intenção rica, eventual sugestão proativa, entidades, métricas (`validation_ms`, `stt_ms`, `nlp_ms`, `route_ms`, `total_ms`) e ID real da interação. Não são mais gerados IDs de interação fictícios nem respostas provisórias de sucesso.
 
-O pipeline classifica e gera respostas informativas. A identificação de uma intenção transacional não executa uma alteração em sistemas corporativos. Autorização por perfil, persistência e integração Entra ID continuam dependendo dos módulos e do ambiente previstos para essas entregas.
+O pipeline classifica e gera respostas informativas. A intenção de relatório inicia um workflow funcional no frontend/backend; outras intenções transacionais ainda não executam alteração em sistemas corporativos. A identidade corporativa Entra ID permanece dependente do ambiente previsto para a implantação.
 
 Com `PLN_WARMUP=1`, a inicialização carrega o classificador antes de aceitar requisições. As chamadas ao modelo são serializadas para evitar carregamentos concorrentes. Uma falha de inicialização exige corrigir dependências/modelos; em testes determinísticos use `PLN_WARMUP=0`.
 

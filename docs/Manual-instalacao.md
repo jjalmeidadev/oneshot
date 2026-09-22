@@ -169,6 +169,28 @@ Para reproduzir o teste de idempotência, execute `02_initial_data.sql` duas vez
 
 Com a URL configurada, a API consulta os extratos persistidos, resolve a intenção secundária no catálogo e registra a trilha mínima de conversas, classificação, rota, fontes e auditoria. Sem a URL, usa os fallbacks JSON locais e não tenta abrir conexão. `03_rollback_data.sql` remove o baseline e só deve ser aplicado em banco descartável ou após um backup.
 
+## 8.1 Relatórios com dados do banco (opcional)
+
+O fluxo de geração de relatório pode ler o portfólio da massa sintética em JSON (padrão) ou das tabelas reais do PostgreSQL. Para usar o banco, aplique também os scripts de relatório e o seed de portfólio, e ative a fonte `database`:
+
+```powershell
+# Estrutura e workflow de relatório
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/05_report_generation.sql
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/07_guided_report_workflow.sql
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/11_secure_report_workflow_tables.sql
+# Massa de portfólio (projetos, riscos, marcos, benefícios) em português
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/13_seed_portfolio_report_data.sql
+```
+
+No `.env` do backend, ative a leitura do banco:
+
+```dotenv
+REPORT_REPOSITORY_MODE=database
+REPORT_PORTFOLIO_SOURCE=database
+```
+
+Sem essas variáveis, os relatórios usam a massa sintética em JSON e o repositório em memória, mantendo o backend reproduzível sem banco. Os scripts `08`, `12` e `14` são os rollbacks correspondentes (workflow, segurança e seed de portfólio) e só devem ser aplicados em banco descartável ou após backup. O armazenamento do DOCX no Supabase Storage exige `REPORT_STORAGE_MODE=supabase`, `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`; sem isso, o artefato é gravado localmente.
+
 # 9. Solução de problemas
 
 | Sintoma | Verificação e correção |

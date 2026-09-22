@@ -8,3 +8,11 @@ export {
   type SendMessageInput,
 } from './chat';
 export { uploadAudio, type UploadAudioInput } from './audio';
+export {
+  answerReportWorkflow,
+  cancelReportWorkflow,
+  confirmReportWorkflow,
+  downloadReportArtifact,
+  getReportWorkflow,
+  startReportWorkflow,
+} from './report-workflow';

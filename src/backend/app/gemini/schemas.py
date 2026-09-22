@@ -1,7 +1,9 @@
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
 from app.nlp.schemas import AudioIntent, ChatPipelineMetrics, PublicEntity
+from app.reports.schemas import WorkflowDirective
 
 
 class GeminiChatRequest(BaseModel):
@@ -58,6 +60,7 @@ class GeminiChatResponse(BaseModel):
     entities: list[PublicEntity] = Field(default_factory=list)
     pipeline_metrics: ChatPipelineMetrics = Field(default_factory=ChatPipelineMetrics)
     proactive_suggestion: ProactiveSuggestion | None = None
+    workflow: WorkflowDirective | None = None
 
 
 class ProactiveConfirmationRequest(BaseModel):
