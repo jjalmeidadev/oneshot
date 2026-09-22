@@ -28,7 +28,7 @@ O modelo fisico foi escrito para **PostgreSQL 14+** e tambem e compativel com Su
 
 ## Escopo do modelo fisico
 
-O script cria 26 tabelas:
+O script cria 27 tabelas:
 
 | Grupo | Tabelas |
 | --- | --- |
@@ -38,7 +38,7 @@ O script cria 26 tabelas:
 | Riscos, problemas e mudancas | `risk_issue_items`, `risk_issue_history`, `change_records` |
 | Usuarios e acesso | `users`, `access_rules` |
 | Intencoes e prompts | `intent_catalog`, `secondary_intents`, `prompt_templates` |
-| Conversas, fontes consultadas e auditoria | `ai_conversations`, `ai_interactions`, `consulted_sources`, `audit_events`, `out_of_scope_requests` |
+| Conversas, fontes consultadas e auditoria | `ai_conversations`, `pending_proactive_suggestions`, `ai_interactions`, `consulted_sources`, `audit_events`, `out_of_scope_requests` |
 | Avaliacao do PLN | `intent_test_cases` |
 
 ## Decisoes de modelagem
@@ -107,6 +107,27 @@ psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM public.projects;"
 psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM public.project_artifacts WHERE metadata ->> 'source_file' IN ('base_atendimento.json', 'comunicados_servico.json', 'procedimentos_operacionais.json');"
 psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM public.source_extracts WHERE metadata ->> 'source_file' IN ('base_atendimento.json', 'comunicados_servico.json', 'procedimentos_operacionais.json');"
 ```
+
+## Verificacao S4-08 e S4-09 no Supabase
+
+No PowerShell, com `DATABASE_URL` ou `SUPABASE_DATABASE_URL` definido apenas
+na sessao local e o cliente `psql` instalado, execute:
+
+```powershell
+./scripts/verify-supabase.ps1 -ApplySchema -TestSchemaReexecution
+```
+
+O comando aplica o baseline em um banco vazio, executa `02_initial_data.sql` e
+`04_rag_synthetic_data.sql` duas vezes, compara as contagens por dominio e
+registra um evento em `audit_events`. A evidencia sem segredos e gravada em
+`docs/evidencias/` com o mesmo `correlation_id`.
+
+O baseline atual deve retornar **27 tabelas, 46 indices explicitos e 27
+triggers**. A expectativa anterior de 25/43/25 era do modelo antes das duas
+evolucoes posteriores: `secondary_intents` (+1/+1/+1) e
+`pending_proactive_suggestions` (+1/+2/+1). A reexecucao de
+`01_create_database.sql` e um erro esperado, pois ele e um baseline para banco
+vazio; a idempotencia requerida e comprovada pela carga repetida.
 
 Rollback completo da PoC:
 
