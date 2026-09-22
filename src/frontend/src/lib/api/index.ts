@@ -16,3 +16,15 @@ export {
   getReportWorkflow,
   startReportWorkflow,
 } from './report-workflow';
+export {
+  answerAlertWorkflow,
+  cancelAlertWorkflow,
+  confirmAlertWorkflow,
+  startAlertWorkflow,
+} from './alert-workflow';
+export {
+  changeAlertSubscription,
+  getAlertSubscriptions,
+  getNotifications,
+  markNotificationRead,
+} from './notifications';

@@ -4,6 +4,7 @@ import { IntentBadge } from '@/components/chat/intent-badge';
 import { MarkdownMessage } from '@/components/chat/markdown-message';
 import { ProactiveSuggestion } from '@/components/chat/proactive-suggestion';
 import { ReportWorkflowCard } from '@/components/chat/report-workflow-card';
+import { AlertWorkflowCard } from '@/components/chat/alert-workflow-card';
 import { SourceCitations } from '@/components/chat/source-citations';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -117,7 +118,12 @@ function AssistantMessage({
         ) : (
           <>
             <MarkdownMessage content={message.content} />
-            {message.workflow && <ReportWorkflowCard workflow={message.workflow} />}
+            {message.workflow?.workflow === 'transacao_gerar_relatorio' && (
+              <ReportWorkflowCard workflow={message.workflow} />
+            )}
+            {message.workflow?.workflow === 'alerta_prazo_atraso' && (
+              <AlertWorkflowCard workflow={message.workflow} />
+            )}
           </>
         )}
 

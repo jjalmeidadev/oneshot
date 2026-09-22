@@ -6,6 +6,7 @@ import { MessageList } from '@/components/chat/message-list';
 import { Composer } from '@/components/composer/composer';
 import { DocumentPanel } from '@/components/documents/document-panel';
 import { ConversationSidebar } from '@/components/sidebar/conversation-sidebar';
+import { NotificationCenter } from '@/components/notifications/notification-center';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useIsDesktop } from '@/hooks/use-media-query';
 import { useChatStore } from '@/state/chat-store';
@@ -94,6 +95,7 @@ export function AppShell() {
           'flex min-w-0 flex-1 flex-col overflow-hidden bg-surface lg:rounded-xl lg:border lg:border-border lg:shadow-panel',
         )}
       >
+        <NotificationCenter />
         <ChatHeader
           conversation={activeConversation}
           sourceCount={activeSources.length}

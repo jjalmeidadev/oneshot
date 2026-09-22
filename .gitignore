@@ -72,3 +72,7 @@ AGENTS.md
 src/frontend/coverage/
 src/frontend/playwright-report/
 src/frontend/test-results/
+
+# Runtime local da stack de alerta/relatório (logs, segredo efêmero e artefatos gerados)
+.runtime/
+src/backend/.runtime/

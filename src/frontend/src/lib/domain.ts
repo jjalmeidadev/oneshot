@@ -19,8 +19,8 @@ import {
   type ChatSource,
   type MacroIntent,
   type PipelineEntity,
+  type GuidedWorkflowSession,
   type ProactiveSuggestion,
-  type WorkflowSessionResponse,
 } from './api/schemas';
 
 /* -------------------------------------------------------------------------
@@ -183,7 +183,7 @@ export type ChatMessage = {
   /** Sugestao separada da resposta principal e vinculada a uma decisao explicita. */
   proactiveSuggestion?: ProactiveSuggestionState;
   /** Estado do fluxo guiado iniciado por esta resposta. */
-  workflow?: WorkflowSessionResponse;
+  workflow?: GuidedWorkflowSession;
 };
 
 export type ConversationStatus = 'ativa' | 'finalizada' | 'abandonada' | 'erro';

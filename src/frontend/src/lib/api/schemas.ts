@@ -94,7 +94,7 @@ export type ChatResponse = {
 export type WorkflowDirective = {
   kind: 'guided_workflow';
   action: 'start';
-  workflow: 'transacao_gerar_relatorio';
+  workflow: 'transacao_gerar_relatorio' | 'alerta_prazo_atraso';
   contract_version: string;
   parameters: Record<string, unknown>;
 };
@@ -167,6 +167,83 @@ export type WorkflowSessionResponse = {
   confirmation_summary?: string | null;
   warnings: string[];
   execution?: ReportExecution | null;
+};
+
+export type AlertWorkflowStep =
+  'project' | 'threshold' | 'schedule' | 'resend' | 'confirmation' | 'completed';
+
+export type AlertRule = {
+  project_id: string;
+  project_label: string;
+  threshold_days: number;
+  comparison_operator: 'gt' | 'gte';
+  day_basis: 'calendar_days' | 'business_days';
+  trigger_type: 'daily' | 'weekly';
+  evaluation_time: string;
+  weekday?: number | null;
+  timezone: string;
+  resend_interval_days?: number | null;
+};
+
+export type AlertSubscription = {
+  subscription_id: string;
+  correlation_id: string;
+  idempotency_key: string;
+  owner_subject: string;
+  rule: AlertRule;
+  status: 'active' | 'paused' | 'cancelled' | 'blocked';
+  revision: number;
+  next_evaluation_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AlertSubscriptionResponse = {
+  contract_version: string;
+  subscription: AlertSubscription;
+};
+
+export type AlertWorkflowResponse = {
+  contract_version: string;
+  session_id: string;
+  workflow: 'alerta_prazo_atraso';
+  status: 'active' | 'ready_for_confirmation' | 'completed' | 'cancelled';
+  current_step: AlertWorkflowStep;
+  revision: number;
+  question?: {
+    step: AlertWorkflowStep;
+    prompt: string;
+    input_type: 'single_select' | 'number';
+    options: WorkflowOption[];
+  } | null;
+  answers: Record<string, unknown>;
+  confirmation_summary?: string | null;
+  warnings: string[];
+  subscription?: AlertSubscription | null;
+};
+
+export type GuidedWorkflowSession = WorkflowSessionResponse | AlertWorkflowResponse;
+
+export type AlertNotification = {
+  notification_id: string;
+  correlation_id: string;
+  subscription_id: string;
+  occurrence_id: string;
+  recipient_subject: string;
+  project_id: string;
+  item_id: string;
+  title: string;
+  body: string;
+  reference_date: string;
+  overdue_days: number;
+  status: 'pending' | 'available' | 'read' | 'failed';
+  created_at: string;
+  read_at?: string | null;
+};
+
+export type NotificationListResponse = {
+  items: AlertNotification[];
+  unread_count: number;
 };
 
 /* -------------------------------------------------------------------------

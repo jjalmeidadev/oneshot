@@ -45,8 +45,23 @@ from app.rag.proactive_confirmation import (
 )
 from app.reports.errors import ReportError
 from app.reports.router import router as reports_router
+from app.alerts.errors import AlertError
+from app.alerts.router import router as alerts_router
 
-load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=True)
+# Em runtime normal (dev/producao) o .env e a fonte de verdade e preenche as
+# variaveis do processo. Cenarios de teste que injetam identidades/config
+# proprias antes do import (ex.: e2e_server, CI) marcam
+# G05_DISABLE_DOTENV_OVERRIDE=1 para que esses valores nao sejam sobrescritos.
+_dotenv_override = os.getenv("G05_DISABLE_DOTENV_OVERRIDE", "0").strip().lower() not in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
+load_dotenv(
+    Path(__file__).resolve().parents[1] / ".env",
+    override=_dotenv_override,
+)
 
 AUDIO_PATH = "/api/audio"
 DEFAULT_LANGUAGE = "pt-BR"
@@ -79,6 +94,7 @@ app = FastAPI(
     version="0.1.0",
 )
 app.include_router(reports_router)
+app.include_router(alerts_router)
 
 
 @app.exception_handler(AudioError)
@@ -90,6 +106,14 @@ def handle_audio_error(_request: Request, error: AudioError) -> JSONResponse:
 
 @app.exception_handler(ReportError)
 def handle_report_error(_request: Request, error: ReportError) -> JSONResponse:
+    return JSONResponse(
+        status_code=error.status_code,
+        content={"error": {"code": error.code, "message": error.message}},
+    )
+
+
+@app.exception_handler(AlertError)
+def handle_alert_error(_request: Request, error: AlertError) -> JSONResponse:
     return JSONResponse(
         status_code=error.status_code,
         content={"error": {"code": error.code, "message": error.message}},
@@ -136,6 +160,19 @@ async def handle_request_validation_error(
                 "error": {
                     "code": "REPORT_INVALID_INPUT",
                     "message": "Revise os parametros informados para o relatorio.",
+                }
+            },
+        )
+    if (
+        request.url.path.startswith("/api/alert-")
+        or request.url.path.startswith("/api/notifications")
+    ):
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": {
+                    "code": "ALERT_INVALID_INPUT",
+                    "message": "Revise os parametros informados para o alerta.",
                 }
             },
         )

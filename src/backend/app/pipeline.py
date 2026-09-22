@@ -104,6 +104,22 @@ def process_message(
             )
             return response
 
+        if result.handler == "handler:alerta_prazo_atraso":
+            response = _alert_workflow_response(
+                intent=intent,
+                entities=entities,
+                nlp_ms=nlp_ms,
+                route_started_at=route_started_at,
+            )
+            _trace_safely(
+                request=request,
+                response=response,
+                intent=intent,
+                entities=entities,
+                processing_ms=response.pipeline_metrics.route_ms,
+            )
+            return response
+
     try:
         provider_kwargs = {"intent": intent, "entities": entities}
         if requester_id is not None and request.proactivity_enabled:
@@ -208,6 +224,47 @@ def _report_workflow_response(
         workflow=WorkflowDirective(
             parameters={"scope_candidates": scope_candidates},
         ),
+    )
+
+
+def _alert_workflow_response(
+    *,
+    intent: AudioIntent,
+    entities: list[PublicEntity],
+    nlp_ms: int,
+    route_started_at: float,
+) -> GeminiChatResponse:
+    """Inicia a configuracao interna sem chamar um provedor generativo."""
+
+    from app.alerts.schemas import AlertDirective
+
+    parameters: dict[str, object] = {
+        "scope_candidates": [
+            {"type": entity.type, "value": entity.value}
+            for entity in entities
+            if entity.type == "projeto"
+        ]
+    }
+    deadline = next((entity.value for entity in entities if entity.type == "prazo_dias"), None)
+    if deadline:
+        digits = "".join(character for character in deadline if character.isdigit())
+        if digits:
+            parameters["threshold_days"] = int(digits)
+    return GeminiChatResponse(
+        text=(
+            "Vou configurar um alerta autonomo de prazo. Antes de ativar, "
+            "preciso confirmar o projeto, o limiar e a recorrencia."
+        ),
+        model="workflow-router",
+        latency_ms=0,
+        usage=GeminiUsage(),
+        intent=intent,
+        entities=entities,
+        pipeline_metrics=ChatPipelineMetrics(
+            nlp_ms=nlp_ms,
+            route_ms=_elapsed_ms(route_started_at),
+        ),
+        workflow=AlertDirective(parameters=parameters),
     )
 
 

@@ -32,6 +32,16 @@ def resolve_report_identity(authorization: str | None) -> ReportIdentity:
     raise ReportAccessDeniedError()
 
 
+def resolve_report_identity_by_subject(subject: str) -> ReportIdentity:
+    """Resolve a identidade persistida para revalidacao em workers sem token."""
+
+    for payload in _configured_identities().values():
+        identity = _identity_from_payload(payload)
+        if hmac.compare_digest(identity.subject, subject):
+            return identity
+    raise ReportAccessDeniedError()
+
+
 def authorize_scope(identity: ReportIdentity, scope: ReportScope) -> None:
     if not identity.can_export:
         raise ReportAccessDeniedError()
