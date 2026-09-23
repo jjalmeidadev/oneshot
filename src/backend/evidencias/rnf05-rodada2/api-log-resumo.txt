@@ -1,0 +1,23 @@
+Resumo do log da API — 2a rodada do RNF05 (22/09/2026, 20:46 a 21:27 UTC)
+Identificadores de infraestrutura removidos.
+
+== api-rodada2.log ==
+respostas HTTP 200 ...................... 451
+respostas com outro status .............. 0
+novas tentativas contra o provedor ...... 0
+respostas truncadas por limite de tokens  36
+falhas ao gravar rastreabilidade RNF03 .. 1
+conexoes devolvidas em estado ACTIVE .... 2
+
+== api-atraso-rodada2.log ==
+respostas HTTP 200 ...................... 50
+respostas com outro status .............. 0
+novas tentativas contra o provedor ...... 0
+respostas truncadas por limite de tokens  4
+falhas ao gravar rastreabilidade RNF03 .. 0
+conexoes devolvidas em estado ACTIVE .... 0
+
+== linhas relevantes (api-rodada2.log) ==
+closing returned connection: <psycopg.Connection [ACTIVE] (host=<omitido> user=<omitido> database=postgres)>
+closing returned connection: <psycopg.Connection [ACTIVE] (host=<omitido> user=<omitido> database=postgres)>
+Falha controlada ao registrar rastreabilidade RNF03.

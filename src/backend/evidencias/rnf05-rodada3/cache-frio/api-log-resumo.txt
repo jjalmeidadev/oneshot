@@ -1,0 +1,20 @@
+Resumo do log da API — janelas com cache frio da 3a rodada do RNF05 (23/09/2026, 01:20 a 02:04 UTC)
+Nenhum identificador de infraestrutura no log de origem.
+
+== api-frio-baseline.log ==
+respostas HTTP 200 ...................... 272
+respostas com outro status .............. 0
+novas tentativas contra o provedor ...... 0
+respostas truncadas por limite de tokens  18
+falhas ao gravar rastreabilidade RNF03 .. 0
+consultas canceladas pelo limite de 5 s . 0
+conexoes devolvidas em estado ACTIVE .... 0
+
+== api-frio-carga.log ==
+respostas HTTP 200 ...................... 325
+respostas com outro status .............. 0
+novas tentativas contra o provedor ...... 0
+respostas truncadas por limite de tokens  18
+falhas ao gravar rastreabilidade RNF03 .. 0
+consultas canceladas pelo limite de 5 s . 0
+conexoes devolvidas em estado ACTIVE .... 0
