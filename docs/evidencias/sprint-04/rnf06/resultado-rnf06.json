@@ -6,7 +6,9 @@
     "numpy": "2.5.2",
     "python": "3.13.15",
     "scikit_learn": "1.6.1",
-    "sistema": "Windows-11-10.0.26200-SP0"
+    "sistema": "Windows-11-10.0.26200-SP0",
+    "torch": "2.13.0+cpu",
+    "transformers": "5.16.1"
   },
   "classificacao": {
     "acuracia": 0.839648,
@@ -54,13 +56,13 @@
     "sem_retreino": true,
     "status": "aprovado"
   },
-  "commit_execucao": "73e2a1be28aa6fd825e76d260e3eead41382cf2f",
+  "commit_execucao": "b827aa8ecda5693987040859595741021699f05a",
   "conclusao": {
     "observacao": "Ao menos um criterio do RNF06 ficou abaixo de 0,80.",
     "regra": "aprovado somente quando as duas metricas atingirem seus limiares",
     "status": "reprovado"
   },
-  "executado_em": "2026-09-22T21:25:40-03:00",
+  "executado_em": "2026-09-22T21:33:30-03:00",
   "integridade_massas": [
     {
       "caminho": "src/notebooks/artefatos/dataset_intencoes.csv",

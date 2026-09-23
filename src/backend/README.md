@@ -344,6 +344,23 @@ todos os exemplos antes de qualquer abstencao; e a classe
 global. Os 1.450 exemplos sinteticos adicionais foram usados exclusivamente no
 treino; validacao e teste permaneceram inalterados.
 
+A reexecucao consolidada da issue #232 tambem mede a recuperacao local. A massa
+foi congelada antes da rodada com nove consultas diretas e nove parafrases. O
+resultado foi recall@3 de 1,000000 nas diretas, 0,222222 no desafio lexical e
+0,611111 no conjunto completo. Portanto, apesar de a classificacao atingir
+acuracia 0,839648 e F1-macro 0,832724, o RNF06 permanece reprovado porque a
+recuperacao ficou abaixo de 0,80. Evidencias, hashes, casos e limitacoes estao em
+`../../docs/evidencias/sprint-04/rnf06/`.
+
+Para reproduzir os dois componentes de uma vez, a partir de `src/backend`:
+
+```powershell
+..\..\.venv\Scripts\python.exe scripts\benchmark_rnf06.py
+```
+
+O retorno 1 e esperado quando um dos limiares nao e atingido; o JSON de
+evidencia ainda e gravado com todos os casos e a conclusao observada.
+
 ## Testes
 
 ```powershell
