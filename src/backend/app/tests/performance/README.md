@@ -101,14 +101,17 @@ de `prompts.py` e precisa acompanhar qualquer P95 comparativo publicado.
 
 ## Estado
 
-**Executado em 22/09/2026, reprovado.** No `gemini-3.7-flash` em tier pago, a
-carga de 5 usuários passou (P95 simples 7,1 s, comparativo 8,0 s) e a linha de
-base reprovou na rota de comparação: P95 de 38 s, causado por **uma única**
-requisição de 37,7 s entre 242. O cenário negativo foi validado.
+**Atendido na 3ª rodada, em 22 e 23/09/2026.** No `gemini-3.7-flash` em plano
+pago, as quatro janelas positivas — 1 e 5 usuários, com cache quente e com cache
+frio — terminaram sem erro, com P95 simples de 7,0 a 7,6 s e comparativo de 7,4 a
+8,4 s. O cenário negativo foi validado. A 1ª rodada (uma requisição de 37,7 s numa
+rota com 10 amostras) e a 2ª (um erro e P95 simples de 11,0 s sob carga)
+continuam registradas como não atendidas. O P95 comparativo carrega a ressalva
+da seção anterior.
 
 As rodadas usam provedor pago. O Free Tier, usado na bancada para não gerar
 custo, tem piso de 14,7 s a 37,7 s por chamada trivial, medido em controle
 separado, e não serve como referência de desempenho do sistema.
 
-Relatório: [`evidencias/rnf05-37flash/RELATORIO.md`](../../../evidencias/rnf05-37flash/RELATORIO.md).
+Relatório: [`evidencias/rnf05-rodada3/RELATORIO.md`](../../../evidencias/rnf05-rodada3/RELATORIO.md).
 Índice de todas as rodadas: [`evidencias/README.md`](../../../evidencias/README.md).
