@@ -1,9 +1,9 @@
 """Persistencia de rastreabilidade RNF03 para interacoes do pipeline."""
 
-from collections.abc import Callable
 import json
 import os
 import re
+from collections.abc import Callable
 from typing import Any
 
 from app.database.connection import open_database_connection
@@ -34,6 +34,7 @@ def trace_interaction(
     channel: str = "api",
     external_conversation_id: str | None = None,
     error_message: str | None = None,
+    requester_id: str | None = None,
     connect: Callable[..., Any] | None = None,
 ) -> str | None:
     """Grava conversa, interacao, fontes persistidas e eventos de auditoria."""
@@ -45,12 +46,15 @@ def trace_interaction(
         connection = open_database_connection(connect=connect)
         try:
             with connection.cursor() as cursor:
+                user_id = _find_user_id(cursor, requester_id)
                 intent_id = _find_intent_id(cursor, intent)
                 conversation_id = _get_or_create_conversation(
                     cursor,
                     request,
                     channel,
                     external_conversation_id=external_conversation_id,
+                    user_id=user_id,
+                    requester_id=requester_id,
                 )
                 status = _processing_status(intent, response, error_message)
                 limitation_response = _limitation_response(intent, response, error_message)
@@ -61,6 +65,7 @@ def trace_interaction(
                     response=response,
                     intent=intent,
                     intent_id=intent_id,
+                    user_id=user_id,
                     status=status,
                     limitation_response=limitation_response,
                     processing_ms=processing_ms,
@@ -75,6 +80,8 @@ def trace_interaction(
                     entities=entities,
                     status=status,
                     error_message=error_message,
+                    user_id=user_id,
+                    requester_id=requester_id,
                 )
             _commit(connection)
             return interaction_id
@@ -105,14 +112,31 @@ def _find_intent_id(cursor: Any, intent: AudioIntent | None) -> str | None:
     return _first(cursor.fetchone())
 
 
+def _find_user_id(cursor: Any, requester_id: str | None) -> str | None:
+    if not requester_id:
+        return None
+    cursor.execute(
+        """
+        SELECT id::text
+        FROM public.users
+        WHERE entra_object_id = %s AND is_active = TRUE
+        LIMIT 1;
+        """,
+        (requester_id,),
+    )
+    return _first(cursor.fetchone())
+
+
 def _get_or_create_conversation(
     cursor: Any,
     request: GeminiChatRequest,
     channel: str,
     *,
     external_conversation_id: str | None = None,
+    user_id: str | None,
+    requester_id: str | None,
 ) -> str:
-    external_id = external_conversation_id or request.previous_interaction_id
+    external_id = external_conversation_id or request.conversation_id
     if external_id:
         cursor.execute(
             """
@@ -120,11 +144,12 @@ def _get_or_create_conversation(
             FROM public.ai_conversations
             WHERE channel = %s
               AND external_conversation_id = %s
+              AND metadata->>'requester_id' IS NOT DISTINCT FROM %s
               AND conversation_status = 'ativa'
             ORDER BY started_at DESC
             LIMIT 1;
             """,
-            (channel, external_id),
+            (channel, external_id, requester_id),
         )
         row = cursor.fetchone()
         if row:
@@ -133,17 +158,23 @@ def _get_or_create_conversation(
     cursor.execute(
         """
         INSERT INTO public.ai_conversations (
+            user_id,
             channel,
             external_conversation_id,
             metadata
         )
-        VALUES (%s, %s, %s::jsonb)
+        VALUES (%s, %s, %s, %s::jsonb)
         RETURNING id::text;
         """,
         (
+            user_id,
             channel,
             external_id,
-            _json({"source": "backend_pipeline", "rn_f": "RNF03"}),
+            _json({
+                "source": "backend_pipeline",
+                "rn_f": "RNF03",
+                "requester_id": requester_id,
+            }),
         ),
     )
     return str(_first(cursor.fetchone()))
@@ -157,6 +188,7 @@ def _insert_interaction(
     response: GeminiChatResponse | None,
     intent: AudioIntent | None,
     intent_id: str | None,
+    user_id: str | None,
     status: str,
     limitation_response: str | None,
     processing_ms: int,
@@ -178,10 +210,11 @@ def _insert_interaction(
             response_text,
             limitation_response,
             processing_status,
-            processing_ms
+            processing_ms,
+            user_id
         )
         VALUES (
-            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::jsonb, %s, %s, %s, %s
+            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::jsonb, %s, %s, %s, %s, %s
         )
         RETURNING id::text;
         """,
@@ -201,6 +234,7 @@ def _insert_interaction(
             limitation_response,
             status,
             processing_ms,
+            user_id,
         ),
     )
     return str(_first(cursor.fetchone()))
@@ -262,6 +296,8 @@ def _insert_audit_events(
     entities: list[PublicEntity],
     status: str,
     error_message: str | None,
+    user_id: str | None,
+    requester_id: str | None,
 ) -> None:
     events = [
         (
@@ -272,6 +308,7 @@ def _insert_audit_events(
                 "message_length": len(request.message),
                 "has_response": response is not None,
                 "processing_status": status,
+                "requester_id": requester_id,
             },
         )
     ]
@@ -294,18 +331,32 @@ def _insert_audit_events(
         )
 
     if response is not None:
-        events.append(
-            (
-                "database_rag_sources_retrieved",
-                "database",
-                "sucesso" if response.sources else "pendente",
-                {
-                    "source_count": len(response.sources),
-                    "persistent_source_count": _persistent_source_count(response),
-                    "retrieval_ms": response.retrieval_ms,
-                },
+        if response.workflow:
+            events.append(
+                (
+                    "guided_workflow_dispatched",
+                    "guided_workflow",
+                    "pendente",
+                    {
+                        "action": response.workflow.action,
+                        "workflow": response.workflow.workflow,
+                        "contract_version": response.workflow.contract_version,
+                    },
+                )
             )
-        )
+        else:
+            events.append(
+                (
+                    "database_rag_sources_retrieved",
+                    "database",
+                    "sucesso" if response.sources else "pendente",
+                    {
+                        "source_count": len(response.sources),
+                        "persistent_source_count": _persistent_source_count(response),
+                        "retrieval_ms": response.retrieval_ms,
+                    },
+                )
+            )
 
     if error_message:
         events.append(
@@ -334,11 +385,19 @@ def _insert_audit_events(
                 event_type,
                 component,
                 event_status,
+                user_id,
                 event_payload
             )
-            VALUES (%s, %s, %s, %s, %s::jsonb);
+            VALUES (%s, %s, %s, %s, %s, %s::jsonb);
             """,
-            (interaction_id, event_type, component, event_status, _json(payload)),
+            (
+                interaction_id,
+                event_type,
+                component,
+                event_status,
+                user_id,
+                _json(payload),
+            ),
         )
 
 
@@ -383,6 +442,8 @@ def _route_taken(
 ) -> str:
     if intent and intent.macro in {"FORA_DE_ESCOPO", "INDEFINIDA"}:
         return "fora_escopo"
+    if response and response.workflow and response.workflow.action == "start":
+        return "guided_workflow"
     if response and response.sources:
         return "sharepoint_query"
     if intent and intent.macro == "CONSULTA":

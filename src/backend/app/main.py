@@ -1,9 +1,8 @@
-from pathlib import Path
-from uuid import uuid4
-from contextlib import asynccontextmanager
 import os
+from contextlib import asynccontextmanager
+from pathlib import Path
 from time import perf_counter
-from starlette.concurrency import run_in_threadpool
+from uuid import uuid4
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
@@ -11,6 +10,7 @@ from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 
 from app.audio.errors import (
     AudioError,
@@ -21,10 +21,11 @@ from app.audio.errors import (
 )
 from app.audio.schemas import (
     MAX_CONVERSATION_ID_LENGTH,
+    AudioAnswer,
+    AudioAnswerSource,
     AudioErrorResponse,
     AudioUploadResponse,
 )
-from app.audio.schemas import AudioAnswer, AudioAnswerSource
 from app.audio.security import resolve_identity, single_request_per_identity
 from app.audio.service import process_audio_upload
 from app.audio.validation import DEFAULT_MAX_SIZE_BYTES
@@ -32,12 +33,27 @@ from app.gemini.client import (
     GeminiAPIError,
     GeminiConfigurationError,
 )
-from app.gemini.schemas import GeminiChatRequest, GeminiChatResponse
+from app.gemini.schemas import (
+    GeminiChatRequest,
+    GeminiChatResponse,
+    ProactiveConfirmationRequest,
+    ProactiveConfirmationResponse,
+)
 from app.nlp.schemas import AudioPipelineMetrics
-from app.pipeline import process_message, warmup_classifier
+from app.pipeline import (
+    process_message,
+    process_proactive_confirmation,
+    warmup_classifier,
+)
+from app.rag.proactive_confirmation import (
+    PendingSuggestionInProgress,
+    PendingSuggestionNotFound,
+    PendingSuggestionStorageError,
+)
+from app.reports.errors import ReportError
+from app.reports.router import router as reports_router
 
-
-load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=True)
 
 AUDIO_PATH = "/api/audio"
 DEFAULT_LANGUAGE = "pt-BR"
@@ -69,6 +85,7 @@ app = FastAPI(
     description="Chat via Gemini com recuperacao de contexto em listas simuladas do SharePoint.",
     version="0.1.0",
 )
+app.include_router(reports_router)
 
 
 @app.exception_handler(AudioError)
@@ -76,6 +93,14 @@ def handle_audio_error(_request: Request, error: AudioError) -> JSONResponse:
     """Converte os cenarios previstos no envelope unico da Secao 8.7.6."""
 
     return JSONResponse(status_code=error.status_code, content=error.to_payload())
+
+
+@app.exception_handler(ReportError)
+def handle_report_error(_request: Request, error: ReportError) -> JSONResponse:
+    return JSONResponse(
+        status_code=error.status_code,
+        content={"error": {"code": error.code, "message": error.message}},
+    )
 
 
 @app.exception_handler(RequestValidationError)
@@ -90,8 +115,37 @@ async def handle_request_validation_error(
     contrato multipart; as demais rotas mantem o comportamento padrao.
     """
 
+    if request.url.path == "/api/chat/proactive-confirmation":
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": {
+                    "code": "INVALID_INPUT",
+                    "message": (
+                        "Informe uma sugestão válida e uma decisão de aceitar "
+                        "ou recusar."
+                    ),
+                }
+            },
+        )
     if request.url.path == "/api/chat":
         return JSONResponse(status_code=422, content={"error": {"code": "INVALID_INPUT", "message": "Informe uma mensagem de 1 a 20.000 caracteres e parâmetros válidos."}})
+    if (
+        request.url.path.startswith("/api/report-requests")
+        or request.url.path.startswith("/api/workflow-sessions")
+        or request.url.path.startswith(
+            "/api/integrations/power-automate/report-results"
+        )
+    ):
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": {
+                    "code": "REPORT_INVALID_INPUT",
+                    "message": "Revise os parametros informados para o relatorio.",
+                }
+            },
+        )
     if request.url.path != AUDIO_PATH:
         return await request_validation_exception_handler(request, error)
 
@@ -108,18 +162,76 @@ def health() -> dict[str, str]:
 
 
 @app.post("/api/chat", response_model=GeminiChatResponse)
-def create_chat_response(request: GeminiChatRequest) -> GeminiChatResponse:
+def create_chat_response(
+    request: GeminiChatRequest,
+    authorization: str | None = Header(default=None),
+) -> GeminiChatResponse:
     try:
-        return process_message(request)
+        identity = (
+            resolve_identity(authorization)
+            if authorization or request.proactivity_enabled
+            else None
+        )
+        return process_message(
+            request,
+            requester_id=identity.object_id if identity else None,
+        )
     except GeminiConfigurationError as error:
         raise HTTPException(status_code=503, detail="O serviço de processamento está indisponível. Tente novamente em instantes.") from error
     except GeminiAPIError as error:
         raise HTTPException(status_code=error.status_code, detail="Não foi possível obter uma resposta. Tente novamente em instantes.") from error
+    except PendingSuggestionStorageError as error:
+        raise HTTPException(
+            status_code=503,
+            detail="O armazenamento de confirmações está indisponível.",
+        ) from error
+
+
+@app.post(
+    "/api/chat/proactive-confirmation",
+    response_model=ProactiveConfirmationResponse,
+)
+def create_proactive_confirmation(
+    request: ProactiveConfirmationRequest,
+    authorization: str | None = Header(default=None),
+) -> ProactiveConfirmationResponse:
+    try:
+        identity = resolve_identity(authorization)
+        return process_proactive_confirmation(
+            request,
+            requester_id=identity.object_id,
+        )
+    except PendingSuggestionNotFound as error:
+        raise HTTPException(
+            status_code=404,
+            detail="A sugestão expirou ou já recebeu uma decisão.",
+        ) from error
+    except PendingSuggestionInProgress as error:
+        raise HTTPException(
+            status_code=409,
+            detail="A sugestão já está sendo processada.",
+        ) from error
+    except PendingSuggestionStorageError as error:
+        raise HTTPException(
+            status_code=503,
+            detail="O armazenamento de confirmações está indisponível.",
+        ) from error
+    except GeminiConfigurationError as error:
+        raise HTTPException(
+            status_code=503,
+            detail="O serviço de processamento está indisponível. Tente novamente em instantes.",
+        ) from error
+    except GeminiAPIError as error:
+        raise HTTPException(
+            status_code=error.status_code,
+            detail="Não foi possível executar a sugestão. Tente novamente em instantes.",
+        ) from error
 
 
 def create_audio_chat_response(
     request: GeminiChatRequest,
     conversation_id: str,
+    requester_id: str | None = None,
 ) -> GeminiChatResponse:
     """Executa o pipeline comum preservando o envelope de erro da rota de audio."""
 
@@ -128,6 +240,7 @@ def create_audio_chat_response(
             request,
             channel="api",
             external_conversation_id=conversation_id,
+            requester_id=requester_id,
         )
     except GeminiConfigurationError as error:
         raise ProcessingUnavailableError() from error
@@ -150,10 +263,12 @@ async def create_audio_upload(
     language: str | None = Form(default=None),
     previous_interaction_id: str | None = Form(default=None, max_length=1024),
     use_intent_classifier: bool = Form(default=True),
+    proactivity_enabled: bool = Form(default=False),
     authorization: str | None = Header(default=None),
 ) -> AudioUploadResponse:
     started_at = perf_counter()
     identity = resolve_identity(authorization)
+    resolved_conversation_id = conversation_id or str(uuid4())
 
     if audio is None:
         raise AudioMissingError()
@@ -167,15 +282,17 @@ async def create_audio_upload(
             data,
             language=language or DEFAULT_LANGUAGE,
         )
-        resolved_conversation_id = conversation_id or str(uuid4())
         response = await run_in_threadpool(
             create_audio_chat_response,
             GeminiChatRequest(
                 message=audio_result.transcription.text,
+                conversation_id=resolved_conversation_id,
                 previous_interaction_id=previous_interaction_id,
                 use_intent_classifier=use_intent_classifier,
+                proactivity_enabled=proactivity_enabled,
             ),
             resolved_conversation_id,
+            identity.object_id,
         )
         return AudioUploadResponse(
             conversation_id=resolved_conversation_id,

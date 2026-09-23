@@ -29,6 +29,7 @@ yarn-error.log*
 
 # --- Jupyter ---
 .ipynb_checkpoints/
+src/notebooks/artefatos/.bertimbau_*_cache.npz
 
 # --- Sistema operacional / editor ---
 .DS_Store
@@ -71,3 +72,4 @@ AGENTS.md
 src/frontend/coverage/
 src/frontend/playwright-report/
 src/frontend/test-results/
+src/database/docs/evidencias/*.json

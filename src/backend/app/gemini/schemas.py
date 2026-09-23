@@ -1,11 +1,17 @@
-from pydantic import BaseModel, Field, field_validator
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
 from app.nlp.schemas import AudioIntent, ChatPipelineMetrics, PublicEntity
+from app.reports.schemas import WorkflowDirective
 
 
 class GeminiChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=20000)
+    conversation_id: str | None = Field(default=None, min_length=1, max_length=160)
     previous_interaction_id: str | None = Field(default=None, max_length=1024)
     use_intent_classifier: bool = True
+    proactivity_enabled: bool = False
 
     @field_validator("message")
     @classmethod
@@ -33,6 +39,14 @@ class GeminiSource(BaseModel):
     excerpt: str | None = None
 
 
+class ProactiveSuggestion(BaseModel):
+    suggestion_id: str
+    intent: str
+    description: str
+    display_message: str
+    requires_confirmation: bool = True
+
+
 class GeminiChatResponse(BaseModel):
     text: str
     model: str
@@ -45,3 +59,18 @@ class GeminiChatResponse(BaseModel):
     intent: AudioIntent | None = None
     entities: list[PublicEntity] = Field(default_factory=list)
     pipeline_metrics: ChatPipelineMetrics = Field(default_factory=ChatPipelineMetrics)
+    proactive_suggestion: ProactiveSuggestion | None = None
+    workflow: WorkflowDirective | None = None
+
+
+class ProactiveConfirmationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    suggestion_id: str = Field(..., min_length=36, max_length=36)
+    conversation_id: str = Field(..., min_length=1, max_length=160)
+    decision: Literal["accept", "decline"]
+
+
+class ProactiveConfirmationResponse(BaseModel):
+    status: Literal["accepted", "declined"]
+    result: GeminiChatResponse | None = None

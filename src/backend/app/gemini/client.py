@@ -1,19 +1,33 @@
 import json
+import logging
 import os
+from dataclasses import dataclass
 from time import perf_counter, sleep
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+from app.database.connection import DatabaseConfigurationError, DatabaseConnectionError
 from app.gemini.schemas import (
     GeminiChatRequest,
     GeminiChatResponse,
     GeminiSource,
     GeminiUsage,
+    ProactiveConfirmationRequest,
+    ProactiveConfirmationResponse,
+    ProactiveSuggestion,
 )
-from app.database.connection import DatabaseConfigurationError, DatabaseConnectionError
 from app.nlp.schemas import AudioIntent, PublicEntity
 from app.rag.database import retrieve_context
-from app.rag.sharepoint import build_rag_input
+from app.rag.proactive_confirmation import (
+    PendingProactiveSuggestion,
+    claim_pending_suggestion,
+    complete_pending_suggestion,
+    decline_pending_suggestion,
+    register_pending_suggestion,
+    release_pending_suggestion,
+)
+from app.rag.proactivity import SecondaryIntent, resolve_secondary_intent
+from app.rag.sharepoint import build_confirmed_proactive_input, build_rag_input
 
 GEMINI_INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions"
 DEFAULT_MODEL = "gemini-3.7-flash"
@@ -23,6 +37,7 @@ DEFAULT_MAX_RETRIES = 3
 DEFAULT_RETRY_BASE_DELAY_SECONDS = 2.0
 RETRYABLE_HTTP_STATUS_CODES = frozenset({408, 429, 500, 502, 503, 504})
 VALID_THINKING_LEVELS = frozenset({"minimal", "low", "medium", "high"})
+logger = logging.getLogger(__name__)
 
 
 class GeminiConfigurationError(RuntimeError):
@@ -39,6 +54,7 @@ def generate_chat_response(
     request: GeminiChatRequest,
     intent: AudioIntent | None = None,
     entities: list[PublicEntity] | None = None,
+    requester_id: str | None = None,
 ) -> GeminiChatResponse:
     api_key = os.getenv("GEMINI_API_KEY", "").strip()
     if not api_key:
@@ -47,6 +63,7 @@ def generate_chat_response(
         )
 
     retrieval_started_at = perf_counter()
+    secondary_intent = _resolve_secondary_safely(request, intent)
     try:
         retrieved_documents = retrieve_context(
             request.message,
@@ -117,21 +134,139 @@ def generate_chat_response(
             thought_tokens=_as_int(usage_data.get("total_thought_tokens")),
             total_tokens=_as_int(usage_data.get("total_tokens")),
         ),
-        sources=[
-            GeminiSource(
-                id=result.document.source_id,
-                title=result.document.title,
-                list_name=result.document.list_name,
-                web_url=result.document.web_url,
-                last_modified=result.document.last_modified,
-                score=result.score,
-                excerpt=result.document.content,
-            )
-            for result in retrieved_documents
-        ],
+        sources=_public_sources(retrieved_documents),
         trace_sources=[
             _trace_source_payload(result, citation_order=index)
             for index, result in enumerate(retrieved_documents, start=1)
+        ],
+        proactive_suggestion=(
+            _public_proactive_suggestion(
+                register_pending_suggestion(
+                    requester_id=_required_requester_id(requester_id),
+                    conversation_id=_required_conversation_id(request),
+                    original_message=request.message,
+                    secondary_intent=secondary_intent,
+                    sources=retrieved_documents,
+                ),
+                secondary_intent,
+            )
+            if secondary_intent and retrieved_documents
+            else None
+        ),
+    )
+
+
+@dataclass(frozen=True)
+class ProactiveConfirmationExecution:
+    response: ProactiveConfirmationResponse
+    pending: PendingProactiveSuggestion
+
+
+def execute_proactive_confirmation(
+    request: ProactiveConfirmationRequest,
+    *,
+    requester_id: str,
+) -> ProactiveConfirmationExecution:
+    """Executa ou recusa a sugestao vinculada, sem aceitar texto livre."""
+
+    if request.decision == "decline":
+        pending = decline_pending_suggestion(
+            request.suggestion_id,
+            requester_id=requester_id,
+            conversation_id=request.conversation_id,
+        )
+        return ProactiveConfirmationExecution(
+            response=ProactiveConfirmationResponse(status="declined"),
+            pending=pending,
+        )
+
+    pending = claim_pending_suggestion(
+        request.suggestion_id,
+        requester_id=requester_id,
+        conversation_id=request.conversation_id,
+    )
+    try:
+        result = _generate_confirmed_proactive_response(pending)
+    except Exception:
+        release_pending_suggestion(pending)
+        raise
+
+    complete_pending_suggestion(pending)
+    return ProactiveConfirmationExecution(
+        response=ProactiveConfirmationResponse(status="accepted", result=result),
+        pending=pending,
+    )
+
+
+def confirm_proactive_suggestion(
+    request: ProactiveConfirmationRequest,
+    *,
+    requester_id: str,
+) -> ProactiveConfirmationResponse:
+    """Atalho sem contexto de auditoria, mantido para os testes do cliente."""
+
+    return execute_proactive_confirmation(
+        request,
+        requester_id=requester_id,
+    ).response
+
+
+def _generate_confirmed_proactive_response(
+    pending: PendingProactiveSuggestion,
+) -> GeminiChatResponse:
+    api_key = os.getenv("GEMINI_API_KEY", "").strip()
+    if not api_key:
+        raise GeminiConfigurationError(
+            "A chave GEMINI_API_KEY nao foi configurada no backend."
+        )
+
+    model = os.getenv("GEMINI_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
+    payload = {
+        "model": model,
+        "input": build_confirmed_proactive_input(
+            pending.original_message,
+            list(pending.sources),
+            confirmed_intent=pending.secondary_intent.name,
+            instruction=pending.secondary_intent.rag_instruction,
+        ),
+        "store": True,
+        "generation_config": {
+            "max_output_tokens": _max_output_tokens(),
+            "thinking_level": _thinking_level(),
+        },
+    }
+    http_request = Request(
+        GEMINI_INTERACTIONS_URL,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "x-goog-api-key": api_key,
+        },
+        method="POST",
+    )
+    started_at = perf_counter()
+    response_data = _send_request_with_retry(http_request)
+    latency_ms = round((perf_counter() - started_at) * 1000)
+    text = _extract_text(response_data)
+    if not text:
+        raise GeminiAPIError("O Gemini nao retornou conteudo de texto.")
+
+    usage_data = response_data.get("usage", {})
+    return GeminiChatResponse(
+        text=text,
+        model=str(response_data.get("model") or model),
+        interaction_id=response_data.get("id"),
+        latency_ms=latency_ms,
+        usage=GeminiUsage(
+            input_tokens=_as_int(usage_data.get("total_input_tokens")),
+            output_tokens=_as_int(usage_data.get("total_output_tokens")),
+            thought_tokens=_as_int(usage_data.get("total_thought_tokens")),
+            total_tokens=_as_int(usage_data.get("total_tokens")),
+        ),
+        sources=_public_sources(pending.sources),
+        trace_sources=[
+            _trace_source_payload(result, citation_order=index)
+            for index, result in enumerate(pending.sources, start=1)
         ],
     )
 
@@ -246,6 +381,66 @@ def _as_int(value: object) -> int:
 
 def _requires_context(intent: AudioIntent | None) -> bool:
     return bool(intent and intent.macro == "CONSULTA" and intent.specific)
+
+
+def _resolve_secondary_safely(
+    request: GeminiChatRequest,
+    intent: AudioIntent | None,
+) -> SecondaryIntent | None:
+    if not request.proactivity_enabled:
+        return None
+    try:
+        return resolve_secondary_intent(intent)
+    except (DatabaseConfigurationError, DatabaseConnectionError):
+        logger.warning(
+            "Intencao secundaria indisponivel; resposta primaria sera preservada."
+        )
+        return None
+
+
+def _required_requester_id(requester_id: str | None) -> str:
+    if not requester_id:
+        raise GeminiAPIError(
+            "A proatividade exige uma identidade autenticada.",
+            status_code=401,
+        )
+    return requester_id
+
+
+def _required_conversation_id(request: GeminiChatRequest) -> str:
+    if not request.conversation_id:
+        raise GeminiAPIError(
+            "A proatividade exige uma conversa identificada.",
+            status_code=422,
+        )
+    return request.conversation_id
+
+
+def _public_proactive_suggestion(
+    suggestion_id: str,
+    secondary_intent: SecondaryIntent,
+) -> ProactiveSuggestion:
+    return ProactiveSuggestion(
+        suggestion_id=suggestion_id,
+        intent=secondary_intent.name,
+        description=secondary_intent.description,
+        display_message=secondary_intent.display_message,
+    )
+
+
+def _public_sources(results) -> list[GeminiSource]:
+    return [
+        GeminiSource(
+            id=result.document.source_id,
+            title=result.document.title,
+            list_name=result.document.list_name,
+            web_url=result.document.web_url,
+            last_modified=result.document.last_modified,
+            score=result.score,
+            excerpt=result.document.content,
+        )
+        for result in results
+    ]
 
 
 def _trace_source_payload(result: object, citation_order: int) -> dict:

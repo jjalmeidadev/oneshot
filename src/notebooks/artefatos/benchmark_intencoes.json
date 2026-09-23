@@ -1,0 +1,1289 @@
+{
+  "melhor_validacao": {
+    "dimensoes": 23300,
+    "modelo": "hierarquico_linear_svc_C_0.5",
+    "representacao": "palavras_1_3_caracteres_2_6",
+    "segundos": 1.003,
+    "validacao_intencao": {
+      "acuracia": 0.778547,
+      "f1_macro": 0.77179
+    },
+    "validacao_macro": {
+      "acuracia": 0.937716,
+      "f1_macro": 0.903588
+    }
+  },
+  "protocolo": {
+    "normalizacao": "NFC + lowercase + espaços; preserva acentos e stopwords",
+    "quantidade_sintetica_adicional": 1450,
+    "selecao": "maior acurácia; desempate por F1-macro na validação",
+    "tamanhos": {
+      "teste": 1135,
+      "treino": 4512,
+      "validacao": 1156
+    },
+    "teste_usado_na_selecao": false
+  },
+  "resultados_validacao": [
+    {
+      "dimensoes": 23300,
+      "modelo": "hierarquico_linear_svc_C_0.5",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 1.003,
+      "validacao_intencao": {
+        "acuracia": 0.778547,
+        "f1_macro": 0.77179
+      },
+      "validacao_macro": {
+        "acuracia": 0.937716,
+        "f1_macro": 0.903588
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "hierarquico_linear_svc_C_0.5",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 0.666,
+      "validacao_intencao": {
+        "acuracia": 0.776817,
+        "f1_macro": 0.771758
+      },
+      "validacao_macro": {
+        "acuracia": 0.938581,
+        "f1_macro": 0.904887
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "hierarquico_linear_svc_C_0.5",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 0.733,
+      "validacao_intencao": {
+        "acuracia": 0.773356,
+        "f1_macro": 0.766851
+      },
+      "validacao_macro": {
+        "acuracia": 0.934256,
+        "f1_macro": 0.891364
+      }
+    },
+    {
+      "dimensoes": 23300,
+      "modelo": "hierarquico_linear_svc_C_1",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 1.114,
+      "validacao_intencao": {
+        "acuracia": 0.772491,
+        "f1_macro": 0.764221
+      },
+      "validacao_macro": {
+        "acuracia": 0.939446,
+        "f1_macro": 0.904749
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "hierarquico_linear_svc_C_1",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 0.728,
+      "validacao_intencao": {
+        "acuracia": 0.771626,
+        "f1_macro": 0.765466
+      },
+      "validacao_macro": {
+        "acuracia": 0.939446,
+        "f1_macro": 0.904863
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "hierarquico_linear_svc_C_2",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 0.829,
+      "validacao_intencao": {
+        "acuracia": 0.770761,
+        "f1_macro": 0.764593
+      },
+      "validacao_macro": {
+        "acuracia": 0.938581,
+        "f1_macro": 0.904085
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "hierarquico_linear_svc_C_4",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 0.984,
+      "validacao_intencao": {
+        "acuracia": 0.769031,
+        "f1_macro": 0.763026
+      },
+      "validacao_macro": {
+        "acuracia": 0.937716,
+        "f1_macro": 0.902905
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "hierarquico_linear_svc_C_1",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 0.813,
+      "validacao_intencao": {
+        "acuracia": 0.767301,
+        "f1_macro": 0.760928
+      },
+      "validacao_macro": {
+        "acuracia": 0.933391,
+        "f1_macro": 0.890575
+      }
+    },
+    {
+      "dimensoes": 23300,
+      "modelo": "hierarquico_linear_svc_C_2",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 1.348,
+      "validacao_intencao": {
+        "acuracia": 0.767301,
+        "f1_macro": 0.759072
+      },
+      "validacao_macro": {
+        "acuracia": 0.938581,
+        "f1_macro": 0.903959
+      }
+    },
+    {
+      "dimensoes": 23300,
+      "modelo": "hierarquico_linear_svc_C_4",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 1.57,
+      "validacao_intencao": {
+        "acuracia": 0.767301,
+        "f1_macro": 0.758616
+      },
+      "validacao_macro": {
+        "acuracia": 0.939446,
+        "f1_macro": 0.904816
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "hierarquico_linear_svc_C_2",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 0.942,
+      "validacao_intencao": {
+        "acuracia": 0.760381,
+        "f1_macro": 0.752482
+      },
+      "validacao_macro": {
+        "acuracia": 0.930796,
+        "f1_macro": 0.883319
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "hierarquico_linear_svc_C_4",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 1.104,
+      "validacao_intencao": {
+        "acuracia": 0.757785,
+        "f1_macro": 0.749779
+      },
+      "validacao_macro": {
+        "acuracia": 0.926471,
+        "f1_macro": 0.87975
+      }
+    },
+    {
+      "dimensoes": 23300,
+      "modelo": "linear_svc_C_4",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 1.818,
+      "validacao_intencao": {
+        "acuracia": 0.703287,
+        "f1_macro": 0.699938
+      },
+      "validacao_macro": {
+        "acuracia": 0.859862,
+        "f1_macro": 0.868422
+      }
+    },
+    {
+      "dimensoes": 23300,
+      "modelo": "linear_svc_C_2",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 1.556,
+      "validacao_intencao": {
+        "acuracia": 0.700692,
+        "f1_macro": 0.696575
+      },
+      "validacao_macro": {
+        "acuracia": 0.858131,
+        "f1_macro": 0.867319
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "linear_svc_C_4",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 1.16,
+      "validacao_intencao": {
+        "acuracia": 0.698962,
+        "f1_macro": 0.694986
+      },
+      "validacao_macro": {
+        "acuracia": 0.863322,
+        "f1_macro": 0.870628
+      }
+    },
+    {
+      "dimensoes": 23300,
+      "modelo": "linear_svc_C_1",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 1.373,
+      "validacao_intencao": {
+        "acuracia": 0.698962,
+        "f1_macro": 0.694436
+      },
+      "validacao_macro": {
+        "acuracia": 0.852941,
+        "f1_macro": 0.863808
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "linear_svc_C_2",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 0.931,
+      "validacao_intencao": {
+        "acuracia": 0.698097,
+        "f1_macro": 0.693356
+      },
+      "validacao_macro": {
+        "acuracia": 0.858131,
+        "f1_macro": 0.867002
+      }
+    },
+    {
+      "dimensoes": 23300,
+      "modelo": "linear_svc_C_0.5",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 1.24,
+      "validacao_intencao": {
+        "acuracia": 0.697232,
+        "f1_macro": 0.692108
+      },
+      "validacao_macro": {
+        "acuracia": 0.850346,
+        "f1_macro": 0.861948
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "linear_svc_C_1",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 0.838,
+      "validacao_intencao": {
+        "acuracia": 0.696367,
+        "f1_macro": 0.692297
+      },
+      "validacao_macro": {
+        "acuracia": 0.852941,
+        "f1_macro": 0.863662
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "linear_svc_C_0.5",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 0.749,
+      "validacao_intencao": {
+        "acuracia": 0.695502,
+        "f1_macro": 0.690972
+      },
+      "validacao_macro": {
+        "acuracia": 0.848616,
+        "f1_macro": 0.860777
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "hierarquico_linear_svc_C_2",
+      "representacao": "palavras_1_2",
+      "segundos": 0.187,
+      "validacao_intencao": {
+        "acuracia": 0.692042,
+        "f1_macro": 0.696932
+      },
+      "validacao_macro": {
+        "acuracia": 0.879758,
+        "f1_macro": 0.867533
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "hierarquico_linear_svc_C_4",
+      "representacao": "palavras_1_2",
+      "segundos": 0.242,
+      "validacao_intencao": {
+        "acuracia": 0.692042,
+        "f1_macro": 0.696284
+      },
+      "validacao_macro": {
+        "acuracia": 0.881488,
+        "f1_macro": 0.868631
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "linear_svc_C_1",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 0.963,
+      "validacao_intencao": {
+        "acuracia": 0.692042,
+        "f1_macro": 0.686772
+      },
+      "validacao_macro": {
+        "acuracia": 0.846886,
+        "f1_macro": 0.855892
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "linear_svc_C_2",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 1.073,
+      "validacao_intencao": {
+        "acuracia": 0.688581,
+        "f1_macro": 0.681769
+      },
+      "validacao_macro": {
+        "acuracia": 0.850346,
+        "f1_macro": 0.858358
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "regressao_logistica_C_4",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 2.926,
+      "validacao_intencao": {
+        "acuracia": 0.688581,
+        "f1_macro": 0.6789
+      },
+      "validacao_macro": {
+        "acuracia": 0.853806,
+        "f1_macro": 0.871198
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "hierarquico_linear_svc_C_1",
+      "representacao": "palavras_1_2",
+      "segundos": 0.156,
+      "validacao_intencao": {
+        "acuracia": 0.687716,
+        "f1_macro": 0.692666
+      },
+      "validacao_macro": {
+        "acuracia": 0.873702,
+        "f1_macro": 0.863235
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "linear_svc_C_0.5",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 0.923,
+      "validacao_intencao": {
+        "acuracia": 0.687716,
+        "f1_macro": 0.680927
+      },
+      "validacao_macro": {
+        "acuracia": 0.843426,
+        "f1_macro": 0.857291
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "linear_svc_C_4",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 1.26,
+      "validacao_intencao": {
+        "acuracia": 0.686851,
+        "f1_macro": 0.67892
+      },
+      "validacao_macro": {
+        "acuracia": 0.853806,
+        "f1_macro": 0.860435
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "regressao_logistica_C_2",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 2.131,
+      "validacao_intencao": {
+        "acuracia": 0.684256,
+        "f1_macro": 0.674945
+      },
+      "validacao_macro": {
+        "acuracia": 0.854671,
+        "f1_macro": 0.872357
+      }
+    },
+    {
+      "dimensoes": 23300,
+      "modelo": "regressao_logistica_C_4",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 3.488,
+      "validacao_intencao": {
+        "acuracia": 0.682526,
+        "f1_macro": 0.673236
+      },
+      "validacao_macro": {
+        "acuracia": 0.850346,
+        "f1_macro": 0.866064
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "hierarquico_linear_svc_C_0.5",
+      "representacao": "palavras_1_2",
+      "segundos": 0.141,
+      "validacao_intencao": {
+        "acuracia": 0.681661,
+        "f1_macro": 0.688061
+      },
+      "validacao_macro": {
+        "acuracia": 0.871107,
+        "f1_macro": 0.861933
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "sgd_log_alpha_3e-05",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 0.656,
+      "validacao_intencao": {
+        "acuracia": 0.681661,
+        "f1_macro": 0.674469
+      },
+      "validacao_macro": {
+        "acuracia": 0.851211,
+        "f1_macro": 0.863776
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "regressao_logistica_C_2",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 2.346,
+      "validacao_intencao": {
+        "acuracia": 0.681661,
+        "f1_macro": 0.672308
+      },
+      "validacao_macro": {
+        "acuracia": 0.854671,
+        "f1_macro": 0.8689
+      }
+    },
+    {
+      "dimensoes": 23300,
+      "modelo": "sgd_log_alpha_3e-05",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 0.97,
+      "validacao_intencao": {
+        "acuracia": 0.680796,
+        "f1_macro": 0.671669
+      },
+      "validacao_macro": {
+        "acuracia": 0.845156,
+        "f1_macro": 0.860456
+      }
+    },
+    {
+      "dimensoes": 23300,
+      "modelo": "sgd_log_alpha_1e-05",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 0.977,
+      "validacao_intencao": {
+        "acuracia": 0.680796,
+        "f1_macro": 0.671441
+      },
+      "validacao_macro": {
+        "acuracia": 0.846886,
+        "f1_macro": 0.861087
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "regressao_logistica_C_4",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 2.44,
+      "validacao_intencao": {
+        "acuracia": 0.679931,
+        "f1_macro": 0.669871
+      },
+      "validacao_macro": {
+        "acuracia": 0.852076,
+        "f1_macro": 0.862536
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "sgd_log_alpha_1e-05",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 0.652,
+      "validacao_intencao": {
+        "acuracia": 0.677336,
+        "f1_macro": 0.671004
+      },
+      "validacao_macro": {
+        "acuracia": 0.851211,
+        "f1_macro": 0.863212
+      }
+    },
+    {
+      "dimensoes": 23300,
+      "modelo": "regressao_logistica_C_2",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 3.264,
+      "validacao_intencao": {
+        "acuracia": 0.677336,
+        "f1_macro": 0.666898
+      },
+      "validacao_macro": {
+        "acuracia": 0.847751,
+        "f1_macro": 0.865421
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "sgd_log_alpha_0.0001",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 1.04,
+      "validacao_intencao": {
+        "acuracia": 0.675606,
+        "f1_macro": 0.667995
+      },
+      "validacao_macro": {
+        "acuracia": 0.850346,
+        "f1_macro": 0.868442
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "sgd_log_alpha_3e-05",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 0.719,
+      "validacao_intencao": {
+        "acuracia": 0.67301,
+        "f1_macro": 0.665416
+      },
+      "validacao_macro": {
+        "acuracia": 0.845156,
+        "f1_macro": 0.856873
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "sgd_log_alpha_1e-05",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 0.716,
+      "validacao_intencao": {
+        "acuracia": 0.672145,
+        "f1_macro": 0.665075
+      },
+      "validacao_macro": {
+        "acuracia": 0.843426,
+        "f1_macro": 0.850703
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "sgd_log_alpha_0.0001",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 1.024,
+      "validacao_intencao": {
+        "acuracia": 0.67128,
+        "f1_macro": 0.665352
+      },
+      "validacao_macro": {
+        "acuracia": 0.847751,
+        "f1_macro": 0.867299
+      }
+    },
+    {
+      "dimensoes": 23300,
+      "modelo": "sgd_log_alpha_0.0001",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 1.347,
+      "validacao_intencao": {
+        "acuracia": 0.67128,
+        "f1_macro": 0.663007
+      },
+      "validacao_macro": {
+        "acuracia": 0.846021,
+        "f1_macro": 0.862502
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "regressao_logistica_C_1",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 2.039,
+      "validacao_intencao": {
+        "acuracia": 0.67128,
+        "f1_macro": 0.661772
+      },
+      "validacao_macro": {
+        "acuracia": 0.852076,
+        "f1_macro": 0.871336
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "regressao_logistica_C_1",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 2.244,
+      "validacao_intencao": {
+        "acuracia": 0.666955,
+        "f1_macro": 0.656335
+      },
+      "validacao_macro": {
+        "acuracia": 0.849481,
+        "f1_macro": 0.865271
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "linear_svc_C_2",
+      "representacao": "palavras_1_2",
+      "segundos": 0.211,
+      "validacao_intencao": {
+        "acuracia": 0.66436,
+        "f1_macro": 0.664003
+      },
+      "validacao_macro": {
+        "acuracia": 0.821799,
+        "f1_macro": 0.840873
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "linear_svc_C_1",
+      "representacao": "palavras_1_2",
+      "segundos": 0.18,
+      "validacao_intencao": {
+        "acuracia": 0.663495,
+        "f1_macro": 0.663388
+      },
+      "validacao_macro": {
+        "acuracia": 0.821799,
+        "f1_macro": 0.840901
+      }
+    },
+    {
+      "dimensoes": 23300,
+      "modelo": "regressao_logistica_C_1",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 3.088,
+      "validacao_intencao": {
+        "acuracia": 0.663495,
+        "f1_macro": 0.650564
+      },
+      "validacao_macro": {
+        "acuracia": 0.84083,
+        "f1_macro": 0.868136
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "linear_svc_C_4",
+      "representacao": "palavras_1_2",
+      "segundos": 0.266,
+      "validacao_intencao": {
+        "acuracia": 0.66263,
+        "f1_macro": 0.662795
+      },
+      "validacao_macro": {
+        "acuracia": 0.820069,
+        "f1_macro": 0.839508
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "hierarquico_linear_svc_C_4",
+      "representacao": "palavras_1_3",
+      "segundos": 0.33,
+      "validacao_intencao": {
+        "acuracia": 0.657439,
+        "f1_macro": 0.659993
+      },
+      "validacao_macro": {
+        "acuracia": 0.865052,
+        "f1_macro": 0.857989
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "hierarquico_linear_svc_C_2",
+      "representacao": "palavras_1_3",
+      "segundos": 0.265,
+      "validacao_intencao": {
+        "acuracia": 0.653979,
+        "f1_macro": 0.656663
+      },
+      "validacao_macro": {
+        "acuracia": 0.862457,
+        "f1_macro": 0.856209
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "complement_nb_alpha_0.5",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 0.373,
+      "validacao_intencao": {
+        "acuracia": 0.652249,
+        "f1_macro": 0.643304
+      },
+      "validacao_macro": {
+        "acuracia": 0.805363,
+        "f1_macro": 0.80134
+      }
+    },
+    {
+      "dimensoes": 23300,
+      "modelo": "complement_nb_alpha_0.1",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 0.588,
+      "validacao_intencao": {
+        "acuracia": 0.650519,
+        "f1_macro": 0.642971
+      },
+      "validacao_macro": {
+        "acuracia": 0.765571,
+        "f1_macro": 0.766341
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "hierarquico_linear_svc_C_1",
+      "representacao": "palavras_1_3",
+      "segundos": 0.228,
+      "validacao_intencao": {
+        "acuracia": 0.649654,
+        "f1_macro": 0.651421
+      },
+      "validacao_macro": {
+        "acuracia": 0.862457,
+        "f1_macro": 0.855973
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "linear_svc_C_0.5",
+      "representacao": "palavras_1_2",
+      "segundos": 0.156,
+      "validacao_intencao": {
+        "acuracia": 0.649654,
+        "f1_macro": 0.650247
+      },
+      "validacao_macro": {
+        "acuracia": 0.817474,
+        "f1_macro": 0.837805
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "complement_nb_alpha_0.5",
+      "representacao": "palavras_1_2",
+      "segundos": 0.077,
+      "validacao_intencao": {
+        "acuracia": 0.647924,
+        "f1_macro": 0.643511
+      },
+      "validacao_macro": {
+        "acuracia": 0.800173,
+        "f1_macro": 0.81095
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "complement_nb_alpha_1",
+      "representacao": "palavras_1_2",
+      "segundos": 0.077,
+      "validacao_intencao": {
+        "acuracia": 0.646194,
+        "f1_macro": 0.643203
+      },
+      "validacao_macro": {
+        "acuracia": 0.801903,
+        "f1_macro": 0.813368
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "linear_svc_C_2",
+      "representacao": "palavras_1_3",
+      "segundos": 0.346,
+      "validacao_intencao": {
+        "acuracia": 0.645329,
+        "f1_macro": 0.642574
+      },
+      "validacao_macro": {
+        "acuracia": 0.814879,
+        "f1_macro": 0.834935
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "linear_svc_C_4",
+      "representacao": "palavras_1_3",
+      "segundos": 0.429,
+      "validacao_intencao": {
+        "acuracia": 0.645329,
+        "f1_macro": 0.642206
+      },
+      "validacao_macro": {
+        "acuracia": 0.814014,
+        "f1_macro": 0.833624
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "hierarquico_linear_svc_C_0.5",
+      "representacao": "palavras_1_3",
+      "segundos": 0.187,
+      "validacao_intencao": {
+        "acuracia": 0.642734,
+        "f1_macro": 0.642324
+      },
+      "validacao_macro": {
+        "acuracia": 0.860727,
+        "f1_macro": 0.854294
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "linear_svc_C_1",
+      "representacao": "palavras_1_3",
+      "segundos": 0.283,
+      "validacao_intencao": {
+        "acuracia": 0.642734,
+        "f1_macro": 0.640943
+      },
+      "validacao_macro": {
+        "acuracia": 0.814014,
+        "f1_macro": 0.834298
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "complement_nb_alpha_1",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 0.382,
+      "validacao_intencao": {
+        "acuracia": 0.642734,
+        "f1_macro": 0.636385
+      },
+      "validacao_macro": {
+        "acuracia": 0.800173,
+        "f1_macro": 0.798369
+      }
+    },
+    {
+      "dimensoes": 23300,
+      "modelo": "regressao_logistica_C_0.5",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 2.991,
+      "validacao_intencao": {
+        "acuracia": 0.642734,
+        "f1_macro": 0.627704
+      },
+      "validacao_macro": {
+        "acuracia": 0.834775,
+        "f1_macro": 0.85423
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "complement_nb_alpha_0.1",
+      "representacao": "palavras_1_2",
+      "segundos": 0.078,
+      "validacao_intencao": {
+        "acuracia": 0.641003,
+        "f1_macro": 0.637407
+      },
+      "validacao_macro": {
+        "acuracia": 0.813149,
+        "f1_macro": 0.820533
+      }
+    },
+    {
+      "dimensoes": 23300,
+      "modelo": "complement_nb_alpha_0.5",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 0.587,
+      "validacao_intencao": {
+        "acuracia": 0.641003,
+        "f1_macro": 0.630873
+      },
+      "validacao_macro": {
+        "acuracia": 0.778547,
+        "f1_macro": 0.782098
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "regressao_logistica_C_0.5",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 1.897,
+      "validacao_intencao": {
+        "acuracia": 0.641003,
+        "f1_macro": 0.626994
+      },
+      "validacao_macro": {
+        "acuracia": 0.839965,
+        "f1_macro": 0.861858
+      }
+    },
+    {
+      "dimensoes": 12272,
+      "modelo": "complement_nb_alpha_0.1",
+      "representacao": "palavras_1_2_caracteres_3_5",
+      "segundos": 0.374,
+      "validacao_intencao": {
+        "acuracia": 0.640138,
+        "f1_macro": 0.628013
+      },
+      "validacao_macro": {
+        "acuracia": 0.770761,
+        "f1_macro": 0.771491
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "regressao_logistica_C_0.5",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 2.081,
+      "validacao_intencao": {
+        "acuracia": 0.640138,
+        "f1_macro": 0.623639
+      },
+      "validacao_macro": {
+        "acuracia": 0.83737,
+        "f1_macro": 0.860592
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "linear_svc_C_0.5",
+      "representacao": "palavras_1_3",
+      "segundos": 0.246,
+      "validacao_intencao": {
+        "acuracia": 0.639273,
+        "f1_macro": 0.636559
+      },
+      "validacao_macro": {
+        "acuracia": 0.811419,
+        "f1_macro": 0.836324
+      }
+    },
+    {
+      "dimensoes": 23300,
+      "modelo": "complement_nb_alpha_1",
+      "representacao": "palavras_1_3_caracteres_2_6",
+      "segundos": 0.585,
+      "validacao_intencao": {
+        "acuracia": 0.636678,
+        "f1_macro": 0.626741
+      },
+      "validacao_macro": {
+        "acuracia": 0.782007,
+        "f1_macro": 0.78416
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "complement_nb_alpha_0.1",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 0.409,
+      "validacao_intencao": {
+        "acuracia": 0.634083,
+        "f1_macro": 0.61398
+      },
+      "validacao_macro": {
+        "acuracia": 0.762111,
+        "f1_macro": 0.72233
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "complement_nb_alpha_0.5",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 0.41,
+      "validacao_intencao": {
+        "acuracia": 0.627163,
+        "f1_macro": 0.60995
+      },
+      "validacao_macro": {
+        "acuracia": 0.778547,
+        "f1_macro": 0.753417
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "sgd_log_alpha_1e-05",
+      "representacao": "palavras_1_2",
+      "segundos": 0.149,
+      "validacao_intencao": {
+        "acuracia": 0.626298,
+        "f1_macro": 0.626468
+      },
+      "validacao_macro": {
+        "acuracia": 0.800173,
+        "f1_macro": 0.829701
+      }
+    },
+    {
+      "dimensoes": 13304,
+      "modelo": "complement_nb_alpha_1",
+      "representacao": "palavras_1_2_caracteres_3_6_min_df_2",
+      "segundos": 0.411,
+      "validacao_intencao": {
+        "acuracia": 0.621972,
+        "f1_macro": 0.605862
+      },
+      "validacao_macro": {
+        "acuracia": 0.778547,
+        "f1_macro": 0.754455
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "sgd_log_alpha_3e-05",
+      "representacao": "palavras_1_2",
+      "segundos": 0.199,
+      "validacao_intencao": {
+        "acuracia": 0.618512,
+        "f1_macro": 0.61895
+      },
+      "validacao_macro": {
+        "acuracia": 0.795848,
+        "f1_macro": 0.826147
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "complement_nb_alpha_1",
+      "representacao": "palavras_1_3",
+      "segundos": 0.114,
+      "validacao_intencao": {
+        "acuracia": 0.614187,
+        "f1_macro": 0.604902
+      },
+      "validacao_macro": {
+        "acuracia": 0.771626,
+        "f1_macro": 0.792634
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "complement_nb_alpha_0.1",
+      "representacao": "palavras_1_3",
+      "segundos": 0.11,
+      "validacao_intencao": {
+        "acuracia": 0.612457,
+        "f1_macro": 0.607494
+      },
+      "validacao_macro": {
+        "acuracia": 0.771626,
+        "f1_macro": 0.791148
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "regressao_logistica_C_4",
+      "representacao": "palavras_1_2",
+      "segundos": 0.264,
+      "validacao_intencao": {
+        "acuracia": 0.608997,
+        "f1_macro": 0.605975
+      },
+      "validacao_macro": {
+        "acuracia": 0.794118,
+        "f1_macro": 0.821338
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "complement_nb_alpha_0.5",
+      "representacao": "palavras_1_3",
+      "segundos": 0.111,
+      "validacao_intencao": {
+        "acuracia": 0.605536,
+        "f1_macro": 0.598059
+      },
+      "validacao_macro": {
+        "acuracia": 0.760381,
+        "f1_macro": 0.782766
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "sgd_log_alpha_0.0001",
+      "representacao": "palavras_1_2",
+      "segundos": 0.247,
+      "validacao_intencao": {
+        "acuracia": 0.600346,
+        "f1_macro": 0.597881
+      },
+      "validacao_macro": {
+        "acuracia": 0.791522,
+        "f1_macro": 0.816304
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "sgd_log_alpha_1e-05",
+      "representacao": "palavras_1_3",
+      "segundos": 0.207,
+      "validacao_intencao": {
+        "acuracia": 0.600346,
+        "f1_macro": 0.59028
+      },
+      "validacao_macro": {
+        "acuracia": 0.789792,
+        "f1_macro": 0.814128
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "regressao_logistica_C_2",
+      "representacao": "palavras_1_2",
+      "segundos": 0.241,
+      "validacao_intencao": {
+        "acuracia": 0.596886,
+        "f1_macro": 0.591981
+      },
+      "validacao_macro": {
+        "acuracia": 0.789792,
+        "f1_macro": 0.81464
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "sgd_log_alpha_3e-05",
+      "representacao": "palavras_1_3",
+      "segundos": 0.267,
+      "validacao_intencao": {
+        "acuracia": 0.596886,
+        "f1_macro": 0.58622
+      },
+      "validacao_macro": {
+        "acuracia": 0.788062,
+        "f1_macro": 0.813502
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "regressao_logistica_C_4",
+      "representacao": "palavras_1_3",
+      "segundos": 0.857,
+      "validacao_intencao": {
+        "acuracia": 0.584775,
+        "f1_macro": 0.576225
+      },
+      "validacao_macro": {
+        "acuracia": 0.783737,
+        "f1_macro": 0.807185
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "regressao_logistica_C_1",
+      "representacao": "palavras_1_2",
+      "segundos": 0.23,
+      "validacao_intencao": {
+        "acuracia": 0.574394,
+        "f1_macro": 0.568141
+      },
+      "validacao_macro": {
+        "acuracia": 0.789792,
+        "f1_macro": 0.815631
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "sgd_log_alpha_0.0001",
+      "representacao": "palavras_1_3",
+      "segundos": 0.32,
+      "validacao_intencao": {
+        "acuracia": 0.570934,
+        "f1_macro": 0.562622
+      },
+      "validacao_macro": {
+        "acuracia": 0.779412,
+        "f1_macro": 0.803537
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "regressao_logistica_C_2",
+      "representacao": "palavras_1_3",
+      "segundos": 0.822,
+      "validacao_intencao": {
+        "acuracia": 0.565744,
+        "f1_macro": 0.557367
+      },
+      "validacao_macro": {
+        "acuracia": 0.776817,
+        "f1_macro": 0.801304
+      }
+    },
+    {
+      "dimensoes": 4680,
+      "modelo": "regressao_logistica_C_0.5",
+      "representacao": "palavras_1_2",
+      "segundos": 0.211,
+      "validacao_intencao": {
+        "acuracia": 0.555363,
+        "f1_macro": 0.551445
+      },
+      "validacao_macro": {
+        "acuracia": 0.793253,
+        "f1_macro": 0.808751
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "regressao_logistica_C_1",
+      "representacao": "palavras_1_3",
+      "segundos": 0.764,
+      "validacao_intencao": {
+        "acuracia": 0.540657,
+        "f1_macro": 0.533127
+      },
+      "validacao_macro": {
+        "acuracia": 0.769896,
+        "f1_macro": 0.788193
+      }
+    },
+    {
+      "dimensoes": 12300,
+      "modelo": "regressao_logistica_C_0.5",
+      "representacao": "palavras_1_3",
+      "segundos": 0.657,
+      "validacao_intencao": {
+        "acuracia": 0.525952,
+        "f1_macro": 0.51459
+      },
+      "validacao_macro": {
+        "acuracia": 0.766436,
+        "f1_macro": 0.775156
+      }
+    }
+  ]
+}

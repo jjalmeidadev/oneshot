@@ -135,7 +135,7 @@
   - [5.3 Diagramas de Sequência da UML](#53-diagramas-de-sequência-da-uml)
     - [5.3.1 Consulta documental via RAG](#531-consulta-documental-via-rag)
     - [5.3.2 Análise e comparação entre projetos via RAG](#532-análise-e-comparação-entre-projetos-via-rag)
-    - [5.3.3 Direcionamento para fluxo funcional via Copilot Studio](#533-direcionamento-para-fluxo-funcional-via-copilot-studio)
+    - [5.3.3 Direcionamento para workflow funcional web](#533-direcionamento-para-workflow-funcional-web)
     - [5.3.4 Entrada por voz com Speech-to-Text](#534-entrada-por-voz-com-speech-to-text)
     - [5.3.5 Considerações sobre os cenários](#535-considerações-sobre-os-cenários)
 - [6. Mapeamento técnico de infraestrutura e implantação](#6-mapeamento-técnico-de-infraestrutura-e-implantação)
@@ -177,6 +177,7 @@
     - [8.5.7 Front-end: componentes e comportamento](#857-front-end-componentes-e-comportamento)
     - [8.5.8 Back-end: ciclo de processamento](#858-back-end-ciclo-de-processamento)
     - [8.5.9 Execução e verificação reproduzíveis](#859-execução-e-verificação-reproduzíveis)
+    - [8.5.10 Geração rastreável de relatório executivo](#8510-geração-rastreável-de-relatório-executivo)
   - [8.6 Requisitos das APIs de voz (STT/TTS)](#86-requisitos-das-apis-de-voz-stttts)
     - [8.6.1 Objetivo e delimitação](#861-objetivo-e-delimitação)
     - [8.6.2 Entradas, saídas e formatos](#862-entradas-saídas-e-formatos)
@@ -1463,10 +1464,10 @@ Por se tratar de uma prova de conceito em contexto acadêmico, o funcionamento d
 | RF04 | O sistema deve recuperar informações relevantes dos documentos e dados sintéticos disponibilizados ao pipeline de acordo com a solicitação realizada.                                         | Ingestão de informações dos projetos | Muito Alta | Não iniciado |
 | RF05 | O sistema deve responder a consultas sobre as informações disponíveis nos documentos de projetos utilizados na prova de conceito.                                                             | Consulta de informações dos projetos | Muito Alta | Não iniciado |
 | RF06 | O sistema deve realizar análises e comparações entre informações de diferentes projetos quando solicitado pelo usuário.                                                                       | Consulta de informações dos projetos | Muito Alta | Não iniciado |
-| RF07 | O sistema deve encaminhar cada intenção pertencente ao escopo para a rota definida no catálogo: fluxo automatizado sem uso de LLM ou LLM com contexto estruturado e validado quando não houver automação correspondente. | Ingestão de informações dos projetos | Muito Alta | Não iniciado |
+| RF07 | O sistema deve encaminhar cada intenção pertencente ao escopo para a rota definida no catálogo: fluxo automatizado sem uso de LLM ou LLM com contexto estruturado e validado quando não houver automação correspondente. | Ingestão de informações dos projetos | Muito Alta | Em andamento (despacho determinístico de `transacao_gerar_relatorio` sem LLM implementado; demais handlers pendentes) |
 | RF08 | O sistema deve retornar o resultado da rota executada de forma estruturada e fundamentada, preservando as referências disponíveis e indicando quando não houver informações suficientes.         | Consulta de informações dos projetos | Muito Alta | Não iniciado |
-| RF09 | Para intenções sem fluxo automatizado, o sistema deve, quando a proatividade estiver habilitada, associar uma intenção secundária compatível e apresentá-la como sugestão opcional de próximo passo, sem executá-la sem confirmação do usuário. | Consulta de informações dos projetos | Muito Alta | Não iniciado |
-| RF10 | O sistema deve permitir ao usuário ativar ou desativar as sugestões proativas sem alterar o processamento da intenção primária.                                                                 | Edição das configurações do agente por menu | Alta | Não iniciado |
+| RF09 | Para intenções sem fluxo automatizado, o sistema deve, quando a proatividade estiver habilitada, associar uma intenção secundária compatível e apresentá-la como sugestão opcional de próximo passo, sem executá-la sem confirmação do usuário. | Consulta de informações dos projetos | Muito Alta | Implementado |
+| RF10 | O sistema deve permitir ao usuário ativar ou desativar as sugestões proativas sem alterar o processamento da intenção primária.                                                                 | Edição das configurações do agente por menu | Alta | Implementado |
 
 ### 3.1.1 User Stories dos Requisitos Funcionais
 
@@ -1583,7 +1584,8 @@ Como usuário da solução, quero que minha solicitação siga a rota prevista p
 **Critérios de aceitação:**
 
 * Quando o catálogo indicar um fluxo automatizado, o sistema deve encaminhar a ele a intenção e os parâmetros estruturados necessários.
-* Uma solicitação atendida por fluxo automatizado não deve ser enviada ao LLM.
+* Uma solicitação atendida por fluxo automatizado não deve ser enviada ao LLM para decisão de intenção, acesso, escopo, período, cálculo, seleção de registros ou conclusão factual.
+* Dentro de um fluxo automatizado, prompts de IA (por exemplo, AI Builder) podem ser usados exclusivamente como transformadores limitados de texto livre — com saída JSON fixa, validação determinística e fallback não generativo — e nunca decidem intenção, acesso, escopo, período, cálculo, seleção de registros ou conclusão factual.
 * Quando a intenção pertencer ao escopo, mas não possuir fluxo automatizado, o sistema deve encaminhar ao LLM somente a intenção e o contexto estruturado e validado necessário para produzir a resposta.
 * O comportamento das duas rotas deve poder ser demonstrado utilizando dados sintéticos ou simulações controladas.
 
@@ -1775,12 +1777,12 @@ Os dez requisitos funcionais não têm o mesmo horizonte de entrega, e a distin�
 | Requisito | Escopo | Justificativa |
 |---|---|---|
 | RF01 a RF08 | **MVP** | Compõem o pipeline de consulta e resposta fundamentada, que é o recorte declarado na Seção 2.9 e sustentado pelas features da faixa Muito Alta da Seção 2.8 |
-| RF09 — Sugestão proativa de intenção secundária | **Previsto, pós-MVP** | Decorre da prototipação exploratória da Seção 3.8, cuja questão era o regime de iniciativa do agente. O comportamento proativo está no Bloco 3 da Seção 2.4.3, fora do MVP |
-| RF10 — Controle da proatividade | **Previsto, pós-MVP** | Depende da feature "Edição das configurações do agente por menu", classificada na faixa Evolução da Seção 2.8. Sem RF09 implementado, não há proatividade a controlar |
+| RF09 — Sugestão proativa de intenção secundária | **Implementado na Sprint 4** | A interface apresenta a sugestão em bloco separado e a rota dedicada executa somente a intenção vinculada após confirmação explícita; a recusa encerra a sugestão sem execução |
+| RF10 — Controle da proatividade | **Implementado na Sprint 4** | O controle da interface ativa ou desativa as sugestões sem alterar o processamento da intenção primária |
 
-A especificação de RF09 e RF10 nesta sprint é deliberada e não amplia o escopo do MVP. A prototipação exploratória produziu uma decisão de comportamento — o agente pode sugerir, mas nunca executar sem confirmação — e registrar essa decisão como requisito, com critérios de aceitação verificáveis, é o que impede que ela se perca entre sprints. A implementação segue condicionada à priorização da Seção 2.8.
+A implementação de RF09 e RF10 concretiza a decisão produzida na prototipação exploratória: o agente pode sugerir, mas nunca executar sem confirmação. A sugestão fica vinculada no backend a um identificador opaco, às fontes recuperadas e a uma intenção catalogada; a interface oferece ações explícitas de aceitar e recusar.
 
-Registra-se também uma lacuna conhecida: nenhum requisito não funcional da Seção 3.2 governa a qualidade da proatividade. O RF09 estabelece que a sugestão aparece separada da resposta principal e exige confirmação, mas não há critério mensurável para intervenção inadequada — a falha que a Seção 3.8.4 identificou como característica do regime proativo. Esse RNF deve ser especificado antes da implementação de RF09.
+Permanece como evolução de qualidade definir um critério quantitativo para intervenções proativas inadequadas. Essa lacuna não altera o contrato funcional entregue: a elegibilidade é decidida pelo catálogo e pela presença de fontes, e a geração secundária só ocorre após confirmação explícita.
 
 ## 3.2 Requisitos Não Funcionais (RNFs)
 
@@ -2074,7 +2076,7 @@ A decisão de não construir cliente próprio é o que torna o suporte a mobile 
 |---|---|---|
 | Canal | Microsoft Teams, Copilot Studio | Interface conversacional e orquestração de tópicos |
 | API da aplicação | Python 3.11, FastAPI, Uvicorn | Endpoint HTTP/JSON, validação de entrada e roteamento |
-| Núcleo de PLN | scikit-learn, gensim, ONNX Runtime, nltk, joblib | Classificação de intenção em dois níveis, conforme as Seções 8.10 e 8.11 |
+| Núcleo de PLN | scikit-learn, PyTorch, Transformers (BERTimbau), nltk, joblib | Classificação de intenção em dois níveis, conforme as Seções 8.10 e 8.11 |
 | Recuperação | Índice vetorial e catálogo local de fontes | Seleção dos trechos que compõem o contexto |
 | Voz | Azure AI Speech | Transcrição de entrada e síntese prevista, Seções 8.8 e 8.9 |
 | Dados | PostgreSQL gerenciado, Supabase Storage | Persistência do modelo físico da Seção 4.4 |
@@ -2797,21 +2799,21 @@ As tabelas `project_status_updates` e `intent_test_cases` não aparecem como cla
 
 ## 5.2 Diagrama de Componentes da UML
 
-O Diagrama de Componentes representa a **estrutura lógica e técnica dos principais módulos da solução e suas interações**, consolidando a arquitetura atualmente adotada para o agente inteligente do Metrô. A representação evidencia as fronteiras entre o Microsoft Teams como canal de interação, o backend da aplicação, o núcleo autoral de Processamento de Linguagem Natural (PLN), a camada de recuperação aumentada por geração (RAG), o Microsoft Copilot Studio e os serviços corporativos e de Inteligência Artificial utilizados pela solução.
+O Diagrama de Componentes representa a **estrutura lógica e técnica dos principais módulos da solução e suas interações**. A representação evidencia as fronteiras entre o chat web como canal de interação, o backend da aplicação, o núcleo autoral de Processamento de Linguagem Natural (PLN), a camada de recuperação aumentada por geração (RAG), os workflows guiados do backend e os serviços de Inteligência Artificial utilizados pela solução. Microsoft Teams, Microsoft Copilot Studio, Microsoft Entra ID e o SharePoint corporativo integram a arquitetura-alvo e são descritos como evolução na Seção 5.2.4 e no capítulo de evolução; eles não participam do runtime atualmente implementado.
 
-A arquitetura parte do **Microsoft Teams**, canal corporativo por onde o usuário interage com o agente sem precisar de novo aplicativo ou novo login, e de uma **API da aplicação**, que centraliza o recebimento das mensagens, o gerenciamento da conversa e a integração com os demais componentes. A entrada pode ocorrer por texto ou, quando habilitada, por voz, cuja transcrição é realizada pelo serviço de Speech-to-Text antes do processamento do núcleo da aplicação.
+A arquitetura parte do **chat web** — a bancada React por onde o usuário interage com o agente — e de uma **API da aplicação** (FastAPI), que centraliza o recebimento das mensagens, o gerenciamento da conversa e a integração com os demais componentes. A entrada pode ocorrer por texto ou por voz, cuja transcrição é realizada pelo serviço de Speech-to-Text (Azure AI Speech) antes do processamento do núcleo da aplicação.
 
 O processamento da solicitação é realizado pelo **Pilar 1 — Núcleo de PLN e Roteamento**, responsável pelo pré-processamento, identificação e classificação da intenção, validação de escopo e extração das entidades necessárias. A intenção identificada é associada ao **catálogo de intenções da solução**, que relaciona as solicitações às capacidades e funcionalidades previstas para o produto.
 
-A partir dessa classificação, a conversa é encaminhada para a capacidade correspondente. Solicitações de **consulta ou dúvida documental** seguem pela rota de **RAG**, na qual o recuperador consulta o índice vetorial e as fontes documentais do SharePoint, reúne os trechos relevantes e monta o contexto utilizado na geração da resposta. O contexto recuperado é então encaminhado ao **LLM**, que produz a resposta em linguagem natural.
+A partir dessa classificação, a conversa é encaminhada para a capacidade correspondente. Solicitações de **consulta ou dúvida documental** seguem pela rota de **RAG**, na qual o recuperador consulta o índice e as fontes documentais — no runtime atual, extratos sintéticos em JSON e no PostgreSQL — reúne os trechos relevantes e monta o contexto utilizado na geração da resposta. O contexto recuperado é então encaminhado ao **LLM**, que produz a resposta em linguagem natural.
 
-Solicitações associadas a **funcionalidades ou fluxos específicos** são encaminhadas ao **Microsoft Copilot Studio**. Nesse caminho, o Copilot Studio atua como mecanismo de orquestração, selecionando o tópico correspondente à intenção identificada e acionando, quando necessário, fluxos do **Power Automate** para leitura, escrita, atualização ou execução de automações sobre os serviços corporativos.
+Solicitações associadas a **funcionalidades ou fluxos específicos** são encaminhadas a um **workflow guiado do backend**: o frontend conduz as perguntas estruturadas consumindo a API de sessões e, após a confirmação, o backend executa a operação localmente ou aciona o **Power Automate** por HTTP como fronteira assíncrona opcional, recebendo o resultado por webhook. O modo local/simulador mantém o fluxo executável sem depender do ambiente corporativo.
 
-A Figura 21 apresenta a estrutura descrita. Dessa forma, os componentes mantêm responsabilidades distintas: o **PLN interpreta e roteia**, o **RAG recupera conhecimento**, o **LLM gera respostas fundamentadas a partir do contexto recuperado** e o **Copilot Studio executa e orquestra os fluxos funcionais associados às intenções**. O SharePoint permanece como fonte documental e de dados corporativos, enquanto identidade, configuração e rastreabilidade atravessam os demais componentes.
+A Figura 21 apresenta a arquitetura-alvo, na qual a orquestração dos fluxos funcionais é assumida por Microsoft Copilot Studio e Power Automate sobre os serviços corporativos. No runtime atualmente implementado, os componentes mantêm responsabilidades distintas: o **PLN interpreta e roteia**, o **RAG recupera conhecimento**, o **LLM gera respostas fundamentadas a partir do contexto recuperado** e os **workflows guiados do backend executam e orquestram os fluxos funcionais associados às intenções**, com Power Automate opcional e Supabase Storage para os artefatos gerados. Identidade, configuração e rastreabilidade atravessam os demais componentes.
 
 <div align="center">
-  <img src="img/componentes-metro-5.2.png" alt="Diagrama de componentes da arquitetura atual da solução" width="100%">
-  <p><strong>Figura 21</strong> - Diagrama de componentes da arquitetura atual da solução.</p>
+  <img src="img/componentes-metro-5.2.png" alt="Diagrama de componentes da arquitetura-alvo da solução" width="100%">
+  <p><strong>Figura 21</strong> - Diagrama de componentes da arquitetura-alvo da solução (visão de evolução corporativa; o runtime atual está descrito no texto desta seção e detalhado na Seção 8.5).</p>
   <sup>Fonte: Material produzido pelos autores, 2026.</sup>
 </div>
 
@@ -2858,8 +2860,8 @@ O fluxo de uma solicitação conversacional típica ocorre da seguinte forma:
 4. Após a validação de escopo, o **catálogo de intenções** associa a intenção reconhecida à capacidade responsável pelo processamento da solicitação.
 5. Quando a intenção corresponde a uma **consulta ou dúvida documental**, o **Recuperador RAG** busca os conteúdos relevantes no índice vetorial e, quando necessário, na integração com o **SharePoint**. Os resultados são organizados pelo componente de **Montagem de Contexto**.
 6. O contexto recuperado é enviado ao **LLM**, que produz a resposta em linguagem natural. O resultado retorna ao gerenciador de conversação.
-7. Quando a intenção corresponde a uma **funcionalidade estruturada**, a solicitação é encaminhada ao **Microsoft Copilot Studio**, que ativa o tópico ou fluxo correspondente. Quando necessário, o fluxo utiliza o **Power Automate** para executar operações sobre SharePoint, listas ou outros serviços corporativos.
-8. O resultado produzido pela rota escolhida é consolidado pelo **backend** e devolvido ao **Microsoft Teams**.
+7. Quando a intenção corresponde a uma **funcionalidade estruturada**, o backend inicia um workflow guiado próprio e o frontend apresenta suas perguntas. O Power Automate é uma fronteira assíncrona opcional; o modo local/simulador mantém o fluxo executável sem acesso ao ambiente do Metrô.
+8. O resultado produzido pela rota escolhida é consolidado pelo **backend** e devolvido ao chat web; a integração futura com Microsoft Teams não é requisito do fluxo atual.
 9. Durante o processamento, os componentes de **identidade e auditoria** registram os elementos necessários para controle de acesso e rastreabilidade da interação.
 
 ### 5.2.3 Relação entre o catálogo de intenções e os fluxos da solução
@@ -2871,7 +2873,7 @@ A arquitetura suporta dois grandes grupos de roteamento:
 | Tipo de intenção | Destino principal | Objetivo |
 |---|---|---|
 | **Consulta / dúvida documental** | RAG → LLM | Recuperar informações das fontes documentais e produzir uma resposta fundamentada em linguagem natural. |
-| **Fluxo funcional / transação / automação** | Copilot Studio → tópico/fluxo → Power Automate | Executar uma capacidade estruturada associada à intenção identificada. |
+| **Fluxo funcional / transação / automação** | Backend → workflow guiado → Power Automate opcional | Executar uma capacidade estruturada associada à intenção identificada. |
 
 O catálogo pode, portanto, evoluir juntamente com as funcionalidades priorizadas do produto, mantendo a mesma estrutura de interpretação e roteamento. A inclusão de uma nova capacidade exige principalmente o registro da nova intenção e a implementação do fluxo correspondente, sem necessidade de alterar a interface de chat ou o mecanismo central de classificação.
 
@@ -2880,8 +2882,8 @@ O catálogo pode, portanto, evoluir juntamente com as funcionalidades priorizada
 - **O canal de interação é desacoplado da lógica de negócio.** O Teams entrega a mensagem à API da aplicação, que controla o roteamento e a consolidação da resposta. Trocar ou acrescentar um canal não exige reestruturar o núcleo de PLN nem as rotas de atendimento.
 - **O núcleo de PLN permanece independente dos modelos generativos.** A identificação da intenção, o controle de escopo e o roteamento são responsabilidades do Pilar 1.
 - **O catálogo de intenções funciona como mecanismo de roteamento.** A mesma entrada conversacional pode ser direcionada a diferentes capacidades conforme a intenção identificada.
-- **O Copilot Studio permanece como componente da arquitetura.** Seu papel é executar e orquestrar tópicos e fluxos específicos, não substituir o canal de interação nem o núcleo de PLN.
-- **RAG e geração são componentes distintos.** O SharePoint fornece o conhecimento documental, o mecanismo de recuperação seleciona o contexto relevante e o LLM produz a resposta a partir desse contexto.
+- **O Copilot Studio foi retirado da arquitetura executável.** Os artefatos exportados permanecem apenas como referência histórica; a orquestração ativa está no backend e no frontend, com Power Automate opcional.
+- **RAG e geração são componentes distintos.** O mecanismo de recuperação seleciona o contexto relevante e o LLM produz a resposta a partir desse contexto. No runtime atual a fonte documental são extratos sintéticos em JSON e no PostgreSQL; o SharePoint corporativo é a fonte prevista na arquitetura-alvo.
 - **A credencial do LLM é protegida no backend.** A interface não acessa diretamente a API generativa nem recebe suas credenciais.
 - **A camada de conhecimento é desacoplada dos canais e da geração.** A fonte documental e o índice podem evoluir sem exigir mudanças estruturais na interface ou no mecanismo de roteamento.
 - **Identidade e rastreabilidade são transversais.** O controle de acesso e os registros de auditoria devem acompanhar as interações independentemente da rota escolhida.
@@ -2902,9 +2904,9 @@ plantuml -charset UTF-8 -tpng -o ../img docs/diagrams/<arquivo>.puml
 ```
 
 
-Os diagramas de sequência desta seção detalham a ordem das interações entre os principais componentes da solução nos cenários críticos definidos para a arquitetura atual. Enquanto a modelagem dinâmica inicial da Seção 3.1.3 apresenta os fluxos em nível funcional, os diagramas desta seção incorporam as decisões técnicas consolidadas na solução, especialmente a utilização do Microsoft Teams, o serviço de Speech-to-Text, o núcleo autoral de PLN, o catálogo de intenções, a arquitetura RAG, a geração de respostas pelo LLM e o acionamento de fluxos específicos por meio do Copilot Studio.
+Os diagramas de sequência desta seção detalham a ordem das interações entre os principais componentes da solução na arquitetura-alvo, na qual o canal é o Microsoft Teams, a identidade vem do Microsoft Entra ID e a orquestração de fluxos funcionais usa o Copilot Studio. No runtime atualmente implementado, o canal é o chat web, a identidade é simulada pelo token da bancada e os fluxos funcionais são conduzidos pelos workflows guiados do backend, com Power Automate como fronteira assíncrona opcional; o núcleo autoral de PLN, o catálogo de intenções, a arquitetura RAG, a geração pelo LLM e o Speech-to-Text permanecem idênticos nos dois cenários.
 
-A seleção dos cenários considera os caminhos centrais da solução: consultas documentais fundamentadas, análises comparativas, direcionamento para fluxos funcionais e entrada por voz. Em todos os casos, o PLN permanece responsável pela interpretação e classificação da solicitação, enquanto o catálogo de intenções determina a capacidade que deverá processá-la. A partir desse roteamento, a solicitação segue para a recuperação e geração de resposta ou para o tópico/fluxo correspondente no Copilot Studio.
+A seleção dos cenários considera os caminhos centrais da solução: consultas documentais fundamentadas, análises comparativas, direcionamento para fluxos funcionais e entrada por voz. Em todos os casos, o PLN permanece responsável pela interpretação e classificação da solicitação, enquanto o catálogo de intenções determina a capacidade que deverá processá-la. A partir desse roteamento, a solicitação segue para a recuperação e geração de resposta ou para o workflow guiado correspondente no backend.
 
 As interações de identidade, autorização e auditoria são tratadas como capacidades transversais. A identidade do usuário deve ser validada antes do acesso às fontes ou da execução de ações, e os eventos relevantes da interação devem ser registrados para fins de rastreabilidade.
 
@@ -2952,9 +2954,17 @@ A sequência preserva a diferenciação entre **fato recuperado** e **resultado 
 
 A validação de identidade antecede a recuperação e os eventos da interação são registrados na auditoria, mantendo o cenário alinhado aos requisitos transversais de controle de acesso e rastreabilidade.
 
-### 5.3.3 Direcionamento para fluxo funcional via Copilot Studio
+### 5.3.3 Direcionamento para workflow funcional web
 
-Este cenário representa uma solicitação cuja intenção corresponde a uma capacidade funcional específica do produto. O PLN identifica a intenção e o catálogo a associa ao tópico ou fluxo correspondente. A partir desse ponto, o Copilot Studio assume a execução do tópico selecionado e pode acionar o Power Automate quando houver uma operação automatizada ou integração com serviço corporativo.
+Este cenário representa uma solicitação cuja intenção corresponde a uma
+capacidade funcional específica do produto. O PLN identifica a intenção e o
+catálogo a associa ao workflow correspondente. A partir desse ponto, o
+frontend conduz as perguntas estruturadas consumindo a API de sessões; após a
+confirmação, o backend executa a operação localmente ou aciona o Power Automate
+por HTTP como fronteira assíncrona opcional e recebe o resultado por webhook.
+A figura abaixo apresenta a orquestração equivalente na arquitetura-alvo, com
+Copilot Studio como plataforma de execução do tópico; no runtime atual esse
+papel é desempenhado pelo próprio backend.
 
 <div align="center">
   <img src="img/sequencia-copilot-fluxo.png" alt="Sequência: direcionamento para fluxo funcional via Copilot Studio" width="100%">
@@ -2968,9 +2978,9 @@ O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-copilo
 java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/sequencia-copilot-fluxo.puml
 ```
 
-Neste cenário, o **Copilot Studio não é responsável por descobrir a intenção do usuário**. A decisão já foi tomada pelo núcleo de PLN e pelo catálogo de intenções. O Copilot Studio atua como plataforma de execução do tópico ou fluxo selecionado.
+Nesta orquestração, o **Copilot Studio não é responsável por descobrir a intenção do usuário**. A decisão já foi tomada pelo núcleo de PLN e pelo catálogo de intenções, e o Copilot Studio atuaria como plataforma de execução do tópico ou fluxo selecionado. No runtime atual esse papel é desempenhado pelo workflow guiado do backend, que conduz as perguntas pelo frontend e consolida o resultado.
 
-O retorno do **Power Automate** ocorre somente quando o tópico efetivamente o aciona. No ramo puramente conversacional, o tópico retorna diretamente ao Copilot Studio, evitando a associação de um resultado de automação a uma operação que não foi executada.
+O retorno do **Power Automate** ocorre somente quando o fluxo efetivamente o aciona; no ramo puramente conversacional, o resultado é consolidado sem automação, evitando associar um retorno de automação a uma operação que não foi executada.
 
 A identidade do usuário é validada antes da execução do fluxo e a auditoria registra a intenção identificada, o fluxo acionado e seu resultado.
 
@@ -2996,11 +3006,11 @@ O ramo de falha contempla situações documentadas para o serviço de STT, como 
 
 ### 5.3.5 Considerações sobre os cenários
 
-Os quatro cenários apresentados cobrem os principais caminhos de interação da arquitetura atual. A **consulta documental** representa o fluxo central de recuperação e geração fundamentada; a **análise comparativa** acrescenta a consolidação e interpretação de informações de múltiplos projetos; o **direcionamento para fluxos funcionais** demonstra a integração entre o núcleo de PLN, o catálogo de intenções, o Copilot Studio e os serviços de automação; e a **entrada por voz** demonstra a utilização da API de Speech-to-Text como modalidade alternativa de entrada.
+Os quatro cenários apresentados cobrem os principais caminhos de interação da solução. A **consulta documental** representa o fluxo central de recuperação e geração fundamentada; a **análise comparativa** acrescenta a consolidação e interpretação de informações de múltiplos projetos; o **direcionamento para fluxos funcionais** demonstra a integração entre o núcleo de PLN, o catálogo de intenções e os workflows guiados do backend — com Copilot Studio previsto apenas na arquitetura-alvo; e a **entrada por voz** demonstra a utilização da API de Speech-to-Text como modalidade alternativa de entrada.
 
-Em todos os cenários, o núcleo de PLN permanece como ponto comum de interpretação e decisão. A diferença entre os caminhos ocorre somente após a identificação e validação da intenção: consultas e análises documentais seguem para recuperação de contexto e geração de resposta, enquanto intenções funcionais são encaminhadas para o tópico ou fluxo associado no Copilot Studio.
+Em todos os cenários, o núcleo de PLN permanece como ponto comum de interpretação e decisão. A diferença entre os caminhos ocorre somente após a identificação e validação da intenção: consultas e análises documentais seguem para recuperação de contexto e geração de resposta, enquanto intenções funcionais são encaminhadas para o workflow guiado associado no backend.
 
-Os cenários também incorporam os requisitos transversais de **identidade, autorização e rastreabilidade**. A autenticação por Microsoft Entra ID antecede as operações protegidas, o acesso às fontes ou serviços deve respeitar as permissões aplicáveis e os eventos relevantes da interação são registrados na trilha de auditoria. No caso de fontes corporativas, a autorização efetiva deve permanecer alinhada ao modelo de permissões do ambiente do Metrô.
+Os cenários também incorporam os requisitos transversais de **identidade, autorização e rastreabilidade**. Na arquitetura-alvo, a autenticação por Microsoft Entra ID antecede as operações protegidas; no runtime atual a identidade é simulada e o token da bancada habilita voz e relatórios. Em ambos os casos, o acesso às fontes ou serviços deve respeitar as permissões aplicáveis e os eventos relevantes da interação são registrados na trilha de auditoria. No caso de fontes corporativas, a autorização efetiva deve permanecer alinhada ao modelo de permissões do ambiente do Metrô.
 
 Por fim, a utilização da **base sintética / índice vetorial** nos cenários de recuperação explicita a delimitação do MVP. A arquitetura permanece preparada para receber as fontes corporativas, inclusive SharePoint, em uma evolução posterior, sem fazer da integração com o portfólio real uma dependência da validação inicial.
 
@@ -3468,7 +3478,7 @@ Navegador React
 
 O `GET /health` verifica se o processo FastAPI terminou de iniciar. O caminho de texto e o caminho posterior à transcrição de áudio convergem em `app/pipeline.py`, portanto classificação, recuperação de contexto e geração não possuem implementações paralelas. O front-end transforma o contrato HTTP em mensagens, fontes, indicadores de intenção e estados de carregamento, mas não acessa Azure ou Gemini diretamente e não recebe suas credenciais.
 
-O PostgreSQL está conectado de forma opcional ao fluxo: quando `DATABASE_URL` ou `SUPABASE_DATABASE_URL` está configurada, o backend consulta os extratos persistidos e registra conversa, interação, intenção, rota, fontes e eventos de auditoria; sem configuração, o RAG usa exports JSON locais que simulam listas do SharePoint. Ainda não estão conectados o Microsoft Entra ID, o SharePoint corporativo, o Microsoft Teams, o Copilot Studio, o Power Automate e a execução de transações. Conversas, token da bancada e preferências de resposta permanecem na sessão do navegador; somente o tema pode ser persistido localmente.
+O PostgreSQL/Supabase está conectado de forma opcional: quando `DATABASE_URL` ou `SUPABASE_DATABASE_URL` está configurada, o backend consulta os extratos persistidos e registra conversa, interação, intenção, rota, fontes, workflow, execução, callback, artefato e auditoria. Sem configuração, consultas e relatórios usam dados sintéticos e repositórios locais. O fluxo `transacao_gerar_relatorio` já executa integralmente em modo local/simulador; o adaptador de Power Automate está implementado, mas sua implantação real depende das credenciais e do endpoint do ambiente. Microsoft Entra ID, SharePoint corporativo, Teams e Copilot Studio não integram a execução atual. Conversas e preferências permanecem na sessão do navegador; somente o tema pode ser persistido localmente.
 
 ### 8.5.2 Arquitetura executável
 
@@ -3485,7 +3495,7 @@ A visão completa de diretórios está na Seção 8.1. Para acompanhar uma requi
 | Recuperação | `src/backend/app/rag/sharepoint.py` | Carrega exports JSON, ranqueia trechos e monta contexto com fontes declaradas. |
 | Geração | `src/backend/app/gemini/` | Chama o Gemini com timeout e retentativas e mapeia texto, uso, latência e fontes. |
 | PLN | `src/backend/app/nlp/` | Carrega artefatos treinados, extrai entidades e classifica macrointenção e intenção específica. |
-| Dados preparados | `src/database/sql/` | Cria, popula e reverte o modelo PostgreSQL ainda não conectado à API. |
+| Dados e artefatos | `src/database/sql/` e `app/reports/` | Migra, persiste e audita workflows/execuções no PostgreSQL e mantém DOCX privado no Supabase Storage ou localmente em desenvolvimento. |
 
 Os componentes visuais não chamam `fetch` diretamente; eles acionam operações do estado, que delega ao cliente de `lib/api/`. No back-end, `main.py` não reproduz regras do classificador ou do RAG: encaminha a entrada ao pipeline e converte apenas as falhas previstas em respostas HTTP. Essa separação permite testar a interface, os contratos e cada integração com duplos determinísticos.
 
@@ -3549,7 +3559,7 @@ O cliente aplica limite de 120 segundos e permite cancelamento por `AbortControl
 | Azure AI Speech | `audio/transcription.py` envia o WAV validado para transcrição `pt-BR`, com timeout e retentativas. | `AZURE_SPEECH_RESOURCE` ou `AZURE_SPEECH_ENDPOINT`, `AZURE_SPEECH_KEY`, timeout e número de tentativas no `.env` do back-end. | Exige credencial e rede; a suíte padrão substitui a fronteira HTTP por duplo. |
 | Gemini | `gemini/client.py` gera a resposta a partir da pergunta e do contexto recuperado, com timeout e backoff. | `GEMINI_API_KEY`, modelo, limite de saída, nível de raciocínio, timeout e retentativas. | Sem chave, o chat que precisa de geração devolve indisponibilidade controlada. |
 | RAG de SharePoint simulado | `rag/sharepoint.py` pesquisa exports JSON versionados e inclui rótulos de fonte no prompt. | `rag/data/sharepoint/` ou `SHAREPOINT_MOCK_DATA_DIR`. | Não acessa o tenant corporativo nem sincroniza alterações do SharePoint. |
-| Classificador local | `nlp/` carrega o `joblib`, Word2Vec e encoder ONNX; `PLN_WARMUP=1` antecipa a carga. | Artefatos em `src/notebooks/artefatos/`; encoder obtido do repositório de modelo indicado na Seção 8.11. | A primeira instalação/carga pode exigir internet e cache local; não executa transações. |
+| Classificador local | `nlp/` carrega o `joblib` e o encoder BERTimbau via PyTorch/Transformers; `PLN_WARMUP=1` antecipa a carga. | Artefatos em `src/notebooks/artefatos/`; encoder obtido do repositório de modelo indicado na Seção 8.11 (`requirements-pln.txt`). | A primeira instalação/carga pode exigir internet e cache local; não executa transações. |
 | Identidade do áudio | `audio/security.py` resolve o Bearer token por um mapa simulado e limita uma transcrição ativa por identidade. | `AUDIO_SIMULATED_IDENTITIES`, por exemplo `token-local=usuario-local`. | Não valida JWT do Entra ID e não aplica as regras da tabela `access_rules`. |
 
 O SharePoint corporativo, Entra ID, Teams, Copilot Studio e Power Automate aparecem nos desenhos e no modelo-alvo, mas não possuem adaptador ativo nesta versão. Em particular, classificar uma solicitação como transacional não executa escrita externa: o resultado apenas descreve a intenção. Essa distinção evita interpretar a bancada como um canal de produção ou como evidência de autorização corporativa.
@@ -3584,7 +3594,7 @@ O primeiro comando deve informar 25 tabelas em um schema `public` inicialmente v
 
 A opção `ON_ERROR_STOP` faz o processo terminar na primeira falha em vez de continuar com uma instalação parcial. A carga usa conflitos controlados e verificações de existência para que uma nova execução atualize ou preserve os registros sintéticos esperados, em vez de duplicá-los.
 
-O banco possui integração opcional no backend. Com `DATABASE_URL` ou `SUPABASE_DATABASE_URL`, a recuperação consulta os extratos PostgreSQL e a rastreabilidade persiste conversas, interações, classificação, rota, fontes e auditoria; sem URL configurada, a aplicação continua reproduzível com os JSONs simulados do SharePoint e não tenta abrir conexão. Não há migração automatizada, e a interface ainda mantém o histórico apenas em memória, sem reidratar as conversas registradas no banco.
+O banco possui integração opcional no backend. Com `DATABASE_URL` ou `SUPABASE_DATABASE_URL`, a recuperação consulta os extratos PostgreSQL e a rastreabilidade persiste conversas, interações, classificação, rota, fontes, workflow e auditoria; sem URL configurada, a aplicação continua reproduzível com dados sintéticos e não tenta abrir conexão. O baseline geral continua aplicado por SQL/CLI, enquanto a infraestrutura de relatórios possui aplicação, verificação e rollback-dry-run em `scripts/manage_report_infrastructure.py` e `scripts/manage_report_security.py`. A interface ainda mantém o histórico de conversa apenas em memória, sem reidratação.
 
 ### 8.5.7 Front-end: componentes e comportamento
 
@@ -3592,8 +3602,8 @@ A bancada usa React 19, TypeScript e Vite. `App.tsx` instala `ThemeProvider` e `
 
 | Área | Responsabilidade observável |
 | --- | --- |
-| `components/sidebar/` | Criação, busca, seleção e exclusão de conversas da sessão, além do token simulado usado somente no áudio. |
-| `components/chat/` | Estado vazio, histórico de mensagens, Markdown seguro, classificação, fontes e indicação de processamento. |
+| `components/sidebar/` | Criação, busca, seleção e exclusão de conversas da sessão, além do token simulado usado por áudio e relatórios. |
+| `components/chat/` | Estado vazio, histórico, Markdown seguro, classificação, fontes, workflow guiado, confirmação, progresso e download de relatório. |
 | `components/composer/` | Entrada de texto, alternância da validação de intenção, captura, prévia, descarte e envio de áudio. |
 | `components/documents/` | Lista de fontes, trecho recuperado, link original e métricas da resposta selecionada. |
 | `components/layout/` e `components/ui/` | Layout responsivo, tema, diálogos, abas e controles acessíveis reutilizáveis. |
@@ -3654,6 +3664,45 @@ npm ci
 Depois de preencher o `.env` local, o back-end deve ser iniciado na porta 8000 e o Vite na 5173, em terminais separados. `GET /health` deve devolver `status=ok` antes do uso. A referência automática fica em `/docs`; a interface, em `http://localhost:5173`.
 
 As verificações locais são `pytest` para o back-end e, no front-end, lint, formatação, cobertura, build e Playwright. Os comandos e resultados de referência estão em `src/frontend/TESTES.md`. Os testes automatizados substituem Azure e Gemini por duplos na fronteira de rede; por isso são reproduzíveis sem credenciais, mas não comprovam integrações corporativas nem os RNFs dependentes do ambiente de produção.
+
+### 8.5.10 Geração rastreável de relatório executivo
+
+A intenção `transacao_gerar_relatorio` possui rota determinística no back-end:
+depois da classificação, o pipeline devolve a diretiva
+`guided_workflow/start/transacao_gerar_relatorio` e não chama o provedor
+generativo. O frontend inicia uma sessão persistível e apresenta no próprio
+chat as perguntas de escopo, período, público, finalidade, ênfase e contexto,
+seguindo até a revisão e a confirmação explícita. O runtime não depende de
+Copilot Studio.
+
+O contrato HTTP implementa sessões com revisão otimista e `client_action_id`,
+preparação, confirmação protegida por HMAC, idempotência, consulta de estado,
+download autenticado e callback do Power Automate. Em modo local, uma massa
+sintética autorizada é congelada em snapshot e renderizada em DOCX. No modo
+`power_automate_simulator`, o mesmo contrato de callback é exercitado sem
+tenant externo. No modo real, o Power Automate recebe o snapshot autorizado,
+usa AI Builder apenas para transformações com JSON fixo e devolve o resultado
+estruturado; não gera nem hospeda o arquivo.
+
+O backend valida o retorno, aplica redação determinística como fallback, gera
+o DOCX com `python-docx`, calcula SHA-256 e o armazena no bucket privado
+`generated-reports` do Supabase. O navegador nunca recebe a service role nem
+uma URL pública permanente: o cartão do relatório no chat baixa o arquivo pelo
+endpoint autenticado. SharePoint, OneDrive e Word Online não participam deste
+fluxo.
+
+O código executável está em `src/backend/app/reports/`; a migration está em
+`src/database/sql/05_report_generation.sql` e
+`src/database/sql/07_guided_report_workflow.sql`; o bucket privado é criado
+por `src/database/sql/09_create_report_storage_bucket.sql`, com rollback seguro
+em `src/backend/scripts/rollback_report_storage_bucket.py`. A migration
+`src/database/sql/11_secure_report_workflow_tables.sql` mantém as cinco tabelas
+internas sob RLS e sem privilégios para `anon` ou `authenticated`; o frontend está
+em `src/frontend/src/components/chat/report-workflow-card.tsx`. Os artefatos
+portáteis de OpenAPI, Power Automate e AI Builder permanecem em
+`src/agent/support/`; `src/agent/ONESHOT` é somente histórico e não integra o
+runtime. A especificação operacional completa fica em
+`src/agent/support/IMPLEMENTATION.md`.
 
 ## 8.6 Requisitos das APIs de voz (STT/TTS)
 
@@ -4524,7 +4573,13 @@ O pipeline é implementado em Python no notebook [`src/notebooks/classificador_i
 | `scipy` | Empilhamento de matrizes esparsas na composição das representações híbridas |
 | `joblib` | Serialização do classificador e dos transformadores ajustados |
 
-O ambiente de **inferência** não repete essa lista. Ele dispensa `torch`, `transformers` e `sentence-transformers`, substituídos pelo ONNX Runtime na execução do encoder, conforme a revisão registrada na Seção 8.10.6. As dependências efetivamente instaladas no backend estão na Seção 8.11.2.
+O ambiente de **inferência** reaproveita parte dessa lista. O encoder do bloco
+BERTimbau é carregado por `torch` e `transformers` (`AutoModel`/`AutoTokenizer`
+de `neuralmind/bert-base-portuguese-cased`), com os embeddings congelados
+concatenados aos vetores TF-IDF antes da decisão do classificador hierárquico.
+Essas dependências ficam separadas em `requirements-pln.txt`; sem elas, a
+classificação de intenção fica indisponível. As dependências efetivamente
+instaladas no backend estão na Seção 8.11.2.
 
 **Passos de configuração**
 
@@ -4655,7 +4710,7 @@ Saída real da execução de referência, reproduzida do notebook:
 |---|---|---|---:|---|
 | "quanto já foi gasto na obra da Linha 6?" | `CONSULTA` | `consulta_orcamento_custo` | 1,00 | Rota de consulta com RAG |
 | "me avisa se o projeto de sinalização atrasar mais de uma semana" | `ALERTA` | `alerta_prazo_atraso` | 1,00 | Fluxo de alerta |
-| "gera um relatório executivo do subportfólio de modernização" | `TRANSACAO` | `transacao_gerar_relatorio` | 1,00 | Fluxo funcional no Copilot Studio |
+| "gera um relatório executivo do subportfólio de modernização" | `TRANSACAO` | `transacao_gerar_relatorio` | 1,00 | Workflow guiado no frontend com execução pelo backend/Power Automate |
 | "compare a execução orçamentária da Linha 2 com a da Linha 15" | `CONSULTA` | `comparacao_entre_projetos` | 0,98 | Rota de comparação com RAG |
 | "bom dia, tudo certo?" | `FORA_DE_ESCOPO` | — | 1,00 | Resposta de limitação, registrada em `out_of_scope_requests` |
 | "prorroga o prazo do PRJ-0442 até março" | `CONSULTA` | `consulta_cronograma_prazo` | 0,73 | Acima do limiar de 0,700, mas é um **erro de classificação** |
@@ -4690,7 +4745,7 @@ A Sprint 2 escolheu o algoritmo dentro do notebook. A Sprint 3 levou essa escolh
 
 A conservação é verificável, e não declarada. A suíte de testes recalcula as métricas sobre o conjunto de teste a cada execução e reprova se a acurácia da intenção específica sair de 0,7383 ou o F1-macro sair de 0,7401, com tolerância de 0,0002. O mesmo vale para o efeito dos limiares: 14 solicitações abaixo do limiar de macrointenção, 305 no fluxo genérico e 0,8775 de acurácia entre as aceitas. A verificação está descrita na Seção 8.11.7.
 
-**O que mudou: o motor de execução do encoder BERT.** O benchmark extraiu os embeddings com `sentence-transformers`, que carrega o modelo em PyTorch. O serviço executa o mesmo modelo em **ONNX Runtime**, a partir do grafo publicado no próprio repositório do modelo no Hugging Face. A troca não altera o algoritmo, a representação nem os pesos: os embeddings coincidem com os do `sentence-transformers` até uma diferença máxima de 2,4 × 10⁻⁷, e as métricas do conjunto de teste ficam inalteradas.
+**O que mudou: o motor de execução do encoder BERT.** O benchmark extraiu os embeddings com `sentence-transformers`, que carrega o modelo em PyTorch. Esta subseção descreve a arquitetura de inferência anterior, baseada em **ONNX Runtime**, e é mantida como registro histórico. O runtime vigente do classificador v2 executa o encoder BERTimbau diretamente por PyTorch e Transformers, conforme a Seção 8.11.10; as dependências efetivas são `torch` e `transformers` em `requirements-pln.txt`. Na versão histórica, o serviço executava o mesmo modelo em ONNX Runtime, a partir do grafo publicado no próprio repositório do modelo no Hugging Face. A troca não alterava o algoritmo, a representação nem os pesos: os embeddings coincidiam com os do `sentence-transformers` até uma diferença máxima de 2,4 × 10⁻⁷, e as métricas do conjunto de teste ficavam inalteradas.
 
 O que muda é o custo de operar a escolha, medido durante a implementação:
 
@@ -4707,11 +4762,29 @@ A variante quantizada em int8 reduziria o grafo de 449 MB para 113 MB, mas custa
 
 **O que o artefato exigiu.** O `joblib` produzido pelo notebook não carregava fora dele. A função *analyzer* do TF-IDF e a classe do classificador hierárquico eram definidas no topo do notebook, e a serialização gravou referências a `__main__.identidade` e `__main__.ClassificadorHierarquico`; de qualquer módulo importável, `joblib.load` falhava com `AttributeError`. As duas definições passaram a viver em `src/backend/app/nlp/classifier.py`, e um script reaponta o artefato para lá sem retreinar. O procedimento está na Seção 8.11.4.
 
-A implementação também tornou explícitas duas dependências que o notebook não precisava declarar. O artefato foi serializado com **scikit-learn 1.6.1**, e carregá-lo com outra versão faz a própria biblioteca advertir que o resultado pode ser inválido. A versão está fixada no `requirements.txt` do backend e o script de migração recusa executar fora dela. O encoder e o tokenizador são obtidos do mesmo snapshot imutável `e8f8c211226b894fcb81acc59f3b34ba3efd5f42`; `PLN_BERT_REVISION` permite substituir conscientemente essa revisão sem voltar a depender do estado móvel de `main`.
+A implementação também tornou explícitas duas dependências que o notebook não precisava declarar. O artefato foi serializado com **scikit-learn 1.6.1**, e carregá-lo com outra versão faz a própria biblioteca advertir que o resultado pode ser inválido. A versão está fixada no `requirements.txt` do backend e o script de migração recusa executar fora dela. O encoder BERTimbau e o tokenizador são obtidos do mesmo snapshot imutável `94d69c95f98f7d5b2a8700c420230ae10def0baa`; `PLN_BERT_REVISION` permite substituir conscientemente essa revisão, mas o runtime exige um SHA hexadecimal completo de 40 caracteres e recusa branches ou tags mutáveis.
 
 Há ainda uma divergência de ambiente entre treino e serviço que convém registrar: a execução de referência do notebook usou Python 3.9, enquanto o serviço exige **Python 3.13 ou anterior**, porque o `gensim` ainda não publica wheel para o 3.14 e a compilação a partir do fonte falha. As duas faixas são compatíveis com os artefatos versionados, mas a restrição superior é real e vale para qualquer ambiente que execute a inferência.
 
 **O que a revisão não muda.** A conclusão do benchmark continua a mesma, com as mesmas ressalvas: a margem sobre o Híbrido W2V+BERT permanece estreita, o conjunto continua sintético e o F1-macro de 0,7401 na intenção específica continua **abaixo** do mínimo de 0,80 exigido pelo RNF06. A implementação não fecha essa lacuna — ela apenas a torna operacional, ao converter a incerteza em fluxo genérico em vez de handler errado. Fechar a lacuna depende dos próximos passos já listados na Seção 8.10.5, e permanece em aberto.
+
+### 8.10.7 Refinamento da acurácia da intenção específica — issue #251
+
+Esta subseção registra a versão 2 do classificador e **substitui, para o artefato atual**, as configurações e métricas históricas das Seções 8.10.3 e 8.10.6. O objetivo foi superar 0,80 de acurácia na intenção específica sem usar o conjunto de teste durante a seleção. Os 1.135 exemplos de teste permaneceram fechados até a escolha final; parâmetros, representações e limiares foram comparados nos 1.156 exemplos de validação.
+
+O pré-processamento escolhido é deliberadamente conservador para português: aplica Unicode NFC, minúsculas e normalização de espaços, mas **não remove acentos, a negação `não` nem stopwords**. Foram geradas 1.450 consultas sintéticas adicionais, distribuídas pelas 31 classes e usadas exclusivamente no treino. A massa base de treino tem 3.062 exemplos; validação e teste não foram ampliados nem reamostrados.
+
+| Configuração avaliada | Acurácia específica na validação | F1-macro específico na validação |
+| --- | ---: | ---: |
+| TF-IDF de palavras/caracteres + SVM hierárquica | 0,778547 | 0,771790 |
+| BERTimbau congelado + SVM hierárquica | 0,730104 | 0,728812 |
+| TF-IDF + BERTimbau + SVM calibrada hierárquica | **0,883218** | **0,881366** |
+
+A configuração final concatena TF-IDF de palavras de 1 a 2 gramas, TF-IDF de caracteres de 3 a 5 gramas e embeddings congelados do `neuralmind/bert-base-portuguese-cased`, estes com peso 2,0. O primeiro estágio e cada especialista usam `LinearSVC` com `C=1,0`, calibrada em três dobras. Os limiares definidos na validação são 0,525 para macrointenção e 0,350 para intenção específica.
+
+Somente depois da seleção o conjunto de teste foi aberto. A intenção específica atingiu **0,839648 de acurácia e 0,832724 de F1-macro**; a macrointenção atingiu **0,981498 de acurácia e 0,971470 de F1-macro**. O requisito de 0,80 foi, portanto, atendido nas duas métricas globais da intenção específica. Os números incluem todos os exemplos, antes de qualquer abstenção. Pelo roteamento, 10 exemplos ficaram abaixo do limiar macro e 63 abaixo do limiar específico.
+
+Os experimentos são reproduzíveis por `benchmark_intencoes.py`, `benchmark_bertimbau.py` e `treinar_classificador_intencoes_v2.py`. Os resultados completos, hashes, matriz de confusão e métricas por classe estão em `src/notebooks/artefatos/`. A principal limitação permanece: a base é majoritariamente sintética e requer validação externa com consultas reais. Além disso, `analise_tendencia_desempenho` continua sendo a classe mais fraca e deve orientar a próxima coleta, apesar do ganho global.
 
 ## 8.11 Implementação do núcleo de PLN
 
@@ -4762,7 +4835,7 @@ As dependências do backend estão separadas em dois arquivos, e a separação t
 | Arquivo | Conteúdo | Quando é necessário |
 | --- | --- | --- |
 | `requirements.txt` | FastAPI, Uvicorn, Pydantic, `httpx`, `scikit-learn`, `nltk`, `numpy`, `joblib`, `pytest` | Sempre — inclui o pré-processamento e a extração de entidades |
-| `requirements-pln.txt` | `gensim`, `onnxruntime`, `tokenizers`, `huggingface_hub` | Somente para a inferência do classificador |
+| `requirements-pln.txt` | `torch`, `transformers` (encoder BERTimbau) | Somente para a inferência do classificador |
 
 | Biblioteca | Versão fixada | Papel na inferência |
 | --- | --- | --- |
@@ -4775,7 +4848,7 @@ As dependências do backend estão separadas em dois arquivos, e a separação t
 | `tokenizers` | 0.23.2 | Tokenização do encoder, independente de `transformers` |
 | `huggingface_hub` | 1.30.0 | Download do grafo ONNX e do tokenizador na primeira execução, com cache local |
 
-**Nem `torch` nem `transformers` são instalados.** O encoder roda em ONNX Runtime, pelo motivo e com as medições registradas na Seção 8.10.6. Um teste automatizado verifica que os dois módulos permanecem ausentes de `sys.modules` depois de uma classificação completa, de modo que uma dependência reintroduzida por engano seja detectada pela suíte e não pelo tamanho da imagem em produção.
+**Observação sobre a versão vigente.** A tabela acima descreve a lista de dependências da arquitetura histórica (ONNX Runtime). No classificador v2 em produção (Seção 8.11.10), o encoder BERTimbau roda por **PyTorch e Transformers**; portanto `torch` e `transformers` (fixados em `requirements-pln.txt`) são justamente as dependências necessárias, e o `onnxruntime` não faz parte do runtime atual.
 
 **O ambiente exige Python 3.13 ou anterior.** O `gensim` ainda não publica *wheel* para o 3.14 e a compilação a partir do fonte falha. A restrição vale para qualquer ambiente que execute a inferência, inclusive o de implantação previsto na Seção 6.2.
 
@@ -4965,29 +5038,20 @@ O terceiro delimita o alcance do mecanismo de contenção: **os dois limiares n�
 
 ### 8.11.7 Testes automatizados
 
-A coleta atual registra **208 testes no backend**. O núcleo de PLN responde por **91 casos coletados**; os 18 casos de `test_pipeline_api.py` verificam rapidamente o contrato HTTP e incluem a cadeia de áudio com classificação real e falhas controladas. Três cenários em `test_traceability.py` atravessam as entradas por texto e áudio até a persistência mínima, incluindo correlação da conversa e auditoria da falha do classificador. Tempos variam conforme o cache do snapshot ONNX e o ambiente de execução.
+A coleta atual registra **252 testes no backend**. A suíte cobre o classificador BERTimbau vigente, os contratos HTTP de texto e áudio e a persistência mínima. Os cenários de áudio incluem a cadeia STT → PLN com classificação real, falhas controladas e correlação por `conversation_id`. Tempos variam conforme o cache do snapshot do modelo e o ambiente de execução.
 
 | Arquivo | Testes | O que verifica |
 | --- | ---: | --- |
-| `test_nlp_preprocessing.py` | 20 | Cada opção da grade de pré-processamento, a `config_22` selecionada, a preservação de stopwords e a estabilidade dos tokens que o artefato espera |
+| `test_nlp_preprocessing.py` | 22 | Cada opção da grade de pré-processamento, a `config_22` selecionada, a preservação de stopwords e a estabilidade dos tokens que o artefato espera |
 | `test_nlp_entities.py` | 30 | Casamento por léxico e por padrão, insensibilidade a caixa e acento, resolução de sobreposição pelo termo mais longo, tipos ambíguos e posições no texto original |
 | `test_nlp_classifier.py` | 19 | Carregamento e validação do artefato, recusa de artefato incompleto, comportamento do classificador hierárquico e a exigência de que ele carregue **fora** do notebook |
-| `test_nlp_inference.py` | 22 | Classificação ponta a ponta, os três caminhos de roteamento, a coerência entre macrointenção e handler, a fidelidade às métricas do benchmark, a ausência de `torch` e o uso da mesma revisão imutável no grafo e tokenizador |
-| `test_pipeline_api.py` | 18 | Contrato de `POST /api/chat` e `POST /api/audio`: intenção e entidades no corpo, opt-out por `use_intent_classifier`, cadeia áudio → STT simulado → PLN real e falhas controladas do PLN e do provedor de resposta |
-| `test_traceability.py` | 13 | Contrato entre HTTP, classificador real, limiares, gerador substituído na fronteira e persistência mínima nas entradas por texto e áudio, incluindo correlação por `conversation_id` e auditoria da falha do classificador |
+| `test_nlp_inference.py` | 25 | Classificação ponta a ponta, roteamento, preservação de acentos e negação, revisão imutável do modelo BERTimbau e do tokenizador |
+| `test_pipeline_api.py` | 22 | Contrato de `POST /api/chat` e `POST /api/audio`, opt-out por `use_intent_classifier`, cadeia áudio → STT simulado → PLN real, proatividade e falhas controladas |
+| `test_traceability.py` | 14 | Contrato entre HTTP, classificador real e persistência mínima nas entradas por texto e áudio, incluindo identidade, correlação por `conversation_id` e auditoria da falha do classificador |
 
-**Quatro testes fazem a documentação e o código responderem um pelo outro.** Eles recalculam sobre o conjunto de teste os números registrados na Seção 8.10.3 e reprovam se houver divergência maior que 0,0002:
+Os testes de inferência verificam as métricas e os limiares do artefato vigente descrito na Seção 8.11.10. Os números da Seção 8.10.3 pertencem ao benchmark histórico e não são critérios para o classificador v2.
 
-| Teste | Valor exigido |
-| --- | --- |
-| `test_acuracia_da_intencao_no_teste` | 0,7383 |
-| `test_f1_macro_da_intencao_no_teste` | 0,7401 |
-| `test_efeito_dos_limiares_reproduz_a_documentacao` | 14 solicitações abaixo do limiar de macro, 305 no fluxo genérico, 0,8775 de acurácia entre as aceitas |
-| `test_limiares_sao_os_calibrados_na_validacao` | 0,550 e 0,700 |
-
-Sem eles, uma troca de artefato, uma alteração no pré-processamento ou uma atualização de biblioteca poderia mudar o comportamento do serviço sem que nada na suíte acusasse — e a Seção 8.10 passaria a descrever um modelo que não é mais o que roda.
-
-Três testes protegem decisões de implementação que não aparecem em métrica: `test_o_encoder_roda_sem_pytorch` verifica que `torch` e `transformers` continuam ausentes de `sys.modules` depois de uma classificação; `test_macro_e_intencao_nunca_saem_incoerentes` percorre todo o conjunto de teste confirmando que a saída jamais anuncia uma macrointenção e um handler de outra; e `test_bloco_desconhecido_e_recusado` garante que um bloco de representação não previsto falhe de forma explícita, em vez de produzir uma matriz de atributos silenciosamente errada.
+Os testes de inferência também verificam a coerência entre macrointenção e handler, a preservação de acentos e negação e a recusa de revisões mutáveis ou inválidas do BERTimbau.
 
 **Execução.**
 
@@ -4997,10 +5061,10 @@ cd src/backend
 ```
 
 ```text
-208 passed, 11 warnings
+252 passed, 11 warnings
 ```
 
-Quando `requirements-pln.txt` não está instalado, os testes de inferência são pulados com a razão declarada (`instale requirements-pln.txt`). O job `backend-api` da CI instala os dois arquivos de dependências, executa `test_nlp_inference.py` e `test_traceability.py` e mantém cache do snapshot imutável, portanto o cenário contratual não pode passar por *skip* silencioso.
+Quando `requirements-pln.txt` não está instalado, os testes de inferência são pulados com a razão declarada (`instale requirements-pln.txt`). O job `backend-api` da CI instala os dois arquivos de dependências, importa explicitamente `torch` e `transformers` como verificação obrigatória, executa `test_nlp_inference.py` e `test_traceability.py` e mantém cache do snapshot imutável, portanto o cenário contratual não pode passar por *skip* silencioso.
 
 **A suíte separa velocidade de evidência entre camadas.** A maior parte de `test_pipeline_api.py` substitui classificador e provedor gerador por duplos para verificar rapidamente campos, códigos HTTP e decisões de chamada. `test_audio_transcription_is_classified_by_real_classifier` mantém somente STT e Gemini nas fronteiras controladas e executa o classificador real. Em `test_traceability.py`, `test_chat_real_classifier_contract_and_minimal_persistence` e `test_audio_real_classifier_contract_and_minimal_persistence` não substituem `classify`: usam o artefato real, validam o contrato público e confirmam a gravação mínima. Azure STT, Gemini e o driver PostgreSQL são substituídos nas respectivas fronteiras para que a suíte permaneça determinística.
 
@@ -5107,6 +5171,14 @@ Exemplo resumido do contrato textual exposto por `POST /api/chat`:
 
 A Seção 8.4 registra a cobertura de teste correspondente e o que continua descoberto.
 
+### 8.11.10 Atualização operacional do classificador v2 — issue #251
+
+O serviço agora consome o mesmo artefato híbrido descrito na Seção 8.10.7. `app/nlp/inference.py` aplica os dois vetorizadores TF-IDF serializados, extrai os embeddings BERTimbau com PyTorch e Transformers, concatena os três blocos e delega a decisão ao classificador hierárquico calibrado. Assim, as referências anteriores a Word2Vec, ONNX Runtime, `config_22`, regressão logística e aos limiares 0,550/0,700 descrevem somente a versão histórica.
+
+A normalização do classificador vive em `normalizar_portugues`, em `app/nlp/preprocessing.py`, separada das rotinas legadas usadas pela extração de entidades. Testes unitários asseguram que `não`, `nao` e caracteres acentuados sejam preservados; testes de integração carregam o artefato real, reproduzem as métricas da Seção 8.10.7 e conferem os limiares 0,525/0,350. As dependências adicionais estão fixadas em `requirements-pln.txt` (`torch` e `transformers`). O custo operacional aumentou em relação à versão lexical/ONNX anterior, portanto o aquecimento na inicialização continua recomendado.
+
+O artefato versionado referencia classes importáveis de `app.nlp.classifier`, sem depender de símbolos definidos em `__main__`. O comando `treinar_classificador_intencoes_v2.py --reparar-artefato` corrige essa referência quando um novo treino for produzido, sem retreinar ou alterar os pesos.
+
 ## 8.12 Histórico da integração da interface web
 
 A issue #131 conectou a bancada React aos endpoints de texto e áudio, unificou ambos no pipeline de resposta e acrescentou os testes de componentes, contratos e navegador. A documentação operacional consolidada está na Seção 8.5 e no `src/frontend/README.md`; as evidências permanecem em `src/frontend/TESTES.md`. Esta nota histórica é mantida para rastreabilidade da entrega, sem repetir contratos, componentes ou instruções de execução.
@@ -5131,7 +5203,7 @@ As ferramentas escolhidas também respeitam os requisitos não funcionais já de
 
 ## 9.1 Testes Funcionais
 
-O plano de testes funcionais valida o comportamento observável definido pelos critérios de aceitação da Seção 3.1. A cobertura contempla RF01 a RF10: RF01 a RF08 formam o núcleo do MVP e devem ser executados sobre a versão entregue; RF09 e RF10 representam a evolução pós-MVP, mas permanecem planejados e rastreáveis para que sua implementação futura já tenha critérios objetivos. Enquanto essa evolução não estiver disponível, seus casos devem ser registrados como **bloqueados por funcionalidade não implementada**, nunca como aprovados sem execução. Cada requisito possui ao menos um cenário positivo, que confirma o fluxo esperado, e um cenário negativo, que exercita entrada inválida, ausência de dados, estado desabilitado ou rota não suportada.
+O plano de testes funcionais valida o comportamento observável definido pelos critérios de aceitação da Seção 3.1. A cobertura contempla RF01 a RF10, incluindo a proatividade controlada de RF09 e RF10 disponível na versão entregue. Cada requisito possui ao menos um cenário positivo, que confirma o fluxo esperado, e um cenário negativo, que exercita entrada inválida, ausência de dados, estado desabilitado ou rota não suportada.
 
 ### 9.1.1 Estratégia e preparação
 
@@ -5236,7 +5308,7 @@ O plano cobre os dez requisitos funcionais e os três regimes principais do prod
 
 A abrangência é adequada ao planejamento sistêmico porque cada critério de aceitação da Seção 3.1 aparece na matriz e é observado em pelo menos um resultado esperado. Ela não pretende substituir testes unitários de todas as funções nem combinações exaustivas de frases, perfis e documentos. Variações linguísticas e métricas quantitativas do classificador pertencem aos RNF06 e RNF07; desempenho, segurança, acessibilidade, usabilidade e confiabilidade quantitativa pertencem às Seções 9.2 e 9.3.
 
-RF09 e RF10 ficam fora da implementação obrigatória do MVP, mas não ficam fora do plano: seus quatro casos permanecem com resultado esperado explícito e serão marcados como bloqueados até a funcionalidade existir. A validação de voz do RF01 depende da disponibilidade do endpoint de áudio especificado na Seção 8.7. Enquanto ele não estiver implementado, o subcenário de áudio do CT-RF01-01 também fica bloqueado e deve ser registrado como tal; a aprovação integral de RF01 requer execução posterior, com a mesma expectativa de encaminhamento após transcrição.
+RF09 e RF10 possuem implementação observável pela interface e pela rota de confirmação, portanto seus casos devem ser executados e não podem mais ser marcados como bloqueados por ausência da funcionalidade. A validação de voz do RF01 segue condicionada à disponibilidade do endpoint de áudio especificado na Seção 8.7.
 
 ### 9.1.5 Resultados
 

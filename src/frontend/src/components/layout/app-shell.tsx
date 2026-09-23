@@ -30,6 +30,8 @@ export function AppShell() {
     status,
     intentLayerEnabled,
     setIntentLayerEnabled,
+    proactivityEnabled,
+    setProactivityEnabled,
     activeSources,
     selectedDocument,
     selectDocument,
@@ -41,6 +43,7 @@ export function AppShell() {
     setSidebarOpen,
     sendMessage,
     sendAudio,
+    resolveProactiveSuggestion,
     stop,
     error,
   } = useChatStore();
@@ -116,6 +119,9 @@ export function AppShell() {
                 selectDocument(id);
                 if (!isDesktop) setDocumentSheetOpen(true);
               }}
+              onResolveProactiveSuggestion={(messageId, decision) => {
+                void resolveProactiveSuggestion(messageId, decision);
+              }}
             />
           )}
         </div>
@@ -138,6 +144,8 @@ export function AppShell() {
           isSending={isSending}
           intentLayerEnabled={intentLayerEnabled}
           onIntentLayerChange={setIntentLayerEnabled}
+          proactivityEnabled={proactivityEnabled}
+          onProactivityChange={setProactivityEnabled}
         />
       </main>
 

@@ -2,20 +2,28 @@ import { AlertTriangle, AudioLines, Sparkles, User } from 'lucide-react';
 
 import { IntentBadge } from '@/components/chat/intent-badge';
 import { MarkdownMessage } from '@/components/chat/markdown-message';
+import { ProactiveSuggestion } from '@/components/chat/proactive-suggestion';
+import { ReportWorkflowCard } from '@/components/chat/report-workflow-card';
 import { SourceCitations } from '@/components/chat/source-citations';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatConfidence, formatDuration, formatTime } from '@/lib/format';
+import type { ProactiveDecision } from '@/lib/api';
 import type { ChatMessage } from '@/lib/domain';
 
 export function MessageBubble({
   message,
   selectedSourceId,
   onSelectSource,
+  onResolveProactiveSuggestion,
 }: {
   message: ChatMessage;
   selectedSourceId: string | null;
   onSelectSource: (id: string) => void;
+  onResolveProactiveSuggestion: (
+    messageId: string,
+    decision: ProactiveDecision,
+  ) => void;
 }) {
   if (message.role === 'user') {
     return <UserMessage message={message} />;
@@ -26,6 +34,7 @@ export function MessageBubble({
       message={message}
       selectedSourceId={selectedSourceId}
       onSelectSource={onSelectSource}
+      onResolveProactiveSuggestion={onResolveProactiveSuggestion}
     />
   );
 }
@@ -73,10 +82,15 @@ function AssistantMessage({
   message,
   selectedSourceId,
   onSelectSource,
+  onResolveProactiveSuggestion,
 }: {
   message: ChatMessage;
   selectedSourceId: string | null;
   onSelectSource: (id: string) => void;
+  onResolveProactiveSuggestion: (
+    messageId: string,
+    decision: ProactiveDecision,
+  ) => void;
 }) {
   const isError = message.status === 'error';
 
@@ -101,7 +115,10 @@ function AssistantMessage({
             <p className="mt-1 text-xs leading-5 text-fg-muted">{message.error}</p>
           </div>
         ) : (
-          <MarkdownMessage content={message.content} />
+          <>
+            <MarkdownMessage content={message.content} />
+            {message.workflow && <ReportWorkflowCard workflow={message.workflow} />}
+          </>
         )}
 
         {message.sources && (
@@ -109,6 +126,13 @@ function AssistantMessage({
             sources={message.sources}
             selectedId={selectedSourceId}
             onSelect={onSelectSource}
+          />
+        )}
+
+        {message.proactiveSuggestion && (
+          <ProactiveSuggestion
+            suggestion={message.proactiveSuggestion}
+            onResolve={(decision) => onResolveProactiveSuggestion(message.id, decision)}
           />
         )}
 

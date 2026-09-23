@@ -19,7 +19,9 @@
 /** `GeminiChatRequest`. `message` tem min_length=1 e max_length=20000. */
 export type ChatRequest = {
   message: string;
+  conversation_id?: string | null;
   use_intent_classifier?: boolean;
+  proactivity_enabled?: boolean;
   previous_interaction_id?: string | null;
 };
 
@@ -52,6 +54,27 @@ export type ChatSource = {
   excerpt?: string | null;
 };
 
+export type ProactiveSuggestion = {
+  suggestion_id: string;
+  intent: string;
+  description: string;
+  display_message: string;
+  requires_confirmation: boolean;
+};
+
+export type ProactiveDecision = 'accept' | 'decline';
+
+export type ProactiveConfirmationRequest = {
+  suggestion_id: string;
+  conversation_id: string;
+  decision: ProactiveDecision;
+};
+
+export type ProactiveConfirmationResponse = {
+  status: 'accepted' | 'declined';
+  result?: ChatResponse | null;
+};
+
 /** `GeminiChatResponse`. */
 export type ChatResponse = {
   intent?: AudioIntent | null;
@@ -64,6 +87,86 @@ export type ChatResponse = {
   retrieval_ms: number;
   usage: ChatUsage;
   sources: ChatSource[];
+  proactive_suggestion?: ProactiveSuggestion | null;
+  workflow?: WorkflowDirective | null;
+};
+
+export type WorkflowDirective = {
+  kind: 'guided_workflow';
+  action: 'start';
+  workflow: 'transacao_gerar_relatorio';
+  contract_version: string;
+  parameters: Record<string, unknown>;
+};
+
+export type WorkflowStep =
+  | 'scope_type'
+  | 'scope'
+  | 'period'
+  | 'audience'
+  | 'purpose'
+  | 'emphasis'
+  | 'additional_context'
+  | 'confirmation'
+  | 'execution';
+
+export type WorkflowOption = {
+  value: string;
+  label: string;
+  description?: string | null;
+};
+
+export type WorkflowQuestion = {
+  step: WorkflowStep;
+  prompt: string;
+  input_type: 'single_select' | 'multi_select' | 'date_range' | 'text';
+  required: boolean;
+  options: WorkflowOption[];
+};
+
+export type ReportArtifact = {
+  artifact_id: string;
+  file_name: string;
+  content_type: string;
+  size_bytes: number;
+  sha256: string;
+  download_url: string;
+  storage_provider: 'local' | 'supabase';
+  created_at: string;
+};
+
+export type ReportExecution = {
+  contract_version: string;
+  execution_id: string;
+  correlation_id: string;
+  status:
+    | 'queued'
+    | 'processing'
+    | 'completed'
+    | 'completed_with_warnings'
+    | 'failed'
+    | 'blocked'
+    | 'cancelled';
+  status_url: string;
+  artifact?: ReportArtifact | null;
+  warnings: string[];
+  error?: { code: string; message: string } | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type WorkflowSessionResponse = {
+  contract_version: string;
+  session_id: string;
+  workflow: 'transacao_gerar_relatorio';
+  status: 'active' | 'ready_for_confirmation' | 'executing' | 'completed' | 'cancelled';
+  current_step: WorkflowStep;
+  revision: number;
+  question?: WorkflowQuestion | null;
+  answers: Record<string, unknown>;
+  confirmation_summary?: string | null;
+  warnings: string[];
+  execution?: ReportExecution | null;
 };
 
 /* -------------------------------------------------------------------------

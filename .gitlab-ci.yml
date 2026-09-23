@@ -23,11 +23,12 @@ backend-api:
   variables:
     HF_HOME: "$CI_PROJECT_DIR/.cache/huggingface"
   cache:
-    key: huggingface-minilm-l12-v2-e8f8c211
+    key: REDACTED_FOR_PUBLIC_RELEASE
     paths:
       - .cache/huggingface/
   script:
     - pip install -r src/backend/requirements.txt -r src/backend/requirements-pln.txt
+    - python -c "import torch, transformers"
     - cd src/backend
     - python -m pytest app/tests/test_gemini_client.py app/tests/test_audio_upload.py app/tests/test_nlp_inference.py app/tests/test_pipeline_api.py app/tests/test_traceability.py -q
 

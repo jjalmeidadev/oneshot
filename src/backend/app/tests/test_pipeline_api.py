@@ -4,7 +4,13 @@ from types import SimpleNamespace
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
-from app.gemini.schemas import GeminiChatResponse, GeminiUsage
+from app.gemini.schemas import (
+    GeminiChatResponse,
+    GeminiUsage,
+    ProactiveConfirmationRequest,
+    ProactiveConfirmationResponse,
+)
+from app.pipeline import process_proactive_confirmation
 from app.gemini.client import GeminiAPIError, GeminiConfigurationError
 from app.audio import transcription
 from app.nlp.inference import get_classifier
@@ -30,7 +36,7 @@ class ProviderCall:
 @pytest.fixture
 def provider(monkeypatch):
     calls = []
-    def generate(request, intent=None, entities=None):
+    def generate(request, intent=None, entities=None, requester_id=None):
         calls.append(ProviderCall(request, intent=intent, entities=entities))
         return GeminiChatResponse(text="Resposta [Fonte 1]", model="teste", interaction_id="next-id",
             latency_ms=4, usage=GeminiUsage(input_tokens=2, output_tokens=3, total_tokens=5),
@@ -99,6 +105,120 @@ def test_text_true_toggle_classifies_and_returns_entities(provider, classifier):
     assert classifier == ['status do Linha 15-Prata']
     assert data['intent']['specific'] == 'consulta_status_projeto'
     assert data['entities'][0]['text'] == 'Linha 15-Prata'
+
+
+def test_text_proactivity_mode_reaches_rag_provider(provider, classifier):
+    with TestClient(app) as client:
+        result = client.post('/api/chat', json={
+            'message': 'status do Linha 15-Prata',
+            'conversation_id': 'conversation-250',
+            'proactivity_enabled': True,
+        }, headers=AUTH_HEADER)
+
+    assert result.status_code == 200
+    assert provider[0].proactivity_enabled is True
+
+
+def test_proactive_confirmation_route_accepts_only_bound_decision(monkeypatch):
+    captured = []
+
+    def confirm(request, *, requester_id):
+        captured.append((request, requester_id))
+        return ProactiveConfirmationResponse(status="declined")
+
+    monkeypatch.setattr("app.main.process_proactive_confirmation", confirm)
+    suggestion_id = "00000000-0000-0000-0000-000000000250"
+    with TestClient(app) as client:
+        result = client.post(
+            "/api/chat/proactive-confirmation",
+            headers=AUTH_HEADER,
+            json={
+                "suggestion_id": suggestion_id,
+                "conversation_id": "conversation-250",
+                "decision": "decline",
+            },
+        )
+        rejected = client.post(
+            "/api/chat/proactive-confirmation",
+            headers=AUTH_HEADER,
+            json={
+                "suggestion_id": suggestion_id,
+                "conversation_id": "conversation-250",
+                "decision": "accept",
+                "message": "execute outra coisa",
+            },
+        )
+
+    assert result.status_code == 200
+    assert result.json() == {"status": "declined", "result": None}
+    assert captured[0][0].suggestion_id == suggestion_id
+    assert captured[0][0].conversation_id == "conversation-250"
+    assert captured[0][0].decision == "decline"
+    assert captured[0][1]
+    assert rejected.status_code == 422
+    assert len(captured) == 1
+
+
+def test_proactive_confirmation_requires_identity_and_conversation():
+    suggestion_id = "00000000-0000-0000-0000-000000000250"
+    with TestClient(app) as client:
+        unauthenticated = client.post(
+            "/api/chat/proactive-confirmation",
+            json={
+                "suggestion_id": suggestion_id,
+                "conversation_id": "conversation-250",
+                "decision": "decline",
+            },
+        )
+        without_conversation = client.post(
+            "/api/chat/proactive-confirmation",
+            headers=AUTH_HEADER,
+            json={"suggestion_id": suggestion_id, "decision": "decline"},
+        )
+
+    assert unauthenticated.status_code == 401
+    assert without_conversation.status_code == 422
+
+
+def test_accepted_proactive_confirmation_is_traced_with_identity(monkeypatch):
+    result = GeminiChatResponse(
+        text="Resposta secundaria [Fonte 1]",
+        model="teste",
+        latency_ms=2,
+        usage=GeminiUsage(),
+        sources=[],
+    )
+    execution = SimpleNamespace(
+        response=ProactiveConfirmationResponse(status="accepted", result=result),
+        pending=SimpleNamespace(
+            conversation_id="conversation-250",
+            secondary_intent=SimpleNamespace(name="sugerir_agilizacao_projeto"),
+        ),
+    )
+    traces = []
+    monkeypatch.setattr(
+        "app.pipeline.execute_proactive_confirmation",
+        lambda request, requester_id: execution,
+    )
+    monkeypatch.setattr(
+        "app.pipeline.trace_interaction",
+        lambda **kwargs: traces.append(kwargs),
+    )
+
+    response = process_proactive_confirmation(
+        ProactiveConfirmationRequest(
+            suggestion_id="00000000-0000-0000-0000-000000000250",
+            conversation_id="conversation-250",
+            decision="accept",
+        ),
+        requester_id="entra-user-250",
+    )
+
+    assert response.result is result
+    assert traces[0]["requester_id"] == "entra-user-250"
+    assert traces[0]["request"].conversation_id == "conversation-250"
+    assert traces[0]["intent"].specific == "sugerir_agilizacao_projeto"
+    assert traces[0]["response"].text == result.text
 
 
 def test_text_false_toggle_opts_out_and_goes_direct_to_gemini(monkeypatch, provider):
