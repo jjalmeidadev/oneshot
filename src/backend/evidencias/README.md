@@ -34,15 +34,21 @@ protocolo.
 
 A 3ª rodada do RNF05, com cache quente e frio, mediu a árvore de `src/backend/app`
 do commit `d33d691`, cuja impressão digital é `71ee4895…`, a mesma gravada no
-[protocolo congelado](rnf05-rodada3/PROTOCOLO-CONGELADO.md) antes da execução. A
-branch recebeu a `develop` depois, por merge, e esse commit continua no histórico.
-Para conferir, a partir da raiz do repositório:
+[protocolo congelado](rnf05-rodada3/PROTOCOLO-CONGELADO.md) antes da execução. O
+commit está na branch `test/executar-rnf04-rnf05`, que recebeu a `develop` depois
+por merge, sem reescrever os commits medidos. Enquanto ele existir no repositório,
+a conferência é, a partir da raiz:
 
 ```bash
 git ls-tree -r --name-only d33d691 -- src/backend/app | LC_ALL=C sort \
   | while read f; do printf '%s  %s\n' "$(git show "d33d691:$f" | shasum -a 256 | cut -d' ' -f1)" "$f"; done \
   | shasum -a 256
 ```
+
+Como o grupo integra os merge requests com *squash*, o commit pode deixar de existir
+depois da integração. A referência que não depende dele é o manifesto por arquivo do
+protocolo congelado: comparado com a `develop`, mostra arquivo a arquivo o que mudou
+depois da medição.
 
 ## Todas as rodadas, em ordem
 
