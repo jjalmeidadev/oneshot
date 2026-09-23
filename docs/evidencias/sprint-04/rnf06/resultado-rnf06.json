@@ -56,13 +56,13 @@
     "sem_retreino": true,
     "status": "aprovado"
   },
-  "commit_execucao": "b827aa8ecda5693987040859595741021699f05a",
+  "commit_execucao": "3a489a30c8c805e160e465cba8c7db669aec5f3c",
   "conclusao": {
-    "observacao": "Ao menos um criterio do RNF06 ficou abaixo de 0,80.",
+    "observacao": "Os dois criterios do RNF06 foram atingidos.",
     "regra": "aprovado somente quando as duas metricas atingirem seus limiares",
-    "status": "reprovado"
+    "status": "aprovado"
   },
-  "executado_em": "2026-09-22T21:33:30-03:00",
+  "executado_em": "2026-09-23T13:05:26-03:00",
   "integridade_massas": [
     {
       "caminho": "src/notebooks/artefatos/dataset_intencoes.csv",
@@ -233,10 +233,12 @@
         "fontes_esperadas": [
           "base-atendimento:301"
         ],
-        "fontes_recuperadas": [],
+        "fontes_recuperadas": [
+          "base-atendimento:301"
+        ],
         "id": "CT-RNF06-N-01",
-        "recall": 0.0,
-        "status": "reprovado"
+        "recall": 1.0,
+        "status": "aprovado"
       },
       {
         "cenario": "desafio_lexical",
@@ -244,10 +246,12 @@
         "fontes_esperadas": [
           "base-atendimento:302"
         ],
-        "fontes_recuperadas": [],
+        "fontes_recuperadas": [
+          "base-atendimento:302"
+        ],
         "id": "CT-RNF06-N-02",
-        "recall": 0.0,
-        "status": "reprovado"
+        "recall": 1.0,
+        "status": "aprovado"
       },
       {
         "cenario": "desafio_lexical",
@@ -255,10 +259,12 @@
         "fontes_esperadas": [
           "base-atendimento:303"
         ],
-        "fontes_recuperadas": [],
+        "fontes_recuperadas": [
+          "base-atendimento:303"
+        ],
         "id": "CT-RNF06-N-03",
-        "recall": 0.0,
-        "status": "reprovado"
+        "recall": 1.0,
+        "status": "aprovado"
       },
       {
         "cenario": "desafio_lexical",
@@ -266,10 +272,12 @@
         "fontes_esperadas": [
           "comunicados-servico:201"
         ],
-        "fontes_recuperadas": [],
+        "fontes_recuperadas": [
+          "comunicados-servico:201"
+        ],
         "id": "CT-RNF06-N-04",
-        "recall": 0.0,
-        "status": "reprovado"
+        "recall": 1.0,
+        "status": "aprovado"
       },
       {
         "cenario": "desafio_lexical",
@@ -277,10 +285,12 @@
         "fontes_esperadas": [
           "comunicados-servico:202"
         ],
-        "fontes_recuperadas": [],
+        "fontes_recuperadas": [
+          "comunicados-servico:202"
+        ],
         "id": "CT-RNF06-N-05",
-        "recall": 0.0,
-        "status": "reprovado"
+        "recall": 1.0,
+        "status": "aprovado"
       },
       {
         "cenario": "desafio_lexical",
@@ -288,10 +298,12 @@
         "fontes_esperadas": [
           "comunicados-servico:203"
         ],
-        "fontes_recuperadas": [],
+        "fontes_recuperadas": [
+          "comunicados-servico:203"
+        ],
         "id": "CT-RNF06-N-06",
-        "recall": 0.0,
-        "status": "reprovado"
+        "recall": 1.0,
+        "status": "aprovado"
       },
       {
         "cenario": "desafio_lexical",
@@ -299,10 +311,12 @@
         "fontes_esperadas": [
           "procedimentos-operacionais:101"
         ],
-        "fontes_recuperadas": [],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:101"
+        ],
         "id": "CT-RNF06-N-07",
-        "recall": 0.0,
-        "status": "reprovado"
+        "recall": 1.0,
+        "status": "aprovado"
       },
       {
         "cenario": "desafio_lexical",
@@ -333,11 +347,11 @@
     ],
     "criterio_recall_at_3_minimo": 0.8,
     "fontes_relevantes": 18,
-    "fontes_relevantes_recuperadas": 11,
+    "fontes_relevantes_recuperadas": 18,
     "por_cenario": {
       "desafio_lexical": {
-        "recall_at_3": 0.222222,
-        "recuperadas": 2,
+        "recall_at_3": 1.0,
+        "recuperadas": 9,
         "relevantes": 9
       },
       "positivo": {
@@ -347,8 +361,8 @@
       }
     },
     "quantidade_casos": 18,
-    "recall_at_3": 0.611111,
-    "status": "reprovado",
+    "recall_at_3": 1.0,
+    "status": "aprovado",
     "top_k": 3
   }
 }
