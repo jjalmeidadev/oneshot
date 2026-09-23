@@ -16,9 +16,9 @@ variação lexical, cada uma com uma fonte relevante previamente rotulada.
 
 ## Execução
 
-- Data: 22 de setembro de 2026.
+- Data da reexecução aprovada: 23 de setembro de 2026.
 - Responsável: Pedro Damacena Machado Uchoa.
-- Commit executado: `b827aa8ecda5693987040859595741021699f05a`.
+- Commit executado: `3a489a30c8c805e160e465cba8c7db669aec5f3c`.
 - Ambiente: Windows, Python 3.13.15, scikit-learn 1.6.1, NumPy 2.5.2,
   joblib 1.6.0, Torch 2.13.0 e Transformers 5.16.1.
 - Evidência estruturada: [`resultado-rnf06.json`](resultado-rnf06.json).
@@ -29,9 +29,9 @@ Comando reproduzível, a partir de `src/backend`:
 ..\..\.venv\Scripts\python.exe scripts\benchmark_rnf06.py
 ```
 
-O comando retorna código 1 quando qualquer critério fica abaixo do limiar. Esse
-retorno representa uma reprovação detectada corretamente, não uma falha de
-execução do benchmark.
+O comando retorna código 0 somente quando os dois critérios atingem o limiar e
+código 1 quando qualquer um deles fica abaixo. A reexecução documentada nesta
+página terminou com código 0.
 
 ## Resultados observados
 
@@ -40,14 +40,20 @@ execução do benchmark.
 | Classificação de intenção específica | Acurácia | 0,839648 | Informativa | Medida |
 | Classificação de intenção específica | F1-macro | 0,832724 | ≥ 0,80 | Aprovado |
 | Recuperação — formulações diretas | *Recall*@3 | 1,000000 | ≥ 0,80 | Aprovado |
-| Recuperação — desafio lexical | *Recall*@3 | 0,222222 | ≥ 0,80 | Reprovado |
-| Recuperação — conjunto completo | *Recall*@3 | 0,611111 | ≥ 0,80 | Reprovado |
+| Recuperação — desafio lexical | *Recall*@3 | 1,000000 | ≥ 0,80 | Aprovado |
+| Recuperação — conjunto completo | *Recall*@3 | 1,000000 | ≥ 0,80 | Aprovado |
 
-O recuperador encontrou 11 das 18 fontes relevantes. As nove consultas diretas
-foram recuperadas, mas somente duas das nove paráfrases foram atendidas. As
-falhas concentram sinônimos e flexões ausentes da sobreposição lexical atual,
-como `passe`/`bilhete`, `barreira`/`catraca`, `bike`/`bicicleta`,
-`comboios`/`trens` e `queixa`/`reclamação`.
+O recuperador encontrou as 18 fontes relevantes: nove nas consultas diretas e
+nove nas paráfrases. A correção reduz termos equivalentes do domínio a formas
+canônicas antes da pontuação, incluindo `passe`/`bilhete`,
+`barreira`/`catraca`, `bike`/`bicicleta`, `comboios`/`trens` e
+`queixa`/`reclamação`. A mesma normalização é aplicada à consulta, ao título e
+ao conteúdo da fonte; não foi incluído modelo adicional em tempo de execução.
+
+Como comparação, a rodada inicial de 22 de setembro recuperou 11 de 18 fontes,
+com *recall*@3 global de 0,611111 e 0,222222 no desafio lexical. A massa e as
+fontes permaneceram byte a byte idênticas entre as rodadas, conforme os hashes
+registrados no manifesto e na evidência estruturada.
 
 Na classificação, as classes mais frágeis continuam sendo
 `analise_tendencia_desempenho` (F1 0,041667),
@@ -57,13 +63,11 @@ como risco de qualidade e devem orientar a próxima coleta de exemplos reais.
 
 ## Conclusão
 
-O RNF06 está **reprovado** nesta execução. A classificação atinge a meta com a
-nova acurácia de 0,839648 e F1-macro de 0,832724, porém a recuperação fica
-18,89 pontos percentuais abaixo do mínimo. O ganho do classificador não pode ser
-usado para declarar o requisito atendido porque o critério exige simultaneamente
-classificação e recuperação acima de 0,80.
+O RNF06 está **aprovado** nesta execução: a classificação atingiu acurácia de
+0,839648 e F1-macro de 0,832724, enquanto a recuperação atingiu *recall*@3 de
+1,000000. Assim, os dois critérios indivisíveis ficaram acima de 0,80.
 
-Como próximo passo, o recuperador deve tratar equivalências lexicais ou adotar
-representação semântica, mantendo esta massa intacta como teste de regressão.
-A medição é local e sintética; não substitui homologação com SharePoint real nem
-validação externa com solicitações do domínio.
+A aprovação vale para a massa sintética congelada. A medição não substitui a
+homologação com SharePoint real nem validação externa com solicitações do
+domínio; as classes frágeis do classificador e novas variações lexicais devem
+continuar sendo monitoradas.

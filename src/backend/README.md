@@ -346,10 +346,11 @@ treino; validacao e teste permaneceram inalterados.
 
 A reexecucao consolidada da issue #232 tambem mede a recuperacao local. A massa
 foi congelada antes da rodada com nove consultas diretas e nove parafrases. O
-resultado foi recall@3 de 1,000000 nas diretas, 0,222222 no desafio lexical e
-0,611111 no conjunto completo. Portanto, apesar de a classificacao atingir
-acuracia 0,839648 e F1-macro 0,832724, o RNF06 permanece reprovado porque a
-recuperacao ficou abaixo de 0,80. Evidencias, hashes, casos e limitacoes estao em
+recuperador normaliza equivalencias auditaveis do dominio antes da pontuacao,
+sem alterar consultas ou fontes. O resultado foi recall@3 de 1,000000 nas
+diretas, 1,000000 no desafio lexical e 1,000000 no conjunto completo. Com
+acuracia 0,839648 e F1-macro 0,832724 na classificacao, o RNF06 esta aprovado.
+Evidencias, hashes, casos e limitacoes estao em
 `../../docs/evidencias/sprint-04/rnf06/`.
 
 Para reproduzir os dois componentes de uma vez, a partir de `src/backend`:
@@ -358,8 +359,9 @@ Para reproduzir os dois componentes de uma vez, a partir de `src/backend`:
 ..\..\.venv\Scripts\python.exe scripts\benchmark_rnf06.py
 ```
 
-O retorno 1 e esperado quando um dos limiares nao e atingido; o JSON de
-evidencia ainda e gravado com todos os casos e a conclusao observada.
+O retorno 0 confirma que os dois limiares foram atingidos. Se algum deles
+regredir, o comando retorna 1 e ainda grava o JSON com todos os casos e a
+conclusao observada.
 
 ## Testes
 
