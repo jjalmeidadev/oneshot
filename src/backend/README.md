@@ -344,13 +344,17 @@ todos os exemplos antes de qualquer abstencao; e a classe
 global. Os 1.450 exemplos sinteticos adicionais foram usados exclusivamente no
 treino; validacao e teste permaneceram inalterados.
 
-A reexecucao consolidada da issue #232 tambem mede a recuperacao local. A massa
-foi congelada antes da rodada com nove consultas diretas e nove parafrases. O
-recuperador normaliza equivalencias auditaveis do dominio antes da pontuacao,
-sem alterar consultas ou fontes. O resultado foi recall@3 de 1,000000 nas
-diretas, 1,000000 no desafio lexical e 1,000000 no conjunto completo. Com
-acuracia 0,839648 e F1-macro 0,832724 na classificacao, o RNF06 esta aprovado.
-Evidencias, hashes, casos e limitacoes estao em
+A avaliacao prospectiva ampliada da issue #232 mede a recuperacao local com 72
+consultas novas, balanceadas entre nove fontes e oito variacoes linguisticas.
+A implementacao e a massa foram congeladas antes da unica execucao. O resultado
+foi recall@3 de 0,555556 (40/72), com intervalo de Wilson de 95% entre 0,440874
+e 0,664609. Embora a classificacao tenha obtido acuracia 0,839648 e F1-macro
+0,832724, o RNF06 esta reprovado porque a recuperacao ficou abaixo de 0,80.
+
+Uma rodada anterior marcou recall@3 de 1,000000 nos 18 casos usados para
+ajustar equivalencias lexicais. Esse valor e mantido somente como teste de
+regressao: como os erros da propria massa orientaram a mudanca, ele nao mede
+generalizacao. Evidencias, hashes, casos e limitacoes estao em
 `../../docs/evidencias/sprint-04/rnf06/`.
 
 Para reproduzir os dois componentes de uma vez, a partir de `src/backend`:

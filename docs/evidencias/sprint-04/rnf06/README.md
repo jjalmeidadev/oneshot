@@ -2,26 +2,31 @@
 
 ## Objetivo e protocolo
 
-Esta execução mede os dois critérios indivisíveis do RNF06: F1-macro mínimo
-de 0,80 na classificação de intenções e *recall*@3 mínimo de 0,80 na
-recuperação de informações. A massa, os limiares e os hashes foram congelados
-antes da execução em [`massa-congelada.json`](massa-congelada.json); nenhum
-exemplo foi removido, reclassificado ou incorporado ao treino após a medição.
+O RNF06 exige simultaneamente F1-macro mínimo de 0,80 na classificação de
+intenções e *recall*@3 mínimo de 0,80 na recuperação de informações. A
+avaliação prospectiva ampliada usa 72 consultas novas, oito por fonte e nove
+por tipo de variação linguística. A implementação, a massa, os limiares e os
+hashes foram congelados antes da execução em
+[`massa-congelada-v2.json`](massa-congelada-v2.json).
+
+A massa v2 não contém consultas idênticas às 18 da avaliação v1. Ela cobre
+paráfrases, sinônimos novos, formulações coloquiais e implícitas, erros leves,
+consultas curtas e longas e detalhes operacionais. A execução foi única: após
+observar o resultado, nem o recuperador nem a massa foram ajustados.
 
 A classificação usa as 1.135 solicitações do `split == teste`, o classificador
 versão 2 e o snapshot imutável
-`94d69c95f98f7d5b2a8700c420230ae10def0baa` do BERTimbau, sem retreino. A
-recuperação usa 18 consultas: nove formulações diretas e nove paráfrases com
-variação lexical, cada uma com uma fonte relevante previamente rotulada.
+`94d69c95f98f7d5b2a8700c420230ae10def0baa` do BERTimbau, sem retreino.
 
-## Execução
+## Execução prospectiva v2
 
-- Data da reexecução aprovada: 23 de setembro de 2026.
+- Data: 23 de setembro de 2026.
 - Responsável: Pedro Damacena Machado Uchoa.
-- Commit executado: `3a489a30c8c805e160e465cba8c7db669aec5f3c`.
+- Implementação congelada: `73e36def87e31b66a731d0d0939f9f6174b62206`.
+- Commit executado: `c627dd26525472d9ca3e2a9592abbca15059d5aa`.
 - Ambiente: Windows, Python 3.13.15, scikit-learn 1.6.1, NumPy 2.5.2,
   joblib 1.6.0, Torch 2.13.0 e Transformers 5.16.1.
-- Evidência estruturada: [`resultado-rnf06.json`](resultado-rnf06.json).
+- Evidência estruturada: [`resultado-rnf06-v2.json`](resultado-rnf06-v2.json).
 
 Comando reproduzível, a partir de `src/backend`:
 
@@ -29,9 +34,9 @@ Comando reproduzível, a partir de `src/backend`:
 ..\..\.venv\Scripts\python.exe scripts\benchmark_rnf06.py
 ```
 
-O comando retorna código 0 somente quando os dois critérios atingem o limiar e
-código 1 quando qualquer um deles fica abaixo. A reexecução documentada nesta
-página terminou com código 0.
+O comando retorna código 0 somente quando F1-macro, *recall*@3 pontual e o
+limite inferior do intervalo de confiança de Wilson a 95% atingem 0,80. A
+execução v2 terminou com código 1 e foi preservada sem nova tentativa.
 
 ## Resultados observados
 
@@ -39,35 +44,51 @@ página terminou com código 0.
 | --- | --- | ---: | ---: | --- |
 | Classificação de intenção específica | Acurácia | 0,839648 | Informativa | Medida |
 | Classificação de intenção específica | F1-macro | 0,832724 | ≥ 0,80 | Aprovado |
-| Recuperação — formulações diretas | *Recall*@3 | 1,000000 | ≥ 0,80 | Aprovado |
-| Recuperação — desafio lexical | *Recall*@3 | 1,000000 | ≥ 0,80 | Aprovado |
-| Recuperação — conjunto completo | *Recall*@3 | 1,000000 | ≥ 0,80 | Aprovado |
+| Recuperação — 72 consultas | *Recall*@3 | 0,555556 (40/72) | ≥ 0,80 | Reprovado |
+| Recuperação — incerteza amostral | IC de Wilson 95% | [0,440874; 0,664609] | Limite inferior ≥ 0,80 | Reprovado |
+| RNF06 consolidado | Critérios simultâneos | F1 0,832724; *recall*@3 0,555556 | ≥ 0,80 | **Reprovado** |
 
-O recuperador encontrou as 18 fontes relevantes: nove nas consultas diretas e
-nove nas paráfrases. A correção reduz termos equivalentes do domínio a formas
-canônicas antes da pontuação, incluindo `passe`/`bilhete`,
-`barreira`/`catraca`, `bike`/`bicicleta`, `comboios`/`trens` e
-`queixa`/`reclamação`. A mesma normalização é aplicada à consulta, ao título e
-ao conteúdo da fonte; não foi incluído modelo adicional em tempo de execução.
+O desempenho por variação foi:
 
-Como comparação, a rodada inicial de 22 de setembro recuperou 11 de 18 fontes,
-com *recall*@3 global de 0,611111 e 0,222222 no desafio lexical. A massa e as
-fontes permaneceram byte a byte idênticas entre as rodadas, conforme os hashes
-registrados no manifesto e na evidência estruturada.
+| Tipo de consulta | Acertos | *Recall*@3 |
+| --- | ---: | ---: |
+| Coloquial | 5/9 | 0,555556 |
+| Consulta curta | 3/9 | 0,333333 |
+| Consulta longa | 8/9 | 0,888889 |
+| Detalhe operacional | 8/9 | 0,888889 |
+| Erro leve | 5/9 | 0,555556 |
+| Formulação implícita | 4/9 | 0,444444 |
+| Paráfrase | 4/9 | 0,444444 |
+| Sinônimo novo | 3/9 | 0,333333 |
 
-Na classificação, as classes mais frágeis continuam sendo
-`analise_tendencia_desempenho` (F1 0,041667),
+Consultas curtas, sinônimos novos, formulações implícitas e paráfrases são os
+principais pontos de fragilidade. Na classificação, as classes mais frágeis
+continuam sendo `analise_tendencia_desempenho` (F1 0,041667),
 `consulta_indicadores_kpi` (0,587156) e `consulta_orcamento_custo` (0,676056).
-Essas fragilidades não derrubam o F1-macro global abaixo de 0,80, mas permanecem
-como risco de qualidade e devem orientar a próxima coleta de exemplos reais.
 
-## Conclusão
+## Interpretação das rodadas anteriores
 
-O RNF06 está **aprovado** nesta execução: a classificação atingiu acurácia de
-0,839648 e F1-macro de 0,832724, enquanto a recuperação atingiu *recall*@3 de
-1,000000. Assim, os dois critérios indivisíveis ficaram acima de 0,80.
+A linha de base v1, executada em 22 de setembro, recuperou 11 de 18 fontes e
+obteve *recall*@3 de 0,611111. Depois dela, o recuperador recebeu equivalências
+lexicais derivadas dos próprios erros dessa massa. A nova execução sobre os
+mesmos 18 casos chegou a 1,000000, mas esse valor mede apenas regressão dos
+casos já conhecidos: houve contaminação entre avaliação e ajuste, portanto ele
+não é evidência válida de generalização nem sustenta aprovação do RNF06.
 
-A aprovação vale para a massa sintética congelada. A medição não substitui a
-homologação com SharePoint real nem validação externa com solicitações do
-domínio; as classes frágeis do classificador e novas variações lexicais devem
-continuar sendo monitoradas.
+Os arquivos `massa-congelada.json` e `resultado-rnf06.json` permanecem
+versionados para rastreabilidade histórica. A conclusão vigente é determinada
+pela avaliação prospectiva v2.
+
+## Conclusão e limitações
+
+O RNF06 está **reprovado**: a classificação supera 0,80, porém a recuperação
+atinge *recall*@3 de 0,555556, com intervalo de confiança incompatível com o
+limiar. A implementação não deve ser ajustada com base nesses 72 casos e depois
+reavaliada na mesma massa; uma melhoria futura precisa usar dados de
+desenvolvimento separados e outro conjunto prospectivo ainda não observado.
+
+A v2 é mais confiável que a reexecução contaminada porque foi criada e
+congelada contra a implementação anterior e usada uma única vez. Ainda assim,
+ela foi escrita internamente e não de forma cega, usa fontes sintéticas locais
+e não substitui uma amostra externa de solicitações reais nem a homologação com
+o SharePoint do parceiro.
