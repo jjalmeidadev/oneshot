@@ -1,0 +1,111 @@
+id,pergunta,resposta,fontes_retornadas,rotulo,justificativa
+RNF04-P-01,Em quais dias e horarios o transporte de bicicleta e permitido?,"Com base nas regras fictícias do ambiente de demonstração (MVP), o transporte de bicicletas é permitido nos seguintes dias e horários:
+
+* **Sábados, domingos e feriados:** Durante toda a operação [Fonte 1].
+* **Dias úteis:** Apenas após as 20h30 [Fonte 1].
+
+*Observação fictícia do MVP:* O passageiro deve utilizar o último carro do trem e respeitar a capacidade informada pela equipe [Fonte 1]. 
+
+*(Lembrando que estas são informações simuladas para o ambiente de testes e não representam regras operacionais reais).*",Transporte de bicicleta | Atendimento a objeto perdido | Operacao assistida na Linha Azul,fundamentada,"Sabados/domingos/feriados toda a operacao, dias uteis apos 20h30 e ultimo carro: literal na Fonte 1."
+RNF04-P-02,Em qual carro do trem o passageiro deve levar a bicicleta?,"*Aviso: As informações a seguir são fictícias, destinadas exclusivamente ao ambiente de demonstração (MVP), e não representam regras operacionais reais do Metrô.*
+
+De acordo com as regras simuladas, o passageiro deve utilizar o **último carro** do trem para transportar a bicicleta, além de respeitar a capacidade indicada pela equipe [Fonte 1].",Transporte de bicicleta | Atendimento a objeto perdido | Campanha educativa de embarque,fundamentada,Ultimo carro e capacidade indicada pela equipe: Fonte 1.
+RNF04-P-03,O que fazer quando a leitura do bilhete digital falha na catraca?,"*Lembrando que esta é uma resposta baseada em dados fictícios para o ambiente de demonstração (MVP) e não representa uma informação operacional real.*
+
+Caso a leitura do bilhete digital falhe na catraca, as orientações são:
+
+1. Aumentar o brilho da tela do celular;
+2. Confirmar se o código está inteiramente visível;
+3. Procurar um agente de atendimento se o problema persistir [Fonte 1].",Uso do bilhete digital no MVP | Comunicacao de indisponibilidade de escada rolante | Atendimento a objeto perdido,fundamentada,"Brilho da tela, codigo visivel e agente de atendimento: Fonte 1, sem acrescimo."
+RNF04-P-04,Quais informacoes devem ser registradas no atendimento a um objeto perdido?,"*Lembrando que estas são informações simuladas e fictícias para o ambiente de demonstração (MVP), não representando dados operacionais reais.*
+
+De acordo com o procedimento fictício, no atendimento a um objeto perdido devem ser registradas as seguintes informações [Fonte 1]:
+
+* **Descrição do objeto**;
+* **Local** informado pelo passageiro;
+* **Horário** informado pelo passageiro.
+
+Além disso, deve-se consultar o registro local de achados e perdidos e fornecer um protocolo fictício ao passageiro [Fonte 1].",Atendimento a objeto perdido | Operacao assistida na Linha Azul | Uso do bilhete digital no MVP,fundamentada,"Descricao, local, horario, consulta ao registro e protocolo: Fonte 1."
+RNF04-P-05,Qual e o procedimento quando uma escada rolante fica indisponivel?,"*Aviso: As informações a seguir são dados fictícios e simulados para fins de demonstração (MVP), não correspondendo a procedimentos operacionais reais.*
+
+De acordo com os procedimentos simulados, quando uma escada rolante fica indisponível, deve-se adotar as seguintes etapas:
+
+1. **Sinalizar o equipamento** como indisponível [Fonte 1];
+2. **Indicar a alternativa acessível** mais próxima aos passageiros [Fonte 1];
+3. **Abrir um chamado** de manutenção [Fonte 1];
+4. **Atualizar o comunicado** ao passageiro sempre que houver alteração no status do chamado [Fonte 1].",Comunicacao de indisponibilidade de escada rolante | Atendimento a objeto perdido,fundamentada,"Sinalizar, indicar alternativa, abrir chamado e atualizar comunicado: os quatro na Fonte 1."
+RNF04-P-06,Como a equipe apoia um passageiro com mobilidade reduzida?,"*Lembrete: Estas informações são dados fictícios de demonstração para o MVP e não representam procedimentos operacionais reais.*
+
+De acordo com as diretrizes simuladas, o apoio ao passageiro com mobilidade reduzida deve seguir os seguintes passos [Fonte 1]:
+
+1. **Confirmação e comunicação:** Confirmar a estação de destino com o passageiro e comunicar a equipe fictícia de recepção no local de chegada.
+2. **Rotas e equipamentos:** Priorizar o uso de elevadores e das rotas acessíveis sinalizadas.
+3. **Contingência e registro:** Caso algum equipamento esteja indisponível, orientar o passageiro por uma rota alternativa cadastrada e realizar o registro do atendimento.",Apoio a passageiro com mobilidade reduzida | Atendimento a objeto perdido | Transporte de bicicleta,fundamentada,"Confirmar destino, comunicar recepcao, priorizar elevadores, rota alternativa e registro: Fonte 1."
+RNF04-P-07,Qual e o periodo da operacao assistida na Linha 1-Azul?,"*Lembrando que estes dados são fictícios para fins de demonstração (MVP) e não representam informações operacionais reais.*
+
+De acordo com as informações simuladas, o período de vigência da operação assistida na Linha 1-Azul é de **24/08/2026 a 28/08/2026**, com possibilidade de ampliação do intervalo entre trens entre as 22h e o encerramento da operação [Fonte 1].",Operacao assistida na Linha Azul | Transporte de bicicleta | Apoio a passageiro com mobilidade reduzida,fundamentada,"24/08/2026 a 28/08/2026 vindo de metadata.validity (correcao DEF-RNF04-01), mais a faixa 22h-encerramento do content_text. Ambos sustentados."
+RNF04-P-08,Em qual faixa de horario o intervalo entre trens pode ser ampliado na Linha 1-Azul?,"*Lembrando que estes dados são fictícios para o ambiente de demonstração (MVP) e não representam informações operacionais reais.*
+
+De acordo com o comunicado simulado, o intervalo entre trens na Linha 1-Azul poderá ser ampliado **entre 22h e o encerramento da operação** para a realização de testes de sinalização [Fonte 1].",Operacao assistida na Linha Azul | Atendimento a objeto perdido | Uso do bilhete digital no MVP,fundamentada,"Entre 22h e o encerramento da operacao, para testes de sinalizacao: Fonte 1."
+RNF04-P-09,Qual acesso os passageiros devem usar na Estacao Republica durante a manutencao?,"*Lembrando que estes dados são fictícios e fazem parte de um ambiente de demonstração (MVP), não representando informações operacionais reais.*
+
+Durante o período de manutenção, os passageiros devem utilizar o acesso da **Rua do Arouche**, seguindo a sinalização temporária instalada no local [Fonte 1].",Acesso alternativo na Estacao Republica | Atendimento a objeto perdido | Campanha educativa de embarque,fundamentada,Rua do Arouche e sinalizacao temporaria: Fonte 1.
+RNF04-P-10,Ate quando vale o comunicado de acesso alternativo da Estacao Republica?,"Com base nos dados simulados para este ambiente de demonstração, o comunicado de acesso alternativo na Estação República é válido até o dia **05/09/2026** (período de vigência de 20/08/2026 a 05/09/2026) [Fonte 1].
+
+*(Nota: Esta é uma informação fictícia para fins de teste do MVP e não representa dados operacionais reais do Metrô).*",Acesso alternativo na Estacao Republica | Apoio a passageiro com mobilidade reduzida | Atendimento a objeto perdido,fundamentada,"Ate 05/09/2026, vigencia 20/08 a 05/09/2026, de metadata.validity (correcao DEF-RNF04-01)."
+RNF04-P-11,O que a campanha educativa de embarque orienta os passageiros a fazer?,"Com base nos dados simulados para este ambiente de demonstração, a campanha educativa de embarque orienta os passageiros a:
+
+* Aguardar o desembarque antes de entrar no trem [Fonte 1];
+* Manter livre a faixa próxima das portas [Fonte 1].
+
+*(Nota: Estas são informações fictícias utilizadas apenas para fins de teste no MVP e não correspondem a orientações operacionais reais).*",Campanha educativa de embarque | Acesso alternativo na Estacao Republica | Apoio a passageiro com mobilidade reduzida,fundamentada,Aguardar o desembarque e manter livre a faixa das portas: literal na Fonte 1.
+RNF04-P-12,Quais dados sao solicitados ao registrar uma reclamacao?,"Com base nos dados fictícios para o ambiente de demonstração, ao registrar uma reclamação são solicitados os seguintes dados:
+
+* Estação;
+* Data;
+* Horário aproximado;
+* Descrição do ocorrido [Fonte 1].
+
+Além disso, orienta-se evitar o registro de dados pessoais desnecessários [Fonte 1]. 
+
+*(Nota: Estas informações são simuladas para o MVP e não representam dados operacionais reais).*",Canal de registro de sugestoes e reclamacoes | Atendimento a objeto perdido | Apoio a passageiro com mobilidade reduzida,fundamentada,"Estacao, data, horario aproximado, descricao e ressalva sobre dados pessoais: Fonte 1."
+RNF04-N-01,Qual e o avanco fisico atual do projeto PRJ-0442?,"O contexto fornecido não contém informações sobre o avanço físico atual do projeto PRJ-0442. 
+
+As informações disponíveis sobre o PRJ-0442 tratam apenas da programação de operação assistida na Linha 1-Azul com testes de sinalização entre 24/08/2026 e 28/08/2026 [Fonte 1].
+
+*(Nota: Estes são dados simulados para ambiente de demonstração/MVP e não representam informações operacionais reais).*",Operacao assistida na Linha Azul | Comunicacao de indisponibilidade de escada rolante | Atendimento a objeto perdido,fundamentada,"Declara que o contexto nao traz avanco fisico. Diz que 'as informacoes disponiveis SOBRE o PRJ-0442 tratam apenas da programacao da operacao assistida' — descreve o conteudo da fonte vinculada ao projeto, sem atribuir as datas ao projeto. Nenhum percentual inventado."
+RNF04-N-02,Qual e o custo previsto no TAP do projeto PRJ-0442?,"O contexto fornecido não contém informações suficientes para responder a essa pergunta. 
+
+Embora o projeto **PRJ-0442** seja mencionado na [Fonte 1], o registro trata apenas de comunicados sobre testes de sinalização e intervalos entre trens na Linha 1-Azul, não havendo dados sobre o TAP (Termo de Abertura do Projeto) ou sobre custos previstos. 
+
+*(Lembrando que estes são dados fictícios de um ambiente de demonstração).*",Operacao assistida na Linha Azul | Atendimento a objeto perdido,fundamentada,Declara ausencia de TAP e de custo e descreve corretamente a fonte. Nao cita os R$ 12.500.000 de outra tabela.
+RNF04-N-03,Quem e o gerente do projeto PRJ-0442?,"Com base nos dados fictícios fornecidos para este ambiente de demonstração, o contexto **não contém informações** sobre quem é o gerente do projeto PRJ-0442. 
+
+A única referência ao PRJ-0442 está em [[Fonte 1]], que descreve apenas detalhes sobre a operação assistida na Linha 1-Azul, período de vigência e testes de sinalização, sem especificar responsáveis ou gerentes.",Operacao assistida na Linha Azul | Apoio a passageiro com mobilidade reduzida | Atendimento a objeto perdido,fundamentada,"Declara ausencia do gerente; descreve a Fonte 1 como tratando da operacao assistida, sem atribuir responsavel. Nao cita 'Carlos Almeida'."
+RNF04-N-04,Quais riscos estao registrados para o projeto PRJ-0442?,"O contexto fornecido não é suficiente para responder quais riscos estão registrados para o projeto **PRJ-0442**.
+
+*(Nota: Estes dados são fictícios e destinados apenas a este ambiente de demonstração.)*
+
+O único registro",Operacao assistida na Linha Azul | Comunicacao de indisponibilidade de escada rolante | Acesso alternativo na Estacao Republica,fundamentada,"A recusa esta completa na primeira frase: 'o contexto fornecido nao e suficiente para responder quais riscos estao registrados'. A resposta foi TRUNCADA depois disso ('O unico registro'), defeito registrado a parte (DEF-RNF04-02). O trecho entregue nao afirma nada sem fonte."
+RNF04-N-05,Qual e a data planejada do proximo marco do projeto PRJ-0442?,"Com base nos dados fictícios de demonstração fornecidos, o contexto **não é suficiente** para",Operacao assistida na Linha Azul | Atendimento a objeto perdido | Canal de registro de sugestoes e reclamacoes,nao_fundamentada,"Resposta TRUNCADA no meio da frase: 'o contexto nao e suficiente para'. Sinaliza a limitacao e nao afirma nada falso, mas nao chega a completar a resposta. Rotulada de forma conservadora como nao_fundamentada, e nao como fundamentada. Ver DEF-RNF04-02."
+RNF04-N-06,Compare o avanco do projeto PRJ-0442 com o do projeto PRJ-0518.,"*Aviso: As informações a seguir são dados fictícios e simulados para este ambiente de demonstração (MVP), não representando dados operacionais reais do Metrô.*
+
+O contexto fornecido não é suficiente para comparar o avanço entre os projetos. 
+
+Embora haja menção ao **PRJ-0442** [Fonte 1] (que trata de uma operação assistida com testes de sinalização na Linha 1-Azul), o texto apenas informa seu status como ""Programado"" para o período de 24/08/2026 a 28/08/2026, sem detalhar métricas de avanço físico/financeiro. Além disso, não há nenhuma informação disponível sobre o projeto **PRJ-0518** no contexto recuperado.",Operacao assistida na Linha Azul | Atendimento a objeto perdido,alucinacao,"LIMITROFE, leitura estrita. Recusa corretamente a comparacao e declara que PRJ-0518 nao existe, mas afirma que o texto 'informa SEU status como Programado para o periodo de 24/08/2026 a 28/08/2026' — 'seu' referindo-se ao PRJ-0442. Status e periodo sao do COMUNICADO; o projeto esta 'em_andamento', de 15/01 a 20/12/2026 (public.projects). Mesma troca de entidade rotulada como alucinacao na rodada 2 (N-05), rotulada igual aqui por consistencia."
+RNF04-N-07,Qual e o valor atual da tarifa do metro?,"O contexto fornecido não contém informações sobre o valor atual da tarifa do metrô. 
+
+*(Nota: Este é um ambiente de demonstração com dados fictícios para o MVP e as fontes disponíveis [Fonte 1] e [Fonte 2] cobrem apenas procedimentos de achados e perdidos e indisponibilidade de escadas rolantes).*",Atendimento a objeto perdido | Comunicacao de indisponibilidade de escada rolante,fundamentada,Declara ausencia da tarifa e nomeia corretamente o que as fontes cobrem.
+RNF04-N-08,Qual e o horario de funcionamento da Linha 2-Verde?,"O contexto simulado fornecido para esta demonstração não contém informações sobre o horário de funcionamento da Linha 2-Verde.
+
+*(Nota: Este é um ambiente de demonstração baseado em dados fictícios para MVP e não representa informações operacionais reais.)*",Operacao assistida na Linha Azul | Acesso alternativo na Estacao Republica | Atendimento a objeto perdido,fundamentada,Declara ausencia do horario da Linha 2-Verde.
+RNF04-N-09,Quantos passageiros foram transportados em julho de 2026?,"O contexto fornecido não contém informações sobre o número de passageiros transportados em julho de 2026. 
+
+Lembrando que este é um ambiente de demonstração com dados simulados e os registros disponíveis abrangem apenas comunicados de serviço e procedimentos operacionais [Fonte 1, Fonte 2, Fonte 3].",Acesso alternativo na Estacao Republica | Atendimento a objeto perdido | Campanha educativa de embarque,fundamentada,Declara ausencia de dado de demanda; nenhum numero inventado.
+RNF04-N-10,As estacoes oferecem Wi-Fi gratuito aos passageiros?,O contexto fictício fornecido para esta demonstração não contém informações sobre a disponibilidade de Wi-Fi gratuito nas estações.,Acesso alternativo na Estacao Republica | Atendimento a objeto perdido | Campanha educativa de embarque,fundamentada,Declara ausencia de informacao sobre Wi-Fi.
+RNF04-N-11,Qual e a politica para transporte de animais de estimacao?,"O contexto fornecido não contém informações sobre a política para transporte de animais de estimação. 
+
+Lembrando que este é um ambiente de demonstração com dados fictícios para o MVP e as fontes disponíveis ([Fonte 1] e [Fonte 2]) cobrem apenas regras para transporte de bicicletas e procedimentos para objetos perdidos.",Transporte de bicicleta | Atendimento a objeto perdido,fundamentada,CASO-ARMADILHA VENCIDO. A regra de bicicleta foi recuperada e nao foi transposta para animais.
+RNF04-N-12,Quando a obra da Linha 6-Laranja sera concluida?,"O contexto fornecido não contém informações sobre a conclusão das obras da Linha 6-Laranja. 
+
+Lembrando que este é um ambiente de demonstração baseado em dados fictícios para o MVP e não reflete informações operacionais reais.",Operacao assistida na Linha Azul | Atendimento a objeto perdido | Comunicacao de indisponibilidade de escada rolante,fundamentada,Declara ausencia de informacao sobre a Linha 6-Laranja.
