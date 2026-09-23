@@ -1,0 +1,456 @@
+{
+  "versao": 2,
+  "descricao": "Holdout prospectivo da issue #232 para estimar recall@3 após congelar a implementação do recuperador.",
+  "protocolo": {
+    "implementacao_congelada_commit": "73e36def87e31b66a731d0d0939f9f6174b62206",
+    "implementacao_congelada_sha256": "a94108e5fefc2a4dc1a3cd1f246dae84b1f0959ea7b56959eede811855c41591",
+    "uso": "avaliacao_unica_sem_ajuste_posterior",
+    "independencia": "consultas novas, sem duplicatas da massa v1; autoria interna e não cega declarada como limitação",
+    "amostragem": "oito consultas por fonte, balanceadas em oito tipos de variação linguística",
+    "tipos_variacao": [
+      "parafrase",
+      "sinonimo_novo",
+      "coloquial",
+      "erro_leve",
+      "formulacao_implicita",
+      "consulta_curta",
+      "consulta_longa",
+      "detalhe_operacional"
+    ]
+  },
+  "top_k": 3,
+  "casos": [
+    {
+      "id": "CT-RNF06-H2-001",
+      "tipo_variacao": "parafrase",
+      "consulta": "O QR code do título de viagem no telefone não foi aceito na entrada",
+      "fontes_esperadas": ["base-atendimento:301"]
+    },
+    {
+      "id": "CT-RNF06-H2-002",
+      "tipo_variacao": "sinonimo_novo",
+      "consulta": "A passagem eletrônica no smartphone falhou ao liberar meu acesso",
+      "fontes_esperadas": ["base-atendimento:301"]
+    },
+    {
+      "id": "CT-RNF06-H2-003",
+      "tipo_variacao": "coloquial",
+      "consulta": "Meu celular não deixa passar pelo bloqueio da estação",
+      "fontes_esperadas": ["base-atendimento:301"]
+    },
+    {
+      "id": "CT-RNF06-H2-004",
+      "tipo_variacao": "erro_leve",
+      "consulta": "O bilhete digtal aparece cortado na tela e não passa",
+      "fontes_esperadas": ["base-atendimento:301"]
+    },
+    {
+      "id": "CT-RNF06-H2-005",
+      "tipo_variacao": "formulacao_implicita",
+      "consulta": "Minha tela está escura e o leitor não reconhece o código; o que faço?",
+      "fontes_esperadas": ["base-atendimento:301"]
+    },
+    {
+      "id": "CT-RNF06-H2-006",
+      "tipo_variacao": "consulta_curta",
+      "consulta": "QR no telefone recusado",
+      "fontes_esperadas": ["base-atendimento:301"]
+    },
+    {
+      "id": "CT-RNF06-H2-007",
+      "tipo_variacao": "consulta_longa",
+      "consulta": "Estou na estação e preciso entrar, mas o código eletrônico exibido no aparelho não é reconhecido pelo leitor",
+      "fontes_esperadas": ["base-atendimento:301"]
+    },
+    {
+      "id": "CT-RNF06-H2-008",
+      "tipo_variacao": "detalhe_operacional",
+      "consulta": "Devo aumentar o brilho para o código ficar totalmente visível?",
+      "fontes_esperadas": ["base-atendimento:301"]
+    },
+    {
+      "id": "CT-RNF06-H2-009",
+      "tipo_variacao": "parafrase",
+      "consulta": "Como formalizo uma manifestação sobre a qualidade do atendimento?",
+      "fontes_esperadas": ["base-atendimento:302"]
+    },
+    {
+      "id": "CT-RNF06-H2-010",
+      "tipo_variacao": "sinonimo_novo",
+      "consulta": "Quero enviar uma crítica e receber número de acompanhamento",
+      "fontes_esperadas": ["base-atendimento:302"]
+    },
+    {
+      "id": "CT-RNF06-H2-011",
+      "tipo_variacao": "coloquial",
+      "consulta": "Onde deixo meu feedback sobre o metrô?",
+      "fontes_esperadas": ["base-atendimento:302"]
+    },
+    {
+      "id": "CT-RNF06-H2-012",
+      "tipo_variacao": "erro_leve",
+      "consulta": "Preciso registra uma reclamaçao do atendimento",
+      "fontes_esperadas": ["base-atendimento:302"]
+    },
+    {
+      "id": "CT-RNF06-H2-013",
+      "tipo_variacao": "formulacao_implicita",
+      "consulta": "Fui mal atendido ontem e gostaria que o caso fosse acompanhado",
+      "fontes_esperadas": ["base-atendimento:302"]
+    },
+    {
+      "id": "CT-RNF06-H2-014",
+      "tipo_variacao": "consulta_curta",
+      "consulta": "Canal para manifestação",
+      "fontes_esperadas": ["base-atendimento:302"]
+    },
+    {
+      "id": "CT-RNF06-H2-015",
+      "tipo_variacao": "consulta_longa",
+      "consulta": "Desejo relatar uma experiência ruim, informando estação, dia e horário sem colocar dados pessoais desnecessários",
+      "fontes_esperadas": ["base-atendimento:302"]
+    },
+    {
+      "id": "CT-RNF06-H2-016",
+      "tipo_variacao": "detalhe_operacional",
+      "consulta": "Quais informações preciso fornecer para obter o protocolo da ocorrência?",
+      "fontes_esperadas": ["base-atendimento:302"]
+    },
+    {
+      "id": "CT-RNF06-H2-017",
+      "tipo_variacao": "parafrase",
+      "consulta": "Em quais períodos posso embarcar levando minha bicicleta?",
+      "fontes_esperadas": ["base-atendimento:303"]
+    },
+    {
+      "id": "CT-RNF06-H2-018",
+      "tipo_variacao": "sinonimo_novo",
+      "consulta": "É permitido viajar com uma magrela nos fins de semana?",
+      "fontes_esperadas": ["base-atendimento:303"]
+    },
+    {
+      "id": "CT-RNF06-H2-019",
+      "tipo_variacao": "coloquial",
+      "consulta": "Dá para entrar no trem com a bike hoje?",
+      "fontes_esperadas": ["base-atendimento:303"]
+    },
+    {
+      "id": "CT-RNF06-H2-020",
+      "tipo_variacao": "erro_leve",
+      "consulta": "Posso leva bicleta no feriado?",
+      "fontes_esperadas": ["base-atendimento:303"]
+    },
+    {
+      "id": "CT-RNF06-H2-021",
+      "tipo_variacao": "formulacao_implicita",
+      "consulta": "Estou de duas rodas e preciso usar o metrô depois do trabalho",
+      "fontes_esperadas": ["base-atendimento:303"]
+    },
+    {
+      "id": "CT-RNF06-H2-022",
+      "tipo_variacao": "consulta_curta",
+      "consulta": "Horário para ciclistas",
+      "fontes_esperadas": ["base-atendimento:303"]
+    },
+    {
+      "id": "CT-RNF06-H2-023",
+      "tipo_variacao": "consulta_longa",
+      "consulta": "Vou retornar para casa em um dia útil depois das oito e meia da noite e quero transportar minha bicicleta",
+      "fontes_esperadas": ["base-atendimento:303"]
+    },
+    {
+      "id": "CT-RNF06-H2-024",
+      "tipo_variacao": "detalhe_operacional",
+      "consulta": "Quem leva bicicleta deve ocupar o último carro?",
+      "fontes_esperadas": ["base-atendimento:303"]
+    },
+    {
+      "id": "CT-RNF06-H2-025",
+      "tipo_variacao": "parafrase",
+      "consulta": "A espera pelas composições da Linha 1 vai aumentar à noite?",
+      "fontes_esperadas": ["comunicados-servico:201"]
+    },
+    {
+      "id": "CT-RNF06-H2-026",
+      "tipo_variacao": "sinonimo_novo",
+      "consulta": "Haverá maior demora entre os veículos por causa dos ensaios de sinais?",
+      "fontes_esperadas": ["comunicados-servico:201"]
+    },
+    {
+      "id": "CT-RNF06-H2-027",
+      "tipo_variacao": "coloquial",
+      "consulta": "O metrô azul vai passar mais devagar no fim do dia?",
+      "fontes_esperadas": ["comunicados-servico:201"]
+    },
+    {
+      "id": "CT-RNF06-H2-028",
+      "tipo_variacao": "erro_leve",
+      "consulta": "Vai ter demora na lina azul depois das 22h?",
+      "fontes_esperadas": ["comunicados-servico:201"]
+    },
+    {
+      "id": "CT-RNF06-H2-029",
+      "tipo_variacao": "formulacao_implicita",
+      "consulta": "Preciso prever tempo extra de viagem antes do encerramento da operação",
+      "fontes_esperadas": ["comunicados-servico:201"]
+    },
+    {
+      "id": "CT-RNF06-H2-030",
+      "tipo_variacao": "consulta_curta",
+      "consulta": "Espera noturna na Linha 1",
+      "fontes_esperadas": ["comunicados-servico:201"]
+    },
+    {
+      "id": "CT-RNF06-H2-031",
+      "tipo_variacao": "consulta_longa",
+      "consulta": "Durante a operação assistida, quero saber se a frequência das composições muda entre dez da noite e o fechamento",
+      "fontes_esperadas": ["comunicados-servico:201"]
+    },
+    {
+      "id": "CT-RNF06-H2-032",
+      "tipo_variacao": "detalhe_operacional",
+      "consulta": "Os testes de sinalização exigem avisar tempo adicional de viagem?",
+      "fontes_esperadas": ["comunicados-servico:201"]
+    },
+    {
+      "id": "CT-RNF06-H2-033",
+      "tipo_variacao": "parafrase",
+      "consulta": "Qual entrada devo usar enquanto uma passagem da República estiver fechada?",
+      "fontes_esperadas": ["comunicados-servico:202"]
+    },
+    {
+      "id": "CT-RNF06-H2-034",
+      "tipo_variacao": "sinonimo_novo",
+      "consulta": "Existe outra rota para acessar a estação próxima à Praça da República?",
+      "fontes_esperadas": ["comunicados-servico:202"]
+    },
+    {
+      "id": "CT-RNF06-H2-035",
+      "tipo_variacao": "coloquial",
+      "consulta": "Por qual lado eu entro na República durante a obra?",
+      "fontes_esperadas": ["comunicados-servico:202"]
+    },
+    {
+      "id": "CT-RNF06-H2-036",
+      "tipo_variacao": "erro_leve",
+      "consulta": "A entrada da estaçao Republica mudou por manutençao?",
+      "fontes_esperadas": ["comunicados-servico:202"]
+    },
+    {
+      "id": "CT-RNF06-H2-037",
+      "tipo_variacao": "formulacao_implicita",
+      "consulta": "Cheguei ao portão bloqueado e preciso localizar outro caminho",
+      "fontes_esperadas": ["comunicados-servico:202"]
+    },
+    {
+      "id": "CT-RNF06-H2-038",
+      "tipo_variacao": "consulta_curta",
+      "consulta": "Entrada pela Rua do Arouche",
+      "fontes_esperadas": ["comunicados-servico:202"]
+    },
+    {
+      "id": "CT-RNF06-H2-039",
+      "tipo_variacao": "consulta_longa",
+      "consulta": "Vou usar as linhas Vermelha e Amarela e quero saber o caminho sinalizado enquanto ocorre a manutenção",
+      "fontes_esperadas": ["comunicados-servico:202"]
+    },
+    {
+      "id": "CT-RNF06-H2-040",
+      "tipo_variacao": "detalhe_operacional",
+      "consulta": "Até quando o acesso alternativo da República ficará sinalizado?",
+      "fontes_esperadas": ["comunicados-servico:202"]
+    },
+    {
+      "id": "CT-RNF06-H2-041",
+      "tipo_variacao": "parafrase",
+      "consulta": "É preciso esperar as pessoas saírem antes de embarcar?",
+      "fontes_esperadas": ["comunicados-servico:203"]
+    },
+    {
+      "id": "CT-RNF06-H2-042",
+      "tipo_variacao": "sinonimo_novo",
+      "consulta": "Qual é a etiqueta correta ao entrar na composição pela plataforma?",
+      "fontes_esperadas": ["comunicados-servico:203"]
+    },
+    {
+      "id": "CT-RNF06-H2-043",
+      "tipo_variacao": "coloquial",
+      "consulta": "Tenho que deixar o pessoal descer primeiro?",
+      "fontes_esperadas": ["comunicados-servico:203"]
+    },
+    {
+      "id": "CT-RNF06-H2-044",
+      "tipo_variacao": "erro_leve",
+      "consulta": "Como fazo para não atrapalhar o desenbarque?",
+      "fontes_esperadas": ["comunicados-servico:203"]
+    },
+    {
+      "id": "CT-RNF06-H2-045",
+      "tipo_variacao": "formulacao_implicita",
+      "consulta": "As portas abriram e há gente tentando entrar e sair ao mesmo tempo",
+      "fontes_esperadas": ["comunicados-servico:203"]
+    },
+    {
+      "id": "CT-RNF06-H2-046",
+      "tipo_variacao": "consulta_curta",
+      "consulta": "Prioridade de saída do trem",
+      "fontes_esperadas": ["comunicados-servico:203"]
+    },
+    {
+      "id": "CT-RNF06-H2-047",
+      "tipo_variacao": "consulta_longa",
+      "consulta": "Na hora de embarcar, quero saber onde aguardar para não bloquear o fluxo das pessoas que deixam o carro",
+      "fontes_esperadas": ["comunicados-servico:203"]
+    },
+    {
+      "id": "CT-RNF06-H2-048",
+      "tipo_variacao": "detalhe_operacional",
+      "consulta": "A faixa próxima às portas deve permanecer livre?",
+      "fontes_esperadas": ["comunicados-servico:203"]
+    },
+    {
+      "id": "CT-RNF06-H2-049",
+      "tipo_variacao": "parafrase",
+      "consulta": "Perdi um pertence durante a viagem; como faço a busca?",
+      "fontes_esperadas": ["procedimentos-operacionais:101"]
+    },
+    {
+      "id": "CT-RNF06-H2-050",
+      "tipo_variacao": "sinonimo_novo",
+      "consulta": "Encontrei uma bolsa esquecida e quero entregá-la ao responsável",
+      "fontes_esperadas": ["procedimentos-operacionais:101"]
+    },
+    {
+      "id": "CT-RNF06-H2-051",
+      "tipo_variacao": "coloquial",
+      "consulta": "Esqueci meu guarda-chuva no metrô, e agora?",
+      "fontes_esperadas": ["procedimentos-operacionais:101"]
+    },
+    {
+      "id": "CT-RNF06-H2-052",
+      "tipo_variacao": "erro_leve",
+      "consulta": "Onde procuro um pertence perdidio na estaçao?",
+      "fontes_esperadas": ["procedimentos-operacionais:101"]
+    },
+    {
+      "id": "CT-RNF06-H2-053",
+      "tipo_variacao": "formulacao_implicita",
+      "consulta": "A mochila não está mais comigo desde que desembarquei",
+      "fontes_esperadas": ["procedimentos-operacionais:101"]
+    },
+    {
+      "id": "CT-RNF06-H2-054",
+      "tipo_variacao": "consulta_curta",
+      "consulta": "Central de pertences",
+      "fontes_esperadas": ["procedimentos-operacionais:101"]
+    },
+    {
+      "id": "CT-RNF06-H2-055",
+      "tipo_variacao": "consulta_longa",
+      "consulta": "Quero informar local, horário e características de algo que desapareceu durante meu deslocamento",
+      "fontes_esperadas": ["procedimentos-operacionais:101"]
+    },
+    {
+      "id": "CT-RNF06-H2-056",
+      "tipo_variacao": "detalhe_operacional",
+      "consulta": "Recebo protocolo mesmo quando o item ainda não foi localizado?",
+      "fontes_esperadas": ["procedimentos-operacionais:101"]
+    },
+    {
+      "id": "CT-RNF06-H2-057",
+      "tipo_variacao": "parafrase",
+      "consulta": "Como solicitar assistência para uma pessoa com dificuldade de locomoção?",
+      "fontes_esperadas": ["procedimentos-operacionais:102"]
+    },
+    {
+      "id": "CT-RNF06-H2-058",
+      "tipo_variacao": "sinonimo_novo",
+      "consulta": "Preciso de suporte para um viajante com deficiência física",
+      "fontes_esperadas": ["procedimentos-operacionais:102"]
+    },
+    {
+      "id": "CT-RNF06-H2-059",
+      "tipo_variacao": "coloquial",
+      "consulta": "Tem alguém para ajudar quem anda com dificuldade?",
+      "fontes_esperadas": ["procedimentos-operacionais:102"]
+    },
+    {
+      "id": "CT-RNF06-H2-060",
+      "tipo_variacao": "erro_leve",
+      "consulta": "Preciso de rota acessivel para cadeirante",
+      "fontes_esperadas": ["procedimentos-operacionais:102"]
+    },
+    {
+      "id": "CT-RNF06-H2-061",
+      "tipo_variacao": "formulacao_implicita",
+      "consulta": "Não consigo usar escadas e preciso chegar à plataforma",
+      "fontes_esperadas": ["procedimentos-operacionais:102"]
+    },
+    {
+      "id": "CT-RNF06-H2-062",
+      "tipo_variacao": "consulta_curta",
+      "consulta": "Auxílio para locomoção",
+      "fontes_esperadas": ["procedimentos-operacionais:102"]
+    },
+    {
+      "id": "CT-RNF06-H2-063",
+      "tipo_variacao": "consulta_longa",
+      "consulta": "Minha acompanhante usa cadeira de rodas e precisamos confirmar uma rota sem barreiras até a estação de destino",
+      "fontes_esperadas": ["procedimentos-operacionais:102"]
+    },
+    {
+      "id": "CT-RNF06-H2-064",
+      "tipo_variacao": "detalhe_operacional",
+      "consulta": "A equipe de destino é avisada para receber o passageiro?",
+      "fontes_esperadas": ["procedimentos-operacionais:102"]
+    },
+    {
+      "id": "CT-RNF06-H2-065",
+      "tipo_variacao": "parafrase",
+      "consulta": "Como proceder quando o equipamento que liga os andares para de operar?",
+      "fontes_esperadas": ["procedimentos-operacionais:103"]
+    },
+    {
+      "id": "CT-RNF06-H2-066",
+      "tipo_variacao": "sinonimo_novo",
+      "consulta": "A escada mecânica está quebrada; existe outro percurso?",
+      "fontes_esperadas": ["procedimentos-operacionais:103"]
+    },
+    {
+      "id": "CT-RNF06-H2-067",
+      "tipo_variacao": "coloquial",
+      "consulta": "A escada travou, por onde eu vou?",
+      "fontes_esperadas": ["procedimentos-operacionais:103"]
+    },
+    {
+      "id": "CT-RNF06-H2-068",
+      "tipo_variacao": "erro_leve",
+      "consulta": "Escada rolante fora de funsionamento",
+      "fontes_esperadas": ["procedimentos-operacionais:103"]
+    },
+    {
+      "id": "CT-RNF06-H2-069",
+      "tipo_variacao": "formulacao_implicita",
+      "consulta": "O caminho automático entre os pisos está parado e preciso de uma alternativa",
+      "fontes_esperadas": ["procedimentos-operacionais:103"]
+    },
+    {
+      "id": "CT-RNF06-H2-070",
+      "tipo_variacao": "consulta_curta",
+      "consulta": "Equipamento de subida parado",
+      "fontes_esperadas": ["procedimentos-operacionais:103"]
+    },
+    {
+      "id": "CT-RNF06-H2-071",
+      "tipo_variacao": "consulta_longa",
+      "consulta": "Ao chegar à estação encontrei o equipamento de circulação vertical desligado e preciso saber qual rota acessível seguir",
+      "fontes_esperadas": ["procedimentos-operacionais:103"]
+    },
+    {
+      "id": "CT-RNF06-H2-072",
+      "tipo_variacao": "detalhe_operacional",
+      "consulta": "É necessário abrir chamado de manutenção e atualizar o aviso ao passageiro?",
+      "fontes_esperadas": ["procedimentos-operacionais:103"]
+    }
+  ]
+}
