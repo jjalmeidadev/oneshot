@@ -10,6 +10,7 @@ sem retreino sobre o split de teste e calcula recall@3 da recuperacao local.
 
 from __future__ import annotations
 
+import argparse
 import csv
 import hashlib
 import json
@@ -43,11 +44,14 @@ from app.rag.sharepoint import (  # noqa: E402
     load_sharepoint_documents,
     retrieve_sharepoint_context,
 )
+from app.rag.evaluation import wilson_interval  # noqa: E402
 
 
 EVIDENCE_DIR = REPO_ROOT / "docs" / "evidencias" / "sprint-04" / "rnf06"
 MANIFEST_PATH = EVIDENCE_DIR / "massa-congelada.json"
 OUTPUT_PATH = EVIDENCE_DIR / "resultado-rnf06.json"
+MANIFEST_V2_PATH = EVIDENCE_DIR / "massa-congelada-v2.json"
+OUTPUT_V2_PATH = EVIDENCE_DIR / "resultado-rnf06-v2.json"
 CLASSIFICATION_DATASET = (
     REPO_ROOT / "src" / "notebooks" / "artefatos" / "dataset_intencoes.csv"
 )
@@ -81,6 +85,8 @@ def validar_massas(manifesto: dict) -> list[dict]:
     entradas = list(manifesto["classificacao"]["arquivos"])
     entradas.extend(manifesto["recuperacao"]["fontes"])
     entradas.append(manifesto["recuperacao"]["massa"])
+    if "implementacao" in manifesto["recuperacao"]:
+        entradas.append(manifesto["recuperacao"]["implementacao"])
     for entrada in entradas:
         caminho = REPO_ROOT / entrada["caminho"]
         observado = _sha256(caminho)
@@ -100,7 +106,7 @@ def validar_massas(manifesto: dict) -> list[dict]:
     return registros
 
 
-def avaliar_classificacao() -> dict:
+def avaliar_classificacao(limiar: float = 0.8) -> dict:
     with CLASSIFICATION_DATASET.open(encoding="utf-8", newline="") as source:
         casos = [linha for linha in csv.DictReader(source) if linha["split"] == "teste"]
 
@@ -137,8 +143,8 @@ def avaliar_classificacao() -> dict:
         6,
     )
     return {
-        "status": "aprovado" if f1_macro >= 0.8 else "reprovado",
-        "criterio_f1_macro_minimo": 0.8,
+        "status": "aprovado" if f1_macro >= limiar else "reprovado",
+        "criterio_f1_macro_minimo": limiar,
         "quantidade": len(casos),
         "acuracia": acuracia,
         "f1_macro": f1_macro,
@@ -148,8 +154,13 @@ def avaliar_classificacao() -> dict:
     }
 
 
-def avaliar_recuperacao() -> dict:
-    massa = json.loads(RETRIEVAL_CASES.read_text(encoding="utf-8"))
+def avaliar_recuperacao(
+    massa_path: Path = RETRIEVAL_CASES,
+    *,
+    limiar_recall: float = 0.8,
+    limiar_confianca: float | None = None,
+) -> dict:
+    massa = json.loads(massa_path.read_text(encoding="utf-8"))
     documentos = load_sharepoint_documents()
     resultados = []
     agregados = defaultdict(lambda: {"relevantes": 0, "recuperadas": 0})
@@ -163,12 +174,13 @@ def avaliar_recuperacao() -> dict:
         recuperadas = [item.document.source_id for item in encontrados]
         esperadas = caso["fontes_esperadas"]
         acertos = len(set(esperadas) & set(recuperadas))
-        agregados[caso["cenario"]]["relevantes"] += len(esperadas)
-        agregados[caso["cenario"]]["recuperadas"] += acertos
+        estrato = caso.get("tipo_variacao") or caso.get("cenario", "sem_estrato")
+        agregados[estrato]["relevantes"] += len(esperadas)
+        agregados[estrato]["recuperadas"] += acertos
         resultados.append(
             {
                 "id": caso["id"],
-                "cenario": caso["cenario"],
+                "estrato": estrato,
                 "consulta": caso["consulta"],
                 "fontes_esperadas": esperadas,
                 "fontes_recuperadas": recuperadas,
@@ -180,40 +192,74 @@ def avaliar_recuperacao() -> dict:
     relevantes = sum(item["relevantes"] for item in agregados.values())
     recuperadas = sum(item["recuperadas"] for item in agregados.values())
     recall = round(recuperadas / relevantes, 6)
-    por_cenario = {
-        cenario: {
+    intervalo = wilson_interval(recuperadas, relevantes)
+    por_estrato = {
+        estrato: {
             **contagens,
             "recall_at_3": round(
                 contagens["recuperadas"] / contagens["relevantes"], 6
             ),
         }
-        for cenario, contagens in sorted(agregados.items())
+        for estrato, contagens in sorted(agregados.items())
     }
+    limite_inferior = round(intervalo[0], 6)
+    limite_superior = round(intervalo[1], 6)
+    confiabilidade_aprovada = (
+        limiar_confianca is None or limite_inferior >= limiar_confianca
+    )
     return {
-        "status": "aprovado" if recall >= 0.8 else "reprovado",
-        "criterio_recall_at_3_minimo": 0.8,
+        "status": "aprovado" if recall >= limiar_recall else "reprovado",
+        "criterio_recall_at_3_minimo": limiar_recall,
+        "confiabilidade": {
+            "metodo": "intervalo de Wilson bilateral de 95%",
+            "limite_inferior": limite_inferior,
+            "limite_superior": limite_superior,
+            "criterio_limite_inferior_minimo": limiar_confianca,
+            "status": "aprovado" if confiabilidade_aprovada else "reprovado",
+        },
         "top_k": massa["top_k"],
         "quantidade_casos": len(resultados),
         "fontes_relevantes": relevantes,
         "fontes_relevantes_recuperadas": recuperadas,
         "recall_at_3": recall,
-        "por_cenario": por_cenario,
+        "por_estrato": por_estrato,
         "casos": resultados,
     }
 
 
-def main() -> int:
-    manifesto = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+def main(
+    manifest_path: Path = MANIFEST_V2_PATH,
+    output_path: Path = OUTPUT_V2_PATH,
+) -> int:
+    manifesto = json.loads(manifest_path.read_text(encoding="utf-8"))
     integridade = validar_massas(manifesto)
-    classificacao = avaliar_classificacao()
-    recuperacao = avaliar_recuperacao()
-    aprovado = (
+    criterios = manifesto["criterios"]
+    classificacao = avaliar_classificacao(
+        criterios["classificacao_f1_macro_minimo"]
+    )
+    recuperacao = avaliar_recuperacao(
+        REPO_ROOT / manifesto["recuperacao"]["massa"]["caminho"],
+        limiar_recall=criterios["recuperacao_recall_at_3_minimo"],
+        limiar_confianca=criterios.get(
+            "recuperacao_limite_inferior_wilson_95_minimo"
+        ),
+    )
+    rnf06_aprovado = (
         classificacao["status"] == "aprovado"
         and recuperacao["status"] == "aprovado"
     )
+    confiabilidade_aprovada = (
+        recuperacao["confiabilidade"]["status"] == "aprovado"
+    )
+    aprovado = rnf06_aprovado and confiabilidade_aprovada
 
     evidencia = {
         "issue": 232,
+        "protocolo": {
+            "tipo_avaliacao": manifesto.get("tipo_avaliacao", "legado"),
+            "manifesto": str(manifest_path.relative_to(REPO_ROOT)),
+            "limitacao": manifesto.get("limitacao"),
+        },
         "executado_em": datetime.now(ZoneInfo("America/Sao_Paulo")).isoformat(
             timespec="seconds"
         ),
@@ -234,24 +280,33 @@ def main() -> int:
         "recuperacao": recuperacao,
         "conclusao": {
             "status": "aprovado" if aprovado else "reprovado",
-            "regra": manifesto["criterios"]["regra_final"],
+            "status_rnf06": "aprovado" if rnf06_aprovado else "reprovado",
+            "status_confiabilidade": (
+                "aprovado" if confiabilidade_aprovada else "reprovado"
+            ),
+            "regra": criterios.get("regra_rnf06")
+            or criterios.get("regra_final"),
             "observacao": (
-                "Os dois criterios do RNF06 foram atingidos."
+                "Os criterios do RNF06 e de confiabilidade foram atingidos."
                 if aprovado
-                else "Ao menos um criterio do RNF06 ficou abaixo de 0,80."
+                else "Ao menos um criterio do RNF06 ou de confiabilidade falhou."
             ),
         },
     }
-    OUTPUT_PATH.write_text(
+    output_path.write_text(
         json.dumps(evidencia, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
     print(json.dumps(evidencia["classificacao"], ensure_ascii=False, indent=2))
     print(json.dumps(evidencia["recuperacao"], ensure_ascii=False, indent=2))
     print(json.dumps(evidencia["conclusao"], ensure_ascii=False, indent=2))
-    print(f"Evidencia gravada em {OUTPUT_PATH.relative_to(REPO_ROOT)}")
+    print(f"Evidencia gravada em {output_path.relative_to(REPO_ROOT)}")
     return 0 if aprovado else 1
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--manifest", type=Path, default=MANIFEST_V2_PATH)
+    parser.add_argument("--output", type=Path, default=OUTPUT_V2_PATH)
+    args = parser.parse_args()
+    raise SystemExit(main(args.manifest, args.output))
