@@ -13,6 +13,7 @@ from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 
 from app.audio.errors import AudioError, AudioMissingError, AudioTooLargeError
+from app.database.connection import close_database_pool
 from app.audio.schemas import AudioErrorResponse, AudioUploadResponse
 from app.audio.schemas import AudioAnswer, AudioAnswerSource
 from app.audio.security import resolve_identity, single_request_per_identity
@@ -65,6 +66,7 @@ async def lifespan(_app: FastAPI):
     if os.getenv("PLN_WARMUP", "0") == "1":
         await run_in_threadpool(warmup_classifier)
     yield
+    await run_in_threadpool(close_database_pool)
 
 
 app = FastAPI(
