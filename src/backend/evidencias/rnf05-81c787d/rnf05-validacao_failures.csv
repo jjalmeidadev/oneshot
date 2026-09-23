@@ -1,0 +1,2 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+POST,POST /api/chat [simples],CatchResponseError('HTTP 429'),1,2026-09-21T20:30:42Z,2026-09-21T20:30:42Z

@@ -92,6 +92,7 @@ def test_retrieves_source_extracts_from_database(monkeypatch):
                 "base-atendimento/303#Conteudo",
                 None,
                 None,
+                {"validity": {"start": "2026-08-20", "end": "2026-09-05"}, "status": "Publicado", "line": "Todas", "category": "Regras de uso"},
                 4.5,
             )
         ]
@@ -107,6 +108,11 @@ def test_retrieves_source_extracts_from_database(monkeypatch):
     assert results[0].document.title == "Transporte de bicicleta"
     assert results[0].document.list_name == "Base de Atendimento"
     assert results[0].score == 4.5
+    # DEF-RNF04-01: vigencia, status, linha e categoria vivem em
+    # source_extracts.metadata e precisam sobreviver ate o prompt.
+    assert ("Vigencia", "de 2026-08-20 a 2026-09-05") in results[0].document.attributes
+    assert ("Status", "Publicado") in results[0].document.attributes
+    assert "se.metadata" in connection.cursor_instance.executed_query
     assert "source_extracts" in connection.cursor_instance.executed_query
     assert "project_artifacts" in connection.cursor_instance.executed_query
     assert connection.closed is True
@@ -170,6 +176,7 @@ def test_database_results_are_compatible_with_gemini_source(monkeypatch):
                         "base-atendimento/303#Conteudo",
                         None,
                         None,
+                        {"validity": {"start": "2026-08-20", "end": "2026-09-05"}, "status": "Publicado", "line": "Todas", "category": "Regras de uso"},
                         3.0,
                 )
             ]
