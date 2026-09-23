@@ -37,6 +37,15 @@ DEFAULT_MAX_RETRIES = 3
 DEFAULT_RETRY_BASE_DELAY_SECONDS = 2.0
 RETRYABLE_HTTP_STATUS_CODES = frozenset({408, 429, 500, 502, 503, 504})
 VALID_THINKING_LEVELS = frozenset({"minimal", "low", "medium", "high"})
+
+#: Provedores de LLM aceitos em `LLM_PROVIDER`. O padrao continua sendo o Gemini
+#: direto; o OpenRouter entra como alternativa selecionada por configuracao.
+LLM_PROVIDER_GEMINI = "gemini"
+LLM_PROVIDER_OPENROUTER = "openrouter"
+VALID_LLM_PROVIDERS = frozenset({LLM_PROVIDER_GEMINI, LLM_PROVIDER_OPENROUTER})
+
+OPENROUTER_CHAT_URL = "https://openrouter.ai/api/v1/chat/completions"
+DEFAULT_OPENROUTER_MODEL = "google/gemini-3.7-flash"
 logger = logging.getLogger(__name__)
 
 
@@ -56,11 +65,7 @@ def generate_chat_response(
     entities: list[PublicEntity] | None = None,
     requester_id: str | None = None,
 ) -> GeminiChatResponse:
-    api_key = os.getenv("GEMINI_API_KEY", "").strip()
-    if not api_key:
-        raise GeminiConfigurationError(
-            "A chave GEMINI_API_KEY nao foi configurada no backend."
-        )
+    api_key = _api_key()
 
     retrieval_started_at = perf_counter()
     secondary_intent = _resolve_secondary_safely(request, intent)
@@ -90,50 +95,18 @@ def generate_chat_response(
             sources=[],
         )
 
-    model = os.getenv("GEMINI_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
-    payload: dict[str, object] = {
-        "model": model,
-        "input": build_rag_input(request.message, retrieved_documents),
-        "store": True,
-        "generation_config": {
-            "max_output_tokens": _max_output_tokens(),
-            "thinking_level": _thinking_level(),
-        },
-    }
-    if request.previous_interaction_id:
-        payload["previous_interaction_id"] = request.previous_interaction_id
-
-    http_request = Request(
-        GEMINI_INTERACTIONS_URL,
-        data=json.dumps(payload).encode("utf-8"),
-        headers={
-            "Content-Type": "application/json",
-            "x-goog-api-key": api_key,
-        },
-        method="POST",
+    llm = _call_llm(
+        build_rag_input(request.message, retrieved_documents),
+        api_key=api_key,
+        previous_interaction_id=request.previous_interaction_id,
     )
-
-    started_at = perf_counter()
-    response_data = _send_request_with_retry(http_request)
-
-    latency_ms = round((perf_counter() - started_at) * 1000)
-    text = _extract_text(response_data)
-    if not text:
-        raise GeminiAPIError("O Gemini nao retornou conteudo de texto.")
-
-    usage_data = response_data.get("usage", {})
     return GeminiChatResponse(
-        text=text,
-        model=str(response_data.get("model") or model),
-        interaction_id=response_data.get("id"),
-        latency_ms=latency_ms,
+        text=llm.text,
+        model=llm.model,
+        interaction_id=llm.interaction_id,
+        latency_ms=llm.latency_ms,
         retrieval_ms=retrieval_ms,
-        usage=GeminiUsage(
-            input_tokens=_as_int(usage_data.get("total_input_tokens")),
-            output_tokens=_as_int(usage_data.get("total_output_tokens")),
-            thought_tokens=_as_int(usage_data.get("total_thought_tokens")),
-            total_tokens=_as_int(usage_data.get("total_tokens")),
-        ),
+        usage=llm.usage,
         sources=_public_sources(retrieved_documents),
         trace_sources=[
             _trace_source_payload(result, citation_order=index)
@@ -214,27 +187,108 @@ def confirm_proactive_suggestion(
 def _generate_confirmed_proactive_response(
     pending: PendingProactiveSuggestion,
 ) -> GeminiChatResponse:
-    api_key = os.getenv("GEMINI_API_KEY", "").strip()
-    if not api_key:
-        raise GeminiConfigurationError(
-            "A chave GEMINI_API_KEY nao foi configurada no backend."
-        )
+    api_key = _api_key()
 
-    model = os.getenv("GEMINI_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
-    payload = {
-        "model": model,
-        "input": build_confirmed_proactive_input(
+    llm = _call_llm(
+        build_confirmed_proactive_input(
             pending.original_message,
             list(pending.sources),
             confirmed_intent=pending.secondary_intent.name,
             instruction=pending.secondary_intent.rag_instruction,
         ),
+        api_key=api_key,
+    )
+    return GeminiChatResponse(
+        text=llm.text,
+        model=llm.model,
+        interaction_id=llm.interaction_id,
+        latency_ms=llm.latency_ms,
+        usage=llm.usage,
+        sources=_public_sources(pending.sources),
+        trace_sources=[
+            _trace_source_payload(result, citation_order=index)
+            for index, result in enumerate(pending.sources, start=1)
+        ],
+    )
+
+
+@dataclass(frozen=True)
+class _LLMResult:
+    """Resposta do provedor ja normalizada, independente de quem a produziu."""
+
+    text: str
+    model: str
+    interaction_id: str | None
+    latency_ms: int
+    usage: GeminiUsage
+
+
+def _provider() -> str:
+    """Provedor configurado em `LLM_PROVIDER`; Gemini direto quando ausente.
+
+    Valor desconhecido e erro de configuracao, nao queda silenciosa para o
+    padrao: um `LLM_PROVIDER=openrotuer` que caisse no Gemini sem avisar faria a
+    equipe medir um provedor achando que mede outro.
+    """
+
+    value = os.getenv("LLM_PROVIDER", LLM_PROVIDER_GEMINI).strip().lower()
+    if value not in VALID_LLM_PROVIDERS:
+        raise GeminiConfigurationError(
+            f"LLM_PROVIDER invalido: use {', '.join(sorted(VALID_LLM_PROVIDERS))}."
+        )
+    return value
+
+
+def _api_key() -> str:
+    name = (
+        "OPENROUTER_API_KEY"
+        if _provider() == LLM_PROVIDER_OPENROUTER
+        else "GEMINI_API_KEY"
+    )
+    api_key = os.getenv(name, "").strip()
+    if not api_key:
+        raise GeminiConfigurationError(
+            f"A chave {name} nao foi configurada no backend."
+        )
+    return api_key
+
+
+def _call_llm(
+    prompt: str,
+    *,
+    api_key: str,
+    previous_interaction_id: str | None = None,
+) -> _LLMResult:
+    """Unico ponto de chamada ao LLM, compartilhado pelas duas rotas do cliente."""
+
+    if _provider() == LLM_PROVIDER_OPENROUTER:
+        return _call_openrouter(prompt, api_key=api_key)
+    return _call_gemini(
+        prompt,
+        api_key=api_key,
+        previous_interaction_id=previous_interaction_id,
+    )
+
+
+def _call_gemini(
+    prompt: str,
+    *,
+    api_key: str,
+    previous_interaction_id: str | None,
+) -> _LLMResult:
+    model = os.getenv("GEMINI_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
+    payload: dict[str, object] = {
+        "model": model,
+        "input": prompt,
         "store": True,
         "generation_config": {
             "max_output_tokens": _max_output_tokens(),
             "thinking_level": _thinking_level(),
         },
     }
+    if previous_interaction_id:
+        payload["previous_interaction_id"] = previous_interaction_id
+
     http_request = Request(
         GEMINI_INTERACTIONS_URL,
         data=json.dumps(payload).encode("utf-8"),
@@ -247,12 +301,13 @@ def _generate_confirmed_proactive_response(
     started_at = perf_counter()
     response_data = _send_request_with_retry(http_request)
     latency_ms = round((perf_counter() - started_at) * 1000)
+
     text = _extract_text(response_data)
     if not text:
         raise GeminiAPIError("O Gemini nao retornou conteudo de texto.")
 
     usage_data = response_data.get("usage", {})
-    return GeminiChatResponse(
+    return _LLMResult(
         text=text,
         model=str(response_data.get("model") or model),
         interaction_id=response_data.get("id"),
@@ -263,12 +318,99 @@ def _generate_confirmed_proactive_response(
             thought_tokens=_as_int(usage_data.get("total_thought_tokens")),
             total_tokens=_as_int(usage_data.get("total_tokens")),
         ),
-        sources=_public_sources(pending.sources),
-        trace_sources=[
-            _trace_source_payload(result, citation_order=index)
-            for index, result in enumerate(pending.sources, start=1)
-        ],
     )
+
+
+def _call_openrouter(prompt: str, *, api_key: str) -> _LLMResult:
+    """Chama o modelo pelo endpoint compativel com OpenAI do OpenRouter.
+
+    Diferencas em relacao ao Gemini direto, todas deliberadas:
+
+    - o prompt vai inteiro como uma mensagem de usuario, exatamente o mesmo
+      texto que o Gemini recebe em `input`, para que trocar de provedor nao mude
+      o que o modelo le;
+    - `thinking_level` vira `reasoning.effort`, que e como o OpenRouter expoe o
+      mesmo controle;
+    - **nao ha continuidade de conversa.** O OpenRouter nao guarda estado entre
+      chamadas, entao `previous_interaction_id` nao tem equivalente e e
+      ignorado. Cada pergunta e respondida sem o historico. E uma limitacao
+      real deste provedor e precisa ser considerada antes de adota-lo no MVP.
+    """
+
+    model = (
+        os.getenv("OPENROUTER_MODEL", DEFAULT_OPENROUTER_MODEL).strip()
+        or DEFAULT_OPENROUTER_MODEL
+    )
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": _max_output_tokens(),
+        "reasoning": {"effort": _thinking_level()},
+    }
+    http_request = Request(
+        OPENROUTER_CHAT_URL,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
+            "X-Title": "Oneshot - Agente de Portfolio do Metro",
+        },
+        method="POST",
+    )
+    started_at = perf_counter()
+    response_data = _send_request_with_retry(http_request)
+    latency_ms = round((perf_counter() - started_at) * 1000)
+
+    text = _extract_openrouter_text(response_data)
+    if not text:
+        raise GeminiAPIError("O provedor nao retornou conteudo de texto.")
+
+    # Os tokens de raciocinio consomem o mesmo `max_tokens` do texto visivel:
+    # numa chamada medida, 245 dos 287 tokens de saida foram raciocinio. Quando
+    # o modelo raciocina demais, a resposta e cortada no meio da frase. Na
+    # rodada do RNF04, duas respostas chegaram cortadas e foram entregues como
+    # se estivessem completas, porque o motivo de parada nao era verificado.
+    choices = response_data.get("choices") or [{}]
+    if choices[0].get("finish_reason") == "length":
+        logger.warning(
+            "Resposta do LLM truncada pelo limite de %d tokens (modelo %s).",
+            _max_output_tokens(),
+            model,
+        )
+
+    usage_data = response_data.get("usage") or {}
+    detalhes = usage_data.get("completion_tokens_details") or {}
+    return _LLMResult(
+        text=text,
+        model=str(response_data.get("model") or model),
+        interaction_id=response_data.get("id"),
+        latency_ms=latency_ms,
+        usage=GeminiUsage(
+            input_tokens=_as_int(usage_data.get("prompt_tokens")),
+            output_tokens=_as_int(usage_data.get("completion_tokens")),
+            thought_tokens=_as_int(detalhes.get("reasoning_tokens")),
+            total_tokens=_as_int(usage_data.get("total_tokens")),
+        ),
+    )
+
+
+def _extract_openrouter_text(response_data: dict) -> str:
+    """Le `choices[0].message.content`, em texto simples ou em partes."""
+
+    choices = response_data.get("choices") or []
+    if not choices:
+        return ""
+    content = (choices[0].get("message") or {}).get("content")
+    if isinstance(content, str):
+        return content.strip()
+    if isinstance(content, list):
+        partes = [
+            parte.get("text", "").strip()
+            for parte in content
+            if isinstance(parte, dict) and parte.get("type") == "text"
+        ]
+        return "\n\n".join(parte for parte in partes if parte)
+    return ""
 
 
 def _extract_text(response_data: dict) -> str:
@@ -303,6 +445,7 @@ def _send_request_with_retry(http_request: Request) -> dict:
                 return json.loads(response.read().decode("utf-8"))
         except HTTPError as error:
             if error.code in RETRYABLE_HTTP_STATUS_CODES and attempt < max_retries:
+                _log_retry(f"HTTP {error.code}", attempt, max_retries)
                 sleep(_retry_delay_seconds(attempt))
                 continue
 
@@ -311,6 +454,7 @@ def _send_request_with_retry(http_request: Request) -> dict:
             raise GeminiAPIError(message, status_code=status_code) from error
         except (URLError, TimeoutError) as error:
             if attempt < max_retries:
+                _log_retry(type(error).__name__, attempt, max_retries)
                 sleep(_retry_delay_seconds(attempt))
                 continue
 
@@ -321,6 +465,24 @@ def _send_request_with_retry(http_request: Request) -> dict:
             raise GeminiAPIError("O Gemini retornou uma resposta invalida.") from error
 
     raise GeminiAPIError("Nao foi possivel conectar ao Gemini.")
+
+
+def _log_retry(motivo: str, attempt: int, max_retries: int) -> None:
+    """Registra cada nova tentativa contra o provedor.
+
+    Sem este registro, um travamento do provedor e invisivel: a requisicao so
+    demora mais. Na rodada do RNF05 de 22/09/2026, uma consulta levou 37,7 s —
+    valor que bate com o timeout de 30 s, mais 2 s de espera e uma nova
+    tentativa, mas que nao pode ser confirmado porque nada foi registrado.
+    """
+
+    logger.warning(
+        "Chamada ao provedor do LLM falhou (%s); tentativa %d de %d em %.1f s.",
+        motivo,
+        attempt + 2,
+        max_retries + 1,
+        _retry_delay_seconds(attempt),
+    )
 
 
 def _max_output_tokens() -> int:
