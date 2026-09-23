@@ -24,6 +24,8 @@ from zoneinfo import ZoneInfo
 import joblib
 import numpy as np
 import sklearn
+import torch
+import transformers
 from sklearn.metrics import accuracy_score, f1_score, precision_recall_fscore_support
 
 
@@ -222,6 +224,8 @@ def main() -> int:
             "scikit_learn": sklearn.__version__,
             "numpy": np.__version__,
             "joblib": joblib.__version__,
+            "torch": torch.__version__,
+            "transformers": transformers.__version__,
             "encoder": DEFAULT_BERT_MODEL,
             "encoder_revisao": DEFAULT_BERT_REVISION,
         },
