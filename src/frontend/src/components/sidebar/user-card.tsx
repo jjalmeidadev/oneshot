@@ -7,7 +7,7 @@ export function UserCard() {
   const id = useId();
   return (
     <div className="block p-2 text-xs text-fg-muted">
-      <label htmlFor={id}>Token de acesso para áudio</label>
+      <label htmlFor={id}>Token de acesso da sessão</label>
       <input
         id={id}
         aria-describedby={`${id}-hint`}

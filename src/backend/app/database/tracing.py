@@ -1,9 +1,9 @@
 """Persistencia de rastreabilidade RNF03 para interacoes do pipeline."""
 
-from collections.abc import Callable
 import json
 import os
 import re
+from collections.abc import Callable
 from typing import Any
 
 from app.database.connection import open_database_connection
@@ -133,7 +133,7 @@ def _get_or_create_conversation(
     user_id: str | None,
     requester_id: str | None,
 ) -> str:
-    external_id = request.conversation_id or request.previous_interaction_id
+    external_id = request.conversation_id
     if external_id:
         cursor.execute(
             """
@@ -328,18 +328,32 @@ def _insert_audit_events(
         )
 
     if response is not None:
-        events.append(
-            (
-                "database_rag_sources_retrieved",
-                "database",
-                "sucesso" if response.sources else "pendente",
-                {
-                    "source_count": len(response.sources),
-                    "persistent_source_count": _persistent_source_count(response),
-                    "retrieval_ms": response.retrieval_ms,
-                },
+        if response.workflow:
+            events.append(
+                (
+                    "guided_workflow_dispatched",
+                    "guided_workflow",
+                    "pendente",
+                    {
+                        "action": response.workflow.action,
+                        "workflow": response.workflow.workflow,
+                        "contract_version": response.workflow.contract_version,
+                    },
+                )
             )
-        )
+        else:
+            events.append(
+                (
+                    "database_rag_sources_retrieved",
+                    "database",
+                    "sucesso" if response.sources else "pendente",
+                    {
+                        "source_count": len(response.sources),
+                        "persistent_source_count": _persistent_source_count(response),
+                        "retrieval_ms": response.retrieval_ms,
+                    },
+                )
+            )
 
     if error_message:
         events.append(
@@ -425,6 +439,8 @@ def _route_taken(
 ) -> str:
     if intent and intent.macro in {"FORA_DE_ESCOPO", "INDEFINIDA"}:
         return "fora_escopo"
+    if response and response.workflow and response.workflow.action == "start":
+        return "guided_workflow"
     if response and response.sources:
         return "sharepoint_query"
     if intent and intent.macro == "CONSULTA":

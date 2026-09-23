@@ -95,6 +95,12 @@ export function isAbortError(error: unknown): boolean {
 }
 
 export function toDisplayMessage(error: unknown): string {
+  if (error instanceof Error && error.message === 'REPORT_ACCESS_TOKEN_REQUIRED') {
+    return 'Informe o token de acesso da sessao para iniciar o fluxo de relatorio.';
+  }
+  if (error instanceof Error && error.message === 'REPORT_PROCESSING_TIMEOUT') {
+    return 'O relatorio continua em processamento. Consulte novamente em alguns instantes.';
+  }
   if (error instanceof ApiError) {
     return error.message;
   }

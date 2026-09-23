@@ -1,9 +1,8 @@
-from pathlib import Path
-from uuid import uuid4
-from contextlib import asynccontextmanager
 import os
+from contextlib import asynccontextmanager
+from pathlib import Path
 from time import perf_counter
-from starlette.concurrency import run_in_threadpool
+from uuid import uuid4
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
@@ -11,14 +10,19 @@ from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 
 from app.audio.errors import AudioError, AudioMissingError, AudioTooLargeError
-from app.database.connection import close_database_pool
-from app.audio.schemas import AudioErrorResponse, AudioUploadResponse
-from app.audio.schemas import AudioAnswer, AudioAnswerSource
+from app.audio.schemas import (
+    AudioAnswer,
+    AudioAnswerSource,
+    AudioErrorResponse,
+    AudioUploadResponse,
+)
 from app.audio.security import resolve_identity, single_request_per_identity
 from app.audio.service import process_audio_upload
 from app.audio.validation import DEFAULT_MAX_SIZE_BYTES
+from app.database.connection import close_database_pool
 from app.gemini.client import (
     GeminiAPIError,
     GeminiConfigurationError,
@@ -40,9 +44,10 @@ from app.rag.proactive_confirmation import (
     PendingSuggestionNotFound,
     PendingSuggestionStorageError,
 )
+from app.reports.errors import ReportError
+from app.reports.router import router as reports_router
 
-
-load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=True)
 
 AUDIO_PATH = "/api/audio"
 DEFAULT_LANGUAGE = "pt-BR"
@@ -75,6 +80,7 @@ app = FastAPI(
     description="Chat via Gemini com recuperacao de contexto em listas simuladas do SharePoint.",
     version="0.1.0",
 )
+app.include_router(reports_router)
 
 
 @app.exception_handler(AudioError)
@@ -82,6 +88,14 @@ def handle_audio_error(_request: Request, error: AudioError) -> JSONResponse:
     """Converte os cenarios previstos no envelope unico da Secao 8.7.6."""
 
     return JSONResponse(status_code=error.status_code, content=error.to_payload())
+
+
+@app.exception_handler(ReportError)
+def handle_report_error(_request: Request, error: ReportError) -> JSONResponse:
+    return JSONResponse(
+        status_code=error.status_code,
+        content={"error": {"code": error.code, "message": error.message}},
+    )
 
 
 @app.exception_handler(RequestValidationError)
@@ -111,6 +125,22 @@ async def handle_request_validation_error(
         )
     if request.url.path == "/api/chat":
         return JSONResponse(status_code=422, content={"error": {"code": "INVALID_INPUT", "message": "Informe uma mensagem de 1 a 20.000 caracteres e parâmetros válidos."}})
+    if (
+        request.url.path.startswith("/api/report-requests")
+        or request.url.path.startswith("/api/workflow-sessions")
+        or request.url.path.startswith(
+            "/api/integrations/power-automate/report-results"
+        )
+    ):
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": {
+                    "code": "REPORT_INVALID_INPUT",
+                    "message": "Revise os parametros informados para o relatorio.",
+                }
+            },
+        )
     if request.url.path != AUDIO_PATH:
         return await request_validation_exception_handler(request, error)
 

@@ -72,3 +72,4 @@ AGENTS.md
 src/frontend/coverage/
 src/frontend/playwright-report/
 src/frontend/test-results/
+src/database/docs/evidencias/*.json

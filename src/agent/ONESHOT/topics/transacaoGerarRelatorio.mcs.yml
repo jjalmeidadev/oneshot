@@ -1,0 +1,148 @@
+kind: AdaptiveDialog
+modelDescription: >-
+  Conduz a confirmação de um relatório executivo de projeto ou subportfólio
+  quando o pipeline local retorna a intenção transacao_gerar_relatorio.
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: transacao_gerar_relatorio
+    includeInOnSelectIntent: false
+    triggerQueries:
+      - gerar relatório executivo
+      - gerar relatório de projeto
+      - gerar relatório de subportfólio
+  actions:
+    - kind: Question
+      id: perguntarTipoEscopo
+      interruptionPolicy:
+        allowInterruption: true
+      variable: init:Topic.ScopeType
+      prompt: O relatório será de um projeto ou de um subportfólio?
+      entity:
+        kind: EmbeddedEntity
+        definition:
+          kind: ClosedListEntity
+          items:
+            - id: project
+              displayName: Projeto
+            - id: subportfolio
+              displayName: Subportfólio
+
+    - kind: Question
+      id: perguntarEscopo
+      interruptionPolicy:
+        allowInterruption: true
+      variable: init:Topic.ScopeId
+      prompt: Informe o código ou identificador exato do escopo.
+      entity: StringPrebuiltEntity
+
+    - kind: Question
+      id: perguntarInicio
+      variable: init:Topic.StartDate
+      prompt: Qual é a data inicial do período de referência?
+      entity: DateTimePrebuiltEntity
+
+    - kind: Question
+      id: perguntarFim
+      variable: init:Topic.EndDate
+      prompt: Qual é a data final do período de referência?
+      entity: DateTimePrebuiltEntity
+
+    - kind: Question
+      id: perguntarPublico
+      variable: init:Topic.Audience
+      prompt: Quem é o público principal do relatório?
+      entity:
+        kind: EmbeddedEntity
+        definition:
+          kind: ClosedListEntity
+          items:
+            - id: executive_board
+              displayName: Diretoria
+            - id: pmo
+              displayName: PMO
+            - id: project_team
+              displayName: Equipe do projeto
+
+    - kind: Question
+      id: perguntarFinalidade
+      variable: init:Topic.Purpose
+      prompt: Qual é a finalidade principal?
+      entity:
+        kind: EmbeddedEntity
+        definition:
+          kind: ClosedListEntity
+          items:
+            - id: monthly_governance
+              displayName: Governança mensal
+            - id: decision_support
+              displayName: Apoio à decisão
+            - id: status_communication
+              displayName: Comunicação de situação
+
+    - kind: Question
+      id: perguntarEnfase
+      variable: init:Topic.EmphasisText
+      prompt: Em quais pontos devo dar ênfase? Por exemplo, cronograma, riscos, benefícios, mudanças ou marcos.
+      entity: StringPrebuiltEntity
+
+    - kind: Question
+      id: perguntarContexto
+      variable: init:Topic.AdditionalContext
+      prompt: Há algum contexto adicional que deva constar? Responda "não" se não houver.
+      entity: StringPrebuiltEntity
+
+    - kind: SendActivity
+      id: apresentarResumo
+      activity: |-
+        Vou preparar um relatório executivo com estes parâmetros:
+        - Escopo: {Topic.ScopeType} / {Topic.ScopeId}
+        - Período: {Topic.StartDate} a {Topic.EndDate}
+        - Público: {Topic.Audience}
+        - Finalidade: {Topic.Purpose}
+        - Ênfase: {Topic.EmphasisText}
+        - Contexto adicional: {Topic.AdditionalContext}
+
+    - kind: Question
+      id: confirmarSolicitacao
+      variable: init:Topic.Confirmed
+      prompt: Confirma a geração com esses parâmetros?
+      entity: BooleanPrebuiltEntity
+
+    - kind: ConditionGroup
+      id: avaliarConfirmacao
+      conditions:
+        - id: confirmado
+          condition: =Topic.Confirmed = true
+          actions:
+            - kind: SetVariable
+              id: construirPayloadValidado
+              variable: Topic.ReportRequest
+              value: |-
+                ={
+                  contract_version: "1.0",
+                  conversation_id: System.Conversation.Id,
+                  report_type: "executive_status",
+                  scope: {type: Topic.ScopeType, id: Trim(Topic.ScopeId)},
+                  period: {start_date: Topic.StartDate, end_date: Topic.EndDate},
+                  options: {
+                    audience: Topic.Audience,
+                    purpose: Topic.Purpose,
+                    emphasis_text: Trim(Topic.EmphasisText),
+                    additional_context: If(Lower(Trim(Topic.AdditionalContext)) = "não", Blank(), Trim(Topic.AdditionalContext)),
+                    output_format: "docx"
+                  }
+                }
+            - kind: SendActivity
+              id: orientarAcaoVinculada
+              activity: >-
+                Parâmetros confirmados. A ação versionada
+                report-generation-v1 deve agora executar prepare, enviar o
+                confirmation_hash e criar a solicitação idempotente. Enquanto
+                a referência de conexão não estiver vinculada, use o simulador
+                local documentado em src/agent/README.md.
+      elseActions:
+        - kind: SendActivity
+          id: cancelado
+          activity: Tudo bem. A geração foi cancelada e nenhum fluxo foi iniciado.

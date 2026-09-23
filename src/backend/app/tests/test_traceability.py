@@ -415,3 +415,40 @@ def test_traceability_error_message_is_sanitized(monkeypatch):
     assert str(error.value) == "Nao foi possivel registrar a rastreabilidade."
     assert "secret-token" not in str(error.value)
     assert "stack trace" not in str(error.value)
+
+
+def test_workflow_directive_is_traced_as_guided_workflow(monkeypatch):
+    from app.reports.schemas import WorkflowDirective
+
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
+    cursor = FakeCursor(fetch_values=[("intent-1",), ("conversation-1",), ("interaction-1",)])
+    connection = FakeConnection(cursor)
+    response = GeminiChatResponse(
+        text="Iniciar dialogo guiado.",
+        model="workflow-router",
+        latency_ms=0,
+        usage=GeminiUsage(),
+        workflow=WorkflowDirective(),
+    )
+
+    trace_interaction(
+        request=GeminiChatRequest(message="gere um relatorio"),
+        response=response,
+        intent=_intent("TRANSACAO", "transacao_gerar_relatorio"),
+        entities=[],
+        processing_ms=1,
+        connect=_connect(connection),
+    )
+
+    interaction_call = next(
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.ai_interactions" in query
+    )
+    assert interaction_call[9] == "guided_workflow"
+    assert any(
+        params[1:4]
+        == ("guided_workflow_dispatched", "guided_workflow", "pendente")
+        for query, params in cursor.calls
+        if "INSERT INTO public.audit_events" in query
+    )

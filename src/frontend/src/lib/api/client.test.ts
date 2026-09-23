@@ -2,6 +2,14 @@ import { describe, it, expect, vi } from 'vitest';
 import { requestJson, toDisplayMessage, parseError } from './client';
 import { sendChatMessage } from './chat';
 import { uploadAudio } from './audio';
+import {
+  answerReportWorkflow,
+  cancelReportWorkflow,
+  confirmReportWorkflow,
+  downloadReportArtifact,
+  getReportWorkflow,
+  startReportWorkflow,
+} from './report-workflow';
 
 describe('Contrato HTTP', () => {
   it('envia texto, contexto e toggle no corpo JSON', async () => {
@@ -9,7 +17,7 @@ describe('Contrato HTTP', () => {
     vi.stubGlobal('fetch', fetch);
     await sendChatMessage({
       message: 'prazo',
-      conversationId: 'conversation-250',
+      conversationId: 'conversation-1',
       accessToken: 'test',
       previousInteractionId: 'anterior',
       useIntentClassifier: true,
@@ -19,7 +27,7 @@ describe('Contrato HTTP', () => {
     expect(url).toBe('/api/chat');
     expect(JSON.parse(init.body)).toEqual({
       message: 'prazo',
-      conversation_id: 'conversation-250',
+      conversation_id: 'conversation-1',
       previous_interaction_id: 'anterior',
       use_intent_classifier: true,
       proactivity_enabled: true,
@@ -42,6 +50,106 @@ describe('Contrato HTTP', () => {
     expect(init.body.get('previous_interaction_id')).toBe('before');
     expect(init.body.get('use_intent_classifier')).toBe('false');
     expect(init.body.get('proactivity_enabled')).toBe('true');
+  });
+  it('inicia e responde o workflow com identidade, revisão e idempotência', async () => {
+    const workflow = {
+      contract_version: '1.0',
+      session_id: 'session-1',
+      workflow: 'transacao_gerar_relatorio',
+      status: 'active',
+      current_step: 'scope_type',
+      revision: 0,
+      answers: {},
+      warnings: [],
+    };
+    const fetch = vi
+      .fn()
+      .mockImplementation(() =>
+        Promise.resolve(new Response(JSON.stringify(workflow))),
+      );
+    vi.stubGlobal('fetch', fetch);
+
+    await startReportWorkflow({
+      conversationId: 'conversation-1',
+      interactionId: 'interaction-1',
+      parameters: { scope_candidates: [] },
+      accessToken: 'report-token',
+    });
+    await answerReportWorkflow({
+      sessionId: 'session-1',
+      step: 'scope_type',
+      value: 'project',
+      revision: 0,
+      accessToken: 'report-token',
+    });
+
+    expect(fetch.mock.calls[0][0]).toBe('/api/workflow-sessions');
+    expect(fetch.mock.calls[0][1].headers.Authorization).toBe('Bearer report-token');
+    expect(JSON.parse(fetch.mock.calls[1][1].body)).toMatchObject({
+      step: 'scope_type',
+      value: 'project',
+      revision: 0,
+    });
+    expect(JSON.parse(fetch.mock.calls[1][1].body).client_action_id).toBeTruthy();
+  });
+  it('confirma, consulta e cancela o workflow autenticado', async () => {
+    const workflow = {
+      contract_version: '1.0',
+      session_id: 'session-1',
+      workflow: 'transacao_gerar_relatorio',
+      status: 'executing',
+      current_step: 'execution',
+      revision: 8,
+      answers: {},
+      warnings: [],
+    };
+    const fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve(
+        new Response(JSON.stringify(workflow), {
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      ),
+    );
+    vi.stubGlobal('fetch', fetch);
+
+    await confirmReportWorkflow({
+      sessionId: 'session-1',
+      revision: 7,
+      accessToken: 'report-token',
+    });
+    await getReportWorkflow('session-1', 'report-token');
+    await cancelReportWorkflow('session-1', 'report-token');
+
+    expect(fetch.mock.calls.map(([url]) => url)).toEqual([
+      '/api/workflow-sessions/session-1/confirm',
+      '/api/workflow-sessions/session-1',
+      '/api/workflow-sessions/session-1/cancel',
+    ]);
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).toMatchObject({ revision: 7 });
+    expect(JSON.parse(fetch.mock.calls[0][1].body).client_action_id).toBeTruthy();
+    expect(fetch.mock.calls[1][1].headers.Authorization).toBe('Bearer report-token');
+  });
+  it('baixa o DOCX pelo backend e revoga a URL temporaria', async () => {
+    const fetch = vi.fn().mockResolvedValue(new Response(new Blob(['PK-report'])));
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => undefined);
+    const createObjectURL = vi.fn().mockReturnValue('blob:report');
+    const revokeObjectURL = vi.fn();
+    vi.stubGlobal('fetch', fetch);
+    vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL });
+
+    await downloadReportArtifact({
+      executionId: 'execution-1',
+      fileName: 'relatorio.docx',
+      accessToken: 'report-token',
+    });
+
+    expect(fetch).toHaveBeenCalledWith('/api/report-requests/execution-1/artifact', {
+      headers: { Authorization: 'Bearer report-token' },
+    });
+    expect(click).toHaveBeenCalledOnce();
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:report');
   });
   it.each([400, 401, 403, 413, 422, 429, 500, 502, 503, 504])(
     'controla o erro HTTP %s sem expor detalhe interno',

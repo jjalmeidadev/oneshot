@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://oneshot.local/schemas/flow-blueprint.schema.json",
+  "type": "object",
+  "required": ["name", "version", "deployable", "trigger", "synchronous_phase", "asynchronous_phase", "error_scopes", "telemetry"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "name": { "type": "string" },
+    "version": { "type": "string" },
+    "deployable": { "type": "boolean" },
+    "deployment_blockers": { "type": "array", "items": { "type": "string" } },
+    "trigger": { "type": "object" },
+    "synchronous_phase": { "type": "array", "minItems": 1 },
+    "asynchronous_phase": { "type": "array", "minItems": 1 },
+    "error_scopes": { "type": "array", "minItems": 1 },
+    "telemetry": { "type": "object" }
+  },
+  "additionalProperties": false
+}
