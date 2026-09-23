@@ -5675,6 +5675,22 @@ Após a execução das tarefas, o participante responderá ao SUS adaptado no fo
 
 O cálculo do SUS seguirá o método tradicional: para itens positivos, subtrai-se 1 da nota atribuída; para itens negativos, subtrai-se a nota de 5. A soma dos valores ajustados é multiplicada por 2,5, resultando em uma pontuação de 0 a 100. Além da pontuação final, os comentários qualitativos e as ocorrências observadas serão usados para priorizar melhorias no agente.
 
+#### Revisão dos instrumentos após o feedback da Sprint 3
+
+Registrada na Sprint 4, antes da primeira sessão, e aplicada igualmente a todos os participantes.
+
+**Instrução do cenário 6.** A instrução anterior, "Observe se o agente sugere um próximo passo e se a sugestão depende da sua confirmação", antecipava ao participante exatamente o que o cenário quer observar: quem é avisado de que haverá uma sugestão procura por ela, e a etapa deixa de medir se a interface a comunica sozinha. A instrução passa a descrever só a tarefa: "Você vai participar de uma reunião sobre o projeto PRJ-0442. Use o agente para se preparar." Consultas sobre situação, prazos, riscos ou marcos do projeto fazem o agente oferecer um próximo passo que depende da confirmação do usuário, e o observador registra se o participante o percebe sem aviso. Uma segunda instrução, lida só depois, pede que o participante ajuste o agente para responder apenas o que foi perguntado, o que observa se ele encontra o controle da proatividade (RF10). O modo proatividade começa ligado em todas as sessões. As demais instruções da planilha descrevem a tarefa sem antecipar o comportamento observado e foram mantidas.
+
+**SUS como dado descritivo.** O SUS mede a percepção global de usabilidade e não aponta problemas específicos; com cinco participantes, a média ainda é instável, porque só se estabiliza por volta de 12 a 14 respondentes. Por isso o plano não fixa meta de SUS para aprovar o sistema. O resultado é publicado com a nota de cada participante, a mediana e a amplitude, ao lado do perfil e da familiaridade declarada, e é lido junto da observação das tarefas, que é o que mostra onde cada pessoa hesitou, errou ou pediu ajuda.
+
+**Perfil de cada participante.** Cada participante recrutado é registrado com a vaga de perfil que preenche, a familiaridade com tecnologia e com agentes conversacionais e a faixa etária, sem dados que o identifiquem. A amostra precisa reunir ao menos uma pessoa de familiaridade baixa e uma de familiaridade alta com agentes conversacionais.
+
+**Ambiente das sessões.** As sessões usam a interface web da bancada (Seção 8.5), que reproduz a conversa, as fontes citadas, a sugestão proativa e a entrada por voz. O canal previsto para o agente é o Teams do Metrô, que não está acessível ao grupo; por isso o item do SUS sobre o uso dentro do Teams mede a expectativa do participante, e não uma experiência que ele teve.
+
+**Instrumentos versionados.** O roteiro do moderador, com abertura, regras de intervenção e o que a base sustenta em cada cenário, o termo de consentimento, o checklist de ambiente executado antes de cada sessão, os critérios de recrutamento e o questionário SUS estão em [`docs/usabilidade/`](usabilidade/README.md). A planilha e o formulário do grupo continuam sendo os instrumentos de campo; os dados anonimizados de cada sessão são transcritos para [`docs/usabilidade/dados/`](usabilidade/dados/) e consolidados pelo notebook [`src/notebooks/consolidacao_usabilidade.ipynb`](../src/notebooks/consolidacao_usabilidade.ipynb). O notebook valida os valores antes de calcular, separa sessões realizadas, bloqueadas e não executadas, apura cada cenário como concluído, concluído com dificuldade, falhou ou não executado, e lista os defeitos críticos ainda sem tratamento ou reteste.
+
+**Piloto técnico.** Antes das sessões, as tarefas foram executadas diretamente contra a API, sem participante, para confirmar que cada uma produz o comportamento que o roteiro descreve: resposta com fonte nos cenários de consulta, declaração de limite nos cenários 4 e 5 e sugestão proativa, com aceite e recusa, no cenário 6. O piloto não gera dado de usabilidade.
+
 ### 9.3.2 Resultados
 
 Os resultados dos testes de usabilidade ainda não foram consolidados. Após a execução com os participantes externos, esta seção deverá apresentar:
