@@ -1,6 +1,5 @@
 # RNF04 — rodada definitiva · 22/09/2026
 
-Issue [#230](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/230) (S4-34).
 Casos `CT-RNF04-P` e `CT-RNF04-N`, Seção 9.2 do `Projeto.md`.
 Amostra congelada v1.2, 24 perguntas, **no modelo da bancada de teste (`gemini-3.7-flash`)**.
 

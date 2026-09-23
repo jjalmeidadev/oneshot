@@ -1,8 +1,7 @@
 # Evidências dos testes de RNF — Sprint 4
 
-Issues [#230](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/230)
-(RNF04) e [#231](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/231)
-(RNF05). Planejamento na Seção 9.2 do [`Projeto.md`](../../../docs/Projeto.md).
+Evidências da execução dos testes de RNF04 e RNF05. Planejamento na Seção 9.2 do
+[`Projeto.md`](../../../docs/Projeto.md).
 
 ## Resultado
 

@@ -1,6 +1,5 @@
 # RNF05 — 3ª rodada, janelas com cache frio · 23/09/2026
 
-Issue [#231](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/231) (S4-35).
 Protocolo congelado às 01:20 UTC, antes de iniciar a API:
 [`PROTOCOLO-CONGELADO.md`](PROTOCOLO-CONGELADO.md). Mesmo código da 3ª rodada
 (hash `71ee4895…`, conferido antes e depois), mesmo modelo e mesma massa.

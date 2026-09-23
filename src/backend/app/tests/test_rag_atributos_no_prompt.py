@@ -1,6 +1,6 @@
 """Regressao do DEF-RNF04-01: atributos estruturados precisam chegar ao prompt.
 
-Defeito encontrado na execucao do RNF04 (issue #230). O recuperador devolvia o
+Defeito encontrado na execucao do RNF04. O recuperador devolvia o
 extrato correto, mas `build_rag_input` montava o bloco `[Fonte N]` apenas com
 titulo, lista, data de atualizacao e `content_text`. Vigencia, status, linha e
 categoria vivem em `source_extracts.metadata` e eram descartados antes do

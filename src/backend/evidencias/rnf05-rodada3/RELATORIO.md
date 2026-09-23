@@ -1,6 +1,5 @@
 # RNF05 — 3ª rodada · 22/09/2026
 
-Issue [#231](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/231) (S4-35).
 Protocolo revisado da Seção 9.2.4 do `Projeto.md`, congelado às 22:22 UTC, antes da
 execução: [`PROTOCOLO-CONGELADO.md`](PROTOCOLO-CONGELADO.md).
 Modelo `gemini-3.7-flash`, o mesmo das rodadas anteriores, em plano pago.

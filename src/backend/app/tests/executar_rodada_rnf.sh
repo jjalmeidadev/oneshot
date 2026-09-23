@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Campanha completa de RNF04 e RNF05, das issues #230 e #231.
+# Campanha completa de RNF04 e RNF05.
 #
 # A API precisa estar no ar ANTES deste script, em outro terminal, a partir de
 # `src/backend`. O provedor e escolhido no comando que sobe a API, nao aqui:

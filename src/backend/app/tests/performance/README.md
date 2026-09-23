@@ -1,8 +1,7 @@
 # RNF05 — desempenho
 
 Cenário de carga do teste obrigatório de desempenho, planejado na Seção 9.2.4 do
-[`Projeto.md`](../../../../../docs/Projeto.md). Issue
-[#231](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/231) (S4-35).
+[`Projeto.md`](../../../../../docs/Projeto.md).
 
 | Arquivo | Papel |
 | --- | --- |
@@ -73,8 +72,8 @@ corre durante o `test_start`: com o aquecimento lá dentro, as rodadas "de 5
 minutos" mediam cerca de 3 min 40 s, e a rodada negativa, que aquecia a instância
 com atraso de 25 s, não chegou a medir nenhuma requisição.
 
-O backend não tem cache de respostas nesta versão (o módulo VHS/cache é a
-`S4-31`, issue #226). "Quente" aqui significa pool de conexões aberto e
+O backend não tem cache de respostas nesta versão; o módulo VHS/cache ainda
+está em desenvolvimento. "Quente" aqui significa pool de conexões aberto e
 classificador carregado, não resposta reaproveitada.
 
 A modalidade usada vai para a ficha do ambiente, em `--cache`.

@@ -1,6 +1,5 @@
 # RNF05 — desempenho · 21/09/2026 · commit `81c787d`
 
-Issue [#231](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/231) (S4-35).
 Casos `CT-RNF05-P` e `CT-RNF05-N`, Seção 9.2.4 do `Projeto.md`.
 
 > **Histórico.** Rodada superada. A definitiva está em
@@ -88,7 +87,7 @@ ao provedor.
 | `app/tests/executar_rodada_rnf.sh` | ✅ rodada completa em um comando |
 
 O `locustfile.py` era exigido nominalmente pela Seção 9.2.4 e **não existia** no
-repositório antes desta task.
+repositório antes desta execução.
 
 Validação executada (30 s, 1 usuário) — evidência em `rnf05-validacao_stats.csv`:
 
@@ -155,7 +154,7 @@ Alternativas consideradas e por que nao servem:
   exatamente em 20 eliminaria qualquer margem e, pior, seria mudar o teste para
   passar em vez de medir o produto;
 - **dividir a amostra em dois dias**: viavel para o RNF04, com versao e commit
-  congelados, e ja resolve aquela task. Nao resolve o RNF05, cujas rodadas de
+  congelados, e resolve a coleta do RNF04. Nao resolve o RNF05, cujas rodadas de
   carga precisam de dezenas de chamadas concentradas em cinco minutos;
 - **duplo deterministico no lugar do provedor**: mediria o pipeline sem o
   componente que consome o orcamento de latencia, produzindo um P95 confortavel

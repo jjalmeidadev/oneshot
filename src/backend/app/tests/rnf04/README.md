@@ -1,8 +1,7 @@
 # RNF04 — confiabilidade das respostas
 
 Instrumentos de execução dos casos `CT-RNF04-P` e `CT-RNF04-N`, planejados na
-Seção 9.2 do [`Projeto.md`](../../../../../docs/Projeto.md). Issue
-[#230](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/230) (S4-34).
+Seção 9.2 do [`Projeto.md`](../../../../../docs/Projeto.md).
 
 ## O que o requisito exige
 

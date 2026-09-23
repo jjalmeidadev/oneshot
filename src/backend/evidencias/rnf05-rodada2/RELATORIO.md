@@ -1,6 +1,5 @@
 # RNF05 — 2ª rodada · 22/09/2026
 
-Issue [#231](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/231) (S4-35).
 Protocolo revisado da Seção 9.2.4 do `Projeto.md`, congelado às 20:46 UTC, antes da
 execução: [`PROTOCOLO-CONGELADO.md`](PROTOCOLO-CONGELADO.md).
 Modelo `gemini-3.7-flash`, o mesmo configurado na bancada de teste, em plano pago.
@@ -81,8 +80,8 @@ Resumo do log, sem identificadores de infraestrutura:
 | Gravar a auditoria fora do caminho da resposta, por fila ou tarefa em segundo plano | Remove de 2 a 4 s da latência percebida; encaixa no sistema de mensageria previsto para a Sprint 5 |
 | Reunir as inserções da auditoria em uma única ida ao banco | Reduz o custo da gravação síncrona, caso ela continue no caminho |
 
-A segunda correção muda a semântica da auditoria do RNF03, testada na `S4-33`, e
-por isso é decisão do grupo, e não desta task.
+A segunda correção muda a semântica da auditoria do RNF03, já verificada nos
+testes desse requisito, e por isso é decisão do grupo.
 
 ## Outros registros da rodada
 

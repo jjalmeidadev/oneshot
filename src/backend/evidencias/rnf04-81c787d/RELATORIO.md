@@ -1,6 +1,5 @@
 # RNF04 — rodada 1 · 21/09/2026 · commit `81c787d`
 
-Issue [#230](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/230) (S4-34).
 Casos `CT-RNF04-P` e `CT-RNF04-N` da Seção 9.2 do `Projeto.md`.
 
 > **Histórico.** Rodada superada. A definitiva está em
@@ -97,7 +96,7 @@ O comportamento é **correto sob o RNF04** — o agente não inventou — e
 existe e foi descartado no caminho. Atinge diretamente "Cronograma", uma das
 três prioridades declaradas do MVP.
 
-### ✅ Corrigido nesta task
+### ✅ Corrigido depois desta rodada
 
 `build_rag_input` passou a incluir vigência, status, linha e categoria no bloco
 `[Fonte N]`. Verificado contra o Supabase real — o prompt agora carrega:
@@ -115,8 +114,8 @@ Conteudo: Durante o periodo ficticio, o intervalo entre trens podera ser ...
 
 Dez testes de regressão em `app/tests/test_rag_atributos_no_prompt.py` fixam o
 comportamento, incluindo o caso de atributos vazarem para o bloco da fonte
-errada. A alteração toca a frente do RAG (issues #206 e #207) e precisa ser
-avisada ao Pedro antes do merge.
+errada. A alteração toca a recuperação do RAG, desenvolvida por outro integrante, e
+precisa ser comunicada antes do merge.
 
 **A reclassificação de `P-07` e `P-10` para negativo permanece na amostra v1.1.**
 Ela descreve o comportamento observado na rodada 1 e é o registro de que o

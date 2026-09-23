@@ -7,7 +7,7 @@
 
 ## Por que estas janelas existem
 
-A issue #231 pede rodadas de 1 e 5 usuários com cache frio e com cache quente, e a
+O planejamento da Sprint 4 pede rodadas de 1 e 5 usuários com cache frio e quente, e a
 Seção 9.2.4 do `Projeto.md` determina que as duas modalidades nunca se misturem no
 mesmo resultado. As rodadas anteriores foram todas com cache quente.
 

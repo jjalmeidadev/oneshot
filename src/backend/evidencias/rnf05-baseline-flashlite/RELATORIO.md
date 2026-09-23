@@ -1,6 +1,5 @@
 # RNF05 — desempenho · 22/09/2026 · commit `81c787d`
 
-Issue [#231](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/231) (S4-35).
 Casos `CT-RNF05-P` e `CT-RNF05-N`, Seção 9.2.4 do `Projeto.md`.
 
 > **Superado.** A rodada definitiva do RNF05, no modelo da bancada em plano pago, está em
@@ -160,12 +159,12 @@ não só reprovou como reprovou pelo valor certo.
    P95 abaixo de 10 s, porque o piso do provedor sozinho já está em ~20 s. As
    rodadas definitivas foram feitas assim, em
    [`rnf05-37flash/`](../rnf05-37flash/RELATORIO.md).
-2. **Módulo VHS/cache** (`S4-31`, issue #226): muda o quadro em *cache hit*,
+2. **Módulo VHS/cache**, em desenvolvimento: muda o quadro em *cache hit*,
    mas o requisito mede *cache miss*, que continua dependendo do provedor.
 3. Reduzir `GEMINI_MAX_OUTPUT_TOKENS` e `GEMINI_THINKING_LEVEL`: **testado e
    descartado**. Com `thinking_level=minimal` e 16 tokens de saída, a chamada
    trivial continuou entre 14,7 s e 37,7 s. As respostas reais usam cerca de 130
    tokens contra um teto de 512, então o limite nunca foi o gargalo.
 
-Nenhuma dessas ações foi executada nesta task. `DEF-RNF05-01` permanece aberto,
+Nenhuma dessas ações foi executada nesta rodada. `DEF-RNF05-01` permanece aberto,
 agora com causa identificada.
