@@ -1,0 +1,32 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF08-01
+Requisito: RF08
+Cenário: Positivo
+Status: FALHOU
+
+Casos reutilizados:
+CT-RF06-01
+CT-RF07-01
+
+Observado em CT-RF07-01:
+- workflow-router
+- tokens 0
+- workflow.action=start
+- parâmetros estruturados para PRJ-0442
+Resultado: parte automatizada atendida.
+
+Observado em CT-RF06-01:
+- intenção comparacao_entre_projetos reconhecida
+- PRJ-0442 e PRJ-0510 reconhecidos como entidades
+- contexto/resposta cobriu somente PRJ-0442
+Resultado: comparação fundamentada dos dois projetos não atendida.
+
+Resultado esperado:
+Validar conjuntamente retorno estruturado do fluxo e resposta LLM fundamentada/contextualizada.
+
+Conclusão:
+FALHOU porque uma das evidências obrigatórias (CT-RF06-01) falhou.
+
+Defeito associado:
+DEF-S4-32A-03.
