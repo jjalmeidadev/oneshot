@@ -12,8 +12,15 @@ from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 
-from app.audio.errors import AudioError, AudioMissingError, AudioTooLargeError
+from app.audio.errors import (
+    AudioError,
+    AudioMissingError,
+    AudioTooLargeError,
+    ProcessingProviderFailedError,
+    ProcessingUnavailableError,
+)
 from app.audio.schemas import (
+    MAX_CONVERSATION_ID_LENGTH,
     AudioAnswer,
     AudioAnswerSource,
     AudioErrorResponse,
@@ -223,6 +230,26 @@ def create_proactive_confirmation(
         ) from error
 
 
+def create_audio_chat_response(
+    request: GeminiChatRequest,
+    conversation_id: str,
+    requester_id: str | None = None,
+) -> GeminiChatResponse:
+    """Executa o pipeline comum preservando o envelope de erro da rota de audio."""
+
+    try:
+        return process_message(
+            request,
+            channel="api",
+            external_conversation_id=conversation_id,
+            requester_id=requester_id,
+        )
+    except GeminiConfigurationError as error:
+        raise ProcessingUnavailableError() from error
+    except GeminiAPIError as error:
+        raise ProcessingProviderFailedError() from error
+
+
 @app.post(
     AUDIO_PATH,
     response_model=AudioUploadResponse,
@@ -231,7 +258,10 @@ def create_proactive_confirmation(
 )
 async def create_audio_upload(
     audio: UploadFile | None = File(default=None),
-    conversation_id: str | None = Form(default=None),
+    conversation_id: str | None = Form(
+        default=None,
+        max_length=MAX_CONVERSATION_ID_LENGTH,
+    ),
     language: str | None = Form(default=None),
     previous_interaction_id: str | None = Form(default=None, max_length=1024),
     use_intent_classifier: bool = Form(default=True),
@@ -255,7 +285,7 @@ async def create_audio_upload(
             language=language or DEFAULT_LANGUAGE,
         )
         response = await run_in_threadpool(
-            process_message,
+            create_audio_chat_response,
             GeminiChatRequest(
                 message=audio_result.transcription.text,
                 conversation_id=resolved_conversation_id,
@@ -263,7 +293,8 @@ async def create_audio_upload(
                 use_intent_classifier=use_intent_classifier,
                 proactivity_enabled=proactivity_enabled,
             ),
-            requester_id=identity.object_id,
+            resolved_conversation_id,
+            identity.object_id,
         )
         return AudioUploadResponse(
             conversation_id=resolved_conversation_id,

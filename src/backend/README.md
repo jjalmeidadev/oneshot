@@ -73,6 +73,32 @@ consuma a franquia do provedor de transcricao.
 | Requisicoes simultaneas por usuario | 1 |
 
 Todo erro previsto usa o mesmo envelope, sem detalhe tecnico interno, conforme o RNF11.
+
+## Smoke test de audio com banco real
+
+Com `DATABASE_URL` ou `SUPABASE_DATABASE_URL` configurada, execute a partir de
+`src/backend`:
+
+```powershell
+.venv\Scripts\python.exe -m scripts.verify_audio_stt_pln_real_db
+```
+
+O script atravessa `POST /api/audio`, STT controlado, PLN real e persistencia no
+PostgreSQL/Supabase. Ele valida um caso positivo e uma falha controlada, confere
+correlacao e auditoria e remove ao final todos os registros sinteticos criados.
+
+Para validar a mesma cadeia com Azure STT real, forneca um WAV PCM de 16 kHz,
+mono e 16 bits. O provedor gerador posterior fica controlado para isolar o
+escopo audio -> STT -> PLN:
+
+```powershell
+.venv\Scripts\python.exe -m scripts.verify_audio_stt_pln_live `
+  C:\caminho\amostra.wav --expected-term perfil --expected-term artrite
+```
+
+O verificador usa PLN e Supabase reais, confere transcricao, classificacao,
+correlacao e auditoria e remove a conversa sintetica no bloco de limpeza. O
+audio permanece local e nao e copiado para o repositorio.
 O campo `detail` so aparece quando ha algo a informar:
 
 ```json

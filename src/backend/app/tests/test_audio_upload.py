@@ -23,6 +23,7 @@ from app.audio.validation import (
     DEFAULT_MAX_SIZE_BYTES,
     validate_audio_upload,
 )
+from app.audio.schemas import MAX_CONVERSATION_ID_LENGTH
 from app.main import app
 
 TOKEN = "token-de-teste"
@@ -125,6 +126,11 @@ def reset_concurrency_control(monkeypatch: pytest.MonkeyPatch) -> None:
         ),
     )
     monkeypatch.setattr("app.nlp.inference.classify", lambda text: classificacao_fixa())
+    monkeypatch.setattr("app.pipeline.trace_interaction", lambda **_kwargs: None)
+    monkeypatch.setenv(
+        "AUDIO_SIMULATED_IDENTITIES",
+        f"{TOKEN}={sha256(TOKEN.encode('utf-8')).hexdigest()}",
+    )
     security._active_identities.clear()
     monkeypatch.delenv(transcription.AZURE_SPEECH_RESOURCE_ENV, raising=False)
     monkeypatch.delenv(transcription.AZURE_SPEECH_ENDPOINT_ENV, raising=False)
@@ -371,6 +377,16 @@ class TestAudioUploadEndpoint:
     def test_request_without_multipart_body_returns_400(self) -> None:
         response = self.client.post("/api/audio", headers=AUTH_HEADER)
         assert_error(response, 400, "AUDIO_MISSING")
+
+    def test_conversation_id_longer_than_database_contract_returns_400(self) -> None:
+        response = self.client.post(
+            "/api/audio",
+            data={"conversation_id": "x" * (MAX_CONVERSATION_ID_LENGTH + 1)},
+            files={"audio": ("p.wav", _build_wav(), "audio/wav")},
+            headers=AUTH_HEADER,
+        )
+
+        assert_error(response, 400, "INVALID_INPUT")
 
     def test_unsupported_format_returns_400(self) -> None:
         response = post_audio(

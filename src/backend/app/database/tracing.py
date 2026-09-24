@@ -32,6 +32,7 @@ def trace_interaction(
     entities: list[PublicEntity],
     processing_ms: int,
     channel: str = "api",
+    external_conversation_id: str | None = None,
     error_message: str | None = None,
     requester_id: str | None = None,
     connect: Callable[..., Any] | None = None,
@@ -51,6 +52,7 @@ def trace_interaction(
                     cursor,
                     request,
                     channel,
+                    external_conversation_id=external_conversation_id,
                     user_id=user_id,
                     requester_id=requester_id,
                 )
@@ -130,10 +132,11 @@ def _get_or_create_conversation(
     request: GeminiChatRequest,
     channel: str,
     *,
+    external_conversation_id: str | None = None,
     user_id: str | None,
     requester_id: str | None,
 ) -> str:
-    external_id = request.conversation_id
+    external_id = external_conversation_id or request.conversation_id
     if external_id:
         cursor.execute(
             """

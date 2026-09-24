@@ -13,12 +13,14 @@ from app.gemini.schemas import (
 from app.pipeline import process_proactive_confirmation
 from app.gemini.client import GeminiAPIError, GeminiConfigurationError
 from app.audio import transcription
+from app.nlp.inference import get_classifier
 from test_audio_upload import _build_wav, AUTH_HEADER, transcricao_fixa
 
 
 @pytest.fixture(autouse=True)
 def disable_traceability(monkeypatch):
     monkeypatch.setattr("app.pipeline.trace_interaction", lambda **_kwargs: None)
+    monkeypatch.setenv('AUDIO_SIMULATED_IDENTITIES', 'token-de-teste=usuario-teste')
 
 
 class ProviderCall:
@@ -272,6 +274,108 @@ def test_audio_completes_same_pipeline_and_context(monkeypatch, provider):
     assert data['pipeline_metrics']['total_ms'] >= 0
     assert provider[0].previous_interaction_id == 'before'
     assert provider[0].message == 'prazo'
+
+
+def test_audio_transcription_is_classified_by_real_classifier(monkeypatch, provider):
+    transcript = 'qual é o status da extensão da Linha 5-Lilás?'
+    monkeypatch.setattr(
+        transcription,
+        'transcribe',
+        transcricao_fixa(text=transcript, confidence=.97, duration_seconds=1),
+    )
+
+    with TestClient(app) as client:
+        result = client.post(
+            '/api/audio',
+            files={'audio': ('teste.wav', _build_wav(), 'audio/wav')},
+            headers=AUTH_HEADER,
+            data={'use_intent_classifier': 'true'},
+        )
+
+    assert result.status_code == 200
+    data = result.json()
+    artifact = get_classifier().artefato
+    assert data['pipeline_status'] == 'completed'
+    assert data['transcription']['text'] == transcript
+    assert data['intent']['macro'] == 'CONSULTA'
+    assert data['intent']['specific'] == 'consulta_status_projeto'
+    assert data['intent']['confidence_macro'] >= artifact.limiar_macro
+    assert data['intent']['confidence_specific'] >= artifact.limiar_intencao
+    assert data['intent']['handler'] == 'handler:consulta_status_projeto'
+    assert provider[0].message == transcript
+    assert provider[0].intent.specific == 'consulta_status_projeto'
+    assert data['chat']['intent'] == data['intent']
+
+
+def test_audio_classifier_failure_is_controlled(monkeypatch):
+    provider_calls = []
+
+    def fail_classifier(_text):
+        raise RuntimeError('private-model-path')
+
+    monkeypatch.setattr(
+        transcription,
+        'transcribe',
+        transcricao_fixa(text='prazo', confidence=.97, duration_seconds=1),
+    )
+    monkeypatch.setattr('app.nlp.inference.classify', fail_classifier)
+    monkeypatch.setattr(
+        'app.pipeline.generate_chat_response',
+        lambda *_args, **_kwargs: provider_calls.append(True),
+    )
+
+    with TestClient(app) as client:
+        result = client.post(
+            '/api/audio',
+            files={'audio': ('teste.wav', _build_wav(), 'audio/wav')},
+            headers=AUTH_HEADER,
+            data={'use_intent_classifier': 'true'},
+        )
+
+    assert result.status_code == 503
+    assert result.json() == {
+        'error': {
+            'code': 'PROCESSING_UNAVAILABLE',
+            'message': (
+                'O servico de processamento esta indisponivel. '
+                'Tente novamente em instantes.'
+            ),
+        }
+    }
+    assert 'private-model-path' not in result.text
+    assert provider_calls == []
+
+
+def test_audio_response_provider_failure_uses_audio_error_contract(monkeypatch):
+    def fail_provider(*_args, **_kwargs):
+        raise GeminiAPIError('secret-provider-payload')
+
+    monkeypatch.setattr(
+        transcription,
+        'transcribe',
+        transcricao_fixa(text='prazo', confidence=.97, duration_seconds=1),
+    )
+    monkeypatch.setattr('app.pipeline.generate_chat_response', fail_provider)
+
+    with TestClient(app) as client:
+        result = client.post(
+            '/api/audio',
+            files={'audio': ('teste.wav', _build_wav(), 'audio/wav')},
+            headers=AUTH_HEADER,
+            data={'use_intent_classifier': 'false'},
+        )
+
+    assert result.status_code == 502
+    assert result.json() == {
+        'error': {
+            'code': 'PROCESSING_PROVIDER_ERROR',
+            'message': (
+                'Nao foi possivel processar a transcricao agora. '
+                'Tente novamente em instantes.'
+            ),
+        }
+    }
+    assert 'secret-provider-payload' not in result.text
 
 
 @pytest.mark.parametrize('error,status', [(GeminiConfigurationError('secret-internal'),503), (GeminiAPIError('secret-internal'),502)])

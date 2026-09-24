@@ -41,6 +41,8 @@ def warmup_classifier() -> None:
 def process_message(
     request: GeminiChatRequest,
     *,
+    channel: str = "api",
+    external_conversation_id: str | None = None,
     requester_id: str | None = None,
 ) -> GeminiChatResponse:
     route_started_at = perf_counter()
@@ -61,6 +63,17 @@ def process_message(
             ]
             nlp_ms = _elapsed_ms(nlp_started_at)
         except Exception as error:
+            _trace_safely(
+                request=request,
+                response=None,
+                intent=None,
+                entities=[],
+                processing_ms=_elapsed_ms(route_started_at),
+                channel=channel,
+                external_conversation_id=external_conversation_id,
+                error_message=str(error),
+                requester_id=requester_id,
+            )
             raise GeminiConfigurationError("Classificador indisponivel.") from error
 
         intent = _public_intent(result)
@@ -84,6 +97,8 @@ def process_message(
                 intent=intent,
                 entities=entities,
                 processing_ms=_elapsed_ms(route_started_at),
+                channel=channel,
+                external_conversation_id=external_conversation_id,
                 requester_id=requester_id,
             )
             return response
@@ -101,6 +116,9 @@ def process_message(
                 intent=intent,
                 entities=entities,
                 processing_ms=response.pipeline_metrics.route_ms,
+                channel=channel,
+                external_conversation_id=external_conversation_id,
+                requester_id=requester_id,
             )
             return response
 
@@ -116,6 +134,8 @@ def process_message(
             intent=intent,
             entities=entities,
             processing_ms=_elapsed_ms(route_started_at),
+            channel=channel,
+            external_conversation_id=external_conversation_id,
             error_message=str(error),
             requester_id=requester_id,
         )
@@ -133,6 +153,8 @@ def process_message(
         intent=intent,
         entities=entities,
         processing_ms=response.pipeline_metrics.route_ms,
+        channel=channel,
+        external_conversation_id=external_conversation_id,
         requester_id=requester_id,
     )
     return response
@@ -250,6 +272,8 @@ def _trace_safely(
     intent: AudioIntent | None,
     entities: list[PublicEntity],
     processing_ms: int,
+    channel: str = "api",
+    external_conversation_id: str | None = None,
     error_message: str | None = None,
     requester_id: str | None = None,
 ) -> None:
@@ -260,6 +284,8 @@ def _trace_safely(
             intent=intent,
             entities=entities,
             processing_ms=processing_ms,
+            channel=channel,
+            external_conversation_id=external_conversation_id,
             error_message=error_message,
             requester_id=requester_id,
         )

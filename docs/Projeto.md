@@ -3995,6 +3995,8 @@ O corpo de erro segue estrutura única, para que o canal possa exibir a mensagem
 | `429 Too Many Requests` | `RATE_LIMITED` | Já existe uma requisição de áudio em processamento para o mesmo usuário. |
 | `502 Bad Gateway` | `STT_PROVIDER_ERROR` | Falha na chamada ao serviço de transcrição. |
 | `503 Service Unavailable` | `STT_PROVIDER_UNAVAILABLE` | Serviço de transcrição indisponível; aplica-se o fallback da Seção 6.2.5. |
+| `502 Bad Gateway` | `PROCESSING_PROVIDER_ERROR` | A transcrição foi concluída, mas o provedor de resposta falhou de forma controlada. |
+| `503 Service Unavailable` | `PROCESSING_UNAVAILABLE` | A transcrição foi concluída, mas o pipeline de PLN ou geração está indisponível. |
 
 O código `403 OUT_OF_SCOPE_FOR_PROFILE`, previsto para a autorização por
 `access_rules`, ainda não é retornado por esta rota: essa verificação depende
@@ -5053,29 +5055,20 @@ O terceiro delimita o alcance do mecanismo de contenção: **os dois limiares n�
 
 ### 8.11.7 Testes automatizados
 
-A coleta atual registra **207 testes no backend**. O núcleo de PLN responde por **94 casos coletados**; os 15 casos de `test_pipeline_api.py` verificam rapidamente o contrato HTTP com duplos, e um cenário adicional em `test_traceability.py` atravessa `POST /api/chat` com o classificador real até a persistência mínima. Tempos variam conforme o cache do snapshot BERTimbau e o ambiente de execução.
+A coleta atual registra **252 testes no backend**. A suíte cobre o classificador BERTimbau vigente, os contratos HTTP de texto e áudio e a persistência mínima. Os cenários de áudio incluem a cadeia STT → PLN com classificação real, falhas controladas e correlação por `conversation_id`. Tempos variam conforme o cache do snapshot do modelo e o ambiente de execução.
 
 | Arquivo | Testes | O que verifica |
 | --- | ---: | --- |
-| `test_nlp_preprocessing.py` | 20 | Cada opção da grade de pré-processamento, a `config_22` selecionada, a preservação de stopwords e a estabilidade dos tokens que o artefato espera |
+| `test_nlp_preprocessing.py` | 22 | Cada opção da grade de pré-processamento, a `config_22` selecionada, a preservação de stopwords e a estabilidade dos tokens que o artefato espera |
 | `test_nlp_entities.py` | 30 | Casamento por léxico e por padrão, insensibilidade a caixa e acento, resolução de sobreposição pelo termo mais longo, tipos ambíguos e posições no texto original |
 | `test_nlp_classifier.py` | 19 | Carregamento e validação do artefato, recusa de artefato incompleto, comportamento do classificador hierárquico e a exigência de que ele carregue **fora** do notebook |
-| `test_nlp_inference.py` | 25 | Classificação ponta a ponta, os três caminhos de roteamento, a coerência entre macrointenção e handler, a fidelidade às métricas do benchmark, a preservação de acentos e negação, o uso da mesma revisão imutável no modelo BERTimbau e no tokenizador e a recusa de revisões mutáveis ou inválidas |
-| `test_pipeline_api.py` | 15 | Contrato real de `POST /api/chat` e `POST /api/audio` com o classificador substituído por um duplo: intenção e entidades no corpo da resposta, resposta controlada sem chamar o provedor gerador, opt-out por `use_intent_classifier` e tradução das falhas em código HTTP |
-| `test_traceability.py` | 11 | Contrato entre HTTP, classificador real, limiares, gerador substituído na fronteira e persistência mínima, além dos cenários controlados de banco e auditoria |
+| `test_nlp_inference.py` | 25 | Classificação ponta a ponta, roteamento, preservação de acentos e negação, revisão imutável do modelo BERTimbau e do tokenizador |
+| `test_pipeline_api.py` | 22 | Contrato de `POST /api/chat` e `POST /api/audio`, opt-out por `use_intent_classifier`, cadeia áudio → STT simulado → PLN real, proatividade e falhas controladas |
+| `test_traceability.py` | 14 | Contrato entre HTTP, classificador real e persistência mínima nas entradas por texto e áudio, incluindo identidade, correlação por `conversation_id` e auditoria da falha do classificador |
 
-**Quatro testes fazem a documentação e o código responderem um pelo outro.** Eles recalculam sobre o conjunto de teste os números registrados na Seção 8.10.3 e reprovam se houver divergência maior que 0,0002:
+Os testes de inferência verificam as métricas e os limiares do artefato vigente descrito na Seção 8.11.10. Os números da Seção 8.10.3 pertencem ao benchmark histórico e não são critérios para o classificador v2.
 
-| Teste | Valor exigido |
-| --- | --- |
-| `test_acuracia_da_intencao_no_teste` | 0,7383 |
-| `test_f1_macro_da_intencao_no_teste` | 0,7401 |
-| `test_efeito_dos_limiares_reproduz_a_documentacao` | 14 solicitações abaixo do limiar de macro, 305 no fluxo genérico, 0,8775 de acurácia entre as aceitas |
-| `test_limiares_sao_os_calibrados_na_validacao` | 0,550 e 0,700 |
-
-Sem eles, uma troca de artefato, uma alteração no pré-processamento ou uma atualização de biblioteca poderia mudar o comportamento do serviço sem que nada na suíte acusasse — e a Seção 8.10 passaria a descrever um modelo que não é mais o que roda.
-
-Três testes protegem decisões de implementação que não aparecem em métrica: `test_o_encoder_roda_sem_pytorch` verifica que `torch` e `transformers` continuam ausentes de `sys.modules` depois de uma classificação; `test_macro_e_intencao_nunca_saem_incoerentes` percorre todo o conjunto de teste confirmando que a saída jamais anuncia uma macrointenção e um handler de outra; e `test_bloco_desconhecido_e_recusado` garante que um bloco de representação não previsto falhe de forma explícita, em vez de produzir uma matriz de atributos silenciosamente errada.
+Os testes de inferência também verificam a coerência entre macrointenção e handler, a preservação de acentos e negação e a recusa de revisões mutáveis ou inválidas do BERTimbau.
 
 **Execução.**
 
@@ -5085,12 +5078,18 @@ cd src/backend
 ```
 
 ```text
-207 passed, 10 warnings in 294.69s
+252 passed, 11 warnings
 ```
 
 Quando `requirements-pln.txt` não está instalado, os testes de inferência são pulados com a razão declarada (`instale requirements-pln.txt`). O job `backend-api` da CI instala os dois arquivos de dependências, importa explicitamente `torch` e `transformers` como verificação obrigatória, executa `test_nlp_inference.py` e `test_traceability.py` e mantém cache do snapshot imutável, portanto o cenário contratual não pode passar por *skip* silencioso.
 
-**A suíte separa velocidade de evidência entre camadas.** `test_pipeline_api.py` substitui classificador e provedor gerador por duplos para verificar rapidamente campos, códigos HTTP e decisões de chamada. `test_chat_real_classifier_contract_and_minimal_persistence`, em `test_traceability.py`, não substitui `classify`: usa o artefato real, valida os limiares de 0,525 e 0,350 no contrato público e confirma a gravação mínima. Somente Gemini e o driver PostgreSQL são substituídos nas fronteiras do teste.
+**A suíte separa velocidade de evidência entre camadas.** A maior parte de `test_pipeline_api.py` substitui classificador e provedor gerador por duplos para verificar rapidamente campos, códigos HTTP e decisões de chamada. `test_audio_transcription_is_classified_by_real_classifier` mantém somente STT e Gemini nas fronteiras controladas e executa o classificador real. Em `test_traceability.py`, `test_chat_real_classifier_contract_and_minimal_persistence` e `test_audio_real_classifier_contract_and_minimal_persistence` não substituem `classify`: usam o artefato real, validam o contrato público e confirmam a gravação mínima. Azure STT, Gemini e o driver PostgreSQL são substituídos nas respectivas fronteiras para que a suíte permaneça determinística.
+
+O smoke test opcional `python -m scripts.verify_audio_stt_pln_real_db`, executado a partir de `src/backend`, comprova a integração com o PostgreSQL/Supabase configurado. Ele envia dois áudios sintéticos pela rota HTTP, mantém o classificador real no cenário positivo, induz uma falha controlada no cenário negativo e verifica `ai_conversations`, `ai_interactions` e `audit_events`. Cada execução usa identificadores únicos e remove explicitamente as conversas, interações e auditorias criadas. A execução de referência da S4-13 confirmou sucesso, falha, correlação, auditoria e limpeza, com zero resíduos.
+
+**Evidência com STT real da S4-13 (17/09/2026).** A cadeia `POST /api/audio` → Azure Speech `pt-BR` → classificador PLN real → Supabase foi executada com a pergunta “Qual é o perfil epidemiológico clássico de uma paciente com artrite reumatoide (AR)?”, da amostra pública [`juliasdata/medical-audio-sample-brazilian-portuguese`](https://huggingface.co/datasets/juliasdata/medical-audio-sample-brazilian-portuguese), revisão `5d31e7d`, licenciada para avaliação por `juliasdata-sample-evaluation-license-1.0`. O WAV original, com SHA-256 `cd04854ed8364e38f1e3a335f9ce5f3e614952421890df6ad9dee9da5a4aaba4`, foi mantido apenas em diretório temporário e convertido de PCM mono, 48 kHz e 16 bits para o contrato PCM mono, 16 kHz e 16 bits; a derivação usada teve SHA-256 `8bda1df850d99ce754e4f95152dc80aabb03a2a31ae5da63bf0a6a790bd4ec59`.
+
+O Azure STT retornou a frase esperada, preservando os termos verificáveis “perfil” e “artrite”. O classificador real retornou a macrointenção `CONSULTA` e, por não haver intenção específica segura para o domínio médico, manteve a intenção específica vazia, respeitando os limiares do artefato. A interação foi localizada no Supabase pelo mesmo `conversation_id`; `ai_interactions.user_prompt` coincidiu com a transcrição, e os eventos `pln_intent_classified` e `database_traceability_recorded` foram encontrados. O provedor gerador, posterior ao escopo áudio → STT → PLN da S4-13, permaneceu como fronteira controlada. O verificador `python -m scripts.verify_audio_stt_pln_live <audio.wav> --expected-term perfil --expected-term artrite` confirmou `LIVE_DB_CORRELATION_OK=True`, `LIVE_DB_AUDIT_OK=True` e `LIVE_DB_CLEANUP_OK=True`; uma consulta posterior não encontrou resíduos da execução.
 
 ### 8.11.8 Desempenho medido
 
