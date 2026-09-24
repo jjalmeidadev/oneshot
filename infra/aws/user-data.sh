@@ -13,7 +13,7 @@ export AWS_DEFAULT_REGION="$AWS_REGION"
 
 install -d -m 0755 /etc/apt/keyrings
 apt-get update
-apt-get install -y ca-certificates curl gnupg amazon-ecr-credential-helper logrotate rsyslog snapd
+apt-get install -y ca-certificates curl gnupg logrotate rsyslog snapd
 systemctl enable --now rsyslog
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
@@ -22,7 +22,7 @@ ARCH="$(dpkg --print-architecture)"
 . /etc/os-release
 printf 'deb [arch=%s signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu %s stable\n' "$ARCH" "$VERSION_CODENAME" > /etc/apt/sources.list.d/docker.list
 apt-get update
-apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin amazon-ecr-credential-helper
 systemctl enable --now docker
 
 # Ubuntu cloud images normally ship SSM Agent. Keep this idempotent fallback for images where it is absent.
@@ -32,7 +32,7 @@ fi
 systemctl enable --now snap.amazon-ssm-agent.amazon-ssm-agent.service
 
 CWA_DEB="/var/tmp/amazon-cloudwatch-agent.deb"
-curl -fsSL "https://amazon-cloudwatch-agent-$AWS_REGION.s3.$AWS_REGION.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb" -o "$CWA_DEB"
+curl -fsSL "https://amazoncloudwatch-agent-$AWS_REGION.s3.$AWS_REGION.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb" -o "$CWA_DEB"
 dpkg -i "$CWA_DEB"
 rm -f "$CWA_DEB"
 
