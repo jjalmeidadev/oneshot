@@ -1,0 +1,140 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+      target: runtime
+    image: ${BACKEND_IMAGE:-m7-g05-backend}:${BACKEND_IMAGE_TAG:-${APP_IMAGE_TAG:-local}}
+    restart: unless-stopped
+    expose:
+      - "8000"
+    environment:
+      PLN_WARMUP: "1"
+      REPORT_EXECUTION_MODE: local
+      REPORT_REPOSITORY_MODE: memory
+      REPORT_STORAGE_MODE: local
+      REPORT_PORTFOLIO_SOURCE: synthetic
+      REPORT_SIMULATED_IDENTITIES: "${REPORT_SIMULATED_IDENTITIES:-}"
+      REPORT_ARTIFACTS_DIR: /var/lib/m7/reports
+      GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
+      GEMINI_MODEL: "${GEMINI_MODEL:-gemini-3.7-flash}"
+      AZURE_SPEECH_RESOURCE: "${AZURE_SPEECH_RESOURCE:-}"
+      AZURE_SPEECH_ENDPOINT: "${AZURE_SPEECH_ENDPOINT:-}"
+      AZURE_SPEECH_KEY: "${AZURE_SPEECH_KEY:-}"
+      AZURE_SPEECH_TIMEOUT_SECONDS: "${AZURE_SPEECH_TIMEOUT_SECONDS:-6}"
+      AZURE_SPEECH_MAX_ATTEMPTS: "${AZURE_SPEECH_MAX_ATTEMPTS:-2}"
+      AUDIO_SIMULATED_IDENTITIES: "${AUDIO_SIMULATED_IDENTITIES:-}"
+    volumes:
+      - report-artifacts:/var/lib/m7/reports
+    networks:
+      - app-private
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=128m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 4g
+    cpus: 2.0
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/health', timeout=3).read()
+      interval: 30s
+      timeout: 5s
+      start_period: 180s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: src/frontend/Dockerfile
+      target: runtime
+    image: ${FRONTEND_IMAGE:-m7-g05-frontend}:${FRONTEND_IMAGE_TAG:-${APP_IMAGE_TAG:-local}}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${APP_BIND_ADDRESS:-127.0.0.1}:${APP_PORT:-80}:8080"
+    networks:
+      - app-private
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 512m
+    cpus: 0.5
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:8080/]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  notebook:
+    profiles:
+      - notebook
+    build:
+      context: .
+      dockerfile: src/notebooks/Dockerfile
+      target: notebook
+    image: ${NOTEBOOK_IMAGE:-m7-g05-notebook}:${APP_IMAGE_TAG:-local}
+    restart: "no"
+    expose:
+      - "8888"
+    ports:
+      - "${NOTEBOOK_BIND_ADDRESS:-127.0.0.1}:${NOTEBOOK_HOST_PORT:-8888}:8888"
+    environment:
+      JUPYTER_TOKEN: "${JUPYTER_TOKEN:-}"
+    volumes:
+      - notebook-workspace:/workspace
+    networks:
+      - notebook-private
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 4g
+    cpus: 2.0
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import socket; socket.create_connection(('127.0.0.1', 8888), timeout=3).close()
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+networks:
+  app-private:
+    driver: bridge
+  notebook-private:
+    driver: bridge
+
+volumes:
+  report-artifacts:
+  notebook-workspace:

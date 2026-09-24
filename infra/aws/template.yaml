@@ -1,0 +1,133 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Temporary M7/g05 MVP on one EC2 instance. The stack creates one security
+  group with no inbound rules, one EC2 instance and one short-retention log
+  group. ECR repositories, IAM and runtime secrets remain external.
+
+Parameters:
+  AmiId:
+    Type: AWS::EC2::Image::Id
+    Description: Existing Ubuntu 24.04 amd64 AMI in us-east-1.
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: Existing default VPC.
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: Existing public subnet in VpcId with an Internet Gateway route.
+  InstanceType:
+    Type: String
+    Default: t3.large
+    AllowedValues:
+      - t3.large
+      - t3.xlarge
+    Description: Use t3.xlarge only if t3.large proves insufficient in memory tests.
+  RootVolumeSize:
+    Type: Number
+    Default: 50
+    MinValue: 50
+    MaxValue: 100
+    Description: Encrypted gp3 root volume size in GiB.
+  InstanceProfileName:
+    Type: String
+    Description: Exact name of an existing profile with SSM, ECR pull and minimal CloudWatch Logs access.
+    MinLength: 1
+    MaxLength: 128
+    AllowedPattern: '^[A-Za-z0-9+=,.@_-]+$'
+  EcrRegistryUri:
+    Type: String
+    Description: Private ECR registry URI in us-east-1.
+    AllowedPattern: '^[0-9]{12}\.dkr\.ecr\.us-east-1\.amazonaws\.com$'
+  BackendImageTag:
+    Type: String
+    Description: Immutable backend tag based on the full commit SHA.
+    AllowedPattern: '^[a-fA-F0-9]{40}$'
+  FrontendImageTag:
+    Type: String
+    Description: Immutable frontend tag based on the full commit SHA.
+    AllowedPattern: '^[a-fA-F0-9]{40}$'
+
+Resources:
+  ApplicationSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: M7/g05 SSM-only MVP; no inbound network access.
+      VpcId: !Ref VpcId
+      SecurityGroupEgress:
+        - Description: Ubuntu package mirrors during bootstrap.
+          IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - Description: SSM, ECR, CloudWatch Logs, Azure Speech and Gemini.
+          IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-ssm-only'
+        - Key: Application
+          Value: m7-g05
+
+  ApplicationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/m7/g05/${AWS::StackName}'
+      RetentionInDays: 7
+      Tags:
+        - Key: Application
+          Value: m7-g05
+
+  ApplicationInstance:
+    Type: AWS::EC2::Instance
+    DependsOn: ApplicationLogGroup
+    Properties:
+      ImageId: !Ref AmiId
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref InstanceProfileName
+      Monitoring: false
+      MetadataOptions:
+        HttpEndpoint: enabled
+        HttpTokens: required
+        HttpPutResponseHopLimit: 1
+      NetworkInterfaces:
+        - DeviceIndex: 0
+          AssociatePublicIpAddress: true
+          SubnetId: !Ref SubnetId
+          GroupSet:
+            - !Ref ApplicationSecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: !Ref RootVolumeSize
+            VolumeType: gp3
+      UserData:
+        Fn::Base64:
+          Fn::Sub: |
+            #!/bin/bash
+            echo "This template source must be rendered with scripts/aws/deploy.ps1." >&2
+            exit 64
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-app'
+        - Key: Application
+          Value: m7-g05
+        - Key: ManagedBy
+          Value: CloudFormation
+        - Key: Lifetime
+          Value: temporary-four-days
+
+Outputs:
+  InstanceId:
+    Description: Target for SSM Session Manager and port forwarding.
+    Value: !Ref ApplicationInstance
+  PublicIpv4:
+    Description: Used for outbound connectivity only; the security group has no inbound rules.
+    Value: !GetAtt ApplicationInstance.PublicIp
+  SecurityGroupId:
+    Description: Security group with no inbound rules.
+    Value: !Ref ApplicationSecurityGroup
+  ApplicationLogGroupName:
+    Value: !Ref ApplicationLogGroup
