@@ -1,0 +1,32 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF03-02
+Requisito: RF03
+Cenário: Negativo
+Status: FALHOU
+
+Entrada:
+Reserve uma sala de reunião para amanhã
+
+Resultado observado:
+HTTP 200
+model: google/gemini-3.7-flash
+sources: []
+intent.macro: TRANSACAO
+intent.specific: transacao_agendar_compromisso
+confidence_macro: 0.7787
+confidence_specific: 0.7335
+flow: Executor de Transação -> Confirmação -> Registro
+alternative fora_escopo_externo: 0.2048
+
+Comportamento:
+O sistema prosseguiu como se a solicitação fosse uma transação válida e pediu informações relacionadas à reserva.
+
+Resultado esperado:
+Não criar associação fictícia ao catálogo; tratar como fora de escopo ou pedir reformulação.
+
+Conclusão:
+FALHOU.
+
+Defeito:
+DEF-S4-32A-02 — reserva genérica aceita como `transacao_agendar_compromisso`.
