@@ -1,0 +1,38 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF06-01
+Requisito: RF06
+Cenário: Positivo
+Status: FALHOU
+
+Entrada:
+Compare os prazos e riscos dos projetos PRJ-0442 e PRJ-0510
+
+Resultado observado:
+HTTP 200
+intent.macro: CONSULTA
+intent.specific: comparacao_entre_projetos
+confidence_specific: 0.7847
+entities.projeto:
+- PRJ-0442
+- PRJ-0510
+
+Resposta/contexto:
+A resposta discutiu somente PRJ-0442, incluindo prazo 24/08/2026–28/08/2026 e risco/teste operacional.
+Não apresentou comparação efetiva com PRJ-0510.
+
+Fontes:
+- conteúdo PRJ-0442 — score 7.0
+- Atendimento a objeto perdido — score 1.0
+
+Pré-condição de massa:
+O seed inspecionado possui dados estruturados de progresso, riscos e marcos para PRJ-0442, PRJ-0510 e PRJ-0587.
+
+Resultado esperado:
+Distinguir ambos os projetos, abordar prazo e risco e apontar dados/fontes para os dois.
+
+Conclusão:
+FALHOU.
+
+Defeito:
+DEF-S4-32A-03 — recuperação/contextualização multi-projeto incompleta.
