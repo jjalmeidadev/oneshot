@@ -13,8 +13,9 @@ export AWS_DEFAULT_REGION="$AWS_REGION"
 
 install -d -m 0755 /etc/apt/keyrings
 apt-get update
-apt-get install -y ca-certificates curl gnupg logrotate rsyslog snapd
+apt-get install -y ca-certificates curl gnupg logrotate rsyslog openssh-server
 systemctl enable --now rsyslog
+systemctl enable --now ssh
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 chmod a+r /etc/apt/keyrings/docker.asc
@@ -25,12 +26,6 @@ apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin amazon-ecr-credential-helper
 systemctl enable --now docker
 
-# Ubuntu cloud images normally ship SSM Agent. Keep this idempotent fallback for images where it is absent.
-if ! systemctl list-unit-files | grep -q '^snap.amazon-ssm-agent.amazon-ssm-agent.service'; then
-  snap install amazon-ssm-agent --classic
-fi
-systemctl enable --now snap.amazon-ssm-agent.amazon-ssm-agent.service
-
 CWA_DEB="/var/tmp/amazon-cloudwatch-agent.deb"
 curl -fsSL "https://amazoncloudwatch-agent-$AWS_REGION.s3.$AWS_REGION.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb" -o "$CWA_DEB"
 dpkg -i "$CWA_DEB"
@@ -38,8 +33,9 @@ rm -f "$CWA_DEB"
 
 install -d -m 0750 /opt/m7 /etc/m7 /var/log/m7 /var/lib/m7/reports /var/lib/m7/notebooks /root/.docker
 if [ ! -e /etc/m7/runtime.env ]; then
-  install -m 0600 /dev/null /etc/m7/runtime.env
+  install -o root -g root -m 0600 /dev/null /etc/m7/runtime.env
 fi
+chown root:root /etc/m7/runtime.env
 chmod 0600 /etc/m7/runtime.env
 
 # These base64 payloads contain only version-controlled, non-secret configuration.
@@ -78,6 +74,10 @@ cat > /usr/local/bin/m7-compose-up <<'EOF'
 #!/usr/bin/env bash
 set -Eeuo pipefail
 RUNTIME_FILE=/etc/m7/runtime.env
+if grep -Eq '^[[:space:]]*(export[[:space:]]+)?AWS_[A-Za-z0-9_]*[[:space:]]*=' "$RUNTIME_FILE"; then
+  echo 'Runtime configuration must not contain AWS_* assignments.' >&2
+  exit 64
+fi
 for name in GEMINI_API_KEY AZURE_SPEECH_KEY AZURE_SPEECH_TIMEOUT_SECONDS AZURE_SPEECH_MAX_ATTEMPTS AUDIO_SIMULATED_IDENTITIES REPORT_SIMULATED_IDENTITIES; do
   if ! grep -Eq "^$name=.+" "$RUNTIME_FILE"; then
     echo "Runtime configuration is missing a required variable: $name" >&2
@@ -159,4 +159,4 @@ docker volume create m7_notebook-workspace >/dev/null
 export AWS_ECR_DISABLE_CACHE=true
 /usr/local/bin/m7-compose pull backend frontend
 
-echo 'Bootstrap completed. The notebook image was intentionally not pulled. Inject runtime configuration through SSM, then run m7-compose-up.'
+echo 'Bootstrap completed. The notebook image was intentionally not pulled. Transfer protected runtime configuration over SSH, install it as root:root mode 0600, then run m7-compose-up.'
