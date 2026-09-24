@@ -46,7 +46,9 @@ from app.rag.proactive_confirmation import (
 from app.reports.errors import ReportError
 from app.reports.router import router as reports_router
 
-load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=True)
+# Container and process environment is authoritative. A local .env remains a
+# development convenience, but must not replace variables injected at runtime.
+load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
 
 AUDIO_PATH = "/api/audio"
 DEFAULT_LANGUAGE = "pt-BR"
