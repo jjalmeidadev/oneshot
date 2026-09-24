@@ -58,6 +58,20 @@ _DOMAIN_TOKEN_EQUIVALENTS = {
 }
 
 
+#: Campos do extrato que ja aparecem em outra parte do bloco `[Fonte N]` e nao
+#: devem ser repetidos como atributo.
+_CAMPOS_JA_RENDERIZADOS = {"Title", "Conteudo", "Descricao", "Resumo", "PalavrasChave"}
+
+#: Rotulos legiveis para os atributos vindos do banco. A chave e o nome tecnico
+#: gravado em `source_extracts.metadata` por 04_rag_synthetic_data.sql.
+_ROTULOS_DE_ATRIBUTO = {
+    "status": "Status",
+    "line": "Linha",
+    "category": "Categoria",
+    "validity": "Vigencia",
+}
+
+
 @dataclass(frozen=True)
 class SharePointDocument:
     source_id: str
@@ -72,12 +86,85 @@ class SharePointDocument:
     project_id: str | None = None
     source_locator: str | None = None
     fallback: bool = True
+    #: Atributos estruturados do extrato, como pares (rotulo, valor) ja prontos
+    #: para o prompt. Vigencia, status, linha e categoria vivem fora do
+    #: `content_text` e, ate a correcao do DEF-RNF04-01, eram recuperados do
+    #: banco e descartados antes de chegar ao LLM: o agente devolvia a fonte
+    #: certa e respondia "contexto insuficiente" sobre uma data que estava no
+    #: registro recuperado. Tupla para preservar o dataclass congelado.
+    attributes: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True)
 class RetrievedDocument:
     document: SharePointDocument
     score: float
+
+
+def attributes_from_fields(fields: dict) -> tuple[tuple[str, str], ...]:
+    """Extrai atributos do item do SharePoint no formato bruto do JSON local.
+
+    `ValidadeInicio` e `ValidadeFim` sao unidos em um unico rotulo `Vigencia`,
+    porque duas datas soltas no prompt levam o modelo a trata-las como fatos
+    independentes em vez de como um intervalo.
+    """
+
+    atributos: list[tuple[str, str]] = []
+    inicio = str(fields.get("ValidadeInicio") or "").strip()
+    fim = str(fields.get("ValidadeFim") or "").strip()
+    if inicio or fim:
+        atributos.append(("Vigencia", _intervalo(inicio, fim)))
+
+    for nome, valor in fields.items():
+        if nome in _CAMPOS_JA_RENDERIZADOS or nome in {"ValidadeInicio", "ValidadeFim"}:
+            continue
+        if not isinstance(valor, (str, int, float)):
+            continue
+        texto = str(valor).strip()
+        if texto:
+            atributos.append((nome, texto))
+    return tuple(atributos)
+
+
+def attributes_from_metadata(metadata: dict | None) -> tuple[tuple[str, str], ...]:
+    """Extrai atributos do `source_extracts.metadata` gravado pelo banco."""
+
+    if not isinstance(metadata, dict):
+        return ()
+
+    atributos: list[tuple[str, str]] = []
+    vigencia = metadata.get("validity")
+    if isinstance(vigencia, dict):
+        intervalo = _intervalo(
+            str(vigencia.get("start") or "").strip(),
+            str(vigencia.get("end") or "").strip(),
+        )
+        if intervalo:
+            atributos.append(("Vigencia", intervalo))
+
+    for chave, rotulo in _ROTULOS_DE_ATRIBUTO.items():
+        if chave == "validity":
+            continue
+        valor = metadata.get(chave)
+        if isinstance(valor, (str, int, float)) and str(valor).strip():
+            atributos.append((rotulo, str(valor).strip()))
+    return tuple(atributos)
+
+
+def _intervalo(inicio: str, fim: str) -> str:
+    if inicio and fim:
+        return f"de {inicio} a {fim}"
+    if inicio:
+        return f"a partir de {inicio}"
+    if fim:
+        return f"ate {fim}"
+    return ""
+
+
+def _blocos_de_atributo(document: SharePointDocument) -> list[str]:
+    """Linhas de atributo do bloco `[Fonte N]`, ou lista vazia se nao houver."""
+
+    return [f"{rotulo}: {valor}" for rotulo, valor in document.attributes]
 
 
 def load_sharepoint_documents(
@@ -119,6 +206,7 @@ def load_sharepoint_documents(
                     web_url=str(item.get("webUrl") or ""),
                     last_modified=str(item.get("lastModifiedDateTime") or ""),
                     search_text=" ".join(searchable_values),
+                    attributes=attributes_from_fields(fields),
                 )
             )
 
@@ -175,6 +263,7 @@ def build_rag_input(
                     f"[Fonte {index}] {document.title}",
                     f"Lista: {document.list_name}",
                     f"Atualizado em: {document.last_modified}",
+                    *_blocos_de_atributo(document),
                     f"Conteudo: {document.content}",
                 )
             )
@@ -211,6 +300,7 @@ def build_confirmed_proactive_input(
                     f"[Fonte {index}] {document.title}",
                     f"Lista: {document.list_name}",
                     f"Atualizado em: {document.last_modified}",
+                    *_blocos_de_atributo(document),
                     f"Conteudo: {document.content}",
                 )
             )

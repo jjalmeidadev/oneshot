@@ -22,6 +22,7 @@ from app.audio.schemas import (
 from app.audio.security import resolve_identity, single_request_per_identity
 from app.audio.service import process_audio_upload
 from app.audio.validation import DEFAULT_MAX_SIZE_BYTES
+from app.database.connection import close_database_pool
 from app.gemini.client import (
     GeminiAPIError,
     GeminiConfigurationError,
@@ -70,6 +71,7 @@ async def lifespan(_app: FastAPI):
     if os.getenv("PLN_WARMUP", "0") == "1":
         await run_in_threadpool(warmup_classifier)
     yield
+    await run_in_threadpool(close_database_pool)
 
 
 app = FastAPI(

@@ -18,4 +18,3 @@ Saída JSON fixa:
   "warnings": []
 }
 ```
-

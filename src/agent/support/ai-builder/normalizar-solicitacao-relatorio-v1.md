@@ -27,4 +27,3 @@ Saída JSON fixa:
   "ambiguities": []
 }
 ```
-

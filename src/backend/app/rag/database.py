@@ -12,6 +12,7 @@ from app.nlp.schemas import AudioIntent, PublicEntity
 from app.rag.sharepoint import (
     RetrievedDocument,
     SharePointDocument,
+    attributes_from_metadata,
     _configured_result_limit,
     _meaningful_tokens,
 )
@@ -40,6 +41,7 @@ SELECT
     se.source_locator,
     p.code AS project_code,
     p.title AS project_title,
+    se.metadata AS extract_metadata,
     COALESCE(
         (
             SELECT SUM(
@@ -243,6 +245,7 @@ def _row_to_result(row: object) -> RetrievedDocument:
         project_id=_optional_str(value("project_id")),
         source_locator=_optional_str(value("source_locator")),
         fallback=False,
+        attributes=attributes_from_metadata(value("extract_metadata")),
     )
     return RetrievedDocument(
         document=document,
@@ -263,7 +266,8 @@ _ROW_INDEX = {
     "source_locator": 9,
     "project_code": 10,
     "project_title": 11,
-    "score": 12,
+    "extract_metadata": 12,
+    "score": 13,
 }
 
 

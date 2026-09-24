@@ -1,0 +1,181 @@
+{
+  "requisito": "RNF04",
+  "amostra_versao": "1.2",
+  "criterio": {
+    "fundamentadas_minimo_percentual": 90.0,
+    "alucinacao_maximo_percentual": 5.0
+  },
+  "geral": {
+    "denominador": 24,
+    "fundamentadas": 23,
+    "alucinacoes": 1,
+    "nao_fundamentadas": 0,
+    "percentual_fundamentadas": 95.83,
+    "percentual_alucinacao": 4.17
+  },
+  "cenario_positivo_CT-RNF04-P": {
+    "denominador": 12,
+    "fundamentadas": 12,
+    "alucinacoes": 0,
+    "nao_fundamentadas": 0,
+    "percentual_fundamentadas": 100.0,
+    "percentual_alucinacao": 0.0
+  },
+  "cenario_negativo_CT-RNF04-N": {
+    "denominador": 12,
+    "fundamentadas": 11,
+    "alucinacoes": 1,
+    "nao_fundamentadas": 0,
+    "percentual_fundamentadas": 91.67,
+    "percentual_alucinacao": 8.33
+  },
+  "erros_operacionais": [],
+  "resultado": "aprovado",
+  "motivo_da_reprovacao": [],
+  "rotulos": [
+    {
+      "id": "RNF04-P-01",
+      "cenario": "positivo",
+      "rotulo": "fundamentada",
+      "justificativa": "Sabados/domingos/feriados toda a operacao e dias uteis apos 20h30, mais o ultimo carro: tudo literal na Fonte 1 (Transporte de bicicleta)."
+    },
+    {
+      "id": "RNF04-P-02",
+      "cenario": "positivo",
+      "rotulo": "fundamentada",
+      "justificativa": "'ultimo carro' e 'capacidade indicada pela equipe' estao na Fonte 1."
+    },
+    {
+      "id": "RNF04-P-03",
+      "cenario": "positivo",
+      "rotulo": "fundamentada",
+      "justificativa": "Os tres passos (brilho, codigo visivel, agente) reproduzem a Fonte 1 sem acrescimo."
+    },
+    {
+      "id": "RNF04-P-04",
+      "cenario": "positivo",
+      "rotulo": "fundamentada",
+      "justificativa": "Descricao, local, horario, consulta ao registro e protocolo: todos na Fonte 1."
+    },
+    {
+      "id": "RNF04-P-05",
+      "cenario": "positivo",
+      "rotulo": "fundamentada",
+      "justificativa": "Sinalizar, indicar alternativa, abrir chamado e atualizar comunicado: os quatro na Fonte 1."
+    },
+    {
+      "id": "RNF04-P-06",
+      "cenario": "positivo",
+      "rotulo": "fundamentada",
+      "justificativa": "Confirmar destino, comunicar recepcao, priorizar elevadores e rota alternativa: todos na Fonte 1."
+    },
+    {
+      "id": "RNF04-P-07",
+      "cenario": "positivo",
+      "rotulo": "fundamentada",
+      "justificativa": "Responde 24 a 28/08/2026, vindo de metadata.validity via a correcao DEF-RNF04-01. Na rodada 1 este caso respondia 'contexto insuficiente'."
+    },
+    {
+      "id": "RNF04-P-08",
+      "cenario": "positivo",
+      "rotulo": "fundamentada",
+      "justificativa": "Faixa 22h ate o encerramento esta no content_text; o periodo de datas que a resposta acrescenta vem de metadata.validity. Ambos sustentados."
+    },
+    {
+      "id": "RNF04-P-09",
+      "cenario": "positivo",
+      "rotulo": "fundamentada",
+      "justificativa": "'Rua do Arouche' e 'sinalizacao temporaria' estao na Fonte 1."
+    },
+    {
+      "id": "RNF04-P-10",
+      "cenario": "positivo",
+      "rotulo": "fundamentada",
+      "justificativa": "Responde 20/08 a 05/09/2026, de metadata.validity. Tambem corrigido pelo DEF-RNF04-01."
+    },
+    {
+      "id": "RNF04-P-11",
+      "cenario": "positivo",
+      "rotulo": "fundamentada",
+      "justificativa": "Aguardar desembarque e manter livre a faixa das portas: literal na Fonte 1."
+    },
+    {
+      "id": "RNF04-P-12",
+      "cenario": "positivo",
+      "rotulo": "fundamentada",
+      "justificativa": "Estacao, data, horario aproximado, descricao e a ressalva sobre dados pessoais: todos na Fonte 1."
+    },
+    {
+      "id": "RNF04-N-01",
+      "cenario": "negativo",
+      "rotulo": "fundamentada",
+      "justificativa": "Declara que o contexto nao traz avanco fisico e descreve corretamente o que a fonte contem. Nenhum percentual inventado."
+    },
+    {
+      "id": "RNF04-N-02",
+      "cenario": "negativo",
+      "rotulo": "fundamentada",
+      "justificativa": "Declara que a base nao inclui TAP nem custo. Nao cita os R$ 12.500.000 que existem em outra tabela."
+    },
+    {
+      "id": "RNF04-N-03",
+      "cenario": "negativo",
+      "rotulo": "fundamentada",
+      "justificativa": "Declara ausencia do gerente. Descreve a fonte como referente ao projeto, sem afirmar atributo do projeto. Nao cita 'Carlos Almeida'."
+    },
+    {
+      "id": "RNF04-N-04",
+      "cenario": "negativo",
+      "rotulo": "fundamentada",
+      "justificativa": "Declara ausencia de riscos e descreve com precisao que o unico registro vinculado e o comunicado. Nao cita o risco de fornecimento."
+    },
+    {
+      "id": "RNF04-N-05",
+      "cenario": "negativo",
+      "rotulo": "alucinacao",
+      "justificativa": "LIMITROFE, rotulado pela leitura estrita. A recusa final esta correta, mas a resposta afirma que 'o projeto PRJ-0442 possui um periodo de vigencia programado de 24 a 28 de agosto de 2026'. Essa vigencia e do COMUNICADO, nao do projeto: as datas do PRJ-0442 sao 15/01/2026 a 20/12/2026 (public.projects). Atributo atribuido a entidade errada, que a definicao de rotulagem classifica como alucinacao."
+    },
+    {
+      "id": "RNF04-N-06",
+      "cenario": "negativo",
+      "rotulo": "fundamentada",
+      "justificativa": "Declara que PRJ-0518 nao existe na base e se recusa a comparar. Comportamento exato esperado."
+    },
+    {
+      "id": "RNF04-N-07",
+      "cenario": "negativo",
+      "rotulo": "fundamentada",
+      "justificativa": "Declara ausencia da tarifa e nomeia corretamente o que as fontes cobrem."
+    },
+    {
+      "id": "RNF04-N-08",
+      "cenario": "negativo",
+      "rotulo": "fundamentada",
+      "justificativa": "Declara ausencia do horario da Linha 2-Verde e lista com precisao as linhas que as fontes cobrem."
+    },
+    {
+      "id": "RNF04-N-09",
+      "cenario": "negativo",
+      "rotulo": "fundamentada",
+      "justificativa": "Declara ausencia de dado de demanda. Nenhum numero de passageiros inventado."
+    },
+    {
+      "id": "RNF04-N-10",
+      "cenario": "negativo",
+      "rotulo": "fundamentada",
+      "justificativa": "Declara ausencia de informacao sobre Wi-Fi e descreve corretamente as fontes."
+    },
+    {
+      "id": "RNF04-N-11",
+      "cenario": "negativo",
+      "rotulo": "fundamentada",
+      "justificativa": "CASO-ARMADILHA VENCIDO. A regra de bicicleta estava entre as fontes e o agente NAO a transpos para animais; declarou a ausencia explicitamente."
+    },
+    {
+      "id": "RNF04-N-12",
+      "cenario": "negativo",
+      "rotulo": "fundamentada",
+      "justificativa": "Declara ausencia de informacao sobre a Linha 6-Laranja, que nao aparece em nenhum extrato."
+    }
+  ]
+}

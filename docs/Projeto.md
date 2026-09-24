@@ -80,6 +80,7 @@
     - [3.1.5 Escopo dos requisitos funcionais](#315-escopo-dos-requisitos-funcionais)
   - [3.2 Requisitos Não Funcionais (RNFs)](#32-requisitos-não-funcionais-rnfs)
     - [3.2.1 RNFs descritos como histórias de usuário](#321-rnfs-descritos-como-histórias-de-usuário)
+    - [3.2.2 Origem das metas e registro de revisões](#322-origem-das-metas-e-registro-de-revisões)
   - [3.3 Visão Inicial sobre a Solução Técnica de Engenharia](#33-visão-inicial-sobre-a-solução-técnica-de-engenharia)
     - [3.3.1 Organização em camadas](#331-organização-em-camadas)
     - [3.3.2 Diagrama de Componentes (UML)](#332-diagrama-de-componentes-uml)
@@ -1793,8 +1794,8 @@ Os requisitos não funcionais definem os atributos de qualidade que a solução 
 | RNF01 | Confidencialidade | A solução não deve processar dados reais ou sensíveis do portfólio em serviços externos não homologados pelo Metrô. No MVP, o desenvolvimento e os testes devem utilizar dados sintéticos ou anonimizados. | Verificar que 100% da base utilizada na prova de conceito é sintética ou anonimizada e que o pipeline não depende do envio de dados sensíveis para serviços externos não homologados. | Muito Alta | Não iniciado |
 | RNF02 | Controle de acesso | A solução deve respeitar os limites de permissão e acesso à informação de cada perfil de usuário. | Validar, em cenários simulados, que 100% das respostas retornadas a usuários com perfis distintos estejam compatíveis com suas permissões e responsabilidades. | Muito Alta | Não iniciado |
 | RNF03 | Rastreabilidade | A solução deve registrar as consultas realizadas, a intenção classificada, as fontes consultadas e a resposta retornada, permitindo auditoria técnica das interações. | Verificar que 100% das interações testadas geram registros estruturados contendo identificação do usuário ou perfil simulado, carimbo de tempo, intenção identificada, documentos recuperados e resposta produzida. | Muito Alta | Não iniciado |
-| RNF04 | Confiabilidade das respostas | As respostas geradas pelo agente devem ser fundamentadas nas informações recuperadas dos dados disponíveis, evitando apresentar como fato informações não sustentadas pela base. | Em testes com dados sintéticos, atingir taxa de respostas fundamentadas igual ou superior a 90% e taxa de alucinação igual ou inferior a 5% nas solicitações pertencentes ao escopo do MVP. | Muito Alta | Não iniciado |
-| RNF05 | Desempenho | O pipeline deve processar solicitações textuais em tempo compatível com uma interação conversacional. | Em ambiente de MVP, responder consultas simples em até 10 segundos e análises comparativas em até 20 segundos, considerando o tempo entre o recebimento da solicitação pela API e o retorno da resposta estruturada. | Alta | Não iniciado |
+| RNF04 | Confiabilidade das respostas | As respostas geradas pelo agente devem ser fundamentadas nas informações recuperadas dos dados disponíveis, evitando apresentar como fato informações não sustentadas pela base. | Em testes com dados sintéticos, atingir taxa de respostas fundamentadas igual ou superior a 90% e taxa de alucinação igual ou inferior a 5% nas solicitações pertencentes ao escopo do MVP. | Muito Alta | Atendido na Sprint 4 |
+| RNF05 | Desempenho | O pipeline deve processar solicitações textuais em tempo compatível com uma interação conversacional. | Em ambiente de MVP, responder consultas simples em até 10 segundos e análises comparativas em até 20 segundos, considerando o tempo entre o recebimento da solicitação pela API e o retorno da resposta estruturada. | Alta | Atendido na Sprint 4 (3ª rodada) |
 | RNF06 | Qualidade do PLN | O núcleo de PLN deve apresentar desempenho mínimo aceitável na classificação de intenções e na recuperação de informações. | Em conjunto de teste sintético, atingir F1 macro igual ou superior a 0,80 na classificação de intenções e recall igual ou superior a 0,80 na recuperação de informações. | Muito Alta | Reprovado na Sprint 4: F1 0,832724; *recall*@3 0,555556; IC 95% [0,440874; 0,664609] |
 | RNF07 | Usabilidade conversacional | A interação deve permitir solicitações em linguagem natural, sem exigir que o usuário conheça comandos técnicos, estrutura dos dados ou nomes internos dos componentes. | Validar, por meio de casos de teste e testes com usuários, que pelo menos 80% das solicitações formuladas em português sejam compreendidas corretamente ou recebam orientação adequada para reformulação. | Alta | Não iniciado |
 | RNF08 | Aderência tecnológica | A solução deve priorizar tecnologias compatíveis com o ecossistema Microsoft já utilizado pelo Metrô, incluindo Teams, Copilot Studio, Power Platform, SharePoint e Azure. | Verificar que a arquitetura proposta utiliza o Teams como canal principal, API documentada em OpenAPI para integração e componentes compatíveis com o ambiente homologável pelo parceiro. | Muito Alta | Não iniciado |
@@ -1823,6 +1824,22 @@ As metas numéricas apresentadas nesta seção representam valores iniciais para
 Os RNFs definidos nesta seção atuam como critérios transversais para a validação do MVP. Assim, eles não se limitam a um único requisito funcional: aspectos como confidencialidade, rastreabilidade, confiabilidade das respostas e controle de acesso devem ser observados em todos os fluxos principais do agente, especialmente nas consultas de informações, análises comparativas e geração de respostas estruturadas.
 
 No contexto da prova de conceito, alguns requisitos serão demonstrados por simulação, principalmente aqueles relacionados à autenticação corporativa, permissões reais do SharePoint e auditoria com valor legal. Ainda assim, a solução deve preservar a arquitetura e os contratos necessários para que esses mecanismos possam ser conectados ao ambiente homologado do Metrô em uma evolução posterior.
+
+### 3.2.2 Origem das metas e registro de revisões
+
+O parágrafo acima, escrito na Sprint 1, já declara que as metas numéricas desta seção são valores iniciais, a serem revisados nas sprints seguintes. Esta subseção registra de onde veio cada meta verificada e toda revisão aplicada, para que um número nunca mude sem data, motivo e evidência.
+
+**RNF05 — hipótese do grupo, não acordo com o parceiro.** Os limites de 10 segundos para consulta simples e 20 segundos para análise comparativa foram definidos pelo grupo na Sprint 1 (*commit* `a511b90`), numa tarefa cuja definição de pronto exigia critérios mensuráveis. Os documentos do parceiro não fixam tempo de resposta: o TAPI e as histórias de usuário pedem acesso "rápido" e "obtenção rápida de análises", e o documento de plataforma tecnológica recomenda limitar a leitura de listas a 500 linhas para não degradar a experiência por latência. O próprio TAPI atribui às equipes o aprofundamento e o tratamento dos requisitos não funcionais. O grupo converteu a expectativa qualitativa em um número verificável; os valores específicos não têm *benchmark* anterior que os sustente, e o parceiro não indicou valores em reunião.
+
+| Data | RNF | Situação anterior | Decisão | Motivo | Vigência |
+| --- | --- | --- | --- | --- | --- |
+| 22/09/2026 | RNF05 | Teto de 10 s e 20 s como hipótese inicial | **Teto mantido** | Com provedor pago, 241 de 242 requisições ficaram abaixo de 8,2 s: o teto é atingível. O *Free Tier* do Gemini, usado na bancada de teste apenas para não gerar custo, tem piso de 14,7 s a 37,7 s por chamada trivial; elevar o teto para acomodá-lo ajustaria o requisito a uma escolha de custo da bancada, e não à expectativa de rapidez do parceiro. | A partir da 2ª rodada (22/09/2026) |
+| 22/09/2026 | RNF05 | P95 calculado sobre qualquer quantidade de amostras | Mínimo de 40 amostras por tipo de consulta e por rodada | Com 10 amostras, a rota comparativa da linha de base da Sprint 4 teve o P95 igual à pior requisição: a rodada mediu o máximo, não o P95 que o requisito define. Detalhe na Seção 9.2.4. | A partir da 2ª rodada (22/09/2026) |
+| 22/09/2026 | RNF05 | Rodada inconclusiva "deve ser estendida", sem forma definida | Nova janela, mais longa, com o mesmo código; um erro em qualquer das janelas reprova; sem terceira janela | A linha de base da 3ª rodada terminou com 37 amostras comparativas. O Locust exporta percentis, e não o tempo de cada requisição, e as duas janelas não podem ser reunidas num P95 único. Registrada antes de conhecer o resultado da carga. Detalhe na Seção 9.2.4. | A partir da 3ª rodada (22/09/2026) |
+
+**O que a revisão não altera.** O resultado da 1ª rodada foi medido com os critérios congelados antes da execução e permanece **não atendido** (Seção 9.2.7). A Seção 9.2.1 proíbe usar resultados observados para flexibilizar a meta depois da medição; por isso as decisões acima valem somente a partir da rodada indicada em cada uma, registradas antes de executá-la, e nenhuma é aplicada retroativamente a uma rodada anterior.
+
+**Provedor da bancada e provedor de produção.** O RNF05 não foi restringido a um ambiente específico. A bancada de teste (Seção 3.4.2.1) usa o Gemini no *Free Tier* para não gerar custo, e esse provedor, sozinho, não comporta o teto: a chamada trivial mede de 14,7 s a 37,7 s. No ambiente do Metrô, o agente usará o Copilot Studio com modelos GPT, no ecossistema Microsoft, e a latência desse provedor é medida na homologação. O piso do *Free Tier* é, portanto, característica da bancada, e não do produto.
 
 ## 3.3 Visão Inicial sobre a Solução Técnica de Engenharia
 
@@ -5349,8 +5366,10 @@ Os dados, prompts, perfis e fontes devem ser sintéticos ou anonimizados. Cada e
 | CT-RNF01-P / CT-RNF01-N | Verificar confidencialidade tanto no uso normal quanto diante de dado proibido. | **P:** percorrer os arquivos da massa, registrar origem e classificação e executar uma consulta com o duplo de rede capturando o payload. **N:** inserir em uma cópia temporária um marcador inequivocamente classificado como sensível e repetir o envio. | **P:** inventário 100% sintético/anonimizado e payload apenas com dados permitidos. **N:** validação bloqueia o processamento antes da fronteira externa; a evidência contém o relatório e a contagem zero de chamadas externas. |
 | CT-RNF02-P / CT-RNF02-N | Confirmar isolamento por perfil e negação segura. | **P:** autenticar o perfil A, consultar um recurso permitido e comparar os campos retornados com a matriz de acesso. **N:** com o perfil B sem permissão, repetir a mesma consulta e inspecionar corpo, metadados e logs. | **P:** somente o escopo autorizado aparece. **N:** resposta de negação controlada, sem conteúdo nem metadados protegidos; anexar requisições e matriz preenchida. |
 | CT-RNF03-P / CT-RNF03-N | Demonstrar rastreabilidade em sucesso e falha. | **P:** executar uma consulta válida e buscar o registro pelo identificador da interação. **N:** configurar o duplo de recuperação para falhar, repetir a consulta e buscar o registro correspondente. | Os dois registros contêm perfil, carimbo de tempo, intenção, fontes disponíveis e resposta ou estado de falha; anexar os registros sanitizados e seus IDs. |
-| CT-RNF04-P / CT-RNF04-N | Medir fundamentação e alucinação sem seleção oportunista de exemplos. | Congelar amostra com no mínimo 20 perguntas rotuladas. **P:** executar perguntas cujas respostas existem e conferir cada afirmação contra a fonte. **N:** executar perguntas com atributo ausente e marcar qualquer afirmação sem fonte como alucinação. | Planilha informa numerador, denominador e exemplos divergentes; aprovação exige ≥90% fundamentadas e ≤5% de alucinação no conjunto completo. |
-| CT-RNF05-P / CT-RNF05-N | Medir desempenho conversacional e provar que violações são detectadas. | Executar as duas rodadas Locust descritas na Seção 9.2.4. Na negativa, o duplo do provedor adiciona atraso superior ao teto em uma rota identificada, sem alterar as demais. | A positiva atende aos dois P95 e tem zero erro; a negativa é marcada como falha e preserva latência, rota e resposta observadas no CSV/HTML. |
+| CT-RNF04-P | Medir a fundamentação quando a resposta existe na base, sem seleção oportunista de exemplos. | 1. Congelar a amostra antes da primeira resposta (`app/tests/rnf04/amostra_congelada.json`, v1.2). 2. Enviar a `/api/chat` as 12 perguntas positivas, cujo fato está em um dos extratos de `public.source_extracts` — por exemplo, "Qual é o período da operação assistida na Linha 1-Azul?" —, com `executar_rnf04.py`, que grava resposta integral e fontes. 3. Rotular a planilha cega, que sai sem cenário nem gabarito, conferindo cada afirmação contra as fontes que a própria resposta retornou. 4. Apurar com `avaliar_rnf04.py`. | Toda afirmação sustentada por um trecho das fontes retornadas. Planilha com rótulo e justificativa por caso; apuração com numerador e denominador. |
+| CT-RNF04-N | Medir se o agente declara a ausência em vez de inventar. | 1. Na mesma amostra congelada, enviar as 12 perguntas negativas: atributos do PRJ-0442 que existem no banco mas não são recuperáveis (avanço, custo, gerente, riscos, próximo marco), comparação com projeto inexistente (PRJ-0518), fatos fora da massa (tarifa, Linha 2-Verde, Wi-Fi, demanda de julho, Linha 6-Laranja) e um caso-armadilha, em que a fonte recuperada é parecida mas não responde (animais de estimação × bicicleta). 2. Rotular na mesma planilha cega, sem saber o cenário de cada pergunta. 3. Apurar junto com o positivo. | Declarar corretamente a ausência conta como fundamentada; qualquer afirmação sem fonte conta como alucinação. O RNF04 é aprovado só se o conjunto das 24 perguntas tiver ≥ 90% de respostas fundamentadas e ≤ 5% de alucinação. |
+| CT-RNF05-P | Medir o tempo de resposta nas condições de uso previstas. | 1. Subir a API e aquecer cada prompt fora da janela de medição (`aquecer.py`). 2. Gravar a ficha de ambiente (`registrar_ambiente.py`). 3. Rodar o `locustfile.py` com 1 usuário por 25 minutos e com 5 usuários por 8 minutos: 75% de consultas simples e 25% de comparações da massa congelada em `prompts.py`, com espera de 1 a 3 s. 4. Repetir as duas janelas com cache frio: reiniciar a API e medir sem o passo 1. 5. Apurar com `apurar_rnf05.py`. Comandos na Seção 9.2.4. | Zero erro HTTP ou de contrato e, com pelo menos 40 amostras por rota, P95 simples ≤ 10 s e P95 comparativo ≤ 20 s nas duas rodadas. Cache frio e quente são apurados em separado. CSVs, log do Locust, ficha de ambiente e apuração no diretório da rodada. |
+| CT-RNF05-N | Provar que a medição detecta uma violação. | 1. Subir `api_com_atraso.py`, uma segunda instância da API em que um duplo acrescenta 25 s a toda comparação da massa congelada, sem alterar o restante do pipeline. 2. Rodar o `locustfile.py` contra ela com `RNF05_SO_COMPARACAO=1`, 5 usuários por 6 minutos. | P95 comparativo acima de 20 s: a rodada precisa reprovar. Se aprovar, a medição não enxerga violação e as rodadas positivas não valem. |
 | CT-RNF06-P / CT-RNF06-N | Avaliar qualidade do PLN contra limiares reproduzíveis. | **P:** executar integralmente `src/notebooks/classificador_intencoes_metro.ipynb` com o conjunto de teste fechado e calcular F1 macro e *recall*. **N:** avaliar separadamente classes e termos ausentes ou fracos, sem treiná-los novamente, e aplicar os mesmos limiares. | `metricas.json` e notebook registram valores e versão da massa; qualquer métrica abaixo de 0,80 reprova o requisito e identifica as classes afetadas. |
 | CT-RNF07-P / CT-RNF07-N | Verificar interação em português natural e orientação de reformulação. | Congelar ao menos 20 formulações. **P:** participantes enviam frases naturais válidas sem conhecer nomes internos. **N:** enviar frases ambíguas, com sinônimos não cadastrados e erros leves; registrar se houve compreensão ou orientação útil. | Pelo menos 80% do conjunto total é compreendido ou recebe reformulação acionável; anexar roteiro, respostas anonimizadas e cálculo. |
 | CT-RNF08-P / CT-RNF08-N | Conferir aderência aos contratos e ao ecossistema definido. | **P:** iniciar a API, abrir `/openapi.json` e confrontar canal, conector e componentes com a arquitetura. **N:** validar uma cópia do contrato com operação obrigatória removida ou tipo incompatível. | Contrato real é válido e a arquitetura mantém Teams/Copilot/SharePoint/Azure previstos; a cópia alterada reprova no checklist, sem substituir o contrato versionado. |
@@ -5374,6 +5393,47 @@ locust -f app/tests/performance/locustfile.py --host http://127.0.0.1:8000 --hea
 
 A primeira rodada estabelece a linha de base com um usuário; a segunda mede cinco usuários simultâneos. Separar no relatório consultas simples e comparativas. O RNF05 é aprovado somente se, nas duas rodadas, houver zero erro HTTP/contrato, P95 simples ≤10 s e P95 comparativo ≤20 s. Registrar também média, mediana, P90, P99, RPS e quantidade de amostras para diagnóstico, mas nenhum desses valores substitui o P95 como critério. No CT-RNF05-N, o atraso injetado deve fazer o Locust registrar a violação; se o relatório permanecer aprovado, o próprio teste de desempenho está incorreto.
 
+#### Revisão do protocolo a partir da 2ª rodada
+
+Registrada em 22/09/2026, depois da 1ª rodada, e aplicável somente às rodadas seguintes. O protocolo acima permanece como o que foi efetivamente executado na 1ª rodada.
+
+**1. Mínimo de 40 amostras por tipo de consulta.** O P95 só é apurado quando cada rota — simples e comparativa — tem ao menos 40 amostras na rodada. Abaixo disso, a rodada é **inconclusiva por amostra insuficiente** e deve ser estendida, nunca aprovada nem reprovada.
+
+O motivo é aritmético. O Locust calcula o percentil em `calculate_response_time_percentile`, e com menos de 21 amostras o resultado coincide com a pior requisição da rodada. Na Sprint 4, a linha de base com um usuário produziu 10 amostras comparativas em 5 minutos: o critério aplicado foi, na prática, o máximo, mais rígido do que o P95 que o RNF05 define, e uma única requisição de 37,7 s decidiu a rodada. O mínimo de 40 dobra o limite de 21, para que o resultado não fique na fronteira em que uma requisição isolada volta a decidir.
+
+Como a rota comparativa recebe 25% da carga, a linha de base com um usuário precisa de cerca de 25 minutos para atingir 40 amostras comparativas, e a carga com cinco usuários, de cerca de 8 minutos. A duração de 5 minutos passa a ser o mínimo, não o valor fixo.
+
+**2. Aquecimento fora da janela de medição.** O aquecimento de cada prompt roda em passo separado (`app/tests/performance/aquecer.py`), antes do Locust. Dentro do `locustfile`, ele consumia parte da janela cronometrada e as rodadas "de 5 minutos" mediam cerca de 3 minutos e 40 segundos.
+
+**3. Cenário negativo determinístico.** A rodada negativa usa `RNF05_SO_COMPARACAO=1`, que envia apenas pedidos de comparação, e o duplo de atraso reconhece esses pedidos pela lista exata da massa congelada. Roda com cinco usuários por 6 minutos, porque cada requisição leva cerca de 30 segundos com o atraso injetado e a rodada também precisa reunir 40 amostras. Com a mistura normal de 75/25, uma rodada curta podia não exercer o atraso nenhuma vez.
+
+**4. Apuração automática.** `app/tests/performance/apurar_rnf05.py` lê os CSVs das rodadas e aplica, nesta ordem, a verificação de erros, a de amostra mínima e a dos tetos de P95, devolvendo aprovado, reprovado ou inconclusivo por rota. Erro reprova qualquer que seja o tamanho da amostra, porque a exigência de zero erro não depende de estatística; só o P95 precisa de amostra mínima para ter significado. A regra deixa de depender de quem lê o CSV.
+
+**5. Forma da extensão.** Registrada durante a 3ª rodada, depois de a linha de base de 25 minutos terminar com 37 amostras comparativas e antes de o resultado da carga ser conhecido. A extensão é uma nova janela, mais longa, com o mesmo código e novo aquecimento fora dela, porque o Locust exporta percentis por rota, e não o tempo de cada requisição, e duas janelas não podem ser reunidas num P95 único. Um erro em qualquer das janelas reprova a rodada, já que a exigência de zero erro não depende de amostra; o P95 é julgado na janela que tem amostra suficiente; se ela também ficar abaixo de 40 amostras em alguma rota, a rodada é inconclusiva e não há terceira janela. As duas janelas são publicadas.
+
+**6. Comandos.** A partir de `src/backend`, com a API em um terminal e a instância com atraso em outro:
+
+```bash
+LLM_PROVIDER=openrouter .venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+LLM_PROVIDER=openrouter .venv/bin/python -m uvicorn app.tests.performance.api_com_atraso:app --host 127.0.0.1 --port 8001
+```
+
+```bash
+export PYTHONPATH=. D=evidencias/rnf05-rodadaN
+.venv/bin/python -m app.tests.performance.aquecer --host http://127.0.0.1:8000
+.venv/bin/python -m app.tests.performance.registrar_ambiente --rodada baseline --cache quente --saida $D/baseline
+.venv/bin/locust -f app/tests/performance/locustfile.py --host http://127.0.0.1:8000 --headless -u 1 -r 1 -t 25m --csv $D/baseline/rnf05-baseline
+.venv/bin/python -m app.tests.performance.registrar_ambiente --rodada carga --cache quente --saida $D/carga
+.venv/bin/locust -f app/tests/performance/locustfile.py --host http://127.0.0.1:8000 --headless -u 5 -r 1 -t 8m --csv $D/carga/rnf05-carga
+.venv/bin/python -m app.tests.performance.registrar_ambiente --rodada violacao --cache quente --host http://127.0.0.1:8001 --saida $D/violacao
+RNF05_SO_COMPARACAO=1 .venv/bin/locust -f app/tests/performance/locustfile.py --host http://127.0.0.1:8001 --headless -u 5 -r 1 -t 6m --csv $D/violacao/rnf05-violacao
+.venv/bin/python -m app.tests.performance.apurar_rnf05 $D/baseline/rnf05-baseline_stats.csv $D/carga/rnf05-carga_stats.csv
+```
+
+Para cache frio, reiniciar a API antes de cada janela, omitir o `aquecer` e usar `--cache frio` na ficha de ambiente. `app/tests/executar_rodada_rnf.sh` encadeia a coleta do RNF04 e os passos de cache quente numa única campanha. `LLM_PROVIDER=openrouter` só tem efeito porque o `.env` da entrega não define essa variável: a API carrega o `.env` com prioridade sobre o ambiente, e o `.env` da entrega usa o Gemini.
+
+O que esta revisão **não** altera: os tetos de 10 e 20 segundos, a exigência de zero erro HTTP ou de contrato, a execução das duas rodadas e o critério de que ambas precisam ser aprovadas. A rodada revisada continua podendo reprovar.
+
 ### 9.2.5 Instruções gerais de execução e evidências
 
 1. Criar o diretório de evidências da execução, nomeado com sprint e *commit*, sem adicionar credenciais ou dados pessoais.
@@ -5388,9 +5448,148 @@ A primeira rodada estabelece a linha de base com um usuário; a segunda mede cin
 
 A abrangência cobre os doze RNFs e as duas direções de comportamento exigidas pelo barema. Os positivos demonstram confidencialidade, autorização, auditoria, fundamentação, desempenho, qualidade do PLN, linguagem natural, aderência tecnológica, portabilidade, manutenção, tratamento de falhas e completude dos dados. Os negativos foram escolhidos a partir das fronteiras de maior risco: vazamento, acesso indevido, perda de auditoria, alucinação, latência, classe fraca, ambiguidade, contrato incompatível, fonte inválida, acoplamento, exceção inesperada e massa incompleta. Essa seleção oferece cobertura sistêmica e rastreável, mas não é uma enumeração de todas as combinações de perfil, documento, intenção e infraestrutura.
 
-Permissões corporativas, Teams, SharePoint real, Entra ID, Azure e transcrição não estão disponíveis na bancada local e, portanto, são simulados; a homologação final depende do ambiente do parceiro. O teste de carga planejado mede o ambiente descrito e não permite extrapolar capacidade de produção. Os resultados permanecem pendentes da Sprint 4 e devem ser preenchidos com evidências observadas, nunca com estimativas.
+Permissões corporativas, Teams, SharePoint real, Entra ID, Azure e transcrição não estão disponíveis na bancada local e, portanto, são simulados; a homologação final depende do ambiente do parceiro. O teste de carga planejado mede o ambiente descrito e não permite extrapolar capacidade de produção. Os resultados são registrados na Seção 9.2.7 com evidências observadas, nunca com estimativas, e a abrangência efetivamente alcançada por cada execução é discutida junto do seu resultado.
 
 ### 9.2.7 Resultados
+
+A execução acontece na Sprint 4. Cada CT-RNF registra data, *commit*, ambiente, responsável, resultado, métricas aplicáveis, falha encontrada e link da evidência. Casos bloqueados identificam a dependência e o plano de desbloqueio.
+
+#### RNF04 e RNF05 — Sprint 4
+
+Executados em 22 e 23/09/2026 por Henrique Diniz. O índice completo das rodadas, inclusive as invalidadas e a descartada, com o motivo de cada uma, está em [`evidencias/README.md`](../src/backend/evidencias/README.md).
+
+**Ambiente comum.** Modelo `gemini-3.7-flash`, o mesmo configurado na bancada de teste, chamado pelo OpenRouter em plano pago: o *Free Tier*, que a bancada usa para não gerar custo, limita a 20 requisições por dia, e a amostra do RNF04 sozinha tem 24 perguntas. O adaptador envia ao modelo exatamente o mesmo texto que o Gemini direto receberia, o que é fixado por teste automatizado. Recuperação no Supabase, retentativas e *timeout* do provedor com os valores de produção. Código medido: base `81c787d` com as alterações das branches das tasks, identificado por impressão digital em [`campanha-37flash/arvore-medida.md`](../src/backend/evidencias/campanha-37flash/arvore-medida.md); a 2ª e a 3ª rodadas do RNF05 registram o próprio hash no protocolo congelado antes da execução.
+
+**Ferramentas e scripts.** Os scripts de medição ficam em `src/backend/app/tests`, versionados com o código medido e cobertos por testes automatizados; o notebook das figuras fica junto das evidências.
+
+| Ferramenta ou script | Uso | Por que foi escolhido |
+| --- | --- | --- |
+| `pytest` | 322 testes do *backend*; desta execução, 55 fixam as correções (RAG, provedor, pool) e 44 testam os próprios scripts de medição | É o framework já usado no *backend* (Seção 8.4); um script de medição sem teste pode aprovar qualquer coisa |
+| `Locust` 2.46 | Carga das rodadas do RNF05 (`performance/locustfile.py`) | Definido no planejamento (Seção 9.2.2): mede do lado do cliente, separa as rotas pelo nome da requisição e grava CSV por rota; é Python, e a massa de prompts é importada do mesmo pacote que os testes |
+| `performance/aquecer.py` | Aquece cada prompt antes da janela de medição | Aquecer dentro do `locustfile` consumia a janela cronometrada (revisão 2 da Seção 9.2.4) |
+| `performance/registrar_ambiente.py` | Ficha de ambiente de cada rodada: máquina, provedor, modelo, retentativas, pool | O planejamento exige registrar o ambiente antes de medir; a ficha registra só a **presença** de cada segredo, nunca o valor |
+| `performance/api_com_atraso.py` | Duplo do `CT-RNF05-N`: instância da API que atrasa em 25 s toda comparação da massa congelada | Testa o instrumento antes de confiar nele: se a rodada com atraso aprovar, a medição está errada |
+| `performance/apurar_rnf05.py` | Aplica a regra de decisão: erros, depois amostra mínima, depois tetos de P95 | Tira a decisão de quem lê o CSV (revisão 4 da Seção 9.2.4) |
+| `rnf04/executar_rnf04.py` | Envia as 24 perguntas congeladas, grava resposta integral e fontes e gera a planilha cega | A planilha sai sem cenário nem gabarito, para que a rotulagem não seja influenciada pelo resultado esperado |
+| `rnf04/avaliar_rnf04.py` | Apura fundamentação e alucinação com numerador e denominador explícitos | Aplica o critério sobre o conjunto completo, nunca sobre um subconjunto escolhido depois |
+| `executar_rodada_rnf.sh` | Encadeia a coleta do RNF04 e as três rodadas do RNF05 numa campanha | Reproduz a execução completa com um comando |
+| SQL em `public.ai_interactions` | Compara o tempo do pipeline, gravado pela auditoria do RNF03, com o tempo do cliente | Separa o custo do sistema do custo do que vem depois do pipeline, sem instrumentação nova |
+| [`evidencias/graficos_rnf05.ipynb`](../src/backend/evidencias/graficos_rnf05.ipynb) | Gera as Figuras 27 e 28 a partir dos CSVs versionados | Nenhum número das figuras é digitado à mão |
+| OpenRouter | Chama o `gemini-3.7-flash` em plano pago | Mesmo modelo da bancada, sem o limite de 20 requisições por dia do *Free Tier*; o adaptador envia exatamente o mesmo texto que o Gemini direto receberia |
+
+**Comandos do RNF04**, a partir de `src/backend`, com a API no ar como na Seção 9.2.4. Os do RNF05 estão no item 6 da revisão do protocolo, na mesma seção.
+
+```bash
+.venv/bin/python -m app.tests.rnf04.executar_rnf04 --host http://127.0.0.1:8000 \
+    --saida evidencias/rnf04-v12-37flash --tentativas-transitorias 3 --pausa 1
+# rotular evidencias/rnf04-v12-37flash/planilha_cega.csv: fundamentada | alucinacao | nao_fundamentada
+.venv/bin/python -m app.tests.rnf04.avaliar_rnf04 --evidencias evidencias/rnf04-v12-37flash
+```
+
+| Caso | Resultado | Métricas | Falha encontrada | Evidência |
+| --- | :---: | --- | --- | --- |
+| CT-RNF04-P e CT-RNF04-N, coleta de 21/09 | ⛔ bloqueado | 11 de 24 perguntas respondidas; as outras 13 receberam HTTP 429, quota diária do *Free Tier* esgotada | Amostra abaixo do mínimo de 20: nenhuma taxa pode ser apurada. A coleta expôs o DEF-RNF04-01 | [relatório](../src/backend/evidencias/rnf04-81c787d/RELATORIO.md) |
+| CT-RNF05-P e CT-RNF05-N, 21/09 | ⚪ não executado | As rodadas do Locust não rodaram: a quota diária esgotou durante a coleta do RNF04 | As latências incidentais incluíam a espera entre novas tentativas do provedor e não foram apuradas | [relatório](../src/backend/evidencias/rnf05-81c787d/RELATORIO.md) |
+| CT-RNF04-P | ✅ aprovado | 12 de 12 respostas fundamentadas | Nenhuma | [relatório](../src/backend/evidencias/rnf04-v12-37flash/RELATORIO.md) |
+| CT-RNF04-N | ✅ aprovado | 10 de 12 fundamentadas, 1 não fundamentada, 1 alucinação | N-06 atribuiu ao projeto o status e o período de um comunicado vinculado a ele; N-04 e N-05 chegaram truncadas | [relatório](../src/backend/evidencias/rnf04-v12-37flash/RELATORIO.md) |
+| **RNF04 (conjunto)** | ✅ **atendido** | **91,67%** fundamentadas (mín. 90%) e **4,17%** de alucinação (máx. 5%) | Margem estreita: um caso a mais em qualquer direção reprova | [planilha rotulada](../src/backend/evidencias/rnf04-v12-37flash/planilha_cega.csv) |
+| CT-RNF05-P, 1ª rodada, 1 usuário | ❌ reprovado | P95 simples 6,6 s (24 amostras); P95 comparativo **38,0 s** (10 amostras); zero erro | Uma requisição comparativa de 37,7 s definiu o P95 da rota | [relatório](../src/backend/evidencias/rnf05-37flash/RELATORIO.md) |
+| CT-RNF05-P, 1ª rodada, 5 usuários | ✅ aprovado | P95 simples 7,1 s (165 amostras); P95 comparativo 8,0 s (43 amostras); zero erro | Nenhuma | [relatório](../src/backend/evidencias/rnf05-37flash/RELATORIO.md) |
+| CT-RNF05-N, 1ª rodada | ✅ validado | P95 comparativo de 32,0 s com atraso injetado de 25 s; a rodada reprovou, como exigido | O duplo deixava de atrasar um dos quatro prompts de comparação; corrigido antes da 2ª rodada | [CSVs](../src/backend/evidencias/rnf05-37flash/violacao/) |
+| CT-RNF05-P, 2ª rodada, 1 usuário | ❌ reprovado | P95 simples 9,3 s (123 amostras); P95 comparativo 12,0 s (41 amostras); **1 erro** | Uma consulta simples não respondeu em 60 s: a gravação da auditoria do RNF03 ficou presa no banco | [relatório](../src/backend/evidencias/rnf05-rodada2/RELATORIO.md) |
+| CT-RNF05-P, 2ª rodada, 5 usuários | ❌ reprovado | P95 simples **11,0 s** (202 amostras); P95 comparativo 11,0 s (72 amostras); zero erro | P95 das consultas simples acima do teto de 10 s | [relatório](../src/backend/evidencias/rnf05-rodada2/RELATORIO.md) |
+| CT-RNF05-N, 2ª rodada | ✅ validado | 50 requisições, todas entre 30,1 s e 34,2 s | Nenhuma: o duplo atrasou todos os prompts de comparação | [CSVs](../src/backend/evidencias/rnf05-rodada2/violacao/) |
+| CT-RNF05-P, 3ª rodada, 1 usuário, 25 min | ⚪ inconclusivo | P95 simples 7,6 s (159 amostras); P95 comparativo 8,2 s (**37 amostras**); zero erro | Amostra comparativa abaixo do mínimo de 40; linha de base estendida pela regra do item 5 da Seção 9.2.4 | [relatório](../src/backend/evidencias/rnf05-rodada3/RELATORIO.md) |
+| CT-RNF05-P, 3ª rodada, 1 usuário, 35 min | ✅ aprovado | P95 simples 7,6 s (181 amostras); P95 comparativo 8,4 s (82 amostras); zero erro | Nenhuma | [relatório](../src/backend/evidencias/rnf05-rodada3/RELATORIO.md) |
+| CT-RNF05-P, 3ª rodada, 5 usuários | ✅ aprovado | P95 simples 7,3 s (245 amostras); P95 comparativo 7,6 s (78 amostras); zero erro | Nenhuma | [relatório](../src/backend/evidencias/rnf05-rodada3/RELATORIO.md) |
+| CT-RNF05-N, 3ª rodada | ✅ validado | 50 requisições, todas entre 29,4 s e 34,3 s; P95 de 34,0 s | Nenhuma | [CSVs](../src/backend/evidencias/rnf05-rodada3/violacao/) |
+| CT-RNF05-P, 3ª rodada, cache frio, 1 usuário, 35 min | ✅ aprovado | P95 simples 7,6 s (208 amostras); P95 comparativo 8,3 s (64 amostras); zero erro | Nenhuma; a primeira requisição depois do reinício levou 7,2 s | [relatório](../src/backend/evidencias/rnf05-rodada3/cache-frio/RELATORIO.md) |
+| CT-RNF05-P, 3ª rodada, cache frio, 5 usuários | ✅ aprovado | P95 simples 7,0 s (239 amostras); P95 comparativo 7,4 s (86 amostras); zero erro | Nenhuma | [relatório](../src/backend/evidencias/rnf05-rodada3/cache-frio/RELATORIO.md) |
+| **RNF05 (conjunto)** | ✅ **atendido na 3ª rodada**, com cache quente e frio | Zero erro em 1.379 requisições das janelas positivas; P95 simples de 7,0 a 7,6 s com 1 e 5 usuários, contra o teto de 10 s; P95 comparativo de 7,4 a 8,4 s, contra 20 s | A 1ª rodada (uma requisição de 37,7 s numa rota com 10 amostras) e a 2ª (um erro e P95 simples de 11,0 s sob carga) continuam registradas como não atendidas. A gravação síncrona da auditoria ainda acrescenta cerca de 1,8 s | [índice das rodadas](../src/backend/evidencias/README.md) |
+
+**Estados usados na tabela.** *Aprovado* e *reprovado* comparam o observado com o critério; *validado* indica o cenário negativo que reprovou, como exigido; *inconclusivo* é a janela com menos de 40 amostras em alguma rota, que não aprova nem reprova; *bloqueado* é a execução impedida por dependência externa; *não executado*, o caso que não chegou a rodar.
+
+A Figura 27 compara o P95 de cada rodada positiva com o teto do requisito. As barras vermelhas são as rodadas reprovadas: na 1ª, a comparação com um usuário teve 10 amostras e o P95 coincidiu com a pior requisição; na 2ª, houve um erro com um usuário e P95 simples de 11,0 s com cinco. Na 3ª, com cache quente e com cache frio, todas as rotas ficaram abaixo do teto, com pelo menos 64 amostras cada.
+
+<div align="center">
+  <img src="img/rnf05-p95-rodadas.png" alt="P95 da consulta simples e da comparação em cada rodada positiva do RNF05, contra os tetos de 10 e 20 segundos" width="100%">
+</div>
+
+<p align="center"><strong>Figura 27</strong> - RNF05: P95 medido pelo cliente em cada rodada positiva.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
+
+A Figura 28 abre os percentis da 3ª rodada. As quatro curvas positivas ficam abaixo dos tetos até o P95; a comparação com um usuário tem uma requisição de 13,5 s, que aparece no P99 e no máximo, ainda abaixo do teto de 20 s. A curva do cenário negativo fica acima de 30 s em todos os percentis: a medição enxerga a violação.
+
+<div align="center">
+  <img src="img/rnf05-rodada3-percentis.png" alt="Mediana, P90, P95, P99 e máximo de cada janela e rota da 3ª rodada do RNF05, com o cenário negativo acima dos tetos" width="100%">
+</div>
+
+<p align="center"><strong>Figura 28</strong> - RNF05: percentis da 3ª rodada por janela e rota, com o cenário negativo.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
+
+**Registros das execuções aprovadas.** Saídas dos apuradores, reproduzíveis a partir dos arquivos de evidência.
+
+Apuração do RNF04 (`avaliar_rnf04.py`), reproduzível a partir da planilha rotulada:
+
+```text
+RNF04 — amostra v1.2
+  denominador ............ 24
+  fundamentadas .......... 22 (91.67%)  [minimo 90.0%]
+  alucinacoes ............ 1 (4.17%)  [maximo 5.0%]
+  nao fundamentadas ...... 1
+  positivo (CT-RNF04-P) .. 12/12 fundamentadas, 0 alucinacao
+  negativo (CT-RNF04-N) .. 10/12 fundamentadas, 1 alucinacao
+
+  RESULTADO: APROVADO
+```
+
+Apuração da 3ª rodada do RNF05 (`apurar_rnf05.py`, [`apuracao-final.txt`](../src/backend/evidencias/rnf05-rodada3/apuracao-final.txt)):
+
+```text
+rodada       rota        amostras falhas       P95  veredito
+baseline-estendida comparacao        82      0    8400ms  aprovado — P95 8400 ms dentro do teto de 20000 ms
+baseline-estendida simples          181      0    7600ms  aprovado — P95 7600 ms dentro do teto de 10000 ms
+carga        comparacao        78      0    7600ms  aprovado — P95 7600 ms dentro do teto de 20000 ms
+carga        simples          245      0    7300ms  aprovado — P95 7300 ms dentro do teto de 10000 ms
+
+RNF05: ATENDIDO
+codigo de saida: 0
+```
+
+Log da API na 3ª rodada, resumido sem identificadores ([`api-log-resumo.txt`](../src/backend/evidencias/rnf05-rodada3/api-log-resumo.txt)): 860 respostas HTTP 200 e nenhuma com outro status, nenhuma nova tentativa contra o provedor, nenhuma falha ao gravar a rastreabilidade do RNF03 e nenhuma consulta cancelada pelo limite de 5 s. Suíte do *backend* depois das correções, com e sem `.env` configurado: `322 passed`.
+
+**Defeitos encontrados e tratamento.**
+
+| ID | Defeito | Tratamento |
+| --- | --- | --- |
+| DEF-RNF04-01 | Vigência, status e linha do extrato eram recuperados do banco e descartados antes do prompt; perguntas de cronograma recebiam "contexto insuficiente" | Corrigido em `build_rag_input`, com 10 testes de regressão; as perguntas afetadas passaram a responder as datas corretas |
+| DEF-RNF04-02 | Respostas truncadas pelo limite de tokens entregues como completas | Mecanismo confirmado nas rodadas do RNF05: 36 de 451 respostas (8,0%) na 2ª e 50 de 860 (5,8%) na 3ª terminaram por limite de tokens no caminho do OpenRouter, porque o raciocínio do modelo consome o mesmo orçamento de 512 tokens do texto. O adaptador passou a registrar cada ocorrência em log. Nenhuma das 35 respostas coletadas pelo Gemini direto terminou cortada |
+| DEF-RNF05-01 | O Gemini no *Free Tier*, provedor da bancada, tem piso de 14,7 s a 37,7 s por chamada trivial, acima do teto do RNF05 | Característica da bancada, não do produto: o *Free Tier* é usado para não gerar custo, e o ambiente do Metrô usará o Copilot Studio com modelos GPT. As rodadas do RNF05 foram medidas com provedor pago. Ver Seção 3.2.2 |
+| DEF-RNF05-02 | A gravação da auditoria do RNF03 é síncrona e fica no caminho da resposta. Na 2ª rodada, sob carga, a distância entre o P95 do cliente e o do pipeline foi de 4,1 s, e, sem limite de tempo nas consultas ao banco, uma gravação presa segurou uma resposta por mais de 60 s | Aplicados antes da 3ª rodada: limite de 5 s por consulta ao banco (`statement_timeout`) e *keepalive* de TCP nas conexões, com 9 testes. Na 3ª rodada a distância caiu para 1,8 s, sem erro. A gravação fora do caminho da resposta, por fila ou tarefa em segundo plano, fica para a mensageria prevista na Sprint 5: muda a semântica da auditoria verificada nos testes do RNF03 e é decisão do grupo |
+| — | Cada requisição abria duas conexões novas com o Supabase, cerca de 1 s cada | Pool de conexões: de 1.209 ms para 599 ms por acesso, ou cerca de 1,2 s a menos por requisição, com qualquer provedor de LLM |
+| — | 21 testes do *backend* falhavam quando havia `.env` configurado | Isolamento do ambiente de teste; 322 testes passam com e sem `.env` |
+
+**Abrangência da execução.** O que as duas execuções cobrem:
+
+- **RNF04:** 24 perguntas congeladas antes da coleta, metade com resposta na base e metade sem, cobrindo as quatro fronteiras de risco de alucinação da massa — atributo do projeto que existe no banco mas não é recuperável, projeto inexistente, fato fora da base e fonte parecida que não responde. A planilha cega impede que o rotulador veja o cenário, e cada rótulo tem justificativa citando a fonte.
+- **RNF05:** 1.379 requisições nas janelas positivas da 3ª rodada, com as duas rotas medidas em separado, um e cinco usuários simultâneos, cache quente e cache frio, e um cenário negativo que prova que a medição detecta a violação. O relógio cobre o caminho de texto inteiro, da chegada à API à resposta estruturada, incluindo classificação, recuperação no banco, chamada ao LLM e gravação da auditoria.
+
+O que elas **não** cobrem, e por quê:
+
+| Fora da cobertura | Motivo | Efeito sobre a leitura do resultado |
+| --- | --- | --- |
+| Modelo de produção | O Metrô usará o Copilot Studio com modelos GPT; as rodadas usam o `gemini-3.7-flash`, o modelo da bancada | Fundamentação e latência valem para o modelo medido e são medidas de novo na homologação, com a mesma amostra e o mesmo protocolo |
+| Base real | A massa tem nove extratos recuperáveis e um projeto | O custo da recuperação e o risco de confundir entidades podem crescer com a base real |
+| Comparação efetivamente produzida | A massa tem um único projeto, o `PRJ-0442`, e a comparação entre projetos foi adiada para a Sprint 5 (Seção 6.4.1 do `GestaoProjeto.md`). Os prompts comparativos pedem a comparação com o `PRJ-0518`, que não existe | O P95 comparativo mede o sistema tratando o pedido de comparação e declarando a limitação, com chamada ao LLM; **não** demonstra o teto de 20 s para uma comparação real, que é medida quando a funcionalidade existir |
+| Rotulagem independente | A planilha é cega, mas foi rotulada por quem construiu a amostra | Cada rótulo pode ser auditado um a um; uma segunda rotulagem por outro integrante daria garantia processual mais forte, e a margem do RNF04 é de um caso em cada critério |
+| Rota de áudio | O RNF05 mede o caminho de texto por definição (Seção 9.2.4); a transcrição tem orçamento próprio de 6 s (Seção 8.7) e seu tempo sai no campo `stt_ms` | O tempo de ponta a ponta com voz soma a transcrição ao que foi medido aqui |
+| Capacidade de produção | Uma máquina local, uma instância da API e até cinco usuários | O resultado não se extrapola para a carga real do Metrô |
+
+A 2ª rodada separou o custo do sistema do custo da auditoria: o pipeline tinha P95 de 6,5 a 6,9 s, e a gravação síncrona do RNF03 levava a consulta simples a 11,0 s sob carga. Na 3ª rodada, com o limite de tempo e o *keepalive* nas conexões, a distância entre cliente e pipeline caiu de 4,1 s para 1,8 s no P95 sob carga, e o pipeline também ficou mais rápido, com P95 de 5,5 a 6,1 s. A rodada não isola quanto de cada ganho veio da correção e quanto da variação do provedor. A margem da consulta simples sob carga é de 2,7 s até o teto.
+
+**Oportunidades de melhoria identificadas.** Tirar a gravação da auditoria do caminho da resposta, o que reduz a latência percebida em até cerca de 1,8 s e encaixa na mensageria prevista para a Sprint 5 (`DEF-RNF05-02`); reservar ao texto visível um orçamento de tokens separado do raciocínio do modelo, para eliminar as respostas truncadas (`DEF-RNF04-02`); inspecionar o motivo de parada também no caminho do Gemini direto; e repetir a rotulagem do RNF04 com um segundo integrante.
+
+**Próxima medição.** Na homologação, com o provedor adotado pelo Metrô, pela mesma massa e pelo protocolo revisado da Seção 9.2.4, com os tetos inalterados. Se a gravação da auditoria sair do caminho da resposta na Sprint 5, uma nova rodada, congelada antes da execução como as anteriores, mede o efeito.
+
+#### RNF06 — Sprint 4
 
 A avaliação prospectiva ampliada do RNF06 foi executada uma única vez em 23 de setembro de 2026 por Pedro Damacena Machado Uchoa, no commit `c627dd26525472d9ca3e2a9592abbca15059d5aa`. O ambiente utilizou Windows, Python 3.13.15, scikit-learn 1.6.1, NumPy 2.5.2, joblib 1.6.0, Torch 2.13.0 e Transformers 5.16.1. Antes da execução foram congelados os critérios, os 1.135 exemplos do teste de classificação, 72 consultas inéditas de recuperação, a implementação e os hashes de todos os artefatos. O recuperador e a massa não foram alterados depois que o resultado foi observado. A evidência completa está em [`evidencias/sprint-04/rnf06/`](evidencias/sprint-04/rnf06/README.md).
 
@@ -5416,42 +5615,42 @@ O planejamento prevê a realização dos testes com pelo menos cinco usuários e
 
 A planilha de execução funciona como instrumento de campo para o moderador e os observadores. A aba "Registro dos testes" organiza os cenários em blocos sequenciais, mantendo o mesmo padrão visual do modelo do grupo: título da tarefa, descrição da atividade, resultado geral, cinco etapas observáveis e campo de observações por usuário. A aba "Ocorrências" concentra problemas identificados durante as sessões, incluindo tarefa relacionada, severidade, resumo do ocorrido, potenciais melhorias e participante afetado. Dessa forma, o artefato permite registrar tanto o desempenho objetivo em cada etapa quanto evidências qualitativas de dificuldade, dúvida, hesitação, necessidade de ajuda ou quebra de confiança.
 
-As Figuras 27 a 31 apresentam os principais recortes da planilha criada para conduzir e registrar os testes. Esses prints documentam como o roteiro foi operacionalizado em tarefas observáveis, permitindo que diferentes avaliadores registrem os resultados de forma padronizada.
+As Figuras 29 a 33 apresentam os principais recortes da planilha criada para conduzir e registrar os testes. Esses prints documentam como o roteiro foi operacionalizado em tarefas observáveis, permitindo que diferentes avaliadores registrem os resultados de forma padronizada.
 
 <div align="center">
   <img src="img/testes-usabilidade-p1e2.png" alt="Planilha de testes de usabilidade com os cenários 1 e 2" width="900">
-  <p><strong>Figura 27</strong> - Registro dos cenários 1 e 2 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 29</strong> - Registro dos cenários 1 e 2 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 27 apresenta os dois primeiros cenários do roteiro: entrada em linguagem natural e consulta de status ou prazo. Esses cenários validam se o usuário consegue iniciar a interação com o agente sem comandos técnicos e se consegue interpretar uma resposta objetiva, incluindo a verificação da fonte indicada.
+A Figura 29 apresenta os dois primeiros cenários do roteiro: entrada em linguagem natural e consulta de status ou prazo. Esses cenários validam se o usuário consegue iniciar a interação com o agente sem comandos técnicos e se consegue interpretar uma resposta objetiva, incluindo a verificação da fonte indicada.
 
 <div align="center">
   <img src="img/testes-usabilidade-p3e4.png" alt="Planilha de testes de usabilidade com os cenários 3 e 4" width="900">
-  <p><strong>Figura 28</strong> - Registro dos cenários 3 e 4 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 30</strong> - Registro dos cenários 3 e 4 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 28 mostra os cenários voltados à consulta de riscos e à análise comparativa entre projetos. Nessa parte do teste, o observador registra se o participante consegue escolher o tema da consulta, compreender as informações retornadas, pedir detalhes quando necessário e avaliar se a comparação apresentada apoia a tomada de decisão.
+A Figura 30 mostra os cenários voltados à consulta de riscos e à análise comparativa entre projetos. Nessa parte do teste, o observador registra se o participante consegue escolher o tema da consulta, compreender as informações retornadas, pedir detalhes quando necessário e avaliar se a comparação apresentada apoia a tomada de decisão.
 
 <div align="center">
   <img src="img/testes-usabilidade-p5e6.png" alt="Planilha de testes de usabilidade com os cenários 5 e 6" width="900">
-  <p><strong>Figura 29</strong> - Registro dos cenários 5 e 6 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 31</strong> - Registro dos cenários 5 e 6 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 29 registra os cenários de informação ausente ou fora de escopo e de sugestão proativa. Esses testes são importantes para avaliar confiança e controle: o agente deve declarar limites quando não houver informação suficiente e, quando sugerir um próximo passo, deve deixar claro que a ação depende da confirmação do usuário.
+A Figura 31 registra os cenários de informação ausente ou fora de escopo e de sugestão proativa. Esses testes são importantes para avaliar confiança e controle: o agente deve declarar limites quando não houver informação suficiente e, quando sugerir um próximo passo, deve deixar claro que a ação depende da confirmação do usuário.
 
 <div align="center">
   <img src="img/testes-usabilidade-p7.png" alt="Planilha de testes de usabilidade com o cenário 7" width="900">
-  <p><strong>Figura 30</strong> - Registro do cenário 7 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 32</strong> - Registro do cenário 7 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 30 apresenta o cenário de entrada por voz. O objetivo desse bloco é observar se o participante consegue acionar a entrada por áudio, formular uma pergunta curta, conferir a transcrição e obter uma resposta coerente, mantendo o mesmo fluxo previsto para solicitações textuais.
+A Figura 32 apresenta o cenário de entrada por voz. O objetivo desse bloco é observar se o participante consegue acionar a entrada por áudio, formular uma pergunta curta, conferir a transcrição e obter uma resposta coerente, mantendo o mesmo fluxo previsto para solicitações textuais.
 
 <div align="center">
   <img src="img/testes-usabilidade-ocorrencias.png" alt="Planilha de ocorrências dos testes de usabilidade" width="900">
-  <p><strong>Figura 31</strong> - Aba de ocorrências dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 33</strong> - Aba de ocorrências dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 31 apresenta a aba de ocorrências, usada para consolidar problemas identificados durante as sessões. O registro separado por tarefa, severidade, descrição do ocorrido, melhoria potencial e participante afetado permite priorizar correções após os testes, distinguindo falhas críticas de ajustes menores de clareza ou interface.
+A Figura 33 apresenta a aba de ocorrências, usada para consolidar problemas identificados durante as sessões. O registro separado por tarefa, severidade, descrição do ocorrido, melhoria potencial e participante afetado permite priorizar correções após os testes, distinguindo falhas críticas de ajustes menores de clareza ou interface.
 
 Os perfis desejados são:
 
