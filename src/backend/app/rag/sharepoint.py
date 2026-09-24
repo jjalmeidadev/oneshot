@@ -37,6 +37,26 @@ _STOP_WORDS = {
     "uma",
 }
 
+# Equivalencias pequenas e auditaveis do dominio metroviario. A normalizacao
+# para um termo canonico melhora a recuperacao de parafrases sem depender da
+# massa de avaliacao ou carregar um modelo adicional em tempo de execucao.
+_DOMAIN_TOKEN_EQUIVALENTS = {
+    "achei": "achado",
+    "achados": "achado",
+    "barreira": "catraca",
+    "bike": "bicicleta",
+    "comboio": "trem",
+    "comboios": "trem",
+    "entro": "acesso",
+    "mochila": "objeto",
+    "passe": "bilhete",
+    "queixa": "reclamacao",
+    "reclamacoes": "reclamacao",
+    "saindo": "desembarque",
+    "trens": "trem",
+    "vagao": "trem",
+}
+
 
 #: Campos do extrato que ja aparecem em outra parte do bloco `[Fonte N]` e nao
 #: devem ser repetidos como atributo.
@@ -198,7 +218,7 @@ def retrieve_sharepoint_context(
     documents: list[SharePointDocument] | None = None,
     limit: int | None = None,
 ) -> list[RetrievedDocument]:
-    query_tokens = _meaningful_tokens(query)
+    query_tokens = _semantic_tokens(query)
     if not query_tokens:
         return []
 
@@ -206,13 +226,12 @@ def retrieve_sharepoint_context(
     scored: list[RetrievedDocument] = []
 
     for document in candidates:
-        normalized_text = _normalize(document.search_text)
-        document_tokens = set(normalized_text.split())
+        document_tokens = _semantic_tokens(document.search_text)
         matched_tokens = query_tokens & document_tokens
         if not matched_tokens:
             continue
 
-        title_tokens = set(_normalize(document.title).split())
+        title_tokens = _semantic_tokens(document.title)
         title_matches = query_tokens & title_tokens
         if len(query_tokens) > 1 and len(matched_tokens) < 2 and not title_matches:
             continue
@@ -318,6 +337,15 @@ def _meaningful_tokens(value: str) -> set[str]:
         token
         for token in _normalize(value).split()
         if len(token) >= 3 and token not in _STOP_WORDS
+    }
+
+
+def _semantic_tokens(value: str) -> set[str]:
+    """Retorna tokens significativos reduzidos ao vocabulario do dominio."""
+
+    return {
+        _DOMAIN_TOKEN_EQUIVALENTS.get(token, token)
+        for token in _meaningful_tokens(value)
     }
 
 

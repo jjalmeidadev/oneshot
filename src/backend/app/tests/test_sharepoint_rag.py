@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from app.rag.sharepoint import (
     build_rag_input,
     load_sharepoint_documents,
@@ -49,6 +51,37 @@ def test_does_not_inject_context_for_unrelated_question() -> None:
 
     assert results == []
     assert build_rag_input("Pergunta geral", results) == "Pergunta geral"
+
+
+@pytest.mark.parametrize(
+    ("query", "expected_source_id"),
+    [
+        ("Meu passe no celular nao funciona na barreira", "base-atendimento:301"),
+        ("Quero abrir uma queixa sobre o servico", "base-atendimento:302"),
+        ("Posso levar bike no domingo?", "base-atendimento:303"),
+        (
+            "Os comboios vao atrasar no fim da noite?",
+            "comunicados-servico:201",
+        ),
+        ("Por onde entro perto do Arouche?", "comunicados-servico:202"),
+        (
+            "Devo dar passagem a quem esta saindo do vagao?",
+            "comunicados-servico:203",
+        ),
+        ("Achei uma mochila; onde devolvo?", "procedimentos-operacionais:101"),
+    ],
+)
+def test_retrieves_context_for_domain_paraphrases(
+    query: str,
+    expected_source_id: str,
+) -> None:
+    documents = load_sharepoint_documents(DATA_DIR)
+
+    results = retrieve_sharepoint_context(query, documents=documents, limit=3)
+
+    assert expected_source_id in {
+        result.document.source_id for result in results
+    }
 
 
 def test_builds_prompt_with_source_labels_and_disclaimer() -> None:
