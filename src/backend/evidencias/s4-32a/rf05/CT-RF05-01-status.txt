@@ -1,0 +1,34 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF05-01
+Requisito: RF05
+Cenário: Positivo
+Status: APROVADO
+
+Entrada:
+Qual é o status do projeto PRJ-0442?
+
+Resultado observado:
+HTTP 200
+Resposta: status Programado [Fonte 1]
+intent.macro: CONSULTA
+intent.specific: consulta_status_projeto
+confidence_specific: 0.8492
+handler: handler:consulta_status_projeto
+
+Fonte principal:
+Operacao assistida na Linha Azul
+list_name: Comunicados de Servico / PRJ-0442
+score: 7.0
+
+Observação:
+Também foram recuperadas fontes secundárias irrelevantes com score 2.0.
+
+Resultado esperado:
+Apresentar status disponível e referência ao contexto/fonte.
+
+Conclusão:
+APROVADO.
+
+Nota:
+O sucesso desta formulação contrasta com CT-RF02-01 e reforça DEF-S4-32A-01.
