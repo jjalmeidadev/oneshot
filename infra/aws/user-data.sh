@@ -13,7 +13,7 @@ export AWS_DEFAULT_REGION="$AWS_REGION"
 
 install -d -m 0755 /etc/apt/keyrings
 apt-get update
-apt-get install -y ca-certificates curl gnupg awscli amazon-ecr-credential-helper logrotate rsyslog snapd
+apt-get install -y ca-certificates curl gnupg amazon-ecr-credential-helper logrotate rsyslog snapd
 systemctl enable --now rsyslog
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
