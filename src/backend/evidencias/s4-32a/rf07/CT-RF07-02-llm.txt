@@ -1,0 +1,30 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF07-02
+Requisito: RF07
+Cenário: Negativo
+Status: APROVADO
+
+Entrada:
+Qual é o prazo do projeto PRJ-0442?
+
+Resultado observado:
+HTTP 200
+model: google/gemini-3.7-flash
+retrieval_ms: 489
+usage.total_tokens: 468
+intent.macro: CONSULTA
+intent.specific: consulta_cronograma_prazo
+confidence_specific: 0.9443
+handler: handler:consulta_cronograma_prazo
+workflow: null
+sources: 2
+
+Comportamento:
+A consulta utilizou recuperação + LLM e não acionou o workflow automatizado.
+
+Resultado esperado:
+Consulta válida sem automação deve seguir o caminho LLM/contexto recuperado, sem fluxo automatizado.
+
+Conclusão:
+APROVADO.
