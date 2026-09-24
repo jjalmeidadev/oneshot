@@ -51,10 +51,10 @@ O objetivo é comprovar que uma pergunta textual atravessa cliente, API, PLN, re
 
 | ID | Resultado obtido | Evidência | Status |
 |---|---|---|:---:|
-| CT-E2E-01 | HTTP 200 em 16,27 s. `model = gemini-3.7-flash`; intenção `CONSULTA / consulta_visao_portfolio`; `nlp_ms = 63`; `retrieval_ms = 1933`; duas fontes devolvidas | `evidencias/r1-e2e-01.json` | **Aprovado** |
+| CT-E2E-01 | HTTP 200 em 16,27 s. `model = gemini-3.7-flash`; intenção `CONSULTA / consulta_visao_portfolio`; `nlp_ms = 63`; `retrieval_ms = 1933`; duas fontes devolvidas | Saída do `pytest` | **Aprovado** |
 | CT-E2E-02 | Os quatro elos conferidos automaticamente: 1 interação localizada pelo marcador, conversa correspondente, fontes gravadas em `consulted_sources` e eventos de auditoria presentes, incluindo o componente `api` | Saída do `pytest` | **Aprovado** |
 | CT-E2E-03 | Cliente recebeu `{"detail":"Não foi possível obter uma resposta. Tente novamente em instantes."}`, sem detalhe técnico. Interação `94c3d48d-9ce7-4832-ae6f-920723558537` persistida com `processing_status = 'erro'` e 2 eventos com `event_status = 'falha'`. `route_taken = 'sharepoint_query'`, ou seja, a recuperação executou e a falha ficou restrita à geração | Consulta ao Supabase na janela da execução | **Aprovado** |
-| CT-E2E-04 | Intenção, confianças, alternativas e fontes idênticas nos dois modelos; apenas `model`, texto e tempo diferentes. Detalhe na seção 4.1 | `evidencias/r1-e2e-04-modelo-b.json` | **Aprovado** |
+| CT-E2E-04 | Intenção, confianças, alternativas e fontes idênticas nos dois modelos; apenas `model`, texto e tempo diferentes. Detalhe na seção 4.1 | `evidencias/r1-e2e-04-modelo-b.json` e saída do `pytest` | **Aprovado** |
 | CT-E2E-05 | O `interaction_id` devolvido foi `v1_ChdqR2kxYXVlVEthSG96N0lQM3R5c21Bcx…`, identificador do Gemini, não um UUID de `ai_interactions` | Saída do `pytest`, registrado como `xfail` | **Falhou** |
 | CT-E2E-06 | Não executado. A integração com o Copilot Studio é entregue por #212–#220 | — | **Bloqueado** |
 | CT-E2E-07 | Não executado. Não há mecanismo de fallback em `app/gemini/client.py`; só troca de modelo por variável de ambiente, que é configuração | — | **Bloqueado** |
