@@ -24,10 +24,9 @@ from app.rag.proactive_confirmation import (
     complete_pending_suggestion,
     decline_pending_suggestion,
     register_pending_suggestion,
-    release_pending_suggestion,
 )
 from app.rag.proactivity import SecondaryIntent, resolve_secondary_intent
-from app.rag.sharepoint import build_confirmed_proactive_input, build_rag_input
+from app.rag.sharepoint import build_rag_input
 
 GEMINI_INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions"
 DEFAULT_MODEL = "gemini-3.7-flash"
@@ -96,12 +95,26 @@ def generate_chat_response(
         )
 
     llm = _call_llm(
-        build_rag_input(request.message, retrieved_documents),
+        build_rag_input(
+            request.message,
+            retrieved_documents,
+            intent=intent,
+            secondary_intent=secondary_intent,
+        ),
         api_key=api_key,
         previous_interaction_id=request.previous_interaction_id,
     )
+    primary_text, prepared_secondary_text = _extract_prepared_responses(
+        llm.text,
+        secondary_intent=secondary_intent,
+    )
+    if secondary_intent and prepared_secondary_text is None:
+        logger.warning(
+            "Resposta secundaria invalida; sugestao proativa sera omitida."
+        )
+
     return GeminiChatResponse(
-        text=llm.text,
+        text=primary_text,
         model=llm.model,
         interaction_id=llm.interaction_id,
         latency_ms=llm.latency_ms,
@@ -120,10 +133,13 @@ def generate_chat_response(
                     original_message=request.message,
                     secondary_intent=secondary_intent,
                     sources=retrieved_documents,
+                    prepared_response=prepared_secondary_text,
+                    prepared_model=llm.model,
+                    prepared_interaction_id=llm.interaction_id,
                 ),
                 secondary_intent,
             )
-            if secondary_intent and retrieved_documents
+            if secondary_intent and prepared_secondary_text and retrieved_documents
             else None
         ),
     )
@@ -158,11 +174,7 @@ def execute_proactive_confirmation(
         requester_id=requester_id,
         conversation_id=request.conversation_id,
     )
-    try:
-        result = _generate_confirmed_proactive_response(pending)
-    except Exception:
-        release_pending_suggestion(pending)
-        raise
+    result = _prepared_proactive_response(pending)
 
     complete_pending_suggestion(pending)
     return ProactiveConfirmationExecution(
@@ -184,32 +196,48 @@ def confirm_proactive_suggestion(
     ).response
 
 
-def _generate_confirmed_proactive_response(
+def _prepared_proactive_response(
     pending: PendingProactiveSuggestion,
 ) -> GeminiChatResponse:
-    api_key = _api_key()
-
-    llm = _call_llm(
-        build_confirmed_proactive_input(
-            pending.original_message,
-            list(pending.sources),
-            confirmed_intent=pending.secondary_intent.name,
-            instruction=pending.secondary_intent.rag_instruction,
-        ),
-        api_key=api_key,
-    )
+    if not pending.prepared_response:
+        raise GeminiAPIError(
+            "A sugestao nao possui resposta preparada.",
+            status_code=409,
+        )
     return GeminiChatResponse(
-        text=llm.text,
-        model=llm.model,
-        interaction_id=llm.interaction_id,
-        latency_ms=llm.latency_ms,
-        usage=llm.usage,
+        text=pending.prepared_response,
+        model=pending.prepared_model or "resposta-preparada",
+        interaction_id=pending.prepared_interaction_id,
+        latency_ms=0,
+        usage=GeminiUsage(),
         sources=_public_sources(pending.sources),
         trace_sources=[
             _trace_source_payload(result, citation_order=index)
             for index, result in enumerate(pending.sources, start=1)
         ],
     )
+
+
+def _extract_prepared_responses(
+    text: str,
+    *,
+    secondary_intent: SecondaryIntent | None,
+) -> tuple[str, str | None]:
+    if secondary_intent is None:
+        return text, None
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        return text, None
+    if not isinstance(payload, dict):
+        return text, None
+    primary = payload.get("primary_response")
+    prepared = payload.get("prepared_secondary_response")
+    if not isinstance(primary, str) or not primary.strip():
+        return text, None
+    if not isinstance(prepared, str) or not prepared.strip():
+        return primary.strip(), None
+    return primary.strip(), prepared.strip()
 
 
 @dataclass(frozen=True)

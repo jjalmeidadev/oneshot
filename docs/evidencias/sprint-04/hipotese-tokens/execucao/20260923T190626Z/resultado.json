@@ -1,0 +1,431 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-23T19:07:25.021948+00:00",
+  "provider": "OpenRouter",
+  "model_requested": "google/gemini-3.1-flash-lite",
+  "hypothesis": "O classificador reduz tokens agregados por roteamento e a intencao secundaria preparada na chamada principal evita uma segunda chamada.",
+  "latency_in_scope": false,
+  "cases_file": "docs\\evidencias\\sprint-04\\hipotese-tokens\\casos.json",
+  "results": [
+    {
+      "case_id": "consulta_status",
+      "variant": {
+        "name": "classificador_desligado",
+        "classifier_enabled": false,
+        "inline_secondary_enabled": false
+      },
+      "classification": {
+        "macro": "CONSULTA",
+        "specific": "consulta_status_projeto",
+        "confidence_macro": 0.9969,
+        "confidence_specific": 0.9419,
+        "flow": "RecuperadorInformacao -> Estruturador de Resposta",
+        "handler": "handler:consulta_status_projeto",
+        "alternatives": [
+          {
+            "intent": "consulta_status_projeto",
+            "confidence": 0.9419
+          },
+          {
+            "intent": "consulta_cronograma_prazo",
+            "confidence": 0.0119
+          },
+          {
+            "intent": "consulta_indicadores_kpi",
+            "confidence": 0.0096
+          }
+        ]
+      },
+      "secondary_intent": null,
+      "llm_calls": 1,
+      "input_tokens": 189,
+      "output_tokens": 94,
+      "reasoning_tokens": 0,
+      "total_tokens": 283,
+      "prompt_sha256": "15150ebb49df060e44b61217eb93f8361476908a14c2b9367ec6761d886a539d",
+      "source_count": 1,
+      "response_text": "Sim, há informações sobre o status do Projeto Aurora em nosso ambiente de demonstração.\n\nDe acordo com os dados fictícios registrados em 23 de setembro de 2026, o Projeto Aurora encontra-se em execução, apresentando um avanço físico hipotético de 42% [Fonte 1].\n\nRessalto que estes dados são provenientes de uma lista simulada para fins de MVP e não representam informações operacionais reais.",
+      "has_expected_citation": true,
+      "status": "concluido",
+      "raw_json": "docs\\evidencias\\sprint-04\\hipotese-tokens\\execucao\\20260923T190626Z\\json-bruto\\consulta-status--classificador_desligado.json",
+      "prepared_secondary_response": null,
+      "model_returned": "google/gemini-3.1-flash-lite"
+    },
+    {
+      "case_id": "consulta_status",
+      "variant": {
+        "name": "classificador_ligado",
+        "classifier_enabled": true,
+        "inline_secondary_enabled": false
+      },
+      "classification": {
+        "macro": "CONSULTA",
+        "specific": "consulta_status_projeto",
+        "confidence_macro": 0.9969,
+        "confidence_specific": 0.9419,
+        "flow": "RecuperadorInformacao -> Estruturador de Resposta",
+        "handler": "handler:consulta_status_projeto",
+        "alternatives": [
+          {
+            "intent": "consulta_status_projeto",
+            "confidence": 0.9419
+          },
+          {
+            "intent": "consulta_cronograma_prazo",
+            "confidence": 0.0119
+          },
+          {
+            "intent": "consulta_indicadores_kpi",
+            "confidence": 0.0096
+          }
+        ]
+      },
+      "secondary_intent": null,
+      "llm_calls": 1,
+      "input_tokens": 204,
+      "output_tokens": 141,
+      "reasoning_tokens": 0,
+      "total_tokens": 345,
+      "prompt_sha256": "5d0220ed7288b524451ce6cd752390217211d89efa89334ba4f21dd7ad20eba3",
+      "source_count": 1,
+      "response_text": "Olá! Como assistente do Metrô em ambiente de demonstração, informo que, com base nos dados fictícios disponíveis para este MVP, há uma atualização recente sobre o projeto:\n\nO **Projeto Aurora** encontra-se atualmente em fase de execução, apresentando um avanço físico hipotético de 42%. Esta informação consta em uma revisão registrada em setembro de 2026 [Fonte 1].\n\nRessalto que estes dados são provenientes de uma massa de dados sintética e não representam informações operacionais reais do Metrô. Caso precise de detalhes adicionais que não constem nesta fonte, o contexto atual não é suficiente para fornecer outras atualizações.",
+      "has_expected_citation": true,
+      "status": "concluido",
+      "raw_json": "docs\\evidencias\\sprint-04\\hipotese-tokens\\execucao\\20260923T190626Z\\json-bruto\\consulta-status--classificador_ligado.json",
+      "prepared_secondary_response": null,
+      "model_returned": "google/gemini-3.1-flash-lite"
+    },
+    {
+      "case_id": "consulta_status",
+      "variant": {
+        "name": "classificador_e_secundaria_inline",
+        "classifier_enabled": true,
+        "inline_secondary_enabled": true
+      },
+      "classification": {
+        "macro": "CONSULTA",
+        "specific": "consulta_status_projeto",
+        "confidence_macro": 0.9969,
+        "confidence_specific": 0.9419,
+        "flow": "RecuperadorInformacao -> Estruturador de Resposta",
+        "handler": "handler:consulta_status_projeto",
+        "alternatives": [
+          {
+            "intent": "consulta_status_projeto",
+            "confidence": 0.9419
+          },
+          {
+            "intent": "consulta_cronograma_prazo",
+            "confidence": 0.0119
+          },
+          {
+            "intent": "consulta_indicadores_kpi",
+            "confidence": 0.0096
+          }
+        ]
+      },
+      "secondary_intent": "sugerir_agilizacao_projeto",
+      "llm_calls": 1,
+      "input_tokens": 343,
+      "output_tokens": 180,
+      "reasoning_tokens": 0,
+      "total_tokens": 523,
+      "prompt_sha256": "279fbe0db9fef424c3ca1c494764cbb935ff5254ec757a4f3196794d01ef0bf9",
+      "source_count": 1,
+      "response_text": "Com base nos dados de demonstração, o Projeto Aurora encontra-se atualmente em fase de execução, apresentando um avanço físico hipotético de 42%, conforme registrado na atualização de 23 de setembro de 2026 [Fonte 1]. Ressalto que estas informações são fictícias e destinadas exclusivamente a este ambiente de teste.",
+      "has_expected_citation": true,
+      "status": "concluido",
+      "raw_json": "docs\\evidencias\\sprint-04\\hipotese-tokens\\execucao\\20260923T190626Z\\json-bruto\\consulta-status--classificador_e_secundaria_inline.json",
+      "prepared_secondary_response": "Análise: O contexto fornecido na [Fonte 1] limita-se ao status de execução e percentual de avanço, não detalhando cronogramas, impedimentos ou gargalos específicos. Recomendação: Como não há dados sobre gargalos no registro atual, recomendo a consulta ao relatório de riscos ou à lista de pendências do projeto para identificar pontos de estrangulamento antes de definir uma ação de agilização.",
+      "model_returned": "google/gemini-3.1-flash-lite"
+    },
+    {
+      "case_id": "transacao_relatorio",
+      "variant": {
+        "name": "classificador_desligado",
+        "classifier_enabled": false,
+        "inline_secondary_enabled": false
+      },
+      "classification": {
+        "macro": "TRANSACAO",
+        "specific": "transacao_gerar_relatorio",
+        "confidence_macro": 0.9972,
+        "confidence_specific": 0.9503,
+        "flow": "Executor de Transação -> Confirmação -> Registro",
+        "handler": "handler:transacao_gerar_relatorio",
+        "alternatives": [
+          {
+            "intent": "transacao_gerar_relatorio",
+            "confidence": 0.9503
+          },
+          {
+            "intent": "transacao_exportar_dados",
+            "confidence": 0.0282
+          },
+          {
+            "intent": "transacao_registrar_pendencia",
+            "confidence": 0.0083
+          }
+        ]
+      },
+      "secondary_intent": null,
+      "llm_calls": 1,
+      "input_tokens": 11,
+      "output_tokens": 252,
+      "reasoning_tokens": 0,
+      "total_tokens": 263,
+      "prompt_sha256": "20a11acd7c289dd8d498fe1b3304f956e60b4930d96aa3b2b3a88501aff73b15",
+      "source_count": 0,
+      "response_text": "Para gerar um relatório executivo eficaz, é importante que ele seja conciso, orientado a dados e focado em resultados. Abaixo, apresento um **modelo estruturado** que você pode adaptar com as informações específicas da sua organização.\n\n---\n\n# Relatório Executivo: Programa de Acessibilidade [Nome da Empresa/Instituição]\n**Período de Referência:** [Ex: Janeiro – Dezembro 2023]\n**Responsável:** [Nome/Departamento]\n**Data:** [Data de emissão]\n\n---\n\n### 1. Resumo Executivo\nEste relatório apresenta o status atual do Programa de Acessibilidade, destacando os avanços na remoção de barreiras (físicas, digitais e atitudinais), o nível de conformidade com a legislação vigente (LBI - Lei Brasileira de Inclusão) e o impacto na cultura organizacional. O foco deste período foi [ex: a digitalização de serviços e a capacitação de lideranças].\n\n### 2. Objetivos Estratégicos\n*   **Inclusão:** Garantir que todos os colaboradores e clientes tenham igualdade de acesso.\n*   **Conformidade:** Adequar",
+      "has_expected_citation": true,
+      "status": "concluido",
+      "raw_json": "docs\\evidencias\\sprint-04\\hipotese-tokens\\execucao\\20260923T190626Z\\json-bruto\\transacao-relatorio--classificador_desligado.json",
+      "prepared_secondary_response": null,
+      "model_returned": "google/gemini-3.1-flash-lite"
+    },
+    {
+      "case_id": "transacao_relatorio",
+      "variant": {
+        "name": "classificador_ligado",
+        "classifier_enabled": true,
+        "inline_secondary_enabled": false
+      },
+      "classification": {
+        "macro": "TRANSACAO",
+        "specific": "transacao_gerar_relatorio",
+        "confidence_macro": 0.9972,
+        "confidence_specific": 0.9503,
+        "flow": "Executor de Transação -> Confirmação -> Registro",
+        "handler": "handler:transacao_gerar_relatorio",
+        "alternatives": [
+          {
+            "intent": "transacao_gerar_relatorio",
+            "confidence": 0.9503
+          },
+          {
+            "intent": "transacao_exportar_dados",
+            "confidence": 0.0282
+          },
+          {
+            "intent": "transacao_registrar_pendencia",
+            "confidence": 0.0083
+          }
+        ]
+      },
+      "secondary_intent": null,
+      "llm_calls": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "reasoning_tokens": 0,
+      "total_tokens": 0,
+      "prompt_sha256": "ab705a53d24d18a315d850ba4dd9b69b1c3b4d5fa878437101af09060ff82e36",
+      "source_count": 0,
+      "response_text": "",
+      "has_expected_citation": true,
+      "status": "roteado_sem_llm",
+      "raw_json": "docs\\evidencias\\sprint-04\\hipotese-tokens\\execucao\\20260923T190626Z\\json-bruto\\transacao-relatorio--classificador_ligado.json"
+    },
+    {
+      "case_id": "transacao_relatorio",
+      "variant": {
+        "name": "classificador_e_secundaria_inline",
+        "classifier_enabled": true,
+        "inline_secondary_enabled": true
+      },
+      "classification": {
+        "macro": "TRANSACAO",
+        "specific": "transacao_gerar_relatorio",
+        "confidence_macro": 0.9972,
+        "confidence_specific": 0.9503,
+        "flow": "Executor de Transação -> Confirmação -> Registro",
+        "handler": "handler:transacao_gerar_relatorio",
+        "alternatives": [
+          {
+            "intent": "transacao_gerar_relatorio",
+            "confidence": 0.9503
+          },
+          {
+            "intent": "transacao_exportar_dados",
+            "confidence": 0.0282
+          },
+          {
+            "intent": "transacao_registrar_pendencia",
+            "confidence": 0.0083
+          }
+        ]
+      },
+      "secondary_intent": null,
+      "llm_calls": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "reasoning_tokens": 0,
+      "total_tokens": 0,
+      "prompt_sha256": "ab705a53d24d18a315d850ba4dd9b69b1c3b4d5fa878437101af09060ff82e36",
+      "source_count": 0,
+      "response_text": "",
+      "has_expected_citation": true,
+      "status": "roteado_sem_llm",
+      "raw_json": "docs\\evidencias\\sprint-04\\hipotese-tokens\\execucao\\20260923T190626Z\\json-bruto\\transacao-relatorio--classificador_e_secundaria_inline.json"
+    },
+    {
+      "case_id": "fora_escopo",
+      "variant": {
+        "name": "classificador_desligado",
+        "classifier_enabled": false,
+        "inline_secondary_enabled": false
+      },
+      "classification": {
+        "macro": "FORA_DE_ESCOPO",
+        "specific": "",
+        "confidence_macro": 0.9218,
+        "confidence_specific": 0.9136,
+        "flow": "Resposta padrão de limitação (RF08)",
+        "handler": "fluxo genérico de FORA_DE_ESCOPO",
+        "alternatives": [
+          {
+            "intent": "fora_escopo_externo",
+            "confidence": 0.9136
+          },
+          {
+            "intent": "consulta_cronograma_prazo",
+            "confidence": 0.0394
+          },
+          {
+            "intent": "analise_tendencia_desempenho",
+            "confidence": 0.032
+          }
+        ]
+      },
+      "secondary_intent": null,
+      "llm_calls": 1,
+      "input_tokens": 11,
+      "output_tokens": 50,
+      "reasoning_tokens": 0,
+      "total_tokens": 61,
+      "prompt_sha256": "c1eef2445f9977624e50e1b48c26da3617854e38aed3269b0753a227a6e66597",
+      "source_count": 0,
+      "response_text": "Para que eu possa te informar a previsão do tempo correta, **preciso que você me diga em qual cidade você está** (ou a cidade para a qual deseja a previsão).\n\nPor favor, informe o nome da cidade e o estado!",
+      "has_expected_citation": true,
+      "status": "concluido",
+      "raw_json": "docs\\evidencias\\sprint-04\\hipotese-tokens\\execucao\\20260923T190626Z\\json-bruto\\fora-escopo--classificador_desligado.json",
+      "prepared_secondary_response": null,
+      "model_returned": "google/gemini-3.1-flash-lite"
+    },
+    {
+      "case_id": "fora_escopo",
+      "variant": {
+        "name": "classificador_ligado",
+        "classifier_enabled": true,
+        "inline_secondary_enabled": false
+      },
+      "classification": {
+        "macro": "FORA_DE_ESCOPO",
+        "specific": "",
+        "confidence_macro": 0.9218,
+        "confidence_specific": 0.9136,
+        "flow": "Resposta padrão de limitação (RF08)",
+        "handler": "fluxo genérico de FORA_DE_ESCOPO",
+        "alternatives": [
+          {
+            "intent": "fora_escopo_externo",
+            "confidence": 0.9136
+          },
+          {
+            "intent": "consulta_cronograma_prazo",
+            "confidence": 0.0394
+          },
+          {
+            "intent": "analise_tendencia_desempenho",
+            "confidence": 0.032
+          }
+        ]
+      },
+      "secondary_intent": null,
+      "llm_calls": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "reasoning_tokens": 0,
+      "total_tokens": 0,
+      "prompt_sha256": "8dc3aa567fef5344ddf061a23399b79d7649a469de487da9d2bb9b84ba44b2a8",
+      "source_count": 0,
+      "response_text": "",
+      "has_expected_citation": true,
+      "status": "roteado_sem_llm",
+      "raw_json": "docs\\evidencias\\sprint-04\\hipotese-tokens\\execucao\\20260923T190626Z\\json-bruto\\fora-escopo--classificador_ligado.json"
+    },
+    {
+      "case_id": "fora_escopo",
+      "variant": {
+        "name": "classificador_e_secundaria_inline",
+        "classifier_enabled": true,
+        "inline_secondary_enabled": true
+      },
+      "classification": {
+        "macro": "FORA_DE_ESCOPO",
+        "specific": "",
+        "confidence_macro": 0.9218,
+        "confidence_specific": 0.9136,
+        "flow": "Resposta padrão de limitação (RF08)",
+        "handler": "fluxo genérico de FORA_DE_ESCOPO",
+        "alternatives": [
+          {
+            "intent": "fora_escopo_externo",
+            "confidence": 0.9136
+          },
+          {
+            "intent": "consulta_cronograma_prazo",
+            "confidence": 0.0394
+          },
+          {
+            "intent": "analise_tendencia_desempenho",
+            "confidence": 0.032
+          }
+        ]
+      },
+      "secondary_intent": null,
+      "llm_calls": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "reasoning_tokens": 0,
+      "total_tokens": 0,
+      "prompt_sha256": "8dc3aa567fef5344ddf061a23399b79d7649a469de487da9d2bb9b84ba44b2a8",
+      "source_count": 0,
+      "response_text": "",
+      "has_expected_citation": true,
+      "status": "roteado_sem_llm",
+      "raw_json": "docs\\evidencias\\sprint-04\\hipotese-tokens\\execucao\\20260923T190626Z\\json-bruto\\fora-escopo--classificador_e_secundaria_inline.json"
+    }
+  ],
+  "summary": {
+    "classificador_desligado": {
+      "cases": 3,
+      "llm_calls": 3,
+      "input_tokens": 211,
+      "output_tokens": 396,
+      "reasoning_tokens": 0,
+      "total_tokens": 607,
+      "functional_successes": 3,
+      "token_reduction_vs_classifier_off": 0.0
+    },
+    "classificador_ligado": {
+      "cases": 3,
+      "llm_calls": 1,
+      "input_tokens": 204,
+      "output_tokens": 141,
+      "reasoning_tokens": 0,
+      "total_tokens": 345,
+      "functional_successes": 3,
+      "token_reduction_vs_classifier_off": 0.431631
+    },
+    "classificador_e_secundaria_inline": {
+      "cases": 3,
+      "llm_calls": 1,
+      "input_tokens": 343,
+      "output_tokens": 180,
+      "reasoning_tokens": 0,
+      "total_tokens": 523,
+      "functional_successes": 3,
+      "token_reduction_vs_classifier_off": 0.138386
+    }
+  }
+}

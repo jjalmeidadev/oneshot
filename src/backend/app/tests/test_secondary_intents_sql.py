@@ -10,6 +10,7 @@ SEED_SQL = SQL_DIR / "02_initial_data.sql"
 MIGRATION_SQL = SQL_DIR / "05_add_secondary_intents.sql"
 VERIFICATION_SQL = SQL_DIR / "06_verify_secondary_intents.sql"
 PENDING_MIGRATION_SQL = SQL_DIR / "07_add_pending_proactive_suggestions.sql"
+PREPARED_RESPONSE_MIGRATION_SQL = SQL_DIR / "08_add_prepared_proactive_response.sql"
 LOCAL_CATALOG = REPO_ROOT / "backend" / "app" / "rag" / "data" / "secondary_intents.json"
 
 EXPECTED_MAPPINGS = {
@@ -53,6 +54,14 @@ def test_pending_confirmations_use_shared_scoped_storage() -> None:
         assert "external_conversation_id" in normalized
         assert "expires_at" in normalized
         assert "claimed_at" in normalized
+
+
+def test_pending_confirmations_persist_prepared_response() -> None:
+    for path in (BASELINE_SQL, PENDING_MIGRATION_SQL, PREPARED_RESPONSE_MIGRATION_SQL):
+        normalized = _read(path).lower()
+        assert "prepared_response" in normalized
+        assert "prepared_model" in normalized
+        assert "prepared_interaction_id" in normalized
 
 
 def test_initial_load_and_migration_cover_all_mappings_idempotently() -> None:

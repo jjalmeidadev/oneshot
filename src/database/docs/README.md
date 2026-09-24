@@ -12,6 +12,8 @@ Os scripts atuais sao:
 - `../sql/04_rag_synthetic_data.sql`: carrega em `project_artifacts` e `source_extracts` os itens ficticios dos JSONs usados pelo RAG local em `src/backend/app/rag/data/sharepoint`.
 - `../sql/05_add_secondary_intents.sql`: adiciona o catalogo de intencoes secundarias a bancos que ja possuem o baseline;
 - `../sql/06_verify_secondary_intents.sql`: verifica leitura, unicidade, integridade referencial e reexecucao da carga sem persistir dados de teste.
+- `../sql/07_add_pending_proactive_suggestions.sql`: cria o armazenamento compartilhado das sugestões pendentes;
+- `../sql/08_add_prepared_proactive_response.sql`: adiciona a resposta secundária preparada na chamada principal e remove pendências legadas incompatíveis.
 
 ## Banco-alvo
 
@@ -60,6 +62,11 @@ A tabela `project_benefits` foi adicionada porque o Mapa de Beneficios e parte c
 
 `secondary_intents` associa uma sugestao proativa a uma intencao especifica existente em `intent_catalog`. A chave estrangeira impede associacoes orfas, enquanto a restricao unica sobre `specific_intent_id` e `secondary_intent` torna a carga idempotente. Os campos `rag_instruction` e `display_message` separam a orientacao enviada ao RAG do texto curto apresentado na interface. A intencao secundaria complementa a consulta e nao altera a classificacao macro ou especifica original.
 
+`pending_proactive_suggestions` guarda também `prepared_response`,
+`prepared_model` e `prepared_interaction_id`. Esses campos comprovam que a
+resposta secundária foi gerada junto da resposta principal; aceitar a sugestão
+somente libera esse conteúdo e não consome uma segunda chamada ao provedor.
+
 ## Tratamento de planilhas Excel do SharePoint
 
 Algumas listas do SharePoint podem guardar apenas links ou anexos para planilhas Excel, especialmente cronogramas. O modelo trata esse caso da seguinte forma:
@@ -80,6 +87,8 @@ psql "$DATABASE_URL" -f src/database/sql/01_create_database.sql
 psql "$DATABASE_URL" -f src/database/sql/02_initial_data.sql
 psql "$DATABASE_URL" -f src/database/sql/04_rag_synthetic_data.sql
 psql "$DATABASE_URL" -f src/database/sql/06_verify_secondary_intents.sql
+psql "$DATABASE_URL" -f src/database/sql/07_add_pending_proactive_suggestions.sql
+psql "$DATABASE_URL" -f src/database/sql/08_add_prepared_proactive_response.sql
 ```
 
 Em um banco que ja possui o baseline, execute

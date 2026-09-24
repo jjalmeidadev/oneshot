@@ -13,6 +13,10 @@ de 2, 4 e 8 segundos. Esses valores podem ser ajustados em `.env` por meio de
 `GEMINI_THINKING_LEVEL`, `GEMINI_MAX_OUTPUT_TOKENS`, `GEMINI_MAX_RETRIES`,
 `GEMINI_RETRY_BASE_DELAY_SECONDS` e `GEMINI_REQUEST_TIMEOUT_SECONDS`.
 
+O benchmark isolado da hipótese de economia de tokens usa OpenRouter sem trocar
+o provedor do backend. Configure `OPENROUTER_API_KEY` somente no mesmo `.env` e
+consulte o [protocolo e as evidências](../../docs/evidencias/sprint-04/hipotese-tokens/README.md).
+
 Para validar a conectividade com o banco Supabase/PostgreSQL do projeto Oneshot,
 configure `DATABASE_URL` ou `SUPABASE_DATABASE_URL` em `src/backend/.env`. A URL
 deve vir do painel **Connect** do Supabase e manter credenciais apenas no ambiente
@@ -462,9 +466,9 @@ teste deve ser convertida para WAV PCM mono a 16 kHz antes do envio ao
 
 `POST /api/chat` aceita `conversation_id`, `use_intent_classifier`, `message` e `previous_interaction_id`. `conversation_id` identifica a conversa; `previous_interaction_id` encadeia o provedor e não é mais reutilizado como ID externo. Campo ausente ou `true` executa classificação e extração de entidades por padrão; `false` é opt-out explícito para preservar o toggle da interface. A resposta inclui `intent` rico (`macro`, `specific`, confianças, `flow`, `handler` e `alternatives`), `entities`, `pipeline_metrics` (`nlp_ms` e `route_ms`) e `sources[].excerpt` com o trecho recuperado. Para `transacao_gerar_relatorio`, inclui `workflow` e não chama Gemini.
 
-`POST /api/chat/proactive-confirmation` aceita exclusivamente `suggestion_id`, `conversation_id` e `decision` (`accept` ou `decline`), sem campo de mensagem livre, e exige o mesmo esquema de autenticação. A confirmação só é encontrada quando UUID, identidade e conversa coincidem. `decline` consome o registro sem chamar o Gemini; `accept` reserva o registro contra execução concorrente, envia somente a instrução vinculada e as fontes armazenadas e grava solicitação, intenção, fontes, resposta e identidade na trilha RNF03. Uma sugestão expirada, já decidida ou fora do escopo do solicitante retorna `404`.
+`POST /api/chat/proactive-confirmation` aceita exclusivamente `suggestion_id`, `conversation_id` e `decision` (`accept` ou `decline`), sem campo de mensagem livre, e exige o mesmo esquema de autenticação. A chamada principal prepara a resposta secundária junto da resposta principal e armazena esse conteúdo sem exibi-lo. A confirmação só é encontrada quando UUID, identidade e conversa coincidem: `decline` descarta o registro e `accept` libera a resposta preparada, ambos sem nova chamada ao Gemini. A decisão e a resposta liberada continuam registradas na trilha RNF03. Uma sugestão expirada, já decidida ou fora do escopo do solicitante retorna `404`.
 
-Com `DATABASE_URL` ou `SUPABASE_DATABASE_URL`, as sugestões pendentes são armazenadas em `pending_proactive_suggestions`, permitindo confirmação por qualquer worker durante o TTL. Sem banco configurado, desenvolvimento e testes usam um fallback em memória de processo; esse modo não oferece continuidade após reinício nem balanceamento entre workers e não deve ser usado em produção.
+Com `DATABASE_URL` ou `SUPABASE_DATABASE_URL`, as sugestões pendentes e suas respostas já preparadas são armazenadas em `pending_proactive_suggestions`, permitindo confirmação por qualquer worker durante o TTL. Bancos existentes precisam da migração `08_add_prepared_proactive_response.sql`. Sem banco configurado, desenvolvimento e testes usam um fallback em memória de processo; esse modo não oferece continuidade após reinício nem balanceamento entre workers e não deve ser usado em produção.
 
 `POST /api/audio` aceita também os campos multipart `previous_interaction_id`, `use_intent_classifier` e `proactivity_enabled`. Depois de validar e transcrever, executa o mesmo pipeline de texto fora do laço assíncrono. Preserva `answer`, retorna `pipeline_status="completed"` e acrescenta `chat` com as fontes completas, intenção rica, eventual sugestão proativa, entidades, métricas (`validation_ms`, `stt_ms`, `nlp_ms`, `route_ms`, `total_ms`) e ID real da interação. Não são mais gerados IDs de interação fictícios nem respostas provisórias de sucesso.
 

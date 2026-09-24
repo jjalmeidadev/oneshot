@@ -1,0 +1,68 @@
+{
+  "request": {
+    "model": "google/gemini-3.1-flash-lite",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Voce e um assistente do Metro em um ambiente de demonstracao. Os trechos abaixo vieram de listas simuladas do SharePoint e sao dados ficticios para o MVP. Use-os quando forem pertinentes, cite as fontes no formato [Fonte N] e informe quando o contexto nao for suficiente. Nao apresente esses dados como informacao operacional real.\n\nRoteamento: classificador desativado; interprete a pergunta diretamente.\n\nContexto recuperado:\n[Fonte 1] Status do Projeto Aurora — cenário fictício\nLista: Massa controlada\nAtualizado em: 2026-09-23\nConteudo: Massa sintética: o Projeto Aurora está em execução, com avanço físico hipotético de 42% e revisão fictícia registrada em setembro de 2026.\n\nPergunta do usuario: Há novidade sobre a execução do Projeto Aurora fictício?"
+      }
+    ],
+    "temperature": 0,
+    "max_tokens": 256
+  },
+  "response": {
+    "id": "gen-1790190436-a3y1NWwWFaGT9vdcG6qS",
+    "object": "chat.completion",
+    "created": 1790190436,
+    "model": "google/gemini-3.1-flash-lite",
+    "provider": "Google",
+    "system_fingerprint": null,
+    "service_tier": "default",
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "STOP",
+        "message": {
+          "role": "assistant",
+          "content": "Sim, há informações sobre o status do Projeto Aurora em nosso ambiente de demonstração.\n\nDe acordo com os dados fictícios registrados em 23 de setembro de 2026, o Projeto Aurora encontra-se em execução, apresentando um avanço físico hipotético de 42% [Fonte 1].\n\nRessalto que estes dados são provenientes de uma lista simulada para fins de MVP e não representam informações operacionais reais.",
+          "refusal": null,
+          "reasoning": null,
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "signature": "AY89a1+1sObsqoqJCWMJiaxDTciX5wofC1R19hgh0Q98wCfH0uwwhN/ZZRqBwHbVvLdKVY5ZdWvE42yPetdZsT1ElbL1Ibzm9r5AHlGMnestwaw=",
+              "format": "google-gemini-v1",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 189,
+      "completion_tokens": 94,
+      "total_tokens": 283,
+      "cost": 0.00018825,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00018825,
+        "upstream_inference_prompt_cost": 4.725e-05,
+        "upstream_inference_completions_cost": 0.000141
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "skipped": false
+}

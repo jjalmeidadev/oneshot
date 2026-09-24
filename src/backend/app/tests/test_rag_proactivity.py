@@ -183,6 +183,9 @@ def test_database_store_recovers_suggestion_for_another_worker(monkeypatch) -> N
                 "score": 4.0,
             }
         ],
+        "Resposta secundaria preparada [Fonte 1].",
+        "gemini-3.7-flash",
+        "interaction-proactive",
     )
 
     claimed = claim_pending_suggestion(
@@ -194,9 +197,10 @@ def test_database_store_recovers_suggestion_for_another_worker(monkeypatch) -> N
     assert "pending_proactive_suggestions" in register_cursor.query
     assert claimed.suggestion_id == suggestion_id
     assert claimed.sources[0].document.source_id == "fonte:1"
+    assert claimed.prepared_response.startswith("Resposta secundaria")
 
 
-def test_proactivity_waits_for_explicit_confirmation_before_secondary_prompt(
+def test_proactivity_prepares_secondary_response_in_single_provider_call(
     monkeypatch,
 ) -> None:
     captured_requests = []
@@ -204,10 +208,13 @@ def test_proactivity_waits_for_explicit_confirmation_before_secondary_prompt(
     def fake_urlopen(request, timeout: int) -> FakeResponse:
         captured_requests.append(request)
         assert timeout == 30
-        text = (
-            "Resposta principal [Fonte 1]."
-            if len(captured_requests) == 1
-            else "O gargalo e o fornecedor; acompanhe o plano [Fonte 1]."
+        text = json.dumps(
+            {
+                "primary_response": "Resposta principal [Fonte 1].",
+                "prepared_secondary_response": (
+                    "O gargalo e o fornecedor; acompanhe o plano [Fonte 1]."
+                ),
+            }
         )
         return FakeResponse(
             {
@@ -248,8 +255,9 @@ def test_proactivity_waits_for_explicit_confirmation_before_secondary_prompt(
     )
 
     primary_payload = json.loads(captured_requests[0].data.decode("utf-8"))
-    assert "principal gargalo" not in primary_payload["input"]
-    assert "Intencao confirmada" not in primary_payload["input"]
+    assert "macro=CONSULTA; especifica=consulta_status_projeto" in primary_payload["input"]
+    assert "Intencao secundaria: sugerir_agilizacao_projeto" in primary_payload["input"]
+    assert "principal gargalo" in primary_payload["input"]
     assert response.text == "Resposta principal [Fonte 1]."
     assert response.proactive_suggestion is not None
     assert response.proactive_suggestion.intent == "sugerir_agilizacao_projeto"
@@ -286,11 +294,9 @@ def test_proactivity_waits_for_explicit_confirmation_before_secondary_prompt(
     assert confirmation.status == "accepted"
     assert confirmation.result is not None
     assert confirmation.result.text.startswith("O gargalo")
-    confirmed_payload = json.loads(captured_requests[1].data.decode("utf-8"))
-    assert "Intencao confirmada: sugerir_agilizacao_projeto" in confirmed_payload["input"]
-    assert "principal gargalo" in confirmed_payload["input"]
-    assert "Resposta principal" not in confirmed_payload["input"]
-    assert "previous_interaction_id" not in confirmed_payload
+    assert confirmation.result.usage.total_tokens == 0
+    assert confirmation.result.latency_ms == 0
+    assert len(captured_requests) == 1
     with pytest.raises(PendingSuggestionNotFound):
         confirm_proactive_suggestion(
             ProactiveConfirmationRequest(
@@ -314,7 +320,19 @@ def test_declining_suggestion_does_not_call_provider_again(monkeypatch) -> None:
                 "steps": [
                     {
                         "type": "model_output",
-                        "content": [{"type": "text", "text": "Resposta principal."}],
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": json.dumps(
+                                    {
+                                        "primary_response": "Resposta principal.",
+                                        "prepared_secondary_response": (
+                                            "Resposta secundaria preparada."
+                                        ),
+                                    }
+                                ),
+                            }
+                        ],
                     }
                 ],
                 "usage": {},
@@ -387,5 +405,6 @@ def test_disabled_proactivity_preserves_primary_rag_prompt(monkeypatch) -> None:
     )
 
     payload = json.loads(captured_request.data.decode("utf-8"))
-    assert "Modo proatividade habilitado" not in payload["input"]
+    assert "macro=CONSULTA; especifica=consulta_status_projeto" in payload["input"]
+    assert "Intencao secundaria:" not in payload["input"]
     assert response.proactive_suggestion is None
