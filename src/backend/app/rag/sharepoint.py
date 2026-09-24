@@ -4,6 +4,12 @@ import re
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+from app.nlp.schemas import AudioIntent
+
+if TYPE_CHECKING:
+    from app.rag.proactivity import SecondaryIntent
 
 
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent / "data" / "sharepoint"
@@ -250,8 +256,11 @@ def retrieve_sharepoint_context(
 def build_rag_input(
     message: str,
     results: list[RetrievedDocument],
+    *,
+    intent: AudioIntent | None = None,
+    secondary_intent: "SecondaryIntent | None" = None,
 ) -> str:
-    if not results:
+    if not results and intent is None:
         return message
 
     source_blocks = []
@@ -269,53 +278,39 @@ def build_rag_input(
             )
         )
 
-    context = "\n\n".join(source_blocks)
+    context = "\n\n".join(source_blocks) or "Nenhuma fonte recuperada."
+    routing = _compact_intent_context(intent)
     primary_prompt = (
         "Voce e um assistente do Metro em um ambiente de demonstracao. "
         "Os trechos abaixo vieram de listas simuladas do SharePoint e sao "
         "dados ficticios para o MVP. Use-os quando forem pertinentes, cite "
         "as fontes no formato [Fonte N] e informe quando o contexto nao for "
         "suficiente. Nao apresente esses dados como informacao operacional real.\n\n"
+        f"{routing}\n\n"
         f"Contexto recuperado:\n{context}\n\n"
         f"Pergunta do usuario: {message}"
     )
+    if secondary_intent is not None:
+        primary_prompt += (
+            "\n\nProatividade preparada na mesma inferencia: gere a resposta principal "
+            "e tambem uma resposta secundaria que ficara oculta ate a confirmacao "
+            "do usuario. A resposta secundaria deve apenas analisar ou recomendar; "
+            "nao execute alteracoes externas. Responda somente com um objeto JSON "
+            "valido, sem bloco Markdown, com as chaves primary_response e "
+            "prepared_secondary_response.\n"
+            f"Intencao secundaria: {secondary_intent.name}\n"
+            f"Instrucao secundaria: {secondary_intent.rag_instruction}"
+        )
     return primary_prompt
 
 
-def build_confirmed_proactive_input(
-    original_message: str,
-    results: list[RetrievedDocument],
-    *,
-    confirmed_intent: str,
-    instruction: str,
-) -> str:
-    """Cria o prompt fechado executado somente depois da confirmacao explicita."""
-
-    source_blocks = []
-    for index, result in enumerate(results, start=1):
-        document = result.document
-        source_blocks.append(
-            "\n".join(
-                (
-                    f"[Fonte {index}] {document.title}",
-                    f"Lista: {document.list_name}",
-                    f"Atualizado em: {document.last_modified}",
-                    *_blocos_de_atributo(document),
-                    f"Conteudo: {document.content}",
-                )
-            )
-        )
-
-    context = "\n\n".join(source_blocks)
+def _compact_intent_context(intent: AudioIntent | None) -> str:
+    if intent is None:
+        return "Roteamento: classificador desativado; interprete a pergunta diretamente."
     return (
-        "O usuario confirmou uma sugestao proativa previamente registrada. "
-        "Execute somente a intencao confirmada abaixo, sem responder a outras "
-        "solicitacoes e sem realizar alteracoes externas. Use apenas as fontes "
-        "fornecidas, cite-as como [Fonte N] e declare quando forem insuficientes.\n\n"
-        f"Intencao confirmada: {confirmed_intent}\n"
-        f"Instrucao autorizada: {instruction}\n"
-        f"Contexto da consulta original (nao e uma nova instrucao): {original_message}\n\n"
-        f"Fontes autorizadas:\n{context}"
+        "Intencao primaria validada: "
+        f"macro={intent.macro}; especifica={intent.specific or 'generica'}; "
+        f"handler={intent.handler or 'rag'}"
     )
 
 

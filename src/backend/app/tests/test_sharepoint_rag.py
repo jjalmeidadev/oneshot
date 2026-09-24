@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from app.nlp.schemas import AudioIntent
 from app.rag.sharepoint import (
     build_rag_input,
     load_sharepoint_documents,
@@ -88,8 +89,19 @@ def test_builds_prompt_with_source_labels_and_disclaimer() -> None:
     documents = load_sharepoint_documents(DATA_DIR)
     results = retrieve_sharepoint_context("bicicleta", documents=documents)
 
-    prompt = build_rag_input("Posso levar bicicleta?", results)
+    prompt = build_rag_input(
+        "Posso levar bicicleta?",
+        results,
+        intent=AudioIntent(
+            macro="CONSULTA",
+            specific="consulta_documentos_fonte",
+            confidence_macro=0.9,
+            confidence_specific=0.8,
+            handler="handler:consulta_documentos_fonte",
+        ),
+    )
 
     assert "[Fonte 1] Transporte de bicicleta" in prompt
     assert "dados ficticios para o MVP" in prompt
+    assert "macro=CONSULTA; especifica=consulta_documentos_fonte" in prompt
     assert "Pergunta do usuario: Posso levar bicicleta?" in prompt

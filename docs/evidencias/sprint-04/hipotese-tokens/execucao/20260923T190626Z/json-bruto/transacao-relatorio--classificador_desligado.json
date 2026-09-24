@@ -1,0 +1,68 @@
+{
+  "request": {
+    "model": "google/gemini-3.1-flash-lite",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Gere um relatório executivo do programa de acessibilidade"
+      }
+    ],
+    "temperature": 0,
+    "max_tokens": 256
+  },
+  "response": {
+    "id": "gen-1790190441-YsZD4agwIFirkZdtccqT",
+    "object": "chat.completion",
+    "created": 1790190441,
+    "model": "google/gemini-3.1-flash-lite",
+    "provider": "Google",
+    "system_fingerprint": null,
+    "service_tier": "default",
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "length",
+        "native_finish_reason": "MAX_TOKENS",
+        "message": {
+          "role": "assistant",
+          "content": "Para gerar um relatório executivo eficaz, é importante que ele seja conciso, orientado a dados e focado em resultados. Abaixo, apresento um **modelo estruturado** que você pode adaptar com as informações específicas da sua organização.\n\n---\n\n# Relatório Executivo: Programa de Acessibilidade [Nome da Empresa/Instituição]\n**Período de Referência:** [Ex: Janeiro – Dezembro 2023]\n**Responsável:** [Nome/Departamento]\n**Data:** [Data de emissão]\n\n---\n\n### 1. Resumo Executivo\nEste relatório apresenta o status atual do Programa de Acessibilidade, destacando os avanços na remoção de barreiras (físicas, digitais e atitudinais), o nível de conformidade com a legislação vigente (LBI - Lei Brasileira de Inclusão) e o impacto na cultura organizacional. O foco deste período foi [ex: a digitalização de serviços e a capacitação de lideranças].\n\n### 2. Objetivos Estratégicos\n*   **Inclusão:** Garantir que todos os colaboradores e clientes tenham igualdade de acesso.\n*   **Conformidade:** Adequar",
+          "refusal": null,
+          "reasoning": null,
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "signature": "AY89a1/5ceQ7TFYYBqIfG+Q4lBO84PsviM8+UF104Qvlz70NSUDrdY68k3R5P7x2HMAS+DYyeM2aMfysrDKdim5SBf5c4jDI6lJqXbfUs/vg10M=",
+              "format": "google-gemini-v1",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 11,
+      "completion_tokens": 252,
+      "total_tokens": 263,
+      "cost": 0.00038075,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00038075,
+        "upstream_inference_prompt_cost": 2.75e-06,
+        "upstream_inference_completions_cost": 0.000378
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "skipped": false
+}
