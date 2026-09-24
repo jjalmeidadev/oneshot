@@ -31,7 +31,11 @@ from app.rag.sharepoint import build_confirmed_proactive_input, build_rag_input
 
 GEMINI_INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions"
 DEFAULT_MODEL = "gemini-3.7-flash"
-DEFAULT_MAX_OUTPUT_TOKENS = 512
+DEFAULT_MAX_OUTPUT_TOKENS = 1024
+AVISO_RESPOSTA_INTERROMPIDA = (
+    "*A resposta foi interrompida antes de terminar. "
+    "Pergunte de novo, de forma mais específica.*"
+)
 DEFAULT_REQUEST_TIMEOUT_SECONDS = 30
 DEFAULT_MAX_RETRIES = 3
 DEFAULT_RETRY_BASE_DELAY_SECONDS = 2.0
@@ -362,14 +366,14 @@ def _call_openrouter(prompt: str, *, api_key: str) -> _LLMResult:
     latency_ms = round((perf_counter() - started_at) * 1000)
 
     text = _extract_openrouter_text(response_data)
-    if not text:
-        raise GeminiAPIError("O provedor nao retornou conteudo de texto.")
 
     # Os tokens de raciocinio consomem o mesmo `max_tokens` do texto visivel:
     # numa chamada medida, 245 dos 287 tokens de saida foram raciocinio. Quando
-    # o modelo raciocina demais, a resposta e cortada no meio da frase. Na
-    # rodada do RNF04, duas respostas chegaram cortadas e foram entregues como
-    # se estivessem completas, porque o motivo de parada nao era verificado.
+    # o modelo raciocina demais, a resposta e cortada no meio da frase ou chega
+    # vazia. Na rodada do RNF04, duas respostas cortadas foram entregues como
+    # completas; no teste de usabilidade, uma chegou so com o aviso de dados
+    # ficticios. A resposta cortada passa a vir acompanhada de um aviso ao
+    # usuario, e a vazia e substituida por ele, em vez de virar erro.
     choices = response_data.get("choices") or [{}]
     if choices[0].get("finish_reason") == "length":
         logger.warning(
@@ -377,6 +381,13 @@ def _call_openrouter(prompt: str, *, api_key: str) -> _LLMResult:
             _max_output_tokens(),
             model,
         )
+        text = (
+            f"{text}\n\n{AVISO_RESPOSTA_INTERROMPIDA}"
+            if text
+            else AVISO_RESPOSTA_INTERROMPIDA
+        )
+    if not text:
+        raise GeminiAPIError("O provedor nao retornou conteudo de texto.")
 
     usage_data = response_data.get("usage") or {}
     detalhes = usage_data.get("completion_tokens_details") or {}

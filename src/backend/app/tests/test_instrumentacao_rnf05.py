@@ -189,3 +189,43 @@ class TestTruncamentoVisivel:
             client._call_llm("prompt", api_key="k")
 
         assert "truncada" not in caplog.text
+
+    def test_resposta_cortada_chega_ao_usuario_com_aviso(self, monkeypatch):
+        """Usabilidade, O5: a resposta cortada parecia completa para quem lia."""
+
+        monkeypatch.setenv("LLM_PROVIDER", "openrouter")
+        monkeypatch.setattr(
+            client, "urlopen", lambda _r, timeout: RespostaFalsa(self._resposta("length"))
+        )
+
+        resultado = client._call_llm("prompt", api_key="k")
+
+        assert resultado.text.startswith("o contexto nao e suficiente para")
+        assert resultado.text.endswith(client.AVISO_RESPOSTA_INTERROMPIDA)
+
+    def test_resposta_vazia_por_limite_vira_aviso_e_nao_erro(self, monkeypatch):
+        """Usabilidade, O7: a resposta chegou vazia e o usuario ficou sem nada."""
+
+        vazia = self._resposta("length")
+        vazia["choices"][0]["message"]["content"] = ""
+        monkeypatch.setenv("LLM_PROVIDER", "openrouter")
+        monkeypatch.setattr(client, "urlopen", lambda _r, timeout: RespostaFalsa(vazia))
+
+        resultado = client._call_llm("prompt", api_key="k")
+
+        assert resultado.text == client.AVISO_RESPOSTA_INTERROMPIDA
+
+    def test_resposta_completa_nao_recebe_aviso(self, monkeypatch):
+        monkeypatch.setenv("LLM_PROVIDER", "openrouter")
+        monkeypatch.setattr(
+            client, "urlopen", lambda _r, timeout: RespostaFalsa(self._resposta("stop"))
+        )
+
+        resultado = client._call_llm("prompt", api_key="k")
+
+        assert client.AVISO_RESPOSTA_INTERROMPIDA not in resultado.text
+
+    def test_limite_padrao_de_tokens_da_resposta(self, monkeypatch):
+        monkeypatch.delenv("GEMINI_MAX_OUTPUT_TOKENS", raising=False)
+
+        assert client._max_output_tokens() == 1024
