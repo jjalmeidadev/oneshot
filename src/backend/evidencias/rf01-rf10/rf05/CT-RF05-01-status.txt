@@ -31,4 +31,4 @@ Conclusão:
 APROVADO.
 
 Nota:
-O sucesso desta formulação contrasta com CT-RF02-01 e reforça DEF-S4-32A-01.
+O sucesso desta formulação contrasta com CT-RF02-01 e reforça DEF-RF02-01.

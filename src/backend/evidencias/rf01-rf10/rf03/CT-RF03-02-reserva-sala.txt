@@ -29,4 +29,4 @@ Conclusão:
 FALHOU.
 
 Defeito:
-DEF-S4-32A-02 — reserva genérica aceita como `transacao_agendar_compromisso`.
+DEF-RF03-01 — reserva genérica aceita como `transacao_agendar_compromisso`.

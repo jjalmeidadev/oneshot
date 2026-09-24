@@ -29,4 +29,4 @@ Conclusão:
 FALHOU porque uma das evidências obrigatórias (CT-RF06-01) falhou.
 
 Defeito associado:
-DEF-S4-32A-03.
+DEF-RF06-01.

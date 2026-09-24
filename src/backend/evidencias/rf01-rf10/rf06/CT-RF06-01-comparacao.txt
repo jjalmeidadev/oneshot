@@ -26,7 +26,8 @@ Fontes:
 - Atendimento a objeto perdido — score 1.0
 
 Pré-condição de massa:
-O seed inspecionado possui dados estruturados de progresso, riscos e marcos para PRJ-0442, PRJ-0510 e PRJ-0587.
+O seed 13_seed_portfolio_report_data.sql grava progresso, riscos e marcos de PRJ-0442, PRJ-0510 e PRJ-0587 em tabelas estruturadas, que só o módulo de relatórios lê.
+A recuperação do chat (app/rag/database.py) consulta apenas source_extracts. Nessa base há 1 extrato de PRJ-0442, 8 sem projeto e nenhum de PRJ-0510; nenhum extrato cita "0510" no texto (consulta de leitura em 24/09/2026).
 
 Resultado esperado:
 Distinguir ambos os projetos, abordar prazo e risco e apontar dados/fontes para os dois.
@@ -35,4 +36,4 @@ Conclusão:
 FALHOU.
 
 Defeito:
-DEF-S4-32A-03 — recuperação/contextualização multi-projeto incompleta.
+DEF-RF06-01 — a base consultada pelo chat não tem documento de PRJ-0510, e o chat não lê as tabelas estruturadas; a comparação sai só com PRJ-0442.

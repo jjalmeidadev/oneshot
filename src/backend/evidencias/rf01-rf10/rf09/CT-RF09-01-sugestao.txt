@@ -3,7 +3,7 @@ TIPO DE REGISTRO: REGISTRO CONSOLIDADO
 Caso: CT-RF09-01 — etapa antes da confirmação
 Requisito: RF09
 Cenário: Positivo
-Status do caso: APROVADO
+Status do caso: FALHOU na rodada; APROVADO no reteste (CT-RF09-01-reteste.txt)
 
 Pré-condição:
 proactivity_enabled=true

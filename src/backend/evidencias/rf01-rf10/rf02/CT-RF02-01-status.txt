@@ -29,4 +29,4 @@ Conclusão:
 FALHOU.
 
 Defeito:
-DEF-S4-32A-01 — sensibilidade lexical da classificação.
+DEF-RF02-01 — sensibilidade lexical da classificação.
