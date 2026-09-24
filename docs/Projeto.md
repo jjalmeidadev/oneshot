@@ -3737,6 +3737,11 @@ do backend. O frontend está em `components/chat/alert-workflow-card.tsx` e
 `components/notifications/notification-center.tsx`; a implementação operacional
 completa está consolidada em [`src/agent/support/IMPLEMENTATION.md`](../src/agent/support/IMPLEMENTATION.md).
 
+As execuções de ponta a ponta, com casos elegíveis e não elegíveis, repetição,
+armazenamento e auditoria correlacionada, estão em
+[`src/backend/evidencias/alerta-prazo-atraso/`](../src/backend/evidencias/alerta-prazo-atraso/README.md),
+junto da reexecução da regra com o código final e da saída dos testes.
+
 ## 8.6 Requisitos das APIs de voz (STT/TTS)
 
 ### 8.6.1 Objetivo e delimitação
