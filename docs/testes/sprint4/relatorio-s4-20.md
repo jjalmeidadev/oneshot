@@ -11,6 +11,8 @@ O objetivo é comprovar que uma pergunta textual atravessa cliente, API, PLN, re
 
 **Escopo de modelos.** A issue previa exercitar caminhos GPT e Claude. O grupo decidiu não implementá-los por enquanto, e o backend tem um único provedor de geração (`app/gemini/`, configurado por `GEMINI_API_KEY` e `GEMINI_MODEL`). O item do DoD sobre seleção de modelo continua verificável: basta comparar duas execuções com modelos Gemini diferentes e confirmar que PLN e recuperação não mudam. O item de fallback não é verificável, pois não existe mecanismo de fallback no código.
 
+**Nota posterior à rodada.** Depois desta execução, a `develop` recebeu uma abstração de provedor de LLM, com OpenRouter como alternativa ao Gemini (`LLM_PROVIDER`, `OPENROUTER_API_KEY`, `test_llm_provider.py`). A afirmação acima descreve o estado da branch no momento da medição, não o estado atual da `develop`. O CT-E2E-07, bloqueado aqui por inexistência de mecanismo de fallback, precisa ser reavaliado sobre a develop.
+
 **Por que não usar o `e2e_server.py` existente.** Aquele servidor substitui PLN, geração e transcrição por versões determinísticas. Serve para validar o contrato entre rotas, mas não atravessa as camadas reais, que é o que este DoD exige. Os cenários abaixo rodam contra o backend real.
 
 **Ferramentas.** `pytest` para os cenários automatizados (`src/backend/app/tests/test_e2e_textual_rag_s4_20.py`), `curl` para os cenários que exigem reiniciar o backend com variáveis diferentes, e consultas SQL no Supabase para conferir a persistência.
@@ -26,7 +28,6 @@ O objetivo é comprovar que uma pergunta textual atravessa cliente, API, PLN, re
 | Rodada | 1 |
 | Data | 24/09/2026 |
 | Branch | `feature/S4-20-e2e-textual-rag`, a partir de `origin/develop` |
-| Commit | `<preencher>` |
 | Ambiente | Backend local (`uvicorn app.main:app --port 8000`), Gemini real, Supabase do projeto |
 | Modelo base | `gemini-3.7-flash` |
 | Modelo alternativo | `gemini-3.8-flash` |
@@ -57,7 +58,7 @@ O objetivo é comprovar que uma pergunta textual atravessa cliente, API, PLN, re
 | CT-E2E-04 | Intenção, confianças, alternativas e fontes idênticas nos dois modelos; apenas `model`, texto e tempo diferentes. Detalhe na seção 4.1 | `evidencias/r1-e2e-04-modelo-b.json` e saída do `pytest` | **Aprovado** |
 | CT-E2E-05 | O `interaction_id` devolvido foi `v1_ChdqR2kxYXVlVEthSG96N0lQM3R5c21Bcx…`, identificador do Gemini, não um UUID de `ai_interactions` | Saída do `pytest`, registrado como `xfail` | **Falhou** |
 | CT-E2E-06 | Não executado. A integração com o Copilot Studio é entregue por #212–#220 | — | **Bloqueado** |
-| CT-E2E-07 | Não executado. Não há mecanismo de fallback em `app/gemini/client.py`; só troca de modelo por variável de ambiente, que é configuração | — | **Bloqueado** |
+| CT-E2E-07 | Não executado. Não havia mecanismo de fallback em `app/gemini/client.py` na branch medida; só troca de modelo por variável de ambiente, que é configuração. A reavaliar sobre a `develop`, que passou a ter abstração de provedor | — | **Bloqueado** |
 
 ### 4.1 Comparação entre modelos (CT-E2E-04)
 
