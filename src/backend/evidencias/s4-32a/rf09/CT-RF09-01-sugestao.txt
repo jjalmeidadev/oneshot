@@ -1,0 +1,34 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF09-01 — etapa antes da confirmação
+Requisito: RF09
+Cenário: Positivo
+Status do caso: APROVADO
+
+Pré-condição:
+proactivity_enabled=true
+Bearer de identidade simulada configurada no ambiente.
+O valor do token foi deliberadamente omitido.
+
+Entrada:
+Qual é o prazo do projeto PRJ-0442?
+conversation_id: ct-rf09-01
+
+Resultado observado:
+HTTP 200
+Resposta principal: prazo de PRJ-0442 de 24/08/2026 a 28/08/2026.
+intent.macro: CONSULTA
+intent.specific: consulta_cronograma_prazo
+confidence_specific: 0.9443
+
+proactive_suggestion.suggestion_id: d35a5245-0b2f-49b2-8b04-7c67ab1dd512
+proactive_suggestion.intent: sugerir_recuperacao_prazo
+proactive_suggestion.description: Apontar a atividade mais critica ou atrasada e sugerir uma acao de recuperacao do cronograma.
+proactive_suggestion.display_message: Quer que eu avalie o ponto mais critico do cronograma e sugira uma acao de recuperacao?
+proactive_suggestion.requires_confirmation: true
+
+Comportamento:
+Nenhuma ação secundária foi executada antes da confirmação.
+
+Nota de preparação:
+Tentativas anteriores sem autenticação válida retornaram HTTP 401 e foram tratadas como pré-condição de execução, não como falha funcional.
