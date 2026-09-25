@@ -2,6 +2,15 @@
 
 A interface web em React 19 e TypeScript permite testar o agente por texto ou áudio, exibir a resposta, consultar as fontes e inspecionar a classificação. A entrega da issue #131 integra a base visual da MR !72 aos endpoints existentes. A interface corporativa prevista no projeto continua sendo o Microsoft Teams; esta aplicação é a bancada web de desenvolvimento e validação.
 
+## Alertas proativos
+
+Quando o classificador devolve `alerta_prazo_atraso`, a interface abre o card
+guiado para projeto, limiar, recorrência, repetição e confirmação. A central
+“Alertas” consulta notificações persistentes a cada 30 segundos, anuncia a
+quantidade não lida e permite marcar notificações, pausar, retomar ou cancelar
+inscrições. Toda ação usa o token da sessão e as APIs internas; não há webhook
+nem dependência de Power Automate.
+
 ## Instalação e execução
 
 Requisitos: Node.js 24, npm, Python 3.12 ou 3.13 e acesso às dependências documentadas. Os comandos abaixo partem da raiz do repositório, no PowerShell:

@@ -174,11 +174,12 @@
     - [8.5.3 Documentação automática da API](#853-documentação-automática-da-api)
     - [8.5.4 APIs consumidas pelo front-end](#854-apis-consumidas-pelo-front-end)
     - [8.5.5 Integrações e limites operacionais](#855-integrações-e-limites-operacionais)
-    - [8.5.6 Banco de dados: artefato disponível e integração pendente](#856-banco-de-dados-artefato-disponível-e-integração-pendente)
+    - [8.5.6 Banco de dados: modelo e integrações operacionais](#856-banco-de-dados-modelo-e-integrações-operacionais)
     - [8.5.7 Front-end: componentes e comportamento](#857-front-end-componentes-e-comportamento)
     - [8.5.8 Back-end: ciclo de processamento](#858-back-end-ciclo-de-processamento)
     - [8.5.9 Execução e verificação reproduzíveis](#859-execução-e-verificação-reproduzíveis)
     - [8.5.10 Geração rastreável de relatório executivo](#8510-geração-rastreável-de-relatório-executivo)
+    - [8.5.11 Alerta autônomo de prazo](#8511-alerta-autônomo-de-prazo)
   - [8.6 Requisitos das APIs de voz (STT/TTS)](#86-requisitos-das-apis-de-voz-stttts)
     - [8.6.1 Objetivo e delimitação](#861-objetivo-e-delimitação)
     - [8.6.2 Entradas, saídas e formatos](#862-entradas-saídas-e-formatos)
@@ -3495,7 +3496,7 @@ Navegador React
 
 O `GET /health` verifica se o processo FastAPI terminou de iniciar. O caminho de texto e o caminho posterior à transcrição de áudio convergem em `app/pipeline.py`, portanto classificação, recuperação de contexto e geração não possuem implementações paralelas. O front-end transforma o contrato HTTP em mensagens, fontes, indicadores de intenção e estados de carregamento, mas não acessa Azure ou Gemini diretamente e não recebe suas credenciais.
 
-O PostgreSQL/Supabase está conectado de forma opcional: quando `DATABASE_URL` ou `SUPABASE_DATABASE_URL` está configurada, o backend consulta os extratos persistidos e registra conversa, interação, intenção, rota, fontes, workflow, execução, callback, artefato e auditoria. Sem configuração, consultas e relatórios usam dados sintéticos e repositórios locais. O fluxo `transacao_gerar_relatorio` já executa integralmente em modo local/simulador; o adaptador de Power Automate está implementado, mas sua implantação real depende das credenciais e do endpoint do ambiente. Microsoft Entra ID, SharePoint corporativo, Teams e Copilot Studio não integram a execução atual. Conversas e preferências permanecem na sessão do navegador; somente o tema pode ser persistido localmente.
+O PostgreSQL/Supabase está conectado de forma opcional: quando `DATABASE_URL` ou `SUPABASE_DATABASE_URL` está configurada, o backend consulta os extratos persistidos e registra conversa, interação, intenção, rota, fontes, workflows, execuções, inscrições, avaliações, notificações, artefatos e auditoria. Sem configuração, consultas, relatórios e alertas podem usar dados sintéticos e repositórios em memória. O fluxo `transacao_gerar_relatorio` executa integralmente em modo local; seu adaptador de Power Automate é opcional e depende das credenciais e do endpoint do ambiente. O fluxo `alerta_prazo_atraso` é executado pelo próprio backend com RabbitMQ e não depende de Power Automate, Copilot Studio ou webhook. Microsoft Entra ID, SharePoint corporativo e Teams não integram a execução atual. Conversas e preferências permanecem na sessão do navegador; somente o tema pode ser persistido localmente.
 
 ### 8.5.2 Arquitetura executável
 
@@ -3512,7 +3513,7 @@ A visão completa de diretórios está na Seção 8.1. Para acompanhar uma requi
 | Recuperação | `src/backend/app/rag/sharepoint.py` | Carrega exports JSON, ranqueia trechos e monta contexto com fontes declaradas. |
 | Geração | `src/backend/app/gemini/` | Chama o Gemini com timeout e retentativas e mapeia texto, uso, latência e fontes. |
 | PLN | `src/backend/app/nlp/` | Carrega artefatos treinados, extrai entidades e classifica macrointenção e intenção específica. |
-| Dados e artefatos | `src/database/sql/` e `app/reports/` | Migra, persiste e audita workflows/execuções no PostgreSQL e mantém DOCX privado no Supabase Storage ou localmente em desenvolvimento. |
+| Dados, artefatos e eventos | `src/database/sql/`, `app/reports/` e `app/alerts/` | Migra, persiste e audita workflows, execuções e inscrições no PostgreSQL; mantém DOCX privado; e processa eventos de alerta por outbox e RabbitMQ. |
 
 Os componentes visuais não chamam `fetch` diretamente; eles acionam operações do estado, que delega ao cliente de `lib/api/`. No back-end, `main.py` não reproduz regras do classificador ou do RAG: encaminha a entrada ao pipeline e converte apenas as falhas previstas em respostas HTTP. Essa separação permite testar a interface, os contratos e cada integração com duplos determinísticos.
 
@@ -3532,13 +3533,16 @@ O título, a descrição e a versão exibidos são definidos na instância `Fast
 
 ### 8.5.4 APIs consumidas pelo front-end
 
-O front-end consome somente três rotas de mesma origem. Em desenvolvimento, o Vite encaminha `/api` e `/health` para o FastAPI; no build publicado, o servidor responsável pelos arquivos estáticos deve oferecer o mesmo encaminhamento. A variável `API_PROXY_TARGET` muda o destino apenas no servidor de desenvolvimento e nos testes.
+O front-end consome somente rotas de mesma origem. Em desenvolvimento, o Vite encaminha `/api` e `/health` para o FastAPI; no build publicado, o servidor responsável pelos arquivos estáticos deve oferecer o mesmo encaminhamento. A variável `API_PROXY_TARGET` muda o destino apenas no servidor de desenvolvimento e nos testes. A tabela abaixo resume as entradas comuns; os contratos completos dos workflows de relatório e alerta estão em [`src/agent/support/IMPLEMENTATION.md`](../src/agent/support/IMPLEMENTATION.md) e no OpenAPI.
 
 | Método e rota | Entrada | Saída utilizada pela interface | Observações de reprodução |
 | --- | --- | --- | --- |
 | `GET /health` | Sem corpo ou autenticação. | `{"status":"ok"}`. | Confirma a inicialização do processo; não testa Azure, Gemini ou a disponibilidade dos dados. |
 | `POST /api/chat` | JSON com `message` (1 a 20.000 caracteres), `previous_interaction_id` opcional e `use_intent_classifier` booleano. | Texto, ID da interação, modelo, latências, consumo, intenção opcional e lista de fontes. | Não exige Bearer token na versão atual. O ID anterior mantém o encadeamento lógico da conversa. |
 | `POST /api/audio` | Multipart com arquivo `audio`; `conversation_id`, `language`, `previous_interaction_id` e `use_intent_classifier` opcionais; cabeçalho `Authorization: Bearer <token>`. | Transcrição, conversa, interação, intenção, resposta resumida, resposta completa em `chat` e `pipeline_status`. | O navegador envia WAV PCM mono, 16 bits e 16 kHz. O back-end revalida o conteúdo e aceita uma requisição simultânea por identidade. |
+| `/api/workflow-sessions` e `/api/report-requests` | Respostas guiadas, revisão, ação idempotente e confirmação assinada. | Estado da sessão, execução e download autenticado do DOCX. | O modo local é completo; a automação externa é opcional. |
+| `/api/alert-workflow-sessions` e `/api/alert-subscriptions` | Configuração, confirmação e comandos de ciclo de vida da inscrição. | Estado da sessão e da inscrição recorrente. | O processamento posterior ocorre nos workers do projeto. |
+| `GET /api/notifications` e `POST /api/notifications/{id}/read` | Token de identidade simulado no ambiente local. | Lista de notificações e confirmação de leitura. | A central consulta periodicamente a API; não recebe webhook. |
 
 Uma chamada textual pode ser reproduzida sem o front-end, depois de iniciar o FastAPI e configurar o Gemini:
 
@@ -3578,10 +3582,11 @@ O cliente aplica limite de 120 segundos e permite cancelamento por `AbortControl
 | RAG de SharePoint simulado | `rag/sharepoint.py` pesquisa exports JSON versionados e inclui rótulos de fonte no prompt. | `rag/data/sharepoint/` ou `SHAREPOINT_MOCK_DATA_DIR`. | Não acessa o tenant corporativo nem sincroniza alterações do SharePoint. |
 | Classificador local | `nlp/` carrega o `joblib` e o encoder BERTimbau via PyTorch/Transformers; `PLN_WARMUP=1` antecipa a carga. | Artefatos em `src/notebooks/artefatos/`; encoder obtido do repositório de modelo indicado na Seção 8.11 (`requirements-pln.txt`). | A primeira instalação/carga pode exigir internet e cache local; não executa transações. |
 | Identidade do áudio | `audio/security.py` resolve o Bearer token por um mapa simulado e limita uma transcrição ativa por identidade. | `AUDIO_SIMULATED_IDENTITIES`, por exemplo `token-local=usuario-local`. | Não valida JWT do Entra ID e não aplica as regras da tabela `access_rules`. |
+| RabbitMQ | `alerts/messaging.py` publica e consome eventos persistentes de avaliação e notificação, com confirmação manual e DLQ. | `RABBITMQ_URL` e `compose.rabbitmq.yml`. | Necessário para o alerta assíncrono persistente; AMQP não é webhook. |
 
-O SharePoint corporativo, Entra ID, Teams, Copilot Studio e Power Automate aparecem nos desenhos e no modelo-alvo, mas não possuem adaptador ativo nesta versão. Em particular, classificar uma solicitação como transacional não executa escrita externa: o resultado apenas descreve a intenção. Essa distinção evita interpretar a bancada como um canal de produção ou como evidência de autorização corporativa.
+O SharePoint corporativo, Entra ID, Teams e Copilot Studio aparecem nos desenhos e no modelo-alvo, mas não possuem adaptador ativo nesta versão. Power Automate possui um adaptador opcional apenas para relatórios; o modo local não depende dele e o alerta não o utiliza. As demais intenções transacionais continuam sem escrita externa. Essa distinção evita interpretar a bancada como um canal de produção ou como evidência de autorização corporativa.
 
-### 8.5.6 Banco de dados: artefato disponível e integração pendente
+### 8.5.6 Banco de dados: modelo e integrações operacionais
 
 O modelo físico descrito na Seção 4.3 está implementado em `src/database/sql/01_create_database.sql` para PostgreSQL 14 ou superior, inclusive Supabase PostgreSQL. São 25 tabelas com UUIDs gerados por `pgcrypto`, chaves estrangeiras, restrições de domínio, índices para os caminhos previstos e `JSONB` para metadados cuja estrutura ainda pode evoluir. A relação completa de tabelas e as decisões de modelagem permanecem em `src/database/docs/README.md` para não repetir o dicionário da Seção 4.
 
@@ -3611,7 +3616,9 @@ O primeiro comando deve informar 25 tabelas em um schema `public` inicialmente v
 
 A opção `ON_ERROR_STOP` faz o processo terminar na primeira falha em vez de continuar com uma instalação parcial. A carga usa conflitos controlados e verificações de existência para que uma nova execução atualize ou preserve os registros sintéticos esperados, em vez de duplicá-los.
 
-O banco possui integração opcional no backend. Com `DATABASE_URL` ou `SUPABASE_DATABASE_URL`, a recuperação consulta os extratos PostgreSQL e a rastreabilidade persiste conversas, interações, classificação, rota, fontes, workflow e auditoria; sem URL configurada, a aplicação continua reproduzível com dados sintéticos e não tenta abrir conexão. O baseline geral continua aplicado por SQL/CLI, enquanto a infraestrutura de relatórios possui aplicação, verificação e rollback-dry-run em `scripts/manage_report_infrastructure.py` e `scripts/manage_report_security.py`. A interface ainda mantém o histórico de conversa apenas em memória, sem reidratação.
+O banco possui integração opcional no backend. Com `DATABASE_URL` ou `SUPABASE_DATABASE_URL`, a recuperação consulta os extratos PostgreSQL e a rastreabilidade persiste conversas, interações, classificação, rota, fontes, workflows e auditoria; sem URL configurada, a aplicação continua reproduzível com dados sintéticos e repositórios em memória. A interface ainda mantém o histórico geral de conversa apenas em memória, sem reidratação.
+
+Sobre o baseline, migrations incrementais especializam os dois workflows. Para relatórios, `05`, `07`, `09` e `11` cobrem execuções, artefatos, callbacks, sessões, respostas, bucket privado e RLS; os scripts `manage_report_infrastructure.py` e `manage_report_security.py` aplicam e verificam essa infraestrutura. Para alertas, `15_alert_deadline_flow.sql` cria inscrições, avaliações, ocorrências, notificações, tentativas de entrega e outbox, além de habilitar RLS e revogar acesso direto de `anon` e `authenticated`; `16_rollback_alert_deadline_flow.sql` é o rollback e `scripts/manage_alert_infrastructure.py` oferece `apply`, `status` e `rollback`. Assim, memória e dados sintéticos são modos de desenvolvimento, não substitutos da integração persistente já implementada.
 
 ### 8.5.7 Front-end: componentes e comportamento
 
@@ -3619,8 +3626,9 @@ A bancada usa React 19, TypeScript e Vite. `App.tsx` instala `ThemeProvider` e `
 
 | Área | Responsabilidade observável |
 | --- | --- |
-| `components/sidebar/` | Criação, busca, seleção e exclusão de conversas da sessão, além do token simulado usado por áudio e relatórios. |
-| `components/chat/` | Estado vazio, histórico, Markdown seguro, classificação, fontes, workflow guiado, confirmação, progresso e download de relatório. |
+| `components/sidebar/` | Criação, busca, seleção e exclusão de conversas da sessão, além do token simulado usado por áudio, relatórios e alertas. |
+| `components/chat/` | Estado vazio, histórico, Markdown seguro, classificação, fontes, workflows guiados, confirmação, progresso e download de relatório. |
+| `components/notifications/` | Central de notificações, contagem de não lidas e gestão de inscrições de alerta. |
 | `components/composer/` | Entrada de texto, alternância da validação de intenção, captura, prévia, descarte e envio de áudio. |
 | `components/documents/` | Lista de fontes, trecho recuperado, link original e métricas da resposta selecionada. |
 | `components/layout/` e `components/ui/` | Layout responsivo, tema, diálogos, abas e controles acessíveis reutilizáveis. |
@@ -3719,7 +3727,37 @@ em `src/frontend/src/components/chat/report-workflow-card.tsx`. Os artefatos
 portáteis de OpenAPI, Power Automate e AI Builder permanecem em
 `src/agent/support/`; `src/agent/ONESHOT` é somente histórico e não integra o
 runtime. A especificação operacional completa fica em
-`src/agent/support/IMPLEMENTATION.md`.
+[`src/agent/support/IMPLEMENTATION.md`](../src/agent/support/IMPLEMENTATION.md), junto ao fluxo de alerta para manter uma
+única referência operacional dos workflows especializados.
+
+### 8.5.11 Alerta autônomo de prazo
+
+A intenção `alerta_prazo_atraso` também possui rota determinística. O frontend
+coleta projeto, limiar, frequência e política de reenvio e, após a confirmação
+assinada, cria uma inscrição persistente. O scheduler registra solicitações de
+avaliação na outbox; o publisher as envia ao RabbitMQ; o evaluator revalida o
+acesso e compara o cronograma; e o notifier disponibiliza, de forma idempotente,
+a notificação na central interna da aplicação.
+
+O fluxo não usa Copilot Studio, Power Automate, Teams, e-mail ou webhook. A
+comunicação entre processos usa AMQP e as ações da interface usam REST. Filas
+duráveis, confirmação manual, dead-letter queues, backoff da outbox,
+`episode_key` única e IDs de correlação protegem contra perda e duplicação. O
+usuário pode pausar, retomar ou cancelar a inscrição e marcar notificações como
+lidas.
+
+No banco, `15_alert_deadline_flow.sql` cria `alert_subscriptions`,
+`alert_evaluations`, `alert_occurrences`, `alert_notifications`,
+`notification_delivery_attempts` e `message_outbox`, todas protegidas por RLS e
+sem acesso direto dos papéis públicos. A API e os workers usam a conexão segura
+do backend. O frontend está em `components/chat/alert-workflow-card.tsx` e
+`components/notifications/notification-center.tsx`; a implementação operacional
+completa está consolidada em [`src/agent/support/IMPLEMENTATION.md`](../src/agent/support/IMPLEMENTATION.md).
+
+As execuções de ponta a ponta, com casos elegíveis e não elegíveis, repetição,
+armazenamento e auditoria correlacionada, estão em
+[`src/backend/evidencias/alerta-prazo-atraso/`](../src/backend/evidencias/alerta-prazo-atraso/README.md),
+junto da reexecução da regra com o código final e da saída dos testes.
 
 ## 8.6 Requisitos das APIs de voz (STT/TTS)
 

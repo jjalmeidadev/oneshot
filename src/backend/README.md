@@ -409,7 +409,7 @@ O fluxo transacional de relatórios possui testes em
 confirmação, callback idempotente, geração do DOCX e download autenticado. O
 modo `power_automate_simulator` exercita o contrato externo sem tenant. Os
 contratos, estados, variáveis e limites da integração estão documentados em
-`../agent/support/IMPLEMENTATION.md`.
+[`../agent/support/IMPLEMENTATION.md`](../agent/support/IMPLEMENTATION.md).
 
 A fonte de dados do relatório é selecionada por `REPORT_PORTFOLIO_SOURCE`:
 `synthetic` (padrão) lê a massa em `app/reports/data/synthetic_portfolio.json`;
@@ -479,3 +479,10 @@ Com `PLN_WARMUP=1`, a inicialização carrega o classificador antes de aceitar r
 Erros de configuração e do Gemini são convertidos em mensagens controladas. Entradas textuais inválidas retornam `422` com `error.code=INVALID_INPUT`; detalhes internos de validação não são apresentados ao usuário.
 
 A [documentação do frontend](../frontend/README.md) descreve estrutura, fluxos, contratos, execução e limitações. A [matriz de testes](../frontend/TESTES.md) reúne as evidências da integração S3/S5.
+
+## Alerta autônomo de prazo
+
+`handler:alerta_prazo_atraso` inicia um workflow guiado próprio. Depois da
+confirmação, scheduler, outbox e RabbitMQ avaliam o cronograma em segundo plano
+e gravam notificações internas. Não há dependência de Power Automate nem
+webhook. Veja [a documentação operacional](../agent/support/IMPLEMENTATION.md#3-workflow-alerta_prazo_atraso).
