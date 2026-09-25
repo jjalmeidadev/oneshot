@@ -1,0 +1,12 @@
+
+ RUN  v5.0.0 C:/Users/wende/OneDrive/Área de Trabalho/G05-MD7/g05/src/frontend
+
+
+ Test Files  4 passed (4)
+      Tests  32 passed (32)
+   Start at  12:18:42
+   Duration  108.97s (environment 62%, import 21%, setup 12%, tests 4%, transform 2%)
+
+    Isolate  4 workers spawned · ~17.22s startup each (spawn + environment, per file)
+             at least ~51.67s faster with isolate: false — reuses workers across files instead of one per file
+
