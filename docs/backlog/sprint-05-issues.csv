@@ -1,0 +1,1611 @@
+"title","description","milestone"
+"Adicionar o gate de marcadores e a suíte de integração à pipeline","**Objetivo da tarefa:** Impedir que marcadores de conflito cheguem à develop e executar na pipeline todos os testes marcados como integração.
+
+**Contexto:** A task S4-04 foi excluída sem ser executada, e a pipeline roda uma lista fixa de arquivos de teste. Na Task S5-01, esta entrega integra a frente de integridade do repositório e da pipeline da Sprint 5. O resultado será aceito quando: job e hook falham com marcador real e aceitam saídas como ================ 10 passed.
+
+**Origem:** Ação de melhoria da Seção 2.4.7; dívida da S4-04.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Adicionar a busca da Seção 5.3.3 do GestaoConfiguracao ao pre-commit e a um job
+- [ ] Trocar a lista fixa do backend-api por pytest -m integration, mantendo os testes atuais
+- [ ] Registrar pipeline vermelha e verde como evidência
+
+**DoR (Definition of Ready):**
+
+- [ ] Regex da Seção 5.3.3 do GestaoConfiguracao revisada
+- [ ] Marcador integration registrado no conftest (S4-32B)
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Job e hook falham com marcador real e aceitam saídas como ================ 10 passed
+- [ ] backend-api executa pytest -m integration
+- [ ] Evidência de pipeline vermelha e verde anexada ao MR
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""DEVOPS""
+/milestone %""Sprint 05""","Sprint 05"
+"Validar automaticamente o título do merge request","**Objetivo da tarefa:** Bloquear o merge de MR cujo título não segue o padrão da Seção 5.3.1 do GestaoConfiguracao.
+
+**Contexto:** Só 7 de 26 títulos seguiram o padrão na Sprint 4, e o projeto não tem padrão de título configurado. Na Task S5-02, esta entrega integra a frente de integridade do repositório e da pipeline da Sprint 5. O resultado será aceito quando: título inválido reprova a pipeline e título válido, com uma ou mais issues, aprova.
+
+**Origem:** Ação de melhoria da Seção 2.4.7; dívida da S4-05.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Criar job de pipeline sobre $CI_MERGE_REQUEST_TITLE
+- [ ] Aceitar uma ou mais issues no padrão
+- [ ] Ativar Pipelines must succeed depois do job
+
+**DoR (Definition of Ready):**
+
+- [ ] Padrão revisado na Seção 5.3.1 do GestaoConfiguracao
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Título inválido reprova a pipeline e título válido, com uma ou mais issues, aprova
+- [ ] Opção Pipelines must succeed ativada
+- [ ] Evidência dos dois casos anexada ao MR
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""DEVOPS""
+/milestone %""Sprint 05""","Sprint 05"
+"Carregar identidades e regras de acesso sintéticas","**Objetivo da tarefa:** Popular users e access_rules com perfis sintéticos que representem PMO, líder de subportfólio, gerente de projeto e consulta.
+
+**Contexto:** O defeito D-01 da S4-11 mostrou users e access_rules vazias, bloqueando RNF02 e os casos CV-09 a CV-12. Na Task S5-03, esta entrega integra a frente de identidade, acesso e alteração de dados pelo chat da Sprint 5. O resultado será aceito quando: duas execuções da carga sem duplicação.
+
+**Origem:** Defeito D-01 (etapa 1); risco R04.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Definir perfis e escopos por subportfólio e projeto
+- [ ] Escrever carga idempotente
+- [ ] Documentar perfis e escopos no Projeto.md
+
+**DoR (Definition of Ready):**
+
+- [ ] Modelo de users e access_rules conferido no esquema físico
+- [ ] Perfis acordados com a frente de acesso
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Duas execuções da carga sem duplicação
+- [ ] Cada perfil tem regra por usuário ou papel e escopo verificável por consulta
+- [ ] Perfis documentados
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_M"" ~""PRIORIDADE ALTA"" ~""DATABASE""
+/milestone %""Sprint 05""","Sprint 05"
+"Aplicar o controle de acesso por perfil nas consultas e ações","**Objetivo da tarefa:** Fazer o backend consultar as regras de acesso antes de responder ou executar uma ação.
+
+**Contexto:** Sem controle de acesso, o RNF02 fica bloqueado e a alteração de dados pelo chat não pode ser liberada. Na Task S5-04, esta entrega integra a frente de identidade, acesso e alteração de dados pelo chat da Sprint 5. O resultado será aceito quando: perfil permitido acessa seu escopo e perfil negado recebe erro controlado e auditado.
+
+**Origem:** Defeito D-01 (etapa 2); risco R04.
+
+**Dependências:**
+
+- S5-03
+
+**Tasks:**
+
+- [ ] Resolver a identidade da requisição
+- [ ] Filtrar recuperação e ações pelo escopo do perfil
+- [ ] Negar com resposta controlada e evento de auditoria
+- [ ] Preencher user_id em ai_interactions e audit_events
+
+**DoR (Definition of Ready):**
+
+- [ ] S5-03 concluída
+- [ ] Identidade simulada da PoC documentada
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Perfil permitido acessa seu escopo e perfil negado recebe erro controlado e auditado
+- [ ] Testes automatizados dos dois casos
+- [ ] user_id preenchido nas interações novas
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_G"" ~""PRIORIDADE ALTA"" ~""BACKEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Definir o contrato de alteração de dados do projeto pelo chat","**Objetivo da tarefa:** Especificar quais dados podem ser alterados pelo chat, por quem e com quais garantias.
+
+**Contexto:** O parceiro pediu, com ênfase, a alteração de informações do banco diretamente pelo chat. Na Task S5-05, esta entrega integra a frente de identidade, acesso e alteração de dados pelo chat da Sprint 5. O resultado será aceito quando: contrato publicado no Projeto.md com entrada, prévia, confirmação, saída, erro e desfazer.
+
+**Origem:** Pedido do parceiro (ênfase); risco R17.
+
+**Dependências:**
+
+- S5-03
+
+**Tasks:**
+
+- [ ] Listar campos editáveis e perfis autorizados
+- [ ] Definir prévia, confirmação, validação e desfazer
+- [ ] Definir o registro em change_records e audit_events
+
+**DoR (Definition of Ready):**
+
+- [ ] Tabelas de projeto, cronograma e riscos conferidas
+- [ ] Perfis da S5-03 definidos
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Contrato publicado no Projeto.md com entrada, prévia, confirmação, saída, erro e desfazer
+- [ ] Cada campo editável tem regra de validação e perfis autorizados
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_M"" ~""PRIORIDADE ALTA"" ~""BACKEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Implementar a alteração de dados do projeto pelo chat com confirmação","**Objetivo da tarefa:** Permitir que um usuário autorizado altere dados do projeto por linguagem natural, com confirmação antes da escrita.
+
+**Contexto:** A escrita pelo chat é a capacidade pedida com mais ênfase e só pode existir sobre o controle de acesso. Na Task S5-06, esta entrega integra a frente de identidade, acesso e alteração de dados pelo chat da Sprint 5. O resultado será aceito quando: alteração confirmada é gravada com trilha completa.
+
+**Origem:** Pedido do parceiro (ênfase); riscos R04 e R17.
+
+**Dependências:**
+
+- S5-04
+- S5-05
+
+**Tasks:**
+
+- [ ] Criar a intenção e o fluxo guiado de alteração
+- [ ] Validar valor e permissão antes da prévia
+- [ ] Gravar de forma transacional com change_records e audit_events
+- [ ] Implementar o desfazer
+
+**DoR (Definition of Ready):**
+
+- [ ] S5-04 integrada
+- [ ] Contrato da S5-05 aprovado
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Alteração confirmada é gravada com trilha completa
+- [ ] Alteração sem permissão ou com valor inválido é recusada sem escrita
+- [ ] Testes automatizados de sucesso, negação e desfazer
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_G"" ~""PRIORIDADE ALTA"" ~""BACKEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Exibir prévia, confirmação e histórico da alteração na interface","**Objetivo da tarefa:** Mostrar ao usuário o que será alterado, pedir confirmação e exibir o histórico da alteração.
+
+**Contexto:** A confirmação explícita é a principal barreira contra alteração indevida pelo chat. Na Task S5-07, esta entrega integra a frente de identidade, acesso e alteração de dados pelo chat da Sprint 5. O resultado será aceito quando: prévia, confirmação, cancelamento e erro tratados na interface.
+
+**Origem:** Pedido do parceiro (ênfase).
+
+**Dependências:**
+
+- S5-06
+
+**Tasks:**
+
+- [ ] Criar o cartão de prévia com antes e depois
+- [ ] Tratar confirmação, cancelamento e erro
+- [ ] Exibir o histórico do campo alterado
+
+**DoR (Definition of Ready):**
+
+- [ ] Contrato da API da S5-06 estável
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Prévia, confirmação, cancelamento e erro tratados na interface
+- [ ] Testes de componente dos quatro estados
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""FRONTEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Testar a alteração pelo chat com perfis permitido e negado","**Objetivo da tarefa:** Comprovar de ponta a ponta que só o perfil autorizado altera dados e que toda alteração fica rastreável.
+
+**Contexto:** Integração só fecha com evidência que atravesse os componentes, conforme a Seção 5.3. Na Task S5-08, esta entrega integra a frente de identidade, acesso e alteração de dados pelo chat da Sprint 5. O resultado será aceito quando: quatro cenários com resultado e evidência.
+
+**Origem:** Pedido do parceiro (ênfase); barema de integração frontend-backend.
+
+**Dependências:**
+
+- S5-06
+- S5-07
+
+**Tasks:**
+
+- [ ] Executar cenário permitido, negado, valor inválido e desfazer
+- [ ] Conferir change_records e audit_events
+- [ ] Registrar relatório com evidências
+
+**DoR (Definition of Ready):**
+
+- [ ] S5-06 e S5-07 integradas
+- [ ] Massa sintética com perfis carregada
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Quatro cenários com resultado e evidência
+- [ ] Trilha localizada no Supabase para cada alteração
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_M"" ~""PRIORIDADE ALTA"" ~""TEST""
+/milestone %""Sprint 05""","Sprint 05"
+"Implementar o webhook de alteração de documentos do SharePoint simulado","**Objetivo da tarefa:** Receber notificações de alteração nas listas e bibliotecas do SharePoint simulado.
+
+**Contexto:** O barema exige dois webhooks com rotas, processamento do payload e resposta ao provedor; os da Sprint 4 foram excluídos. Na Task S5-09, esta entrega integra a frente de webhooks e mensageria da Sprint 5. O resultado será aceito quando: payload válido recebe 2xx, inválido é rejeitado e repetição não duplica.
+
+**Origem:** Barema, item 3 (webhooks); risco R05.
+
+**Dependências:**
+
+- S5-12
+
+**Tasks:**
+
+- [ ] Criar a rota POST com validação do token de handshake e do clientState
+- [ ] Validar campos e tipos do payload
+- [ ] Responder 200 ou 202 e persistir o evento de forma idempotente
+- [ ] Documentar rota, método, campos, tipos e exemplos
+
+**DoR (Definition of Ready):**
+
+- [ ] Estrutura do SharePoint simulado da S5-12 definida
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Payload válido recebe 2xx, inválido é rejeitado e repetição não duplica
+- [ ] Rota e payload documentados no Projeto.md com exemplos
+- [ ] Testes automatizados dos casos
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_G"" ~""PRIORIDADE ALTA"" ~""BACKEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Implementar o webhook de confirmação de entrega de notificações","**Objetivo da tarefa:** Receber a confirmação de entrega das notificações e atualizar o estado da entrega.
+
+**Contexto:** Segundo webhook exigido pelo barema, aproveitando a central de notificações do alerta de prazo. Na Task S5-10, esta entrega integra a frente de webhooks e mensageria da Sprint 5. O resultado será aceito quando: payload válido recebe 200, assinatura inválida recebe 401 e repetição é idempotente.
+
+**Origem:** Barema, item 3 (webhooks).
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Criar a rota POST com assinatura HMAC
+- [ ] Atualizar notification_delivery_attempts
+- [ ] Documentar rota, método, campos e tipos
+
+**DoR (Definition of Ready):**
+
+- [ ] Tabelas de notificação da migração 15 aplicadas
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Payload válido recebe 200, assinatura inválida recebe 401 e repetição é idempotente
+- [ ] Rota e payload documentados com exemplos
+- [ ] Testes automatizados dos casos
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""BACKEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Integrar os webhooks às filas do RabbitMQ com produtores e consumidores","**Objetivo da tarefa:** Publicar os eventos recebidos pelos webhooks em filas e processá-los por consumidores dedicados.
+
+**Contexto:** O barema exige mensageria integrada aos webhooks; a infraestrutura de filas do alerta já existe. Na Task S5-11, esta entrega integra a frente de webhooks e mensageria da Sprint 5. O resultado será aceito quando: evento de webhook chega ao consumidor e produz o efeito esperado.
+
+**Origem:** Barema, item 4 (mensageria).
+
+**Dependências:**
+
+- S5-09
+- S5-10
+
+**Tasks:**
+
+- [ ] Definir exchange, filas, chaves e dead-letter queue
+- [ ] Publicar a partir dos webhooks
+- [ ] Consumir para reindexar a fonte alterada e registrar a entrega
+- [ ] Documentar tópicos, filas, produtores, consumidores e casos de uso
+
+**DoR (Definition of Ready):**
+
+- [ ] S5-09 e S5-10 integradas
+- [ ] RabbitMQ disponível no ambiente local e na nuvem
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Evento de webhook chega ao consumidor e produz o efeito esperado
+- [ ] Mensagem inválida vai para a dead-letter queue
+- [ ] Topologia e casos de uso documentados com testes
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_G"" ~""PRIORIDADE ALTA"" ~""BACKEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Ampliar o SharePoint simulado com a estrutura disponibilizada pelo Metrô","**Objetivo da tarefa:** Reproduzir no SharePoint simulado as listas e bibliotecas indicadas pelo Metrô, com documentos para todos os projetos da massa.
+
+**Contexto:** A comparação saiu parcial por falta de documentos (DEF-RF06-01), e a recuperação reprovou no RNF06. Na Task S5-12, esta entrega integra a frente de capacidades pedidas pelo parceiro da Sprint 5. O resultado será aceito quando: todos os projetos da massa têm documentos recuperáveis.
+
+**Origem:** Pedido do parceiro; DEF-RF06-01; riscos R01 e R03.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Mapear a estrutura recebida do Metrô
+- [ ] Gerar documentos sintéticos para todos os projetos
+- [ ] Reindexar a base e registrar a cobertura por projeto
+
+**DoR (Definition of Ready):**
+
+- [ ] Material do Metrô disponível ao grupo
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Todos os projetos da massa têm documentos recuperáveis
+- [ ] Estrutura documentada com a correspondência ao material do Metrô
+- [ ] Reindexação reproduzível por comando
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_G"" ~""PRIORIDADE ALTA"" ~""DATABASE""
+/milestone %""Sprint 05""","Sprint 05"
+"Implementar lembretes do projeto sobre a infraestrutura de alertas","**Objetivo da tarefa:** Permitir que o usuário peça ao agente um lembrete sobre o projeto e o receba na central de notificações.
+
+**Contexto:** O scheduler, as filas e a central de notificações do alerta de prazo já existem. Na Task S5-13, esta entrega integra a frente de capacidades pedidas pelo parceiro da Sprint 5. O resultado será aceito quando: lembrete criado pelo chat é entregue no horário.
+
+**Origem:** Pedido do parceiro.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Criar a intenção de lembrete e o fluxo guiado
+- [ ] Registrar o lembrete como inscrição
+- [ ] Entregar pela central de notificações
+
+**DoR (Definition of Ready):**
+
+- [ ] Infraestrutura de alertas da Seção 8.5.11 funcionando
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Lembrete criado pelo chat é entregue no horário
+- [ ] Cancelamento e repetição tratados
+- [ ] Teste automatizado do fluxo
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""BACKEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Exibir tarefas e calendário do projeto no chat","**Objetivo da tarefa:** Mostrar as tarefas e os marcos de um projeto em lista e em calendário.
+
+**Contexto:** As tabelas schedule_items e project_deliverables_milestones já têm os dados. Na Task S5-14, esta entrega integra a frente de capacidades pedidas pelo parceiro da Sprint 5. O resultado será aceito quando: usuário abre tarefas e calendário a partir do chat.
+
+**Origem:** Pedido do parceiro.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Expor as tarefas e os marcos por projeto na API
+- [ ] Criar as visões de lista e de calendário
+- [ ] Respeitar o escopo do perfil
+
+**DoR (Definition of Ready):**
+
+- [ ] Rotas de leitura do projeto disponíveis
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Usuário abre tarefas e calendário a partir do chat
+- [ ] Testes de componente das duas visões
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""FRONTEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Responder com áudio usando Text-to-Speech","**Objetivo da tarefa:** Devolver a resposta do agente também em áudio, reproduzível na interface.
+
+**Contexto:** A API de Text-to-Speech foi escolhida na Seção 8.9 e ainda não foi implementada. Na Task S5-15, esta entrega integra a frente de capacidades pedidas pelo parceiro da Sprint 5. O resultado será aceito quando: resposta textual gera áudio reproduzível.
+
+**Origem:** Pedido do parceiro.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Integrar o Azure Speech na síntese
+- [ ] Tratar timeout e indisponibilidade com resposta só em texto
+- [ ] Adicionar o reprodutor de áudio na interface
+
+**DoR (Definition of Ready):**
+
+- [ ] Credencial do Azure Speech disponível
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Resposta textual gera áudio reproduzível
+- [ ] Falha do provedor mantém a resposta em texto, com aviso
+- [ ] Testes automatizados de sucesso e falha
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_G"" ~""PRIORIDADE MÉDIA"" ~""BACKEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Estruturar respostas com tabelas, indicadores e destaques","**Objetivo da tarefa:** Incluir no contrato de resposta blocos estruturados de tabela, indicador numérico e destaque.
+
+**Contexto:** O parceiro pediu respostas mais interativas e visuais. Na Task S5-16, esta entrega integra a frente de capacidades pedidas pelo parceiro da Sprint 5. O resultado será aceito quando: schema versionado com os novos blocos.
+
+**Origem:** Pedido do parceiro.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Definir os blocos no schema versionado
+- [ ] Gerar os blocos a partir dos dados recuperados
+- [ ] Manter compatibilidade com respostas só em texto
+
+**DoR (Definition of Ready):**
+
+- [ ] Contrato de resposta vigente (1.1.0) conferido
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Schema versionado com os novos blocos
+- [ ] Testes de contrato para cada bloco
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""BACKEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Renderizar tabelas, indicadores em destaque e alertas visuais nas respostas","**Objetivo da tarefa:** Exibir os blocos estruturados com contraste adequado e leitura rápida.
+
+**Contexto:** Complementa a S5-16 e responde ao pedido de maior interação nas mensagens. Na Task S5-17, esta entrega integra a frente de capacidades pedidas pelo parceiro da Sprint 5. O resultado será aceito quando: os três blocos são exibidos e acessíveis.
+
+**Origem:** Pedido do parceiro.
+
+**Dependências:**
+
+- S5-16
+
+**Tasks:**
+
+- [ ] Criar os componentes de tabela, indicador e destaque
+- [ ] Garantir contraste AA e leitura por leitor de tela
+- [ ] Cobrir os componentes com testes
+
+**DoR (Definition of Ready):**
+
+- [ ] Schema da S5-16 estável
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Os três blocos são exibidos e acessíveis
+- [ ] Testes de componente aprovados
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_G"" ~""PRIORIDADE MÉDIA"" ~""FRONTEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Expor o agente como servidor MCP para conexão com o Copilot","**Objetivo da tarefa:** Disponibilizar as capacidades do agente como ferramentas MCP consumíveis pelo Copilot.
+
+**Contexto:** O Metrô não disponibilizou o Copilot Studio à equipe; o MCP permite que o próprio Metrô conecte o agente. Na Task S5-18, esta entrega integra a frente de capacidades pedidas pelo parceiro da Sprint 5. O resultado será aceito quando: cliente MCP lista e executa as ferramentas.
+
+**Origem:** Pedido do parceiro; oportunidade O9.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Expor consulta de status, relatório e alerta como ferramentas MCP
+- [ ] Exigir autenticação
+- [ ] Testar com um cliente MCP
+- [ ] Documentar a conexão com o Copilot Studio
+
+**DoR (Definition of Ready):**
+
+- [ ] Contratos das rotas de consulta, relatório e alerta estáveis
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Cliente MCP lista e executa as ferramentas
+- [ ] Chamada sem credencial é recusada
+- [ ] Passo a passo de conexão com o Copilot documentado
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_G"" ~""PRIORIDADE MÉDIA"" ~""BACKEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Avaliar a viabilidade da integração com o Microsoft Teams","**Objetivo da tarefa:** Registrar se a integração com o Teams é viável na Sprint 5 e, se não for, qual é o caminho.
+
+**Contexto:** O parceiro pediu a integração com o Teams se possível; ela depende de tenant e registro de aplicativo. Na Task S5-19, esta entrega integra a frente de capacidades pedidas pelo parceiro da Sprint 5. O resultado será aceito quando: decisão registrada com requisitos e bloqueios.
+
+**Origem:** Pedido do parceiro (se possível); risco R02.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Levantar os requisitos de bot ou aplicativo do Teams
+- [ ] Verificar o acesso ao tenant
+- [ ] Registrar a decisão
+
+**DoR (Definition of Ready):**
+
+- [ ] Resposta do Metrô sobre o tenant solicitada
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Decisão registrada com requisitos e bloqueios
+- [ ] Caminho recomendado incorporado à tabela de-para
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_P"" ~""PRIORIDADE BAIXA"" ~""RESEARCH""
+/milestone %""Sprint 05""","Sprint 05"
+"Simplificar a tela do chat e tornar visíveis os controles da proatividade","**Objetivo da tarefa:** Reduzir a informação exibida por padrão e deixar o controle da proatividade junto da sugestão.
+
+**Contexto:** O parceiro pediu menos informação na tela, e a usabilidade registrou a ocorrência O8. Na Task S5-20, esta entrega integra a frente de frontend completo e integração da Sprint 5. O resultado será aceito quando: tela padrão sem detalhes técnicos visíveis.
+
+**Origem:** Pedido do parceiro; ocorrência O8; barema, item 6.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Recolher detalhes técnicos por padrão
+- [ ] Destacar a resposta e as fontes
+- [ ] Levar o controle da proatividade para junto da sugestão
+
+**DoR (Definition of Ready):**
+
+- [ ] Ocorrências da Seção 9.3.2 conferidas
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Tela padrão sem detalhes técnicos visíveis
+- [ ] Sugestão com ação de aceitar, recusar e desativar no mesmo lugar
+- [ ] Testes de componente atualizados
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_G"" ~""PRIORIDADE ALTA"" ~""FRONTEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Garantir responsividade e acessibilidade da interface","**Objetivo da tarefa:** Tornar a interface utilizável em celular, tablet e desktop e acessível por teclado e leitor de tela.
+
+**Contexto:** O barema do frontend completo exige design responsivo e recursos de acessibilidade. Na Task S5-21, esta entrega integra a frente de frontend completo e integração da Sprint 5. O resultado será aceito quando: três larguras sem rolagem horizontal.
+
+**Origem:** Barema, item 6.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Ajustar os pontos de quebra
+- [ ] Garantir navegação por teclado e rótulos ARIA
+- [ ] Verificar contraste e executar verificação automática de acessibilidade
+
+**DoR (Definition of Ready):**
+
+- [ ] Telas da S5-20 definidas
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Três larguras sem rolagem horizontal
+- [ ] Nenhuma violação crítica na verificação automática
+- [ ] Fluxo principal navegável só por teclado
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_G"" ~""PRIORIDADE ALTA"" ~""FRONTEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Completar os testes unitários por componente com meta de cobertura","**Objetivo da tarefa:** Cobrir cada componente da interface com testes unitários e definir a cobertura mínima na pipeline.
+
+**Contexto:** O barema exige testes unitários por componente e automação de testes. Na Task S5-22, esta entrega integra a frente de frontend completo e integração da Sprint 5. O resultado será aceito quando: todo componente tem ao menos um teste.
+
+**Origem:** Barema, item 6.
+
+**Dependências:**
+
+- S5-20
+- S5-21
+
+**Tasks:**
+
+- [ ] Levantar componentes sem teste
+- [ ] Escrever os testes faltantes
+- [ ] Definir o limite de cobertura na pipeline
+
+**DoR (Definition of Ready):**
+
+- [ ] Componentes das S5-20 e S5-21 integrados
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Todo componente tem ao menos um teste
+- [ ] Cobertura mínima aplicada na pipeline e registrada no MR
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_G"" ~""PRIORIDADE ALTA"" ~""TEST""
+/milestone %""Sprint 05""","Sprint 05"
+"Automatizar os testes E2E dos fluxos integrados e das falhas de comunicação","**Objetivo da tarefa:** Automatizar os fluxos principais da interface contra o backend, incluindo indisponibilidade e timeout.
+
+**Contexto:** O barema de integração frontend-backend exige testes de integração e tratamento de falhas de comunicação. Na Task S5-23, esta entrega integra a frente de frontend completo e integração da Sprint 5. O resultado será aceito quando: fluxos principais aprovados no E2E.
+
+**Origem:** Barema, itens 6 e 7.
+
+**Dependências:**
+
+- S5-07
+- S5-17
+- S5-20
+
+**Tasks:**
+
+- [ ] Cobrir texto, áudio, relatório, alerta e alteração
+- [ ] Simular 5xx, timeout e perda de conexão
+- [ ] Publicar o relatório na pipeline
+
+**DoR (Definition of Ready):**
+
+- [ ] Funcionalidades congeladas em 02/10
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Fluxos principais aprovados no E2E
+- [ ] Falhas de comunicação exibem mensagem controlada
+- [ ] Relatório do E2E como artefato da pipeline
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_G"" ~""PRIORIDADE ALTA"" ~""TEST""
+/milestone %""Sprint 05""","Sprint 05"
+"Documentar navegabilidade, estratégia de código e testes do frontend","**Objetivo da tarefa:** Documentar os fluxos entre telas, a organização do código e os testes do frontend.
+
+**Contexto:** O barema do frontend completo exige essa documentação. Na Task S5-24, esta entrega integra a frente de frontend completo e integração da Sprint 5. O resultado será aceito quando: seção do Projeto.md atualizada com fluxos, estratégia e testes.
+
+**Origem:** Barema, item 6.
+
+**Dependências:**
+
+- S5-22
+- S5-23
+
+**Tasks:**
+
+- [ ] Desenhar os fluxos entre telas
+- [ ] Descrever a estratégia de construção
+- [ ] Listar casos, resultados esperados e cobertura
+
+**DoR (Definition of Ready):**
+
+- [ ] Testes das S5-22 e S5-23 executados
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Seção do Projeto.md atualizada com fluxos, estratégia e testes
+- [ ] Cobertura registrada com a data da medição
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""DOCUMENTAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
+"Corrigir a auditoria de fora de escopo, correlation_id e fluxo guiado","**Objetivo da tarefa:** Fazer a auditoria gravar pedidos fora de escopo, o identificador de correlação e os eventos do fluxo guiado.
+
+**Contexto:** Os defeitos D-02, D-03 e D-05 estão registrados como xfail estrito nas suítes da Sprint 4. Na Task S5-25, esta entrega integra a frente de correções de qualidade do agente da Sprint 5. O resultado será aceito quando: os três xfail passam a aprovar e o marcador é removido.
+
+**Origem:** Defeitos D-02, D-03 e D-05.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Gravar out_of_scope_requests
+- [ ] Incluir correlation_id nos eventos
+- [ ] Ajustar o componente do fluxo guiado ao domínio da restrição
+
+**DoR (Definition of Ready):**
+
+- [ ] Casos xfail correspondentes identificados
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Os três xfail passam a aprovar e o marcador é removido
+- [ ] Nenhuma interação perdida por violação de restrição
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""BUG"" ~""SIZE_G"" ~""PRIORIDADE ALTA"" ~""BACKEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Registrar as fontes das respostas documentais","**Objetivo da tarefa:** Garantir que toda resposta de rota documental grave as fontes usadas.
+
+**Contexto:** O defeito D-04 derrubou o elemento fontes do RNF03, com 16 ocorrências na rodada da S4-33. Na Task S5-26, esta entrega integra a frente de correções de qualidade do agente da Sprint 5. O resultado será aceito quando: nenhuma resposta documental nova sem fonte registrada.
+
+**Origem:** Defeito D-04.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Localizar o caminho sem gravação
+- [ ] Gravar consulted_sources em todas as rotas documentais
+- [ ] Cobrir com teste
+
+**DoR (Definition of Ready):**
+
+- [ ] Ocorrências do D-04 inspecionadas
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Nenhuma resposta documental nova sem fonte registrada
+- [ ] Teste de regressão aprovado
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""BUG"" ~""SIZE_M"" ~""PRIORIDADE ALTA"" ~""BACKEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Bloquear conteúdo sensível antes do envio ao provedor","**Objetivo da tarefa:** Impedir que dado sensível saia no prompt enviado ao provedor de LLM.
+
+**Contexto:** O CT-RNF01-N mostrou que um marcador sensível atravessa a montagem do prompt (D-06). Na Task S5-27, esta entrega integra a frente de correções de qualidade do agente da Sprint 5. O resultado será aceito quando: CT-RNF01-N aprovado.
+
+**Origem:** Defeito D-06; RNF01.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Definir os padrões de dado sensível
+- [ ] Mascarar ou bloquear antes do envio
+- [ ] Registrar o bloqueio na auditoria
+
+**DoR (Definition of Ready):**
+
+- [ ] Padrões de dado sensível acordados
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] CT-RNF01-N aprovado
+- [ ] Bloqueio auditado sem expor o dado
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""BUG"" ~""SIZE_M"" ~""PRIORIDADE ALTA"" ~""BACKEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Aceitar perguntas curtas e ajustar as fronteiras de intenção","**Objetivo da tarefa:** Tratar perguntas curtas sobre temas da base e corrigir as classificações indevidas registradas nos testes.
+
+**Contexto:** Usabilidade (O1) e testes funcionais (DEF-RF02-01 e DEF-RF03-01) mostraram recusas e associações indevidas. Na Task S5-28, esta entrega integra a frente de correções de qualidade do agente da Sprint 5. O resultado será aceito quando: os casos congelados passam a ser tratados corretamente.
+
+**Origem:** Ocorrência O1; DEF-RF02-01; DEF-RF03-01.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Ampliar exemplos de paráfrase e perguntas curtas
+- [ ] Fortalecer a fronteira de transacao_agendar_compromisso
+- [ ] Orientar a reformulação sem exigir projeto
+
+**DoR (Definition of Ready):**
+
+- [ ] Casos O1, CT-RF02-01 e CT-RF03-02 congelados
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Os casos congelados passam a ser tratados corretamente
+- [ ] F1-macro do classificador não cai abaixo de 0,80
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""BUG"" ~""SIZE_G"" ~""PRIORIDADE MÉDIA"" ~""BACKEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Condicionar as sugestões proativas às fontes recuperadas","**Objetivo da tarefa:** Oferecer sugestão só quando as fontes recuperadas sustentarem a ação e separar a entidade de cada fonte no prompt.
+
+**Contexto:** A usabilidade registrou sugestões sem sustentação (O2 e O3) e confusão entre comunicado e projeto (O4). Na Task S5-29, esta entrega integra a frente de correções de qualidade do agente da Sprint 5. O resultado será aceito quando: os três cenários reproduzidos deixam de ocorrer.
+
+**Origem:** Ocorrências O2, O3 e O4.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Checar a sustentação antes de sugerir
+- [ ] Suprimir a sugestão comparativa quando a comparação foi recusada
+- [ ] Indicar a entidade de cada fonte no prompt
+
+**DoR (Definition of Ready):**
+
+- [ ] Ocorrências O2, O3 e O4 reproduzidas
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Os três cenários reproduzidos deixam de ocorrer
+- [ ] Testes de regressão aprovados
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""BUG"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""BACKEND""
+/milestone %""Sprint 05""","Sprint 05"
+"Reexecutar RNF01 a RNF03 após as correções","**Objetivo da tarefa:** Reexecutar confidencialidade, acesso por perfil e auditoria depois das correções da Sprint 5.
+
+**Contexto:** RNF01 e RNF03 reprovaram e RNF02 ficou bloqueado na S4-33. Na Task S5-30, esta entrega integra a frente de complementação dos testes sistêmicos da Sprint 5. O resultado será aceito quando: seis casos com resultado e evidência.
+
+**Origem:** Barema, item 10.
+
+**Dependências:**
+
+- S5-04
+- S5-25
+- S5-26
+- S5-27
+
+**Tasks:**
+
+- [ ] Reexecutar os seis casos da S4-33
+- [ ] Remover os xfail resolvidos
+- [ ] Atualizar o relatório com a rodada 2
+
+**DoR (Definition of Ready):**
+
+- [ ] Correções integradas
+- [ ] Perfis carregados
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Seis casos com resultado e evidência
+- [ ] Relatório atualizado sem reescrever a rodada 1
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_G"" ~""PRIORIDADE ALTA"" ~""TEST""
+/milestone %""Sprint 05""","Sprint 05"
+"Executar RNF07 a RNF09","**Objetivo da tarefa:** Executar usabilidade conversacional, aderência tecnológica e portabilidade.
+
+**Contexto:** RNF07 a RNF12 foram reservados para a complementação da Sprint 5 (Seção 6.4.1). Na Task S5-31, esta entrega integra a frente de complementação dos testes sistêmicos da Sprint 5. O resultado será aceito quando: seis casos com resultado, ferramenta e evidência.
+
+**Origem:** Barema, item 10.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Congelar a amostra do RNF07
+- [ ] Executar CT-RNF07 a CT-RNF09, positivos e negativos
+- [ ] Registrar resultados e evidências
+
+**DoR (Definition of Ready):**
+
+- [ ] Casos da Seção 9.2.3 revisados
+- [ ] Ambiente estável
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Seis casos com resultado, ferramenta e evidência
+- [ ] Casos não executados identificados com motivo
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_G"" ~""PRIORIDADE MÉDIA"" ~""TEST""
+/milestone %""Sprint 05""","Sprint 05"
+"Executar RNF10 a RNF12","**Objetivo da tarefa:** Executar manutenibilidade, tratamento de falhas e qualidade dos dados sintéticos.
+
+**Contexto:** Complementa a execução dos RNFs reservada para a Sprint 5. Na Task S5-32, esta entrega integra a frente de complementação dos testes sistêmicos da Sprint 5. O resultado será aceito quando: seis casos com resultado, ferramenta e evidência.
+
+**Origem:** Barema, item 10.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Executar CT-RNF10 a CT-RNF12, positivos e negativos
+- [ ] Rodar o validador da massa
+- [ ] Registrar resultados e evidências
+
+**DoR (Definition of Ready):**
+
+- [ ] Casos da Seção 9.2.3 revisados
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Seis casos com resultado, ferramenta e evidência
+- [ ] Casos não executados identificados com motivo
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_G"" ~""PRIORIDADE MÉDIA"" ~""TEST""
+/milestone %""Sprint 05""","Sprint 05"
+"Reexecutar os casos funcionais reprovados e o RNF06","**Objetivo da tarefa:** Reexecutar CT-RF02-01, CT-RF03-02, CT-RF06-01, CT-RF08-01 e a recuperação do RNF06 depois das correções.
+
+**Contexto:** Quatro casos funcionais falharam e o RNF06 reprovou na recuperação. Na Task S5-33, esta entrega integra a frente de complementação dos testes sistêmicos da Sprint 5. O resultado será aceito quando: quatro casos e RNF06 com resultado e evidência.
+
+**Origem:** Barema, item 10; RNF06.
+
+**Dependências:**
+
+- S5-12
+- S5-28
+
+**Tasks:**
+
+- [ ] Reexecutar os quatro casos
+- [ ] Congelar nova massa prospectiva do RNF06 antes de medir
+- [ ] Registrar os resultados
+
+**DoR (Definition of Ready):**
+
+- [ ] Correções das S5-12 e S5-28 integradas
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Quatro casos e RNF06 com resultado e evidência
+- [ ] Massa do RNF06 congelada antes da medição
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""TEST""
+/milestone %""Sprint 05""","Sprint 05"
+"Conduzir usabilidade com os perfis ainda não cobertos","**Objetivo da tarefa:** Ouvir participantes com perfil de gestão de projetos e de uso das ferramentas Microsoft.
+
+**Contexto:** As vagas desses perfis ficaram vazias na usabilidade da Sprint 4. Na Task S5-34, esta entrega integra a frente de complementação dos testes sistêmicos da Sprint 5. O resultado será aceito quando: sessões registradas e anonimizadas.
+
+**Origem:** Revisão do MR !101.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Recrutar ao menos dois participantes dos perfis vazios
+- [ ] Aplicar o roteiro vigente e o SUS
+- [ ] Registrar ocorrências
+
+**DoR (Definition of Ready):**
+
+- [ ] Participantes confirmados
+- [ ] Interface congelada
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Sessões registradas e anonimizadas
+- [ ] Ocorrências novas classificadas por severidade
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_M"" ~""PRIORIDADE BAIXA"" ~""TEST""
+/milestone %""Sprint 05""","Sprint 05"
+"Homologar o cache VHS com o Azure Speech real","**Objetivo da tarefa:** Executar o roteiro de homologação do VHS contra o provedor real.
+
+**Contexto:** O VHS foi testado localmente na S4-31, e a homologação externa ficou pendente. Na Task S5-35, esta entrega integra a frente de complementação dos testes sistêmicos da Sprint 5. O resultado será aceito quando: miss e hits medidos separadamente.
+
+**Origem:** Pendência da S4-31.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Executar o roteiro da Seção 9.4
+- [ ] Anexar a saída sanitizada
+
+**DoR (Definition of Ready):**
+
+- [ ] Credencial do Azure Speech disponível
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Miss e hits medidos separadamente
+- [ ] Saída sanitizada anexada às evidências
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_P"" ~""PRIORIDADE BAIXA"" ~""TEST""
+/milestone %""Sprint 05""","Sprint 05"
+"Consolidar os resultados finais dos testes sistêmicos","**Objetivo da tarefa:** Reunir em uma visão única o resultado final de todos os testes do projeto.
+
+**Contexto:** O barema exige cobertura prevista e documentação dos resultados. Na Task S5-36, esta entrega integra a frente de complementação dos testes sistêmicos da Sprint 5. O resultado será aceito quando: tabela final por requisito com status e evidência.
+
+**Origem:** Barema, item 10.
+
+**Dependências:**
+
+- S5-30
+- S5-31
+- S5-32
+- S5-33
+
+**Tasks:**
+
+- [ ] Consolidar aprovados, falhas, bloqueios e não executados
+- [ ] Ligar cada resultado à evidência
+- [ ] Registrar os defeitos remanescentes
+
+**DoR (Definition of Ready):**
+
+- [ ] Rodadas da Sprint 5 concluídas
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Tabela final por requisito com status e evidência
+- [ ] Defeitos remanescentes com destino declarado
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_M"" ~""PRIORIDADE ALTA"" ~""TEST""
+/milestone %""Sprint 05""","Sprint 05"
+"Publicar a versão final e atualizar o manual de implantação e uso","**Objetivo da tarefa:** Publicar a versão congelada na nuvem e atualizar o manual de implantação e uso da PoC.
+
+**Contexto:** O barema exige ambientes, deploy documentado, monitoramento e manual de uso. Na Task S5-37, esta entrega integra a frente de deploy da versão final da Sprint 5. O resultado será aceito quando: versão final responde na nuvem.
+
+**Origem:** Barema, item 9; risco R16.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Atualizar a instância com a versão congelada
+- [ ] Executar smoke test e rollback intencional
+- [ ] Atualizar o manual e o runbook
+
+**DoR (Definition of Ready):**
+
+- [ ] Versão congelada em 02/10
+- [ ] Credenciais do Learner Lab válidas
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Versão final responde na nuvem
+- [ ] Rollback exercitado e registrado
+- [ ] Manual atualizado
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""FEATURE"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""DEVOPS""
+/milestone %""Sprint 05""","Sprint 05"
+"Atualizar componentes, tecnologias e funcionalidades implementadas","**Objetivo da tarefa:** Listar os componentes e as tecnologias com justificativa e descrever as funcionalidades da PoC.
+
+**Contexto:** Itens 1 e 4 do barema da documentação técnica final. Na Task S5-38, esta entrega integra a frente de documentação técnica final da Sprint 5. O resultado será aceito quando: seções atualizadas no Projeto.md, coerentes com o código.
+
+**Origem:** Barema da documentação final, itens 1 e 4.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Atualizar a lista de componentes e tecnologias
+- [ ] Justificar cada escolha
+- [ ] Descrever as funcionalidades entregues
+
+**DoR (Definition of Ready):**
+
+- [ ] Funcionalidades congeladas em 02/10
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Seções atualizadas no Projeto.md, coerentes com o código
+- [ ] Nenhuma funcionalidade descrita sem evidência
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_M"" ~""PRIORIDADE ALTA"" ~""DOCUMENTAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
+"Detalhar os custos de implementação da PoC e da solução final","**Objetivo da tarefa:** Detalhar os custos de pessoal e de tecnologia da PoC e da solução final.
+
+**Contexto:** Item 2 do barema; parte da viabilidade financeira da Sprint 4 (S4-52A a S4-52C) ainda não foi integrada. Na Task S5-39, esta entrega integra a frente de documentação técnica final da Sprint 5. O resultado será aceito quando: custos de pessoal e tecnologia com premissa, quantidade e valor.
+
+**Origem:** Barema da documentação final, item 2.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Consolidar os insumos das S4-52A a S4-52C
+- [ ] Separar PoC e solução final
+- [ ] Registrar premissas e fontes
+
+**DoR (Definition of Ready):**
+
+- [ ] Material das S4-52A a S4-52C disponível
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Custos de pessoal e tecnologia com premissa, quantidade e valor
+- [ ] PoC e solução final separadas
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_M"" ~""PRIORIDADE ALTA"" ~""DOCUMENTAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
+"Elaborar a análise financeira para o parceiro","**Objetivo da tarefa:** Projetar custos e receitas de pessoal e de tecnologia para o Metrô.
+
+**Contexto:** Item 3 do barema da documentação técnica final. Na Task S5-40, esta entrega integra a frente de documentação técnica final da Sprint 5. O resultado será aceito quando: projeção com premissas auditáveis.
+
+**Origem:** Barema da documentação final, item 3.
+
+**Dependências:**
+
+- S5-39
+
+**Tasks:**
+
+- [ ] Projetar custos e ganhos no horizonte acordado
+- [ ] Explicitar premissas
+- [ ] Apresentar o resultado em tabela e gráfico
+
+**DoR (Definition of Ready):**
+
+- [ ] Custos da S5-39 consolidados
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Projeção com premissas auditáveis
+- [ ] Conclusão útil para a decisão do parceiro
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_M"" ~""PRIORIDADE ALTA"" ~""DOCUMENTAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
+"Atualizar os benefícios e os aperfeiçoamentos futuros","**Objetivo da tarefa:** Atualizar os benefícios entregues e descrever as melhorias possíveis.
+
+**Contexto:** Itens 5 e 7 do barema da documentação técnica final. Na Task S5-41, esta entrega integra a frente de documentação técnica final da Sprint 5. O resultado será aceito quando: benefícios ligados a funcionalidades e evidências.
+
+**Origem:** Barema da documentação final, itens 5 e 7.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Atualizar os benefícios com evidência
+- [ ] Listar os aperfeiçoamentos, incluindo os itens cortados da Sprint 5
+
+**DoR (Definition of Ready):**
+
+- [ ] Resultados dos testes disponíveis
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Benefícios ligados a funcionalidades e evidências
+- [ ] Aperfeiçoamentos priorizados
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""DOCUMENTAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
+"Criar o documento de revisão de feedbacks das Sprints 1 a 4","**Objetivo da tarefa:** Registrar cada feedback recebido, a sprint em que foi apontado e a correção realizada.
+
+**Contexto:** Item 6 do barema: documento livre na pasta docs. Na Task S5-42, esta entrega integra a frente de documentação técnica final da Sprint 5. O resultado será aceito quando: documento em docs/ com item, sprint e correção.
+
+**Origem:** Barema da documentação final, item 6.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Reunir os feedbacks das quatro sprints
+- [ ] Localizar a correção de cada item
+- [ ] Marcar os itens ainda pendentes
+
+**DoR (Definition of Ready):**
+
+- [ ] Feedbacks das Sprints 1 a 4 disponíveis
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Documento em docs/ com item, sprint e correção
+- [ ] Todo item com correção ou justificativa
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_M"" ~""PRIORIDADE ALTA"" ~""DOCUMENTAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
+"Revisar a arquitetura e a interação entre os componentes","**Objetivo da tarefa:** Atualizar a visão geral do sistema e os diagramas para a solução efetivamente implementada.
+
+**Contexto:** Item 8 do barema; a documentação ainda descreve o Copilot Studio como canal (R10). Na Task S5-43, esta entrega integra a frente de documentação técnica final da Sprint 5. O resultado será aceito quando: diagramas atualizados com fonte e imagem.
+
+**Origem:** Barema da documentação final, item 8; risco R10.
+
+**Dependências:**
+
+- S5-11
+- S5-18
+
+**Tasks:**
+
+- [ ] Atualizar os diagramas de componentes e de implantação (.puml e imagem)
+- [ ] Conciliar Projeto.md e GestaoProjeto.md sobre o Copilot
+- [ ] Revisar o RNF08 à luz da decisão do Metrô
+
+**DoR (Definition of Ready):**
+
+- [ ] Mensageria e MCP integrados
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Diagramas atualizados com fonte e imagem
+- [ ] Nenhuma contradição entre as seções sobre o canal
+- [ ] RNF08 revisado
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_G"" ~""PRIORIDADE ALTA"" ~""DOCUMENTAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
+"Elaborar a tabela de-para para o ecossistema Microsoft do Metrô","**Objetivo da tarefa:** Mostrar o que o Metrô pode reaproveitar da solução e com qual componente do seu ecossistema cada parte se corresponde.
+
+**Contexto:** Pedido do parceiro: a PoC usa componentes próprios que teriam equivalentes no ecossistema Microsoft. Na Task S5-44, esta entrega integra a frente de documentação técnica final da Sprint 5. O resultado será aceito quando: tabela no Projeto.md com componente, equivalente, reaproveitamento e observação.
+
+**Origem:** Pedido do parceiro.
+
+**Dependências:**
+
+- S5-19
+
+**Tasks:**
+
+- [ ] Listar cada componente da PoC
+- [ ] Indicar o equivalente no ecossistema do Metrô
+- [ ] Classificar o reaproveitamento e o esforço
+
+**DoR (Definition of Ready):**
+
+- [ ] Componentes da PoC listados
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Tabela no Projeto.md com componente, equivalente, reaproveitamento e observação
+- [ ] Coerência com a revisão da arquitetura
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_M"" ~""PRIORIDADE ALTA"" ~""DOCUMENTAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
+"Revisar o Canvas de proposta de valor e a análise de ODS","**Objetivo da tarefa:** Atualizar o Canvas da Sprint 1 e justificar os ODS atendidos e os eventualmente ameaçados.
+
+**Contexto:** Item 9 do barema da documentação técnica final. Na Task S5-45, esta entrega integra a frente de documentação técnica final da Sprint 5. O resultado será aceito quando: canvas atualizado.
+
+**Origem:** Barema da documentação final, item 9.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Revisar o Canvas com o que foi entregue
+- [ ] Justificar cada ODS com elementos do projeto
+- [ ] Analisar criticamente os ODS ameaçados
+
+**DoR (Definition of Ready):**
+
+- [ ] Canvas da Sprint 1 disponível
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Canvas atualizado
+- [ ] Cada ODS justificado com elemento do projeto, inclusive os ameaçados
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""DOCUMENTAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
+"Elaborar o mapa de adoção e aculturamento organizacional","**Objetivo da tarefa:** Mapear público-alvo, barreiras e ações de onboarding para a adoção do agente no Metrô.
+
+**Contexto:** Item 11.1 do barema: a adoção depende de pessoas, e não só do código. Na Task S5-46, esta entrega integra a frente de documentação técnica final da Sprint 5. O resultado será aceito quando: mapa específico ao Metrô, com públicos, barreiras e ações.
+
+**Origem:** Barema da documentação final, item 11.1.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Definir públicos por perfil de acesso
+- [ ] Mapear barreiras culturais e técnicas
+- [ ] Definir ações de onboarding e educação
+
+**DoR (Definition of Ready):**
+
+- [ ] Perfis de acesso da S5-03 definidos
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Mapa específico ao Metrô, com públicos, barreiras e ações
+- [ ] Seção própria no Projeto.md ou arquivo .md
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_M"" ~""PRIORIDADE ALTA"" ~""DOCUMENTAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
+"Definir os mecanismos de incentivo e engajamento","**Objetivo da tarefa:** Mapear o que cada usuário ganha e como participa da evolução do agente.
+
+**Contexto:** Item 11.2 do barema: utilidade, governança e comunidade. Na Task S5-47, esta entrega integra a frente de documentação técnica final da Sprint 5. O resultado será aceito quando: cada dimensão justificada no contexto do Metrô.
+
+**Origem:** Barema da documentação final, item 11.2.
+
+**Dependências:**
+
+- S5-46
+
+**Tasks:**
+
+- [ ] Descrever os ganhos de produtividade
+- [ ] Definir os mecanismos de governança e voz ativa
+- [ ] Definir comunidade e reconhecimento
+
+**DoR (Definition of Ready):**
+
+- [ ] Mapa da S5-46 disponível
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Cada dimensão justificada no contexto do Metrô
+- [ ] Indicadores de uso e qualidade propostos
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""DOCUMENTAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
+"Garantir a conformidade do repositório com o escritório de projetos","**Objetivo da tarefa:** Conferir a estrutura do repositório, os documentos e os critérios do escritório de projetos.
+
+**Contexto:** Item 10 do barema; a auditoria da Sprint 4 deixou pendências (Seção 7.4 do GestaoConfiguracao). Na Task S5-48, esta entrega integra a frente de documentação técnica final da Sprint 5. O resultado será aceito quando: checklist atendido ou com justificativa.
+
+**Origem:** Barema da documentação final, item 10; issue #252.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Aplicar o checklist do escritório de projetos
+- [ ] Corrigir README, Index.md, .env.example e os links quebrados apontados na Seção 7.4 do GestaoConfiguracao
+- [ ] Remover as branches temporárias integradas
+
+**DoR (Definition of Ready):**
+
+- [ ] Todos os MRs da Sprint 5 integrados
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Checklist atendido ou com justificativa
+- [ ] Nenhuma pendência da auditoria da Sprint 4 sem destino
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_M"" ~""PRIORIDADE ALTA"" ~""GESTÃO DE PROJETO E CONFIGURAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
+"Analisar a Sprint 5 e fechar o acompanhamento do módulo","**Objetivo da tarefa:** Registrar pontos fortes, pontos fracos e ações verificáveis da Sprint 5.
+
+**Contexto:** Item 1 do barema da gestão final. Na Task S5-49, esta entrega integra a frente de gestão final e apresentação da Sprint 5. O resultado será aceito quando: análise com indicadores, efetividade e ações verificáveis.
+
+**Origem:** Barema da gestão final, item 1.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Apurar os indicadores após o fechamento
+- [ ] Avaliar a efetividade das ações da Seção 2.4.7
+- [ ] Registrar ações para projetos futuros
+
+**DoR (Definition of Ready):**
+
+- [ ] Sprint encerrada e MRs integrados
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Análise com indicadores, efetividade e ações verificáveis
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""GESTÃO DE PROJETO E CONFIGURAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
+"Analisar a evolução das métricas das Sprints 1 a 5","**Objetivo da tarefa:** Interpretar a série das métricas das cinco sprints e extrair tendências.
+
+**Contexto:** Item 2 do barema da gestão final. Na Task S5-50, esta entrega integra a frente de gestão final e apresentação da Sprint 5. O resultado será aceito quando: série com gráfico e conclusões por indicador.
+
+**Origem:** Barema da gestão final, item 2.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Montar a série histórica
+- [ ] Visualizar a evolução
+- [ ] Concluir sobre eficiência e eficácia
+
+**DoR (Definition of Ready):**
+
+- [ ] Indicadores das Sprints 1 a 4 consolidados
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Série com gráfico e conclusões por indicador
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""GESTÃO DE PROJETO E CONFIGURAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
+"Consolidar o post mortem de riscos em tabela única","**Objetivo da tarefa:** Consolidar todos os riscos e oportunidades desde o entendimento de negócio, com status final e análise.
+
+**Contexto:** Item 3 do barema da gestão final. Na Task S5-51, esta entrega integra a frente de gestão final e apresentação da Sprint 5. O resultado será aceito quando: tabela única com status final de cada item.
+
+**Origem:** Barema da gestão final, item 3.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Unificar os itens da Seção 2.7 do Projeto.md até a Sprint 5
+- [ ] Comparar o impacto estimado com o observado
+- [ ] Registrar os eventos não previstos
+
+**DoR (Definition of Ready):**
+
+- [ ] Matriz da Sprint 5 atualizada
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Tabela única com status final de cada item
+- [ ] Análise de materialização, mitigação, oportunidades e eventos não previstos
+- [ ] Conclusão sobre a identificação inicial
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_G"" ~""PRIORIDADE MÉDIA"" ~""GESTÃO DE PROJETO E CONFIGURAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
+"Redigir a análise post mortem do projeto","**Objetivo da tarefa:** Refletir sobre as conquistas e as oportunidades de melhoria do projeto.
+
+**Contexto:** Item 4 do barema da gestão final. Na Task S5-52, esta entrega integra a frente de gestão final e apresentação da Sprint 5. O resultado será aceito quando: post mortem com conquistas, desafios e sugestões.
+
+**Origem:** Barema da gestão final, item 4.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Registrar conquistas
+- [ ] Registrar desafios e sugestões para projetos futuros
+
+**DoR (Definition of Ready):**
+
+- [ ] Análises das S5-49 a S5-51 disponíveis
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Post mortem com conquistas, desafios e sugestões
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""GESTÃO DE PROJETO E CONFIGURAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
+"Fechar a matriz de papéis e o contrato de convivência","**Objetivo da tarefa:** Consolidar os papéis das cinco sprints e avaliar os acordos de convivência.
+
+**Contexto:** Item 5 do barema da gestão final. Na Task S5-53, esta entrega integra a frente de gestão final e apresentação da Sprint 5. O resultado será aceito quando: rotação e competências evidenciadas.
+
+**Origem:** Barema da gestão final, item 5.
+
+**Dependências:**
+
+- Nenhuma dependência de outra task da Sprint 5
+
+**Tasks:**
+
+- [ ] Consolidar a rotação das cinco sprints
+- [ ] Avaliar cada acordo do contrato
+- [ ] Indicar os acordos que o grupo manteria
+
+**DoR (Definition of Ready):**
+
+- [ ] Matriz da Sprint 5 registrada
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Rotação e competências evidenciadas
+- [ ] Avaliação final de cada acordo
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_M"" ~""PRIORIDADE MÉDIA"" ~""GESTÃO DE PROJETO E CONFIGURAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
+"Planejar e construir a apresentação final para stakeholders","**Objetivo da tarefa:** Construir a apresentação final com objetivos, solução, resultados, métricas e aprendizados.
+
+**Contexto:** Item 6 do barema da gestão final; a demonstração depende do ambiente em nuvem (R16). Na Task S5-54, esta entrega integra a frente de gestão final e apresentação da Sprint 5. O resultado será aceito quando: material com objetivos, solução, resultados e aprendizados.
+
+**Origem:** Barema da gestão final, item 6.
+
+**Dependências:**
+
+- S5-36
+- S5-37
+
+**Tasks:**
+
+- [ ] Definir narrativa e responsáveis
+- [ ] Construir o material com visualizações das métricas
+- [ ] Preparar a contingência da demonstração
+
+**DoR (Definition of Ready):**
+
+- [ ] Resultados dos testes e versão final disponíveis
+- [ ] Assignee, revisor de outra frente, labels e milestone definidos na planning
+
+**DoD (Definition of Done):**
+
+- [ ] Material com objetivos, solução, resultados e aprendizados
+- [ ] Contingência da demonstração validada
+- [ ] Evidência registrada, MR aprovado com comentário do revisor e `Closes` apontando esta issue
+
+/label ~""DOCS"" ~""SIZE_G"" ~""PRIORIDADE ALTA"" ~""GESTÃO DE PROJETO E CONFIGURAÇÃO""
+/milestone %""Sprint 05""","Sprint 05"
