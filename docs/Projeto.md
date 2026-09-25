@@ -257,6 +257,16 @@
     - [10.2.9 Publicação com Cloudflare Quick Tunnel](#1029-publicação-com-cloudflare-quick-tunnel)
     - [10.2.10 Validação e resultado da Sprint 4](#10210-validação-e-resultado-da-sprint-4)
     - [10.2.11 Operação após o deploy](#10211-operação-após-o-deploy)
+- [11. Análise de Viabilidade Financeira](#11-análise-de-viabilidade-financeira)
+  - [11.1 Escopo considerado no orçamento](#111-escopo-considerado-no-orçamento)
+  - [11.2 Custos diretos do projeto](#112-custos-diretos-do-projeto)
+  - [11.3 Despesas operacionais](#113-despesas-operacionais)
+  - [11.4 Carga tributária estimada](#114-carga-tributária-estimada)
+  - [11.5 Margem de lucro desejada](#115-margem-de-lucro-desejada)
+  - [11.6 Preço final do projeto](#116-preço-final-do-projeto)
+  - [11.7 Defesa das premissas e dos valores](#117-defesa-das-premissas-e-dos-valores)
+  - [11.8 Fluxo de caixa sintético](#118-fluxo-de-caixa-sintético)
+  - [11.9 Conclusão da viabilidade](#119-conclusão-da-viabilidade)
 - [Referências](#referências)
 
 # 1. Introdução
@@ -6494,7 +6504,176 @@ Não se deve usar `docker compose down -v` enquanto os volumes de RabbitMQ ou ar
 
 Os procedimentos detalhados de diagnóstico, atualização, rollback e encerramento permanecem no [runbook AWS](aws-operacao.md) e no [runbook Docker](docker-operacao.md). O histórico das decisões está no [handoff inicial](deploy-aws-learner-lab-handoff.md), no [replanejamento](deploy-aws-learner-lab-replan.md) e nas stories de [infraestrutura AWS](stories/phase-4-aws-mvp.md), [substituição da EC2](stories/phase-4-ec2-ssh-replacement-preparation.md) e [workers/atualização](stories/phase-4-alert-workers-local-update.md).
 
+# 11. Análise de Viabilidade Financeira
+
+Esta seção simula a equipe como uma startup contratada pelo Metrô de São Paulo. Todos os valores estão em reais e representam estimativas para uma venda hipotética do MVP. A análise separa **custos diretos**, necessários para construir a solução, de **despesas operacionais**, necessárias para manter a empresa e viabilizar a entrega, e da **despesa financeira** do empréstimo. O orçamento também incorpora tributos calculados por dentro, lucro e o fluxo de caixa necessário para pagar as obrigações durante o desenvolvimento.
+
+## 11.1 Escopo considerado no orçamento
+
+O objeto da proposta é a entrega, em **7 de outubro de 2026**, de um MVP demonstrável do agente de IA para apoio à gestão do portfólio de projetos do Metrô. O produto utiliza dados sintéticos e contempla as funcionalidades, a arquitetura, os testes, a documentação e o deploy descritos neste documento.
+
+O projeto ocorre entre **3 de agosto e 7 de outubro de 2026**, totalizando dez semanas de calendário e **47 dias úteis de trabalho**, após a exclusão do feriado nacional de 7 de setembro. Foram consideradas seis pessoas desenvolvedoras juniores, contratadas como prestadoras de serviço PJ, com dedicação de oito horas por dia útil. O contrato simulado termina com a entrega: manutenção evolutiva, operação assistida e suporte posterior a 7 de outubro não integram o preço.
+
+## 11.2 Custos diretos do projeto
+
+Custos diretos são os recursos consumidos na produção do MVP e que podem ser atribuídos à entrega. Eles abrangem o trabalho técnico da equipe e as ferramentas usadas diretamente no desenvolvimento.
+
+### 11.2.1 Equipe de desenvolvimento
+
+Cada integrante trabalha 376 horas no período, calculadas por `47 dias úteis × 8 horas`. Como os seis integrantes têm a mesma senioridade, dedicação e responsabilidade de execução, foi aplicada a mesma taxa de **R$ 50,00 por hora**.
+
+| Integrante | Função orçada | Horas | Valor por hora | Custo |
+|---|---|---:|---:|---:|
+| Felipe Neves | Pessoa desenvolvedora júnior PJ — interface e experiência de uso | 376 | R$ 50,00 | R$ 18.800,00 |
+| Henrique Diniz | Pessoa desenvolvedora júnior PJ — PLN e classificação de intenções | 376 | R$ 50,00 | R$ 18.800,00 |
+| Jaime Almeida | Pessoa desenvolvedora júnior PJ — dados, voz e testes | 376 | R$ 50,00 | R$ 18.800,00 |
+| Leonardo Ramos | Pessoa desenvolvedora júnior PJ — integração e deploy | 376 | R$ 50,00 | R$ 18.800,00 |
+| Pedro Uchoa | Pessoa desenvolvedora júnior PJ — integração e qualidade | 376 | R$ 50,00 | R$ 18.800,00 |
+| Wendel Feitosa | Pessoa desenvolvedora júnior PJ — backend e áudio | 376 | R$ 50,00 | R$ 18.800,00 |
+| **Total da equipe** | **6 pessoas** | **2.256** |  | **R$ 112.800,00** |
+
+A taxa de R$ 50,00 por hora equivale a R$ 8.000,00 para um mês de 160 horas. Ela foi adotada como taxa comercial PJ, que precisa remunerar o trabalho e também compensar a ausência de férias, décimo terceiro, FGTS e demais benefícios típicos de um vínculo CLT. Como referência externa para a ordem de grandeza da remuneração, foi consultado o [Guia Salarial 2026 da Robert Half](https://www.roberthalf.com/br/pt/insights/salary-guide) e sua página para [desenvolvimento full-stack júnior](https://www.roberthalf.com/br/pt/vagas-detalhes/desenvolvedora-full-stack-junior). O valor também mantém o custo da equipe próximo da referência de R$ 111.625,00 observada no feedback fornecido para outro projeto, com a diferença explicada pelas horas efetivas e pela taxa única adotada neste caso.
+
+### 11.2.2 Ferramentas e serviços diretamente ligados à entrega
+
+| Item | Premissa | Custo |
+|---|---|---:|
+| Codex | Verba simulada de R$ 100,00 por mês para cada uma das 6 pessoas, durante 3 meses | R$ 1.800,00 |
+| Gemini | Franquia estimada para desenvolvimento, integração e testes do agente | R$ 500,00 |
+| Azure AI Speech | Franquia estimada para integração e testes de transcrição de voz | R$ 300,00 |
+| **Total de ferramentas diretas** |  | **R$ 2.600,00** |
+
+O valor de Codex é uma **premissa interna do orçamento**, definida pelo grupo, e não uma conversão de um preço oficial em reais. Os valores de Gemini e Azure AI Speech são franquias controladas para o MVP e devem ser revistos se o volume real de chamadas superar o cenário de demonstração.
+
+Assim, os custos diretos totalizam:
+
+| Categoria de custo | Valor |
+|---|---:|
+| Equipe de desenvolvimento | R$ 112.800,00 |
+| Ferramentas e serviços diretos | R$ 2.600,00 |
+| **Total de custos diretos** | **R$ 115.400,00** |
+
+## 11.3 Despesas operacionais
+
+Despesas operacionais são gastos necessários para administrar a startup, divulgar a solução e disponibilizar o ambiente do MVP, mas que não correspondem diretamente às horas de construção das funcionalidades.
+
+| Despesa | Premissa de cálculo | Valor estimado |
+|---|---|---:|
+| Recursos humanos terceirizado | 40 horas × R$ 75,00 para contratos, cadastro e apoio às pessoas prestadoras | R$ 3.000,00 |
+| Financeiro terceirizado | 90 horas × R$ 75,00 para contas a pagar, cobrança, conciliação e fluxo de caixa | R$ 6.750,00 |
+| Contabilidade | 3 meses × R$ 1.000,00 para escrituração e apuração tributária simuladas | R$ 3.000,00 |
+| Divulgação e marketing | 40 horas × R$ 50,00 para apresentação comercial e comunicação da solução | R$ 2.000,00 |
+| Materiais de divulgação | Peças digitais e materiais para a demonstração | R$ 300,00 |
+| Infraestrutura do MVP | AWS, monitoramento e Supabase durante a janela necessária | R$ 721,36 |
+| **Total de despesas operacionais** |  | **R$ 15.771,36** |
+
+Não foi incluída uma rubrica separada de gestão do projeto: planejamento, cerimônias, coordenação técnica e documentação estão absorvidos nas horas da equipe. Também não foi incluído atendimento ao cliente após a entrega, porque o contrato hipotético termina em 7 de outubro. Essa delimitação evita cobrar atividades que não pertencem ao escopo contratado.
+
+### 11.3.1 Infraestrutura minimizada para o MVP
+
+A infraestrutura considera a EC2 ativa por aproximadamente seis semanas, entre **31 de agosto e 7 de outubro de 2026**, a partir do início da Sprint 3, além dos recursos mínimos de persistência, armazenamento de imagens, observabilidade e banco gerenciado. Para converter os preços de referência em dólar, foi utilizada a PTAX de venda de **R$ 5,1795 por US$ 1,00**, consultada para 24 de setembro de 2026.
+
+| Recurso | Premissa | Valor estimado |
+|---|---|---:|
+| EC2 `t3.large` | Execução sob demanda por aproximadamente 6 semanas | R$ 393,01 |
+| EBS `gp3`, 50 GB | Volume persistente durante o período do projeto | R$ 26,24 |
+| IPv4 público | Endereço público durante a janela de execução | R$ 23,62 |
+| Amazon ECR | Armazenamento das imagens de backend e frontend | R$ 6,56 |
+| Amazon CloudWatch | Logs e métricas essenciais do ambiente | R$ 12,95 |
+| Supabase Pro | Banco gerenciado por aproximadamente 2 meses | R$ 258,98 |
+| **Total de infraestrutura** |  | **R$ 721,36** |
+
+Os valores foram estimados a partir das páginas oficiais de preços da [AWS EC2 T3](https://aws.amazon.com/ec2/instance-types/t3/), [EBS](https://aws.amazon.com/ebs/volume-types/), [ECR](https://aws.amazon.com/ecr/pricing/), [CloudWatch](https://aws.amazon.com/cloudwatch/pricing/), [IPv4 público](https://aws.amazon.com/vpc/pricing/) e [Supabase](https://supabase.com/pricing). A arquitetura foi dimensionada para demonstração e testes controlados, sem alta disponibilidade, domínio pago ou redundância de produção. Essa escolha mantém a infraestrutura proporcional ao MVP descrito na Seção 10.
+
+## 11.4 Carga tributária estimada
+
+Para a simulação, a startup foi enquadrada no **Simples Nacional, Anexo V**, com receita bruta acumulada nos 12 meses (RBT12) hipotética de **R$ 200.000,00**. Esse valor posiciona a empresa na segunda faixa do Anexo V, com alíquota nominal de 18% e parcela a deduzir de R$ 4.500,00. A alíquota efetiva única é:
+
+`Alíquota efetiva = (RBT12 × alíquota nominal − parcela a deduzir) ÷ RBT12`
+
+`Alíquota efetiva = (R$ 200.000,00 × 18% − R$ 4.500,00) ÷ R$ 200.000,00 = 15,75%`
+
+O percentual de **15,75%** incide sobre o preço cobrado do cliente. Por isso, o imposto não foi apenas somado ao custo: ele foi calculado **por dentro**, de modo que o próprio preço contenha a receita necessária para pagar o tributo. A hipótese usa uma única porcentagem, conforme solicitado no barema, e segue a tabela do [Anexo V da Lei Complementar nº 123/2006](https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp123.htm). Em uma contratação real, o enquadramento, a RBT12 e o fator R precisariam ser confirmados pela contabilidade.
+
+## 11.5 Margem de lucro desejada
+
+A margem desejada é de **15% sobre a soma de custos, despesas operacionais, despesa financeira e impostos**. Ela foi escolhida como estratégia de entrada para uma startup que entrega um primeiro MVP a um cliente institucional: remunera o risco técnico e comercial sem elevar a proposta ao patamar de uma solução produtiva com sustentação e alta disponibilidade.
+
+Como o recebimento integral ocorre somente na entrega, os juros do empréstimo fazem parte da despesa necessária para executar o contrato. O custo financeiro estimado é de **R$ 5.684,09**, calculado sobre o principal de R$ 131.171,36, à taxa de 2% ao mês, pelo prazo de 65 dias. Esse valor foi incorporado à formação do preço para que o lucro permaneça em 15% após a quitação do financiamento.
+
+Como o imposto depende do preço e a margem também inclui o imposto em sua base, o preço foi obtido pela seguinte equação:
+
+`P = B × (1 + m) ÷ [1 − t × (1 + m)]`
+
+Onde `P` é o preço final, `B` é a base de custos, despesas operacionais e despesa financeira, `m` é a margem e `t` é a alíquota tributária. Substituindo `B = R$ 136.855,45`, `m = 15%` e `t = 15,75%`, obtém-se **P = R$ 192.195,11**. O imposto contido nesse preço é de **R$ 30.270,73**. O lucro de **R$ 25.068,93** corresponde a 15% de `R$ 136.855,45 + R$ 30.270,73`.
+
+## 11.6 Preço final do projeto
+
+| Componente do preço | Valor |
+|---|---:|
+| Custos diretos | R$ 115.400,00 |
+| Despesas operacionais | R$ 15.771,36 |
+| Despesa financeira do empréstimo | R$ 5.684,09 |
+| **Base antes de tributos e lucro** | **R$ 136.855,45** |
+| Imposto, calculado por dentro a 15,75% do preço | R$ 30.270,73 |
+| Lucro desejado, 15% sobre custos + despesas + juros + impostos | R$ 25.068,93 |
+| **Preço final para o Metrô de São Paulo** | **R$ 192.195,11** |
+
+Os valores, as fórmulas e as premissas detalhadas podem ser consultados na [planilha de precificação do projeto](https://docs.google.com/spreadsheets/d/1okRWK8HoPHITbrlPIta1h3NH3-2euzaHEm_N-hrCl30/edit?usp=sharing).
+
+O preço corresponde a uma entrega fechada do MVP e não deve ser interpretado como mensalidade. Qualquer extensão de prazo, uso de dados reais, adequação ao ambiente corporativo do Metrô, suporte continuado ou transformação do MVP em produto de produção exigiria novo orçamento.
+
+## 11.7 Defesa das premissas e dos valores
+
+| Premissa | Defesa |
+|---|---|
+| 2.256 horas de desenvolvimento | A carga deriva do calendário real: 6 pessoas × 47 dias úteis × 8 horas. Ela evita tratar um projeto de dedicação integral como atividade parcial. |
+| R$ 50,00 por hora PJ | Corresponde a R$ 8.000,00 por 160 horas e inclui o risco contratual da prestação PJ. A taxa é uniforme porque senioridade e dedicação são iguais entre os seis integrantes. |
+| R$ 112.800,00 de equipe | Representa 86,0% da base de custos e despesas, proporção coerente com um projeto de software intensivo em trabalho especializado. Também se aproxima da referência de R$ 111.625,00 citada no feedback da professora. |
+| Ferramentas limitadas a R$ 2.600,00 | São franquias específicas para desenvolvimento e testes do MVP. Não foram incluídas licenças corporativas ou volumes de produção que o escopo não exige. |
+| Infraestrutura de R$ 721,36 | A EC2 fica ligada apenas na janela de seis semanas e os serviços foram dimensionados para demonstração. A ausência de alta disponibilidade e domínio pago reduz o custo sem ocultar os componentes utilizados. |
+| Apoio terceirizado | RH, financeiro e contabilidade representam funções reais de uma startup com seis prestadores. As horas foram limitadas ao período do contrato. |
+| Marketing de R$ 2.300,00 | O projeto prevê divulgação leve e preparação da apresentação comercial, compatíveis com uma venda institucional dirigida, sem campanha de mídia ampla. |
+| Juros de R$ 5.684,09 | A despesa financeira decorre do pagamento integral apenas na entrega. Ela foi calculada a 2% ao mês por 65 dias e incorporada ao preço para não reduzir o lucro desejado. |
+| Imposto de 15,75% | A alíquota efetiva deriva de uma RBT12 explicitamente simulada e é aplicada sobre a receita. O cálculo por dentro impede que o tributo reduza a margem planejada. |
+| Lucro de 15% | É uma margem de entrada para o MVP. Incide sobre custos, despesas operacionais, juros e imposto, preservando a rentabilidade mesmo após a quitação do empréstimo. |
+
+## 11.8 Fluxo de caixa sintético
+
+O cronograma completo de entradas, saídas e saldos está disponível na [planilha de fluxo de caixa do projeto](https://docs.google.com/spreadsheets/d/1yrltco3si6FzcyDPYJFIB3E7hWGV1H-1uU3Cttr9AMk/edit?usp=sharing).
+
+O orçamento mede o resultado econômico do contrato, enquanto o fluxo de caixa verifica se há dinheiro disponível nas datas de pagamento. Como a simulação prevê o pagamento integral pelo Metrô apenas na entrega, em 7 de outubro, a startup precisa financiar os desembolsos de agosto, setembro e do início de outubro.
+
+Foi simulado um empréstimo recebido em **3 de agosto de 2026**, no valor de **R$ 131.171,36**, exatamente igual ao total de custos diretos e despesas operacionais. A taxa assumida é de **2% ao mês**, com juros simples proporcionais por 65 dias:
+
+`Juros = R$ 131.171,36 × 2% × (65 ÷ 30) = R$ 5.684,09`
+
+O empréstimo continua limitado a R$ 131.171,36 porque precisa financiar somente os custos diretos e as despesas operacionais anteriores ao recebimento. Os juros não aumentam o principal: eles são pagos após a entrada do cliente e foram incorporados ao preço de venda.
+
+O Metrô paga R$ 192.195,11 em 7 de outubro. Na mesma data, após o recebimento, a startup quita o principal e os juros do empréstimo. O imposto de R$ 30.270,73 é pago em 20 de novembro, data sintética adotada para evidenciar a obrigação tributária após o faturamento.
+
+| Mês | Saldo inicial | Entradas | Saídas do projeto | Principal do empréstimo | Juros | Impostos | Saldo final |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Agosto/2026 | R$ 0,00 | R$ 131.171,36 | R$ 55.261,83 | R$ 0,00 | R$ 0,00 | R$ 0,00 | R$ 75.909,53 |
+| Setembro/2026 | R$ 75.909,53 | R$ 0,00 | R$ 57.534,30 | R$ 0,00 | R$ 0,00 | R$ 0,00 | R$ 18.375,23 |
+| Outubro/2026 | R$ 18.375,23 | R$ 192.195,11 | R$ 18.375,23 | R$ 131.171,36 | R$ 5.684,09 | R$ 0,00 | R$ 55.339,66 |
+| Novembro/2026 | R$ 55.339,66 | R$ 0,00 | R$ 0,00 | R$ 0,00 | R$ 0,00 | R$ 30.270,73 | **R$ 25.068,93** |
+| **Total** |  | **R$ 323.366,47** | **R$ 131.171,36** | **R$ 131.171,36** | **R$ 5.684,09** | **R$ 30.270,73** | **R$ 25.068,93** |
+
+Antes do recebimento do cliente, o empréstimo é totalmente consumido pelos R$ 131.171,36 de custos e despesas, de modo que o menor saldo projetado é zero. A conciliação final é:
+
+`Lucro após financiamento = resultado antes do financiamento − juros`
+
+`Lucro após financiamento = R$ 30.753,02 − R$ 5.684,09 = R$ 25.068,93`
+
+O fluxo confirma que todos os pagamentos mapeados podem ser liquidados e que o saldo final coincide com o lucro desejado. Os R$ 25.068,93 representam exatamente 15% da soma de custos diretos, despesas operacionais, juros e imposto. Em relação ao preço de venda, esse resultado corresponde a aproximadamente 13,04%, pois o percentual de 15% foi aplicado sobre a base definida no barema e não diretamente sobre a receita. A simulação não inclui IOF, tarifa de abertura, custo bancário, atraso do cliente nem reserva de contingência; em uma proposta real, esses itens também deveriam compor o preço ou uma linha de crédito adicional. Um adiantamento do Metrô reduziria a necessidade de capital de giro.
+
+## 11.9 Conclusão da viabilidade
+
+Nas premissas adotadas, a entrega é financeiramente viável pelo preço de **R$ 192.195,11**. Esse valor paga os R$ 115.400,00 de custos diretos, os R$ 15.771,36 de despesas operacionais, os R$ 5.684,09 de juros, o imposto único estimado em R$ 30.270,73 e o lucro de R$ 25.068,93. O empréstimo de R$ 131.171,36 resolve o descasamento entre os pagamentos do desenvolvimento e o recebimento final, enquanto a inclusão dos juros na formação do preço preserva o lucro desejado de 15% após a quitação. Portanto, a viabilidade depende de cumprir o prazo, controlar o uso das ferramentas e receber do cliente na data contratada.
+
 # Referências
+
 - Microsoft. [Preços do Azure AI Speech](https://azure.microsoft.com/en-us/pricing/details/speech/). Acesso em: 19 ago. 2026.
 - Microsoft. [Quotas e limites do Azure AI Speech](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-services-quotas-and-limits). Acesso em: 19 ago. 2026.
 - Microsoft. [API REST de conversão de fala em texto para áudio curto](https://learn.microsoft.com/pt-br/azure/ai-services/speech-service/rest-speech-to-text-short). Acesso em: 19 ago. 2026.
@@ -6507,5 +6686,16 @@ Os procedimentos detalhados de diagnóstico, atualização, rollback e encerrame
 - Amazon Web Services. [Idiomas do Amazon Transcribe](https://docs.aws.amazon.com/pt_br/transcribe/latest/dg/supported-languages.html). Acesso em: 19 ago. 2026.
 - OpenAI. [Preços da API](https://platform.openai.com/pricing). Acesso em: 19 ago. 2026.
 - OpenAI. [Audio API — Create transcription](https://platform.openai.com/docs/api-reference/audio/createTranscription). Acesso em: 19 ago. 2026.
+- Amazon Web Services. [Instâncias Amazon EC2 T3](https://aws.amazon.com/ec2/instance-types/t3/). Acesso em: 25 set. 2026.
+- Amazon Web Services. [Tipos de volume do Amazon EBS](https://aws.amazon.com/ebs/volume-types/). Acesso em: 25 set. 2026.
+- Amazon Web Services. [Preços do Amazon ECR](https://aws.amazon.com/ecr/pricing/). Acesso em: 25 set. 2026.
+- Amazon Web Services. [Preços do Amazon CloudWatch](https://aws.amazon.com/cloudwatch/pricing/). Acesso em: 25 set. 2026.
+- Amazon Web Services. [Preços da Amazon VPC](https://aws.amazon.com/vpc/pricing/). Acesso em: 25 set. 2026.
+- Banco Central do Brasil. [Cotações e boletins PTAX](https://ptax.bcb.gov.br/ptax_internet/consultarTodasAsMoedas.do?method=consultaTodasMoedas). Acesso em: 25 set. 2026.
+- Brasil. [Lei Complementar nº 123, de 14 de dezembro de 2006](https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp123.htm). Acesso em: 25 set. 2026.
+- OpenAI. [Codex pricing](https://learn.chatgpt.com/docs/pricing). Acesso em: 25 set. 2026.
+- Robert Half. [Guia Salarial 2026](https://www.roberthalf.com/br/pt/insights/salary-guide). Acesso em: 25 set. 2026.
+- Robert Half. [Desenvolvedor(a) full-stack júnior](https://www.roberthalf.com/br/pt/vagas-detalhes/desenvolvedora-full-stack-junior). Acesso em: 25 set. 2026.
+- Supabase. [Preços](https://supabase.com/pricing). Acesso em: 25 set. 2026.
 
 <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">[nome do projeto]</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">INTELI, [aluno 1], [aluno 2], [aluno 3], [aluno 4], [aluno 5], [aluno 6], [aluno 7]</a> is licensed under <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">Attribution 4.0 International<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"></a></p>
