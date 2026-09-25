@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { expect, it } from 'vitest';
 import { TooltipProvider } from '../ui/tooltip';
 import { DocumentViewer } from './document-viewer';
+import { SourceCitations } from '../chat/source-citations';
 import { ResponseDetails } from './response-details';
 import { toAssistantMessage, toRetrievedDocument } from '@/lib/domain';
 import { response } from '@/tests/fixtures';
@@ -33,8 +34,8 @@ it('exibe identificadores e periodos disponiveis da fonte', () => {
     'Período de registro',
     'Vigência',
     'Em andamento',
-    '2026-09-01 — 2026-09-24',
-    '2026-09-01 — Fim não informado',
+    '01 de set. de 2026 — 24 de set. de 2026',
+    '01 de set. de 2026 — Fim não informado',
   ]) {
     expect(screen.getByText(value)).toBeVisible();
   }
@@ -47,4 +48,18 @@ it('exibe o identificador que permite localizar a auditoria', () => {
   );
   render(<ResponseDetails message={message} />);
   expect(screen.getByText('trace-17')).toBeVisible();
+});
+
+it('sinaliza fontes consultadas que nao sustentam uma resposta insuficiente', () => {
+  const sources = [toRetrievedDocument(response.sources[0], 0)];
+  const { rerender } = render(
+    <SourceCitations sources={sources} selectedId={null} onSelect={() => {}} />,
+  );
+  expect(screen.getByText('Fontes consultadas')).toBeVisible();
+  rerender(
+    <SourceCitations sources={sources} selectedId={null} onSelect={() => {}} unused />,
+  );
+  expect(
+    screen.getByText('Fontes consultadas, sem evidência para esta resposta'),
+  ).toBeVisible();
 });

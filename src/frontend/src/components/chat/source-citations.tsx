@@ -8,16 +8,20 @@ import type { RetrievedDocument } from '@/lib/domain';
  *
  * A ordem e a mesma que `build_rag_input` usa ao numerar `[Fonte N]` no prompt,
  * entao o numero exibido aqui casa com a citacao que aparece no texto.
- * Clicar abre o documento no painel da direita.
+ * Clicar abre o documento no painel da direita. Quando a resposta se absteve
+ * por falta de evidencia, as fontes continuam inspecionaveis, mas o rotulo
+ * deixa claro que nao sustentam o texto exibido.
  */
 export function SourceCitations({
   sources,
   selectedId,
   onSelect,
+  unused = false,
 }: {
   sources: RetrievedDocument[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  unused?: boolean;
 }) {
   if (sources.length === 0) {
     return null;
@@ -26,7 +30,7 @@ export function SourceCitations({
   return (
     <div className="mt-3">
       <p className="pb-1.5 text-2xs font-semibold uppercase tracking-wide text-fg-subtle">
-        Fontes consultadas
+        {unused ? 'Fontes consultadas, sem evidência para esta resposta' : 'Fontes consultadas'}
       </p>
       <div className="flex flex-wrap gap-1.5">
         {sources.map((source) => {

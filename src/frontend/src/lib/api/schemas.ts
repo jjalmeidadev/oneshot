@@ -112,6 +112,8 @@ export type ChatResponse = {
   sources: ChatSource[];
   claims?: FactualClaim[];
   evidence_status?: EvidenceStatus;
+  /** Presente so na resposta secundaria confirmada: analise rotulada, nao fato. */
+  recommendation?: string | null;
   proactive_suggestion?: ProactiveSuggestion | null;
   workflow?: WorkflowDirective | null;
 };
@@ -323,7 +325,7 @@ export type AudioPipelineMetrics = ChatPipelineMetrics & {
   total_ms: number;
 };
 
-/** Referencia completa com aliases legados; Partial aceita respostas anteriores a S4-17A. */
+/** Referencia completa com aliases legados; Partial aceita respostas anteriores ao contrato 1.1.0. */
 export type AudioAnswerSource = Partial<ChatSource> & {
   artifact: string;
   section: string;

@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { formatDateTime } from '@/lib/format';
+import { formatDateTime, formatPeriod } from '@/lib/format';
 import type { RetrievedDocument } from '@/lib/domain';
 
 /** Documento recuperado, com trecho, metadados e acesso à origem. */
@@ -54,14 +54,14 @@ export function DocumentViewer({ document }: { document: RetrievedDocument }) {
             <MetaRow
               icon={Timer}
               label="Período de registro"
-              value={`${document.registrationPeriod.start ?? 'Início não informado'} — ${document.registrationPeriod.end ?? 'Fim não informado'}`}
+              value={formatPeriod(document.registrationPeriod)}
             />
           )}
           {document.validity && (
             <MetaRow
               icon={Timer}
               label="Vigência"
-              value={`${document.validity.start ?? 'Início não informado'} — ${document.validity.end ?? 'Fim não informado'}`}
+              value={formatPeriod(document.validity)}
             />
           )}
           <div className="flex items-center gap-1.5">

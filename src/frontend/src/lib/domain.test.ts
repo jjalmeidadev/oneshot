@@ -3,7 +3,7 @@ import { toAssistantMessage } from './domain';
 import { response } from '@/tests/fixtures';
 import type { ChatResponse } from './api/schemas';
 
-describe('S4-17A: referencias preservadas na interface', () => {
+describe('referências preservadas na interface', () => {
   it('preserva evidencias, periodos e correlacao ao converter a resposta', () => {
     const source = {
       ...response.sources[0],
@@ -66,7 +66,7 @@ describe('S4-17A: referencias preservadas na interface', () => {
       {
         ...response,
         evidence_status: 'insufficient',
-        text: 'Nao ha evidencia recuperada suficiente.',
+        text: 'Não há evidência recuperada suficiente.',
         claims: [],
       },
       { roundTripMs: 10, intentLayerEnabled: false },
