@@ -112,6 +112,12 @@ def classificacao_fixa(
     )
 
 
+#: Marcado pela #228 (S4-32B): este arquivo cruza fronteira entre
+#: componentes (API, modelo, banco ou servico externo). Rodar so estes com
+#: `pytest -m integration`.
+pytestmark = pytest.mark.integration
+
+
 @pytest.fixture(autouse=True)
 def reset_concurrency_control(monkeypatch: pytest.MonkeyPatch) -> None:
     from app.gemini.schemas import GeminiChatResponse, GeminiUsage

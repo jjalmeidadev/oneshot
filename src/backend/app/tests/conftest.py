@@ -85,3 +85,18 @@ def ambiente_isolado(monkeypatch):
     # ate o timeout, em vez de falhar na hora como antes. O comportamento do
     # pool tem testes proprios em test_database_pool.py, com pool falso.
     monkeypatch.setenv("DATABASE_POOL_ENABLED", "0")
+
+
+def pytest_configure(config):
+    """Registra os marcadores usados pela suite.
+
+    Sem isto, `pytestmark = pytest.mark.integration` gera PytestUnknownMarkWarning
+    em cada arquivo marcado. O registro fica aqui, e nao em um `pytest.ini` novo,
+    para nao mudar o rootdir da suite.
+    """
+
+    config.addinivalue_line(
+        "markers",
+        "integration: cruza fronteira entre componentes (API, modelo, banco ou "
+        "servico externo)",
+    )

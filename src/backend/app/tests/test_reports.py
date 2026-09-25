@@ -21,6 +21,12 @@ AUTH_HEADER = {"Authorization": "Bearer report-test-token"}
 CALLBACK_HEADER = {"X-Callback-Token": "callback-test-token"}
 
 
+#: Marcado pela #228 (S4-32B): este arquivo cruza fronteira entre
+#: componentes (API, modelo, banco ou servico externo). Rodar so estes com
+#: `pytest -m integration`.
+pytestmark = pytest.mark.integration
+
+
 @pytest.fixture(autouse=True)
 def report_environment(monkeypatch, tmp_path):
     identities = {

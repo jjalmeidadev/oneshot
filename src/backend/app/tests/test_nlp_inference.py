@@ -41,6 +41,12 @@ pytest.importorskip("torch", reason="instale requirements-pln.txt")
 pytest.importorskip("transformers", reason="instale requirements-pln.txt")
 
 
+#: Marcado pela #228 (S4-32B): este arquivo cruza fronteira entre
+#: componentes (API, modelo, banco ou servico externo). Rodar so estes com
+#: `pytest -m integration`.
+pytestmark = pytest.mark.integration
+
+
 @pytest.fixture(scope="module")
 def classificador() -> ClassificadorDeIntencoes:
     with warnings.catch_warnings():

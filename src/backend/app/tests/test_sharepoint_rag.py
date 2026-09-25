@@ -15,6 +15,12 @@ DATA_DIR = (
 )
 
 
+#: Marcado pela #228 (S4-32B): este arquivo cruza fronteira entre
+#: componentes (API, modelo, banco ou servico externo). Rodar so estes com
+#: `pytest -m integration`.
+pytestmark = pytest.mark.integration
+
+
 def test_loads_mock_sharepoint_list_exports() -> None:
     documents = load_sharepoint_documents(DATA_DIR)
 
