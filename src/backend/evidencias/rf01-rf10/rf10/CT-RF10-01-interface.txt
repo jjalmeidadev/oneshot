@@ -1,0 +1,31 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO + EVIDÊNCIA VISUAL
+
+Caso: CT-RF10-01
+Requisito: RF10
+Cenário: Positivo
+Status: APROVADO
+
+Sequência observada na interface:
+1. Nova conversa com "Modo proatividade" OFF.
+2. Controle alterado para ON.
+3. Envio de: Qual é o prazo do projeto PRJ-0442?
+4. Resposta principal apresentada normalmente.
+5. Bloco separado "Sugestão opcional" exibido, com ações de aceitar e recusar.
+6. Modo proatividade alterado novamente para OFF.
+7. Nova conversa.
+8. Mesma pergunta enviada.
+9. Resposta principal preservada.
+10. Nenhuma sugestão proativa exibida.
+
+Conclusão:
+ON -> resposta principal + sugestão.
+OFF -> resposta principal sem sugestão.
+
+Evidências visuais esperadas nesta pasta:
+CT-RF10-01-A-estado-inicial-off.png
+CT-RF10-01-B-estado-on.png
+CT-RF10-01-C-consulta-on-com-sugestao.png
+CT-RF10-01-D-consulta-off-sem-sugestao.png
+
+Observação:
+O código inspecionado inicia `proactivityEnabled=false` e mantém o estado na sessão. Não foi observada persistência da preferência em localStorage; portanto, não se afirma persistência após reload completo.

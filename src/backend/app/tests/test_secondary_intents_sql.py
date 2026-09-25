@@ -64,6 +64,43 @@ def test_pending_confirmations_persist_prepared_response() -> None:
         assert "prepared_interaction_id" in normalized
 
 
+def test_prepared_response_migration_only_deletes_expired_unclaimed_legacy_rows() -> None:
+    sql = re.sub(r"\s+", " ", _read(PREPARED_RESPONSE_MIGRATION_SQL).lower())
+    delete = re.search(
+        r"delete from public\.pending_proactive_suggestions (.*?) do \$\$",
+        sql,
+    )
+    assert delete is not None
+    assert delete.group(1).strip() == (
+        "where (prepared_response is null or prepared_model is null) "
+        "and expires_at < now() and claimed_at is null;"
+    )
+    assert sql.index("raise exception") < sql.index("alter column prepared_response set not null")
+    assert "where prepared_response is null or prepared_model is null" in sql
+    assert "alter table public.pending_proactive_suggestions enable row level security" in sql
+    assert "revoke all on public.pending_proactive_suggestions from anon, authenticated" in sql
+    assert "alter column prepared_interaction_id set not null" not in sql
+    assert sql.startswith("--") and "begin;" in sql and sql.rstrip().endswith("commit;")
+
+
+def test_prepared_response_cleanup_predicate_protects_active_and_claimed_rows() -> None:
+    sql = re.sub(r"\s+", " ", _read(PREPARED_RESPONSE_MIGRATION_SQL).lower())
+    assert (
+        "where (prepared_response is null or prepared_model is null) "
+        "and expires_at < now() and claimed_at is null;"
+    ) in sql
+
+    # Casos da regra SQL acima: somente o legado expirado e não reivindicado sai.
+    cases = [
+        (True, True, True, True),
+        (True, False, True, False),
+        (True, True, False, False),
+        (False, True, True, False),
+    ]
+    for incomplete, expired, unclaimed, should_delete in cases:
+        assert (incomplete and expired and unclaimed) is should_delete
+
+
 def test_initial_load_and_migration_cover_all_mappings_idempotently() -> None:
     seed_sql = _read(SEED_SQL)
     migration_sql = _read(MIGRATION_SQL)

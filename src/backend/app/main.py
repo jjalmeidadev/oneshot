@@ -56,20 +56,7 @@ from app.reports.router import router as reports_router
 from app.alerts.errors import AlertError
 from app.alerts.router import router as alerts_router
 
-# Em runtime normal (dev/producao) o .env e a fonte de verdade e preenche as
-# variaveis do processo. Cenarios de teste que injetam identidades/config
-# proprias antes do import (ex.: e2e_server, CI) marcam
-# G05_DISABLE_DOTENV_OVERRIDE=1 para que esses valores nao sejam sobrescritos.
-_dotenv_override = os.getenv("G05_DISABLE_DOTENV_OVERRIDE", "0").strip().lower() not in {
-    "1",
-    "true",
-    "yes",
-    "on",
-}
-load_dotenv(
-    Path(__file__).resolve().parents[1] / ".env",
-    override=_dotenv_override,
-)
+load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
 
 AUDIO_PATH = "/api/audio"
 DEFAULT_LANGUAGE = "pt-BR"

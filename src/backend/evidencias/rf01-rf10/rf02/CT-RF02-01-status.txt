@@ -1,0 +1,32 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF02-01
+Requisito: RF02
+Cenário: Positivo
+Status: FALHOU
+
+Entrada:
+Mostre o status do projeto PRJ-0442
+
+Resultado observado:
+HTTP 200
+intent.macro: CONSULTA
+intent.specific: ""
+confidence_macro: 0.5372
+confidence_specific: 0.4108
+
+Alternativas preservadas:
+transacao_atualizar_status: 0.4108
+consulta_status_projeto: 0.403
+
+Observação:
+A resposta final tratou semanticamente o status do projeto, porém a intenção específica `consulta_status_projeto` não foi selecionada como intenção primária.
+
+Resultado esperado:
+Identificar a intenção primária de consulta de status e encaminhá-la ao catálogo.
+
+Conclusão:
+FALHOU.
+
+Defeito:
+DEF-RF02-01 — sensibilidade lexical da classificação.

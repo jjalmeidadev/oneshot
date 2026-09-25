@@ -1,0 +1,28 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF08-02
+Requisito: RF08
+Cenário: Negativo
+Status: APROVADO
+
+Entrada:
+Qual será o custo final do projeto PRJ-0442?
+
+Resultado observado:
+HTTP 200
+A resposta declarou que o contexto não continha previsão de custo final.
+Nenhum valor numérico de custo final foi inventado.
+intent.macro: CONSULTA
+intent.specific: consulta_orcamento_custo
+confidence_specific: 0.737
+handler: handler:consulta_orcamento_custo
+workflow: null
+
+Fontes:
+fonte PRJ-0442 com score 6.0 e fonte genérica com score 1.0.
+
+Resultado esperado:
+Declarar insuficiência/impossibilidade sem inventar valor, fonte ou certeza.
+
+Conclusão:
+APROVADO.
