@@ -276,3 +276,32 @@ def test_json_fallback_is_explicit_when_database_url_is_absent(monkeypatch):
 
     assert results
     assert results[0].document.title == "Transporte de bicicleta"
+
+
+@pytest.mark.parametrize("use_entities", [True, False])
+def test_explicit_project_excludes_other_projects_even_with_same_keywords(monkeypatch, use_entities):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://synthetic:synthetic@example.test/test")
+    rows = [dict(extract_id=f"extract-{code}", artifact_id=f"artifact-{code}",
+        project_id=f"project-{code}", project_code=code,
+        artifact_title="Status do projeto", content_text="Status: Em andamento",
+        extract_metadata={}, score=10) for code in ["PRJ-9999", "PRJ-0017"]]
+    connect, connection = _connect_with_rows(rows)
+    results = retrieve_database_context(
+        "Qual o status?" if use_entities else "Qual o status do PRJ-0017?",
+        entities=[_entity("PRJ-0017")] if use_entities else [], connect=connect)
+    assert len(results) == 1
+    assert results[0].document.project_id == "project-PRJ-0017"
+    assert connection.cursor_instance.params[2] == ["prj-0017"]
+    assert "requested_projects" in connection.cursor_instance.executed_query
+
+
+def test_absent_project_never_uses_another_projects_source(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://synthetic:synthetic@example.test/test")
+    rows = [dict(extract_id="extract-1", project_id="project-1", project_code="PRJ-9999",
+                 content_text="Status: Em andamento", extract_metadata={}, score=10)]
+    connect, _ = _connect_with_rows(rows)
+    assert retrieve_database_context("Status PRJ-0017", connect=connect) == []
+
+
+def test_local_fallback_without_project_identity_abstains():
+    assert retrieve_context("Status e bicicleta no PRJ-0017") == []
