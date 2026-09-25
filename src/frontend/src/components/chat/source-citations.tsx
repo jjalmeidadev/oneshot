@@ -30,7 +30,9 @@ export function SourceCitations({
   return (
     <div className="mt-3">
       <p className="pb-1.5 text-2xs font-semibold uppercase tracking-wide text-fg-subtle">
-        {unused ? 'Fontes consultadas, sem evidência para esta resposta' : 'Fontes consultadas'}
+        {unused
+          ? 'Fontes consultadas, sem evidência para esta resposta'
+          : 'Fontes consultadas'}
       </p>
       <div className="flex flex-wrap gap-1.5">
         {sources.map((source) => {
