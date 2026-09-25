@@ -1,0 +1,30 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF02-02
+Requisito: RF02
+Cenário: Negativo
+Status: APROVADO
+
+Entrada:
+bom dia, tudo certo?
+
+Resultado observado:
+HTTP 200
+text: Posso ajudar com informações do portfólio. Reformule sua pergunta indicando um projeto ou documento.
+model: classificador-local
+latency_ms: 0
+retrieval_ms: 0
+usage.total_tokens: 0
+sources: []
+intent.macro: FORA_DE_ESCOPO
+intent.specific: ""
+confidence_macro: 0.8949
+confidence_specific: 0.8819
+flow: Resposta padrão de limitação (RF08)
+alternative: fora_escopo_social (0.8819)
+
+Resultado esperado:
+Não atribuir intenção de projeto indevida; tratar como fora de escopo ou pedir reformulação.
+
+Conclusão:
+APROVADO.

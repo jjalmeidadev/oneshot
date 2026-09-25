@@ -1,0 +1,34 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF01-01
+Requisito: RF01
+Cenário: Positivo
+Status: APROVADO
+
+Entrada textual:
+Qual é o prazo do projeto PRJ-0442?
+
+Resultado observado:
+HTTP 200
+model: google/gemini-3.7-flash
+intent.macro: CONSULTA
+intent.specific: consulta_cronograma_prazo
+intent.confidence_specific: 0.9443
+entity.projeto: PRJ-0442
+
+Resposta observada:
+Prazo/vigência de 24/08/2026 a 28/08/2026, com fontes recuperadas.
+
+Modalidade áudio:
+A mesma solicitação foi enviada pela interface em áudio.
+O frontend apresentou estado "Transcrito" e encaminhou a transcrição ao pipeline.
+A transcrição aproximou foneticamente o identificador PRJ-0442, mas o pipeline resolveu o projeto correto e respondeu ao pedido.
+
+Resultado esperado:
+Texto e áudio em linguagem natural devem entrar no pipeline sem exigir sintaxe técnica.
+
+Conclusão:
+APROVADO. A aproximação fonética do identificador no STT foi registrada como observação de qualidade.
+
+Evidência complementar:
+CT-RF01-01-audio.png

@@ -226,7 +226,7 @@
     - [9.1.2 Matriz de rastreabilidade](#912-matriz-de-rastreabilidade)
     - [9.1.3 Casos de teste](#913-casos-de-teste)
     - [9.1.4 Abrangência e limitações](#914-abrangência-e-limitações)
-    - [9.1.5 Resultados](#915-resultados)
+    - [9.1.5 Execução e consolidação dos testes funcionais](#915-execução-e-consolidação-dos-testes-funcionais)
   - [9.2 Testes de RNFs](#92-testes-de-rnfs)
     - [9.2.1 Planejamento](#921-planejamento)
     - [9.2.2 Matriz de rastreabilidade e critérios](#922-matriz-de-rastreabilidade-e-critérios)
@@ -5363,11 +5363,259 @@ O plano cobre os dez requisitos funcionais e os três regimes principais do prod
 
 A abrangência é adequada ao planejamento sistêmico porque cada critério de aceitação da Seção 3.1 aparece na matriz e é observado em pelo menos um resultado esperado. Ela não pretende substituir testes unitários de todas as funções nem combinações exaustivas de frases, perfis e documentos. Variações linguísticas e métricas quantitativas do classificador pertencem aos RNF06 e RNF07; desempenho, segurança, acessibilidade, usabilidade e confiabilidade quantitativa pertencem às Seções 9.2 e 9.3.
 
-RF09 e RF10 possuem implementação observável pela interface e pela rota de confirmação, portanto seus casos devem ser executados e não podem mais ser marcados como bloqueados por ausência da funcionalidade. A validação de voz do RF01 segue condicionada à disponibilidade do endpoint de áudio especificado na Seção 8.7.
+RF09 e RF10 possuem implementação observável pela interface e pela rota de confirmação, portanto seus casos devem ser executados e não podem mais ser marcados como bloqueados por ausência da funcionalidade. A validação de voz do RF01 depende do endpoint de áudio especificado na Seção 8.7, disponível na versão executada na Sprint 4.
 
-### 9.1.5 Resultados
+### 9.1.5 Execução e consolidação dos testes funcionais
 
-Os casos acima constituem o plano da Sprint 3. A execução e o registro dos resultados ocorrerão na Sprint 4. Esta subseção deve ser atualizada com a data da execução, a versão testada, o responsável, o resultado de cada caso e os links para suas evidências. Casos ainda indisponíveis devem aparecer como bloqueados, com a dependência identificada, em vez de serem omitidos ou aprovados por planejamento.
+A execução da Sprint 4 consolidou os resultados dos casos definidos na Seção 9.1.3 para os requisitos RF01 a RF10. Foram preservados o propósito, o cenário positivo ou negativo, a entrada, o resultado esperado e a rastreabilidade de cada caso. A classificação foi realizada somente após a comparação entre o comportamento esperado e o comportamento observado; uma resposta HTTP `200`, isoladamente, não foi considerada suficiente para aprovar um caso.
+
+Foram executados **20 de 20 casos planejados**, sem casos `BLOQUEADO` ou `NÃO EXECUTADO`. Na rodada de 23/09/2026, 15 casos foram aprovados e 5 falharam. A falha do CT-RF09-01 veio de um defeito já registrado na Seção 9.2.7, o `DEF-RNF04-02`, que foi corrigido; no reteste, o caso foi aprovado. O resultado consolidado é de **16 casos APROVADOS (80%)** e **4 casos que FALHARAM (20%)**.
+
+As evidências desta execução são mantidas em `src/backend/evidencias/rf01-rf10/`. Para chamadas de API, os registros textuais são a evidência principal, pois preservam os campos observados durante a execução. Capturas de tela são usadas como evidência complementar nos cenários de áudio e controle de proatividade.
+
+#### 9.1.5.1 Ambiente e protocolo de execução
+
+| Item                                | Configuração observada                                                            |
+|:------------------------------------|:----------------------------------------------------------------------------------|
+| Data da rodada                      | 23/09/2026; os registros com horário vão das 20:59 às 21:42                       |
+| Responsável                         | Wendel Feitosa                                                                    |
+| Versão testada                      | commit `be814f6` da `develop`, base da branch `test/executa-rfs`                  |
+| Backend                             | FastAPI/Uvicorn em `http://127.0.0.1:8000`                                        |
+| Verificação de saúde                | `/health` retornando HTTP `200` e `{"status":"ok"}`                               |
+| Python                              | 3.12.x                                                                            |
+| Provedor da rodada funcional válida | OpenRouter                                                                        |
+| Modelo generativo                   | `google/gemini-3.7-flash`, com limite de 512 tokens de saída, padrão dessa versão |
+| Recuperação                         | RAG sobre os extratos documentais sintéticos (`source_extracts`, no Supabase)     |
+| Projetos utilizados                 | `PRJ-0442` e `PRJ-0510`                                                           |
+| Projeto inexistente de controle     | `INEXISTENTE-999`                                                                 |
+| Autenticação da proatividade        | Bearer de identidade simulada configurado no ambiente; valor não versionado       |
+| Reteste do CT-RF09-01               | 24/09/2026, commit `c793983`, limite de 1024 tokens                               |
+
+A execução utilizou os estados `APROVADO`, `FALHOU`, `BLOQUEADO` e `NÃO EXECUTADO`. Os testes não foram alterados para forçar aprovação. Quando o caminho estava disponível e a resposta divergiu do critério funcional, o caso foi registrado como `FALHOU`. Os comandos para reproduzir os casos de API estão no README da pasta de evidências.
+
+Três pontos da execução diferem do plano da Seção 9.1.3, sem mudar o resultado esperado de nenhum caso. Os projetos `XPTO` e `ABC` do plano não existem no banco, que tem apenas `PRJ-0442`, `PRJ-0510` e `PRJ-0587`; foram substituídos por `PRJ-0442` e `PRJ-0510`, e `INEXISTENTE-999` segue como controle. No CT-RF09-01, a consulta de status do plano deu lugar a uma consulta de prazo; as duas intenções têm intenção secundária compatível no catálogo. No CT-RF03-01, o catálogo não tem campo de frase de teste cadastrada, e foram usadas frases representativas das descrições das intenções.
+
+A massa sintética fica em dois lugares. As tabelas estruturadas do banco guardam progresso, riscos e marcos de `PRJ-0442`, `PRJ-0510` e `PRJ-0587`, mas só o módulo de relatórios as lê. A recuperação do chat consulta os extratos documentais, e nessa base só o `PRJ-0442` tem documento: há 1 extrato dele, 8 sem projeto e nenhum do `PRJ-0510`. Essa condição foi mantida durante os testes e explica a falha do RF06.
+
+#### 9.1.5.2 Resultado consolidado
+
+| Requisito | Caso positivo                | Caso negativo                | Resultado                     |
+|:----------|:-----------------------------|:-----------------------------|:------------------------------|
+| RF01      | CT-RF01-01 — **APROVADO**    | CT-RF01-02 — **APROVADO**    | 2/2 aprovados                 |
+| RF02      | CT-RF02-01 — **FALHOU**      | CT-RF02-02 — **APROVADO**    | 1 aprovado / 1 falhou         |
+| RF03      | CT-RF03-01 — **APROVADO**    | CT-RF03-02 — **FALHOU**      | 1 aprovado / 1 falhou         |
+| RF04      | CT-RF04-01 — **APROVADO**    | CT-RF04-02 — **APROVADO**    | 2/2 aprovados                 |
+| RF05      | CT-RF05-01 — **APROVADO**    | CT-RF05-02 — **APROVADO**    | 2/2 aprovados                 |
+| RF06      | CT-RF06-01 — **FALHOU**      | CT-RF06-02 — **APROVADO**    | 1 aprovado / 1 falhou         |
+| RF07      | CT-RF07-01 — **APROVADO**    | CT-RF07-02 — **APROVADO**    | 2/2 aprovados                 |
+| RF08      | CT-RF08-01 — **FALHOU**      | CT-RF08-02 — **APROVADO**    | 1 aprovado / 1 falhou         |
+| RF09      | CT-RF09-01 — **APROVADO**¹   | CT-RF09-02 — **APROVADO**    | 2/2 aprovados                 |
+| RF10      | CT-RF10-01 — **APROVADO**    | CT-RF10-02 — **APROVADO**    | 2/2 aprovados                 |
+| **Total** | **8 aprovados / 2 falharam** | **8 aprovados / 2 falharam** | **16 aprovados / 4 falharam** |
+
+¹ Falhou na rodada de 23/09, pelo `DEF-RNF04-02`, e foi aprovado no reteste depois da correção. Na rodada, o total foi de 15 aprovados e 5 falharam.
+
+#### 9.1.5.3 Resultados detalhados
+
+##### RF01 — Entrada de comandos em linguagem natural
+
+| ID         | Cenário  | Entrada executada                                                            | Resultado esperado                                                              | Resultado observado                                                                                                                                                                                                                              | Status       | Evidência                                                                          |
+|:-----------|:---------|:-----------------------------------------------------------------------------|:--------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------|:-----------------------------------------------------------------------------------|
+| CT-RF01-01 | Positivo | Texto `Qual é o prazo do projeto PRJ-0442?` e áudio com a mesma solicitação. | Texto e áudio são aceitos e encaminhados ao PLN sem sintaxe técnica.            | Texto retornou HTTP `200`, `CONSULTA / consulta_cronograma_prazo`, entidade `PRJ-0442` e prazo de 24/08/2026 a 28/08/2026. O áudio foi transcrito e processado; apesar da aproximação fonética do identificador, o pipeline resolveu `PRJ-0442`. | **APROVADO** | `src/backend/evidencias/rf01-rf10/rf01/CT-RF01-01-texto.txt` e `CT-RF01-01-audio.png` |
+| CT-RF01-02 | Negativo | Mensagem vazia ou composta apenas por espaços.                               | A solicitação não é encaminhada ao PLN e o sistema solicita uma entrada válida. | HTTP `422`, código `INVALID_INPUT`, com mensagem para informar uma mensagem válida.                                                                                                                                                              | **APROVADO** | `src/backend/evidencias/rf01-rf10/rf01/CT-RF01-02-vazio.txt`                          |
+
+A diferença fonética observada no STT de CT-RF01-01 foi registrada como observação de qualidade, pois o projeto correto foi resolvido pelo pipeline e o processamento funcional foi concluído.
+
+##### RF02 — Identificação semântica da intenção
+
+| ID         | Cenário  | Entrada executada                     | Resultado esperado                                                                  | Resultado observado                                                                                                                                                                                          | Status       | Evidência                                                       |
+|:-----------|:---------|:--------------------------------------|:------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------|:----------------------------------------------------------------|
+| CT-RF02-01 | Positivo | `Mostre o status do projeto PRJ-0442` | Identificar a intenção primária de consulta de status e encaminhá-la ao catálogo.   | HTTP `200`, porém `specific=""`. A confiança da macro foi `0.5372`; `transacao_atualizar_status` apareceu com `0.4108` e `consulta_status_projeto` com `0.403`, sem seleção da intenção específica esperada. | **FALHOU**   | `src/backend/evidencias/rf01-rf10/rf02/CT-RF02-01-status.txt`      |
+| CT-RF02-02 | Negativo | `bom dia, tudo certo?`                | Não atribuir intenção de projeto; tratar como fora de escopo ou pedir reformulação. | `FORA_DE_ESCOPO`, `model=classificador-local`, zero tokens, nenhuma fonte e orientação de reformulação.                                                                                                      | **APROVADO** | `src/backend/evidencias/rf01-rf10/rf02/CT-RF02-02-fora-escopo.txt` |
+
+CT-RF02-01 demonstra que uma resposta semanticamente relacionada não é suficiente para aprovação quando a intenção primária exigida pelo critério não é identificada.
+
+##### RF03 — Classificação e associação ao catálogo
+
+| ID         | Cenário  | Entrada executada                                          | Resultado esperado                                                                          | Resultado observado                                                                                                                                                                                           | Status       | Evidência                                                        |
+|:-----------|:---------|:-----------------------------------------------------------|:--------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------|:-----------------------------------------------------------------|
+| CT-RF03-01 | Positivo | Consulta de prazo; geração de relatório; alerta de atraso. | Demonstrar as categorias consulta, transação e alerta, com associação às respectivas rotas. | Prazo → `CONSULTA / consulta_cronograma_prazo` (`0.9443`); relatório → `TRANSACAO / transacao_gerar_relatorio` (`0.8773`, `workflow-router`, tokens `0`); atraso → `ALERTA / alerta_prazo_atraso` (`0.7645`). | **APROVADO** | `src/backend/evidencias/rf01-rf10/rf03/CT-RF03-01-categorias.txt`   |
+| CT-RF03-02 | Negativo | `Reserve uma sala de reunião para amanhã`                  | Não associar ficticiamente ao catálogo; informar fora de escopo ou pedir reformulação.      | HTTP `200`, classificado como `TRANSACAO / transacao_agendar_compromisso`, confiança específica `0.7335`, com continuidade da interação.                                                                      | **FALHOU**   | `src/backend/evidencias/rf01-rf10/rf03/CT-RF03-02-reserva-sala.txt` |
+
+O artefato de catálogo inspecionado contém intenções, categorias e fluxos, mas não apresenta um campo explícito de “frase de teste cadastrada”. Por isso, CT-RF03-01 foi executado com frases representativas alinhadas às descrições das intenções, sem afirmar que essas frases estavam cadastradas literalmente.
+
+##### RF04 — Recuperação de informações
+
+| ID         | Cenário  | Entrada executada                            | Resultado esperado                                                            | Resultado observado                                                                                                                                                         | Status       | Evidência                                                       |
+|:-----------|:---------|:---------------------------------------------|:------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------|:----------------------------------------------------------------|
+| CT-RF04-01 | Positivo | `Qual é o prazo do projeto PRJ-0442?`        | Recuperar trecho relacionado ao projeto e utilizá-lo como contexto.           | A fonte principal foi `Operacao assistida na Linha Azul`, vinculada a `Comunicados de Servico / PRJ-0442`, score `8.0`. Uma fonte não relacionada apareceu com score `2.0`. | **APROVADO** | `src/backend/evidencias/rf01-rf10/rf04/CT-RF04-01-recuperacao.txt` |
+| CT-RF04-02 | Negativo | `Qual é o prazo do projeto INEXISTENTE-999?` | Não atribuir informação de outro projeto ao inexistente e comunicar ausência. | O sistema declarou que não havia informação para `INEXISTENTE-999`. Fontes de baixo score foram recuperadas, mas não foram atribuídas ao projeto inexistente.               | **APROVADO** | `src/backend/evidencias/rf01-rf10/rf04/CT-RF04-02-inexistente.txt` |
+
+Foi observado ruído de recuperação em fontes secundárias de baixo score. Como a resposta final preservou a separação entre o projeto solicitado e o conteúdo não relacionado, o comportamento não alterou a classificação dos casos.
+
+##### RF05 — Consulta de informações dos projetos
+
+| ID         | Cenário  | Entrada executada                            | Resultado esperado                                                 | Resultado observado                                                                                                                    | Status       | Evidência                                                        |
+|:-----------|:---------|:---------------------------------------------|:-------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------|:-------------|:-----------------------------------------------------------------|
+| CT-RF05-01 | Positivo | `Qual é o status do projeto PRJ-0442?`       | Apresentar o status disponível e referência ao contexto ou fonte.  | HTTP `200`, status `Programado`, fonte relacionada a `PRJ-0442` e `CONSULTA / consulta_status_projeto`, confiança específica `0.8492`. | **APROVADO** | `src/backend/evidencias/rf01-rf10/rf05/CT-RF05-01-status.txt`       |
+| CT-RF05-02 | Negativo | `Quem é o patrocinador do projeto PRJ-0442?` | Informar indisponibilidade sem completar a resposta com suposição. | O sistema declarou contexto insuficiente e não inventou patrocinador.                                                                  | **APROVADO** | `src/backend/evidencias/rf01-rf10/rf05/CT-RF05-02-patrocinador.txt` |
+
+A diferença entre `Mostre o status...`, que falhou em CT-RF02-01, e `Qual é o status...`, corretamente classificado neste caso, reforça a sensibilidade lexical registrada no defeito DEF-RF02-01.
+
+##### RF06 — Análise e comparação de projetos
+
+| ID         | Cenário  | Entrada executada                                             | Resultado esperado                                                      | Resultado observado                                                                                                                           | Status       | Evidência                                                                  |
+|:-----------|:---------|:--------------------------------------------------------------|:------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------|:-------------|:---------------------------------------------------------------------------|
+| CT-RF06-01 | Positivo | `Compare os prazos e riscos dos projetos PRJ-0442 e PRJ-0510` | Distinguir os dois projetos, abordar prazo e risco e fundamentar ambos. | A intenção `comparacao_entre_projetos` (`0.7847`) e os dois IDs foram reconhecidos, porém a resposta e as fontes cobriram somente `PRJ-0442`. | **FALHOU**   | `src/backend/evidencias/rf01-rf10/rf06/CT-RF06-01-comparacao.txt`             |
+| CT-RF06-02 | Negativo | `Compare os riscos dos projetos PRJ-0442 e INEXISTENTE-999`   | Identificar a ausência e limitar a conclusão.                           | O sistema informou contexto insuficiente, identificou o projeto inexistente e não inventou uma comparação completa.                           | **APROVADO** | `src/backend/evidencias/rf01-rf10/rf06/CT-RF06-02-comparacao-inexistente.txt` |
+
+A falha do CT-RF06-01 vem da base consultada pelo chat, e não da recuperação com vários projetos. O `PRJ-0510` tem progresso, riscos e marcos nas tabelas estruturadas, que o chat não lê, e nenhum documento entre os extratos que ele consulta (Seção 9.1.5.1). Com contexto só do `PRJ-0442`, a resposta não tinha como comparar os dois.
+
+##### RF07 — Roteamento híbrido das intenções
+
+| ID         | Cenário  | Entrada executada                                         | Resultado esperado                                                                      | Resultado observado                                                                                                                                         | Status       | Evidência                                                    |
+|:-----------|:---------|:----------------------------------------------------------|:----------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------|:-------------------------------------------------------------|
+| CT-RF07-01 | Positivo | `Gere um relatório de acompanhamento do projeto PRJ-0442` | Utilizar rota automatizada, com intenção e parâmetros estruturados, sem chamada ao LLM. | `TRANSACAO / transacao_gerar_relatorio`, `model=workflow-router`, tokens `0`, `workflow.kind=guided_workflow`, `workflow.action=start` e escopo `PRJ-0442`. | **APROVADO** | `src/backend/evidencias/rf01-rf10/rf07/CT-RF07-01-workflow.txt` |
+| CT-RF07-02 | Negativo | `Qual é o prazo do projeto PRJ-0442?`                     | Utilizar contexto recuperado + LLM, sem executar fluxo automatizado.                    | Modelo Gemini, uso de tokens, fontes RAG, `consulta_cronograma_prazo` e `workflow=null`.                                                                    | **APROVADO** | `src/backend/evidencias/rf01-rf10/rf07/CT-RF07-02-llm.txt`      |
+
+Em CT-RF07-01, o estado observado foi `start`. A evidência demonstra o roteamento e o início do workflow; não se afirma que o relatório final foi concluído nessa etapa.
+
+##### RF08 — Respostas estruturadas e fundamentadas
+
+| ID         | Cenário  | Entrada executada                              | Resultado esperado                                                                          | Resultado observado                                                                                             | Status       | Evidência                                                       |
+|:-----------|:---------|:-----------------------------------------------|:--------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------|:-------------|:----------------------------------------------------------------|
+| CT-RF08-01 | Positivo | Reutilização de CT-RF06-01 e CT-RF07-01.       | Demonstrar retorno estruturado do fluxo e resposta LLM fundamentada no contexto recuperado. | CT-RF07-01 demonstrou o workflow corretamente, porém CT-RF06-01 não fundamentou a comparação dos dois projetos. | **FALHOU**   | `src/backend/evidencias/rf01-rf10/rf08/CT-RF08-01-consolidado.txt` |
+| CT-RF08-02 | Negativo | `Qual será o custo final do projeto PRJ-0442?` | Declarar insuficiência sem inventar valor, fonte ou certeza.                                | O sistema declarou ausência de previsão de custo final e não criou valor numérico.                              | **APROVADO** | `src/backend/evidencias/rf01-rf10/rf08/CT-RF08-02-custo-final.txt` |
+
+A falha de CT-RF08-01 decorre da mesma causa raiz identificada em CT-RF06-01 e, por isso, não foi tratada como um defeito independente.
+
+##### RF09 — Sugestão proativa de intenção secundária
+
+| ID         | Cenário  | Entrada executada                                                                                                   | Resultado esperado                                                                                                         | Resultado observado                                                                                                                                                                                    | Status       | Evidência                                                                                     |
+|:-----------|:---------|:--------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------|:----------------------------------------------------------------------------------------------|
+| CT-RF09-01 | Positivo | Proatividade ativa; consulta `Qual é o prazo do projeto PRJ-0442?`; registro da sugestão; confirmação com `accept`. | Resposta principal normal; sugestão separada e opcional; nenhuma execução antes da confirmação; processamento após aceite. | A resposta principal foi preservada e retornou `sugerir_recuperacao_prazo`, `requires_confirmation=true`. A confirmação em `/api/chat/proactive-confirmation` retornou HTTP `200` e `status=accepted`, mas a resposta ao aceite foi cortada e a ação sugerida não chegou ao usuário. No reteste, as cinco respostas ao aceite chegaram inteiras. | **FALHOU** na rodada; **APROVADO** no reteste | `src/backend/evidencias/rf01-rf10/rf09/CT-RF09-01-sugestao.txt`, `CT-RF09-01-accept.txt` e `CT-RF09-01-reteste.txt` |
+| CT-RF09-02 | Negativo | \(a\) alerta sem secundária compatível; (b) nova sugestão elegível seguida de `decline`.                            | \(a\) nenhuma sugestão fictícia; (b) recusa encerra a sugestão sem executar a ação secundária.                             | \(a\) `proactive_suggestion=null`; (b) HTTP `200`, `status=declined` e `result=null`.                                                                                                                  | **APROVADO** | `src/backend/evidencias/rf01-rf10/rf09/CT-RF09-02-sem-secundaria.txt` e `CT-RF09-02-decline.txt` |
+
+A proatividade exige identidade. Tentativas de preparação sem Bearer válido retornaram `401` e foram tratadas como falha de pré-condição da execução, não como falha funcional. A rodada válida utilizou a identidade simulada configurada no ambiente sem registrar o valor do token.
+
+Na rodada, a resposta ao aceite do CT-RF09-01 parou depois da primeira linha, sem a ação de recuperação: dos 508 tokens de saída, 463 foram de raciocínio, com o limite de 512. A rodada não registrou o motivo de parada, mas 508 tokens é o valor de todas as respostas encerradas pelo limite de 512 no reteste do truncamento da Seção 9.2.7, e nenhuma resposta completa chegou a esse valor. É o `DEF-RNF04-02`, registrado nessa seção. O `result.intent=null` não indica falha, porque a resposta ao aceite não traz esse campo; a intenção confirmada vai no prompt.
+
+Depois da correção, que eleva o limite para 1024 tokens e avisa o usuário quando a resposta é interrompida, o caso foi reexecutado cinco vezes, com a mesma pergunta, no commit `c793983`. Fora os testes, o único código da aplicação alterado desde a versão da rodada é essa correção. Nas cinco repetições, a sugestão exigiu confirmação e a resposta ao aceite chegou inteira, com 436 a 694 tokens de saída; três delas teriam sido cortadas com o limite anterior. Em todas, o agente procurou a atividade crítica e declarou que as fontes não registram atraso que sustente uma ação de recuperação, sem inventar dados.
+
+##### RF10 — Controle da proatividade
+
+| ID         | Cenário  | Entrada executada                                                                                            | Resultado esperado                                                            | Resultado observado                                                                                                                   | Status       | Evidência                                                                               |
+|:-----------|:---------|:-------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------|:-------------|:----------------------------------------------------------------------------------------|
+| CT-RF10-01 | Positivo | Pela interface: registrar OFF, ativar ON, consultar prazo, desativar e repetir a consulta em nova interação. | Com ON, exibir sugestão; com OFF, preservar a resposta primária sem sugestão. | ON exibiu a resposta principal e o bloco `Sugestão opcional`; após OFF, a mesma consulta continuou funcional e não exibiu sugestão.   | **APROVADO** | `src/backend/evidencias/rf01-rf10/rf10/CT-RF10-01-interface.txt` e quatro capturas de tela |
+| CT-RF10-02 | Negativo | Com `proactivity_enabled=false`, executar consulta simples, comparação e saudação.                           | Preservar processamento primário e não produzir sugestão.                     | Os três fluxos retornaram HTTP `200`, foram classificados/roteados conforme seus cenários e apresentaram `proactive_suggestion=null`. | **APROVADO** | `src/backend/evidencias/rf01-rf10/rf10/CT-RF10-02-proatividade-off.txt`                    |
+
+As quatro capturas de CT-RF10-01 registram, respectivamente, estado inicial OFF, estado ON, consulta ON com sugestão e nova interação OFF sem sugestão. O plano espera que o controle persista a escolha; o verificado foi a persistência nas interações seguintes da mesma sessão (CA10.2): o estado escolhido continuou valendo na nova conversa. A implementação inspecionada mantém o estado na sessão do frontend; não foi observada persistência em `localStorage`, portanto a evidência não é usada para afirmar persistência após recarregamento completo da aplicação.
+
+#### 9.1.5.4 Defeitos identificados
+
+| ID            | Caso(s)                 | Descrição                                                                                                                                                                          | Impacto observado                                                                                                      |
+|:--------------|:------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------|
+| DEF-RF02-01 | CT-RF02-01              | Sensibilidade lexical na consulta de status. `Mostre o status...` não selecionou a intenção específica, enquanto `Qual é o status...` foi corretamente classificado em CT-RF05-01. | Paráfrases semanticamente equivalentes podem produzir classificação específica diferente.                              |
+| DEF-RF03-01 | CT-RF03-02              | Solicitação genérica de reserva de sala foi associada a `transacao_agendar_compromisso`.                                                                                           | O limite de domínio fica permissivo para solicitações sem vínculo com projeto ou portfólio.                            |
+| DEF-RF06-01 | CT-RF06-01 e CT-RF08-01 | A comparação reconheceu os dois projetos, mas a base consultada pelo chat não tem documento do `PRJ-0510`, e o chat não lê as tabelas estruturadas em que o projeto tem dados. | Comparações com projetos sem documento na base saem parciais, com apenas um dos projetos.                              |
+| DEF-RNF04-02, da Seção 9.2.7 | CT-RF09-01 | Resposta ao aceite da sugestão cortada pelo limite de 512 tokens, consumido pelo raciocínio do modelo.                                                                    | A ação sugerida não chegou ao usuário. Corrigido com o limite de 1024 e o aviso de resposta interrompida; reteste aprovado nas cinco repetições. |
+
+Como ações de correção, recomenda-se ampliar os exemplos/paráfrases de consulta de status, fortalecer a fronteira de domínio de `transacao_agendar_compromisso` e incluir na base consultada pelo chat os extratos documentais dos demais projetos da massa, ou fazer a recuperação do chat ler também as tabelas estruturadas.
+
+#### 9.1.5.5 Observações de qualidade e incidentes
+
+Além das falhas funcionais, a execução revelou cinco pontos que não alteraram diretamente o status dos demais casos:
+
+1.  **Ruído de recuperação:** fontes não relacionadas apareceram em algumas consultas com score baixo. Nos casos aprovados, a resposta final não atribuiu esse conteúdo ao projeto solicitado.
+2.  **Sensibilidade lexical:** formulações semanticamente equivalentes de consulta de status produziram classificações diferentes, formalizadas em DEF-RF02-01.
+3.  **Proatividade autenticada:** o caminho proativo exige identidade válida. Respostas `401` durante a preparação foram resolvidas com a identidade simulada prevista pela PoC.
+4.  **Incidente de provedor:** uma tentativa anterior com a configuração inicial encontrou HTTP `429`. A rodada funcional válida foi repetida com OpenRouter e `google/gemini-3.7-flash`; o incidente permanece apenas como histórico de execução.
+5.  **Resposta cortada no CT-RF10-02:** a resposta da comparação terminou no meio da frase, com 508 tokens de saída, pelo mesmo `DEF-RNF04-02`. O status não muda: o corte não depende do controle de proatividade, e a resposta já tinha declarado a insuficiência do contexto antes de parar.
+
+#### 9.1.5.6 Organização das evidências
+
+As evidências ficam versionadas com a seguinte organização:
+
+``` text
+src/backend/evidencias/rf01-rf10/
+├── README.md
+├── rf01/
+│   ├── CT-RF01-01-texto.txt
+│   ├── CT-RF01-01-audio.png
+│   └── CT-RF01-02-vazio.txt
+├── rf02/
+│   ├── CT-RF02-01-status.txt
+│   └── CT-RF02-02-fora-escopo.txt
+├── rf03/
+│   ├── CT-RF03-01-categorias.txt
+│   └── CT-RF03-02-reserva-sala.txt
+├── rf04/
+│   ├── CT-RF04-01-recuperacao.txt
+│   └── CT-RF04-02-inexistente.txt
+├── rf05/
+│   ├── CT-RF05-01-status.txt
+│   └── CT-RF05-02-patrocinador.txt
+├── rf06/
+│   ├── CT-RF06-01-comparacao.txt
+│   └── CT-RF06-02-comparacao-inexistente.txt
+├── rf07/
+│   ├── CT-RF07-01-workflow.txt
+│   └── CT-RF07-02-llm.txt
+├── rf08/
+│   ├── CT-RF08-01-consolidado.txt
+│   └── CT-RF08-02-custo-final.txt
+├── rf09/
+│   ├── CT-RF09-01-sugestao.txt
+│   ├── CT-RF09-01-accept.txt
+│   ├── CT-RF09-01-reteste.txt
+│   ├── reteste_ct_rf09_01.py
+│   ├── CT-RF09-02-sem-secundaria.txt
+│   └── CT-RF09-02-decline.txt
+└── rf10/
+    ├── CT-RF10-01-interface.txt
+    ├── CT-RF10-01-A-estado-inicial-off.png
+    ├── CT-RF10-01-B-estado-on.png
+    ├── CT-RF10-01-C-consulta-on-com-sugestao.png
+    ├── CT-RF10-01-D-consulta-off-sem-sugestao.png
+    └── CT-RF10-02-proatividade-off.txt
+```
+
+Os arquivos `.txt` distinguem registros consolidados de saídas brutas preservadas. Nenhuma credencial, chave, senha ou token deve ser incluído nas evidências.
+
+#### 9.1.5.7 Matriz final de rastreabilidade
+
+| Caso       | Resultado observado resumido                                           | Status       | Evidência principal                                  |
+|:-----------|:-----------------------------------------------------------------------|:-------------|:-----------------------------------------------------|
+| CT-RF01-01 | Texto e áudio chegaram ao pipeline; `PRJ-0442` foi resolvido.          | **APROVADO** | `rf01/CT-RF01-01-texto.txt` + print                  |
+| CT-RF01-02 | Entrada vazia retornou `422 INVALID_INPUT`.                            | **APROVADO** | `rf01/CT-RF01-02-vazio.txt`                          |
+| CT-RF02-01 | Intenção específica ficou vazia.                                       | **FALHOU**   | `rf02/CT-RF02-01-status.txt`                         |
+| CT-RF02-02 | `FORA_DE_ESCOPO`, sem chamada ao LLM.                                  | **APROVADO** | `rf02/CT-RF02-02-fora-escopo.txt`                    |
+| CT-RF03-01 | Consulta, transação e alerta foram reconhecidos.                       | **APROVADO** | `rf03/CT-RF03-01-categorias.txt`                     |
+| CT-RF03-02 | Reserva genérica foi classificada como transação de agenda.            | **FALHOU**   | `rf03/CT-RF03-02-reserva-sala.txt`                   |
+| CT-RF04-01 | Fonte vinculada a `PRJ-0442` foi recuperada.                           | **APROVADO** | `rf04/CT-RF04-01-recuperacao.txt`                    |
+| CT-RF04-02 | Ausência de `INEXISTENTE-999` foi comunicada.                          | **APROVADO** | `rf04/CT-RF04-02-inexistente.txt`                    |
+| CT-RF05-01 | Status, fonte e intenção específica foram retornados.                  | **APROVADO** | `rf05/CT-RF05-01-status.txt`                         |
+| CT-RF05-02 | Patrocinador ausente não foi inventado.                                | **APROVADO** | `rf05/CT-RF05-02-patrocinador.txt`                   |
+| CT-RF06-01 | Só o `PRJ-0442` tem documento na base do chat; a comparação saiu parcial. | **FALHOU**   | `rf06/CT-RF06-01-comparacao.txt`                     |
+| CT-RF06-02 | Projeto inexistente foi identificado e a conclusão foi limitada.       | **APROVADO** | `rf06/CT-RF06-02-comparacao-inexistente.txt`         |
+| CT-RF07-01 | `workflow-router`, tokens `0` e `action=start`.                        | **APROVADO** | `rf07/CT-RF07-01-workflow.txt`                       |
+| CT-RF07-02 | RAG + LLM, com `workflow=null`.                                        | **APROVADO** | `rf07/CT-RF07-02-llm.txt`                            |
+| CT-RF08-01 | Workflow correto, porém comparação incompleta.                         | **FALHOU**   | `rf08/CT-RF08-01-consolidado.txt`                    |
+| CT-RF08-02 | Ausência de custo final foi declarada sem invenção.                    | **APROVADO** | `rf08/CT-RF08-02-custo-final.txt`                    |
+| CT-RF09-01 | Sugestão exigiu confirmação; na rodada, a resposta ao aceite foi cortada; no reteste, chegou inteira nas cinco repetições. | **FALHOU** na rodada; **APROVADO** no reteste | `rf09/CT-RF09-01-accept.txt` + `CT-RF09-01-reteste.txt` |
+| CT-RF09-02 | Sem sugestão incompatível; recusa retornou `declined` e `result=null`. | **APROVADO** | `rf09/CT-RF09-02-sem-secundaria.txt` + `decline.txt` |
+| CT-RF10-01 | ON exibiu sugestão; OFF preservou resposta sem sugestão.               | **APROVADO** | `rf10/CT-RF10-01-interface.txt` + quatro prints      |
+| CT-RF10-02 | Três fluxos primários preservados e `proactive_suggestion=null`.       | **APROVADO** | `rf10/CT-RF10-02-proatividade-off.txt`               |
+
+#### 9.1.5.8 Conclusão
+
+A execução cobriu integralmente os **20 casos funcionais planejados para RF01 a RF10**, sem bloqueios e sem casos não executados. Na rodada, 15 casos foram aprovados e 5 falharam. A falha do CT-RF09-01 veio do `DEF-RNF04-02`, que foi corrigido; no reteste, o caso foi aprovado. O resultado consolidado é de **16 casos aprovados e 4 casos que falharam**.
+
+As quatro falhas em aberto foram mantidas como diagnóstico do produto e agrupadas em três causas raiz: sensibilidade lexical na classificação de status, associação indevida de uma solicitação genérica ao catálogo transacional e falta de documentos do `PRJ-0510` na base consultada pelo chat, que deixa a comparação parcial. CT-RF08-01 é consequência da mesma limitação observada em CT-RF06-01.
+
+Os cenários negativos de ausência de informação apresentaram comportamento seguro: projeto inexistente, patrocinador não documentado e custo final ausente foram tratados sem fabricação de fatos. O roteamento híbrido também foi observado nas duas direções: workflow transacional sem geração LLM e consulta com recuperação + LLM. Por fim, RF09 e RF10 demonstraram que a sugestão secundária permanece opcional, condicionada à confirmação e ausente quando a proatividade está desabilitada.
+
+Com isso, todos os casos possuem classificação, resultado observado, evidência associada e, quando aplicável, defeito ou observação de qualidade rastreável.
 
 ## 9.2 Testes de RNFs
 
