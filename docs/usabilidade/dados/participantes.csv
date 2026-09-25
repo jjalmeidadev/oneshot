@@ -1,7 +1,7 @@
-participante,vaga_perfil,externo_a_turma,familiaridade_tecnologica,familiaridade_agentes,faixa_etaria,confirmado_em,sessao_em,status_sessao,motivo_status,moderador,observador,commit_testado
-P1,gestao_de_projetos,,,,,,,,,,,
-P2,analise_de_indicadores,,,,,,,,,,,
-P3,ferramentas_microsoft,,,,,,,,,,,
-P4,baixa_familiaridade_agentes,,,,,,,,,,,
-P5,sem_vinculo_com_a_equipe,,,,,,,,,,,
-P6,reserva,,,,,,,,,,,
+participante,vaga_perfil,externo_a_turma,familiaridade_tecnologica,familiaridade_agentes,faixa_etaria,sessao,confirmado_em,sessao_em,status_sessao,motivo_status,moderador,observador,commit_testado
+P1,estudante_de_tecnologia,sim,alta,alta,18-29,S1,,2026-09-23,realizada,,Henrique Diniz,,c9ad16a
+P2,estudante_de_tecnologia,sim,alta,media,18-29,S2,,2026-09-23,realizada,,Henrique Diniz,,c9ad16a
+P3,estudante_de_tecnologia,sim,media,baixa,18-29,S3,,2026-09-23,realizada,,Henrique Diniz,,c9ad16a
+P4,estudante_de_tecnologia,sim,alta,media,18-29,S4,,2026-09-23,realizada,,Henrique Diniz,,c9ad16a
+P5,estudante_de_tecnologia,sim,alta,alta,18-29,S5,,2026-09-23,realizada,,Henrique Diniz,,c9ad16a
+P6,estudante_de_tecnologia,sim,media,baixa,18-29,S6,,2026-09-23,realizada,,Henrique Diniz,,c9ad16a

@@ -48,8 +48,9 @@ consentimento assinado, guardado pelo moderador fora do repositório.
 | --- | --- |
 | `vaga_perfil` | a vaga de [`perfis-participantes.md`](perfis-participantes.md) que o participante preenche |
 | `externo_a_turma` | `sim` — exigência para todos |
-| `familiaridade_tecnologica`, `familiaridade_agentes` | `baixa`, `media` ou `alta`, declarada pelo participante |
+| `familiaridade_tecnologica`, `familiaridade_agentes` | `baixa`, `media` ou `alta`, declarada pelo participante; `nao_informada` quando não foi coletada |
 | `faixa_etaria` | `18-29`, `30-39`, `40-49`, `50-59` ou `60+` |
+| `sessao` | identificador da sessão de que o participante fez parte, como `S1`. Em sessão individual, `registro.csv` traz o resultado observado daquele participante; quando vários participantes fazem as tarefas na mesma sessão, a linha de cada um traz o resultado da sessão |
 | `status_sessao` | `realizada`, `bloqueada` (impedida por falha de ambiente, com o motivo) ou `nao_executada` |
 | `commit_testado` | commit da versão usada na sessão; o mesmo para todas |
 
@@ -78,12 +79,21 @@ foi dada.
 `sim`. Todo defeito crítico precisa de `tratamento` (correção feita, com o commit,
 ou impedimento declarado) e de `reteste` (`aprovado`, `reprovado` ou `pendente`).
 
+### `ocorrencias.csv` — `participante`
+
+O código do participante em cuja sessão a ocorrência foi registrada, o da sessão (`S1`), quando
+ela vale para todos os participantes de uma sessão coletiva, ou `verificacao_posterior`, quando
+foi encontrada pelo moderador depois da sessão, sem participantes. Uma ocorrência que se repete
+em várias sessões entra uma vez, com a recorrência declarada no `resumo`.
+
 ### `sus.csv`
 
+O formulário não identifica quem respondeu. Cada resposta entra como `R1`, `R2`…, na
+ordem de envio, com o horário em `enviada_em`, sem vínculo com os códigos `P1`–`P6`.
 `q1` a `q10` recebem inteiros de 1 a 5, na ordem do formulário. Resposta em branco
-invalida o SUS daquele participante, que é reportado como inválido e nunca
-completado por estimativa. `comentario_aberto` guarda as três perguntas abertas do
-encerramento, sem nada que identifique a pessoa.
+invalida aquele SUS, que é reportado como inválido e nunca completado por estimativa.
+`comentario_aberto` guarda as perguntas abertas do encerramento, quando houver, sem
+nada que identifique a pessoa.
 
 ## Limitação conhecida do cenário 4
 
