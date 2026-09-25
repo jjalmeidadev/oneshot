@@ -67,6 +67,12 @@ def _intent(
     )
 
 
+SECONDARY_RESPONSE = (
+    "O fornecedor do equipamento crítico registra atraso de 18 dias [Fonte 1]\n"
+    "**Sugestão:** Acompanhar semanalmente o plano de recuperação do fornecedor."
+)
+
+
 def _retrieved_document() -> RetrievedDocument:
     return RetrievedDocument(
         document=SharePointDocument(
@@ -77,7 +83,6 @@ def _retrieved_document() -> RetrievedDocument:
             web_url="https://example.test/projeto",
             last_modified="2026-09-18",
             search_text="status projeto fornecedor atraso",
-            attributes=(("Acao recomendada", "Acompanhar o plano do fornecedor"),),
         ),
         score=4.0,
     )
@@ -212,9 +217,7 @@ def test_proactivity_prepares_secondary_response_in_single_provider_call(
         text = json.dumps(
             {
                 "primary_response": "O fornecedor do equipamento critico registra atraso de 18 dias. [Fonte 1]",
-                "prepared_secondary_response": (
-                    "Acao recomendada: Acompanhar o plano do fornecedor [Fonte 1]"
-                ),
+                "prepared_secondary_response": SECONDARY_RESPONSE,
             }
         )
         return FakeResponse(
@@ -294,8 +297,14 @@ def test_proactivity_prepares_secondary_response_in_single_provider_call(
 
     assert confirmation.status == "accepted"
     assert confirmation.result is not None
-    assert confirmation.result.text == "Acao recomendada: Acompanhar o plano do fornecedor [Fonte 1]"
-    assert confirmation.result.claims[0].evidence[0].attribute == "Acao recomendada"
+    assert confirmation.result.text == (
+        "O fornecedor do equipamento critico registra atraso de 18 dias. [Fonte 1]\n"
+        "Sugestão: Acompanhar semanalmente o plano de recuperação do fornecedor."
+    )
+    assert confirmation.result.recommendation == (
+        "Acompanhar semanalmente o plano de recuperação do fornecedor."
+    )
+    assert confirmation.result.claims[0].evidence[0].field == "excerpt"
     assert confirmation.result.usage.total_tokens == 0
     assert confirmation.result.latency_ms == 0
     assert len(captured_requests) == 1
@@ -328,9 +337,7 @@ def test_declining_suggestion_does_not_call_provider_again(monkeypatch) -> None:
                                 "text": json.dumps(
                                     {
                                         "primary_response": "O fornecedor do equipamento critico registra atraso de 18 dias. [Fonte 1]",
-                                        "prepared_secondary_response": (
-                                            "Acao recomendada: Acompanhar o plano do fornecedor [Fonte 1]"
-                                        ),
+                                        "prepared_secondary_response": SECONDARY_RESPONSE,
                                     }
                                 ),
                             }
@@ -409,4 +416,58 @@ def test_disabled_proactivity_preserves_primary_rag_prompt(monkeypatch) -> None:
     payload = json.loads(captured_request.data.decode("utf-8"))
     assert "macro=CONSULTA; especifica=consulta_status_projeto" in payload["input"]
     assert "Intencao secundaria:" not in payload["input"]
+    assert response.proactive_suggestion is None
+
+
+@pytest.mark.parametrize(
+    "secondary",
+    [
+        # Sugestao sem evidencia copiada nao tem onde se apoiar.
+        "Sugestão: Acompanhar o plano do fornecedor.",
+        # Numero ausente das fontes seria fato inventado dentro da sugestao.
+        "O fornecedor do equipamento critico registra atraso de 18 dias. [Fonte 1]\n"
+        "Sugestão: Antecipar a entrega em 10 dias.",
+        # Evidencia parafraseada continua sem suporte integral.
+        "O fornecedor esta atrasado. [Fonte 1]\nSugestão: Acompanhar o plano do fornecedor.",
+    ],
+)
+def test_unsupported_secondary_response_is_not_offered(monkeypatch, secondary) -> None:
+    text = json.dumps(
+        {
+            "primary_response": "O fornecedor do equipamento critico registra atraso de 18 dias. [Fonte 1]",
+            "prepared_secondary_response": secondary,
+        }
+    )
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.delenv("SUPABASE_DATABASE_URL", raising=False)
+    monkeypatch.setattr(
+        "app.gemini.client.retrieve_context",
+        lambda *_args, **_kwargs: [_retrieved_document()],
+    )
+    monkeypatch.setattr(
+        "app.gemini.client.urlopen",
+        lambda *_args, **_kwargs: FakeResponse(
+            {
+                "id": "interaction-primary",
+                "model": "gemini-3.7-flash",
+                "steps": [
+                    {"type": "model_output", "content": [{"type": "text", "text": text}]}
+                ],
+                "usage": {},
+            }
+        ),
+    )
+
+    response = generate_chat_response(
+        GeminiChatRequest(
+            message="status",
+            conversation_id="conversation-250",
+            proactivity_enabled=True,
+        ),
+        intent=_intent(),
+        requester_id="user-250",
+    )
+
+    assert response.evidence_status == "referenced"
     assert response.proactive_suggestion is None

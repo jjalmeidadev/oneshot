@@ -425,6 +425,7 @@ def _insert_audit_events(
                         "provider_interaction_id": response.interaction_id,
                         "evidence_status": response.evidence_status,
                         "claims": [claim.model_dump() for claim in response.claims],
+                        "recommendation": response.recommendation,
                         "sources": [source.model_dump() for source in response.sources],
                     },
                 )

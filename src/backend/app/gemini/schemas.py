@@ -87,6 +87,8 @@ class GeminiChatResponse(BaseModel):
     sources: list[GeminiSource] = Field(default_factory=list)
     claims: list[FactualClaim] = Field(default_factory=list)
     evidence_status: Literal["referenced", "insufficient", "not_applicable"] = "not_applicable"
+    # Somente na resposta secundaria confirmada: analise rotulada, nao fato.
+    recommendation: str | None = None
     trace_sources: list[dict] = Field(default_factory=list, exclude=True)
     intent: AudioIntent | None = None
     entities: list[PublicEntity] = Field(default_factory=list)
@@ -105,20 +107,29 @@ class GeminiChatResponse(BaseModel):
             raise ValueError("Afirmacoes exigem status referenced")
         if any(not set(claim.citation_ids) <= set(ids) for claim in self.claims):
             raise ValueError("Afirmacao referencia fonte inexistente")
+        if self.recommendation is not None and not self.claims:
+            raise ValueError("Sugestao exige evidencia verificada")
         if self.claims:
-            from app.gemini.evidence import normalize_quote, source_units
+            from app.gemini.evidence import (
+                comparable_quote,
+                recommendation_problem,
+                render_answer,
+                source_units,
+            )
 
             units = {source.citation_id: source_units(source) for source in self.sources}
             for claim in self.claims:
                 if [item.citation_id for item in claim.evidence] != claim.citation_ids:
                     raise ValueError("Cada citacao exige evidencia verificavel")
                 if any(item not in units.get(item.citation_id, [])
-                       or normalize_quote(claim.text) != normalize_quote(item.quote)
+                       or comparable_quote(claim.text) != comparable_quote(item.quote)
                        for item in claim.evidence):
                     raise ValueError("Afirmacao nao corresponde integralmente a fonte")
-            expected = "\n".join(f"{claim.text} " + " ".join(
-                f"[{citation_id}]" for citation_id in claim.citation_ids) for claim in self.claims)
-            if self.text != expected:
+            if self.recommendation is not None:
+                problem = recommendation_problem(self.recommendation)
+                if problem:
+                    raise ValueError(problem)
+            if self.text != render_answer(self.claims, self.recommendation):
                 raise ValueError("Texto deve corresponder as afirmacoes verificadas")
         return self
 

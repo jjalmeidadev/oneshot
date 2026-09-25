@@ -119,15 +119,22 @@ def generate_chat_response(
         )
 
     public_sources = _public_sources(retrieved_documents)
-    primary_text, claims, evidence_status = validate_evidence(primary_text, public_sources)
+    primary = validate_evidence(primary_text, public_sources)
     if prepared_secondary_text:
-        prepared_secondary_text, _, secondary_status = validate_evidence(prepared_secondary_text, public_sources)
-        if secondary_status == "insufficient":
+        secondary = validate_evidence(
+            prepared_secondary_text, public_sources, allow_recommendation=True
+        )
+        if secondary.status == "insufficient":
+            logger.warning(
+                "Resposta secundaria sem evidencia verificavel; sugestao proativa sera omitida."
+            )
             prepared_secondary_text = None
+        else:
+            prepared_secondary_text = secondary.text
     return GeminiChatResponse(
-        text=primary_text,
-        claims=claims,
-        evidence_status=evidence_status,
+        text=primary.text,
+        claims=primary.claims,
+        evidence_status=primary.status,
         model=llm.model,
         interaction_id=llm.interaction_id,
         latency_ms=llm.latency_ms,
@@ -218,11 +225,14 @@ def _prepared_proactive_response(
             status_code=409,
         )
     public_sources = _public_sources(pending.sources)
-    text, claims, evidence_status = validate_evidence(pending.prepared_response, public_sources)
+    prepared = validate_evidence(
+        pending.prepared_response, public_sources, allow_recommendation=True
+    )
     return GeminiChatResponse(
-        text=text,
-        claims=claims,
-        evidence_status=evidence_status,
+        text=prepared.text,
+        claims=prepared.claims,
+        evidence_status=prepared.status,
+        recommendation=prepared.recommendation,
         model=pending.prepared_model or "resposta-preparada",
         interaction_id=pending.prepared_interaction_id,
         latency_ms=0,

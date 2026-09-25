@@ -1,4 +1,4 @@
-"""S4-17A: synthetic evidence across retrieval, providers, API and audit."""
+"""Referencias nas respostas: evidencia sintetica entre recuperacao, provedores, API e auditoria."""
 import json
 
 import pytest
@@ -9,6 +9,7 @@ from app.database.tracing import trace_interaction
 from app.gemini.client import generate_chat_response
 from app.gemini.schemas import GeminiChatRequest
 from app.main import app
+from app.nlp.schemas import AudioIntent
 from app.rag.database import _row_to_result
 from test_audio_upload import AUTH_HEADER, _build_wav, transcricao_fixa
 from test_gemini_client import FakeResponse
@@ -126,15 +127,18 @@ def test_missing_or_invalid_citations_abstain(monkeypatch, evidence, provider, t
     response = generate_chat_response(GeminiChatRequest(message="Qual o prazo?"))
     assert response.evidence_status == "insufficient"
     assert response.claims == []
-    assert "Nao ha evidencia" in response.text
+    assert "Não há evidência" in response.text
     assert response.sources[0].extract_id == "extract-17"
 
 
-@pytest.mark.parametrize("require_context", [True, False])
-def test_empty_retrieval_abstains_without_generation(monkeypatch, evidence, require_context):
+@pytest.mark.parametrize("with_intent", [True, False])
+def test_empty_retrieval_abstains_without_generation(monkeypatch, evidence, with_intent):
     monkeypatch.setattr("app.gemini.client.retrieve_context", lambda *a, **kw: [])
     monkeypatch.setattr("app.gemini.client._call_llm", lambda *a, **kw: pytest.fail("Unexpected LLM"))
-    response = generate_chat_response(GeminiChatRequest(message="Prazo?"), require_rag_context=require_context)
+    intent = AudioIntent(macro="CONSULTA", specific="consulta_cronograma_prazo",
+                         confidence_macro=0.9, confidence_specific=0.8)
+    response = generate_chat_response(GeminiChatRequest(message="Prazo?"),
+                                      intent=intent if with_intent else None)
     assert response.evidence_status == "insufficient"
     assert response.sources == response.claims == []
 
@@ -227,7 +231,7 @@ def test_valid_citation_does_not_authorize_invented_fact(monkeypatch, evidence, 
     chat = body if channel == "chat" else body["chat"]
     assert chat["evidence_status"] == "insufficient"
     assert chat["claims"] == []
-    assert "Nao ha evidencia" in chat["text"]
+    assert "Não há evidência" in chat["text"]
     assert traces[0]["response"].text == chat["text"]
     if channel == "audio":
         assert body["answer"]["text"] == chat["text"]
@@ -305,3 +309,49 @@ def test_retrieval_failure_is_controlled_in_both_channels(monkeypatch, evidence)
     assert text.status_code == 503
     assert audio.status_code == 502  # envelope de erro de provedor do audio
     assert "internal-secret" not in text.text + audio.text
+
+
+@pytest.mark.parametrize("answer", [
+    "O prazo e 30/09/2026 [Fonte 1]",  # sem o ponto final do trecho
+    "O prazo é 30/09/2026. [Fonte 1]",  # acento acrescentado pelo modelo
+    "- O prazo e 30/09/2026. [Fonte 1]",  # marcador de lista
+    "1. O prazo e 30/09/2026. [Fonte 1]",  # lista numerada
+    "**O prazo e 30/09/2026.** [Fonte 1]",  # negrito
+    "O prazo e 30/09/2026. (Fonte 1)",  # citacao entre parenteses
+    "Segundo o cronograma:\nO prazo e 30/09/2026. [Fonte 1]",  # cabecalho sem fato
+])
+def test_presentation_variants_of_a_complete_copy_are_accepted(monkeypatch, evidence, answer):
+    provider_response(monkeypatch, "gemini", answer)
+    response = generate_chat_response(GeminiChatRequest(message="Prazo?"))
+    assert response.evidence_status == "referenced"
+    assert response.text == "O prazo e 30/09/2026. [Fonte 1]"
+
+
+def test_grouped_citation_requires_support_in_every_source(monkeypatch, evidence):
+    from dataclasses import replace
+    second = replace(evidence, document=replace(evidence.document,
+        extract_id="extract-18", content="O prazo é 30/09/2026."))
+    monkeypatch.setattr("app.gemini.client.retrieve_context", lambda *a, **kw: [evidence, second])
+    provider_response(monkeypatch, "gemini", "O prazo e 30/09/2026. [Fontes 1 e 2]")
+    response = generate_chat_response(GeminiChatRequest(message="Prazo?"))
+    assert response.evidence_status == "referenced"
+    assert response.claims[0].citation_ids == ["Fonte 1", "Fonte 2"]
+    assert response.text == "O prazo e 30/09/2026. [Fonte 1] [Fonte 2]"
+
+
+def test_recommendation_is_only_accepted_in_the_secondary_response(monkeypatch, evidence):
+    provider_response(monkeypatch, "gemini",
+        "O prazo e 30/09/2026. [Fonte 1]\nSugestão: Confirmar o prazo com o fornecedor.")
+    response = generate_chat_response(GeminiChatRequest(message="Prazo?"))
+    assert response.evidence_status == "insufficient"
+
+
+def test_schema_rejects_recommendation_with_new_facts(monkeypatch, evidence):
+    from pydantic import ValidationError
+    from app.gemini.schemas import GeminiChatResponse
+    provider_response(monkeypatch, "gemini", "O prazo e 30/09/2026. [Fonte 1]")
+    payload = generate_chat_response(GeminiChatRequest(message="Prazo?")).model_dump()
+    payload["recommendation"] = "Adiar para 15/10/2026."
+    payload["text"] += "\nSugestão: Adiar para 15/10/2026."
+    with pytest.raises(ValidationError, match="numeros ou datas"):
+        GeminiChatResponse.model_validate(payload)
