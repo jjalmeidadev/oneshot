@@ -27,7 +27,7 @@ from app.rag.proactive_confirmation import (
 )
 from app.rag.proactivity import SecondaryIntent, resolve_secondary_intent
 from app.rag.sharepoint import build_rag_input
-from app.gemini.evidence import validate_evidence
+from app.gemini.evidence import ValidatedAnswer, validate_evidence
 
 GEMINI_INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions"
 DEFAULT_MODEL = "gemini-3.7-flash"
@@ -122,7 +122,14 @@ def generate_chat_response(
         )
 
     public_sources = _public_sources(retrieved_documents)
-    primary = validate_evidence(primary_text, public_sources)
+    if llm.text.endswith(AVISO_RESPOSTA_INTERROMPIDA):
+        # Resposta cortada pelo limite de tokens: a ultima linha esta incompleta
+        # e nao pode ser verificada. O aviso, que orienta a reformular a
+        # pergunta, substitui a abstencao generica.
+        primary = ValidatedAnswer(AVISO_RESPOSTA_INTERROMPIDA, [], "insufficient")
+        prepared_secondary_text = None
+    else:
+        primary = validate_evidence(primary_text, public_sources)
     if prepared_secondary_text:
         secondary = validate_evidence(
             prepared_secondary_text, public_sources, allow_recommendation=True

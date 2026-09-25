@@ -355,3 +355,16 @@ def test_schema_rejects_recommendation_with_new_facts(monkeypatch, evidence):
     payload["text"] += "\nSugestão: Adiar para 15/10/2026."
     with pytest.raises(ValidationError, match="numeros ou datas"):
         GeminiChatResponse.model_validate(payload)
+
+
+@pytest.mark.parametrize("content", ["O prazo e 30/09/2026. [Fonte 1]\nO custo e", ""])
+def test_interrupted_answer_keeps_the_interruption_notice(monkeypatch, evidence, content):
+    from app.gemini.client import AVISO_RESPOSTA_INTERROMPIDA
+    monkeypatch.setenv("LLM_PROVIDER", "openrouter")
+    payload = {"id": "provider-17", "model": "synthetic-model", "choices": [
+        {"message": {"content": content}, "finish_reason": "length"}]}
+    monkeypatch.setattr("app.gemini.client.urlopen", lambda *a, **kw: FakeResponse(payload))
+    response = generate_chat_response(GeminiChatRequest(message="Prazo?"))
+    assert response.evidence_status == "insufficient"
+    assert response.claims == []
+    assert response.text == AVISO_RESPOSTA_INTERROMPIDA

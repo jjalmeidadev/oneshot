@@ -125,6 +125,12 @@ verificadas. Na abstenção, a resposta é HTTP 200 com:
 }
 ```
 
+Quando o provedor encerra a geração pelo limite de tokens, a última linha
+fica incompleta e não pode ser verificada. Nesse caso, a resposta também volta
+como `insufficient`, mas o texto é o aviso de interrupção ("A resposta foi
+interrompida antes de terminar. Pergunte de novo, de forma mais específica."),
+que orienta o usuário a reformular a pergunta.
+
 As fontes recuperadas permanecem em `sources` para inspeção; sua presença não
 significa que sustentaram uma resposta aceita. Sem resultados de recuperação,
 inclusive com o classificador desligado, o LLM não é chamado e a mensagem de
