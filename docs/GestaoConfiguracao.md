@@ -27,6 +27,7 @@
   - [1.2 Escopo](#12-escopo)
 - [2. Visão geral do GitFlow](#2-visão-geral-do-gitflow)
   - [2.1 Revisão do fluxo após a Sprint 3](#21-revisão-do-fluxo-após-a-sprint-3)
+  - [2.2 Revisão do fluxo após a Sprint 4](#22-revisão-do-fluxo-após-a-sprint-4)
 - [3. Estrutura de branches](#3-estrutura-de-branches)
   - [3.1 Branches permanentes](#31-branches-permanentes)
   - [3.2 Branches temporárias](#32-branches-temporárias)
@@ -47,6 +48,7 @@
   - [7.1 Como ativar, verificar e desativar](#71-como-ativar-verificar-e-desativar)
   - [7.2 Validações executadas](#72-validações-executadas)
   - [7.3 Auditoria do repositório](#73-auditoria-do-repositório)
+  - [7.4 Auditoria final da Sprint 4](#74-auditoria-final-da-sprint-4)
 - [8. Versionamento de artefatos técnicos](#8-versionamento-de-artefatos-técnicos)
   - [8.1 O que é versionado e por quê](#81-o-que-é-versionado-e-por-quê)
   - [8.2 A restrição que vem junto](#82-a-restrição-que-vem-junto)
@@ -57,6 +59,7 @@
   - [9.3 Integração de entrega documental com renumeração de seções](#93-integração-de-entrega-documental-com-renumeração-de-seções)
   - [9.4 Hotfix](#94-hotfix)
   - [9.5 Correção de integração após conflito](#95-correção-de-integração-após-conflito)
+  - [9.6 Promoção da release 0.4.0 depois de promoções com squash](#96-promoção-da-release-040-depois-de-promoções-com-squash)
 - [10. Regras de governança do GitFlow](#10-regras-de-governança-do-gitflow)
 
 # 1. Introdução
@@ -121,6 +124,26 @@ As alterações desta revisão são:
 - a auditoria de conformidade usa um único recorte e uma única regra nos dois documentos de gestão.
 
 Não são criadas branches permanentes adicionais. `main`, `develop` e `hmg` continuam separando versão estável, integração e homologação; `feature/*`, `release/*` e `hotfix/*` preservam os papéis exigidos pelo artefato.
+
+## 2.2 Revisão do fluxo após a Sprint 4
+
+A seção executa a issue [#243](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/243). O recorte é o mesmo da Seção 2.4 do `GestaoProjeto.md`: de 11 a 25/09/2026, sobre `origin/develop@964cd8c`, com os dados de merge request extraídos da API do GitLab.
+
+Na Sprint 4 entraram em `develop` 26 merge requests. O desenho do GitFlow continuou adequado, e a proteção das branches permanentes funcionou: `main`, `develop` e `hmg` não aceitam push direto e não receberam nenhum commit fora de MR. Os problemas estiveram nas bordas do fluxo:
+
+- **Título e squash.** Dezessete MRs usaram squash, e só 8 dos 17 commits gerados pelo servidor atendem à regra completa do hook. Os outros nove MRs foram integrados sem squash e trouxeram 58 commits locais, dos quais 57 atendem à regra. O ponto fraco é o título do MR — apenas 7 de 26 no padrão da Seção 5.3.1 —, e a validação automática não foi configurada: o projeto não tem padrão de título definido, e a pipeline não tem job equivalente.
+- **Gate de integridade.** A `develop` fechou sem marcadores de conflito, mas nem o `pre-commit` nem a pipeline aplicam a busca da Seção 5.3.3. Uma resolução de conflito descartou uma regra do `.gitignore`, restaurada depois em `fb15994`: o gate de marcadores não pegaria esse caso, que depende da revisão do diff resolvido.
+- **Exclusão de branch.** Sete MRs foram integrados sem marcar a exclusão da branch de origem. No fechamento, o remoto tem 33 branches temporárias: 27 com MR já integrado, 1 com MR fechado sem merge e 5 sem MR.
+- **Nomenclatura.** Três branches ativas no remoto fogem da Seção 4 por usarem maiúsculas ou acentos — `feat/Implementar-validação-de-formatos-e-tratamento`, `feature/S4-20-e2e-textual-rag` e `feature/S4-32B-testes-integracao` —, além de `docs/documentação-stt`, de sprint anterior. `test/232-reexecutar-benchmark-rnf06` é o exemplo a seguir: tipo, número da issue e escopo em minúsculas.
+- **Promoção.** A release 0.3.0 foi promovida por MR direto de `develop` para `hmg` ([!84](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/84)) e de `hmg` para `main` ([!86](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/86)), ambos com squash. O squash de promoção recria a divergência de histórico corrigida na Sprint 2: `hmg` e `main` têm o mesmo conteúdo de `develop` em 11/09 (`aec6457`), mas não o seu histórico, e um merge direto de `develop` em `hmg` hoje produziria 65 arquivos em conflito. O procedimento correto está na Seção 9.6.
+
+As alterações desta revisão são:
+
+- MRs de promoção, de `release/*` para `hmg` e de `hmg` para `main`, **nunca usam squash**; o squash fica restrito às branches de trabalho;
+- o padrão de título passa a aceitar mais de uma issue, como `(#214, #215, #220)`, porque um MR que entrega várias tasks é legítimo e já ocorreu quatro vezes no recorte da Sprint 4;
+- merge sem squash passa a ser permitido quando todos os commits da branch passaram pelo hook `commit-msg`, e continua obrigatório o título no padrão;
+- a validação do título e o gate de marcadores viram tasks do primeiro dia da Sprint 5 (S5-02 e S5-01), com a opção "Pipelines must succeed" ativada nas configurações do projeto depois que os jobs existirem;
+- a exclusão da branch de origem é marcada na abertura do MR, e as 27 branches com MR integrado são removidas depois da promoção da release 0.4.0 (Seção 5.4).
 
 # 3. Estrutura de branches
 
@@ -250,23 +273,28 @@ O grupo utiliza merge com squash, e o commit resultante é criado pelo servidor:
 
 Na revisão da Sprint 3, foram encontrados 15 commits de entrega: 8 com tipo válido e 6 na regra completa. Essa nova apuração orienta o gate da Sprint 4 sem alterar os números publicados nas seções históricas.
 
+Na Sprint 4, 7 dos 26 títulos de MR seguiram o padrão, e 8 dos 17 commits de squash atenderam à regra completa, contra 57 dos 58 commits locais trazidos por MRs sem squash (Seção 2.2). O problema está no título, e não nos commits.
+
 Esses valores seguem a recontagem comunicada no feedback da avaliação para o recorte de `develop` entre 15 e 27/08 e são a linha de base única adotada pelos dois documentos de gestão.
 
-O checklist humano permanece, mas deixa de ser a única barreira. O projeto deve configurar a validação de título do GitLab em **Settings → Merge requests → Title pattern**, quando o plano e a versão da instância oferecerem o recurso, usando RE2. A documentação oficial confirma que um título fora do padrão bloqueia o merge. Se o recurso não estiver disponível, um job do pipeline deve validar `$CI_MERGE_REQUEST_TITLE` e produzir o mesmo bloqueio. Referência: [Merge request title validation — GitLab Docs](https://docs.gitlab.com/user/project/merge_requests/title_validation/).
+O checklist humano permanece, mas deixa de ser a única barreira. O projeto deve configurar a validação de título do GitLab em **Settings → Merge requests → Title pattern**, quando o plano e a versão da instância oferecerem o recurso, usando RE2. A documentação oficial confirma que um título fora do padrão bloqueia o merge. Se o recurso não estiver disponível, um job do pipeline deve validar `$CI_MERGE_REQUEST_TITLE` e produzir o mesmo bloqueio. Na auditoria da Sprint 4, o projeto não tinha padrão configurado e a pipeline não tinha job equivalente; o job é a task S5-02, e a opção "Pipelines must succeed" é ativada em seguida. Referência: [Merge request title validation — GitLab Docs](https://docs.gitlab.com/user/project/merge_requests/title_validation/).
 
-Padrão proposto:
+Padrão vigente, revisado na Sprint 4 para aceitar mais de uma issue:
 
 ```text
-^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\([A-Za-z0-9._-]+\))?!?: .+ \(#[0-9]+\)$
+^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\([A-Za-z0-9._-]+\))?!?: .+ \(#[0-9]+(, #[0-9]+)*\)$
 ```
 
-Exemplo apresentado no GitLab:
+Exemplos apresentados no GitLab:
 
 ```text
 feat(api): integrar classificador de intenções (#126)
+feat: implementar o fluxo de alerta de prazo em atraso (#214, #215, #220)
 ```
 
 Títulos como `resolve merge`, `feat/implementar-frontend` ou `Docs/atualizar-modelagem` não podem ser mergeados. A proteção do título é complementada pelas push rules de branch e commit, quando disponíveis, conforme a [documentação de Push Rules do GitLab](https://docs.gitlab.com/user/project/repository/push_rules/).
+
+**Squash ou merge sem squash.** O squash continua sendo o padrão do projeto para branches de trabalho. O merge sem squash é permitido quando todos os commits da branch passaram pelo hook `commit-msg`, porque preserva commits já validados. Nos MRs de promoção — de `release/*` para `hmg` e de `hmg` para `main` — o squash é proibido, pelo motivo descrito na Seção 9.6.
 
 Há um segundo efeito do squash que vale conhecer: o commit gerado registra no campo de committer o nome de quem aprovou o merge, e não o de quem escreveu o código. A autoria original é preservada no campo de autor, mas não aparece em contagens que usam o committer.
 
@@ -311,6 +339,13 @@ git branch -d docs/gestao-projeto
 
 Branches temporárias só devem permanecer abertas quando houver trabalho ainda em andamento ou revisão pendente.
 
+A exclusão é marcada na abertura do MR, e não no momento do merge. No fechamento da Sprint 4, o remoto tinha 33 branches temporárias, 27 delas com MR já integrado (Seção 7.4). A limpeza é feita depois da promoção de cada release, pelo responsável pela conformidade do repositório, conferindo antes que a branch não tem MR aberto:
+
+```bash
+git fetch origin --prune
+git push origin --delete test/executar-rnf04-rnf05   # exemplo: MR !96 integrado
+```
+
 # 6. Fluxo de desenvolvimento
 
 ## 6.1 Fluxo de feature
@@ -348,7 +383,8 @@ Regras:
 - Só são permitidos ajustes finais, correções, documentação e validações;
 - A versão deve ser validada em `hmg` antes de chegar à `main`;
 - Depois do merge em `main`, qualquer ajuste feito na release deve voltar para `develop`;
-- Se uma entrega estiver pronta e outra não, o grupo deve usar MR individual, feature flag ou branch de release para não bloquear promoção de trabalho concluído.
+- Se uma entrega estiver pronta e outra não, o grupo deve usar MR individual, feature flag ou branch de release para não bloquear promoção de trabalho concluído;
+- Os MRs de `release/*` para `hmg` e de `hmg` para `main` não usam squash; a release 0.3.0 foi promovida com squash, e a correção está na Seção 9.6.
 
 Procedimento de integração: abrir MR de `release/*` para `hmg`; homologar a versão; promover `hmg` para `main` por novo MR; retornar a `develop` qualquer correção criada na release; e excluir a branch temporária conforme a Seção 5.4. Não é permitido integrar `release/*` diretamente em `main`.
 
@@ -538,6 +574,28 @@ por pares.
 powershell -ExecutionPolicy Bypass -File scripts/audit-repo.ps1
 ```
 
+## 7.4 Auditoria final da Sprint 4
+
+Auditoria executada em 25/09/2026 sobre `origin/develop@964cd8c`, depois da integração do último merge request da sprint, e sobre as configurações do projeto no GitLab. Cada divergência encontrada tem justificativa ou ação com destino definido.
+
+| Verificação | Método | Resultado | Situação |
+| --- | --- | --- | --- |
+| Marcadores de conflito | `git grep -n -I -E '^(<<<<<<< .+\|=======[[:space:]]*\|>>>>>>> .+)$' 964cd8c` sobre os 764 arquivos versionados | Nenhuma ocorrência | ✅ Conforme |
+| Segredos versionados | Busca por padrões de chave (AWS, OpenRouter, Google, GitLab, GitHub, chave privada) e por URLs de banco com senha | Nenhuma credencial. As URLs encontradas usam hosts fictícios de teste (`example`, `example.test`, `exemplo`). Os quatro `.env.example` têm valores vazios ou marcadores | ✅ Conforme |
+| Identificadores de infraestrutura | Leitura da Seção 10.2 do `Projeto.md` | ID da conta AWS no endereço do ECR e IDs de instância EC2 e AMI documentados | ✅ Justificado: são identificadores, e não credenciais; o acesso depende das credenciais temporárias do Learner Lab, que não estão no repositório |
+| Variáveis sem uso | Conferência de cada variável do `.env.example` da raiz contra o código | 11 variáveis de ferramentas externas sem nenhuma referência no repositório (por exemplo, `CLICKUP_API_KEY`, `RAILWAY_TOKEN` e `N8N_API_KEY`) | ⚠️ Divergência: removidas na conformidade do repositório (S5-48) |
+| Links relativos da documentação | Resolução de cada link relativo do `README.md`, de `docs/*.md` e dos READMEs de `src/` | 9 links quebrados, 8 no `Projeto.md` e 1 em `src/backend/README.md`, para cinco arquivos removidos no [!108](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/108) (`aws-operacao.md`, `docker-operacao.md`, `deploy-aws-learner-lab-handoff.md`, `deploy-aws-learner-lab-replan.md` e `contrato-referencias.md`) | ⚠️ Divergência: corrigidos na conformidade do repositório (S5-48), apontando para a Seção 10.2 do `Projeto.md` ou restaurando os arquivos |
+| Proteção das branches permanentes | Configuração de branches protegidas | `main`, `develop` e `hmg` sem push direto; merge por Developers e Maintainers | ✅ Conforme |
+| Pipeline como condição de merge | Configurações de merge request do projeto | "Pipelines must succeed" desativada | ⚠️ Divergência: ativar depois dos jobs das tasks S5-01 e S5-02 |
+| Padrão de título de MR | Configurações do projeto e `.gitlab-ci.yml` | Sem padrão configurado e sem job equivalente | ⚠️ Divergência: task S5-02 |
+| Squash | Configuração do projeto e MRs integrados | Squash "ativado por padrão"; 9 de 26 MRs integrados sem squash | ✅ Justificado pela nova regra da Seção 2.2 |
+| Branches temporárias remanescentes | `GET /repository/branches` e cruzamento com os MRs | 33 temporárias: 27 com MR integrado, 1 com MR fechado sem merge e 5 sem MR | ⚠️ Divergência: limpeza depois da promoção da release 0.4.0 |
+| Nomenclatura de branches | Regex e regras da Seção 4 | 4 branches ativas com maiúsculas ou acentos | ⚠️ Divergência: removidas na limpeza; nenhuma branch nova fora da regra |
+| Coerência entre `develop`, `hmg` e `main` | `git merge-base` e `git diff` | `hmg` e `main` idênticas entre si e ao conteúdo de `develop` em `aec6457` (11/09); histórico divergente desde `ca455b3` | ✅ Justificado: a release 0.4.0 é promovida depois desta entrega, pelo procedimento da Seção 9.6 |
+| Cobertura automatizada | `.gitlab-ci.yml` | O job `backend-api` executa 13 arquivos nomeados; o marcador `integration` já existe, mas não é usado pela pipeline | ⚠️ Divergência: task S5-01 |
+
+O script `scripts/audit-repo.ps1` da Seção 7.3 cobre nomes de branch, mensagens de commit e vínculo com issues. A auditoria acima acrescenta segredos, configurações do projeto e coerência entre as branches permanentes, que o script não verifica.
+
 # 8. Versionamento de artefatos técnicos
 
 O repositório versiona os artefatos gerados pelo treinamento do classificador de intenções, em `src/notebooks/artefatos/`. A decisão foi tomada na Sprint 2, quando o notebook de classificação entrou no projeto, e é registrada aqui porque tem consequência permanente sobre o tamanho do repositório.
@@ -672,6 +730,31 @@ git grep -n -E '^(<<<<<<< .+|=======[[:space:]]*|>>>>>>> .+)$'
 
 O segundo `git grep` deve retornar vazio. A branch segue por MR para `develop`, com lista dos arquivos corrigidos e evidência dos testes. Depois de homologada, a correção segue pelo fluxo normal até `main`; não se corrige diretamente a branch permanente.
 
+## 9.6 Promoção da release 0.4.0 depois de promoções com squash
+
+Situação real do fechamento da Sprint 4. A release 0.3.0 foi promovida com squash nos dois passos ([!84](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/84) e [!86](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/86)), e por isso `hmg` guarda o conteúdo de `develop` em 11/09, mas não o seu histórico. Um MR direto de `develop` para `hmg` conflitaria em 65 arquivos, porque o Git compara as duas pontas com uma base de 28/08.
+
+Como a árvore de `hmg` é idêntica à de `aec6457`, que já está no histórico de `develop`, basta registrar `hmg` como ancestral na branch de release, sem alterar nenhum arquivo:
+
+```bash
+git fetch origin
+git checkout -b release/0.4.0 origin/develop
+git merge -s ours origin/hmg -m "chore(release): registrar hmg como ancestral da 0.4.0 (#243)"
+git diff --stat origin/develop HEAD      # deve sair vazio: nenhum arquivo muda
+git push -u origin release/0.4.0
+# MR release/0.4.0 -> hmg, SEM squash; validar em hmg
+# MR hmg -> main, SEM squash
+```
+
+A estratégia `-s ours` só é segura quando a árvore descartada já está contida no histórico recebido. Por isso, a verificação de conteúdo vem antes:
+
+```bash
+git diff --stat aec6457 origin/hmg       # vazio: hmg é igual a develop em 11/09
+git diff --stat origin/hmg origin/main   # vazio: main é igual a hmg
+```
+
+O procedimento foi simulado sobre `964cd8c` antes desta entrega: a branch de release fica com a mesma árvore de `develop`, e os merges em `hmg` e depois em `main` terminam sem nenhum conflito. Com os dois MRs de promoção sem squash, `main` passa a conter o histórico de `develop`, e a próxima release volta a ser um merge comum, sem estratégia especial. Depois da promoção, as branches temporárias com MR integrado são removidas conforme a Seção 5.4.
+
 # 10. Regras de governança do GitFlow
 
 - Não é permitido commitar diretamente em `main`, `develop` ou `hmg`;
@@ -680,6 +763,7 @@ O segundo `git grep` deve retornar vazio. A branch segue por MR para `develop`, 
 - Cada branch temporária deve representar uma issue;
 - Toda integração deve passar por Merge Request;
 - O título do MR deve ser validado automaticamente no GitLab ou pelo pipeline antes do squash;
+- MRs de promoção não usam squash; merge sem squash em branch de trabalho só quando todos os commits passaram pelo hook;
 - Nenhum MR pode ser aprovado enquanto houver marcador de conflito em arquivo rastreado;
 - O fluxo obrigatório de promoção é `feature/* -> develop -> hmg -> main`;
 - `develop` recebe apenas MR aprovado;
