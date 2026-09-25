@@ -116,9 +116,13 @@ def _lexicon_pattern() -> re.Pattern[str]:
 
 
 # Valores fora de lista fechada. O codigo de projeto exige ao menos tres letras
-# para nao capturar siglas curtas coladas a numero.
+# para nao capturar siglas curtas coladas a numero, e nao aceita hifen vizinho
+# para nao recortar o sufixo de codigos compostos como POP-MVP-001, que
+# identifica um procedimento e nao um projeto.
+PROJECT_CODE_PATTERN = re.compile(r"(?<![\w-])[a-z]{3,}-\d{3,}(?![\w-])")
+
 PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
-    ("projeto", re.compile(r"(?<!\w)[a-z]{3,}-\d{3,}(?!\w)")),
+    ("projeto", PROJECT_CODE_PATTERN),
     ("percentual", re.compile(r"(?<!\w)\d{1,3}(?:[.,]\d+)?\s*%")),
     ("data", re.compile(r"(?<!\w)\d{2}/\d{2}/\d{4}(?!\w)")),
     ("prazo_dias", re.compile(r"(?<!\w)\d{1,4}\s+dias?(?!\w)")),

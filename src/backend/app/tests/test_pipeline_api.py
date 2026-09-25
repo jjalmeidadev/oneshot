@@ -29,12 +29,10 @@ class ProviderCall:
         request,
         intent=None,
         entities=None,
-        require_rag_context=False,
     ):
         self.request = request
         self.intent = intent
         self.entities = entities or []
-        self.require_rag_context = require_rag_context
 
     def __getattr__(self, name):
         return getattr(self.request, name)
@@ -48,14 +46,12 @@ def provider(monkeypatch):
         intent=None,
         entities=None,
         requester_id=None,
-        require_rag_context=False,
     ):
         calls.append(
             ProviderCall(
                 request,
                 intent=intent,
                 entities=entities,
-                require_rag_context=require_rag_context,
             )
         )
         return GeminiChatResponse(text="Resposta [Fonte 1]", model="teste", interaction_id="next-id",
@@ -289,7 +285,6 @@ def test_classifier_routes_or_uses_generic_rag(
     assert result.json()['intent']['alternatives'][0]['intent'] == 'consulta_status_projeto'
     assert result.json()['pipeline_metrics']['route_ms'] >= 0
     assert len(provider) == 1
-    assert provider[0].require_rag_context is uses_fallback
     assert (provider[0].intent is None) is uses_fallback
     if uses_fallback:
         assert not result.json()['intent']['handler'].startswith('handler:')
@@ -311,7 +306,6 @@ def test_low_specific_confidence_skips_handler_and_uses_generic_rag(
     assert result.json()['intent']['specific'] == ''
     assert not result.json()['intent']['handler'].startswith('handler:')
     assert provider[0].intent is None
-    assert provider[0].require_rag_context is True
 
 
 def test_audio_completes_same_pipeline_and_context(monkeypatch, provider):

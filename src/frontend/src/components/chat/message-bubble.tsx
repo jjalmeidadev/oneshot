@@ -132,6 +132,7 @@ function AssistantMessage({
             sources={message.sources}
             selectedId={selectedSourceId}
             onSelect={onSelectSource}
+            unused={message.evidenceStatus === 'insufficient'}
           />
         )}
 

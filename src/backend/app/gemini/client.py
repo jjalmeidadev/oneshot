@@ -27,6 +27,7 @@ from app.rag.proactive_confirmation import (
 )
 from app.rag.proactivity import SecondaryIntent, resolve_secondary_intent
 from app.rag.sharepoint import build_rag_input
+from app.gemini.evidence import ValidatedAnswer, validate_evidence
 
 GEMINI_INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions"
 DEFAULT_MODEL = "gemini-3.7-flash"
@@ -71,7 +72,6 @@ def generate_chat_response(
     intent: AudioIntent | None = None,
     entities: list[PublicEntity] | None = None,
     requester_id: str | None = None,
-    require_rag_context: bool = False,
 ) -> GeminiChatResponse:
     api_key = _api_key()
 
@@ -90,9 +90,8 @@ def generate_chat_response(
         ) from error
     retrieval_ms = round((perf_counter() - retrieval_started_at) * 1000)
 
-    if not retrieved_documents and (
-        require_rag_context or _requires_context(intent)
-    ):
+    # Mesmo com o classificador desligado, nao gerar fatos sem fonte.
+    if not retrieved_documents:
         return GeminiChatResponse(
             text=OUT_OF_SCOPE_ANSWER,
             model="rag-retriever",
@@ -100,6 +99,7 @@ def generate_chat_response(
             retrieval_ms=retrieval_ms,
             usage=GeminiUsage(),
             sources=[],
+            evidence_status="insufficient",
         )
 
     llm = _call_llm(
@@ -121,14 +121,36 @@ def generate_chat_response(
             "Resposta secundaria invalida; sugestao proativa sera omitida."
         )
 
+    public_sources = _public_sources(retrieved_documents)
+    if llm.text.endswith(AVISO_RESPOSTA_INTERROMPIDA):
+        # Resposta cortada pelo limite de tokens: a ultima linha esta incompleta
+        # e nao pode ser verificada. O aviso, que orienta a reformular a
+        # pergunta, substitui a abstencao generica.
+        primary = ValidatedAnswer(AVISO_RESPOSTA_INTERROMPIDA, [], "insufficient")
+        prepared_secondary_text = None
+    else:
+        primary = validate_evidence(primary_text, public_sources)
+    if prepared_secondary_text:
+        secondary = validate_evidence(
+            prepared_secondary_text, public_sources, allow_recommendation=True
+        )
+        if secondary.status == "insufficient":
+            logger.warning(
+                "Resposta secundaria sem evidencia verificavel; sugestao proativa sera omitida."
+            )
+            prepared_secondary_text = None
+        else:
+            prepared_secondary_text = secondary.text
     return GeminiChatResponse(
-        text=primary_text,
+        text=primary.text,
+        claims=primary.claims,
+        evidence_status=primary.status,
         model=llm.model,
         interaction_id=llm.interaction_id,
         latency_ms=llm.latency_ms,
         retrieval_ms=retrieval_ms,
         usage=llm.usage,
-        sources=_public_sources(retrieved_documents),
+        sources=public_sources,
         trace_sources=[
             _trace_source_payload(result, citation_order=index)
             for index, result in enumerate(retrieved_documents, start=1)
@@ -212,13 +234,20 @@ def _prepared_proactive_response(
             "A sugestao nao possui resposta preparada.",
             status_code=409,
         )
+    public_sources = _public_sources(pending.sources)
+    prepared = validate_evidence(
+        pending.prepared_response, public_sources, allow_recommendation=True
+    )
     return GeminiChatResponse(
-        text=pending.prepared_response,
+        text=prepared.text,
+        claims=prepared.claims,
+        evidence_status=prepared.status,
+        recommendation=prepared.recommendation,
         model=pending.prepared_model or "resposta-preparada",
         interaction_id=pending.prepared_interaction_id,
         latency_ms=0,
         usage=GeminiUsage(),
-        sources=_public_sources(pending.sources),
+        sources=public_sources,
         trace_sources=[
             _trace_source_payload(result, citation_order=index)
             for index, result in enumerate(pending.sources, start=1)
@@ -584,10 +613,6 @@ def _as_int(value: object) -> int:
     return value if isinstance(value, int) else 0
 
 
-def _requires_context(intent: AudioIntent | None) -> bool:
-    return bool(intent and intent.macro == "CONSULTA" and intent.specific)
-
-
 def _resolve_secondary_safely(
     request: GeminiChatRequest,
     intent: AudioIntent | None,
@@ -643,8 +668,16 @@ def _public_sources(results) -> list[GeminiSource]:
             last_modified=result.document.last_modified,
             score=result.score,
             excerpt=result.document.content,
+            citation_id=f"Fonte {index}",
+            artifact_id=result.document.artifact_id,
+            extract_id=result.document.extract_id,
+            project_id=result.document.project_id,
+            source_locator=result.document.source_locator,
+            registration_period=result.document.registration_period,
+            validity=result.document.validity,
+            attributes=dict(result.document.attributes),
         )
-        for result in results
+        for index, result in enumerate(results, start=1)
     ]
 
 
@@ -664,5 +697,11 @@ def _trace_source_payload(result: object, citation_order: int) -> dict:
             "fallback": document.fallback,
             "source_id": document.source_id,
             "list_name": document.list_name,
+            "citation_id": f"Fonte {citation_order}",
+            "excerpt": document.content,
+            "last_modified": document.last_modified,
+            "registration_period": document.registration_period,
+            "validity": document.validity,
+            "attributes": dict(document.attributes),
         },
     }

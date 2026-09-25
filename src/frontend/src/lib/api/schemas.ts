@@ -52,7 +52,28 @@ export type ChatSource = {
   last_modified: string;
   score: number;
   excerpt?: string | null;
+  citation_id?: string | null;
+  artifact_id?: string | null;
+  extract_id?: string | null;
+  project_id?: string | null;
+  source_locator?: string | null;
+  registration_period?: { start?: string | null; end?: string | null } | null;
+  validity?: { start?: string | null; end?: string | null } | null;
+  attributes?: Record<string, string>;
 };
+
+export type ClaimEvidence = {
+  citation_id: string;
+  field: 'excerpt' | 'attribute';
+  attribute: string | null;
+  quote: string;
+};
+export type FactualClaim = {
+  text: string;
+  citation_ids: string[];
+  evidence?: ClaimEvidence[];
+};
+export type EvidenceStatus = 'referenced' | 'insufficient' | 'not_applicable';
 
 export type ProactiveSuggestion = {
   suggestion_id: string;
@@ -77,6 +98,8 @@ export type ProactiveConfirmationResponse = {
 
 /** `GeminiChatResponse`. */
 export type ChatResponse = {
+  contract_version?: '1.1.0';
+  trace_id?: string | null;
   intent?: AudioIntent | null;
   entities?: PipelineEntity[];
   pipeline_metrics?: ChatPipelineMetrics;
@@ -87,6 +110,10 @@ export type ChatResponse = {
   retrieval_ms: number;
   usage: ChatUsage;
   sources: ChatSource[];
+  claims?: FactualClaim[];
+  evidence_status?: EvidenceStatus;
+  /** Presente so na resposta secundaria confirmada: analise rotulada, nao fato. */
+  recommendation?: string | null;
   proactive_suggestion?: ProactiveSuggestion | null;
   workflow?: WorkflowDirective | null;
 };
@@ -298,8 +325,8 @@ export type AudioPipelineMetrics = ChatPipelineMetrics & {
   total_ms: number;
 };
 
-/** `AudioAnswerSource`. Formato diferente do `ChatSource` da rota de texto. */
-export type AudioAnswerSource = {
+/** Referencia completa com aliases legados; Partial aceita respostas anteriores ao contrato 1.1.0. */
+export type AudioAnswerSource = Partial<ChatSource> & {
   artifact: string;
   section: string;
 };
@@ -308,10 +335,14 @@ export type AudioAnswerSource = {
 export type AudioAnswer = {
   text: string;
   sources: AudioAnswerSource[];
+  claims?: FactualClaim[];
+  evidence_status?: EvidenceStatus;
 };
 
 /** `AudioUploadResponse`. */
 export type AudioUploadResponse = {
+  contract_version?: '1.1.0';
+  trace_id?: string | null;
   chat?: ChatResponse | null;
   conversation_id: string;
   interaction_id: string | null;
