@@ -1,7 +1,7 @@
 # Backend
 
 Contrato de fontes, citações por afirmação, períodos e correlação da auditoria:
-[S4-17A — Referências na resposta](../../docs/contrato-referencias-s4-17a.md).
+[Referências nas respostas](../../docs/contrato-referencias.md).
 
 API FastAPI do projeto, com chat via Gemini e recuperacao de contexto em listas simuladas do SharePoint.
 
