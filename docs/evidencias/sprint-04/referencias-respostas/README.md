@@ -11,6 +11,8 @@ Atualizado em 25/09/2026. Contrato: `1.1.0`.
 | Frontend: domínio, fontes, componentes e estado do chat | **33 aprovados**, 4 arquivos — [saída](frontend-tests.txt) |
 | TypeScript (`tsc --noEmit`) | Código de saída 0 |
 | ESLint dos arquivos frontend afetados | Código de saída 0, sem avisos |
+| E2E textual com backend, PLN, Gemini e Supabase reais | **7 aprovados**, incluindo o `trace_id` localizando a interação em `ai_interactions` — [relatório do E2E, seção 4.2](../../../testes/sprint4/relatorio-s4-20.md) |
+| Validação extrativa com respostas do modelo real (`google/gemini-3.7-flash` via OpenRouter, sem gravação no banco) | 3 perguntas: 2 respostas `referenced` com cópia integral da fonte (uma delas restrita à única fonte do PRJ-0442) e 1 abstenção em que o próprio modelo declarou evidência insuficiente — [relatório do E2E, seção 4.2](../../../testes/sprint4/relatorio-s4-20.md) |
 
 A rodada focada não repete a avaliação completa do corpus em
 `test_nlp_inference.py`, incluída na rodada ampliada.
@@ -62,6 +64,7 @@ node node_modules/eslint/bin/eslint.js src/lib/domain.ts src/lib/domain.test.ts 
 
 Os testes de contrato usam massa sintética e simulam o transporte do LLM,
 o STT e a conexão do banco; executam as rotas, a adaptação, a validação e a
-persistência reais do código. Os testes específicos do PLN executam o
-classificador real. Não houve escrita de dados de teste no Supabase nem
-chamada ao LLM ou ao STT.
+persistência reais do código, sem escrita no Supabase nem chamada ao LLM ou
+ao STT. Os testes específicos do PLN executam o classificador real. O E2E
+textual roda contra o backend real e grava no Supabase uma interação de teste
+identificada por marcador único.
