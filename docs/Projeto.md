@@ -5561,7 +5561,7 @@ Log da API na 3ª rodada, resumido sem identificadores ([`api-log-resumo.txt`](.
 | ID | Defeito | Tratamento |
 | --- | --- | --- |
 | DEF-RNF04-01 | Vigência, status e linha do extrato eram recuperados do banco e descartados antes do prompt; perguntas de cronograma recebiam "contexto insuficiente" | Corrigido em `build_rag_input`, com 10 testes de regressão; as perguntas afetadas passaram a responder as datas corretas |
-| DEF-RNF04-02 | Respostas truncadas pelo limite de tokens entregues como completas | Mecanismo confirmado nas rodadas do RNF05: 36 de 451 respostas (8,0%) na 2ª e 50 de 860 (5,8%) na 3ª terminaram por limite de tokens no caminho do OpenRouter, porque o raciocínio do modelo consome o mesmo orçamento de 512 tokens do texto. O adaptador passou a registrar cada ocorrência em log. Nenhuma das 35 respostas coletadas pelo Gemini direto terminou cortada |
+| DEF-RNF04-02 | Respostas truncadas pelo limite de tokens entregues como completas | Mecanismo confirmado nas rodadas do RNF05: 36 de 451 respostas (8,0%) na 2ª e 50 de 860 (5,8%) na 3ª terminaram por limite de tokens no caminho do OpenRouter, porque o raciocínio do modelo consome o mesmo orçamento de 512 tokens do texto. O adaptador passou a registrar cada ocorrência em log. Nenhuma das 35 respostas coletadas pelo Gemini direto terminou cortada. Depois do teste de usabilidade, em que uma resposta chegou vazia (Seção 9.3.2), o limite passou a 1024 tokens e a resposta interrompida passou a vir com um aviso ao usuário; no reteste, 0 de 38 respostas foram cortadas, contra 4 de 38 com o limite antigo, com cerca de 0,2 s a mais na mediana do tempo do modelo ([relatório](../src/backend/evidencias/reteste-truncamento/RELATORIO.md)). As rodadas do RNF05 foram medidas com o limite de 512 |
 | DEF-RNF05-01 | O Gemini no *Free Tier*, provedor da bancada, tem piso de 14,7 s a 37,7 s por chamada trivial, acima do teto do RNF05 | Característica da bancada, não do produto: o *Free Tier* é usado para não gerar custo, e o ambiente do Metrô usará o Copilot Studio com modelos GPT. As rodadas do RNF05 foram medidas com provedor pago. Ver Seção 3.2.2 |
 | DEF-RNF05-02 | A gravação da auditoria do RNF03 é síncrona e fica no caminho da resposta. Na 2ª rodada, sob carga, a distância entre o P95 do cliente e o do pipeline foi de 4,1 s, e, sem limite de tempo nas consultas ao banco, uma gravação presa segurou uma resposta por mais de 60 s | Aplicados antes da 3ª rodada: limite de 5 s por consulta ao banco (`statement_timeout`) e *keepalive* de TCP nas conexões, com 9 testes. Na 3ª rodada a distância caiu para 1,8 s, sem erro. A gravação fora do caminho da resposta, por fila ou tarefa em segundo plano, fica para a mensageria prevista na Sprint 5: muda a semântica da auditoria verificada nos testes do RNF03 e é decisão do grupo |
 | — | Cada requisição abria duas conexões novas com o Supabase, cerca de 1 s cada | Pool de conexões: de 1.209 ms para 599 ms por acesso, ou cerca de 1,2 s a menos por requisição, com qualquer provedor de LLM |
@@ -5677,9 +5677,9 @@ O cálculo do SUS seguirá o método tradicional: para itens positivos, subtrai-
 
 #### Revisão dos instrumentos após o feedback da Sprint 3
 
-Registrada na Sprint 4, antes da primeira sessão, e aplicada igualmente a todos os participantes.
+Registrada na Sprint 4, antes das sessões com os participantes.
 
-**Instrução do cenário 6.** A instrução anterior, "Observe se o agente sugere um próximo passo e se a sugestão depende da sua confirmação", antecipava ao participante exatamente o que o cenário quer observar: quem é avisado de que haverá uma sugestão procura por ela, e a etapa deixa de medir se a interface a comunica sozinha. A instrução passa a descrever só a tarefa: "Você vai participar de uma reunião sobre o projeto PRJ-0442. Use o agente para se preparar." Consultas sobre situação, prazos, riscos ou marcos do projeto fazem o agente oferecer um próximo passo que depende da confirmação do usuário, e o observador registra se o participante o percebe sem aviso. Uma segunda instrução, lida só depois, pede que o participante ajuste o agente para responder apenas o que foi perguntado, o que observa se ele encontra o controle da proatividade (RF10). O modo proatividade começa ligado em todas as sessões. As demais instruções da planilha descrevem a tarefa sem antecipar o comportamento observado e foram mantidas.
+**Instrução do cenário 6.** A instrução anterior, "Observe se o agente sugere um próximo passo e se a sugestão depende da sua confirmação", antecipava ao participante exatamente o que o cenário quer observar: quem é avisado de que haverá uma sugestão procura por ela, e a etapa deixa de medir se a interface a comunica sozinha. A instrução passa a descrever só a tarefa: "Você vai participar de uma reunião sobre o projeto PRJ-0442. Use o agente para se preparar." Consultas sobre situação, prazos, riscos ou marcos do projeto fazem o agente oferecer um próximo passo que depende da confirmação do usuário, e o observador registra se o participante o percebe sem aviso. Uma segunda instrução, lida só depois, pede que o participante ajuste o agente para responder apenas o que foi perguntado, o que observa se ele encontra o controle da proatividade (RF10). O modo proatividade começa ligado em todas as sessões. As demais instruções da planilha descrevem a tarefa sem antecipar o comportamento observado e foram mantidas. Nas sessões da Sprint 4, a planilha ainda trazia a instrução original do cenário 6, e foi ela a lida aos participantes; o resultado desse cenário é lido com essa ressalva na Seção 9.3.2.
 
 **SUS como dado descritivo.** O SUS mede a percepção global de usabilidade e não aponta problemas específicos; com cinco participantes, a média ainda é instável, porque só se estabiliza por volta de 12 a 14 respondentes. Por isso o plano não fixa meta de SUS para aprovar o sistema. O resultado é publicado com a nota de cada participante, a mediana e a amplitude, ao lado do perfil e da familiaridade declarada, e é lido junto da observação das tarefas, que é o que mostra onde cada pessoa hesitou, errou ou pediu ajuda.
 
@@ -5693,16 +5693,77 @@ Registrada na Sprint 4, antes da primeira sessão, e aplicada igualmente a todos
 
 ### 9.3.2 Resultados
 
-Os resultados dos testes de usabilidade ainda não foram consolidados. Após a execução com os participantes externos, esta seção deverá apresentar:
+**Execução.** Seis sessões moderadas individuais, em 23/09/2026, conduzidas em sequência na interface web da bancada (commit `c9ad16a`, modelo `gemini-3.7-flash`), uma por participante, todas com o mesmo roteiro, o mesmo moderador e a mesma versão do sistema. O formulário SUS foi aplicado ao final da rodada, e os seis responderam entre 16:56 e 17:05.
 
-- quantidade de participantes e descrição dos perfis avaliados;
-- taxa de sucesso, dificuldade e falha por cenário;
-- principais ocorrências observadas e sua severidade;
-- pontuação SUS individual e média geral;
-- síntese dos comentários qualitativos dos participantes;
-- melhorias priorizadas para a evolução do agente.
+A sessão conduzida na bancada compartilhada ficou registrada na auditoria do RNF03: onze perguntas numa mesma conversa, de 16:39:51 a 16:50:12, e a consulta do cenário 3, às 17:26:26, numa conversa separada. As demais sessões rodaram em instâncias locais da bancada, sem `SUPABASE_DATABASE_URL` configurada, o que leva a recuperação ao índice local e não produz evento de auditoria; o registro delas é a planilha de campo do grupo. Os dados anonimizados de todas as sessões estão em [`docs/usabilidade/dados/`](usabilidade/dados/) e a consolidação, em [`src/notebooks/consolidacao_usabilidade.ipynb`](../src/notebooks/consolidacao_usabilidade.ipynb).
 
-Os dados brutos serão registrados na planilha "Oneshot - Testes de Usabilidade - Agente de Gestão de Portifólio", que organiza cada cenário em etapas observáveis e mantém uma aba específica para ocorrências. O formulário SUS será utilizado como fonte complementar para medir a percepção geral de usabilidade após a experiência prática com o agente. A consolidação final deverá cruzar os registros da planilha com as respostas do SUS, permitindo identificar quais cenários tiveram maior taxa de sucesso, quais etapas concentraram dificuldades e quais problemas devem ser priorizados na evolução do agente.
+**Participantes.** Seis estudantes de uma faculdade de tecnologia, de 18 a 21 anos, externos à turma. A familiaridade declarada com agentes conversacionais cobre os três níveis previstos na Seção 9.3.1: dois participantes de familiaridade alta, que usam ferramentas como ChatGPT, Gemini e Claude na rotina de estudo; dois de familiaridade média, com uso esporádico; e dois de familiaridade baixa, sem uso regular desse tipo de ferramenta. Na familiaridade com tecnologia em geral, quatro declararam alta e dois, média. Nos dados, aparecem como `P1` a `P6`, sem nomes.
+
+| Participante | Sessão | Familiaridade com tecnologia | Familiaridade com agentes |
+| :---: | :---: | :---: | :---: |
+| P1 | S1 | alta | alta |
+| P2 | S2 | alta | média |
+| P3 | S3 | média | baixa |
+| P4 | S4 | alta | média |
+| P5 | S5 | alta | alta |
+| P6 | S6 | média | baixa |
+
+**Resultado por cenário.** Cada participante executou os sete cenários na própria sessão, e cada cenário tem seis observações independentes.
+
+| Cenário | ✅ Concluído | ⚠️ Com dificuldade | ❌ Falhou | Leitura |
+| --- | :---: | :---: | :---: | --- |
+| 1. Entrada em linguagem natural | 4 | 2 | 0 | A pergunta em linguagem comum funcionou sem comando técnico; os dois participantes de familiaridade baixa procuraram um menu de comandos antes de digitar |
+| 2. Consulta de status e prazo | 5 | 1 | 0 | "me fale o prazo do projeto da linha azul" trouxe a vigência de 24/08 a 28/08/2026, com a fonte citada; um participante não identificou a fonte dentro do texto |
+| 3. Consulta de riscos e informações do projeto | 2 | 2 | 2 | Duas respostas chegaram vazias, só com o aviso de dados fictícios (O7), e duas chegaram cortadas no meio da frase (O5) |
+| 4. Análise e comparação entre projetos | 4 | 2 | 0 | O agente declarou que a base tem um único projeto e os participantes seguiram; em uma sessão o comunicado de serviço foi tratado como projeto (O4) |
+| 5. Informação ausente ou fora de escopo | 0 | 4 | 2 | O limite foi declarado para a Linha 5, mas perguntas curtas sobre temas que estão na base foram recusadas (O1); dois participantes só concluíram depois da dica do moderador |
+| 6. Sugestão proativa e controle do usuário | 0 | 4 | 2 | As sugestões aceitas responderam que as fontes eram insuficientes (O2) e o controle da proatividade não foi localizado sem ajuda por dois participantes (O8) |
+| 7. Entrada por voz | 4 | 2 | 0 | A transcrição preservou a intenção em todas as sessões (O6); dois participantes hesitaram em acionar o botão de áudio |
+
+Quatro dicas do moderador foram necessárias, todas nos cenários 5 e 6 e todas com participantes de familiaridade média ou baixa com agentes conversacionais. As etapas com mais problemas foram "entender a orientação recebida" no cenário 5 e "avaliar a utilidade da sugestão" no cenário 6, com seis registros de dificuldade ou falha cada.
+
+<div align="center">
+  <img src="img/usabilidade-resultado-por-cenario.png" alt="Resultado de cada cenário do teste de usabilidade, com a distribuição dos seis participantes entre concluído, concluído com dificuldade e falhou" width="100%">
+</div>
+
+<p align="center"><strong>Figura 34</strong> - Resultado por cenário do teste de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos dados anonimizados das seis sessões.</sup></p>
+
+**Ocorrências.**
+
+| ID | Cenário | Severidade | Ocorrido | Tratamento |
+| --- | :---: | :---: | --- | --- |
+| O1 | 5 | média | "fale sobre os Objetos perdidos", "fale sobre o Bilhete digital" e "Bilhete digital", temas que estão na base, foram recusados pelo classificador, com confiança de 42% a 50%, e a orientação pediu para indicar um projeto; a recusa se repetiu nas seis sessões | Aceitar perguntas curtas sobre temas operacionais e orientar a reformulação com exemplos, sem exigir um projeto |
+| O2 | 6 | média | As sugestões foram oferecidas sem sustentação nas fontes: depois de uma pergunta sobre a Linha 5, o agente sugeriu identificar o gargalo do projeto e, aceita a sugestão, respondeu que as fontes eram insuficientes | Oferecer a sugestão só quando as fontes recuperadas sustentarem a ação |
+| O3 | 4 | baixa | Depois de declarar que só existe um projeto, o agente sugeriu adaptar a prática do projeto com melhor desempenho | Não oferecer sugestão comparativa quando a comparação foi recusada |
+| O4 | 4 | baixa | A resposta tratou o comunicado de serviço como projeto, e o participante passou a comparar comunicado com projeto | Indicar no prompt a entidade de cada fonte |
+| O5 | 7 | média | Respostas terminaram cortadas no meio da frase, pelo limite de tokens | Corrigido e retestado, com O7 |
+| O6 | 7 | cosmética | A transcrição registrou "Eu sou eu perdi um objeto"; a intenção foi preservada | — |
+| O7 | 3 | alta | Duas respostas chegaram vazias, só com o aviso de dados fictícios: o raciocínio do modelo consumiu o limite de 512 tokens antes do texto | Corrigido: limite de 1024 tokens e aviso ao usuário quando a resposta for interrompida. No reteste, 0 de 38 respostas cortadas, contra 4 de 38 com o limite antigo ([relatório](../src/backend/evidencias/reteste-truncamento/RELATORIO.md)) |
+| O8 | 6 | média | O controle da proatividade não foi localizado sem ajuda: dois participantes não encontraram onde pedir que o agente respondesse apenas o que foi perguntado | Tornar o controle da proatividade visível na própria conversa, junto da sugestão oferecida |
+
+O único defeito crítico, O7, foi corrigido e retestado. O1 a O4 e O8 entram como melhorias para a Sprint 5.
+
+**SUS.** As seis respostas, em ordem de envio, sem vínculo com os códigos dos participantes, porque o formulário não identifica quem respondeu:
+
+| Resposta | R1 | R2 | R3 | R4 | R5 | R6 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| SUS | 97,5 | 100,0 | 87,5 | 80,0 | 77,5 | 75,0 |
+
+Mediana de 83,75 e amplitude de 75 a 100, com média de 86,2 para seis respondentes. Como definido na Seção 9.3.1, o SUS é dado descritivo e não critério de aprovação. A percepção declarada é mais favorável do que a observação das tarefas sugere: nenhum participante concluiu os cenários 5 e 6 sem dificuldade, houve perguntas recusadas (O1), sugestões que não entregaram o que ofereciam (O2) e duas respostas vazias (O7). A amplitude de 25 pontos acompanha a distância entre as notas mais altas e as mais baixas, mas o formulário não identifica quem respondeu, e por isso não é possível associá-la à familiaridade declarada.
+
+**Abrangência e limitações.**
+
+| Limitação | Efeito sobre a leitura |
+| --- | --- |
+| Seis sessões, um participante em cada | Cada cenário tem seis observações independentes, o que permite distinguir dificuldade individual de comportamento do sistema, mas não sustenta estatística |
+| Amostra concentrada em um perfil | Seis estudantes de tecnologia da mesma faixa etária; a familiaridade com agentes conversacionais varia entre baixa, média e alta, mas os perfis planejados de gestão de projetos, análise de indicadores e ferramentas Microsoft não foram cobertos |
+| Instrução original do cenário 6 | A instrução lida antecipava a sugestão proativa; a etapa "ler a sugestão" não mede se a interface a comunica sozinha |
+| SUS sem vínculo com o participante | O formulário é anônimo, e a nota não pode ser cruzada com a familiaridade declarada nem com o desempenho observado |
+| SUS respondido ao final da rodada | As seis respostas chegaram em nove minutos, depois da última sessão, e não logo após a sessão de cada participante; quem foi atendido primeiro respondeu com mais tempo decorrido |
+| Auditoria cobre uma das seis sessões | As sessões em instância local não persistem em `ai_interactions` nem em `audit_events`; para elas, a evidência é a planilha de campo, e não a trilha do RNF03 |
+| Massa sintética com um projeto | Os cenários 3 e 4 medem sobretudo como o agente declara o que não tem |
+
+**Melhorias priorizadas.** (1) Aceitar perguntas curtas sobre temas operacionais da base, que responde por O1 e pela dificuldade do cenário 5; (2) condicionar a sugestão proativa às fontes recuperadas, que responde por O2 e O3; (3) tornar o controle da proatividade visível junto da sugestão, que responde por O8; (4) separar no prompt a entidade de cada fonte, que responde por O4. Para a próxima rodada, recomendam-se novas sessões com os perfis ainda não cobertos.
 
 ---
 
