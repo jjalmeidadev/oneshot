@@ -46,7 +46,7 @@ consentimento assinado, guardado pelo moderador fora do repositório.
 
 | Coluna | Valores |
 | --- | --- |
-| `vaga_perfil` | a vaga de [`perfis-participantes.md`](perfis-participantes.md) que o participante preenche |
+| `vaga_perfil` | a vaga de [`perfis-participantes.md`](perfis-participantes.md) que o participante preenche; quando ele não corresponde a nenhuma das vagas de perfil profissional, o perfil real, como `estudante_de_tecnologia`, e as vagas que ficaram vazias são declaradas na Seção 9.3.2 |
 | `externo_a_turma` | `sim` — exigência para todos |
 | `familiaridade_tecnologica`, `familiaridade_agentes` | `baixa`, `media` ou `alta`, declarada pelo participante; `nao_informada` quando não foi coletada |
 | `faixa_etaria` | `18-29`, `30-39`, `40-49`, `50-59` ou `60+` |

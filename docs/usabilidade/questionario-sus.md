@@ -62,7 +62,7 @@ tarefas, e não como critério de aprovação do sistema. Não há meta de SUS.
   sessões acontecem na interface web da bancada, porque o ambiente Teams do Metrô
   não está acessível ao grupo. A resposta mede a expectativa do participante, e
   não uma experiência que ele teve.
-- **Com cinco participantes, a média é instável.** Cinco pessoas bastam para revelar
+- **Com cinco ou seis participantes, a média é instável.** Cinco pessoas bastam para revelar
   boa parte dos problemas recorrentes (Nielsen e Landauer, 1993), mas a média do SUS
   só se estabiliza por volta de 12 a 14 respondentes (Tullis e Stetson, 2004).
 

@@ -9,23 +9,23 @@ P1,7,Entrada por voz,sucesso,sucesso,sucesso,sucesso,sucesso,sucesso,nao,"Duas p
 P2,1,Entrada em linguagem natural,sucesso,sucesso,sucesso,sucesso,sucesso,sucesso,nao,"Perguntou ""o que você sabe sobre o PRJ-0442""; leu a resposta e a considerou suficiente."
 P2,2,Consulta de status e prazo,sucesso,sucesso,sucesso,sucesso,sucesso,sucesso,nao,Perguntou pelo status e pelo prazo na mesma frase; as duas informações vieram com a fonte.
 P2,3,Consulta de riscos e informações do projeto,sucesso,sucesso,sucesso,sucesso,sucesso,sucesso,nao,"Perguntou pelos marcos do projeto; a resposta veio completa, com a fonte citada."
-P2,4,Análise e comparação entre projetos,sucesso,sucesso,sucesso,sucesso,sucesso,dificuldade,nao,"Depois de declarar que só existe um projeto, o agente sugeriu adaptar a prática do projeto com melhor desempenho (O3); o participante estranhou a sugestão."
+P2,4,Análise e comparação entre projetos,dificuldade,sucesso,sucesso,sucesso,sucesso,dificuldade,nao,"Depois de declarar que só existe um projeto, o agente sugeriu adaptar a prática do projeto com melhor desempenho (O3); o participante estranhou a sugestão."
 P2,5,Informação ausente ou fora de escopo,dificuldade,sucesso,sucesso,sucesso,dificuldade,sucesso,nao,"Mesma recusa de O1 em ""Objetos perdidos""; o participante disse que a orientação não explicava o que reformular."
 P2,6,Sugestão proativa e controle do usuário,dificuldade,sucesso,sucesso,sucesso,sucesso,dificuldade,nao,"Recusou a primeira sugestão e aceitou a segunda, que também respondeu com fontes insuficientes (O2)."
 P2,7,Entrada por voz,sucesso,sucesso,sucesso,sucesso,sucesso,sucesso,nao,"A transcrição registrou ""Eu sou eu perdi um objeto""; a intenção foi preservada e a resposta veio correta (O6)."
 P3,1,Entrada em linguagem natural,dificuldade,dificuldade,sucesso,sucesso,sucesso,sucesso,nao,Procurou por um menu de comandos antes de digitar; começou a escrever depois de ler o texto de boas-vindas.
-P3,2,Consulta de status e prazo,sucesso,sucesso,sucesso,sucesso,dificuldade,sucesso,nao,Não percebeu a fonte citada na primeira leitura; encontrou depois de reler a resposta.
+P3,2,Consulta de status e prazo,dificuldade,sucesso,sucesso,sucesso,dificuldade,sucesso,nao,Não percebeu a fonte citada na primeira leitura; encontrou depois de reler a resposta.
 P3,3,Consulta de riscos e informações do projeto,dificuldade,sucesso,dificuldade,dificuldade,sucesso,dificuldade,nao,Pediu detalhe depois da primeira resposta; a segunda chegou cortada (O5) e o participante não soube dizer se faltava conteúdo.
 P3,4,Análise e comparação entre projetos,dificuldade,dificuldade,dificuldade,sucesso,sucesso,sucesso,nao,"Levou tempo para escolher os dois projetos, porque não sabia o que havia na base; escolheu pelos nomes citados na resposta anterior."
 P3,5,Informação ausente ou fora de escopo,nao_conseguiu,sucesso,dificuldade,dificuldade,nao_conseguiu,nao_conseguiu,sim,Interpretou a recusa como resposta definitiva e parou; concluiu a etapa depois da dica do moderador (O1).
-P3,6,Sugestão proativa e controle do usuário,nao_conseguiu,sucesso,dificuldade,sucesso,nao_conseguiu,nao_conseguiu,sim,Não localizou o controle da proatividade pedido na segunda instrução; concluiu a etapa depois da dica do moderador.
+P3,6,Sugestão proativa e controle do usuário,nao_conseguiu,sucesso,dificuldade,sucesso,nao_conseguiu,nao_conseguiu,sim,Não localizou o controle da proatividade pedido na segunda instrução; concluiu a etapa depois da dica do moderador (O8).
 P3,7,Entrada por voz,dificuldade,dificuldade,sucesso,sucesso,sucesso,sucesso,nao,"Procurou o botão de áudio antes de acioná-lo; depois disso, o fluxo foi igual ao de texto."
 P4,1,Entrada em linguagem natural,sucesso,sucesso,sucesso,sucesso,sucesso,sucesso,nao,"Formulou a pergunta sem hesitar, depois de conferir o campo de texto."
 P4,2,Consulta de status e prazo,sucesso,sucesso,sucesso,sucesso,sucesso,sucesso,nao,Leu a resposta em voz alta e confirmou o dado principal.
 P4,3,Consulta de riscos e informações do projeto,nao_conseguiu,sucesso,sucesso,nao_conseguiu,nao_testado,nao_conseguiu,nao,"Mesma falha de O7: resposta vazia, só com o aviso de dados fictícios. O participante entendeu como recusa do agente, e não como erro."
 P4,4,Análise e comparação entre projetos,dificuldade,sucesso,dificuldade,sucesso,dificuldade,sucesso,nao,"A resposta tratou o comunicado de serviço como projeto (""o comunicado PRJ-0442""), e o participante passou a comparar comunicado com projeto (O4)."
 P4,5,Informação ausente ou fora de escopo,nao_conseguiu,sucesso,sucesso,dificuldade,nao_conseguiu,nao_conseguiu,sim,"Depois de duas recusas do classificador (O1), não encontrou uma formulação aceita; o moderador sugeriu citar o projeto, e a pergunta passou."
-P4,6,Sugestão proativa e controle do usuário,dificuldade,sucesso,dificuldade,sucesso,dificuldade,dificuldade,nao,"Percebeu a sugestão, mas não tinha certeza de que precisava confirmar; clicou para ver o que aconteceria (O2)."
+P4,6,Sugestão proativa e controle do usuário,dificuldade,sucesso,dificuldade,sucesso,dificuldade,dificuldade,nao,"Percebeu a sugestão, mas não tinha certeza de que precisava confirmar; clicou para ver o que aconteceria (O8)."
 P4,7,Entrada por voz,sucesso,sucesso,sucesso,sucesso,sucesso,sucesso,nao,Acionou a entrada por voz sem hesitar e conferiu a transcrição.
 P5,1,Entrada em linguagem natural,sucesso,sucesso,sucesso,sucesso,sucesso,sucesso,nao,"Primeira pergunta em linguagem comum, sobre o projeto da linha azul."
 P5,2,Consulta de status e prazo,sucesso,sucesso,sucesso,sucesso,sucesso,sucesso,nao,Localizou a vigência e abriu a fonte citada para conferir.
@@ -39,5 +39,5 @@ P6,2,Consulta de status e prazo,dificuldade,sucesso,sucesso,dificuldade,dificuld
 P6,3,Consulta de riscos e informações do projeto,sucesso,sucesso,sucesso,sucesso,sucesso,sucesso,nao,Perguntou pelos avanços do projeto; respondeu que a resposta era clara.
 P6,4,Análise e comparação entre projetos,sucesso,sucesso,sucesso,sucesso,sucesso,sucesso,nao,Pediu a comparação e aceitou a recusa sem reformular.
 P6,5,Informação ausente ou fora de escopo,dificuldade,sucesso,sucesso,sucesso,dificuldade,dificuldade,nao,"Declarou não confiar na resposta depois da recusa, porque sabia que o tema estava na base (O1)."
-P6,6,Sugestão proativa e controle do usuário,nao_conseguiu,sucesso,nao_conseguiu,sucesso,nao_conseguiu,nao_conseguiu,sim,"Leu a sugestão como parte da resposta, sem perceber que era uma ação a confirmar; precisou de dica para separar as duas coisas."
+P6,6,Sugestão proativa e controle do usuário,nao_conseguiu,sucesso,nao_conseguiu,sucesso,nao_conseguiu,nao_conseguiu,sim,"Leu a sugestão como parte da resposta, sem perceber que era uma ação a confirmar; precisou de dica para separar as duas coisas (O8)."
 P6,7,Entrada por voz,dificuldade,dificuldade,dificuldade,sucesso,sucesso,dificuldade,nao,Falou antes de acionar o botão e precisou repetir a pergunta; a resposta chegou cortada (O5).
