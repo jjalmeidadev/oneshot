@@ -18,12 +18,13 @@ from app.audio.errors import (
     RateLimitedError,
     UnauthenticatedError,
 )
+from app.audio.schemas import MAX_CONVERSATION_ID_LENGTH
 from app.audio.validation import (
     DEFAULT_MAX_DURATION_SECONDS,
     DEFAULT_MAX_SIZE_BYTES,
     validate_audio_upload,
 )
-from app.audio.schemas import MAX_CONVERSATION_ID_LENGTH
+from app.gemini.schemas import GeminiChatResponse, GeminiUsage
 from app.main import app
 
 TOKEN = "token-de-teste"
@@ -622,13 +623,22 @@ class TestAudioUploadEndpoint:
         assert body["pipeline_metrics"]["nlp_ms"] == body["chat"]["pipeline_metrics"]["nlp_ms"]
         assert body["pipeline_metrics"]["total_ms"] >= body["pipeline_metrics"]["stt_ms"]
 
-    def test_audio_out_of_scope_finishes_with_controlled_answer_without_gemini(
+    def test_audio_out_of_scope_uses_rag_and_returns_controlled_answer(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        def fail_if_called(_request):
-            raise AssertionError("Gemini/RAG should not run for out-of-scope audio")
+        provider_calls = []
 
-        monkeypatch.setattr("app.pipeline.generate_chat_response", fail_if_called)
+        def generic_rag(_request, **kwargs):
+            provider_calls.append(kwargs)
+            return GeminiChatResponse(
+                text="Essa solicitação não está no escopo da base de conhecimento disponível.",
+                model="rag-retriever",
+                latency_ms=0,
+                usage=GeminiUsage(),
+                sources=[],
+            )
+
+        monkeypatch.setattr("app.pipeline.generate_chat_response", generic_rag)
         monkeypatch.setattr(
             "app.nlp.inference.classify",
             lambda text: classificacao_fixa(
@@ -654,8 +664,13 @@ class TestAudioUploadEndpoint:
         assert body["chat"]["interaction_id"] is None
         assert body["chat"]["sources"] == []
         assert body["intent"]["macro"] == "FORA_DE_ESCOPO"
+        assert not body["intent"]["handler"].startswith("handler:")
         assert body["answer"]["text"] == body["chat"]["text"]
-        assert "portfólio" in body["answer"]["text"]
+        assert body["answer"]["text"] == (
+            "Essa solicitação não está no escopo da base de conhecimento disponível."
+        )
+        assert provider_calls[0]["intent"] is None
+        assert provider_calls[0]["require_rag_context"] is True
         assert body["pipeline_metrics"]["nlp_ms"] >= 0
         assert body["pipeline_metrics"]["total_ms"] >= body["pipeline_metrics"]["nlp_ms"]
 

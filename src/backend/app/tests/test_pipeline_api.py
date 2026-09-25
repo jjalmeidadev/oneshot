@@ -24,10 +24,17 @@ def disable_traceability(monkeypatch):
 
 
 class ProviderCall:
-    def __init__(self, request, intent=None, entities=None):
+    def __init__(
+        self,
+        request,
+        intent=None,
+        entities=None,
+        require_rag_context=False,
+    ):
         self.request = request
         self.intent = intent
         self.entities = entities or []
+        self.require_rag_context = require_rag_context
 
     def __getattr__(self, name):
         return getattr(self.request, name)
@@ -36,8 +43,21 @@ class ProviderCall:
 @pytest.fixture
 def provider(monkeypatch):
     calls = []
-    def generate(request, intent=None, entities=None, requester_id=None):
-        calls.append(ProviderCall(request, intent=intent, entities=entities))
+    def generate(
+        request,
+        intent=None,
+        entities=None,
+        requester_id=None,
+        require_rag_context=False,
+    ):
+        calls.append(
+            ProviderCall(
+                request,
+                intent=intent,
+                entities=entities,
+                require_rag_context=require_rag_context,
+            )
+        )
         return GeminiChatResponse(text="Resposta [Fonte 1]", model="teste", interaction_id="next-id",
             latency_ms=4, usage=GeminiUsage(input_tokens=2, output_tokens=3, total_tokens=5),
             sources=[dict(id="lista:1", title="Projeto", list_name="Projetos", web_url="https://example.org/projeto",
@@ -52,13 +72,20 @@ def _classification_result(
     suggested=None,
     specific='consulta_status_projeto',
 ):
+    routed_specific = (
+        specific if routed and macro != 'FORA_DE_ESCOPO' else None
+    )
     return SimpleNamespace(
         macrointencao=macro,
-        intencao=specific if routed else None,
+        intencao=routed_specific,
         confianca_macro=.9 if routed else .3,
         confianca_intencao=.8,
         fluxo='Consulta documental',
-        handler=f'handler:{specific}' if specific else 'limitacao',
+        handler=(
+            f'handler:{routed_specific}'
+            if routed_specific
+            else ('limitacao' if not routed else f'fluxo genérico de {macro}')
+        ),
         alternativas=[(specific or 'fora_de_escopo', .8)],
         roteada=routed,
         resposta_sugerida=suggested,
@@ -237,21 +264,54 @@ def test_text_false_toggle_opts_out_and_goes_direct_to_gemini(monkeypatch, provi
     assert data['pipeline_metrics']['route_ms'] >= 0
 
 
-@pytest.mark.parametrize('macro,routed,suggested', [('CONSULTA', True, None), ('INDEFINIDA', False, 'Reformule'), ('FORA_DE_ESCOPO', True, None)])
-def test_classifier_routes_or_limits(monkeypatch, provider, macro, routed, suggested):
+@pytest.mark.parametrize(
+    'macro,routed,suggested,uses_fallback',
+    [
+        ('CONSULTA', True, None, False),
+        ('INDEFINIDA', False, 'Reformule', True),
+        ('FORA_DE_ESCOPO', True, None, True),
+    ],
+)
+def test_classifier_routes_or_uses_generic_rag(
+    monkeypatch,
+    provider,
+    macro,
+    routed,
+    suggested,
+    uses_fallback,
+):
     monkeypatch.setattr('app.nlp.inference.classify', lambda text: _classification_result(macro=macro, routed=routed, suggested=suggested))
     with TestClient(app) as client:
         result = client.post('/api/chat', json=dict(message='prazo', use_intent_classifier=True))
     assert result.status_code == 200
     assert result.json()['intent']['macro'] == macro
     assert result.json()['intent']['flow'] == 'Consulta documental'
-    assert result.json()['intent']['handler'] == 'handler:consulta_status_projeto'
     assert result.json()['intent']['alternatives'][0]['intent'] == 'consulta_status_projeto'
     assert result.json()['pipeline_metrics']['route_ms'] >= 0
-    assert bool(provider) == (macro == 'CONSULTA')
-    if macro != 'CONSULTA':
-        assert result.json()['interaction_id'] is None
-        assert result.json()['sources'] == []
+    assert len(provider) == 1
+    assert provider[0].require_rag_context is uses_fallback
+    assert (provider[0].intent is None) is uses_fallback
+    if uses_fallback:
+        assert not result.json()['intent']['handler'].startswith('handler:')
+
+
+def test_low_specific_confidence_skips_handler_and_uses_generic_rag(
+    monkeypatch,
+    provider,
+):
+    monkeypatch.setattr(
+        'app.nlp.inference.classify',
+        lambda _text: _classification_result(specific=None),
+    )
+
+    with TestClient(app) as client:
+        result = client.post('/api/chat', json={'message': 'me fale do projeto'})
+
+    assert result.status_code == 200
+    assert result.json()['intent']['specific'] == ''
+    assert not result.json()['intent']['handler'].startswith('handler:')
+    assert provider[0].intent is None
+    assert provider[0].require_rag_context is True
 
 
 def test_audio_completes_same_pipeline_and_context(monkeypatch, provider):

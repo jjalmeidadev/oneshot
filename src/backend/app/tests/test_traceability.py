@@ -396,6 +396,15 @@ def test_trace_interaction_records_rf08_absence_as_limitation(monkeypatch):
     )
     assert interaction_call[12] == response.text
     assert interaction_call[13] == "processado"
+    out_of_scope_call = next(
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.out_of_scope_requests" in query
+    )
+    assert out_of_scope_call[0] == "interaction-1"
+    assert out_of_scope_call[1] == "prazo do projeto inexistente"
+    assert out_of_scope_call[2:4] == ("CONSULTA", "consulta_cronograma_prazo")
+    assert out_of_scope_call[5] == "sem_contexto_rag"
 
 
 @pytest.mark.parametrize(
@@ -451,16 +460,26 @@ def test_trace_interaction_normalizes_macro_intent_for_database_check(
         (SimpleNamespace(macrointencao="INDEFINIDA", intencao=None, confianca_macro=0.3, confianca_intencao=0.0, fluxo="", handler="limitacao", alternativas=[], roteada=False, resposta_sugerida="Reformule"), "sem_confianca"),
     ],
 )
-def test_chat_limited_by_classifier_traces_without_calling_provider(
+def test_low_confidence_uses_generic_rag_and_preserves_classification_trace(
     monkeypatch,
     classification,
     status,
 ):
     traces = []
+    provider_calls = []
     monkeypatch.setattr("app.nlp.inference.classify", lambda _text: classification)
     monkeypatch.setattr(
         "app.pipeline.generate_chat_response",
-        lambda *_args, **_kwargs: pytest.fail("Gemini/RAG nao deveria ser chamado"),
+        lambda *_args, **kwargs: (
+            provider_calls.append(kwargs)
+            or GeminiChatResponse(
+                text="Essa solicitação não está no escopo da base de conhecimento disponível.",
+                model="rag-retriever",
+                latency_ms=0,
+                usage=GeminiUsage(),
+                sources=[],
+            )
+        ),
     )
     monkeypatch.setattr(
         "app.pipeline.trace_interaction",
@@ -472,7 +491,9 @@ def test_chat_limited_by_classifier_traces_without_calling_provider(
 
     assert result.status_code == 200
     assert traces
-    assert traces[0]["response"].model == "classificador-local"
+    assert provider_calls[0]["intent"] is None
+    assert provider_calls[0]["require_rag_context"] is True
+    assert traces[0]["response"].model == "rag-retriever"
     assert traces[0]["intent"].macro == classification.macrointencao
 
 

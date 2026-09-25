@@ -208,7 +208,30 @@ def test_absence_of_database_result_returns_rf08_explicit_response(monkeypatch):
 
     assert response.model == "rag-retriever"
     assert response.sources == []
-    assert "Nao encontrei fontes suficientes" in response.text
+    assert response.text == (
+        "Essa solicitação não está no escopo da base de conhecimento disponível."
+    )
+
+
+def test_generic_fallback_does_not_call_llm_without_rag_context(monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr("app.gemini.client.retrieve_context", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr(
+        "app.gemini.client._call_llm",
+        lambda *_args, **_kwargs: pytest.fail("LLM nao deve responder sem fonte RAG"),
+    )
+
+    response = generate_chat_response(
+        GeminiChatRequest(message="pergunta ambigua"),
+        intent=None,
+        require_rag_context=True,
+    )
+
+    assert response.model == "rag-retriever"
+    assert response.sources == []
+    assert response.text == (
+        "Essa solicitação não está no escopo da base de conhecimento disponível."
+    )
 
 
 def test_database_error_does_not_leak_secret_or_internal_detail(monkeypatch):

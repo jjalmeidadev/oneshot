@@ -44,6 +44,10 @@ LLM_PROVIDER_GEMINI = "gemini"
 LLM_PROVIDER_OPENROUTER = "openrouter"
 VALID_LLM_PROVIDERS = frozenset({LLM_PROVIDER_GEMINI, LLM_PROVIDER_OPENROUTER})
 
+OUT_OF_SCOPE_ANSWER = (
+    "Essa solicitação não está no escopo da base de conhecimento disponível."
+)
+
 OPENROUTER_CHAT_URL = "https://openrouter.ai/api/v1/chat/completions"
 DEFAULT_OPENROUTER_MODEL = "google/gemini-3.7-flash"
 logger = logging.getLogger(__name__)
@@ -64,6 +68,7 @@ def generate_chat_response(
     intent: AudioIntent | None = None,
     entities: list[PublicEntity] | None = None,
     requester_id: str | None = None,
+    require_rag_context: bool = False,
 ) -> GeminiChatResponse:
     api_key = _api_key()
 
@@ -82,12 +87,11 @@ def generate_chat_response(
         ) from error
     retrieval_ms = round((perf_counter() - retrieval_started_at) * 1000)
 
-    if _requires_context(intent) and not retrieved_documents:
+    if not retrieved_documents and (
+        require_rag_context or _requires_context(intent)
+    ):
         return GeminiChatResponse(
-            text=(
-                "Nao encontrei fontes suficientes para responder com seguranca. "
-                "Informe outro projeto, linha ou criterio de consulta."
-            ),
+            text=OUT_OF_SCOPE_ANSWER,
             model="rag-retriever",
             latency_ms=0,
             retrieval_ms=retrieval_ms,
