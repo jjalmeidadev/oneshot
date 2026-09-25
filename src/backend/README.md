@@ -13,6 +13,10 @@ de 2, 4 e 8 segundos. Esses valores podem ser ajustados em `.env` por meio de
 `GEMINI_THINKING_LEVEL`, `GEMINI_MAX_OUTPUT_TOKENS`, `GEMINI_MAX_RETRIES`,
 `GEMINI_RETRY_BASE_DELAY_SECONDS` e `GEMINI_REQUEST_TIMEOUT_SECONDS`.
 
+O benchmark isolado da hipótese de economia de tokens usa OpenRouter sem trocar
+o provedor do backend. Configure `OPENROUTER_API_KEY` somente no mesmo `.env` e
+consulte o [protocolo e as evidências](../../docs/evidencias/sprint-04/hipotese-tokens/README.md).
+
 Para validar a conectividade com o banco Supabase/PostgreSQL do projeto Oneshot,
 configure `DATABASE_URL` ou `SUPABASE_DATABASE_URL` em `src/backend/.env`. A URL
 deve vir do painel **Connect** do Supabase e manter credenciais apenas no ambiente
@@ -73,6 +77,32 @@ consuma a franquia do provedor de transcricao.
 | Requisicoes simultaneas por usuario | 1 |
 
 Todo erro previsto usa o mesmo envelope, sem detalhe tecnico interno, conforme o RNF11.
+
+## Smoke test de audio com banco real
+
+Com `DATABASE_URL` ou `SUPABASE_DATABASE_URL` configurada, execute a partir de
+`src/backend`:
+
+```powershell
+.venv\Scripts\python.exe -m scripts.verify_audio_stt_pln_real_db
+```
+
+O script atravessa `POST /api/audio`, STT controlado, PLN real e persistencia no
+PostgreSQL/Supabase. Ele valida um caso positivo e uma falha controlada, confere
+correlacao e auditoria e remove ao final todos os registros sinteticos criados.
+
+Para validar a mesma cadeia com Azure STT real, forneca um WAV PCM de 16 kHz,
+mono e 16 bits. O provedor gerador posterior fica controlado para isolar o
+escopo audio -> STT -> PLN:
+
+```powershell
+.venv\Scripts\python.exe -m scripts.verify_audio_stt_pln_live `
+  C:\caminho\amostra.wav --expected-term perfil --expected-term artrite
+```
+
+O verificador usa PLN e Supabase reais, confere transcricao, classificacao,
+correlacao e auditoria e remove a conversa sintetica no bloco de limpeza. O
+audio permanece local e nao e copiado para o repositorio.
 O campo `detail` so aparece quando ha algo a informar:
 
 ```json
@@ -344,6 +374,29 @@ todos os exemplos antes de qualquer abstencao; e a classe
 global. Os 1.450 exemplos sinteticos adicionais foram usados exclusivamente no
 treino; validacao e teste permaneceram inalterados.
 
+A avaliacao prospectiva ampliada da issue #232 mede a recuperacao local com 72
+consultas novas, balanceadas entre nove fontes e oito variacoes linguisticas.
+A implementacao e a massa foram congeladas antes da unica execucao. O resultado
+foi recall@3 de 0,555556 (40/72), com intervalo de Wilson de 95% entre 0,440874
+e 0,664609. Embora a classificacao tenha obtido acuracia 0,839648 e F1-macro
+0,832724, o RNF06 esta reprovado porque a recuperacao ficou abaixo de 0,80.
+
+Uma rodada anterior marcou recall@3 de 1,000000 nos 18 casos usados para
+ajustar equivalencias lexicais. Esse valor e mantido somente como teste de
+regressao: como os erros da propria massa orientaram a mudanca, ele nao mede
+generalizacao. Evidencias, hashes, casos e limitacoes estao em
+`../../docs/evidencias/sprint-04/rnf06/`.
+
+Para reproduzir os dois componentes de uma vez, a partir de `src/backend`:
+
+```powershell
+..\..\.venv\Scripts\python.exe scripts\benchmark_rnf06.py
+```
+
+O retorno 0 confirma que os dois limiares foram atingidos. Se algum deles
+regredir, o comando retorna 1 e ainda grava o JSON com todos os casos e a
+conclusao observada.
+
 ## Testes
 
 ```powershell
@@ -356,7 +409,7 @@ O fluxo transacional de relatórios possui testes em
 confirmação, callback idempotente, geração do DOCX e download autenticado. O
 modo `power_automate_simulator` exercita o contrato externo sem tenant. Os
 contratos, estados, variáveis e limites da integração estão documentados em
-`../agent/support/IMPLEMENTATION.md`.
+[`../agent/support/IMPLEMENTATION.md`](../agent/support/IMPLEMENTATION.md).
 
 A fonte de dados do relatório é selecionada por `REPORT_PORTFOLIO_SOURCE`:
 `synthetic` (padrão) lê a massa em `app/reports/data/synthetic_portfolio.json`;
@@ -413,9 +466,9 @@ teste deve ser convertida para WAV PCM mono a 16 kHz antes do envio ao
 
 `POST /api/chat` aceita `conversation_id`, `use_intent_classifier`, `message` e `previous_interaction_id`. `conversation_id` identifica a conversa; `previous_interaction_id` encadeia o provedor e não é mais reutilizado como ID externo. Campo ausente ou `true` executa classificação e extração de entidades por padrão; `false` é opt-out explícito para preservar o toggle da interface. A resposta inclui `intent` rico (`macro`, `specific`, confianças, `flow`, `handler` e `alternatives`), `entities`, `pipeline_metrics` (`nlp_ms` e `route_ms`) e `sources[].excerpt` com o trecho recuperado. Para `transacao_gerar_relatorio`, inclui `workflow` e não chama Gemini.
 
-`POST /api/chat/proactive-confirmation` aceita exclusivamente `suggestion_id`, `conversation_id` e `decision` (`accept` ou `decline`), sem campo de mensagem livre, e exige o mesmo esquema de autenticação. A confirmação só é encontrada quando UUID, identidade e conversa coincidem. `decline` consome o registro sem chamar o Gemini; `accept` reserva o registro contra execução concorrente, envia somente a instrução vinculada e as fontes armazenadas e grava solicitação, intenção, fontes, resposta e identidade na trilha RNF03. Uma sugestão expirada, já decidida ou fora do escopo do solicitante retorna `404`.
+`POST /api/chat/proactive-confirmation` aceita exclusivamente `suggestion_id`, `conversation_id` e `decision` (`accept` ou `decline`), sem campo de mensagem livre, e exige o mesmo esquema de autenticação. A chamada principal prepara a resposta secundária junto da resposta principal e armazena esse conteúdo sem exibi-lo. A confirmação só é encontrada quando UUID, identidade e conversa coincidem: `decline` descarta o registro e `accept` libera a resposta preparada, ambos sem nova chamada ao Gemini. A decisão e a resposta liberada continuam registradas na trilha RNF03. Uma sugestão expirada, já decidida ou fora do escopo do solicitante retorna `404`.
 
-Com `DATABASE_URL` ou `SUPABASE_DATABASE_URL`, as sugestões pendentes são armazenadas em `pending_proactive_suggestions`, permitindo confirmação por qualquer worker durante o TTL. Sem banco configurado, desenvolvimento e testes usam um fallback em memória de processo; esse modo não oferece continuidade após reinício nem balanceamento entre workers e não deve ser usado em produção.
+Com `DATABASE_URL` ou `SUPABASE_DATABASE_URL`, as sugestões pendentes e suas respostas já preparadas são armazenadas em `pending_proactive_suggestions`, permitindo confirmação por qualquer worker durante o TTL. Bancos existentes precisam da migração `08_add_prepared_proactive_response.sql`. Sem banco configurado, desenvolvimento e testes usam um fallback em memória de processo; esse modo não oferece continuidade após reinício nem balanceamento entre workers e não deve ser usado em produção.
 
 `POST /api/audio` aceita também os campos multipart `previous_interaction_id`, `use_intent_classifier` e `proactivity_enabled`. Depois de validar e transcrever, executa o mesmo pipeline de texto fora do laço assíncrono. Preserva `answer`, retorna `pipeline_status="completed"` e acrescenta `chat` com as fontes completas, intenção rica, eventual sugestão proativa, entidades, métricas (`validation_ms`, `stt_ms`, `nlp_ms`, `route_ms`, `total_ms`) e ID real da interação. Não são mais gerados IDs de interação fictícios nem respostas provisórias de sucesso.
 
@@ -426,3 +479,10 @@ Com `PLN_WARMUP=1`, a inicialização carrega o classificador antes de aceitar r
 Erros de configuração e do Gemini são convertidos em mensagens controladas. Entradas textuais inválidas retornam `422` com `error.code=INVALID_INPUT`; detalhes internos de validação não são apresentados ao usuário.
 
 A [documentação do frontend](../frontend/README.md) descreve estrutura, fluxos, contratos, execução e limitações. A [matriz de testes](../frontend/TESTES.md) reúne as evidências da integração S3/S5.
+
+## Alerta autônomo de prazo
+
+`handler:alerta_prazo_atraso` inicia um workflow guiado próprio. Depois da
+confirmação, scheduler, outbox e RabbitMQ avaliam o cronograma em segundo plano
+e gravam notificações internas. Não há dependência de Power Automate nem
+webhook. Veja [a documentação operacional](../agent/support/IMPLEMENTATION.md#3-workflow-alerta_prazo_atraso).

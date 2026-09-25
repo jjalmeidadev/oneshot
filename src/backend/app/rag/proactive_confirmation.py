@@ -36,6 +36,9 @@ class PendingProactiveSuggestion:
     original_message: str
     secondary_intent: SecondaryIntent
     sources: tuple[RetrievedDocument, ...]
+    prepared_response: str = ""
+    prepared_model: str = ""
+    prepared_interaction_id: str | None = None
     expires_at: float | None = None
     claimed: bool = False
 
@@ -51,8 +54,11 @@ def register_pending_suggestion(
     original_message: str,
     secondary_intent: SecondaryIntent,
     sources: list[RetrievedDocument],
+    prepared_response: str = "",
+    prepared_model: str = "",
+    prepared_interaction_id: str | None = None,
 ) -> str:
-    """Persiste uma sugestao opaca, limitada ao usuario e conversa de origem."""
+    """Persiste a resposta ja preparada, limitada ao usuario e conversa de origem."""
 
     suggestion_id = str(uuid4())
     pending = PendingProactiveSuggestion(
@@ -62,6 +68,9 @@ def register_pending_suggestion(
         original_message=original_message,
         secondary_intent=secondary_intent,
         sources=tuple(sources),
+        prepared_response=prepared_response,
+        prepared_model=prepared_model,
+        prepared_interaction_id=prepared_interaction_id,
         expires_at=monotonic() + _pending_ttl_seconds(),
     )
     if _database_is_configured():
@@ -175,9 +184,10 @@ def _register_in_database(pending: PendingProactiveSuggestion) -> None:
         """
         INSERT INTO public.pending_proactive_suggestions (
             id, requester_id, external_conversation_id, original_message,
-            secondary_intent, sources, expires_at
+            secondary_intent, sources, prepared_response, prepared_model,
+            prepared_interaction_id, expires_at
         )
-        VALUES (%s, %s, %s, %s, %s::jsonb, %s::jsonb,
+        VALUES (%s, %s, %s, %s, %s::jsonb, %s::jsonb, %s, %s, %s,
                 NOW() + (%s * INTERVAL '1 second'));
         """,
         (
@@ -187,6 +197,9 @@ def _register_in_database(pending: PendingProactiveSuggestion) -> None:
             pending.original_message,
             _json(asdict(pending.secondary_intent)),
             _json([asdict(source) for source in pending.sources]),
+            pending.prepared_response,
+            pending.prepared_model,
+            pending.prepared_interaction_id,
             _pending_ttl_seconds(),
         ),
     )
@@ -207,7 +220,8 @@ def _claim_in_database(
         WHERE id = %s AND requester_id = %s AND external_conversation_id = %s
           AND expires_at > NOW() AND claimed_at IS NULL
         RETURNING id::text, requester_id, external_conversation_id,
-                  original_message, secondary_intent, sources;
+                  original_message, secondary_intent, sources,
+                  prepared_response, prepared_model, prepared_interaction_id;
         """,
     )
 
@@ -226,7 +240,8 @@ def _decline_in_database(
         WHERE id = %s AND requester_id = %s AND external_conversation_id = %s
           AND expires_at > NOW() AND claimed_at IS NULL
         RETURNING id::text, requester_id, external_conversation_id,
-                  original_message, secondary_intent, sources;
+                  original_message, secondary_intent, sources,
+                  prepared_response, prepared_model, prepared_interaction_id;
         """,
     )
 
@@ -298,6 +313,8 @@ def _pending_from_row(row: object) -> PendingProactiveSuggestion:
         values = (
             row["id"], row["requester_id"], row["external_conversation_id"],
             row["original_message"], row["secondary_intent"], row["sources"],
+            row["prepared_response"], row["prepared_model"],
+            row["prepared_interaction_id"],
         )
     else:
         values = tuple(row)
@@ -316,6 +333,9 @@ def _pending_from_row(row: object) -> PendingProactiveSuggestion:
             )
             for source in sources_payload
         ),
+        prepared_response=str(values[6] or ""),
+        prepared_model=str(values[7] or ""),
+        prepared_interaction_id=str(values[8]) if values[8] else None,
         claimed=True,
     )
 

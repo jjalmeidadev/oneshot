@@ -1,0 +1,93 @@
+TIPO DE REGISTRO: SAÍDA BRUTA PRESERVADA
+
+Reexecução da regra do alerta de prazo com o código atual
+Execução: 24/09/2026 17:54 (UTC-0300)
+Commit: 2fb95a2
+Cronograma: marcos do banco, somente leitura (PostgresScheduleSource)
+Repositório: em memória, sem escrita no banco (InMemoryAlertRepository)
+Identidade: sujeito pmo-1, da identidade simulada do .env
+
+Comando, a partir de src/backend:
+  PYTHONPATH=. .venv/bin/python evidencias/alerta-prazo-atraso/reexecutar_regra.py
+
+Resultado: 9 de 9 cenários conforme o esperado.
+
+Cenário 1 — elegível: PRJ-0442, limiar de 0 dias
+  esperado: matched e uma notificação criada
+  observado: matched (1 de 3 itens elegíveis), data de referência 2026-09-22
+    - Instalacao do primeiro lote de equipamentos de sinalizacao: 2 dias de atraso → matched
+    - Inicio da operacao assistida na Linha Azul: 0 dias de atraso → not_matched
+    - Aceite definitivo do sistema de sinalizacao: 0 dias de atraso → not_matched
+  pedidos de notificação consumidos: notificação criada
+  resultado: conforme
+
+Cenário 2 — limite estrito: PRJ-0442, limiar de 2 dias
+  esperado: not_matched, porque 2 dias de atraso não é mais que 2
+  observado: not_matched (0 de 3 itens elegíveis), data de referência 2026-09-22
+    - Instalacao do primeiro lote de equipamentos de sinalizacao: 2 dias de atraso → not_matched
+    - Inicio da operacao assistida na Linha Azul: 0 dias de atraso → not_matched
+    - Aceite definitivo do sistema de sinalizacao: 0 dias de atraso → not_matched
+  pedidos de notificação consumidos: nenhum
+  resultado: conforme
+
+Cenário 3 — não elegível: PRJ-0442, limiar de 3 dias
+  esperado: not_matched e nenhuma notificação
+  observado: not_matched (0 de 3 itens elegíveis), data de referência 2026-09-22
+    - Instalacao do primeiro lote de equipamentos de sinalizacao: 2 dias de atraso → not_matched
+    - Inicio da operacao assistida na Linha Azul: 0 dias de atraso → not_matched
+    - Aceite definitivo do sistema de sinalizacao: 0 dias de atraso → not_matched
+  pedidos de notificação consumidos: nenhum
+  resultado: conforme
+
+Cenário 4 — não elegível: PRJ-0587, limiar de 3650 dias
+  esperado: not_matched e nenhuma notificação
+  observado: not_matched (0 de 3 itens elegíveis), data de referência 2026-09-22
+    - Conclusao da especificacao tecnica dos elevadores: 0 dias de atraso → not_matched
+    - Contratacao do fornecedor de elevadores: 0 dias de atraso → not_matched
+    - Entrega da primeira estacao adaptada: 0 dias de atraso → not_matched
+  pedidos de notificação consumidos: nenhum
+  resultado: conforme
+
+Cenário 5 — repetição: nova avaliação da inscrição do cenário 1, mesma data
+  esperado: matched, e o novo pedido de notificação é ignorado pelo episódio já notificado
+  observado: matched (1 de 3 itens elegíveis), data de referência 2026-09-22
+    - Instalacao do primeiro lote de equipamentos de sinalizacao: 2 dias de atraso → matched
+    - Inicio da operacao assistida na Linha Azul: 0 dias de atraso → not_matched
+    - Aceite definitivo do sistema de sinalizacao: 0 dias de atraso → not_matched
+  pedidos de notificação consumidos: episódio já notificado, ignorado
+  notificações do dono depois da repetição: 1
+  resultado: conforme
+
+Cenário 6 — reenvio a cada 7 dias: PRJ-0442, limiar de 0 dias, avaliado em 22/09, 29/09 e 30/09
+  esperado: notificação em 22/09 (2 dias de atraso), nova em 29/09 (9 dias, novo bloco de 7) e nenhuma em 30/09 (10 dias, mesmo bloco)
+  observado: matched (1 de 3 itens elegíveis), data de referência 2026-09-22
+    - Instalacao do primeiro lote de equipamentos de sinalizacao: 2 dias de atraso → matched
+    - Inicio da operacao assistida na Linha Azul: 0 dias de atraso → not_matched
+    - Aceite definitivo do sistema de sinalizacao: 0 dias de atraso → not_matched
+  pedidos de notificação consumidos: notificação criada
+  observado: matched (1 de 3 itens elegíveis), data de referência 2026-09-29
+    - Instalacao do primeiro lote de equipamentos de sinalizacao: 9 dias de atraso → matched
+    - Inicio da operacao assistida na Linha Azul: 0 dias de atraso → not_matched
+    - Aceite definitivo do sistema de sinalizacao: 0 dias de atraso → not_matched
+  pedidos de notificação consumidos: notificação criada
+  observado: matched (1 de 3 itens elegíveis), data de referência 2026-09-30
+    - Instalacao do primeiro lote de equipamentos de sinalizacao: 10 dias de atraso → matched
+    - Inicio da operacao assistida na Linha Azul: 0 dias de atraso → not_matched
+    - Aceite definitivo do sistema de sinalizacao: 0 dias de atraso → not_matched
+  pedidos de notificação consumidos: episódio já notificado, ignorado
+  resultado: conforme
+
+Cenário 7 — criação idempotente: mesma chave de idempotência duas vezes
+  esperado: a segunda chamada devolve a mesma inscrição, sem criar outra
+  observado: primeira criada=True, segunda criada=False, mesma inscrição=True
+  resultado: conforme
+
+Cenário 8 — confirmação adulterada: limiar alterado depois da revisão
+  esperado: recusa com AlertConflictError
+  observado: AlertConflictError — A configuracao foi alterada apos a revisao.
+  resultado: conforme
+
+Cenário 9 — bloqueio: inscrição cujo dono não tem mais identidade válida
+  esperado: AlertAccessDeniedError e inscrição no estado blocked
+  observado: AlertAccessDeniedError; estado da inscrição: blocked
+  resultado: conforme

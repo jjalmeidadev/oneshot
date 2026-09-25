@@ -1,0 +1,23 @@
+Resumo do log da API — 3a rodada do RNF05 (22/09/2026, 22:22 a 23:40 UTC)
+Nenhum identificador de infraestrutura no log de origem.
+
+== api-rodada3.log ==
+respostas HTTP 200 ...................... 810
+respostas com outro status .............. 0
+novas tentativas contra o provedor ...... 0
+respostas truncadas por limite de tokens  41
+falhas ao gravar rastreabilidade RNF03 .. 0
+consultas canceladas pelo limite de 5 s . 0
+conexoes devolvidas em estado ACTIVE .... 0
+
+== api-atraso-rodada3.log ==
+respostas HTTP 200 ...................... 50
+respostas com outro status .............. 0
+novas tentativas contra o provedor ...... 0
+respostas truncadas por limite de tokens  9
+falhas ao gravar rastreabilidade RNF03 .. 0
+consultas canceladas pelo limite de 5 s . 0
+conexoes devolvidas em estado ACTIVE .... 0
+
+api-rodada3.log cobre os dois aquecimentos (14 + 14), a linha de base de
+25 min (196), a carga (323) e a linha de base estendida (263): 810 respostas.

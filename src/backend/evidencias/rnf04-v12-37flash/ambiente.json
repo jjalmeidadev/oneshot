@@ -1,0 +1,25 @@
+{
+  "coletado_em": "2026-09-22T18:53:54.181085+00:00",
+  "host": "http://127.0.0.1:8000",
+  "commit": "81c787d",
+  "python": "3.13.15",
+  "sistema": "Darwin 25.6.0 (arm64)",
+  "modelo_llm": "google/gemini-3.7-flash",
+  "rag_max_sources": "3",
+  "configuracao_presente": {
+    "GEMINI_API_KEY": true,
+    "DATABASE_URL": false,
+    "SUPABASE_DATABASE_URL": true
+  },
+  "origem_do_rag": "banco (public.source_extracts)",
+  "amostra_versao": "1.2",
+  "total_de_perguntas": 24,
+  "faixa": "completa",
+  "retries_do_provedor": "3 (padrao de producao, vindo do .env)",
+  "modelo_observado_nas_respostas": [
+    "google/gemini-3.7-flash"
+  ],
+  "provedor_llm": "openrouter (ativado so no comando que subiu a API; o .env da entrega aponta para gemini)",
+  "pool_de_conexoes": false,
+  "nota": "Rodada executada antes da introducao do pool de conexoes. O pool altera apenas o tempo de acesso ao banco, nao o conteudo recuperado nem a resposta, e portanto nao afeta fundamentacao nem alucinacao."
+}

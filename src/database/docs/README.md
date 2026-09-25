@@ -12,6 +12,8 @@ Os scripts atuais sao:
 - `../sql/04_rag_synthetic_data.sql`: carrega em `project_artifacts` e `source_extracts` os itens ficticios dos JSONs usados pelo RAG local em `src/backend/app/rag/data/sharepoint`.
 - `../sql/05_add_secondary_intents.sql`: adiciona o catalogo de intencoes secundarias a bancos que ja possuem o baseline;
 - `../sql/06_verify_secondary_intents.sql`: verifica leitura, unicidade, integridade referencial e reexecucao da carga sem persistir dados de teste.
+- `../sql/07_add_pending_proactive_suggestions.sql`: cria o armazenamento compartilhado das sugestões pendentes;
+- `../sql/08_add_prepared_proactive_response.sql`: adiciona a resposta secundária preparada na chamada principal e remove pendências legadas incompatíveis.
 
 ## Banco-alvo
 
@@ -28,7 +30,7 @@ O modelo fisico foi escrito para **PostgreSQL 14+** e tambem e compativel com Su
 
 ## Escopo do modelo fisico
 
-O script cria 26 tabelas:
+O script cria 27 tabelas:
 
 | Grupo | Tabelas |
 | --- | --- |
@@ -38,7 +40,7 @@ O script cria 26 tabelas:
 | Riscos, problemas e mudancas | `risk_issue_items`, `risk_issue_history`, `change_records` |
 | Usuarios e acesso | `users`, `access_rules` |
 | Intencoes e prompts | `intent_catalog`, `secondary_intents`, `prompt_templates` |
-| Conversas, fontes consultadas e auditoria | `ai_conversations`, `ai_interactions`, `consulted_sources`, `audit_events`, `out_of_scope_requests` |
+| Conversas, fontes consultadas e auditoria | `ai_conversations`, `pending_proactive_suggestions`, `ai_interactions`, `consulted_sources`, `audit_events`, `out_of_scope_requests` |
 | Avaliacao do PLN | `intent_test_cases` |
 
 ## Decisoes de modelagem
@@ -60,6 +62,11 @@ A tabela `project_benefits` foi adicionada porque o Mapa de Beneficios e parte c
 
 `secondary_intents` associa uma sugestao proativa a uma intencao especifica existente em `intent_catalog`. A chave estrangeira impede associacoes orfas, enquanto a restricao unica sobre `specific_intent_id` e `secondary_intent` torna a carga idempotente. Os campos `rag_instruction` e `display_message` separam a orientacao enviada ao RAG do texto curto apresentado na interface. A intencao secundaria complementa a consulta e nao altera a classificacao macro ou especifica original.
 
+`pending_proactive_suggestions` guarda também `prepared_response`,
+`prepared_model` e `prepared_interaction_id`. Esses campos comprovam que a
+resposta secundária foi gerada junto da resposta principal; aceitar a sugestão
+somente libera esse conteúdo e não consome uma segunda chamada ao provedor.
+
 ## Tratamento de planilhas Excel do SharePoint
 
 Algumas listas do SharePoint podem guardar apenas links ou anexos para planilhas Excel, especialmente cronogramas. O modelo trata esse caso da seguinte forma:
@@ -80,6 +87,8 @@ psql "$DATABASE_URL" -f src/database/sql/01_create_database.sql
 psql "$DATABASE_URL" -f src/database/sql/02_initial_data.sql
 psql "$DATABASE_URL" -f src/database/sql/04_rag_synthetic_data.sql
 psql "$DATABASE_URL" -f src/database/sql/06_verify_secondary_intents.sql
+psql "$DATABASE_URL" -f src/database/sql/07_add_pending_proactive_suggestions.sql
+psql "$DATABASE_URL" -f src/database/sql/08_add_prepared_proactive_response.sql
 ```
 
 Em um banco que ja possui o baseline, execute
@@ -107,6 +116,27 @@ psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM public.projects;"
 psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM public.project_artifacts WHERE metadata ->> 'source_file' IN ('base_atendimento.json', 'comunicados_servico.json', 'procedimentos_operacionais.json');"
 psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM public.source_extracts WHERE metadata ->> 'source_file' IN ('base_atendimento.json', 'comunicados_servico.json', 'procedimentos_operacionais.json');"
 ```
+
+## Verificacao S4-08 e S4-09 no Supabase
+
+No PowerShell, com `DATABASE_URL` ou `SUPABASE_DATABASE_URL` definido apenas
+na sessao local e o cliente `psql` instalado, execute:
+
+```powershell
+./scripts/verify-supabase.ps1 -ApplySchema -TestSchemaReexecution
+```
+
+O comando aplica o baseline em um banco vazio, executa `02_initial_data.sql` e
+`04_rag_synthetic_data.sql` duas vezes, compara as contagens por dominio e
+registra um evento em `audit_events`. A evidencia sem segredos e gravada em
+`docs/evidencias/` com o mesmo `correlation_id`.
+
+O baseline atual deve retornar **27 tabelas, 46 indices explicitos e 27
+triggers**. A expectativa anterior de 25/43/25 era do modelo antes das duas
+evolucoes posteriores: `secondary_intents` (+1/+1/+1) e
+`pending_proactive_suggestions` (+1/+2/+1). A reexecucao de
+`01_create_database.sql` e um erro esperado, pois ele e um baseline para banco
+vazio; a idempotencia requerida e comprovada pela carga repetida.
 
 Rollback completo da PoC:
 

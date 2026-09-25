@@ -1,0 +1,23 @@
+{
+  "coletado_em": "2026-09-22T17:33:50.536131+00:00",
+  "host": "http://127.0.0.1:8000",
+  "commit": "81c787d",
+  "python": "3.13.15",
+  "sistema": "Darwin 25.6.0 (arm64)",
+  "modelo_llm": "gemini-3.1-flash-lite",
+  "rag_max_sources": "3",
+  "configuracao_presente": {
+    "GEMINI_API_KEY": true,
+    "DATABASE_URL": false,
+    "SUPABASE_DATABASE_URL": true
+  },
+  "origem_do_rag": "banco (public.source_extracts)",
+  "amostra_versao": "1.2",
+  "total_de_perguntas": 24,
+  "faixa": "completa",
+  "retries_do_provedor": "0 (definido no comando de subida da API, nao no .env)",
+  "modelo_observado_nas_respostas": [
+    "gemini-3.1-flash-lite"
+  ],
+  "divergencia_de_modelo": "O `.env` diz 'gemini-3.7-flash', mas as 24 respostas vieram de 'gemini-3.1-flash-lite'. Vale o que as respostas dizem: a API foi iniciada com GEMINI_MODEL e GEMINI_MAX_RETRIES no proprio comando, que o coletor nao enxerga. Corrigido no instrumento: a ficha agora deriva o modelo das respostas."
+}

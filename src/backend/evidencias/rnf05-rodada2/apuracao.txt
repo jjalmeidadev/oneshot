@@ -1,0 +1,8 @@
+rodada       rota        amostras falhas       P95  veredito
+baseline     comparacao        41      0   12000ms  aprovado — P95 12000 ms dentro do teto de 20000 ms
+baseline     simples          123      1    9300ms  reprovado — 1 erro(s); o criterio exige zero
+carga        comparacao        72      0   11000ms  aprovado — P95 11000 ms dentro do teto de 20000 ms
+carga        simples          202      0   11000ms  reprovado — P95 11000 ms acima do teto de 10000 ms
+
+RNF05: NAO ATENDIDO
+codigo de saida: 1

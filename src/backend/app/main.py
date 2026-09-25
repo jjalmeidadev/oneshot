@@ -12,8 +12,15 @@ from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 
-from app.audio.errors import AudioError, AudioMissingError, AudioTooLargeError
+from app.audio.errors import (
+    AudioError,
+    AudioMissingError,
+    AudioTooLargeError,
+    ProcessingProviderFailedError,
+    ProcessingUnavailableError,
+)
 from app.audio.schemas import (
+    MAX_CONVERSATION_ID_LENGTH,
     AudioAnswer,
     AudioAnswerSource,
     AudioErrorResponse,
@@ -22,6 +29,7 @@ from app.audio.schemas import (
 from app.audio.security import resolve_identity, single_request_per_identity
 from app.audio.service import process_audio_upload
 from app.audio.validation import DEFAULT_MAX_SIZE_BYTES
+from app.database.connection import close_database_pool
 from app.gemini.client import (
     GeminiAPIError,
     GeminiConfigurationError,
@@ -45,9 +53,9 @@ from app.rag.proactive_confirmation import (
 )
 from app.reports.errors import ReportError
 from app.reports.router import router as reports_router
+from app.alerts.errors import AlertError
+from app.alerts.router import router as alerts_router
 
-# Container and process environment is authoritative. A local .env remains a
-# development convenience, but must not replace variables injected at runtime.
 load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
 
 AUDIO_PATH = "/api/audio"
@@ -72,6 +80,7 @@ async def lifespan(_app: FastAPI):
     if os.getenv("PLN_WARMUP", "0") == "1":
         await run_in_threadpool(warmup_classifier)
     yield
+    await run_in_threadpool(close_database_pool)
 
 
 app = FastAPI(
@@ -81,6 +90,7 @@ app = FastAPI(
     version="0.1.0",
 )
 app.include_router(reports_router)
+app.include_router(alerts_router)
 
 
 @app.exception_handler(AudioError)
@@ -92,6 +102,14 @@ def handle_audio_error(_request: Request, error: AudioError) -> JSONResponse:
 
 @app.exception_handler(ReportError)
 def handle_report_error(_request: Request, error: ReportError) -> JSONResponse:
+    return JSONResponse(
+        status_code=error.status_code,
+        content={"error": {"code": error.code, "message": error.message}},
+    )
+
+
+@app.exception_handler(AlertError)
+def handle_alert_error(_request: Request, error: AlertError) -> JSONResponse:
     return JSONResponse(
         status_code=error.status_code,
         content={"error": {"code": error.code, "message": error.message}},
@@ -138,6 +156,19 @@ async def handle_request_validation_error(
                 "error": {
                     "code": "REPORT_INVALID_INPUT",
                     "message": "Revise os parametros informados para o relatorio.",
+                }
+            },
+        )
+    if (
+        request.url.path.startswith("/api/alert-")
+        or request.url.path.startswith("/api/notifications")
+    ):
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": {
+                    "code": "ALERT_INVALID_INPUT",
+                    "message": "Revise os parametros informados para o alerta.",
                 }
             },
         )
@@ -223,6 +254,26 @@ def create_proactive_confirmation(
         ) from error
 
 
+def create_audio_chat_response(
+    request: GeminiChatRequest,
+    conversation_id: str,
+    requester_id: str | None = None,
+) -> GeminiChatResponse:
+    """Executa o pipeline comum preservando o envelope de erro da rota de audio."""
+
+    try:
+        return process_message(
+            request,
+            channel="api",
+            external_conversation_id=conversation_id,
+            requester_id=requester_id,
+        )
+    except GeminiConfigurationError as error:
+        raise ProcessingUnavailableError() from error
+    except GeminiAPIError as error:
+        raise ProcessingProviderFailedError() from error
+
+
 @app.post(
     AUDIO_PATH,
     response_model=AudioUploadResponse,
@@ -231,7 +282,10 @@ def create_proactive_confirmation(
 )
 async def create_audio_upload(
     audio: UploadFile | None = File(default=None),
-    conversation_id: str | None = Form(default=None),
+    conversation_id: str | None = Form(
+        default=None,
+        max_length=MAX_CONVERSATION_ID_LENGTH,
+    ),
     language: str | None = Form(default=None),
     previous_interaction_id: str | None = Form(default=None, max_length=1024),
     use_intent_classifier: bool = Form(default=True),
@@ -255,7 +309,7 @@ async def create_audio_upload(
             language=language or DEFAULT_LANGUAGE,
         )
         response = await run_in_threadpool(
-            process_message,
+            create_audio_chat_response,
             GeminiChatRequest(
                 message=audio_result.transcription.text,
                 conversation_id=resolved_conversation_id,
@@ -263,7 +317,8 @@ async def create_audio_upload(
                 use_intent_classifier=use_intent_classifier,
                 proactivity_enabled=proactivity_enabled,
             ),
-            requester_id=identity.object_id,
+            resolved_conversation_id,
+            identity.object_id,
         )
         return AudioUploadResponse(
             conversation_id=resolved_conversation_id,

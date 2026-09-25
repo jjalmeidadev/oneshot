@@ -21,6 +21,12 @@ import {
   downloadReportArtifact,
   getReportWorkflow,
   startReportWorkflow,
+  answerAlertWorkflow,
+  cancelAlertWorkflow,
+  confirmAlertWorkflow,
+  startAlertWorkflow,
+  type AlertWorkflowStep,
+  type GuidedWorkflowSession,
   type AudioPipelineMetrics,
   type ProactiveDecision,
   type WorkflowSessionResponse,
@@ -78,7 +84,7 @@ type Action =
   | { type: 'set-document-sheet'; open: boolean }
   | { type: 'set-sidebar'; open: boolean }
   | { type: 'set-token'; token: string }
-  | { type: 'update-workflow'; workflow: WorkflowSessionResponse };
+  | { type: 'update-workflow'; workflow: GuidedWorkflowSession };
 
 function createConversation(): Conversation {
   const now = new Date().toISOString();
@@ -281,12 +287,12 @@ type ChatStoreValue = {
   setSidebarOpen: (open: boolean) => void;
   setAccessToken: (token: string) => void;
   answerWorkflow: (
-    workflow: WorkflowSessionResponse,
-    step: WorkflowStep,
+    workflow: GuidedWorkflowSession,
+    step: WorkflowStep | AlertWorkflowStep,
     value: unknown,
   ) => Promise<void>;
-  confirmWorkflow: (workflow: WorkflowSessionResponse) => Promise<void>;
-  cancelWorkflow: (workflow: WorkflowSessionResponse) => Promise<void>;
+  confirmWorkflow: (workflow: GuidedWorkflowSession) => Promise<void>;
+  cancelWorkflow: (workflow: GuidedWorkflowSession) => Promise<void>;
   downloadArtifact: (workflow: WorkflowSessionResponse) => Promise<void>;
 };
 
@@ -473,7 +479,11 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
           if (!state.accessToken.trim()) {
             throw new Error('REPORT_ACCESS_TOKEN_REQUIRED');
           }
-          assistantMessage.workflow = await startReportWorkflow({
+          assistantMessage.workflow = await (
+            response.workflow.workflow === 'alerta_prazo_atraso'
+              ? startAlertWorkflow
+              : startReportWorkflow
+          )({
             conversationId: conversation.id,
             interactionId: response.interaction_id,
             parameters: response.workflow.parameters,
@@ -630,29 +640,48 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const answerWorkflow = useCallback(
-    async (workflow: WorkflowSessionResponse, step: WorkflowStep, value: unknown) => {
-      const updated = await answerReportWorkflow({
-        sessionId: workflow.session_id,
-        step,
-        value,
-        revision: workflow.revision,
-        accessToken: requireAccessToken(),
-      });
+    async (
+      workflow: GuidedWorkflowSession,
+      step: WorkflowStep | AlertWorkflowStep,
+      value: unknown,
+    ) => {
+      const updated = await (workflow.workflow === 'alerta_prazo_atraso'
+        ? answerAlertWorkflow({
+            sessionId: workflow.session_id,
+            step: step as AlertWorkflowStep,
+            value,
+            revision: workflow.revision,
+            accessToken: requireAccessToken(),
+          })
+        : answerReportWorkflow({
+            sessionId: workflow.session_id,
+            step: step as WorkflowStep,
+            value,
+            revision: workflow.revision,
+            accessToken: requireAccessToken(),
+          }));
       dispatch({ type: 'update-workflow', workflow: updated });
     },
     [requireAccessToken],
   );
 
   const confirmWorkflow = useCallback(
-    async (workflow: WorkflowSessionResponse) => {
+    async (workflow: GuidedWorkflowSession) => {
       const accessToken = requireAccessToken();
-      const updated = await confirmReportWorkflow({
+      const updated = await (
+        workflow.workflow === 'alerta_prazo_atraso'
+          ? confirmAlertWorkflow
+          : confirmReportWorkflow
+      )({
         sessionId: workflow.session_id,
         revision: workflow.revision,
         accessToken,
       });
       dispatch({ type: 'update-workflow', workflow: updated });
-      if (updated.status === 'executing') {
+      if (
+        updated.workflow === 'transacao_gerar_relatorio' &&
+        updated.status === 'executing'
+      ) {
         void pollWorkflow(updated.session_id, accessToken);
       }
     },
@@ -660,11 +689,12 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
   );
 
   const cancelWorkflow = useCallback(
-    async (workflow: WorkflowSessionResponse) => {
-      const updated = await cancelReportWorkflow(
-        workflow.session_id,
-        requireAccessToken(),
-      );
+    async (workflow: GuidedWorkflowSession) => {
+      const updated = await (
+        workflow.workflow === 'alerta_prazo_atraso'
+          ? cancelAlertWorkflow
+          : cancelReportWorkflow
+      )(workflow.session_id, requireAccessToken());
       dispatch({ type: 'update-workflow', workflow: updated });
     },
     [requireAccessToken],

@@ -1,0 +1,30 @@
+{
+  "registrado_em": "2026-09-22T17:56:27.984468+00:00",
+  "rodada": "baseline",
+  "modalidade_de_cache": "frio",
+  "host_medido": "http://127.0.0.1:8000",
+  "commit": "81c787d",
+  "branch": "test/executar-rnf04-rnf05",
+  "arvore_limpa": false,
+  "maquina": {
+    "cpu": "Apple M5 Pro",
+    "nucleos_logicos": 18,
+    "memoria_total": "48.0 GB",
+    "sistema": "Darwin 25.6.0",
+    "arquitetura": "arm64"
+  },
+  "python": "3.13.15",
+  "configuracao_da_api": {
+    "modelo_llm": "gemini-3.1-flash-lite",
+    "max_output_tokens": "512",
+    "thinking_level": "low",
+    "timeout_provedor_s": "30",
+    "rag_max_sources": "3",
+    "pln_warmup": "1",
+    "origem_do_rag": "banco (public.source_extracts)"
+  },
+  "segredos_presentes": {
+    "GEMINI_API_KEY": true,
+    "SUPABASE_DATABASE_URL": true
+  }
+}

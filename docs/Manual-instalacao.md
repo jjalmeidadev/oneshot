@@ -75,6 +75,8 @@ Edite somente `src/backend/.env` e não versione credenciais. Para exercitar tod
 ```dotenv
 GEMINI_API_KEY=<chave-do-google-ai-studio>
 GEMINI_MODEL=gemini-3.7-flash
+OPENROUTER_API_KEY=<chave-usada-somente-no-benchmark-de-tokens>
+OPENROUTER_MODEL=google/gemini-3.1-flash-lite
 AZURE_SPEECH_RESOURCE=<nome-do-recurso>
 AZURE_SPEECH_KEY=<chave-do-azure-speech>
 AUDIO_SIMULATED_IDENTITIES=token-local=usuario-local
@@ -165,11 +167,30 @@ Para atualizar um banco que já possui o baseline, execute `05_add_secondary_int
 
 Depois, execute `07_add_pending_proactive_suggestions.sql` para habilitar o armazenamento compartilhado das confirmações entre workers. Em produção, `DATABASE_URL` ou `SUPABASE_DATABASE_URL` deve permanecer configurada; o fallback em memória existe apenas para desenvolvimento local com um único processo.
 
+Se a tabela de sugestões já existia, execute também
+`08_add_prepared_proactive_response.sql`. A migração acrescenta a resposta
+secundária preparada na chamada principal e elimina pendências antigas que não
+podem ser confirmadas sem uma nova inferência.
+
+## 8.1 Benchmark de economia de tokens
+
+Com `OPENROUTER_API_KEY` configurada apenas em `src/backend/.env`, execute:
+
+```powershell
+Set-Location src/backend
+python scripts/benchmark_token_hypothesis.py
+```
+
+O comando usa os três prompts congelados em
+`docs/evidencias/sprint-04/hipotese-tokens/casos.json`, persiste os JSONs brutos
+e produz `resultado.json`. O protocolo completo explica as variantes, a fórmula
+e os limites da conclusão. Tempo de resposta não faz parte dessa medição.
+
 Para reproduzir o teste de idempotência, execute `02_initial_data.sql` duas vezes consecutivas e então execute `06_verify_secondary_intents.sql`. O resultado esperado continua sendo 13 associações ativas, sem duplicatas ou registros órfãos.
 
 Com a URL configurada, a API consulta os extratos persistidos, resolve a intenção secundária no catálogo e registra a trilha mínima de conversas, classificação, rota, fontes e auditoria. Sem a URL, usa os fallbacks JSON locais e não tenta abrir conexão. `03_rollback_data.sql` remove o baseline e só deve ser aplicado em banco descartável ou após um backup.
 
-## 8.1 Relatórios com dados do banco (opcional)
+## 8.2 Relatórios com dados do banco (opcional)
 
 O fluxo de geração de relatório pode ler o portfólio da massa sintética em JSON (padrão) ou das tabelas reais do PostgreSQL. Para usar o banco, aplique também os scripts de relatório e o seed de portfólio, e ative a fonte `database`:
 

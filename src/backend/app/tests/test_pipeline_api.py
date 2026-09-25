@@ -13,19 +13,28 @@ from app.gemini.schemas import (
 from app.pipeline import process_proactive_confirmation
 from app.gemini.client import GeminiAPIError, GeminiConfigurationError
 from app.audio import transcription
+from app.nlp.inference import get_classifier
 from test_audio_upload import _build_wav, AUTH_HEADER, transcricao_fixa
 
 
 @pytest.fixture(autouse=True)
 def disable_traceability(monkeypatch):
     monkeypatch.setattr("app.pipeline.trace_interaction", lambda **_kwargs: None)
+    monkeypatch.setenv('AUDIO_SIMULATED_IDENTITIES', 'token-de-teste=usuario-teste')
 
 
 class ProviderCall:
-    def __init__(self, request, intent=None, entities=None):
+    def __init__(
+        self,
+        request,
+        intent=None,
+        entities=None,
+        require_rag_context=False,
+    ):
         self.request = request
         self.intent = intent
         self.entities = entities or []
+        self.require_rag_context = require_rag_context
 
     def __getattr__(self, name):
         return getattr(self.request, name)
@@ -34,8 +43,21 @@ class ProviderCall:
 @pytest.fixture
 def provider(monkeypatch):
     calls = []
-    def generate(request, intent=None, entities=None, requester_id=None):
-        calls.append(ProviderCall(request, intent=intent, entities=entities))
+    def generate(
+        request,
+        intent=None,
+        entities=None,
+        requester_id=None,
+        require_rag_context=False,
+    ):
+        calls.append(
+            ProviderCall(
+                request,
+                intent=intent,
+                entities=entities,
+                require_rag_context=require_rag_context,
+            )
+        )
         return GeminiChatResponse(text="Resposta [Fonte 1]", model="teste", interaction_id="next-id",
             latency_ms=4, usage=GeminiUsage(input_tokens=2, output_tokens=3, total_tokens=5),
             sources=[dict(id="lista:1", title="Projeto", list_name="Projetos", web_url="https://example.org/projeto",
@@ -50,13 +72,20 @@ def _classification_result(
     suggested=None,
     specific='consulta_status_projeto',
 ):
+    routed_specific = (
+        specific if routed and macro != 'FORA_DE_ESCOPO' else None
+    )
     return SimpleNamespace(
         macrointencao=macro,
-        intencao=specific if routed else None,
+        intencao=routed_specific,
         confianca_macro=.9 if routed else .3,
         confianca_intencao=.8,
         fluxo='Consulta documental',
-        handler=f'handler:{specific}' if specific else 'limitacao',
+        handler=(
+            f'handler:{routed_specific}'
+            if routed_specific
+            else ('limitacao' if not routed else f'fluxo genérico de {macro}')
+        ),
         alternativas=[(specific or 'fora_de_escopo', .8)],
         roteada=routed,
         resposta_sugerida=suggested,
@@ -235,21 +264,54 @@ def test_text_false_toggle_opts_out_and_goes_direct_to_gemini(monkeypatch, provi
     assert data['pipeline_metrics']['route_ms'] >= 0
 
 
-@pytest.mark.parametrize('macro,routed,suggested', [('CONSULTA', True, None), ('INDEFINIDA', False, 'Reformule'), ('FORA_DE_ESCOPO', True, None)])
-def test_classifier_routes_or_limits(monkeypatch, provider, macro, routed, suggested):
+@pytest.mark.parametrize(
+    'macro,routed,suggested,uses_fallback',
+    [
+        ('CONSULTA', True, None, False),
+        ('INDEFINIDA', False, 'Reformule', True),
+        ('FORA_DE_ESCOPO', True, None, True),
+    ],
+)
+def test_classifier_routes_or_uses_generic_rag(
+    monkeypatch,
+    provider,
+    macro,
+    routed,
+    suggested,
+    uses_fallback,
+):
     monkeypatch.setattr('app.nlp.inference.classify', lambda text: _classification_result(macro=macro, routed=routed, suggested=suggested))
     with TestClient(app) as client:
         result = client.post('/api/chat', json=dict(message='prazo', use_intent_classifier=True))
     assert result.status_code == 200
     assert result.json()['intent']['macro'] == macro
     assert result.json()['intent']['flow'] == 'Consulta documental'
-    assert result.json()['intent']['handler'] == 'handler:consulta_status_projeto'
     assert result.json()['intent']['alternatives'][0]['intent'] == 'consulta_status_projeto'
     assert result.json()['pipeline_metrics']['route_ms'] >= 0
-    assert bool(provider) == (macro == 'CONSULTA')
-    if macro != 'CONSULTA':
-        assert result.json()['interaction_id'] is None
-        assert result.json()['sources'] == []
+    assert len(provider) == 1
+    assert provider[0].require_rag_context is uses_fallback
+    assert (provider[0].intent is None) is uses_fallback
+    if uses_fallback:
+        assert not result.json()['intent']['handler'].startswith('handler:')
+
+
+def test_low_specific_confidence_skips_handler_and_uses_generic_rag(
+    monkeypatch,
+    provider,
+):
+    monkeypatch.setattr(
+        'app.nlp.inference.classify',
+        lambda _text: _classification_result(specific=None),
+    )
+
+    with TestClient(app) as client:
+        result = client.post('/api/chat', json={'message': 'me fale do projeto'})
+
+    assert result.status_code == 200
+    assert result.json()['intent']['specific'] == ''
+    assert not result.json()['intent']['handler'].startswith('handler:')
+    assert provider[0].intent is None
+    assert provider[0].require_rag_context is True
 
 
 def test_audio_completes_same_pipeline_and_context(monkeypatch, provider):
@@ -272,6 +334,108 @@ def test_audio_completes_same_pipeline_and_context(monkeypatch, provider):
     assert data['pipeline_metrics']['total_ms'] >= 0
     assert provider[0].previous_interaction_id == 'before'
     assert provider[0].message == 'prazo'
+
+
+def test_audio_transcription_is_classified_by_real_classifier(monkeypatch, provider):
+    transcript = 'qual é o status da extensão da Linha 5-Lilás?'
+    monkeypatch.setattr(
+        transcription,
+        'transcribe',
+        transcricao_fixa(text=transcript, confidence=.97, duration_seconds=1),
+    )
+
+    with TestClient(app) as client:
+        result = client.post(
+            '/api/audio',
+            files={'audio': ('teste.wav', _build_wav(), 'audio/wav')},
+            headers=AUTH_HEADER,
+            data={'use_intent_classifier': 'true'},
+        )
+
+    assert result.status_code == 200
+    data = result.json()
+    artifact = get_classifier().artefato
+    assert data['pipeline_status'] == 'completed'
+    assert data['transcription']['text'] == transcript
+    assert data['intent']['macro'] == 'CONSULTA'
+    assert data['intent']['specific'] == 'consulta_status_projeto'
+    assert data['intent']['confidence_macro'] >= artifact.limiar_macro
+    assert data['intent']['confidence_specific'] >= artifact.limiar_intencao
+    assert data['intent']['handler'] == 'handler:consulta_status_projeto'
+    assert provider[0].message == transcript
+    assert provider[0].intent.specific == 'consulta_status_projeto'
+    assert data['chat']['intent'] == data['intent']
+
+
+def test_audio_classifier_failure_is_controlled(monkeypatch):
+    provider_calls = []
+
+    def fail_classifier(_text):
+        raise RuntimeError('private-model-path')
+
+    monkeypatch.setattr(
+        transcription,
+        'transcribe',
+        transcricao_fixa(text='prazo', confidence=.97, duration_seconds=1),
+    )
+    monkeypatch.setattr('app.nlp.inference.classify', fail_classifier)
+    monkeypatch.setattr(
+        'app.pipeline.generate_chat_response',
+        lambda *_args, **_kwargs: provider_calls.append(True),
+    )
+
+    with TestClient(app) as client:
+        result = client.post(
+            '/api/audio',
+            files={'audio': ('teste.wav', _build_wav(), 'audio/wav')},
+            headers=AUTH_HEADER,
+            data={'use_intent_classifier': 'true'},
+        )
+
+    assert result.status_code == 503
+    assert result.json() == {
+        'error': {
+            'code': 'PROCESSING_UNAVAILABLE',
+            'message': (
+                'O servico de processamento esta indisponivel. '
+                'Tente novamente em instantes.'
+            ),
+        }
+    }
+    assert 'private-model-path' not in result.text
+    assert provider_calls == []
+
+
+def test_audio_response_provider_failure_uses_audio_error_contract(monkeypatch):
+    def fail_provider(*_args, **_kwargs):
+        raise GeminiAPIError('secret-provider-payload')
+
+    monkeypatch.setattr(
+        transcription,
+        'transcribe',
+        transcricao_fixa(text='prazo', confidence=.97, duration_seconds=1),
+    )
+    monkeypatch.setattr('app.pipeline.generate_chat_response', fail_provider)
+
+    with TestClient(app) as client:
+        result = client.post(
+            '/api/audio',
+            files={'audio': ('teste.wav', _build_wav(), 'audio/wav')},
+            headers=AUTH_HEADER,
+            data={'use_intent_classifier': 'false'},
+        )
+
+    assert result.status_code == 502
+    assert result.json() == {
+        'error': {
+            'code': 'PROCESSING_PROVIDER_ERROR',
+            'message': (
+                'Nao foi possivel processar a transcricao agora. '
+                'Tente novamente em instantes.'
+            ),
+        }
+    }
+    assert 'secret-provider-payload' not in result.text
 
 
 @pytest.mark.parametrize('error,status', [(GeminiConfigurationError('secret-internal'),503), (GeminiAPIError('secret-internal'),502)])

@@ -1,0 +1,24 @@
+TIPO DE REGISTRO: SAÍDA BRUTA PRESERVADA
+
+Testes automatizados do alerta de prazo
+Execução: 24/09/2026 17:54 (UTC-0300)
+Commit: 2fb95a2
+
+Comando, a partir de src/backend:
+  .venv/bin/python -m pytest app/tests/test_alerts.py -v --no-header -p no:warnings
+
+============================= test session starts ==============================
+collecting ... collected 10 items
+
+app/tests/test_alerts.py::test_confirmation_and_creation_are_idempotent PASSED [ 10%]
+app/tests/test_alerts.py::test_tampered_confirmation_is_rejected PASSED  [ 20%]
+app/tests/test_alerts.py::test_evaluation_matches_only_overdue_open_item PASSED [ 30%]
+app/tests/test_alerts.py::test_threshold_boundary_is_strict PASSED       [ 40%]
+app/tests/test_alerts.py::test_missing_data_yields_indeterminate PASSED  [ 50%]
+app/tests/test_alerts.py::test_schedule_due_enqueues_and_updates_atomically PASSED [ 60%]
+app/tests/test_alerts.py::test_resend_bucket_anchors_on_threshold_crossing PASSED [ 70%]
+app/tests/test_alerts.py::test_subscription_created_is_not_enqueued PASSED [ 80%]
+app/tests/test_alerts.py::test_guided_workflow_reaches_active_subscription PASSED [ 90%]
+app/tests/test_alerts.py::test_http_contract_configures_and_lists_alert PASSED [100%]
+
+============================== 10 passed in 3.92s ==============================

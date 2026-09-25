@@ -1,0 +1,2 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+POST,POST /api/chat [simples],CatchResponseError('HTTP 502'),1,2026-09-22T17:56:53Z,2026-09-22T17:56:53Z

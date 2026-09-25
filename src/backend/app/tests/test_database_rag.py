@@ -92,6 +92,7 @@ def test_retrieves_source_extracts_from_database(monkeypatch):
                 "base-atendimento/303#Conteudo",
                 None,
                 None,
+                {"validity": {"start": "2026-08-20", "end": "2026-09-05"}, "status": "Publicado", "line": "Todas", "category": "Regras de uso"},
                 4.5,
             )
         ]
@@ -107,6 +108,11 @@ def test_retrieves_source_extracts_from_database(monkeypatch):
     assert results[0].document.title == "Transporte de bicicleta"
     assert results[0].document.list_name == "Base de Atendimento"
     assert results[0].score == 4.5
+    # DEF-RNF04-01: vigencia, status, linha e categoria vivem em
+    # source_extracts.metadata e precisam sobreviver ate o prompt.
+    assert ("Vigencia", "de 2026-08-20 a 2026-09-05") in results[0].document.attributes
+    assert ("Status", "Publicado") in results[0].document.attributes
+    assert "se.metadata" in connection.cursor_instance.executed_query
     assert "source_extracts" in connection.cursor_instance.executed_query
     assert "project_artifacts" in connection.cursor_instance.executed_query
     assert connection.closed is True
@@ -170,6 +176,7 @@ def test_database_results_are_compatible_with_gemini_source(monkeypatch):
                         "base-atendimento/303#Conteudo",
                         None,
                         None,
+                        {"validity": {"start": "2026-08-20", "end": "2026-09-05"}, "status": "Publicado", "line": "Todas", "category": "Regras de uso"},
                         3.0,
                 )
             ]
@@ -201,7 +208,30 @@ def test_absence_of_database_result_returns_rf08_explicit_response(monkeypatch):
 
     assert response.model == "rag-retriever"
     assert response.sources == []
-    assert "Nao encontrei fontes suficientes" in response.text
+    assert response.text == (
+        "Essa solicitação não está no escopo da base de conhecimento disponível."
+    )
+
+
+def test_generic_fallback_does_not_call_llm_without_rag_context(monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr("app.gemini.client.retrieve_context", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr(
+        "app.gemini.client._call_llm",
+        lambda *_args, **_kwargs: pytest.fail("LLM nao deve responder sem fonte RAG"),
+    )
+
+    response = generate_chat_response(
+        GeminiChatRequest(message="pergunta ambigua"),
+        intent=None,
+        require_rag_context=True,
+    )
+
+    assert response.model == "rag-retriever"
+    assert response.sources == []
+    assert response.text == (
+        "Essa solicitação não está no escopo da base de conhecimento disponível."
+    )
 
 
 def test_database_error_does_not_leak_secret_or_internal_detail(monkeypatch):

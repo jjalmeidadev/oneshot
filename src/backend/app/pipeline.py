@@ -41,10 +41,13 @@ def warmup_classifier() -> None:
 def process_message(
     request: GeminiChatRequest,
     *,
+    channel: str = "api",
+    external_conversation_id: str | None = None,
     requester_id: str | None = None,
 ) -> GeminiChatResponse:
     route_started_at = perf_counter()
     intent = None
+    fallback_to_rag = False
     nlp_ms = 0
     entities: list[PublicEntity] = []
 
@@ -61,35 +64,50 @@ def process_message(
             ]
             nlp_ms = _elapsed_ms(nlp_started_at)
         except Exception as error:
+            _trace_safely(
+                request=request,
+                response=None,
+                intent=None,
+                entities=[],
+                processing_ms=_elapsed_ms(route_started_at),
+                channel=channel,
+                external_conversation_id=external_conversation_id,
+                error_message=str(error),
+                requester_id=requester_id,
+            )
             raise GeminiConfigurationError("Classificador indisponivel.") from error
 
         intent = _public_intent(result)
-        if not result.roteada or result.macrointencao == "FORA_DE_ESCOPO":
-            response = GeminiChatResponse(
-                text=result.resposta_sugerida
-                or "Posso ajudar com informações do portfólio. Reformule sua pergunta indicando um projeto ou documento.",
-                model="classificador-local",
-                latency_ms=0,
-                usage=GeminiUsage(),
+        fallback_to_rag = (
+            not result.roteada
+            or result.macrointencao == "FORA_DE_ESCOPO"
+            or result.intencao is None
+        )
+
+        if (
+            not fallback_to_rag
+            and result.handler == "handler:transacao_gerar_relatorio"
+        ):
+            response = _report_workflow_response(
                 intent=intent,
                 entities=entities,
-                pipeline_metrics=ChatPipelineMetrics(
-                    nlp_ms=nlp_ms,
-                    route_ms=_elapsed_ms(route_started_at),
-                ),
+                nlp_ms=nlp_ms,
+                route_started_at=route_started_at,
             )
             _trace_safely(
                 request=request,
                 response=response,
                 intent=intent,
                 entities=entities,
-                processing_ms=_elapsed_ms(route_started_at),
+                processing_ms=response.pipeline_metrics.route_ms,
+                channel=channel,
+                external_conversation_id=external_conversation_id,
                 requester_id=requester_id,
             )
             return response
 
-        if result.handler == "handler:transacao_gerar_relatorio":
-            response = _report_workflow_response(
+        if result.handler == "handler:alerta_prazo_atraso":
+            response = _alert_workflow_response(
                 intent=intent,
                 entities=entities,
                 nlp_ms=nlp_ms,
@@ -105,7 +123,12 @@ def process_message(
             return response
 
     try:
-        provider_kwargs = {"intent": intent, "entities": entities}
+        provider_kwargs = {
+            "intent": None if fallback_to_rag else intent,
+            "entities": entities,
+        }
+        if fallback_to_rag:
+            provider_kwargs["require_rag_context"] = True
         if requester_id is not None and request.proactivity_enabled:
             provider_kwargs["requester_id"] = requester_id
         response = generate_chat_response(request, **provider_kwargs)
@@ -116,6 +139,8 @@ def process_message(
             intent=intent,
             entities=entities,
             processing_ms=_elapsed_ms(route_started_at),
+            channel=channel,
+            external_conversation_id=external_conversation_id,
             error_message=str(error),
             requester_id=requester_id,
         )
@@ -133,6 +158,8 @@ def process_message(
         intent=intent,
         entities=entities,
         processing_ms=response.pipeline_metrics.route_ms,
+        channel=channel,
+        external_conversation_id=external_conversation_id,
         requester_id=requester_id,
     )
     return response
@@ -211,6 +238,47 @@ def _report_workflow_response(
     )
 
 
+def _alert_workflow_response(
+    *,
+    intent: AudioIntent,
+    entities: list[PublicEntity],
+    nlp_ms: int,
+    route_started_at: float,
+) -> GeminiChatResponse:
+    """Inicia a configuracao interna sem chamar um provedor generativo."""
+
+    from app.alerts.schemas import AlertDirective
+
+    parameters: dict[str, object] = {
+        "scope_candidates": [
+            {"type": entity.type, "value": entity.value}
+            for entity in entities
+            if entity.type == "projeto"
+        ]
+    }
+    deadline = next((entity.value for entity in entities if entity.type == "prazo_dias"), None)
+    if deadline:
+        digits = "".join(character for character in deadline if character.isdigit())
+        if digits:
+            parameters["threshold_days"] = int(digits)
+    return GeminiChatResponse(
+        text=(
+            "Vou configurar um alerta autonomo de prazo. Antes de ativar, "
+            "preciso confirmar o projeto, o limiar e a recorrencia."
+        ),
+        model="workflow-router",
+        latency_ms=0,
+        usage=GeminiUsage(),
+        intent=intent,
+        entities=entities,
+        pipeline_metrics=ChatPipelineMetrics(
+            nlp_ms=nlp_ms,
+            route_ms=_elapsed_ms(route_started_at),
+        ),
+        workflow=AlertDirective(parameters=parameters),
+    )
+
+
 def _public_entity(entity: Entidade) -> PublicEntity:
     return PublicEntity(
         type=entity.tipo,
@@ -250,6 +318,8 @@ def _trace_safely(
     intent: AudioIntent | None,
     entities: list[PublicEntity],
     processing_ms: int,
+    channel: str = "api",
+    external_conversation_id: str | None = None,
     error_message: str | None = None,
     requester_id: str | None = None,
 ) -> None:
@@ -260,6 +330,8 @@ def _trace_safely(
             intent=intent,
             entities=entities,
             processing_ms=processing_ms,
+            channel=channel,
+            external_conversation_id=external_conversation_id,
             error_message=error_message,
             requester_id=requester_id,
         )

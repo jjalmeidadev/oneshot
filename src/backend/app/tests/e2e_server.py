@@ -8,6 +8,8 @@ import os
 import json
 import tempfile
 
+# Impede que o .env sobrescreva as identidades/config simuladas definidas abaixo.
+os.environ['G05_DISABLE_DOTENV_OVERRIDE'] = '1'
 os.environ['AUDIO_SIMULATED_IDENTITIES'] = 'e2e-token=e2e-user'
 os.environ['REPORT_SIMULATED_IDENTITIES'] = json.dumps({
     'e2e-token': {
