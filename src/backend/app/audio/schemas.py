@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 from app.nlp.schemas import AudioIntent, AudioPipelineMetrics, PublicEntity
-from app.gemini.schemas import GeminiChatResponse
+from app.gemini.schemas import GeminiChatResponse, GeminiSource, FactualClaim
+from typing import Literal
 
 MAX_CONVERSATION_ID_LENGTH = 160
 
@@ -15,7 +16,7 @@ class AudioTranscription(BaseModel):
     duration_seconds: float
 
 
-class AudioAnswerSource(BaseModel):
+class AudioAnswerSource(GeminiSource):
     artifact: str
     section: str
 
@@ -23,11 +24,15 @@ class AudioAnswerSource(BaseModel):
 class AudioAnswer(BaseModel):
     text: str
     sources: list[AudioAnswerSource] = Field(default_factory=list)
+    claims: list[FactualClaim] = Field(default_factory=list)
+    evidence_status: Literal["referenced", "insufficient", "not_applicable"] = "not_applicable"
 
 
 class AudioUploadResponse(BaseModel):
+    contract_version: Literal["1.1.0"] = "1.1.0"
     conversation_id: str = Field(max_length=MAX_CONVERSATION_ID_LENGTH)
     interaction_id: str | None
+    trace_id: str | None = None
     transcription: AudioTranscription
     intent: AudioIntent | None
     entities: list[PublicEntity] = Field(default_factory=list)

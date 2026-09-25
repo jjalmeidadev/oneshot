@@ -17,7 +17,7 @@ O objetivo é comprovar que uma pergunta textual atravessa cliente, API, PLN, re
 
 **Ferramentas.** `pytest` para os cenários automatizados (`src/backend/app/tests/test_e2e_textual_rag_s4_20.py`), `curl` para os cenários que exigem reiniciar o backend com variáveis diferentes, e consultas SQL no Supabase para conferir a persistência.
 
-**Correlação.** Como a API não devolve o identificador da linha gravada no banco (achado A-01), a correlação entre resposta e registro é feita por um marcador único injetado no texto da pergunta.
+**Correlação.** Na rodada 1, a API não devolvia o identificador da linha gravada no banco (achado A-01), e a correlação entre resposta e registro foi feita por um marcador único injetado no texto da pergunta. Com a correção do A-01, a resposta passou a trazer esse identificador em `trace_id`; o marcador continua na pergunta para localizar a mesma linha por um caminho independente e conferir que os dois coincidem.
 
 ---
 
@@ -32,6 +32,17 @@ O objetivo é comprovar que uma pergunta textual atravessa cliente, API, PLN, re
 | Modelo base | `gemini-3.7-flash` |
 | Modelo alternativo | `gemini-3.8-flash` |
 
+Reteste do CT-E2E-05, após a correção do A-01:
+
+| Campo | Valor |
+|---|---|
+| Rodada | 2 (reteste) |
+| Data | 25/09/2026 |
+| Branch | `feat/referencias-respostas` (contrato de resposta 1.1.0), com a `develop` em `1964e49` mesclada |
+| Ambiente | Backend local (`uvicorn app.main:app --host 127.0.0.1 --port 8000`), Gemini real, Supabase do projeto |
+| Modelo | `gemini-3.7-flash` |
+| Escopo | Os sete testes de `test_e2e_textual_rag_s4_20.py` (CT-E2E-01, CT-E2E-02 e CT-E2E-05) |
+
 ---
 
 ## 3. Cenários de teste
@@ -42,7 +53,7 @@ O objetivo é comprovar que uma pergunta textual atravessa cliente, API, PLN, re
 | CT-E2E-02 | Positivo | Confirmar que a interação é localizável no Supabase com a cadeia completa | Localizar a interação pelo marcador e percorrer conversa, fontes e auditoria | 1 interação; conversa correspondente; linhas em `consulted_sources`; eventos em `audit_events` |
 | CT-E2E-03 | Negativo | Confirmar tratamento de falha do provedor de geração | Subir o backend com modelo indisponível para a chave e enviar a mesma pergunta | Cliente recebe mensagem controlada, sem detalhe técnico; interação persistida com `processing_status = 'erro'` e evento com `event_status = 'falha'` |
 | CT-E2E-04 | Positivo | Confirmar que a seleção de modelo altera somente a geração | Mesma pergunta com `GEMINI_MODEL = gemini-3.7-flash` e depois `gemini-3.8-flash` | Intenção e fontes idênticas; `model` e texto diferentes |
-| CT-E2E-05 | Positivo | Confirmar que a resposta permite ao cliente localizar seu registro no banco | Comparar o `interaction_id` da resposta com `ai_interactions.id` | O identificador devolvido corresponde a uma linha em `ai_interactions` |
+| CT-E2E-05 | Positivo | Confirmar que a resposta permite ao cliente localizar seu registro no banco | Comparar o identificador de correlação da resposta com `ai_interactions.id`: `interaction_id` na rodada 1; `trace_id` a partir do contrato 1.1.0, conferindo também a interação localizada pelo marcador | O identificador devolvido corresponde a uma linha em `ai_interactions`, a mesma localizada pelo marcador |
 | CT-E2E-06 | Positivo | Correlacionar o Copilot Studio no E2E | Depende da integração entregue por #212–#220 | Evidência de ponta a ponta incluindo o canal do Copilot Studio |
 | CT-E2E-07 | Positivo | Verificar fallback entre modelos | Forçar indisponibilidade do modelo principal | Sistema recorre a modelo alternativo automaticamente |
 
@@ -56,7 +67,7 @@ O objetivo é comprovar que uma pergunta textual atravessa cliente, API, PLN, re
 | CT-E2E-02 | Os quatro elos conferidos automaticamente: 1 interação localizada pelo marcador, conversa correspondente, fontes gravadas em `consulted_sources` e eventos de auditoria presentes, incluindo o componente `api` | Saída do `pytest` | **Aprovado** |
 | CT-E2E-03 | Cliente recebeu `{"detail":"Não foi possível obter uma resposta. Tente novamente em instantes."}`, sem detalhe técnico. Interação `94c3d48d-9ce7-4832-ae6f-920723558537` persistida com `processing_status = 'erro'` e 2 eventos com `event_status = 'falha'`. `route_taken = 'sharepoint_query'`, ou seja, a recuperação executou e a falha ficou restrita à geração | Consulta ao Supabase na janela da execução | **Aprovado** |
 | CT-E2E-04 | Intenção, confianças, alternativas e fontes idênticas nos dois modelos; apenas `model`, texto e tempo diferentes. Detalhe na seção 4.1 | `evidencias/r1-e2e-04-modelo-b.json` e saída do `pytest` | **Aprovado** |
-| CT-E2E-05 | O `interaction_id` devolvido foi `v1_ChdqR2kxYXVlVEthSG96N0lQM3R5c21Bcx…`, identificador do Gemini, não um UUID de `ai_interactions` | Saída do `pytest`, registrado como `xfail` | **Falhou** |
+| CT-E2E-05 | Rodada 1: o `interaction_id` devolvido foi `v1_ChdqR2kxYXVlVEthSG96N0lQM3R5c21Bcx…`, identificador do Gemini, não um UUID de `ai_interactions`. Reteste: o `trace_id` devolvido corresponde a uma linha de `ai_interactions` e é a mesma interação localizada pelo marcador (seção 4.2) | Rodada 1: saída do `pytest`, registrado como `xfail`. Reteste: `evidencias/r2-e2e-pytest.txt` | **Falhou** na rodada 1; **Aprovado** no reteste |
 | CT-E2E-06 | Não executado. A integração com o Copilot Studio é entregue por #212–#220 | — | **Bloqueado** |
 | CT-E2E-07 | Não executado. Não havia mecanismo de fallback em `app/gemini/client.py` na branch medida; só troca de modelo por variável de ambiente, que é configuração. A reavaliar sobre a `develop`, que passou a ter abstração de provedor | — | **Bloqueado** |
 
@@ -76,6 +87,21 @@ O objetivo é comprovar que uma pergunta textual atravessa cliente, API, PLN, re
 
 A classificação coincidiu até a quarta casa decimal, inclusive a lista de alternativas, e as fontes vieram com os mesmos identificadores e escores. A troca de modelo não afetou PLN nem recuperação.
 
+### 4.2 Reteste do CT-E2E-05 (rodada 2)
+
+Os sete testes automatizados foram aprovados (`evidencias/r2-e2e-pytest.txt`), agora sem `xfail`. A interação gravada foi conferida em seguida no Supabase, em consulta somente leitura:
+
+| Medida | Valor |
+|---|---|
+| `trace_id` devolvido = `ai_interactions.id` | `e2b8a24a-70e0-4d2f-aeed-2d6cd5b70a57`, a mesma linha localizada pelo marcador |
+| Intenção | `CONSULTA / comparacao_entre_projetos` |
+| `route_taken` / `processing_status` | `sharepoint_query` / `processado` |
+| `processing_ms` | 37.617 |
+| `consulted_sources` | 3 linhas (`Fonte 1` a `Fonte 3`), com `evidence_status = insufficient` |
+| `audit_events` | `api`, `pln` e `database` (`database_traceability_recorded`: `sucesso`; `database_rag_sources_retrieved`: `pendente`) |
+
+A resposta dessa rodada foi a abstenção do contrato 1.1.0: "Não há evidência recuperada suficiente para responder com rastreabilidade." As três fontes recuperadas (indisponibilidade de escada rolante, operação assistida na Linha Azul e atendimento a objeto perdido) não tratam do status dos projetos do portfólio, e por isso o evento de recuperação ficou `pendente`. Para distinguir abstenção correta de rejeição indevida pela validação, a mesma pergunta foi reproduzida com o mesmo modelo via OpenRouter, sem gravação no banco: o próprio modelo respondeu "Evidência insuficiente.". Na mesma reprodução, "Qual o status do projeto PRJ-0442?" devolveu somente a fonte associada ao projeto na carga sintética, com a resposta `Status: Programado [Fonte 1]` aceita como `referenced`, e "Posso levar bicicleta no metro?" teve o trecho integral aceito como `referenced`.
+
 ---
 
 ## 5. Achados
@@ -88,7 +114,9 @@ O cliente não consegue apontar para o próprio registro. A correlação só é 
 
 É o mesmo problema do defeito D-03 da #200 (`correlation_id` nunca gravado), visto pelo lado do cliente.
 
-Correção: `_trace_safely()` retorna o identificador e `process_message()` o atribui à resposta. Duas linhas.
+Correção proposta: `_trace_safely()` retorna o identificador e `process_message()` o atribui à resposta. Duas linhas.
+
+**Correção aplicada.** O contrato de resposta 1.1.0 ([Referências nas respostas](../../contrato-referencias.md)) incorporou a correção: `_trace_safely()` atribui à resposta o identificador retornado por `trace_interaction()`, exposto como `trace_id` em `POST /api/chat` e `POST /api/audio`. `interaction_id` continua com o identificador do provedor, porque é ele que encadeia a conversa no provedor de geração. Por isso o CT-E2E-05 passou a comparar `trace_id` com `ai_interactions.id`, sem `xfail`, e a exigir que ele aponte para a mesma interação localizada pelo marcador. Na suíte do backend, `test_references_survive_provider_api_and_audit` confere que o `trace_id` devolvido é o mesmo gravado em `consulted_sources` e `audit_events`.
 
 ### A-02 — falha de persistência não é sinalizada ao cliente
 
@@ -130,7 +158,7 @@ Se o `.env` tiver `PLN_WARMUP=1`, o servidor carrega o classificador antes de ac
 
 O `main.py` carrega o `.env` com `override=True`, então trocar `GEMINI_MODEL` exige editar o arquivo — exportar a variável no terminal não tem efeito.
 
-Resultado da rodada 1 nos cenários automatizados: 6 aprovados, 1 `xfail` (o CT-E2E-05, esperado e documentado).
+Resultado da rodada 1 nos cenários automatizados: 6 aprovados, 1 `xfail` (o CT-E2E-05, esperado e documentado). Com a correção do A-01, o CT-E2E-05 deixou de ser `xfail` e passa a exigir o `trace_id` na resposta; na rodada 2, os sete testes foram aprovados.
 
 ---
 
@@ -161,7 +189,7 @@ Os dois itens parciais ficaram assim por ausência de implementação, não por 
 
 ## 8. Conclusão
 
-**4 aprovados, 1 falha, 2 bloqueados.**
+**Rodada 1: 4 aprovados, 1 falha, 2 bloqueados. Após o reteste do CT-E2E-05: 5 aprovados, 2 bloqueados.**
 
 O fluxo textual com RAG funciona de ponta a ponta: a pergunta atravessa todas as camadas e o resultado fica gravado no Supabase de forma correlacionada e verificável automaticamente.
 
@@ -169,4 +197,4 @@ O tratamento de erro também está correto. A falha do provedor ocorreu naturalm
 
 A troca de modelo não afetou as camadas anteriores, que era o ponto central do item de seleção de modelo no DoD.
 
-A falha registrada é a ausência de identificador de correlação na resposta da API (A-01), com correção de duas linhas. Os dois bloqueios — Copilot Studio e fallback — dependem de implementação que não existe nesta sprint.
+A falha registrada é a ausência de identificador de correlação na resposta da API (A-01), corrigida no contrato 1.1.0 com o campo `trace_id` e aprovada no reteste (seção 4.2). Os dois bloqueios — Copilot Studio e fallback — dependem de implementação que não existe nesta sprint.

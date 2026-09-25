@@ -127,8 +127,6 @@ def process_message(
             "intent": None if fallback_to_rag else intent,
             "entities": entities,
         }
-        if fallback_to_rag:
-            provider_kwargs["require_rag_context"] = True
         if requester_id is not None and request.proactivity_enabled:
             provider_kwargs["requester_id"] = requester_id
         response = generate_chat_response(request, **provider_kwargs)
@@ -324,7 +322,7 @@ def _trace_safely(
     requester_id: str | None = None,
 ) -> None:
     try:
-        trace_interaction(
+        trace_id = trace_interaction(
             request=request,
             response=response,
             intent=intent,
@@ -335,5 +333,7 @@ def _trace_safely(
             error_message=error_message,
             requester_id=requester_id,
         )
+        if response is not None:
+            response.trace_id = trace_id
     except TraceabilityError:
         logger.warning("Falha controlada ao registrar rastreabilidade RNF03.")

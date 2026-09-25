@@ -21,6 +21,8 @@ import {
   type PipelineEntity,
   type GuidedWorkflowSession,
   type ProactiveSuggestion,
+  type FactualClaim,
+  type EvidenceStatus,
 } from './api/schemas';
 
 /* -------------------------------------------------------------------------
@@ -30,6 +32,15 @@ import {
 export type RetrievedDocument = {
   /** `<lista>:<item>`, por exemplo `base-atendimento:301`. */
   id: string;
+  sourceId?: string;
+  citationId?: string | null;
+  artifactId?: string | null;
+  extractId?: string | null;
+  projectId?: string | null;
+  sourceLocator?: string | null;
+  registrationPeriod?: ChatSource['registration_period'];
+  validity?: ChatSource['validity'];
+  attributes?: Record<string, string>;
   title: string;
   /** Nome de exibicao da lista do SharePoint de origem. */
   listName: string;
@@ -170,6 +181,10 @@ export type ChatMessage = {
   status: MessageStatus;
   /** Identificador devolvido pelo backend; encadeia o contexto no Gemini. */
   interactionId?: string | null;
+  traceId?: string | null;
+  contractVersion?: string;
+  evidenceStatus?: EvidenceStatus;
+  claims?: FactualClaim[];
   sources?: RetrievedDocument[];
   intent?: IntentResult;
   entities?: ExtractedEntity[];
@@ -214,7 +229,18 @@ export function toRetrievedDocument(
   index: number,
 ): RetrievedDocument {
   return {
-    id: source.id,
+    id:
+      source.extract_id ??
+      (source.citation_id ? `${source.id}#${source.citation_id}` : source.id),
+    sourceId: source.id,
+    citationId: source.citation_id,
+    artifactId: source.artifact_id,
+    extractId: source.extract_id,
+    projectId: source.project_id,
+    sourceLocator: source.source_locator,
+    registrationPeriod: source.registration_period,
+    validity: source.validity,
+    attributes: source.attributes,
     title: source.title,
     listName: source.list_name,
     webUrl: source.web_url,
@@ -295,6 +321,10 @@ export function toAssistantMessage(
     origin: 'text',
     status: 'complete',
     interactionId: response.interaction_id,
+    traceId: response.trace_id,
+    contractVersion: response.contract_version,
+    evidenceStatus: response.evidence_status,
+    claims: response.claims,
     sources: response.sources.map(toRetrievedDocument),
     intent: response.intent ? toIntentResult(response.intent) : undefined,
     entities: (response.entities ?? []).map(toExtractedEntity),

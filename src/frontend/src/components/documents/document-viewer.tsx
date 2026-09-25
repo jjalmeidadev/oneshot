@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { formatDateTime } from '@/lib/format';
+import { formatDateTime, formatPeriod } from '@/lib/format';
 import type { RetrievedDocument } from '@/lib/domain';
 
 /** Documento recuperado, com trecho, metadados e acesso à origem. */
@@ -28,7 +28,42 @@ export function DocumentViewer({ document }: { document: RetrievedDocument }) {
             label="Atualizado em"
             value={formatDateTime(document.lastModified)}
           />
-          <MetaRow icon={Hash} label="Identificador" value={document.id} mono />
+          <MetaRow
+            icon={Hash}
+            label="Identificador"
+            value={document.sourceId ?? document.id}
+            mono
+          />
+          {document.artifactId && (
+            <MetaRow icon={Hash} label="Artefato" value={document.artifactId} mono />
+          )}
+          {document.extractId && (
+            <MetaRow icon={Hash} label="Extrato" value={document.extractId} mono />
+          )}
+          {document.projectId && (
+            <MetaRow icon={Hash} label="Projeto" value={document.projectId} mono />
+          )}
+          {document.sourceLocator && (
+            <MetaRow
+              icon={Layers}
+              label="Local do trecho"
+              value={document.sourceLocator}
+            />
+          )}
+          {document.registrationPeriod && (
+            <MetaRow
+              icon={Timer}
+              label="Período de registro"
+              value={formatPeriod(document.registrationPeriod)}
+            />
+          )}
+          {document.validity && (
+            <MetaRow
+              icon={Timer}
+              label="Vigência"
+              value={formatPeriod(document.validity)}
+            />
+          )}
           <div className="flex items-center gap-1.5">
             <FileSearch size={12} className="shrink-0 text-fg-subtle" />
             <dt className="text-fg-subtle">Score do recuperador</dt>
@@ -58,6 +93,13 @@ export function DocumentViewer({ document }: { document: RetrievedDocument }) {
       <Separator />
 
       <div className="min-h-0 flex-1 overflow-y-auto scrollbar-slim px-3 py-3">
+        {document.attributes && Object.keys(document.attributes).length > 0 && (
+          <dl className="grid gap-1.5 pb-3 text-2xs">
+            {Object.entries(document.attributes).map(([label, value]) => (
+              <MetaRow key={label} icon={Layers} label={label} value={value} />
+            ))}
+          </dl>
+        )}
         {document.excerpt ? (
           <blockquote className="border-l-2 border-primary/40 pl-3 text-xs leading-6 text-fg-muted">
             {document.excerpt}

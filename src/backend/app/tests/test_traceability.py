@@ -492,7 +492,6 @@ def test_low_confidence_uses_generic_rag_and_preserves_classification_trace(
     assert result.status_code == 200
     assert traces
     assert provider_calls[0]["intent"] is None
-    assert provider_calls[0]["require_rag_context"] is True
     assert traces[0]["response"].model == "rag-retriever"
     assert traces[0]["intent"].macro == classification.macrointencao
 
