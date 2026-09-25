@@ -77,6 +77,7 @@ def _retrieved_document() -> RetrievedDocument:
             web_url="https://example.test/projeto",
             last_modified="2026-09-18",
             search_text="status projeto fornecedor atraso",
+            attributes=(("Acao recomendada", "Acompanhar o plano do fornecedor"),),
         ),
         score=4.0,
     )
@@ -210,9 +211,9 @@ def test_proactivity_prepares_secondary_response_in_single_provider_call(
         assert timeout == 30
         text = json.dumps(
             {
-                "primary_response": "Resposta principal [Fonte 1].",
+                "primary_response": "O fornecedor do equipamento critico registra atraso de 18 dias. [Fonte 1]",
                 "prepared_secondary_response": (
-                    "O gargalo e o fornecedor; acompanhe o plano [Fonte 1]."
+                    "Acao recomendada: Acompanhar o plano do fornecedor [Fonte 1]"
                 ),
             }
         )
@@ -258,7 +259,7 @@ def test_proactivity_prepares_secondary_response_in_single_provider_call(
     assert "macro=CONSULTA; especifica=consulta_status_projeto" in primary_payload["input"]
     assert "Intencao secundaria: sugerir_agilizacao_projeto" in primary_payload["input"]
     assert "principal gargalo" in primary_payload["input"]
-    assert response.text == "Resposta principal [Fonte 1]."
+    assert response.text == "O fornecedor do equipamento critico registra atraso de 18 dias. [Fonte 1]"
     assert response.proactive_suggestion is not None
     assert response.proactive_suggestion.intent == "sugerir_agilizacao_projeto"
     assert response.proactive_suggestion.requires_confirmation is True
@@ -293,7 +294,8 @@ def test_proactivity_prepares_secondary_response_in_single_provider_call(
 
     assert confirmation.status == "accepted"
     assert confirmation.result is not None
-    assert confirmation.result.text.startswith("O gargalo")
+    assert confirmation.result.text == "Acao recomendada: Acompanhar o plano do fornecedor [Fonte 1]"
+    assert confirmation.result.claims[0].evidence[0].attribute == "Acao recomendada"
     assert confirmation.result.usage.total_tokens == 0
     assert confirmation.result.latency_ms == 0
     assert len(captured_requests) == 1
@@ -325,9 +327,9 @@ def test_declining_suggestion_does_not_call_provider_again(monkeypatch) -> None:
                                 "type": "text",
                                 "text": json.dumps(
                                     {
-                                        "primary_response": "Resposta principal.",
+                                        "primary_response": "O fornecedor do equipamento critico registra atraso de 18 dias. [Fonte 1]",
                                         "prepared_secondary_response": (
-                                            "Resposta secundaria preparada."
+                                            "Acao recomendada: Acompanhar o plano do fornecedor [Fonte 1]"
                                         ),
                                     }
                                 ),
