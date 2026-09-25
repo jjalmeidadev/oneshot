@@ -11,9 +11,12 @@ Por isso ele nao roda na suite normal. Precisa de:
   DATABASE_URL   ou SUPABASE_DATABASE_URL, para conferir a persistencia
 Sem essas variaveis o modulo inteiro se ignora.
 
-Como a API nao devolve o identificador da interacao gravada no banco (achado
-A-04 do relatorio S4-20), a correlacao entre resposta e linha persistida e
-feita por um marcador unico injetado no texto da pergunta.
+A resposta devolve em `trace_id` o identificador da linha gravada em
+ai_interactions (contrato 1.1.0, correcao do achado A-01 do relatorio S4-20).
+A pergunta continua levando um marcador unico, que localiza a mesma linha por
+um caminho independente; o CT-E2E-05 confere que os dois caminhos coincidem.
+`interaction_id` segue com o identificador do provedor de geracao, usado para
+encadear a conversa.
 """
 
 from __future__ import annotations
@@ -228,32 +231,31 @@ def test_auditoria_da_interacao_foi_registrada(
 
 
 # --------------------------------------------------------------------------
-# E2E-05 — achado A-04: a resposta nao devolve a alca de correlacao
+# E2E-05 — achado A-01: a resposta devolve a alca de correlacao (trace_id)
 # --------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "A-04: _trace_safely em app/pipeline.py descarta o retorno de "
-        "trace_interaction, entao o id da linha no Supabase nunca chega a "
-        "resposta. O campo interaction_id carrega o id do provedor de geracao. "
-        "Ver secao 6 do relatorio S4-20."
-    ),
-)
 def test_resposta_permite_localizar_a_interacao_no_banco(
     connection: Any, resposta_e2e: dict[str, Any]
 ) -> None:
-    interaction_id_da_resposta = resposta_e2e.get("interaction_id")
-    assert interaction_id_da_resposta, "resposta sem interaction_id"
+    trace_id = resposta_e2e.get("trace_id")
+    assert trace_id, (
+        "resposta sem trace_id: o cliente nao consegue localizar o proprio registro"
+    )
 
     linhas = _linhas(
         connection,
         "SELECT id FROM public.ai_interactions WHERE id::text = %s",
-        (str(interaction_id_da_resposta),),
+        (str(trace_id),),
     )
 
     assert len(linhas) == 1, (
-        "o interaction_id devolvido pela API nao corresponde a nenhuma linha em "
-        "ai_interactions: o cliente nao consegue localizar o proprio registro"
+        "o trace_id devolvido pela API nao corresponde a nenhuma linha em "
+        "ai_interactions"
     )
+
+    localizada_pelo_marcador = resposta_e2e.get("_interaction_id")
+    if localizada_pelo_marcador:
+        assert str(linhas[0][0]) == str(localizada_pelo_marcador), (
+            "trace_id e marcador apontam para interacoes diferentes"
+        )
