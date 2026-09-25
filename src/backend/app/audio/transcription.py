@@ -18,6 +18,7 @@ import json
 from hashlib import sha256
 from dataclasses import dataclass
 from urllib.parse import urlencode, urlparse
+from uuid import uuid4
 
 import httpx
 
@@ -75,6 +76,7 @@ class Transcription:
 
 
 response_cache: ResponseCache[Transcription] = ResponseCache()
+VHS_WORKER_ID = uuid4().hex
 
 
 async def transcribe(

@@ -42,6 +42,19 @@ class AudioUploadResponse(BaseModel):
     pipeline_status: str = Field(default="completed", description="Transcrição e resposta concluídas pelo pipeline.")
 
 
+class VhsMetricsResponse(BaseModel):
+    enabled: bool
+    worker_id: str
+    topology: Literal["single-worker-per-container"] = "single-worker-per-container"
+    ttl_seconds: float
+    max_entries: int
+    entries: int
+    pending: int
+    counters: dict[str, int]
+    hit_ratio: float = Field(ge=0, le=1)
+    estimated_provider_calls_avoided: int = Field(ge=0)
+
+
 class AudioErrorDetail(BaseModel):
     code: str
     message: str

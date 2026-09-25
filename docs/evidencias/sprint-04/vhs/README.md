@@ -26,6 +26,12 @@ Sem rede real: o HTTP do Azure é substituído por resposta controlada e contado
 O PLN/LLM e a persistência do pipeline são substituídos na suíte de upload.
 As evidências aprovam somente o escopo local testado. O cache é em memória,
 por worker, com TTL de 300 s e capacidade de 256; não persiste após reinício.
+O runtime publicado fixa um worker de API por container, e testes automatizados
+protegem essa configuração. Métricas autenticadas expõem, sem dados sensíveis,
+o worker observado, hits, misses, chamadas ao provedor, erros, taxa de hit e
+chamadas evitadas. A coleta com Azure real usa o comando documentado no plano;
+enquanto sua saída não for anexada, o cenário externo continua corretamente
+classificado como não executado.
 
 ## Defeito encontrado e reteste
 

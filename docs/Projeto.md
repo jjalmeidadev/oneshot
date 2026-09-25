@@ -6125,6 +6125,13 @@ recuperação, isolamento de chave, capacidade e concorrência. As
 [evidências S4-31](evidencias/sprint-04/vhs/README.md) distinguem os resultados
 locais dos cenários externos não executados. O coletor registra a comparação
 com os critérios em pytest/JUnit antes de classificar cada caso.
+O runtime limita a API a um worker enquanto o cache permanecer em memória. A
+telemetria autenticada identifica o worker e quantifica hits, misses, chamadas
+ao provedor, erros, taxa de acerto e chamadas evitadas. O roteiro de homologação
+com Azure real repete um áudio autorizado, mede miss e hits separadamente,
+publica mediana/P95 sem expor áudio ou transcrição e remove a conversa sintética
+do banco ao final. A homologação externa só é considerada aprovada após a saída
+sanitizada dessa execução ser anexada às evidências.
 
 # 10. Procedimentos de Implantação
 

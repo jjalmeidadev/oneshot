@@ -25,6 +25,14 @@ Invalidação durante uma chamada impede que a resposta antiga repovoe o cache.
 Repetições simultâneas compartilham uma chamada; erros e ausência de fala nunca
 são gravados. Erros continuam usando o contrato HTTP existente.
 
+O container de produção inicia a API explicitamente com `--workers 1`, e o
+Compose possui uma única instância do serviço `backend`. Essa é uma restrição
+operacional verificável, não uma promessa de coerência distribuída: o backend
+não pode ser escalado horizontalmente enquanto o VHS permanecer em memória.
+O endpoint autenticado `GET /api/audio/vhs/metrics` informa um `worker_id`
+efêmero e a topologia `single-worker-per-container`, permitindo detectar troca
+de processo durante a coleta sem publicar áudio, transcrição ou credenciais.
+
 ## DoR e coleta reproduzível
 
 Executar a partir de `src/backend`, com o ambiente virtual do projeto:
@@ -46,6 +54,32 @@ para chamadas externas nesta suíte.
 Ferramentas: pytest, FastAPI TestClient, monkeypatch sobre `httpx.AsyncClient.post`,
 relógio injetado para TTL e JUnit XML. Evidências: `pytest.txt`, `pytest.xml`
 (assertions, tempos e propriedades) e `resultado.json` por caso.
+
+## Homologação real e benefício quantitativo
+
+No ambiente publicado, executar dentro do backend, em janela sem tráfego
+paralelo e com um áudio de fala autorizado que não seja versionado:
+
+```powershell
+python scripts/verify_audio_stt_pln_live.py <audio.wav> `
+  --expected-term <termo-esperado> --repetitions 5
+```
+
+O processo usa a configuração real do Azure Speech e do PostgreSQL, substitui
+somente a geração posterior ao PLN por uma resposta controlada e remove do
+banco a conversa sintética ao terminar. O primeiro envio deve produzir um miss
+e uma chamada real ao Azure; os quatro seguintes devem reproduzir a mesma
+transcrição como hits, sem nova chamada. A saída publica apenas hashes do áudio
+e da transcrição, identificador efêmero do worker, deltas dos contadores,
+chamadas evitadas, taxa de hit e latências de STT do miss e dos hits
+(mediana/P95). Token, URL do Azure, áudio e texto transcrito não são impressos.
+
+Critério para cinco repetições: `provider_call=1`, `miss=1`, `record=1`,
+`hit=4`, `provider_error=0`, quatro chamadas evitadas e taxa de hit de 80%.
+Uma coleta só pode ser classificada como homologação aprovada quando esse
+comando for realmente executado na imagem publicada e sua saída sanitizada for
+preservada. A existência do script ou o resultado controlado local não substitui
+essa evidência.
 
 ## Critérios congelados por cenário
 

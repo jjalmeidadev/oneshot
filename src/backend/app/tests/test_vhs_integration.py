@@ -1,6 +1,8 @@
 """S4-31: fronteira HTTP controlada; nenhuma chamada real ao Azure."""
 
 import asyncio
+import runpy
+from pathlib import Path
 
 import httpx
 import pytest
@@ -11,8 +13,9 @@ from app.audio.validation import validate_audio_upload
 from app.audio.vhs import ResponseCache
 from app.main import app
 from app.tests.test_audio_upload import (
-    _build_wav, post_audio, reset_concurrency_control,  # noqa: F401
+    AUTH_HEADER, _build_wav, post_audio, reset_concurrency_control,  # noqa: F401
 )
+from scripts.verify_audio_stt_pln_live import _delta, _p95
 
 SUCCESS = {"RecognitionStatus": "Success", "NBest": [
     {"Display": "Qual o prazo do projeto?", "Confidence": 0.94}
@@ -53,6 +56,48 @@ def test_record_and_hit(provider):
     assert provider["calls"] == 1
     metrics = transcription.response_cache.metrics()
     assert (metrics["miss"], metrics["record"], metrics["hit"]) == (1, 1, 1)
+
+
+def test_authenticated_metrics_quantify_cache_benefit(provider):
+    with TestClient(app) as client:
+        assert send(client).status_code == 200
+        assert send(client).status_code == 200
+        response = client.get("/api/audio/vhs/metrics", headers=AUTH_HEADER)
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["enabled"] is True
+    assert payload["topology"] == "single-worker-per-container"
+    assert len(payload["worker_id"]) == 32
+    assert payload["entries"] == 1
+    assert payload["pending"] == 0
+    assert payload["counters"]["provider_call"] == 1
+    assert payload["counters"]["hit"] == 1
+    assert payload["hit_ratio"] == 0.5
+    assert payload["estimated_provider_calls_avoided"] == 1
+
+
+def test_metrics_reject_unauthenticated_access(provider):
+    with TestClient(app) as client:
+        response = client.get("/api/audio/vhs/metrics")
+
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "UNAUTHENTICATED"
+
+
+def test_container_runtime_uses_one_api_worker():
+    entrypoint = Path(__file__).resolve().parents[2] / "docker-entrypoint.py"
+    command = runpy.run_path(str(entrypoint))["runtime_command"]()
+    workers_index = command.index("--workers")
+    assert command[workers_index + 1] == "1"
+
+
+def test_live_evidence_helpers_calculate_delta_and_nearest_rank_p95():
+    assert _delta({"hit": 7, "miss": 3}, {"hit": 2, "miss": 2}) == {
+        "hit": 5,
+        "miss": 1,
+    }
+    assert _p95([1, 2, 3, 4, 5]) == 5
 
 
 def test_miss_different_audio(provider):

@@ -36,6 +36,23 @@ class ResponseCache(Generic[T]):
                 "eviction", "provider_call", "provider_error", "coalesced",
             )}
 
+    def snapshot(self) -> dict[str, object]:
+        """Devolve telemetria agregada sem audio, chave ou credencial."""
+        with self._lock:
+            counters = self.metrics()
+            lookups = counters["hit"] + counters["miss"]
+            return {
+                "ttl_seconds": self.ttl_seconds,
+                "max_entries": self.max_entries,
+                "entries": len(self._entries),
+                "pending": len(self._pending),
+                "counters": counters,
+                "hit_ratio": counters["hit"] / lookups if lookups else 0.0,
+                "estimated_provider_calls_avoided": (
+                    counters["hit"] + counters["coalesced"]
+                ),
+            }
+
     def invalidate(self) -> int:
         """Descarta tudo; chamadas em andamento nao repovoam esta geracao."""
         with self._lock:
