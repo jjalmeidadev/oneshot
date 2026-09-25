@@ -6,8 +6,8 @@ Atualizado em 25/09/2026. Contrato: `1.1.0`.
 
 | Validação | Resultado |
 | --- | --- |
-| Backend ampliado, incluindo avaliação do corpus de PLN | **287 aprovados**, zero falhas/erros/ignorados, 41,16 s — [saída](backend-tests.txt) |
-| Backend focado nas camadas afetadas, incluindo os testes com classificador real | **262 aprovados**, zero falhas/erros/ignorados, 4,15 s — [saída](backend-final.txt), [JUnit](backend-junit.xml) |
+| Backend ampliado, incluindo avaliação do corpus de PLN | **289 aprovados**, zero falhas/erros/ignorados, 40,84 s — [saída](backend-tests.txt) |
+| Backend focado nas camadas afetadas, incluindo os testes com classificador real | **264 aprovados**, zero falhas/erros/ignorados, 4,22 s — [saída](backend-final.txt), [JUnit](backend-junit.xml) |
 | Frontend: domínio, fontes, componentes e estado do chat | **33 aprovados**, 4 arquivos — [saída](frontend-tests.txt) |
 | TypeScript (`tsc --noEmit`) | Código de saída 0 |
 | ESLint dos arquivos frontend afetados | Código de saída 0, sem avisos |
@@ -24,7 +24,7 @@ A rodada focada não repete a avaliação completa do corpus em
 | Artefato, trecho e IDs disponíveis | `GeminiSource`, referências completas em `answer.sources` e `chat.sources`; `test_references_survive_provider_api_and_audit` |
 | Atualização e período de registro quando disponíveis | `last_modified` da origem, `registration_period` distinto de `validity`; testes de metadados completos/ausentes; painel de fontes da interface, com períodos na data local |
 | Cada informação factual associada à fonte que a sustenta | `claims[].evidence` contém a unidade integral; a validação extrativa rejeita número alterado, negação invertida, condição omitida e empréstimo de evidência de outra fonte, e aceita apenas variações de apresentação (`test_presentation_variants_of_a_complete_copy_are_accepted`) |
-| Resposta sem evidência suficiente | `evidence_status=insufficient`, sem claims; fontes recuperadas preservadas e sinalizadas na interface como sem evidência para a resposta; sem recuperação, não chama o LLM mesmo com classificador desligado |
+| Resposta sem evidência suficiente | `evidence_status=insufficient`, sem claims; fontes recuperadas preservadas e sinalizadas na interface como sem evidência para a resposta; sem recuperação, não chama o LLM mesmo com classificador desligado; resposta interrompida pelo limite de tokens devolve o aviso de interrupção (`test_interrupted_answer_keeps_the_interruption_notice`) |
 | Sugestão proativa sustentada por evidência | Resposta secundária com evidências verificadas e uma linha `Sugestão:` sem números ou datas, exposta em `recommendation`; sugestão sem evidência, com número novo ou com evidência parafraseada não é oferecida (`test_unsupported_secondary_response_is_not_offered`) |
 | Cenários positivo e de falha automatizados | Texto/áudio × Gemini/OpenRouter; citações inexistentes, fatos inventados com citação existente e falha de recuperação |
 | Evidência correlacionada entre camadas | Recuperação → provedor → API → persistência de interação/fontes/eventos e commit; `trace_id` comum e snapshot de claims, sugestão e fontes |
