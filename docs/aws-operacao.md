@@ -19,6 +19,14 @@ Os repositórios `m7-g05-backend` e `m7-g05-frontend` usam tags imutáveis. A ta
 
 O commit da tag e o HEAD observado `bae2e9b27b70c6253fb2411bf0459d18a9f58531` tinham a árvore Git `20dfce2c29db8be07a79eb4f94ff8b5223abdec0`. Essa igualdade é evidência limitada: sozinha, não comprova como as imagens foram construídas. O deploy consulta novamente imutabilidade e tag/digest no ECR. Não há rebuild ou push nesta fase.
 
+## Pré-requisito PostgreSQL dos alertas
+
+Antes de iniciar o runtime novo, consulte em leitura o estado com `python src/backend/scripts/manage_alert_infrastructure.py status` no ambiente Python do backend, com `DATABASE_URL` ou `SUPABASE_DATABASE_URL` configurada fora do Git. A migração `08_add_prepared_proactive_response.sql` deve preceder o runtime: ela remove apenas confirmações legadas incompletas, expiradas e não reivindicadas. Se houver linha incompleta ativa, não expirada ou reivindicada, ela lança exceção e desfaz toda a transação. Não preencha artificialmente resposta/modelo preparado. Para aplicar 08 em uma janela autorizada, depois de revalidar a contagem e o estado dos registros, use `python src/backend/scripts/manage_alert_infrastructure.py prepare-proactive --confirm-expired-cleanup`.
+
+As seis tabelas e os índices/constraints da migração `15_alert_deadline_flow.sql` já foram observados em estrutura compatível no preflight remoto. Não reaplique 15 nesse estado; `apply` recusa qualquer tabela de alertas preexistente e requer 08 pronta. A compatibilidade deve ser novamente verificada em leitura antes da janela, pois o script não registra histórico de migrações. O arquivo `16_rollback_alert_deadline_flow.sql` elimina as seis tabelas e seus dados, não restaura todas as constraints-base e **não é rollback automático**. O comando `rollback` exige `--confirm-destructive` e decisão específica após avaliar os dados existentes.
+
+O backend consulta `pending_proactive_suggestions` pela conexão PostgreSQL privada. A migração 08 habilita RLS e revoga acesso direto de `anon` e `authenticated`; essas roles devem permanecer sem privilégios nessa tabela. Nunca coloque a URL de conexão ou outros secrets em comandos, logs ou no repositório.
+
 ## Atualização da aplicação na EC2 existente
 
 Depois da substituição da EC2, atualizações de Compose e imagens da aplicação usam `scripts/aws/update-app.ps1` por SSH. Esse fluxo não cria change set, não altera CloudFormation e não substitui a instância. Passe o `InstanceId` atual obtido da stack, a chave privada correspondente à key pair importada, tags e digests imutáveis que já existam no ECR e um `runtime.env` protegido fora do repositório. A atualização local desta story não cria nem publica essas imagens. Antes de uma janela real, confirme que a imagem backend escolhida contém `app.alerts.worker` e que o esquema de alertas no banco está aplicado; o health check HTTP não prova o fluxo de alertas.
