@@ -489,3 +489,21 @@ A [documentação do frontend](../frontend/README.md) descreve estrutura, fluxos
 confirmação, scheduler, outbox e RabbitMQ avaliam o cronograma em segundo plano
 e gravam notificações internas. Não há dependência de Power Automate nem
 webhook. Veja [a documentação operacional](../agent/support/IMPLEMENTATION.md#3-workflow-alerta_prazo_atraso).
+
+## VHS/cache de transcricao (S4-31)
+
+Cache STT ativo por padrao, TTL 300s e 256 entradas por processo.
+`VHS_ENABLED=0` desativa; reiniciar os workers invalida todos os cassetes.
+O runtime do container fixa um worker de API enquanto o cache não for
+compartilhado. Não escale o serviço `backend` horizontalmente sem substituir o
+VHS por armazenamento distribuído.
+
+Uma identidade válida do áudio pode consultar `GET /api/audio/vhs/metrics`.
+O endpoint não devolve áudio, transcrição, chave ou credencial: informa somente
+o identificador efêmero do worker, topologia, ocupação, contadores, taxa de hit
+e estimativa de chamadas evitadas.
+
+Plano, limites e comandos: [plano VHS](../../docs/testes/sprint4/plano-vhs.md).
+Coleta local: `python scripts/verify_vhs.py` a partir de `src/backend`.
+Validação com Azure real: `python scripts/verify_audio_stt_pln_live.py
+<audio.wav> --expected-term <termo> --repetitions 5`, no ambiente publicado.

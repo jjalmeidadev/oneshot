@@ -10,11 +10,13 @@ import argparse
 from hashlib import sha256
 import os
 from pathlib import Path
+from statistics import median
 import unicodedata
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
 
+from app.audio import transcription
 from app.database.connection import open_database_connection
 from app.gemini.schemas import GeminiChatResponse, GeminiUsage
 from app.main import app
@@ -42,6 +44,12 @@ def _arguments() -> argparse.Namespace:
         action="append",
         default=[],
         help="Termo que deve aparecer na transcricao; pode ser repetido.",
+    )
+    parser.add_argument(
+        "--repetitions",
+        type=int,
+        default=5,
+        help="Quantidade de envios identicos; minimo 2 para comprovar miss e hit.",
     )
     return parser.parse_args()
 
@@ -78,8 +86,22 @@ def _residue_count(conversation_id: str) -> int:
         connection.close()
 
 
+def _delta(after: dict[str, int], before: dict[str, int]) -> dict[str, int]:
+    return {name: after[name] - before[name] for name in after}
+
+
+def _p95(values: list[int]) -> int:
+    ordered = sorted(values)
+    index = max(0, (95 * len(ordered) + 99) // 100 - 1)
+    return ordered[index]
+
+
 def main() -> None:
     arguments = _arguments()
+    if arguments.repetitions < 2:
+        raise SystemExit("--repetitions deve ser pelo menos 2.")
+    if os.getenv("VHS_ENABLED", "1").strip() == "0":
+        raise SystemExit("VHS_ENABLED=0; habilite o cache para esta verificacao.")
     audio_path = arguments.audio_file.resolve(strict=True)
     audio_bytes = audio_path.read_bytes()
     conversation_id = f"s4-13-live-{uuid4()}"
@@ -89,24 +111,32 @@ def main() -> None:
     pipeline.generate_chat_response = _controlled_provider
 
     try:
+        transcription.response_cache.invalidate()
+        metrics_before = transcription.response_cache.metrics()
+        payloads = []
         with TestClient(app) as client:
-            response = client.post(
-                "/api/audio",
-                files={"audio": (audio_path.name, audio_bytes, "audio/wav")},
-                headers=AUTH_HEADER,
-                data={
-                    "conversation_id": conversation_id,
-                    "language": "pt-BR",
-                    "use_intent_classifier": "true",
-                },
-            )
+            for _ in range(arguments.repetitions):
+                response = client.post(
+                    "/api/audio",
+                    files={"audio": (audio_path.name, audio_bytes, "audio/wav")},
+                    headers=AUTH_HEADER,
+                    data={
+                        "conversation_id": conversation_id,
+                        "language": "pt-BR",
+                        "use_intent_classifier": "true",
+                    },
+                )
+                assert response.status_code == 200, response.text
+                payloads.append(response.json())
 
-        assert response.status_code == 200, response.text
-        payload = response.json()
+        payload = payloads[0]
         transcript = payload["transcription"]["text"]
         intent = payload["intent"]
         assert transcript.strip(), "Azure STT retornou transcricao vazia."
         assert intent is not None, "PLN nao retornou classificacao."
+        assert all(
+            item["transcription"] == payload["transcription"] for item in payloads
+        ), "O hit nao reproduziu a mesma transcricao."
 
         normalized_transcript = _normalized(transcript)
         for term in arguments.expected_term:
@@ -125,10 +155,29 @@ def main() -> None:
         assert any(event[0] == "pln_intent_classified" for event in events)
         assert ("database_traceability_recorded", "database", "sucesso") in events
 
+        metrics_delta = _delta(
+            transcription.response_cache.metrics(), metrics_before
+        )
+        assert metrics_delta["miss"] == 1
+        assert metrics_delta["record"] == 1
+        assert metrics_delta["provider_call"] == 1
+        assert metrics_delta["hit"] == arguments.repetitions - 1
+        assert metrics_delta["provider_error"] == 0
+        stt_times = [item["pipeline_metrics"]["stt_ms"] for item in payloads]
+        hit_times = stt_times[1:]
+
         print(f"LIVE_AUDIO_SHA256={sha256(audio_bytes).hexdigest()}")
-        print(f"LIVE_STT_TRANSCRIPT={transcript}")
+        print(f"LIVE_STT_TRANSCRIPT_SHA256={sha256(transcript.encode()).hexdigest()}")
         print(f"LIVE_PLN_MACRO={intent['macro']}")
         print(f"LIVE_PLN_SPECIFIC={intent['specific']}")
+        print(f"LIVE_VHS_WORKER_ID={transcription.VHS_WORKER_ID}")
+        print(f"LIVE_VHS_REPETITIONS={arguments.repetitions}")
+        print(f"LIVE_VHS_PROVIDER_CALLS={metrics_delta['provider_call']}")
+        print(f"LIVE_VHS_CALLS_AVOIDED={metrics_delta['hit']}")
+        print(f"LIVE_VHS_HIT_RATIO={metrics_delta['hit'] / arguments.repetitions:.4f}")
+        print(f"LIVE_VHS_MISS_STT_MS={stt_times[0]}")
+        print(f"LIVE_VHS_HIT_STT_MEDIAN_MS={median(hit_times):.1f}")
+        print(f"LIVE_VHS_HIT_STT_P95_MS={_p95(hit_times)}")
         print("LIVE_DB_CORRELATION_OK=True")
         print("LIVE_DB_AUDIT_OK=True")
     finally:

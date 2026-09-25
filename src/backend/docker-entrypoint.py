@@ -12,6 +12,22 @@ def fail(message: str) -> None:
     raise SystemExit(64)
 
 
+def runtime_command() -> list[str]:
+    """Mantém o VHS em um único processo até existir cache compartilhado."""
+
+    return [
+        "uvicorn",
+        "app.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--workers",
+        "1",
+        "--no-access-log",
+    ]
+
+
 def main() -> None:
     audio_entries = [
         item.strip()
@@ -49,20 +65,7 @@ def main() -> None:
     ):
         fail("configure AZURE_SPEECH_RESOURCE or AZURE_SPEECH_ENDPOINT.")
 
-    os.execvp(
-        "uvicorn",
-        [
-            "uvicorn",
-            "app.main:app",
-            "--host",
-            "0.0.0.0",
-            "--port",
-            "8000",
-            "--workers",
-            "1",
-            "--no-access-log",
-        ],
-    )
+    os.execvp("uvicorn", runtime_command())
 
 
 if __name__ == "__main__":

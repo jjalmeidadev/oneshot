@@ -1,0 +1,40 @@
+{
+  "frozen_at_utc": "2026-09-25T17:13:07.405812+00:00",
+  "base_commit": "aa1fe18338752af3e0dbe4053b2b83044edea03c",
+  "working_tree": " M .env.example\n M docs/Projeto.md\n M src/backend/.env.example\n M src/backend/README.md\n M src/backend/app/audio/transcription.py\n M src/backend/app/tests/conftest.py\n M src/backend/app/tests/performance/README.md\n?? docs/testes/sprint4/plano-vhs.md\n?? src/backend/app/audio/vhs.py\n?? src/backend/app/tests/test_vhs_integration.py\n?? src/backend/scripts/verify_vhs.py\n",
+  "python": "3.12.7",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "packages": {
+    "pytest": "9.1.1",
+    "fastapi": "0.141.1",
+    "httpx": "0.28.1"
+  },
+  "command": [
+    "C:\\Users\\wende\\OneDrive\\Área de Trabalho\\G05-MD7\\g05\\.venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "app/tests/test_vhs_integration.py",
+    "app/tests/test_audio_upload.py",
+    "-v",
+    "-o",
+    "junit_family=legacy",
+    "--junitxml=C:\\Users\\wende\\OneDrive\\Área de Trabalho\\G05-MD7\\g05\\docs\\evidencias\\sprint-04\\vhs\\20260925T171307400200Z\\pytest.xml"
+  ],
+  "cwd": "src/backend",
+  "provider": "httpx.AsyncClient.post controlado; sem rede Azure",
+  "mass": "WAV PCM sintetico: 16kHz, mono, 16 bits, 1s, amplitudes 8000/4000; pt-BR/en-US",
+  "sha256": {
+    "src\\backend\\app\\audio\\errors.py": "c72190d043049a74d4c8c993ac064a7a2d1958279606640614562cb933656426",
+    "src\\backend\\app\\audio\\schemas.py": "53e4a0542ff4d502cb7f1a3e7dde91418c09233536b4b8c82397d5d45988f3e4",
+    "src\\backend\\app\\audio\\security.py": "0c6e3ef31d87ee15fafaa022d3bf28e7265eb3902b8bcc56bc914529dc4ab692",
+    "src\\backend\\app\\audio\\service.py": "4261f6e22012e2a45305c299fd24e1cd60332aa49de37871b950dc25c5d8aeb9",
+    "src\\backend\\app\\audio\\transcription.py": "b4102a5c485ec7976f6e7adf1fef99fe5b87135ed80ba18cc456d52683fc598f",
+    "src\\backend\\app\\audio\\validation.py": "08bff6aed46f1889f313c6dcaafd7cab8a8f86c94c60bc240ddbda8856a04d63",
+    "src\\backend\\app\\audio\\vhs.py": "f126de01fa3da517684c14f767a836216aab52fb873eac0412d44e245e35399f",
+    "src\\backend\\app\\tests\\test_vhs_integration.py": "512dd81daf62a0b171478e28ad4ee25af336bb3fb595abf7a1c23d592271da2f",
+    "src\\backend\\app\\tests\\test_audio_upload.py": "4a3ba17e0720e69b2f15ed0010c6579e5788f490c5273ea2853503ce13e3c91f",
+    "src\\backend\\app\\tests\\conftest.py": "f42dd15e4cb0d9021c481afab5e188d21d20a0d27b19dba72b71d614bab708f8",
+    "src\\backend\\scripts\\verify_vhs.py": "74dc2cd99b841ceb8ac2ebfde9b17d4d14523c39b4f4c39f4ff48618696f7824",
+    "docs\\testes\\sprint4\\plano-vhs.md": "4056e1cbc847ac3290ba094a005008fe042bccfc85ec1bbad41ec3e7fe54810a"
+  }
+}

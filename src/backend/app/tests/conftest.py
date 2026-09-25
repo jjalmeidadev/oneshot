@@ -51,6 +51,7 @@ VARIAVEIS_DE_AMBIENTE_NEUTRALIZADAS = (
     "AZURE_SPEECH_KEY",
     "AZURE_SPEECH_TIMEOUT_SECONDS",
     "AZURE_SPEECH_MAX_ATTEMPTS",
+    "VHS_ENABLED",
     # Identidade simulada do endpoint de audio
     "AUDIO_SIMULATED_IDENTITIES",
     # Proatividade e armazenamento
@@ -77,6 +78,9 @@ def ambiente_isolado(monkeypatch):
     de quem roda a suite — o que e o caso normal na CI.
     """
 
+    from app.audio import transcription
+    from app.audio.vhs import ResponseCache
+    monkeypatch.setattr(transcription, "response_cache", ResponseCache())
     for nome in VARIAVEIS_DE_AMBIENTE_NEUTRALIZADAS:
         monkeypatch.delenv(nome, raising=False)
 

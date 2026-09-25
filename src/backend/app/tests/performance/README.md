@@ -72,9 +72,11 @@ corre durante o `test_start`: com o aquecimento lá dentro, as rodadas "de 5
 minutos" mediam cerca de 3 min 40 s, e a rodada negativa, que aquecia a instância
 com atraso de 25 s, não chegou a medir nenhuma requisição.
 
-O backend não tem cache de respostas nesta versão; o módulo VHS/cache ainda
-está em desenvolvimento. "Quente" aqui significa pool de conexões aberto e
-classificador carregado, não resposta reaproveitada.
+O VHS mantém cache de transcrições de áudio por processo (S4-31). Não há cache
+das respostas textuais do LLM. Nos cenários textuais, "quente" significa pool
+de conexões aberto e classificador carregado. Em medições de áudio, registrar
+`VHS_ENABLED`, hits/misses e quantidade de workers; usar `VHS_ENABLED=0` para
+medir todas as chamadas ao STT.
 
 A modalidade usada vai para a ficha do ambiente, em `--cache`.
 

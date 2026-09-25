@@ -25,7 +25,9 @@ from app.audio.schemas import (
     AudioAnswerSource,
     AudioErrorResponse,
     AudioUploadResponse,
+    VhsMetricsResponse,
 )
+from app.audio import transcription
 from app.audio.security import resolve_identity, single_request_per_identity
 from app.audio.service import process_audio_upload
 from app.audio.validation import DEFAULT_MAX_SIZE_BYTES
@@ -185,6 +187,21 @@ async def handle_request_validation_error(
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/api/audio/vhs/metrics", response_model=VhsMetricsResponse)
+def get_vhs_metrics(
+    authorization: str | None = Header(default=None),
+) -> VhsMetricsResponse:
+    """Expõe somente contadores agregados a uma identidade autenticada."""
+
+    resolve_identity(authorization)
+    snapshot = transcription.response_cache.snapshot()
+    return VhsMetricsResponse(
+        enabled=os.getenv("VHS_ENABLED", "1").strip() != "0",
+        worker_id=transcription.VHS_WORKER_ID,
+        **snapshot,
+    )
 
 
 @app.post("/api/chat", response_model=GeminiChatResponse)
