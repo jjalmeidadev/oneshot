@@ -70,6 +70,12 @@ class PoolFalso:
         self.devolvidas.append(conexao)
 
 
+#: Marcado pela #228 (S4-32B): este arquivo cruza fronteira entre
+#: componentes (API, modelo, banco ou servico externo). Rodar so estes com
+#: `pytest -m integration`.
+pytestmark = pytest.mark.integration
+
+
 class TestConexaoEmprestada:
     def test_delega_a_conexao_real(self):
         emprestada = _PooledConnection(PoolFalso(ConexaoFalsa()))

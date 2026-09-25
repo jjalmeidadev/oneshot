@@ -127,6 +127,12 @@ def _response_with_db_source() -> GeminiChatResponse:
     )
 
 
+#: Marcado pela #228 (S4-32B): este arquivo cruza fronteira entre
+#: componentes (API, modelo, banco ou servico externo). Rodar so estes com
+#: `pytest -m integration`.
+pytestmark = pytest.mark.integration
+
+
 def test_chat_real_classifier_contract_and_minimal_persistence(monkeypatch):
     monkeypatch.setenv("PLN_WARMUP", "0")
     monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")

@@ -37,6 +37,26 @@ JANELA_DE_ESCRITA_SEGUNDOS = 300
 
 _FOLGA = f"NOW() - INTERVAL '{JANELA_DE_ESCRITA_SEGUNDOS} seconds'"
 
+# Corte historico da auditoria completa.
+#
+# A rodada de linha de base da #228 encontrou 2 interacoes sem nenhum evento de
+# auditoria, ambas de 11/09/2026 (Sprint 3), do caminho de baixa confianca:
+# "qa final baixa confianca indefinida" e "verificacao controlada baixa
+# confianca". Sao sondagens manuais de QA daquela data.
+#
+# Nao ha reincidencia: em ~2.600 interacoes posteriores, todas tem auditoria. O
+# codigo atual de _insert_audit_events sempre emite ao menos o evento
+# api_interaction_processed, qualquer que seja o status.
+#
+# Sem este corte, o invariante reprovaria para sempre por causa de dois
+# registros de uma versao anterior do codigo, e deixaria de servir para o que
+# importa: acusar uma ocorrencia NOVA. Os dois registros historicos estao
+# documentados no relatorio da #228; o corte nao os esconde, apenas tira do
+# teste um fato ja fechado.
+INICIO_DA_AUDITORIA_COMPLETA = "2026-09-12"
+
+_APOS_O_CORTE = f"i.created_at >= DATE '{INICIO_DA_AUDITORIA_COMPLETA}'"
+
 
 @pytest.fixture(scope="module")
 def connection() -> Any:
@@ -164,6 +184,7 @@ def test_toda_interacao_gera_evento_de_auditoria(connection: Any) -> None:
         SELECT COUNT(*)
           FROM public.ai_interactions i
          WHERE i.created_at < {_FOLGA}
+           AND {_APOS_O_CORTE}
            AND NOT EXISTS (SELECT 1
                              FROM public.audit_events e
                             WHERE e.interaction_id = i.id)

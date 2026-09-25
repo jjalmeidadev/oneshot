@@ -17,6 +17,12 @@ from app.nlp.inference import get_classifier
 from test_audio_upload import _build_wav, AUTH_HEADER, transcricao_fixa
 
 
+#: Marcado pela #228 (S4-32B): este arquivo cruza fronteira entre
+#: componentes (API, modelo, banco ou servico externo). Rodar so estes com
+#: `pytest -m integration`.
+pytestmark = pytest.mark.integration
+
+
 @pytest.fixture(autouse=True)
 def disable_traceability(monkeypatch):
     monkeypatch.setattr("app.pipeline.trace_interaction", lambda **_kwargs: None)

@@ -46,6 +46,12 @@ def _resposta_openrouter(texto: str = "Resposta com [Fonte 1].") -> dict:
     }
 
 
+#: Marcado pela #228 (S4-32B): este arquivo cruza fronteira entre
+#: componentes (API, modelo, banco ou servico externo). Rodar so estes com
+#: `pytest -m integration`.
+pytestmark = pytest.mark.integration
+
+
 @pytest.fixture
 def captura(monkeypatch):
     """Substitui o urlopen e guarda a requisicao que o cliente montou."""
