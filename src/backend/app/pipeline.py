@@ -127,8 +127,6 @@ def process_message(
             "intent": None if fallback_to_rag else intent,
             "entities": entities,
         }
-        if fallback_to_rag:
-            provider_kwargs["require_rag_context"] = True
         if requester_id is not None and request.proactivity_enabled:
             provider_kwargs["requester_id"] = requester_id
         response = generate_chat_response(request, **provider_kwargs)

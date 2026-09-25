@@ -68,7 +68,6 @@ def generate_chat_response(
     intent: AudioIntent | None = None,
     entities: list[PublicEntity] | None = None,
     requester_id: str | None = None,
-    require_rag_context: bool = False,
 ) -> GeminiChatResponse:
     api_key = _api_key()
 

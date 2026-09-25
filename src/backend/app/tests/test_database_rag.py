@@ -224,7 +224,6 @@ def test_generic_fallback_does_not_call_llm_without_rag_context(monkeypatch):
     response = generate_chat_response(
         GeminiChatRequest(message="pergunta ambigua"),
         intent=None,
-        require_rag_context=True,
     )
 
     assert response.model == "rag-retriever"
