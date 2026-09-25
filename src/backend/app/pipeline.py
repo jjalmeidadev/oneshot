@@ -47,6 +47,7 @@ def process_message(
 ) -> GeminiChatResponse:
     route_started_at = perf_counter()
     intent = None
+    fallback_to_rag = False
     nlp_ms = 0
     entities: list[PublicEntity] = []
 
@@ -77,33 +78,16 @@ def process_message(
             raise GeminiConfigurationError("Classificador indisponivel.") from error
 
         intent = _public_intent(result)
-        if not result.roteada or result.macrointencao == "FORA_DE_ESCOPO":
-            response = GeminiChatResponse(
-                text=result.resposta_sugerida
-                or "Posso ajudar com informações do portfólio. Reformule sua pergunta indicando um projeto ou documento.",
-                model="classificador-local",
-                latency_ms=0,
-                usage=GeminiUsage(),
-                intent=intent,
-                entities=entities,
-                pipeline_metrics=ChatPipelineMetrics(
-                    nlp_ms=nlp_ms,
-                    route_ms=_elapsed_ms(route_started_at),
-                ),
-            )
-            _trace_safely(
-                request=request,
-                response=response,
-                intent=intent,
-                entities=entities,
-                processing_ms=_elapsed_ms(route_started_at),
-                channel=channel,
-                external_conversation_id=external_conversation_id,
-                requester_id=requester_id,
-            )
-            return response
+        fallback_to_rag = (
+            not result.roteada
+            or result.macrointencao == "FORA_DE_ESCOPO"
+            or result.intencao is None
+        )
 
-        if result.handler == "handler:transacao_gerar_relatorio":
+        if (
+            not fallback_to_rag
+            and result.handler == "handler:transacao_gerar_relatorio"
+        ):
             response = _report_workflow_response(
                 intent=intent,
                 entities=entities,
@@ -139,7 +123,12 @@ def process_message(
             return response
 
     try:
-        provider_kwargs = {"intent": intent, "entities": entities}
+        provider_kwargs = {
+            "intent": None if fallback_to_rag else intent,
+            "entities": entities,
+        }
+        if fallback_to_rag:
+            provider_kwargs["require_rag_context"] = True
         if requester_id is not None and request.proactivity_enabled:
             provider_kwargs["requester_id"] = requester_id
         response = generate_chat_response(request, **provider_kwargs)

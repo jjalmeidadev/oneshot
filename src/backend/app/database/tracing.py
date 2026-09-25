@@ -71,6 +71,13 @@ def trace_interaction(
                     processing_ms=processing_ms,
                 )
                 _insert_consulted_sources(cursor, interaction_id, response)
+                _insert_out_of_scope_request(
+                    cursor,
+                    interaction_id=interaction_id,
+                    request=request,
+                    response=response,
+                    intent=intent,
+                )
                 _insert_audit_events(
                     cursor,
                     interaction_id=interaction_id,
@@ -286,6 +293,62 @@ def _insert_consulted_sources(
         )
 
 
+def _insert_out_of_scope_request(
+    cursor: Any,
+    *,
+    interaction_id: str,
+    request: GeminiChatRequest,
+    response: GeminiChatResponse | None,
+    intent: AudioIntent | None,
+) -> None:
+    """Enfileira para curadoria apenas perguntas sem contexto recuperável."""
+
+    if not response or response.model != "rag-retriever" or response.sources:
+        return
+
+    cursor.execute(
+        """
+        INSERT INTO public.out_of_scope_requests (
+            interaction_id,
+            user_prompt,
+            predicted_macro_intent,
+            predicted_specific_intent,
+            confidence,
+            reason
+        )
+        VALUES (%s, %s, %s, %s, %s, %s);
+        """,
+        (
+            interaction_id,
+            request.message,
+            intent.macro if intent else None,
+            intent.specific if intent and intent.specific else None,
+            _out_of_scope_confidence(intent),
+            _out_of_scope_reason(intent),
+        ),
+    )
+
+
+def _out_of_scope_confidence(intent: AudioIntent | None) -> float | None:
+    if not intent:
+        return None
+    if intent.macro == "INDEFINIDA":
+        return intent.confidence_macro
+    if not intent.specific and intent.macro != "FORA_DE_ESCOPO":
+        return intent.confidence_specific
+    return intent.confidence_macro
+
+
+def _out_of_scope_reason(intent: AudioIntent | None) -> str:
+    if not intent:
+        return "sem_classificacao_e_sem_contexto_rag"
+    if intent.macro == "FORA_DE_ESCOPO":
+        return "macrointencao_fora_de_escopo_e_sem_contexto_rag"
+    if intent.macro == "INDEFINIDA" or not intent.specific:
+        return "baixa_confianca_e_sem_contexto_rag"
+    return "sem_contexto_rag"
+
+
 def _insert_audit_events(
     cursor: Any,
     *,
@@ -428,10 +491,7 @@ def _limitation_response(
 ) -> str | None:
     if error_message:
         return _safe_error_message(error_message)
-    if response and (
-        response.model in {"classificador-local", "rag-retriever"}
-        or (intent and intent.macro in {"FORA_DE_ESCOPO", "INDEFINIDA"})
-    ):
+    if response and response.model in {"classificador-local", "rag-retriever"}:
         return response.text
     return None
 
@@ -440,12 +500,12 @@ def _route_taken(
     intent: AudioIntent | None,
     response: GeminiChatResponse | None,
 ) -> str:
-    if intent and intent.macro in {"FORA_DE_ESCOPO", "INDEFINIDA"}:
-        return "fora_escopo"
     if response and response.workflow and response.workflow.action == "start":
         return "guided_workflow"
     if response and response.sources:
         return "sharepoint_query"
+    if intent and intent.macro in {"FORA_DE_ESCOPO", "INDEFINIDA"}:
+        return "fora_escopo"
     if intent and intent.macro == "CONSULTA":
         return "sharepoint_query"
     return "analise_local"
