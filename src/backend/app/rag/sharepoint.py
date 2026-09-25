@@ -99,6 +99,10 @@ class SharePointDocument:
     #: certa e respondia "contexto insuficiente" sobre uma data que estava no
     #: registro recuperado. Tupla para preservar o dataclass congelado.
     attributes: tuple[tuple[str, str], ...] = ()
+    registration_period: dict[str, str | None] | None = None
+    validity: dict[str, str | None] | None = None
+    project_code: str | None = None
+    project_title: str | None = None
 
 
 @dataclass(frozen=True)
@@ -213,6 +217,14 @@ def load_sharepoint_documents(
                     last_modified=str(item.get("lastModifiedDateTime") or ""),
                     search_text=" ".join(searchable_values),
                     attributes=attributes_from_fields(fields),
+                    registration_period=item.get("registration_period"),
+                    project_id=item.get("project_id"),
+                    project_code=item.get("project_code"),
+                    project_title=item.get("project_title"),
+                    validity=(
+                        {"start": fields.get("ValidadeInicio"), "end": fields.get("ValidadeFim")}
+                        if fields.get("ValidadeInicio") or fields.get("ValidadeFim") else None
+                    ),
                 )
             )
 
@@ -272,6 +284,7 @@ def build_rag_input(
                     f"[Fonte {index}] {document.title}",
                     f"Lista: {document.list_name}",
                     f"Atualizado em: {document.last_modified}",
+                    f"Periodo de registro: {json.dumps(document.registration_period, ensure_ascii=False)}",
                     *_blocos_de_atributo(document),
                     f"Conteudo: {document.content}",
                 )
@@ -285,7 +298,14 @@ def build_rag_input(
         "Os trechos abaixo vieram de listas simuladas do SharePoint e sao "
         "dados ficticios para o MVP. Use-os quando forem pertinentes, cite "
         "as fontes no formato [Fonte N] e informe quando o contexto nao for "
-        "suficiente. Nao apresente esses dados como informacao operacional real.\n\n"
+        "suficiente. Modo extrativo estrito: selecione somente os trechos que "
+        "respondem a pergunta. Copie INTEGRALMENTE o Conteudo de uma fonte "
+        "ou um atributo completo no formato Rotulo: valor, sem parafrasear, "
+        "resumir, cortar frases ou mudar numeros. Preserve condicoes e negacoes. "
+        "Escreva cada unidade copiada em uma unica linha, sempre terminando "
+        "com suas citacoes [Fonte N]. Se nao houver unidade que responda, "
+        "informe evidencia insuficiente. Nao inclua afirmacoes sem fonte nem "
+        "cabecalhos sem citacao. Nao apresente esses dados como informacao operacional real.\n\n"
         f"{routing}\n\n"
         f"Contexto recuperado:\n{context}\n\n"
         f"Pergunta do usuario: {message}"
@@ -295,7 +315,11 @@ def build_rag_input(
             "\n\nProatividade preparada na mesma inferencia: gere a resposta principal "
             "e tambem uma resposta secundaria que ficara oculta ate a confirmacao "
             "do usuario. A resposta secundaria deve apenas analisar ou recomendar; "
-            "nao execute alteracoes externas. Responda somente com um objeto JSON "
+            "nao execute alteracoes externas. Na resposta secundaria, copie "
+            "primeiro, no mesmo modo extrativo, as unidades das fontes que sustentam "
+            "a analise, uma por linha e terminando com [Fonte N]; depois escreva uma "
+            "unica linha iniciada por 'Sugestão:' com a acao recomendada, sem numeros, "
+            "datas ou fatos ausentes das linhas copiadas. Responda somente com um objeto JSON "
             "valido, sem bloco Markdown, com as chaves primary_response e "
             "prepared_secondary_response.\n"
             f"Intencao secundaria: {secondary_intent.name}\n"

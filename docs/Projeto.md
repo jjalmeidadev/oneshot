@@ -3886,12 +3886,17 @@ texto reconhecido ao mesmo pipeline de PLN usado por `POST /api/chat`. A
 resposta aprovada traz `pipeline_status: "completed"`, intenção estruturada,
 entidades extraídas e métricas do percurso de áudio e PLN, mantendo RNF05
 rastreável no contrato HTTP e RNF11 com mensagens controladas para entradas sem
-rota segura.
+rota segura. No exemplo, `chat` omite `intent`, `entities` e `pipeline_metrics`,
+que repetem os objetos do nível superior; `answer.sources` também omite os
+campos nulos. O contrato completo das referências está em
+[Referências nas respostas](contrato-referencias.md).
 
 ```json
 {
+  "contract_version": "1.1.0",
   "conversation_id": "1f5c9a24-1c2e-4a8f-9a3e-2b6d8c0f1a77",
   "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
+  "trace_id": "0d6f2c1e-4b7a-4f0e-9c3d-5a8b7e6f1d20",
   "transcription": {
     "text": "qual e o prazo do projeto XPTO?",
     "confidence": 0.92,
@@ -3927,66 +3932,71 @@ rota segura.
     "total_ms": 456
   },
   "chat": {
-    "text": "O prazo do projeto XPTO consta nas fontes recuperadas para esta consulta.",
-    "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
-    "intent": {
-      "macro": "CONSULTA",
-      "specific": "consulta_prazo",
-      "confidence_macro": 0.98,
-      "confidence_specific": 0.86,
-      "flow": "consulta_documental",
-      "handler": "consultar_prazo",
-      "alternatives": [
-        { "specific": "consulta_status", "confidence": 0.09 }
-      ]
-    },
-    "entities": [
-      {
-        "type": "projeto",
-        "value": "XPTO",
-        "text": "projeto XPTO",
-        "start": 17,
-        "end": 29,
-        "types": ["projeto"],
-        "ambiguous": false
-      }
-    ],
-    "pipeline_metrics": {
-      "nlp_ms": 8,
-      "route_ms": 35
-    },
-    "sources": []
-  },
-  "answer": {
-    "text": "O projeto está em andamento.",
-    "sources": [
-      { "artifact": "Status do projeto", "section": "base_atendimento" }
-    ]
-  },
-  "chat": {
-    "text": "O projeto está em andamento.",
+    "contract_version": "1.1.0",
+    "text": "O prazo do projeto XPTO e 30/09/2026. [Fonte 1]",
     "model": "gemini-3.7-flash",
     "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
+    "trace_id": "0d6f2c1e-4b7a-4f0e-9c3d-5a8b7e6f1d20",
     "latency_ms": 840,
     "retrieval_ms": 12,
     "usage": { "input_tokens": 120, "output_tokens": 34, "thought_tokens": 0, "total_tokens": 154 },
-    "sources": [
+    "evidence_status": "referenced",
+    "claims": [
       {
-        "id": "status-projeto-01",
-        "title": "Status do projeto",
-        "list_name": "base_atendimento",
-        "web_url": "https://mock.sharepoint.local/status-projeto-01",
-        "last_modified": "2026-08-26T12:00:00Z",
-        "score": 4.2,
-        "excerpt": "Projeto em andamento."
+        "text": "O prazo do projeto XPTO e 30/09/2026.",
+        "citation_ids": ["Fonte 1"],
+        "evidence": [
+          { "citation_id": "Fonte 1", "field": "excerpt", "attribute": null, "quote": "O prazo do projeto XPTO e 30/09/2026." }
+        ]
       }
     ],
-    "intent": {
-      "macro": "CONSULTA",
-      "specific": "consulta_status_projeto",
-      "confidence_macro": 0.97,
-      "confidence_specific": 0.91
-    }
+    "recommendation": null,
+    "sources": [
+      {
+        "id": "cronograma-xpto-01",
+        "citation_id": "Fonte 1",
+        "title": "Cronograma do projeto XPTO",
+        "list_name": "base_atendimento",
+        "web_url": "https://mock.sharepoint.local/cronograma-xpto-01",
+        "artifact_id": null,
+        "extract_id": null,
+        "project_id": null,
+        "source_locator": null,
+        "last_modified": "2026-08-26T12:00:00Z",
+        "registration_period": null,
+        "validity": null,
+        "attributes": {},
+        "score": 4.2,
+        "excerpt": "O prazo do projeto XPTO e 30/09/2026."
+      }
+    ]
+  },
+  "answer": {
+    "text": "O prazo do projeto XPTO e 30/09/2026. [Fonte 1]",
+    "evidence_status": "referenced",
+    "claims": [
+      {
+        "text": "O prazo do projeto XPTO e 30/09/2026.",
+        "citation_ids": ["Fonte 1"],
+        "evidence": [
+          { "citation_id": "Fonte 1", "field": "excerpt", "attribute": null, "quote": "O prazo do projeto XPTO e 30/09/2026." }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "cronograma-xpto-01",
+        "citation_id": "Fonte 1",
+        "title": "Cronograma do projeto XPTO",
+        "list_name": "base_atendimento",
+        "web_url": "https://mock.sharepoint.local/cronograma-xpto-01",
+        "last_modified": "2026-08-26T12:00:00Z",
+        "score": 4.2,
+        "excerpt": "O prazo do projeto XPTO e 30/09/2026.",
+        "artifact": "Cronograma do projeto XPTO",
+        "section": "base_atendimento"
+      }
+    ]
   },
   "pipeline_status": "completed"
 }
@@ -3994,17 +4004,21 @@ rota segura.
 
 | Campo | Tipo | Descrição |
 |---|---|---|
+| `contract_version` | `string` | Versão do contrato de resposta, comum a texto e áudio (`1.1.0`). |
 | `conversation_id` | `string` | Valor recebido no formulário ou UUID gerado pela API se o campo não foi enviado. |
 | `interaction_id` | `string` | UUID gerado para a interação. |
+| `trace_id` | `string \| null` | Identificador do registro de auditoria (`ai_interactions`), comum a `consulted_sources` e `audit_events`; `null` sem persistência disponível. |
 | `transcription.text` | `string` | Texto reconhecido pelo STT e enviado ao pipeline de PLN. |
 | `transcription.confidence` | `float` | Confiança retornada pelo provedor de transcrição. |
 | `transcription.duration_seconds` | `float` | Duração extraída do arquivo e arredondada para duas casas decimais. |
 | `intent` | `object` | Intenção rica derivada da transcrição: `macro`, `specific`, confianças, `flow`, `handler` e `alternatives`. |
 | `entities` | `array` | Entidades extraídas da transcrição, com tipo, valor, texto original, posição e ambiguidade. |
 | `pipeline_metrics` | `object` | Tempos em milissegundos de validação, STT, PLN, roteamento e fluxo total, usados para acompanhar o RNF05. |
-| `chat` | `object` | Resposta textual completa no mesmo contrato de `POST /api/chat`, incluindo `intent`, `entities`, fontes e métricas do pipeline. |
+| `chat` | `object` | Resposta textual completa no mesmo contrato de `POST /api/chat`, incluindo `intent`, `entities`, fontes, afirmações verificadas e métricas do pipeline. |
 | `answer.text` | `string` | Espelho compatível do texto de resposta usado pelo frontend atual. |
-| `answer.sources` | `array` | Fontes resumidas preservadas por compatibilidade. |
+| `answer.evidence_status` | `string` | `referenced` quando cada afirmação reproduz integralmente a fonte citada; `insufficient` na abstenção. |
+| `answer.claims` | `array` | Afirmações com as citações e a evidência integral que as sustenta, iguais às de `chat.claims`. |
+| `answer.sources` | `array` | Mesmos campos de `chat.sources`, com os aliases legados `artifact` (título) e `section` (localizador ou lista). |
 | `pipeline_status` | `string` | `completed` quando validação, STT e pipeline de chat terminam com resposta controlada. |
 
 ### 8.7.6 Códigos de resposta e tratamento de erro
@@ -5188,12 +5202,29 @@ A persistência é ativada por `DATABASE_URL` ou `SUPABASE_DATABASE_URL`; sem um
 dessas variáveis, a API mantém o modo local sem falhar. Autorização por perfil
 continua pendente da entrega específica.
 
-Exemplo resumido do contrato textual exposto por `POST /api/chat`:
+Exemplo resumido do contrato textual exposto por `POST /api/chat`. Cada linha
+do texto reproduz integralmente um trecho ou atributo da fonte citada, e a
+evidência que a sustenta acompanha a resposta em `claims`; sem evidência
+verificável, a resposta volta com `evidence_status: "insufficient"`. Campos,
+regras de validação e sugestão proativa estão em
+[Referências nas respostas](contrato-referencias.md).
 
 ```json
 {
-  "text": "A extensão da Linha 5-Lilás está em acompanhamento [Fonte 1].",
+  "contract_version": "1.1.0",
+  "text": "Status: Em acompanhamento [Fonte 1]",
   "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
+  "trace_id": "0d6f2c1e-4b7a-4f0e-9c3d-5a8b7e6f1d20",
+  "evidence_status": "referenced",
+  "claims": [
+    {
+      "text": "Status: Em acompanhamento",
+      "citation_ids": ["Fonte 1"],
+      "evidence": [
+        { "citation_id": "Fonte 1", "field": "attribute", "attribute": "Status", "quote": "Status: Em acompanhamento" }
+      ]
+    }
+  ],
   "intent": {
     "macro": "CONSULTA",
     "specific": "consulta_status_projeto",
@@ -5220,7 +5251,19 @@ Exemplo resumido do contrato textual exposto por `POST /api/chat`:
     "nlp_ms": 8,
     "route_ms": 35
   },
-  "sources": []
+  "sources": [
+    {
+      "id": "projetos:512",
+      "citation_id": "Fonte 1",
+      "title": "Extensão da Linha 5-Lilás",
+      "list_name": "Projetos",
+      "web_url": "https://mock.sharepoint.local/projetos/512",
+      "last_modified": "2026-08-26T12:00:00Z",
+      "score": 4.2,
+      "excerpt": "Obra em fase de sistemas.",
+      "attributes": { "Status": "Em acompanhamento" }
+    }
+  ]
 }
 ```
 

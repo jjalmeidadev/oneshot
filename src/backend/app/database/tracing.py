@@ -257,6 +257,11 @@ def _insert_consulted_sources(
 
     for order, source in enumerate(response.trace_sources, start=1):
         metadata = dict(source.get("metadata") or {})
+        metadata["evidence_status"] = response.evidence_status
+        metadata["claims"] = [
+            claim.model_dump() for claim in response.claims
+            if metadata.get("citation_id") in claim.citation_ids
+        ]
         if metadata.get("fallback"):
             continue
 
@@ -412,11 +417,16 @@ def _insert_audit_events(
                 (
                     "database_rag_sources_retrieved",
                     "database",
-                    "sucesso" if response.sources else "pendente",
+                    "sucesso" if response.sources and response.evidence_status != "insufficient" else "pendente",
                     {
                         "source_count": len(response.sources),
                         "persistent_source_count": _persistent_source_count(response),
                         "retrieval_ms": response.retrieval_ms,
+                        "provider_interaction_id": response.interaction_id,
+                        "evidence_status": response.evidence_status,
+                        "claims": [claim.model_dump() for claim in response.claims],
+                        "recommendation": response.recommendation,
+                        "sources": [source.model_dump() for source in response.sources],
                     },
                 )
             )
@@ -491,7 +501,8 @@ def _limitation_response(
 ) -> str | None:
     if error_message:
         return _safe_error_message(error_message)
-    if response and response.model in {"classificador-local", "rag-retriever"}:
+    if response and (response.evidence_status == "insufficient"
+                     or response.model in {"classificador-local", "rag-retriever"}):
         return response.text
     return None
 

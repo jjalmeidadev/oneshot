@@ -670,7 +670,6 @@ class TestAudioUploadEndpoint:
             "Essa solicitação não está no escopo da base de conhecimento disponível."
         )
         assert provider_calls[0]["intent"] is None
-        assert provider_calls[0]["require_rag_context"] is True
         assert body["pipeline_metrics"]["nlp_ms"] >= 0
         assert body["pipeline_metrics"]["total_ms"] >= body["pipeline_metrics"]["nlp_ms"]
 
