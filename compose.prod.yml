@@ -109,7 +109,7 @@ services:
     environment: *alert-environment
     networks: [app-private]
     read_only: true
-    tmpfs: [/tmp:rw,noexec,nosuid,size=64m]
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
     mem_limit: 256m
@@ -130,7 +130,7 @@ services:
     environment: *alert-environment
     networks: [app-private]
     read_only: true
-    tmpfs: [/tmp:rw,noexec,nosuid,size=64m]
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
     mem_limit: 256m
@@ -151,7 +151,7 @@ services:
     environment: *alert-environment
     networks: [app-private]
     read_only: true
-    tmpfs: [/tmp:rw,noexec,nosuid,size=64m]
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
     mem_limit: 512m
@@ -172,7 +172,7 @@ services:
     environment: *alert-environment
     networks: [app-private]
     read_only: true
-    tmpfs: [/tmp:rw,noexec,nosuid,size=64m]
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
     mem_limit: 512m

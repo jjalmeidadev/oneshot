@@ -2,11 +2,11 @@
 
 ## Arquitetura e limites
 
-A stack existente `m7-g05-mvp` em `us-east-1` tem uma EC2 `t3.large`, EBS raiz gp3 criptografado de 50 GiB, Security Group e Log Group. VPC, subnet, `LabInstanceProfile` e os repositórios ECR são externos. O frontend fica em `127.0.0.1:80` no host, o backend só na rede privada do Compose e o notebook não inicia nem é puxado por padrão. Não há entrada HTTP pública. SSH TCP/22 aceita somente o IPv4 atual do operador `/32`. O Cloudflare Tunnel, se usado na EC2, precisa de saída TCP e UDP/7844. TCP/80 e TCP/443 de saída continuam necessários ao bootstrap e runtime.
+A stack existente `m7-g05-mvp` em `us-east-1` tem uma EC2 `t3.large`, EBS raiz gp3 criptografado de 50 GiB, Security Group e Log Group. VPC, subnet, `LabInstanceProfile` e os repositórios ECR são externos. O frontend fica em `127.0.0.1:80` no host, o backend só na rede privada do Compose e o notebook não inicia nem é puxado por padrão. Não há entrada HTTP pública. SSH TCP/22 aceita somente o IPv4 atual do operador `/32`. O Cloudflare Tunnel precisa de saída TCP e UDP/7844. TCP/80 e TCP/443 são necessários ao bootstrap e runtime; TCP/5432 de saída permite a conexão PostgreSQL com o session pooler do Supabase.
 
 O User Data não recebe secrets. A instância usa a instance profile para pull ECR e logs. O `runtime.env` é transferido por SSH depois do bootstrap. A troca de `KeyName` no CloudFormation **substitui a EC2**, causando indisponibilidade; o volume raiz antigo será removido. O operador confirmou que não é necessário preservar seus artefatos.
 
-O `GroupDescription` legado (`M7/g05 SSM-only MVP; no inbound network access.`) e a tag `Name` com sufixo `-ssm-only` permanecem literalmente iguais aos do template implantado para evitar a substituição do Security Group. Esses textos históricos não descrevem as novas regras: a entrada SSH `/32` e a saída TCP/UDP 7844 estão declaradas no template. A inspeção deve rejeitar qualquer change set que proponha substituir o SG.
+O `GroupDescription` legado (`M7/g05 SSM-only MVP; no inbound network access.`) e a tag `Name` com sufixo `-ssm-only` permanecem literalmente iguais aos do template implantado para evitar a substituição do Security Group. Esses textos históricos não descrevem as regras atuais: a entrada SSH `/32` e as saídas TCP/UDP 7844 e TCP/5432 estão declaradas no template. A inspeção deve rejeitar qualquer change set que proponha substituir o SG.
 
 ## Evidência das imagens
 
@@ -18,6 +18,8 @@ Os repositórios `m7-g05-backend` e `m7-g05-frontend` usam tags imutáveis. A ta
 | Frontend | `sha256:feac52befdf953df04df75abdf1ac79b07fa6abd59f4e3b2a31169fa1d538723` |
 
 O commit da tag e o HEAD observado `bae2e9b27b70c6253fb2411bf0459d18a9f58531` tinham a árvore Git `20dfce2c29db8be07a79eb4f94ff8b5223abdec0`. Essa igualdade é evidência limitada: sozinha, não comprova como as imagens foram construídas. O deploy consulta novamente imutabilidade e tag/digest no ECR. Não há rebuild ou push nesta fase.
+
+Na atualização de 25/09/2026, a aplicação passou a usar a tag imutável `f776feb352c3556d02e83dc14eea49b0d795f6b9`. O ECR confirmou os digests `sha256:1bb49e4cfb7a83881f2b1ea5741792bc916710ec565c5659d827097bf114b497` para o backend e `sha256:ee4cd9024f63519c0f64c061f7c47fbefbeba21b660c01e3bad0bac4e8e3e317` para o frontend. O preflight deve continuar recebendo e validando a tag e os digests explicitamente em cada atualização.
 
 ## Pré-requisito PostgreSQL dos alertas
 
@@ -147,7 +149,9 @@ Revise logs antes de compartilhá-los. Não rode `docker compose config` com o r
 
 ## Quick Tunnel, rollback e encerramento
 
-**Depois** de SSH e health check, um Quick Tunnel pode rodar na EC2 com `cloudflared tunnel --url http://127.0.0.1:80`. Instale `cloudflared` somente a partir da distribuição oficial verificada; teste conectividade TCP/UDP 7844. O URL HTTPS é temporário, muda entre execuções e exige processo ativo. Faça teste real de `/health`, frontend, chat e áudio pelo URL antes de enviá-lo ao cliente. Antes de compartilhar, aplique controle de acesso, pois `/api/chat` pode consumir cota Gemini sem `Authorization`; o URL aleatório não é controle de acesso.
+**Depois** de SSH e health check, o Quick Tunnel pode rodar na EC2 com `cloudflared tunnel --no-autoupdate --protocol http2 --url http://127.0.0.1:80`. Instale `cloudflared` somente a partir da distribuição oficial verificada; teste conectividade TCP/UDP 7844. Na implantação de 25/09/2026, ele foi instalado como `m7-cloudflared-quick.service`, com usuário sem privilégios, reinício automático e proteções do systemd. Consulte o URL atual com `sudo journalctl -u m7-cloudflared-quick --no-pager | grep -Eo 'https://[^ ]+\.trycloudflare\.com' | tail -1` e confirme `systemctl is-active m7-cloudflared-quick` antes de compartilhar.
+
+O URL HTTPS é temporário, muda se o Quick Tunnel for recriado e exige o serviço ativo. Faça teste real de `/health`, frontend, chat e áudio pelo URL antes de enviá-lo ao cliente. O endpoint `/api/chat` pode consumir cota Gemini sem `Authorization`; compartilhe o endereço somente com os participantes previstos e encerre o serviço com `sudo systemctl disable --now m7-cloudflared-quick` ao fim da avaliação.
 
 `scripts/aws/rollback.ps1` faz preflight somente leitura por padrão: recebe InstanceId, tags e digests anteriores, EcrRegistryUri e PrivateKeyPath, valida EC2 e ECR. Para executar por SSH, use `-ExecuteRollback -ConfirmRollback` e confirme a operação. O wrapper remoto troca somente tags não secretas, puxa as imagens, inicia Compose e requer verificação posterior de `/health` e containers. `ssm:StartSession` e `ssm:SendCommand` não fazem parte do fluxo.
 

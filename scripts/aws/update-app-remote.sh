@@ -15,6 +15,7 @@ compose=/opt/m7/compose.prod.yml
 deploy=/etc/m7/deploy.env
 runtime=/etc/m7/runtime.env
 agent=/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+active_agent=/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d/file_amazon-cloudwatch-agent.json
 services=(rabbitmq backend frontend scheduler publisher evaluator notifier)
 
 cleanup_stage() {
@@ -58,7 +59,14 @@ chmod 0700 "$backup"
 install -o root -g root -m 0644 "$compose" "$backup/compose.prod.yml"
 install -o root -g root -m 0600 "$deploy" "$backup/deploy.env"
 install -o root -g root -m 0600 "$runtime" "$backup/runtime.env"
-install -o root -g root -m 0644 "$agent" "$backup/cloudwatch-agent.json"
+if test -f "$agent"; then
+  install -o root -g root -m 0644 "$agent" "$backup/cloudwatch-agent.json"
+elif test -f "$active_agent"; then
+  install -o root -g root -m 0644 "$active_agent" "$backup/cloudwatch-agent.json"
+else
+  echo 'Existing CloudWatch Agent configuration is unavailable.' >&2
+  exit 64
+fi
 trap rollback ERR
 trap cleanup_stage EXIT
 

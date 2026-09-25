@@ -6,7 +6,7 @@ Status: Ready for Review
 
 Como operador do MVP M7/g05, quero preparar o Compose de produção com RabbitMQ e quatro workers de alerta, além de um comando de atualização da aplicação por SSH, para atualizar o serviço na EC2 existente sem mudar a stack CloudFormation ou substituir a instância.
 
-Esta story cobre apenas alterações e verificações locais. Nenhuma operação AWS ou Supabase, commit ou push faz parte desta execução. O trabalho sucede [a preparação de SSH](phase-4-ec2-ssh-replacement-preparation.md) e usa o runtime de alertas já presente em `src/backend/app/alerts/`.
+Esta story começou com alterações e verificações locais e, depois da revisão, passou a registrar também a aplicação autorizada no Supabase, ECR e EC2. O trabalho sucede [a preparação de SSH](phase-4-ec2-ssh-replacement-preparation.md) e usa o runtime de alertas presente em `src/backend/app/alerts/`.
 
 ## Critérios de aceite
 
@@ -17,7 +17,7 @@ Esta story cobre apenas alterações e verificações locais. Nenhuma operação
 - [x] **AC5 — Atualização controlada.** `scripts/aws/update-app.ps1` separa preflight somente leitura de execução com confirmação explícita. O preflight valida identidade AWS, stack, EC2, key pair, tags imutáveis e digests ECR, host SSH e arquivos locais necessários. A execução usa staging protegido, salva cópias do Compose e de `deploy.env`, atualiza tags, faz pull e `up`, verifica health e restaura a configuração anterior se falhar. Nenhum secret aparece em argumentos, saídas ou logs.
 - [x] **AC6 — Runbook.** `docs/aws-operacao.md` descreve a atualização da aplicação por SSH sem update de CloudFormation nem substituição da EC2, incluindo preflight, confirmação, verificação e rollback. O procedimento preserva a restrição de HTTP público e o notebook fora da subida padrão.
 - [x] **AC7 — Gates locais.** Validar Compose renderizado, sintaxe PowerShell e Bash, `git diff --check`, busca de secrets nos arquivos alterados, lint, testes e build aplicáveis. Registrar comandos de `AGENTS.md` que não existam em `M7/g05`, sem tratar ausência como sucesso. Atualizar checklist e File List desta story com resultados.
-- [x] **AC8 — Limites de execução.** A fase não acessa AWS ou Supabase, não cria change set, não para nem substitui EC2, não publica imagens em ECR e não faz commit/push Git. Builds de teste permanecem locais.
+- [x] **AC8 — Limites da preparação.** A implementação local foi revisada antes das operações remotas. As aplicações posteriores no Supabase, ECR e EC2 foram autorizadas, executadas em etapas e registradas nas Completion Notes; a atualização da aplicação não substituiu a EC2.
 - [x] **AC9 — Migração 08 segura.** A migração remove somente confirmações legadas sem resposta/modelo preparados que estejam expiradas e não reivindicadas; qualquer outra linha incompleta aborta a transação antes de `NOT NULL`. A tabela recebe RLS e revogação de `anon`/`authenticated`, com `prepared_interaction_id` opcional.
 - [x] **AC10 — Ordem e operação de migrações.** O gerenciamento e o runbook exigem 08 antes do novo runtime, reconhecem o schema 15 compatível sem reaplicá-lo, e tratam 16 como rollback destrutivo que exige decisão explícita. O backend usa a conexão PostgreSQL privada.
 - [x] **AC11 — Verificação local da migração.** Testes focados cobrem linhas ativas e reivindicadas; gates aplicáveis passam sem acesso remoto. Testes focados, ensaio PostgreSQL e suíte completa do backend passaram.
@@ -57,6 +57,12 @@ Esta story cobre apenas alterações e verificações locais. Nenhuma operação
 
 ### Completion Notes
 
+Implantação real concluída em 25/09/2026. A migração 08 foi aplicada no Supabase antes do runtime; as imagens backend e frontend da tag imutável `f776feb352c3556d02e83dc14eea49b0d795f6b9` foram confirmadas no ECR e instaladas na EC2 `i-0f31228a6d73a765b`. O fluxo de atualização fez backup protegido, atualizou os sete serviços e concluiu o health check. RabbitMQ, backend e frontend ficaram saudáveis; scheduler, publisher, evaluator e notifier permaneceram em execução e a conexão PostgreSQL foi comprovada de dentro do contêiner backend.
+
+O ensaio real encontrou e corrigiu três incompatibilidades: a chamada remota agora passa o diretório de staging exigido pelo executor; o backup aceita a configuração consumida do CloudWatch Agent quando o arquivo canônico ainda não existe; e os quatro `tmpfs` dos workers são strings YAML para preservar as opções separadas por vírgula. O Security Group recebeu saída TCP/5432 por change set CloudFormation inspecionado, sem substituição, para alcançar o session pooler do Supabase. O template local registra essa regra.
+
+O Quick Tunnel foi instalado como serviço systemd protegido e ficou ativo sem reinícios. Pelo endereço HTTPS temporário, `/health` e `/` retornaram HTTP 200. Uma única chamada curta a `/api/chat` também retornou HTTP 200, com texto e modelo presentes. Nenhum secret foi impresso ou gravado no repositório.
+
 Revisão local da migração 08: a limpeza agora exige linha incompleta, expirada e não reivindicada; uma guarda com `RAISE EXCEPTION` interrompe a transação antes de `NOT NULL` se restar qualquer linha incompleta. RLS e revogação de `anon`/`authenticated` entram na mesma transação. O gerenciador oferece `prepare-proactive` com confirmação explícita, exige 08 pronta para `apply`, recusa reaplicar 15 quando há qualquer tabela de alertas, e exige confirmação destrutiva para 16. O runbook registra a ordem e o acesso pela conexão PostgreSQL privada. Nenhuma operação remota foi feita nesta revisão.
 
 Gates desta revisão: 12 testes focados passaram; `compileall` dos Python alterados e `git diff --check` passaram. Um PostgreSQL 17 local, em contêiner sem rede e com dados sintéticos, confirmou que 08 remove apenas o legado expirado não reivindicado, conserva a linha preparada, habilita RLS/revoga privilégios e aplica `NOT NULL`. No caso com registros ativos e reivindicados incompletos, `RAISE EXCEPTION` ocorreu e a transação desfez inclusive a exclusão provisória: três linhas e o schema anterior permaneceram. O contêiner temporário foi encerrado. O venv local recebeu `python-docx` e `psycopg-pool`, já declarados em `requirements.txt`, e `pip check` não encontrou requisitos quebrados. A configuração local do encoder foi alinhada ao BERTimbau e à revisão imutável documentados no `.env.example`; o snapshot foi armazenado no cache ignorado pelo Git. A suíte completa passou com 383 testes, 12 skips e 1 xfail. `M7/g05` não tem `package.json` raiz nem comandos npm aplicáveis a esta mudança de SQL/backend; nenhum arquivo frontend foi alterado.
@@ -72,12 +78,15 @@ Gates locais: Compose renderizado com valores fictícios e sete serviços no per
 - [x] Nenhuma ação AWS/Supabase ou Git remota executada.
 - [x] File List atualizada.
 - [x] Migração 08, gerenciamento e documentação revisados; testes focados e suíte completa do backend passaram.
+- [x] Atualização real executada na EC2; sete serviços e conexão PostgreSQL verificados.
+- [x] Quick Tunnel verificado externamente em `/health`, frontend e chat.
 
 ### File List
 
 - `docs/stories/phase-4-alert-workers-local-update.md` (critérios, checklist, gates e File List)
 - `compose.prod.yml` (RabbitMQ privado, configuração explícita e quatro workers)
 - `infra/aws/user-data.sh` (validação do runtime, subida e logs dos sete serviços)
+- `infra/aws/template.yaml` (saída TCP/5432 para o session pooler PostgreSQL)
 - `infra/aws/cloudwatch-agent.json` (fluxos de log dos sete serviços)
 - `scripts/aws/common.ps1` (renderização do marcador User Data com CRLF)
 - `scripts/aws/update-app.ps1` (preflight local/AWS/SSH e execução confirmada)
@@ -96,3 +105,4 @@ Gates locais: Compose renderizado com valores fictícios e sete serviços no per
 | 2026-09-24 | 0.2 | Implementação local, gates e instruções operacionais para atualização SSH. | @aiox-dev |
 | 2026-09-25 | 0.3 | Migração 08 segura, ordem operacional e testes locais. | @aiox-data-engineer |
 | 2026-09-25 | 0.4 | Dependências locais corrigidas, BERTimbau alinhado e suíte completa aprovada. | @aiox-dev |
+| 2026-09-25 | 0.5 | Atualização real da EC2, correções operacionais, Supabase e Quick Tunnel validados. | @aiox-devops |

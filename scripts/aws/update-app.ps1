@@ -139,7 +139,7 @@ try {
     $knownHost = Assert-CommandSucceeded -Program $sshKeygen.Source -Arguments @('-F',$ip) -Failure 'Current SSH host key is not in known_hosts; verify it independently first.'
     if ([string]::IsNullOrWhiteSpace($knownHost)) { throw 'Current SSH host key is not in known_hosts.' }
     $sshArgs = @('-i',$PrivateKeyPath,'-o','BatchMode=yes','-o','IdentitiesOnly=yes','-o','StrictHostKeyChecking=yes','-o','ConnectTimeout=10',"ubuntu@$ip")
-    $null = Assert-CommandSucceeded -Program $ssh.Source -Arguments ($sshArgs + @('sudo -n test -f /etc/m7/deploy.env && sudo -n test -f /etc/m7/runtime.env && sudo -n test -f /opt/m7/compose.prod.yml && sudo -n test -f /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json')) -Failure 'SSH host or required remote files are unavailable.'
+    $null = Assert-CommandSucceeded -Program $ssh.Source -Arguments ($sshArgs + @('sudo -n test -f /etc/m7/deploy.env && sudo -n test -f /etc/m7/runtime.env && sudo -n test -f /opt/m7/compose.prod.yml && (sudo -n test -f /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json || sudo -n test -f /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d/file_amazon-cloudwatch-agent.json)')) -Failure 'SSH host or required remote files are unavailable.'
     Write-Output "Read-only preflight passed for stack m7-g05-mvp and instance $InstanceId. Images and digests match; SSH host is trusted."
     if ($Action -eq 'Preflight') { Write-Output 'No files transferred and no remote mutation performed.'; return }
 
@@ -151,7 +151,7 @@ try {
         foreach ($file in @(@{Local=(Join-Path $script:AwsRepoRoot 'compose.prod.yml');Remote='compose.prod.yml'},@{Local=$runtimePath;Remote='runtime.env'},@{Local=(Join-Path $script:AwsRepoRoot 'infra/aws/cloudwatch-agent.json');Remote='cloudwatch-agent.json'},@{Local=(Join-Path $PSScriptRoot 'update-app-remote.sh');Remote='update-app-remote.sh'})) {
             $null = Assert-CommandSucceeded -Program $scp.Source -Arguments @('-i',$PrivateKeyPath,'-o','BatchMode=yes','-o','IdentitiesOnly=yes','-o','StrictHostKeyChecking=yes','-q',$file.Local,"ubuntu@${ip}:$stage/$($file.Remote)") -Failure 'Protected stage transfer failed.'
         }
-        $null = Assert-CommandSucceeded -Program $ssh.Source -Arguments ($sshArgs + @("sudo -n bash $stage/update-app-remote.sh $BackendImageTag $FrontendImageTag")) -Failure 'Remote update failed; inspect root-only backup and container health before retrying.'
+        $null = Assert-CommandSucceeded -Program $ssh.Source -Arguments ($sshArgs + @("sudo -n bash $stage/update-app-remote.sh $stage $BackendImageTag $FrontendImageTag")) -Failure 'Remote update failed; inspect root-only backup and container health before retrying.'
         Write-Output 'Remote update and health check completed. Review /health and alert workflow before sharing the service.'
     } finally {
         if ($stage -match '^/home/ubuntu/\.m7-update-[A-Za-z0-9]+$') {
