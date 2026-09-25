@@ -98,7 +98,7 @@ function Get-M7RenderedTemplate {
     $userData = $userData.Replace('__CLOUDWATCH_AGENT_BASE64__', $agentBase64)
 
     $indentUserData = (($userData -split '\r?\n') | ForEach-Object { "            $_" }) -join "`n"
-    $stubPattern = '(?m)^            echo "This template source must be rendered with scripts/aws/deploy\.ps1\." >&2\r?\n            exit 64[ \t]*$'
+    $stubPattern = '(?m)^            echo "This template source must be rendered with scripts/aws/deploy\.ps1\." >&2\r?\n            exit 64[ \t]*\r?$'
     $stubMatch = [regex]::Match($template, $stubPattern)
     if (-not $stubMatch.Success) {
         throw 'CloudFormation UserData render marker is missing or has changed.'

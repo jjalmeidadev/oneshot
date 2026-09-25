@@ -19,7 +19,37 @@ Os repositórios `m7-g05-backend` e `m7-g05-frontend` usam tags imutáveis. A ta
 
 O commit da tag e o HEAD observado `bae2e9b27b70c6253fb2411bf0459d18a9f58531` tinham a árvore Git `20dfce2c29db8be07a79eb4f94ff8b5223abdec0`. Essa igualdade é evidência limitada: sozinha, não comprova como as imagens foram construídas. O deploy consulta novamente imutabilidade e tag/digest no ECR. Não há rebuild ou push nesta fase.
 
-## Janela de troca: preflight e change set
+## Atualização da aplicação na EC2 existente
+
+Depois da substituição da EC2, atualizações de Compose e imagens da aplicação usam `scripts/aws/update-app.ps1` por SSH. Esse fluxo não cria change set, não altera CloudFormation e não substitui a instância. Passe o `InstanceId` atual obtido da stack, a chave privada correspondente à key pair importada, tags e digests imutáveis que já existam no ECR e um `runtime.env` protegido fora do repositório. A atualização local desta story não cria nem publica essas imagens. Antes de uma janela real, confirme que a imagem backend escolhida contém `app.alerts.worker` e que o esquema de alertas no banco está aplicado; o health check HTTP não prova o fluxo de alertas.
+
+O `runtime.env` deve conter as variáveis já exigidas para Gemini e Azure Speech, além de `DATABASE_URL` **ou** `SUPABASE_DATABASE_URL`, `ALERT_CONFIRMATION_SECRET`, `RABBITMQ_USER`, `RABBITMQ_PASSWORD`, `RABBITMQ_URL`, `DATABASE_POOL_MAX_SIZE` e `DATABASE_STATEMENT_TIMEOUT_MS`. Use uma URL `amqp://` com host `rabbitmq`, porta 5672 e usuário/senha compatíveis com `RABBITMQ_USER` e `RABBITMQ_PASSWORD`; escolha usuário diferente de `guest` e codifique caracteres reservados da senha na URL. Não inclua `AWS_*`. O Compose injeta explicitamente as variáveis em API e workers; `--env-file` sozinho apenas fornece valores para interpolação. O broker usa a imagem `rabbitmq:4.1.8-alpine`, volume persistente e somente `app-private`, sem publicação de 5672 ou 15672. Scheduler, publisher, evaluator e notifier usam a mesma imagem backend; o notebook continua fora da subida padrão.
+
+Exemplo sem valores sensíveis na linha de comando:
+
+```powershell
+$update = @{
+  InstanceId = '<INSTANCE_ID_ATUAL_DA_STACK>'
+  PrivateKeyPath = '<CHAVE_PRIVADA_FORA_DO_REPO>'
+  RuntimeEnvPath = '<RUNTIME_ENV_PROTEGIDO_FORA_DO_REPO>'
+  EcrRegistryUri = '<CONTA>.dkr.ecr.us-east-1.amazonaws.com'
+  BackendImageTag = '<SHA40_BACKEND>'
+  FrontendImageTag = '<SHA40_FRONTEND>'
+  BackendImageDigest = 'sha256:<DIGEST_BACKEND>'
+  FrontendImageDigest = 'sha256:<DIGEST_FRONTEND>'
+}
+.\scripts\aws\update-app.ps1 @update
+# Somente na janela autorizada, após revisar o preflight:
+.\scripts\aws\update-app.ps1 @update -Action Execute -ConfirmUpdate
+```
+
+O preflight consulta STS, stack, EC2, key pair e ECR em leitura, renderiza o Compose localmente sem imprimi-lo, confirma a host key previamente registrada em `known_hosts` e testa acesso SSH somente em leitura. Verifique o fingerprint da host key por canal independente antes do primeiro SSH; não use `StrictHostKeyChecking=no`. O modo Execute exige `-ConfirmUpdate` e confirmação PowerShell. Ele cria um staging remoto privado, transfere Compose, `runtime.env`, configuração do CloudWatch Agent e o executor remoto, salva backup root-only do Compose, `deploy.env`, runtime e configuração anterior, atualiza tags, faz pull, inicia os sete serviços e verifica `/health` e processos. Em falha, restaura os arquivos anteriores e tenta voltar os containers à configuração salva. Verifique o estado manualmente antes de qualquer nova tentativa. O backup contém secrets e permanece root-only para recuperação controlada.
+
+Após sucesso, confirme por SSH `sudo /usr/local/bin/m7-compose ps` e `curl --fail --silent --output /dev/null http://127.0.0.1:80/health`, além de um fluxo de alerta com dados sintéticos. Os logs locais e o CloudWatch Agent cobrem backend, frontend, RabbitMQ e quatro workers; revise-os antes de compartilhar qualquer trecho. O CloudWatch Agent da EC2 existente é atualizado pelo script de aplicação, pois editar User Data local não o reaplica à instância atual. Não rode `docker compose config` sem `--quiet` com runtime real em terminal, porque a configuração renderizada contém secrets.
+
+## Histórico da troca da EC2: preflight e change set
+
+Esta seção registra o procedimento da substituição já concluída. Para atualizar somente a aplicação na EC2 existente, use a seção anterior e não execute os change sets históricos.
 
 Renove as credenciais temporárias em `src/backend/.env`; o helper carrega só as quatro variáveis AWS no processo e não imprime valores. Reconsulte stack, EC2, Key Pair, VPC, subnet, rota, AMI, ECR e permissões. Consulte o IPv4 público **atual** do operador, forme `/32`, e não use endereços de relatórios antigos. Confirme saldo e cota do Learner Lab para substituição. Confirme também que a chave pública importada `m7-g05-learner-lab-2026` corresponde à privada local. A simulação IAM não prova que a execução real será aceita.
 
@@ -55,7 +85,7 @@ $deploy = @{
 3. Depois que estiver `CREATE_COMPLETE/AVAILABLE`, rode `-Action InspectChangeSet -ChangeSetName <NOME>`. A inspeção exige a substituição de `ApplicationInstance` por `KeyName`, atualização **sem substituição** de `ApplicationSecurityGroup`, CIDR ainda atual e nenhum outro recurso. Confira os detalhes antes de avançar. Se houver mudança inesperada, pare.
 4. Somente na janela autorizada, em **nova invocação**, rode `-Action ExecuteChangeSet -ChangeSetName <NOME> -ConfirmExecution`. O script consulta novamente o change set e pede confirmação PowerShell. Acompanhe eventos da stack e obtenha o novo InstanceId e IPv4 pela EC2; outputs antigos podem estar defasados.
 
-O change set `m7-g05-ssh-9435a35c3cb34a9e8c3459965ade114c`, criado com o template anterior, é **OBSOLETO**: ele propõe substituir também `ApplicationSecurityGroup` porque alterou `GroupDescription`. Ele estava `CREATE_COMPLETE/AVAILABLE` e não executado na última consulta. Editar arquivos locais não altera esse change set. Não o execute; a próxima etapa operacional é criar e inspecionar um **novo** change set com o template corrigido, mediante autorização específica. Não coloque secrets em parâmetros, tags, User Data, linha de comando ou logs.
+O change set `m7-g05-ssh-9435a35c3cb34a9e8c3459965ade114c`, criado com o template anterior, é **OBSOLETO**: ele propõe substituir também `ApplicationSecurityGroup` porque alterou `GroupDescription`. Ele não foi executado. O change set corrigido `m7-g05-ssh-d2fa39877cc7478292ca37fac513d12a` concluiu a substituição da EC2; não o execute novamente. A operação corrente de aplicação usa SSH e não requer novo change set. Não coloque secrets em parâmetros, tags, User Data, linha de comando ou logs.
 
 ## Bootstrap e acesso SSH
 

@@ -20,6 +20,31 @@
             "file_path": "/var/log/m7/frontend.log",
             "log_group_name": "/m7/g05/__STACK_NAME__",
             "log_stream_name": "{instance_id}/frontend"
+          },
+          {
+            "file_path": "/var/log/m7/rabbitmq.log",
+            "log_group_name": "/m7/g05/__STACK_NAME__",
+            "log_stream_name": "{instance_id}/rabbitmq"
+          },
+          {
+            "file_path": "/var/log/m7/scheduler.log",
+            "log_group_name": "/m7/g05/__STACK_NAME__",
+            "log_stream_name": "{instance_id}/scheduler"
+          },
+          {
+            "file_path": "/var/log/m7/publisher.log",
+            "log_group_name": "/m7/g05/__STACK_NAME__",
+            "log_stream_name": "{instance_id}/publisher"
+          },
+          {
+            "file_path": "/var/log/m7/evaluator.log",
+            "log_group_name": "/m7/g05/__STACK_NAME__",
+            "log_stream_name": "{instance_id}/evaluator"
+          },
+          {
+            "file_path": "/var/log/m7/notifier.log",
+            "log_group_name": "/m7/g05/__STACK_NAME__",
+            "log_stream_name": "{instance_id}/notifier"
           }
         ]
       }

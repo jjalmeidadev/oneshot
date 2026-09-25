@@ -1,14 +1,33 @@
+x-backend-image: &backend-image ${BACKEND_IMAGE:-m7-g05-backend}:${BACKEND_IMAGE_TAG:-${APP_IMAGE_TAG:-local}}
+x-alert-environment: &alert-environment
+  ALERT_REPOSITORY_MODE: database
+  ALERT_SCHEDULE_SOURCE: database
+  DATABASE_URL: "${DATABASE_URL:-}"
+  SUPABASE_DATABASE_URL: "${SUPABASE_DATABASE_URL:-}"
+  DATABASE_POOL_ENABLED: "${DATABASE_POOL_ENABLED:-1}"
+  DATABASE_POOL_MAX_SIZE: "${DATABASE_POOL_MAX_SIZE:-5}"
+  DATABASE_STATEMENT_TIMEOUT_MS: "${DATABASE_STATEMENT_TIMEOUT_MS:-5000}"
+  ALERT_CONFIRMATION_SECRET: "${ALERT_CONFIRMATION_SECRET:-}"
+  RABBITMQ_URL: "${RABBITMQ_URL:-}"
+  ALERT_DATA_FRESHNESS_DAYS: "${ALERT_DATA_FRESHNESS_DAYS:-45}"
+  ALERT_SCHEDULER_INTERVAL_SECONDS: "${ALERT_SCHEDULER_INTERVAL_SECONDS:-60}"
+  ALERT_OUTBOX_POLL_SECONDS: "${ALERT_OUTBOX_POLL_SECONDS:-2}"
+
 services:
   backend:
     build:
       context: .
       dockerfile: src/backend/Dockerfile
       target: runtime
-    image: ${BACKEND_IMAGE:-m7-g05-backend}:${BACKEND_IMAGE_TAG:-${APP_IMAGE_TAG:-local}}
+    image: *backend-image
     restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     expose:
       - "8000"
     environment:
+      <<: *alert-environment
       PLN_WARMUP: "1"
       REPORT_EXECUTION_MODE: local
       REPORT_REPOSITORY_MODE: memory
@@ -52,6 +71,115 @@ services:
       options:
         max-size: 10m
         max-file: "3"
+
+  rabbitmq:
+    image: rabbitmq:4.1.8-alpine
+    hostname: m7-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER:-}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASSWORD:-}"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - app-private
+    mem_limit: 512m
+    cpus: 0.5
+    healthcheck:
+      test: [CMD, rabbitmq-diagnostics, -q, ping]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 6
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  scheduler:
+    image: *backend-image
+    command: [python, -m, app.alerts.worker, scheduler]
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment: *alert-environment
+    networks: [app-private]
+    read_only: true
+    tmpfs: [/tmp:rw,noexec,nosuid,size=64m]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    mem_limit: 256m
+    cpus: 0.25
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
+
+  publisher:
+    image: *backend-image
+    command: [python, -m, app.alerts.worker, publisher]
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment: *alert-environment
+    networks: [app-private]
+    read_only: true
+    tmpfs: [/tmp:rw,noexec,nosuid,size=64m]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    mem_limit: 256m
+    cpus: 0.25
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
+
+  evaluator:
+    image: *backend-image
+    command: [python, -m, app.alerts.worker, evaluator]
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment: *alert-environment
+    networks: [app-private]
+    read_only: true
+    tmpfs: [/tmp:rw,noexec,nosuid,size=64m]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    mem_limit: 512m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
+
+  notifier:
+    image: *backend-image
+    command: [python, -m, app.alerts.worker, notifier]
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment: *alert-environment
+    networks: [app-private]
+    read_only: true
+    tmpfs: [/tmp:rw,noexec,nosuid,size=64m]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    mem_limit: 512m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
 
   frontend:
     build:
@@ -138,3 +266,4 @@ networks:
 volumes:
   report-artifacts:
   notebook-workspace:
+  rabbitmq-data:

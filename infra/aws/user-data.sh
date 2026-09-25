@@ -80,7 +80,7 @@ if grep -Eq '^[[:space:]]*(export[[:space:]]+)?AWS_[A-Za-z0-9_]*[[:space:]]*=' "
   echo 'Runtime configuration must not contain AWS_* assignments.' >&2
   exit 64
 fi
-for name in GEMINI_API_KEY AZURE_SPEECH_KEY AZURE_SPEECH_TIMEOUT_SECONDS AZURE_SPEECH_MAX_ATTEMPTS AUDIO_SIMULATED_IDENTITIES REPORT_SIMULATED_IDENTITIES; do
+for name in GEMINI_API_KEY AZURE_SPEECH_KEY AZURE_SPEECH_TIMEOUT_SECONDS AZURE_SPEECH_MAX_ATTEMPTS AUDIO_SIMULATED_IDENTITIES REPORT_SIMULATED_IDENTITIES ALERT_CONFIRMATION_SECRET RABBITMQ_USER RABBITMQ_PASSWORD RABBITMQ_URL DATABASE_POOL_MAX_SIZE DATABASE_STATEMENT_TIMEOUT_MS; do
   if ! grep -Eq "^$name=.+" "$RUNTIME_FILE"; then
     echo "Runtime configuration is missing a required variable: $name" >&2
     exit 64
@@ -90,9 +90,35 @@ if ! grep -Eq '^AZURE_SPEECH_RESOURCE=.+|^AZURE_SPEECH_ENDPOINT=.+' "$RUNTIME_FI
   echo 'Runtime configuration needs AZURE_SPEECH_RESOURCE or AZURE_SPEECH_ENDPOINT.' >&2
   exit 64
 fi
-/usr/local/bin/m7-compose up -d --no-build
-systemctl enable m7-container-logs@backend.service m7-container-logs@frontend.service
-systemctl restart m7-container-logs@backend.service m7-container-logs@frontend.service
+if ! grep -Eq '^(DATABASE_URL|SUPABASE_DATABASE_URL)=.+' "$RUNTIME_FILE"; then
+  echo 'Runtime configuration needs DATABASE_URL or SUPABASE_DATABASE_URL.' >&2
+  exit 64
+fi
+# Keep the rendered configuration in memory because it includes secrets.
+if ! /usr/local/bin/m7-compose config --format json | python3 -c '
+import json, sys
+from urllib.parse import unquote, urlsplit
+try:
+    services = json.load(sys.stdin)["services"]
+    broker = services["rabbitmq"]["environment"]
+    url = urlsplit(services["backend"]["environment"]["RABBITMQ_URL"])
+    valid = (url.scheme == "amqp" and url.hostname == "rabbitmq"
+             and url.port == 5672
+             and broker["RABBITMQ_DEFAULT_USER"] != "guest"
+             and unquote(url.username or "") == broker["RABBITMQ_DEFAULT_USER"]
+             and unquote(url.password or "") == broker["RABBITMQ_DEFAULT_PASS"])
+except (KeyError, ValueError, TypeError, json.JSONDecodeError):
+    valid = False
+sys.exit(0 if valid else 1)
+'; then
+  echo 'RabbitMQ URL and broker credentials do not match.' >&2
+  exit 64
+fi
+/usr/local/bin/m7-compose up -d --no-build rabbitmq backend frontend scheduler publisher evaluator notifier
+for service in backend frontend rabbitmq scheduler publisher evaluator notifier; do
+  systemctl enable "m7-container-logs@$service.service"
+  systemctl restart "m7-container-logs@$service.service"
+done
 EOF
 chmod 0750 /usr/local/bin/m7-compose-up
 
@@ -156,9 +182,10 @@ systemctl daemon-reload
 
 docker volume create m7_report-artifacts >/dev/null
 docker volume create m7_notebook-workspace >/dev/null
+docker volume create m7_rabbitmq-data >/dev/null
 
 # The helper uses the EC2 instance profile and does not persist a docker login token.
 export AWS_ECR_DISABLE_CACHE=true
-/usr/local/bin/m7-compose pull backend frontend
+/usr/local/bin/m7-compose pull backend frontend rabbitmq
 
 echo 'Bootstrap completed. The notebook image was intentionally not pulled. Transfer protected runtime configuration over SSH, install it as root:root mode 0600, then run m7-compose-up.'
