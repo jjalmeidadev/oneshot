@@ -1,14 +1,15 @@
 """Recuperacao RAG em PostgreSQL/Supabase sobre extratos consultaveis."""
 
 from collections.abc import Callable, Iterable
+from dataclasses import dataclass
 import os
-import re
 
 from app.database.connection import (
     DatabaseConfigurationError,
     DatabaseConnectionError,
     open_database_connection,
 )
+from app.nlp.entities import PROJECT_CODE_PATTERN
 from app.nlp.schemas import AudioIntent, PublicEntity
 from app.rag.sharepoint import (
     RetrievedDocument,
@@ -30,7 +31,12 @@ entity_terms AS (
     SELECT unnest(%s::text[]) AS term
 ),
 requested_projects AS (
-    SELECT unnest(%s::text[]) AS term
+    SELECT p.id
+    FROM public.projects p
+    JOIN (SELECT unnest(%s::text[]) AS term) requested
+        ON lower(p.code) = lower(requested.term)
+        OR lower(p.title) = lower(requested.term)
+        OR lower(p.id::text) = lower(requested.term)
 )
 SELECT
     se.id::text AS extract_id,
@@ -107,12 +113,7 @@ WHERE
     COALESCE(a.metadata ->> 'mock', se.metadata ->> 'mock') = 'true'
     AND (
         NOT EXISTS (SELECT 1 FROM requested_projects)
-        OR EXISTS (
-            SELECT 1 FROM requested_projects
-            WHERE lower(p.code) = lower(requested_projects.term)
-               OR lower(p.title) = lower(requested_projects.term)
-               OR lower(p.id::text) = lower(requested_projects.term)
-        )
+        OR COALESCE(se.project_id, a.project_id) IN (SELECT id FROM requested_projects)
     )
     AND (
         EXISTS (
@@ -172,15 +173,16 @@ def retrieve_database_context(
                     (
                         query_terms,
                         entity_terms,
-                        sorted(project_scope),
+                        project_scope.terms,
                         specific_intent,
                         specific_intent,
                         specific_intent,
                         result_limit,
                     ),
                 )
-                return [result for row in cursor.fetchall()
-                        if _matches_project_scope(result := _row_to_result(row), project_scope)]
+                return project_scope.apply(
+                    [_row_to_result(row) for row in cursor.fetchall()]
+                )
         finally:
             connection.close()
     except DatabaseConfigurationError:
@@ -202,28 +204,56 @@ def retrieve_context(
         from app.rag.sharepoint import retrieve_sharepoint_context
 
         scope = _requested_projects(query, entities)
-        results = retrieve_sharepoint_context(query, limit=limit)
-        return [result for result in results if _matches_project_scope(result, scope)]
+        return scope.apply(retrieve_sharepoint_context(query, limit=limit))
 
     return retrieve_database_context(query, intent=intent, entities=entities, limit=limit)
 
 
-def _requested_projects(query: str, entities: Iterable[PublicEntity]) -> set[str]:
+@dataclass(frozen=True)
+class _ProjectScope:
+    """Projetos pedidos na pergunta.
+
+    Codigo explicito restringe sempre: projeto inexistente resulta em
+    abstencao, nunca em fonte de outro projeto. Nome vindo do lexico do NER
+    (linha, estacao, programa) so restringe quando corresponde a um projeto
+    cadastrado; caso contrario continua apenas pontuando a busca.
+    """
+
+    codes: frozenset[str] = frozenset()
+    names: frozenset[str] = frozenset()
+
+    @property
+    def terms(self) -> list[str]:
+        return sorted(self.codes | self.names)
+
+    def apply(self, results: list[RetrievedDocument]) -> list[RetrievedDocument]:
+        if self.codes:
+            return [result for result in results if _project_identifiers(result) & self.codes]
+        if self.names:
+            matching = [result for result in results if _project_identifiers(result) & self.names]
+            return matching or results
+        return results
+
+
+def _requested_projects(query: str, entities: Iterable[PublicEntity]) -> _ProjectScope:
     # Codigos explicitos funcionam inclusive com classificador desabilitado.
-    codes = set(re.findall(r"(?<!\w)[a-z]{3,}-\d{3,}(?!\w)", query.casefold()))
-    if codes:
-        return codes
-    return {entity.value.strip().casefold() for entity in entities
-            if entity.type == "projeto" and entity.value.strip()}
+    codes = set(PROJECT_CODE_PATTERN.findall(query.casefold()))
+    names = set()
+    for entity in entities:
+        value = entity.value.strip().casefold()
+        if entity.type != "projeto" or not value:
+            continue
+        if PROJECT_CODE_PATTERN.fullmatch(value):
+            codes.add(value)
+        else:
+            names.add(value)
+    return _ProjectScope(codes=frozenset(codes), names=frozenset(names))
 
 
-def _matches_project_scope(result: RetrievedDocument, scope: set[str]) -> bool:
-    if not scope:
-        return True
+def _project_identifiers(result: RetrievedDocument) -> set[str]:
     document = result.document
-    identifiers = {value.strip().casefold() for value in (
+    return {value.strip().casefold() for value in (
         document.project_id, document.project_code, document.project_title) if value}
-    return bool(scope & identifiers)
 
 
 def _expand_query_terms(query: str, intent: AudioIntent | None) -> set[str]:

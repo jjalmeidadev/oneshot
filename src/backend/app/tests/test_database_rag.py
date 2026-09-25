@@ -305,3 +305,33 @@ def test_absent_project_never_uses_another_projects_source(monkeypatch):
 
 def test_local_fallback_without_project_identity_abstains():
     assert retrieve_context("Status e bicicleta no PRJ-0017") == []
+
+
+def test_project_name_outside_the_register_keeps_other_sources(monkeypatch):
+    # "Linha 2-Verde" vem do lexico do NER, mas nao e um projeto cadastrado.
+    monkeypatch.setenv("DATABASE_URL", "postgresql://synthetic:synthetic@example.test/test")
+    rows = [dict(extract_id="extract-1", artifact_title="Transporte de bicicleta",
+                 content_text="Bicicletas sao aceitas aos sabados.", extract_metadata={}, score=4)]
+    connect, connection = _connect_with_rows(rows)
+    results = retrieve_database_context(
+        "Posso levar bicicleta?", entities=[_entity("Linha 2-Verde")], connect=connect)
+    assert [result.document.title for result in results] == ["Transporte de bicicleta"]
+    assert connection.cursor_instance.params[2] == ["linha 2-verde"]
+
+
+def test_registered_project_name_restricts_sources(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://synthetic:synthetic@example.test/test")
+    rows = [dict(extract_id=f"extract-{index}", project_id=f"project-{index}",
+                 project_code=f"PRJ-000{index}", project_title=title,
+                 content_text="Status: Em andamento", extract_metadata={}, score=4)
+            for index, title in enumerate(["Modernizacao do CCO", "Outro projeto"], start=1)]
+    connect, _ = _connect_with_rows(rows)
+    results = retrieve_database_context(
+        "Qual o status?", entities=[_entity("Modernizacao do CCO")], connect=connect)
+    assert [result.document.project_id for result in results] == ["project-1"]
+
+
+def test_compound_procedure_code_is_not_a_project_scope():
+    titles = [result.document.title for result in retrieve_context(
+        "Qual o procedimento POP-MVP-001 de acessibilidade?")]
+    assert "Atendimento a objeto perdido" in titles
