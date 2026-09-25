@@ -486,3 +486,10 @@ A [documentação do frontend](../frontend/README.md) descreve estrutura, fluxos
 confirmação, scheduler, outbox e RabbitMQ avaliam o cronograma em segundo plano
 e gravam notificações internas. Não há dependência de Power Automate nem
 webhook. Veja [a documentação operacional](../agent/support/IMPLEMENTATION.md#3-workflow-alerta_prazo_atraso).
+
+## VHS/cache de transcricao (S4-31)
+
+Cache STT ativo por padrao, TTL 300s e 256 entradas por processo.
+`VHS_ENABLED=0` desativa; reiniciar os workers invalida todos os cassetes.
+Plano, limites e comandos: [plano VHS](../../docs/testes/sprint4/plano-vhs.md).
+Coleta local: `python scripts/verify_vhs.py` a partir de `src/backend`.
