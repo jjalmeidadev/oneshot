@@ -36,6 +36,14 @@ export function ResponseDetails({ message }: { message: ChatMessage | null }) {
 
   return (
     <div className="space-y-4 px-3 py-3">
+      {message.traceId && (
+        <section>
+          <SectionTitle icon={Database}>Rastreabilidade</SectionTitle>
+          <p className="break-all font-mono text-2xs text-fg-muted">
+            {message.traceId}
+          </p>
+        </section>
+      )}
       {intent && (
         <section>
           <SectionTitle icon={Brain}>Classificação de intenção</SectionTitle>
