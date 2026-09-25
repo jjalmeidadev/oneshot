@@ -243,7 +243,20 @@
     - [9.4.2 Resultados](#942-resultados)
 - [10. Procedimentos de Implantação](#10-procedimentos-de-implantação)
   - [10.1 Implantação e Configuração do Banco de Dados](#101-implantação-e-configuração-do-banco-de-dados)
+    - [10.1.1 Preflight do esquema](#1011-preflight-do-esquema)
+    - [10.1.2 Aplicação da migração](#1012-aplicação-da-migração)
   - [10.2 Implantação do Protótipo para uso por equipe de desenvolvimento](#102-implantação-do-protótipo-para-uso-por-equipe-de-desenvolvimento)
+    - [10.2.1 Restrições do Learner Lab e arquitetura adotada](#1021-restrições-do-learner-lab-e-arquitetura-adotada)
+    - [10.2.2 Preparação dos contêineres](#1022-preparação-dos-contêineres)
+    - [10.2.3 Build e publicação no ECR](#1023-build-e-publicação-no-ecr)
+    - [10.2.4 Preparação da conta AWS](#1024-preparação-da-conta-aws)
+    - [10.2.5 Criação da chave e substituição da EC2](#1025-criação-da-chave-e-substituição-da-ec2)
+    - [10.2.6 Bootstrap da instância](#1026-bootstrap-da-instância)
+    - [10.2.7 Instalação do runtime e inicialização da aplicação](#1027-instalação-do-runtime-e-inicialização-da-aplicação)
+    - [10.2.8 Atualização e rollback](#1028-atualização-e-rollback)
+    - [10.2.9 Publicação com Cloudflare Quick Tunnel](#1029-publicação-com-cloudflare-quick-tunnel)
+    - [10.2.10 Validação e resultado da Sprint 4](#10210-validação-e-resultado-da-sprint-4)
+    - [10.2.11 Operação após o deploy](#10211-operação-após-o-deploy)
 - [Referências](#referências)
 
 # 1. Introdução
@@ -6157,15 +6170,351 @@ Será executado na Sprint 4.
 
 # 10. Procedimentos de Implantação
 
-O processo de implantação proposto, as variáveis de ambiente previstas, os comandos de execução local e as pendências de provisionamento estão registrados na Seção 6.2. Esta seção recebe os procedimentos efetivamente executados, com capturas de tela e evidências, quando o deploy for realizado na Sprint 4, conforme a Seção 8.3.2.
+O deploy da Sprint 4 foi realizado no AWS Academy Learner Lab e teve como objetivo disponibilizar a PoC para testes da equipe e do cliente sem depender de infraestrutura corporativa do Metrô. O processo combinou Supabase PostgreSQL, imagens Docker privadas no Amazon ECR, uma instância EC2 gerenciada por CloudFormation e um Cloudflare Quick Tunnel para fornecer acesso HTTPS temporário.
+
+As etapas abaixo descrevem o que foi configurado, os comandos e artefatos usados e as verificações executadas. Os valores sensíveis foram mantidos fora do Git e são representados apenas pelos nomes das variáveis.
 
 ## 10.1 Implantação e Configuração do Banco de Dados
 
-O script de criação do modelo físico está versionado em [`src/database/sql/01_create_database.sql`](../src/database/sql/01_create_database.sql) e descrito na Seção 4.4. Os scripts de carga inicial e de rollback estão previstos no mesmo diretório e serão preenchidos junto com a massa sintética, conforme registrado em [`src/database/docs/README.md`](../src/database/docs/README.md). O registro da execução em ambiente de nuvem será feito na Sprint 4.
+O runtime utiliza o PostgreSQL gerenciado do projeto Supabase **Oneshot**. A conexão administrativa foi configurada localmente em `SUPABASE_DATABASE_URL`, sem versionar seu valor. Antes de iniciar os workers de alerta, o esquema foi inspecionado e a migração pendente foi aplicada separadamente do deploy da aplicação.
+
+### 10.1.1 Preflight do esquema
+
+O primeiro passo foi executar o modo de leitura do gerenciador de infraestrutura de alertas:
+
+```powershell
+cd src/backend
+.venv\Scripts\python.exe scripts/manage_alert_infrastructure.py status
+```
+
+O preflight encontrou as seis tabelas de alertas da migração [`15_alert_deadline_flow.sql`](../src/database/sql/15_alert_deadline_flow.sql) já criadas e estruturalmente compatíveis. Por isso, a migração 15 não foi reaplicada. Também foram encontrados sete registros em `pending_proactive_suggestions`, ainda sem as colunas de resposta preparada exigidas pela migração 08.
+
+Antes da execução, [`08_add_prepared_proactive_response.sql`](../src/database/sql/08_add_prepared_proactive_response.sql) foi alterada para excluir somente registros que fossem, ao mesmo tempo, incompletos, expirados e não reivindicados. A migração lança uma exceção e desfaz a transação se encontrar qualquer registro incompleto que ainda esteja ativo ou reivindicado.
+
+### 10.1.2 Aplicação da migração
+
+Após comparar o arquivo local e confirmar que nenhum registro protegido seria removido, a migração foi enviada ao Supabase e executada uma única vez como transação. O Supabase registrou `08_add_prepared_proactive_response`, versão `20260925034214`.
+
+| Verificação | Antes | Depois |
+|---|---:|---:|
+| Registros em `pending_proactive_suggestions` | 7 | 0 |
+| Registros incompletos protegidos | 0 | 0 |
+| Registros expirados, incompletos e não reivindicados | 7 | 0 |
+
+A limpeza removeu os sete registros expirados e não reivindicados. Depois da aplicação, `prepared_response` ficou como `TEXT NOT NULL`, `prepared_model` como `VARCHAR(160) NOT NULL` e `prepared_interaction_id` permaneceu anulável. O RLS foi habilitado e os privilégios diretos de `anon` e `authenticated` foram revogados. As seis tabelas de alertas e seus dados permaneceram inalterados.
+
+O rollback [`16_rollback_alert_deadline_flow.sql`](../src/database/sql/16_rollback_alert_deadline_flow.sql) não foi usado porque remove as seis tabelas e seus dados. A conexão PostgreSQL foi posteriormente testada de dentro do contêiner backend na EC2 pela saída TCP/5432 do Security Group.
 
 ## 10.2 Implantação do Protótipo para uso por equipe de desenvolvimento
 
-As instruções de execução local do backend e do frontend estão na Seção 6.2.8. O manual de implantação da PoC será consolidado na Sprint 4.
+### 10.2.1 Restrições do Learner Lab e arquitetura adotada
+
+O primeiro deploy usava AWS Systems Manager para toda a operação remota. A EC2 chegou a registrar o SSM Agent como online, mas a política `voc-cancel-cred` do Learner Lab negou explicitamente `ssm:StartSession` e `ssm:SendCommand`. Como uma negação explícita não pode ser contornada pela role da instância, o desenho foi substituído por:
+
+- EC2 pública com Ubuntu 24.04;
+- SSH por chave, restrito ao IPv4 `/32` do operador;
+- frontend publicado apenas em `127.0.0.1:80` na EC2;
+- backend, RabbitMQ e workers somente na rede privada do Compose;
+- Cloudflare Quick Tunnel iniciado na própria EC2 para acesso HTTPS externo;
+- Supabase como PostgreSQL gerenciado;
+- ECR privado para as imagens de backend e frontend;
+- CloudWatch Agent e logs locais com rotação.
+
+Não foi aberta entrada HTTP pública no Security Group. O Cloudflare estabelece conexões de saída e encaminha as requisições para o frontend ligado ao *loopback*. O [handoff do primeiro deploy](deploy-aws-learner-lab-handoff.md) e o [replanejamento](deploy-aws-learner-lab-replan.md) registram a transição entre as duas arquiteturas.
+
+### 10.2.2 Preparação dos contêineres
+
+O backend e o frontend foram empacotados em Dockerfiles *multi-stage*. O estágio final do backend contém a API FastAPI, o núcleo de PLN e os comandos dos workers. O frontend é compilado com Node e servido por Nginx, que encaminha `/api` para o backend e expõe `/health`.
+
+O arquivo [`compose.prod.yml`](../compose.prod.yml) foi usado tanto nos testes locais quanto na EC2. O perfil padrão contém:
+
+| Serviço | Comando ou função | Rede e exposição |
+|---|---|---|
+| `backend` | API FastAPI | Apenas `app-private`, porta 8000 não publicada |
+| `frontend` | React + Nginx | `127.0.0.1:80` no host |
+| `rabbitmq` | `rabbitmq:4.1.8-alpine` | Apenas `app-private`, com volume persistente |
+| `scheduler` | `python -m app.alerts.worker scheduler` | Apenas `app-private` |
+| `publisher` | `python -m app.alerts.worker publisher` | Apenas `app-private` |
+| `evaluator` | `python -m app.alerts.worker evaluator` | Apenas `app-private` |
+| `notifier` | `python -m app.alerts.worker notifier` | Apenas `app-private` |
+
+O notebook foi mantido no profile opcional `notebook` e não é iniciado nem baixado na configuração padrão da EC2. Os contêineres usam limites de CPU e memória, `read_only`, `tmpfs`, `no-new-privileges`, descarte de capabilities e rotação do driver de logs. Backend, frontend e RabbitMQ possuem *health checks*; os workers não usam health check HTTP porque não servem requisições.
+
+O build local foi executado com uma tag igual ao SHA completo do commit:
+
+```powershell
+$tag = (git rev-parse HEAD).Trim()
+.\scripts\docker-build.ps1 -Tag $tag
+docker compose -f compose.prod.yml config --quiet
+```
+
+Antes da publicação, o backend passou pela suíte completa e pelo `/health` em contêiner. O frontend passou por lint, 59 testes, build TypeScript e health local. Também foi verificado que nenhum `.env`, chave privada ou credencial fazia parte do contexto das imagens.
+
+### 10.2.3 Build e publicação no ECR
+
+Foram usados dois repositórios privados existentes na conta do Learner Lab: `m7-g05-backend` e `m7-g05-frontend`. Ambos foram configurados com tags imutáveis. Não foi utilizada a tag `latest`; cada imagem recebe o SHA completo do commit que originou o build.
+
+Depois do build local, as imagens foram renomeadas com o endereço do registry, autenticadas e enviadas ao ECR:
+
+```powershell
+$registry = '307432329071.dkr.ecr.us-east-1.amazonaws.com'
+$tag = (git rev-parse HEAD).Trim()
+
+aws ecr get-login-password --region us-east-1 |
+  docker login --username AWS --password-stdin $registry
+
+docker tag "m7-g05-backend:$tag" "$registry/m7-g05-backend:$tag"
+docker tag "m7-g05-frontend:$tag" "$registry/m7-g05-frontend:$tag"
+docker push "$registry/m7-g05-backend:$tag"
+docker push "$registry/m7-g05-frontend:$tag"
+```
+
+A publicação foi feita para `linux/amd64`. Depois do push, `ecr:DescribeImages` foi usado para recuperar e registrar os digests, que são exigidos pelo preflight de atualização. A versão implantada corresponde ao commit `f776feb352c3556d02e83dc14eea49b0d795f6b9`:
+
+| Imagem | Tag imutável | Digest confirmado no ECR |
+|---|---|---|
+| `m7-g05-backend` | `f776feb352c3556d02e83dc14eea49b0d795f6b9` | `sha256:1bb49e4cfb7a83881f2b1ea5741792bc916710ec565c5659d827097bf114b497` |
+| `m7-g05-frontend` | `f776feb352c3556d02e83dc14eea49b0d795f6b9` | `sha256:ee4cd9024f63519c0f64c061f7c47fbefbeba21b660c01e3bad0bac4e8e3e317` |
+
+Antes do deploy, o preflight confirmou que cada tag existia uma única vez, que os repositórios continuavam imutáveis e que os digests informados coincidiam com o ECR. A correspondência entre tag e commit é usada como rastreabilidade, enquanto o digest identifica o conteúdo efetivamente publicado.
+
+### 10.2.4 Preparação da conta AWS
+
+As credenciais temporárias da sessão do Learner Lab foram mantidas em `.env` local e carregadas por [`common.ps1`](../scripts/aws/common.ps1). O helper lê somente `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN` e `AWS_DEFAULT_REGION`, exige `us-east-1` e não imprime os valores. Como essas credenciais expiram, o primeiro teste de cada janela foi `sts:GetCallerIdentity`.
+
+O preflight consultou a VPC, subnet, rota para Internet Gateway, AMI, disponibilidade do tipo de instância, instance profile, ECR e stack existente. Os valores utilizados foram:
+
+| Parâmetro | Configuração usada |
+|---|---|
+| Região | `us-east-1` |
+| VPC | `vpc-071dbf8c393325483` |
+| Subnet pública | `subnet-0a4ab0f965bbfa086` em `us-east-1a` |
+| AMI | Ubuntu Server 24.04 LTS amd64, `ami-0045d7fc2ad003464` |
+| Tipo | `t3.large`, 2 vCPU e 8 GiB de memória |
+| Volume raiz | EBS gp3 criptografado de 50 GiB |
+| Instance profile | `LabInstanceProfile` |
+| Stack | `m7-g05-mvp` |
+| Key pair | `m7-g05-learner-lab-2026` |
+
+O template [`infra/aws/template.yaml`](../infra/aws/template.yaml) cria apenas a EC2, o Security Group e um Log Group com retenção de sete dias. VPC, subnet, instance profile e repositórios ECR permanecem externos à stack.
+
+O Security Group não expõe HTTP. A única entrada prevista é TCP/22 a partir do IPv4 público atual do operador em `/32`. As saídas permitem TCP/80 para pacotes do bootstrap, TCP/443 para ECR, CloudWatch, Gemini e Azure Speech, TCP/5432 para o *session pooler* do Supabase e TCP/UDP 7844 para o Cloudflare Tunnel.
+
+### 10.2.5 Criação da chave e substituição da EC2
+
+A primeira EC2 havia sido criada sem key pair. Como a política do Learner Lab impedia SSM e não havia outro canal para instalar uma chave no sistema operacional, a instância precisou ser substituída. Foi usada uma chave ED25519 denominada `m7-g05-learner-lab-2026`. A chave pública foi importada na EC2 e a chave privada permaneceu em `C:\Users\Inteli\.ssh`, fora do repositório e com ACL restrita ao usuário e ao sistema.
+
+O script [`deploy.ps1`](../scripts/aws/deploy.ps1) separa o processo em quatro invocações. A substituição ocorreu antes do rebuild final da Sprint 4 e, portanto, usou a versão anterior já validada no ECR. O mapeamento usado foi:
+
+```powershell
+$deploy = @{
+  VpcId = 'vpc-071dbf8c393325483'
+  SubnetId = 'subnet-0a4ab0f965bbfa086'
+  AmiId = 'ami-0045d7fc2ad003464'
+  InstanceType = 't3.large'
+  RootVolumeSize = 50
+  InstanceProfileName = 'LabInstanceProfile'
+  EcrRegistryUri = '307432329071.dkr.ecr.us-east-1.amazonaws.com'
+  BackendImageTag = '0ef613347a33131036e975bb74b5a3b4baa56fca'
+  FrontendImageTag = '0ef613347a33131036e975bb74b5a3b4baa56fca'
+  BackendImageDigest = 'sha256:a36625c35ce19f2fbbba96769d474597ba9227f6ff332cca86735c86ca89ee06'
+  FrontendImageDigest = 'sha256:feac52befdf953df04df75abdf1ac79b07fa6abd59f4e3b2a31169fa1d538723'
+  KeyPairName = 'm7-g05-learner-lab-2026'
+  OperatorSshCidr = '<IP_PUBLICO_ATUAL_DO_OPERADOR>/32'
+}
+
+.\scripts\aws\deploy.ps1 @deploy
+.\scripts\aws\deploy.ps1 @deploy -Action CreateChangeSet
+.\scripts\aws\deploy.ps1 -Action InspectChangeSet `
+  -ChangeSetName 'm7-g05-ssh-d2fa39877cc7478292ca37fac513d12a'
+.\scripts\aws\deploy.ps1 -Action ExecuteChangeSet `
+  -ChangeSetName 'm7-g05-ssh-d2fa39877cc7478292ca37fac513d12a' `
+  -ConfirmExecution
+```
+
+O primeiro comando executa somente o preflight. O segundo cria um change set `UPDATE` sem executá-lo. O terceiro confirma o nome da stack, o estado `CREATE_COMPLETE/AVAILABLE`, o CIDR SSH atual e cada recurso afetado. A execução ocorre apenas na quarta invocação.
+
+O primeiro change set revisado propunha substituir também o Security Group porque o texto de `GroupDescription` havia mudado; ele foi descartado. O template foi corrigido para preservar literalmente a descrição e a tag do grupo existente. O change set seguinte apresentou apenas:
+
+- `ApplicationInstance`: `Modify`, `Replacement=True`, causado pela inclusão de `KeyName`;
+- `ApplicationSecurityGroup`: `Modify`, `Replacement=False`, restrito às regras de rede.
+
+Depois da execução, a instância antiga `i-0ee46033b616aeedc` foi terminada pelo CloudFormation e a nova instância `i-0f31228a6d73a765b` entrou em execução com as verificações de sistema e instância aprovadas. A stack terminou em `UPDATE_COMPLETE`.
+
+O IPv4 público da EC2 muda quando a instância é parada e iniciada. Por isso, ele nunca foi fixado em scripts ou documentação operacional. A chave de host SSH foi validada antes da primeira conexão e gravada em `known_hosts`; conexões seguintes usam `StrictHostKeyChecking=yes`.
+
+### 10.2.6 Bootstrap da instância
+
+O User Data da EC2 é mantido em [`infra/aws/user-data.sh`](../infra/aws/user-data.sh). O [`deploy.ps1`](../scripts/aws/deploy.ps1) renderiza esse arquivo dentro do template antes de enviar o CloudFormation; o template-fonte recusa execução sem essa renderização.
+
+Durante o primeiro boot, o script:
+
+1. instala `openssh-server`, `rsyslog`, `logrotate`, `curl`, `gnupg` e certificados;
+2. adiciona o repositório oficial do Docker para Ubuntu 24.04;
+3. instala Docker CE, CLI, `containerd`, Buildx, Compose Plugin e `amazon-ecr-credential-helper`;
+4. instala e inicia o Amazon CloudWatch Agent;
+5. cria `/opt/m7`, `/etc/m7`, `/var/log/m7` e os diretórios persistentes;
+6. grava o Compose renderizado em `/opt/m7/compose.prod.yml`;
+7. cria `/etc/m7/deploy.env` com registry, tags, porta 80 e bind `127.0.0.1`;
+8. configura o ECR credential helper para usar a instance profile, sem salvar senha de login;
+9. cria os wrappers `/usr/local/bin/m7-compose`, `m7-compose-up` e `m7-rollback`;
+10. cria serviços `systemd` para encaminhar os logs de cada contêiner a arquivos limitados por `logrotate`;
+11. configura o CloudWatch Agent para coletar os logs dos sete serviços;
+12. cria os volumes Docker de relatórios, notebook e RabbitMQ;
+13. baixa backend, frontend e RabbitMQ, sem iniciar a aplicação antes da instalação dos secrets.
+
+Os primeiros ensaios do bootstrap falharam porque o pacote `awscli` não existia no APT padrão do Ubuntu 24.04, o helper do ECR havia sido instalado em ordem incompatível com Docker CE e a URL do pacote do CloudWatch Agent estava incorreta. O script final removeu a dependência do AWS CLI na EC2, instalou Docker e o helper na mesma transação e corrigiu o bucket para `amazoncloudwatch-agent-$AWS_REGION`.
+
+### 10.2.7 Instalação do runtime e inicialização da aplicação
+
+O bootstrap não recebe secrets. Foi criado um `runtime.env` fora do repositório contendo as variáveis exigidas pelo backend e pelos workers: `GEMINI_API_KEY`, configuração do Azure Speech, `SUPABASE_DATABASE_URL`, identidades simuladas, `ALERT_CONFIRMATION_SECRET`, credenciais do RabbitMQ, `RABBITMQ_URL` e parâmetros do pool PostgreSQL. O arquivo não pode conter variáveis `AWS_*`.
+
+Depois de confirmar o término do cloud-init, o arquivo foi enviado por um diretório temporário privado e instalado com permissões restritas:
+
+```powershell
+ssh -i <CHAVE_PRIVADA> ubuntu@<IP_EC2> `
+  "umask 077; mkdir -p ~/.runtime-stage; chmod 700 ~/.runtime-stage"
+
+scp -i <CHAVE_PRIVADA> -o StrictHostKeyChecking=yes `
+  <RUNTIME_ENV_PROTEGIDO> `
+  ubuntu@<IP_EC2>:.runtime-stage/runtime.env.incoming
+
+ssh -i <CHAVE_PRIVADA> ubuntu@<IP_EC2>
+```
+
+Na EC2, a instalação e a subida foram concluídas com:
+
+```bash
+chmod 600 ~/.runtime-stage/runtime.env.incoming
+sudo install -o root -g root -m 0600 \
+  ~/.runtime-stage/runtime.env.incoming /etc/m7/runtime.env
+rm -f ~/.runtime-stage/runtime.env.incoming
+sudo /usr/local/bin/m7-compose-up
+```
+
+`m7-compose-up` valida a presença das variáveis, confirma que a URL AMQP corresponde às credenciais do RabbitMQ e inicia `rabbitmq`, `backend`, `frontend`, `scheduler`, `publisher`, `evaluator` e `notifier`. O arquivo instalado foi conferido como `root:root` modo `0600`.
+
+O frontend permaneceu em `127.0.0.1:80`; o backend e o broker não publicam portas no host. O health check interno foi executado antes de criar qualquer acesso externo:
+
+```bash
+sudo /usr/local/bin/m7-compose ps
+curl --fail --silent --output /dev/null http://127.0.0.1:80/health
+```
+
+### 10.2.8 Atualização e rollback
+
+O Compose e as tags não são atualizados automaticamente quando o repositório muda. Para instalar uma nova versão na mesma EC2 foi criado [`update-app.ps1`](../scripts/aws/update-app.ps1), acompanhado pelo executor [`update-app-remote.sh`](../scripts/aws/update-app-remote.sh).
+
+Os parâmetros incluem o ID da instância, chave SSH, runtime protegido, registry, tags e digests esperados. Para instalar a versão final da Sprint 4, foi usado o seguinte mapeamento; apenas os dois caminhos protegidos dependem da estação do operador:
+
+```powershell
+$update = @{
+  InstanceId = 'i-0f31228a6d73a765b'
+  PrivateKeyPath = '<CHAVE_PRIVADA_FORA_DO_REPOSITORIO>'
+  RuntimeEnvPath = '<RUNTIME_ENV_FORA_DO_REPOSITORIO>'
+  EcrRegistryUri = '307432329071.dkr.ecr.us-east-1.amazonaws.com'
+  BackendImageTag = 'f776feb352c3556d02e83dc14eea49b0d795f6b9'
+  FrontendImageTag = 'f776feb352c3556d02e83dc14eea49b0d795f6b9'
+  BackendImageDigest = 'sha256:1bb49e4cfb7a83881f2b1ea5741792bc916710ec565c5659d827097bf114b497'
+  FrontendImageDigest = 'sha256:ee4cd9024f63519c0f64c061f7c47fbefbeba21b660c01e3bad0bac4e8e3e317'
+}
+
+.\scripts\aws\update-app.ps1 @update
+```
+
+O preflight valida STS, stack, EC2, key pair, host SSH, arquivos locais, Compose e correspondência das tags/digests no ECR. Depois da revisão, a atualização é iniciada explicitamente:
+
+```powershell
+.\scripts\aws\update-app.ps1 @update -Action Execute -ConfirmUpdate
+```
+
+O script cria um staging remoto com modo `0700`, transfere Compose, runtime, configuração do CloudWatch e executor, cria um backup root-only, atualiza as tags em `/etc/m7/deploy.env`, executa `pull`, recria os sete serviços e verifica `/health`. Se uma etapa falhar, o executor restaura os arquivos anteriores e tenta recuperar os contêineres.
+
+Na primeira execução real foram corrigidos três problemas: o caminho do staging não era enviado ao executor, a configuração consumida do CloudWatch podia estar em um caminho diferente do canônico e as opções `tmpfs` dos workers precisavam estar entre aspas no YAML. Depois das correções, o fluxo terminou com health check aprovado.
+
+O rollback de versão usa [`rollback.ps1`](../scripts/aws/rollback.ps1). Ele confirma previamente que as tags antigas ainda existem no ECR e que seus digests correspondem aos valores registrados. A execução remota exige `-ExecuteRollback -ConfirmRollback` e termina com nova verificação dos contêineres e de `/health`.
+
+Na rotação posterior da chave Gemini, apenas o runtime protegido foi substituído. Backend e workers foram recriados primeiro e o frontend depois, pois o Nginx precisa resolver novamente o endereço interno do backend quando o contêiner é recriado. A chave foi comparada internamente sem imprimir seu valor e a chamada de chat confirmou o novo runtime.
+
+### 10.2.9 Publicação com Cloudflare Quick Tunnel
+
+O acesso externo foi configurado somente depois do health check interno. Foi instalado na EC2 o pacote oficial `cloudflared` para Linux amd64, versão `2026.9.3`, com verificação do checksum publicado. Em seguida foi criado o serviço `m7-cloudflared-quick.service` com usuário sem privilégios, `NoNewPrivileges`, `ProtectSystem=strict`, `ProtectHome=true`, reinício automático e o comando:
+
+```bash
+/usr/bin/cloudflared tunnel --no-autoupdate --protocol http2 \
+  --url http://127.0.0.1:80
+```
+
+O túnel não exige entrada TCP/80 ou TCP/443 na EC2. Ele inicia conexões de saída para a Cloudflare pelas portas permitidas no Security Group. DNS, API Cloudflare, TCP/HTTP2 e UDP/QUIC foram verificados pelo próprio `cloudflared`.
+
+O serviço foi habilitado para iniciar junto com a EC2:
+
+```bash
+sudo systemctl enable --now m7-cloudflared-quick
+sudo systemctl is-active m7-cloudflared-quick
+```
+
+O endereço atual é obtido pelo journal:
+
+```bash
+sudo journalctl -u m7-cloudflared-quick --no-pager \
+  | grep -Eo 'https://[^ ]+\.trycloudflare\.com' \
+  | tail -1
+```
+
+O subdomínio `trycloudflare.com` é temporário e muda quando o túnel é recriado. Qualquer pessoa com o link consegue abrir a aplicação; por isso, o endereço é compartilhado somente com o grupo e o cliente durante a janela de teste. O endpoint `/api/chat` consome a cota Gemini e não deve ser divulgado publicamente.
+
+### 10.2.10 Validação e resultado da Sprint 4
+
+Depois da subida dos serviços e da criação do túnel, os testes foram repetidos pela rede externa. O estado final registrado foi:
+
+| Verificação | Resultado |
+|---|---|
+| Stack `m7-g05-mvp` | `UPDATE_COMPLETE` |
+| EC2 | `running`, verificações de sistema e instância aprovadas |
+| Backend | `healthy` |
+| Frontend | `healthy` |
+| RabbitMQ | `healthy` |
+| Scheduler, publisher, evaluator e notifier | Em execução |
+| Runtime | `/etc/m7/runtime.env`, `root:root`, modo `0600` |
+| Conexão ao Supabase a partir do backend | Aprovada |
+| `GET /health` interno | HTTP 200 |
+| `GET /health` pelo Quick Tunnel | HTTP 200 |
+| `GET /` pelo Quick Tunnel | HTTP 200 |
+| `POST /api/chat` pelo Quick Tunnel | HTTP 200, texto e modelo presentes |
+| Serviço do Cloudflare | `active`, sem reinícios na verificação |
+
+Com essas evidências, a aplicação foi considerada **funcional na nuvem na Sprint 4**. O ambiente é adequado à demonstração acadêmica e aos testes controlados da equipe. Ele não representa produção nem homologação corporativa. O fluxo de áudio real não foi reexecutado pelo endereço público nessa validação final e não compõe a evidência de encerramento.
+
+### 10.2.11 Operação após o deploy
+
+Para verificar o ambiente em uma nova sessão:
+
+```bash
+sudo /usr/local/bin/m7-compose ps
+curl --fail --silent --output /dev/null http://127.0.0.1:80/health
+sudo systemctl is-active m7-cloudflared-quick
+```
+
+A EC2 pode ser interrompida entre as demonstrações para reduzir consumo. Ao iniciá-la novamente, seu IPv4 público provavelmente mudará. O operador deve consultar o novo endereço, atualizar a regra SSH para o IPv4 atual em `/32`, validar a chave de host e obter o novo endereço do Quick Tunnel. Durante a operação, o provedor do operador alternou entre dois IPv4; os dois foram autorizados temporariamente como `/32`, sem abrir SSH para `0.0.0.0/0`.
+
+Os contêineres do Docker Desktop local não sustentam a aplicação na AWS e podem ser desligados. Na EC2, os serviços usam `restart: unless-stopped` e voltam com o Docker, mas o health check deve ser repetido antes de compartilhar o link.
+
+Para encerrar apenas o acesso externo:
+
+```bash
+sudo systemctl disable --now m7-cloudflared-quick
+```
+
+Para parar a aplicação antes de interromper a instância:
+
+```bash
+sudo /usr/local/bin/m7-compose stop
+```
+
+Não se deve usar `docker compose down -v` enquanto os volumes de RabbitMQ ou artefatos ainda forem necessários. Mesmo com a EC2 parada, EBS, ECR e CloudWatch continuam armazenados e podem gerar custo. As principais limitações permanecem sendo as credenciais temporárias do Learner Lab, o SSH dependente do IP do operador, a URL temporária do Cloudflare e a ausência de autenticação adequada para divulgação pública.
+
+Os procedimentos detalhados de diagnóstico, atualização, rollback e encerramento permanecem no [runbook AWS](aws-operacao.md) e no [runbook Docker](docker-operacao.md). O histórico das decisões está no [handoff inicial](deploy-aws-learner-lab-handoff.md), no [replanejamento](deploy-aws-learner-lab-replan.md) e nas stories de [infraestrutura AWS](stories/phase-4-aws-mvp.md), [substituição da EC2](stories/phase-4-ec2-ssh-replacement-preparation.md) e [workers/atualização](stories/phase-4-alert-workers-local-update.md).
 
 # Referências
 - Microsoft. [Preços do Azure AI Speech](https://azure.microsoft.com/en-us/pricing/details/speech/). Acesso em: 19 ago. 2026.
