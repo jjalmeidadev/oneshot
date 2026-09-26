@@ -43,10 +43,10 @@ describe('AppShell, barra lateral, sessão e tema', () => {
   it('UserCard guarda token apenas na sessão e AppShell anuncia falhas', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('private error')));
     render(<App />);
-    fireEvent.change(screen.getByLabelText('Token de acesso para áudio'), {
+    fireEvent.change(screen.getByLabelText('Token de acesso da sessão'), {
       target: { value: 'test-token' },
     });
-    expect(screen.getByLabelText('Token de acesso para áudio')).toHaveValue(
+    expect(screen.getByLabelText('Token de acesso da sessão')).toHaveValue(
       'test-token',
     );
     expect(window.localStorage.getItem('test-token')).toBeNull();

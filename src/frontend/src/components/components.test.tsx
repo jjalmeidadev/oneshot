@@ -13,6 +13,7 @@ import { IntentBadge } from './chat/intent-badge';
 import { Composer } from './composer/composer';
 import { AudioButton } from './composer/audio-button';
 import { IntentToggle } from './composer/intent-toggle';
+import { ProactivityToggle } from './composer/proactivity-toggle';
 import { RecordingBar, RecordingPreview } from './composer/recording-bar';
 import { DocumentCard } from './documents/document-card';
 import { DocumentViewer } from './documents/document-viewer';
@@ -85,6 +86,7 @@ describe('Componentes de chat', () => {
         message={{ ...message, status: 'error', error: 'Tente novamente' }}
         selectedSourceId={null}
         onSelectSource={vi.fn()}
+        onResolveProactiveSuggestion={vi.fn()}
       />,
     );
     expect(screen.getByText('Não foi possível responder')).toBeVisible();
@@ -108,12 +110,29 @@ describe('Componentes de chat', () => {
         intentLayerEnabled={true}
         selectedSourceId={null}
         onSelectSource={vi.fn()}
+        onResolveProactiveSuggestion={vi.fn()}
       />,
     );
     expect(screen.getByRole('log')).toHaveAttribute('aria-busy', 'true');
     await waitFor(() =>
       expect(screen.getByText(/Classificando a intenção/)).toBeVisible(),
     );
+  });
+  it('MessageBubble exige seleção explícita para a sugestão opcional', async () => {
+    const resolve = vi.fn();
+    mount(
+      <MessageBubble
+        message={message}
+        selectedSourceId={null}
+        onSelectSource={vi.fn()}
+        onResolveProactiveSuggestion={resolve}
+      />,
+    );
+    expect(screen.getByRole('region', { name: 'Sugestão opcional' })).toBeVisible();
+    await userEvent.click(screen.getByRole('button', { name: 'Aceitar sugestão' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Recusar sugestão' }));
+    expect(resolve).toHaveBeenNthCalledWith(1, message.id, 'accept');
+    expect(resolve).toHaveBeenNthCalledWith(2, message.id, 'decline');
   });
 });
 
@@ -127,6 +146,8 @@ describe('Componentes de entrada', () => {
     isSending: false,
     intentLayerEnabled: true,
     onIntentLayerChange: vi.fn(),
+    proactivityEnabled: false,
+    onProactivityChange: vi.fn(),
   };
   it('Composer envia por Enter, preserva Shift+Enter e bloqueia excesso de texto', () => {
     const submit = vi.fn();
@@ -160,6 +181,16 @@ describe('Componentes de entrada', () => {
     mount(<IntentToggle enabled onChange={change} disabled={false} />);
     await userEvent.click(screen.getByRole('switch'));
     expect(change).toHaveBeenCalledWith(false);
+  });
+  it('ProactivityToggle encaminha a ativação opcional', async () => {
+    const change = vi.fn();
+    mount(<ProactivityToggle enabled={false} onChange={change} disabled={false} />);
+    await userEvent.click(
+      screen.getByRole('switch', {
+        name: 'Ativar sugestões proativas depois da resposta principal',
+      }),
+    );
+    expect(change).toHaveBeenCalledWith(true);
   });
   it('RecordingBar permite concluir ou descartar', async () => {
     const stop = vi.fn(),

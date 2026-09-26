@@ -1,0 +1,86 @@
+{
+  "$schema": "./flow-blueprint.schema.json",
+  "name": "transacao-gerar-relatorio-v2",
+  "version": "2.0.0",
+  "deployable": false,
+  "deployment_blockers": [
+    "power_automate_http_trigger_url",
+    "ai_builder_connection_reference",
+    "backend_trigger_token_reference",
+    "backend_callback_token_reference",
+    "public_https_callback_base_url"
+  ],
+  "trigger": {
+    "type": "authenticated_http_request",
+    "caller": "backend",
+    "inputs": ["contract_version", "execution_id", "correlation_id", "callback_url", "prepared_request", "snapshot"],
+    "response": { "status": 202, "body": ["flow_run_id"] }
+  },
+  "synchronous_phase": [
+    {
+      "id": "validate_backend_request",
+      "operation": "parse_json_and_validate_contract",
+      "rule": "Reject unknown contract versions and missing correlation identifiers."
+    },
+    {
+      "id": "acknowledge_dispatch",
+      "operation": "http_response",
+      "outputs": ["flow_run_id"],
+      "must_complete_before_seconds": 90
+    }
+  ],
+  "asynchronous_phase": [
+    {
+      "id": "normalize_optional_text",
+      "connector": "ai_builder",
+      "prompt": "normalizar-complemento-usuario-v1",
+      "input": "prepared_request.options.additional_context",
+      "output": "normalized_context",
+      "on_failure": "return_null_and_warning"
+    },
+    {
+      "id": "draft_executive_summary",
+      "connector": "ai_builder",
+      "prompt": "redigir-resumo-executivo-v1",
+      "input": "snapshot",
+      "output": "executive_summary",
+      "on_failure": "return_null_and_warning"
+    },
+    {
+      "id": "review_foundation",
+      "connector": "ai_builder",
+      "prompt": "revisar-fundamentacao-relatorio-v1",
+      "input": ["snapshot", "executive_summary"],
+      "output": "foundation_review",
+      "on_failure": "return_not_approved"
+    },
+    {
+      "id": "validate_fixed_json",
+      "connector": "built_in_data_operations",
+      "checks": [
+        "schema_version equals 1.0",
+        "citation_source_ids belong to snapshot.sources",
+        "no unknown fields",
+        "all outputs respect their maximum lengths"
+      ]
+    },
+    {
+      "id": "result_callback",
+      "connector": "http",
+      "operation": "POST callback_url",
+      "path": "/api/integrations/power-automate/report-results",
+      "authentication": "x-callback-token-from-secure-reference",
+      "retry": { "type": "exponential", "count": 4, "interval": "PT5S" },
+      "idempotency": "callback_id"
+    }
+  ],
+  "error_scopes": [
+    { "id": "catch_blocked_dependency", "status": "blocked", "public_error_code": "REPORT_DEPENDENCY_UNAVAILABLE" },
+    { "id": "catch_validation_failure", "status": "failed", "public_error_code": "REPORT_OUTPUT_VALIDATION_FAILED" },
+    { "id": "catch_unexpected_failure", "status": "failed", "public_error_code": "REPORT_GENERATION_FAILED" }
+  ],
+  "telemetry": {
+    "required_ids": ["conversation_id", "interaction_id", "correlation_id", "execution_id", "flow_run_id", "callback_id", "idempotency_key"],
+    "prohibited_fields": ["access_token", "service_role_key", "database_url", "callback_secret", "raw_prompt_with_sensitive_data"]
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "versao": 1,
+  "descricao": "Massa congelada da issue #232 para medir recall@3 da recuperacao local do RNF06.",
+  "top_k": 3,
+  "casos": [
+    {
+      "id": "CT-RNF06-P-01",
+      "cenario": "positivo",
+      "consulta": "Como usar o bilhete digital na catraca?",
+      "fontes_esperadas": ["base-atendimento:301"]
+    },
+    {
+      "id": "CT-RNF06-P-02",
+      "cenario": "positivo",
+      "consulta": "Onde registrar sugestoes e reclamacoes?",
+      "fontes_esperadas": ["base-atendimento:302"]
+    },
+    {
+      "id": "CT-RNF06-P-03",
+      "cenario": "positivo",
+      "consulta": "Posso transportar bicicleta no sabado?",
+      "fontes_esperadas": ["base-atendimento:303"]
+    },
+    {
+      "id": "CT-RNF06-P-04",
+      "cenario": "positivo",
+      "consulta": "Qual o intervalo entre trens na Linha Azul durante os testes de sinalizacao?",
+      "fontes_esperadas": ["comunicados-servico:201"]
+    },
+    {
+      "id": "CT-RNF06-P-05",
+      "cenario": "positivo",
+      "consulta": "Qual acesso alternativo esta disponivel na Estacao Republica?",
+      "fontes_esperadas": ["comunicados-servico:202"]
+    },
+    {
+      "id": "CT-RNF06-P-06",
+      "cenario": "positivo",
+      "consulta": "Como aguardar o desembarque antes de entrar no trem?",
+      "fontes_esperadas": ["comunicados-servico:203"]
+    },
+    {
+      "id": "CT-RNF06-P-07",
+      "cenario": "positivo",
+      "consulta": "Como registrar um objeto perdido?",
+      "fontes_esperadas": ["procedimentos-operacionais:101"]
+    },
+    {
+      "id": "CT-RNF06-P-08",
+      "cenario": "positivo",
+      "consulta": "Como apoiar passageiro com mobilidade reduzida?",
+      "fontes_esperadas": ["procedimentos-operacionais:102"]
+    },
+    {
+      "id": "CT-RNF06-P-09",
+      "cenario": "positivo",
+      "consulta": "O que fazer quando a escada rolante esta indisponivel?",
+      "fontes_esperadas": ["procedimentos-operacionais:103"]
+    },
+    {
+      "id": "CT-RNF06-N-01",
+      "cenario": "desafio_lexical",
+      "consulta": "Meu passe no celular nao funciona na barreira",
+      "fontes_esperadas": ["base-atendimento:301"]
+    },
+    {
+      "id": "CT-RNF06-N-02",
+      "cenario": "desafio_lexical",
+      "consulta": "Quero abrir uma queixa sobre o servico",
+      "fontes_esperadas": ["base-atendimento:302"]
+    },
+    {
+      "id": "CT-RNF06-N-03",
+      "cenario": "desafio_lexical",
+      "consulta": "Posso levar bike no domingo?",
+      "fontes_esperadas": ["base-atendimento:303"]
+    },
+    {
+      "id": "CT-RNF06-N-04",
+      "cenario": "desafio_lexical",
+      "consulta": "Os comboios vao atrasar no fim da noite?",
+      "fontes_esperadas": ["comunicados-servico:201"]
+    },
+    {
+      "id": "CT-RNF06-N-05",
+      "cenario": "desafio_lexical",
+      "consulta": "Por onde entro perto do Arouche?",
+      "fontes_esperadas": ["comunicados-servico:202"]
+    },
+    {
+      "id": "CT-RNF06-N-06",
+      "cenario": "desafio_lexical",
+      "consulta": "Devo dar passagem a quem esta saindo do vagao?",
+      "fontes_esperadas": ["comunicados-servico:203"]
+    },
+    {
+      "id": "CT-RNF06-N-07",
+      "cenario": "desafio_lexical",
+      "consulta": "Achei uma mochila; onde devolvo?",
+      "fontes_esperadas": ["procedimentos-operacionais:101"]
+    },
+    {
+      "id": "CT-RNF06-N-08",
+      "cenario": "desafio_lexical",
+      "consulta": "Preciso de ajuda com cadeira de rodas",
+      "fontes_esperadas": ["procedimentos-operacionais:102"]
+    },
+    {
+      "id": "CT-RNF06-N-09",
+      "cenario": "desafio_lexical",
+      "consulta": "A escada parou de funcionar; como sigo viagem?",
+      "fontes_esperadas": ["procedimentos-operacionais:103"]
+    }
+  ]
+}

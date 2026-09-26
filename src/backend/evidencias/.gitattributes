@@ -1,0 +1,4 @@
+# Evidências brutas são versionadas exatamente como os instrumentos as gravaram.
+# O Locust e o gerador da planilha cega escrevem CSV com fim de linha CRLF;
+# reescrever esses arquivos para passar no `git diff --check` alteraria a evidência.
+* -whitespace

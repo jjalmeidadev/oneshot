@@ -1,0 +1,19 @@
+{
+  "contract_version": "1.0",
+  "conversation_id": "conversation-example-001",
+  "correlation_id": "correlation-example-001",
+  "report_type": "executive_status",
+  "scope": { "type": "subportfolio", "id": "sp-modernizacao" },
+  "period": {
+    "start_date": "2026-08-01",
+    "end_date": "2026-08-31",
+    "label": "Agosto de 2026"
+  },
+  "options": {
+    "audience": "executive_board",
+    "purpose": "monthly_governance",
+    "emphasis": ["schedule", "risks", "benefits"],
+    "additional_context": "Destacar decisões necessárias para o próximo ciclo.",
+    "output_format": "docx"
+  }
+}

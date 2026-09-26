@@ -92,6 +92,7 @@ def test_retrieves_source_extracts_from_database(monkeypatch):
                 "base-atendimento/303#Conteudo",
                 None,
                 None,
+                {"validity": {"start": "2026-08-20", "end": "2026-09-05"}, "status": "Publicado", "line": "Todas", "category": "Regras de uso"},
                 4.5,
             )
         ]
@@ -107,6 +108,11 @@ def test_retrieves_source_extracts_from_database(monkeypatch):
     assert results[0].document.title == "Transporte de bicicleta"
     assert results[0].document.list_name == "Base de Atendimento"
     assert results[0].score == 4.5
+    # DEF-RNF04-01: vigencia, status, linha e categoria vivem em
+    # source_extracts.metadata e precisam sobreviver ate o prompt.
+    assert ("Vigencia", "de 2026-08-20 a 2026-09-05") in results[0].document.attributes
+    assert ("Status", "Publicado") in results[0].document.attributes
+    assert "se.metadata" in connection.cursor_instance.executed_query
     assert "source_extracts" in connection.cursor_instance.executed_query
     assert "project_artifacts" in connection.cursor_instance.executed_query
     assert connection.closed is True
@@ -170,6 +176,7 @@ def test_database_results_are_compatible_with_gemini_source(monkeypatch):
                         "base-atendimento/303#Conteudo",
                         None,
                         None,
+                        {"validity": {"start": "2026-08-20", "end": "2026-09-05"}, "status": "Publicado", "line": "Todas", "category": "Regras de uso"},
                         3.0,
                 )
             ]
@@ -201,7 +208,29 @@ def test_absence_of_database_result_returns_rf08_explicit_response(monkeypatch):
 
     assert response.model == "rag-retriever"
     assert response.sources == []
-    assert "Nao encontrei fontes suficientes" in response.text
+    assert response.text == (
+        "Essa solicitação não está no escopo da base de conhecimento disponível."
+    )
+
+
+def test_generic_fallback_does_not_call_llm_without_rag_context(monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr("app.gemini.client.retrieve_context", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr(
+        "app.gemini.client._call_llm",
+        lambda *_args, **_kwargs: pytest.fail("LLM nao deve responder sem fonte RAG"),
+    )
+
+    response = generate_chat_response(
+        GeminiChatRequest(message="pergunta ambigua"),
+        intent=None,
+    )
+
+    assert response.model == "rag-retriever"
+    assert response.sources == []
+    assert response.text == (
+        "Essa solicitação não está no escopo da base de conhecimento disponível."
+    )
 
 
 def test_database_error_does_not_leak_secret_or_internal_detail(monkeypatch):
@@ -246,3 +275,62 @@ def test_json_fallback_is_explicit_when_database_url_is_absent(monkeypatch):
 
     assert results
     assert results[0].document.title == "Transporte de bicicleta"
+
+
+@pytest.mark.parametrize("use_entities", [True, False])
+def test_explicit_project_excludes_other_projects_even_with_same_keywords(monkeypatch, use_entities):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://synthetic:synthetic@example.test/test")
+    rows = [dict(extract_id=f"extract-{code}", artifact_id=f"artifact-{code}",
+        project_id=f"project-{code}", project_code=code,
+        artifact_title="Status do projeto", content_text="Status: Em andamento",
+        extract_metadata={}, score=10) for code in ["PRJ-9999", "PRJ-0017"]]
+    connect, connection = _connect_with_rows(rows)
+    results = retrieve_database_context(
+        "Qual o status?" if use_entities else "Qual o status do PRJ-0017?",
+        entities=[_entity("PRJ-0017")] if use_entities else [], connect=connect)
+    assert len(results) == 1
+    assert results[0].document.project_id == "project-PRJ-0017"
+    assert connection.cursor_instance.params[2] == ["prj-0017"]
+    assert "requested_projects" in connection.cursor_instance.executed_query
+
+
+def test_absent_project_never_uses_another_projects_source(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://synthetic:synthetic@example.test/test")
+    rows = [dict(extract_id="extract-1", project_id="project-1", project_code="PRJ-9999",
+                 content_text="Status: Em andamento", extract_metadata={}, score=10)]
+    connect, _ = _connect_with_rows(rows)
+    assert retrieve_database_context("Status PRJ-0017", connect=connect) == []
+
+
+def test_local_fallback_without_project_identity_abstains():
+    assert retrieve_context("Status e bicicleta no PRJ-0017") == []
+
+
+def test_project_name_outside_the_register_keeps_other_sources(monkeypatch):
+    # "Linha 2-Verde" vem do lexico do NER, mas nao e um projeto cadastrado.
+    monkeypatch.setenv("DATABASE_URL", "postgresql://synthetic:synthetic@example.test/test")
+    rows = [dict(extract_id="extract-1", artifact_title="Transporte de bicicleta",
+                 content_text="Bicicletas sao aceitas aos sabados.", extract_metadata={}, score=4)]
+    connect, connection = _connect_with_rows(rows)
+    results = retrieve_database_context(
+        "Posso levar bicicleta?", entities=[_entity("Linha 2-Verde")], connect=connect)
+    assert [result.document.title for result in results] == ["Transporte de bicicleta"]
+    assert connection.cursor_instance.params[2] == ["linha 2-verde"]
+
+
+def test_registered_project_name_restricts_sources(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://synthetic:synthetic@example.test/test")
+    rows = [dict(extract_id=f"extract-{index}", project_id=f"project-{index}",
+                 project_code=f"PRJ-000{index}", project_title=title,
+                 content_text="Status: Em andamento", extract_metadata={}, score=4)
+            for index, title in enumerate(["Modernizacao do CCO", "Outro projeto"], start=1)]
+    connect, _ = _connect_with_rows(rows)
+    results = retrieve_database_context(
+        "Qual o status?", entities=[_entity("Modernizacao do CCO")], connect=connect)
+    assert [result.document.project_id for result in results] == ["project-1"]
+
+
+def test_compound_procedure_code_is_not_a_project_scope():
+    titles = [result.document.title for result in retrieve_context(
+        "Qual o procedimento POP-MVP-001 de acessibilidade?")]
+    assert "Atendimento a objeto perdido" in titles

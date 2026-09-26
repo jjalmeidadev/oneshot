@@ -1,0 +1,80 @@
+id,pergunta,resposta,fontes_retornadas,rotulo,justificativa
+RNF04-P-01,Em quais dias e horarios o transporte de bicicleta e permitido?,"*Lembrando que estes dados são fictícios para o ambiente de demonstração do MVP e não representam informações operacionais reais.*
+
+De acordo com a política simulada, o transporte de bicicletas é permitido nos seguintes dias e horários:
+
+* **Sábados, domingos e feriados:** Durante toda a operação [Fonte 1].
+* **Dias úteis:** Apenas após as 20h30 [Fonte 1].
+
+Além disso, é necessário que o passageiro utilize o último carro do trem e respeite a capacidade indicada pela equipe [Fonte 1].",Transporte de bicicleta | Atendimento a objeto perdido | Operacao assistida na Linha Azul,,
+RNF04-P-02,Em qual carro do trem o passageiro deve levar a bicicleta?,"De acordo com as diretrizes simuladas para este ambiente de demonstração (MVP), o passageiro deve utilizar o **último carro** do trem para transportar a bicicleta, respeitando a capacidade indicada pela equipe [Fonte 1]. 
+
+*(Nota: Esta é uma informação fictícia para fins de demonstração e não deve ser considerada como regra operacional real).*",Transporte de bicicleta | Atendimento a objeto perdido | Campanha educativa de embarque,,
+RNF04-P-03,O que fazer quando a leitura do bilhete digital falha na catraca?,"*Lembrando que estas informações são fictícias e fazem parte de um ambiente de demonstração (MVP).*
+
+Caso a leitura do bilhete digital falhe na catraca, você deve seguir os seguintes passos:
+
+1. Aumentar o brilho da tela do celular;
+2. Confirmar que o código está inteiramente visível;
+3. Procurar um agente de atendimento se o problema persistir.
+
+**Fonte:** [Fonte 1]",Uso do bilhete digital no MVP | Comunicacao de indisponibilidade de escada rolante | Atendimento a objeto perdido,,
+RNF04-P-04,Quais informacoes devem ser registradas no atendimento a um objeto perdido?,"*Lembrete: Estas informações são dados fictícios de um ambiente de demonstração (MVP) e não representam procedimentos operacionais reais.*
+
+De acordo com o procedimento fictício, devem ser registradas as seguintes informações no atendimento a um objeto perdido:
+
+* A **descrição do objeto**;
+* O **local** informado pelo passageiro;
+* O **horário** informado pelo passageiro [Fonte 1].
+
+Além disso, deve-se consultar o registro local de achados e perdidos e fornecer um protocolo fictício ao passageiro [Fonte 1].",Atendimento a objeto perdido | Operacao assistida na Linha Azul | Uso do bilhete digital no MVP,,
+RNF04-P-05,Qual e o procedimento quando uma escada rolante fica indisponivel?,"*Aviso: As informações a seguir são dados fictícios baseados em um ambiente de demonstração para o MVP e não representam procedimentos operacionais reais.*
+
+De acordo com os procedimentos simulados, quando uma escada rolante fica indisponível, deve-se adotar as seguintes etapas:
+
+1. Sinalizar o equipamento como indisponível [Fonte 1];
+2. Indicar a alternativa acessível mais próxima [Fonte 1];
+3. Abrir um chamado de manutenção [Fonte 1];
+4. Atualizar o comunicado ao passageiro conforme o status do chamado for alterado [Fonte 1].",Comunicacao de indisponibilidade de escada rolante | Atendimento a objeto perdido,,
+RNF04-P-06,Como a equipe apoia um passageiro com mobilidade reduzida?,"No ambiente de demonstração e com base nos procedimentos fictícios do MVP, o apoio ao passageiro com mobilidade reduzida é realizado da seguinte forma:
+
+1. **Confirmação e Comunicação:** Confirmar a estação de destino do passageiro e comunicar a equipe de recepção [Fonte 1].
+2. **Priorização de Acessibilidade:** Priorizar o uso de elevadores e rotas acessíveis sinalizadas [Fonte 1].
+3. **Indisponibilidade de Equipamentos:** Caso algum equipamento esteja indisponível, orientar o passageiro por uma rota alternativa cadastrada e registrar o atendimento [Fonte 1].
+
+*(Nota: Estas diretrizes são dados simulados para fins de demonstração do sistema e não representam procedimentos operacionais reais).*",Apoio a passageiro com mobilidade reduzida | Atendimento a objeto perdido | Transporte de bicicleta,,
+RNF04-P-07,Qual e o periodo da operacao assistida na Linha 1-Azul?,"*(Nota: Os dados a seguir são fictícios e destinados apenas a este ambiente de demonstração/MVP, não representando informações operacionais reais do Metrô.)*
+
+Com base no contexto fornecido, a operação assistida na Linha Azul prevê testes de sinalização com ampliação do intervalo entre trens no período entre as **22h e o encerramento da operação** [Fonte 1]. 
+
+No entanto, o contexto **não é suficiente** para informar o período completo de datas/calendário (início e término) em que essa operação assistida ocorrerá, mencionando apenas que se trata de um ""período fictício"" [Fonte 1].",Operacao assistida na Linha Azul | Transporte de bicicleta | Apoio a passageiro com mobilidade reduzida,,
+RNF04-P-08,Em qual faixa de horario o intervalo entre trens pode ser ampliado na Linha 1-Azul?,"*Aviso: As informações a seguir são fictícias, destinadas exclusivamente ao ambiente de demonstração (MVP), e não representam dados operacionais reais.*
+
+De acordo com a simulação, na Linha Azul o intervalo entre trens poderá ser ampliado no período **entre 22h e o encerramento da operação** para a realização de testes de sinalização [Fonte 1].",Operacao assistida na Linha Azul | Atendimento a objeto perdido | Uso do bilhete digital no MVP,,
+RNF04-P-09,Qual acesso os passageiros devem usar na Estacao Republica durante a manutencao?,"*Aviso: As informações a seguir são fictícias e fazem parte de um ambiente de demonstração (MVP), não representando dados operacionais reais.*
+
+Durante a manutenção, os passageiros devem utilizar o acesso da **Rua do Arouche**, seguindo a sinalização temporária no local [Fonte 1].",Acesso alternativo na Estacao Republica | Atendimento a objeto perdido | Campanha educativa de embarque,,
+RNF04-P-10,Ate quando vale o comunicado de acesso alternativo da Estacao Republica?,"O contexto fornecido não é suficiente para responder até quando o comunicado é válido. 
+
+De acordo com as informações simuladas disponíveis, é informado apenas que um dos acessos estará fechado para manutenção e que os passageiros devem utilizar a Rua do Arouche [Fonte 1], sem menção a uma data de término ou prazo de validade.
+
+*(Nota: Estes dados são fictícios e fazem parte de um ambiente de demonstração para o MVP, não representando informações operacionais reais).*",Acesso alternativo na Estacao Republica | Apoio a passageiro com mobilidade reduzida | Atendimento a objeto perdido,,
+RNF04-P-11,O que a campanha educativa de embarque orienta os passageiros a fazer?,"Com base nos dados simulados para este ambiente de demonstração, a campanha educativa de embarque orienta que os passageiros devem:
+
+* Aguardar o desembarque antes de entrar no trem [Fonte 1].
+* Manter livre a faixa próxima das portas [Fonte 1].
+
+*(Nota: Estas informações são dados fictícios de teste e não representam procedimentos operacionais reais.)*",Campanha educativa de embarque | Acesso alternativo na Estacao Republica | Apoio a passageiro com mobilidade reduzida,,
+RNF04-P-12,Quais dados sao solicitados ao registrar uma reclamacao?,"{""detail"":""Não foi possível obter uma resposta. Tente novamente em instantes.""}",,,
+RNF04-N-01,Qual e o avanco fisico atual do projeto PRJ-0442?,"{""detail"":""Não foi possível obter uma resposta. Tente novamente em instantes.""}",,,
+RNF04-N-02,Qual e o custo previsto no TAP do projeto PRJ-0442?,"{""detail"":""Não foi possível obter uma resposta. Tente novamente em instantes.""}",,,
+RNF04-N-03,Quem e o gerente do projeto PRJ-0442?,"{""detail"":""Não foi possível obter uma resposta. Tente novamente em instantes.""}",,,
+RNF04-N-04,Quais riscos estao registrados para o projeto PRJ-0442?,"{""detail"":""Não foi possível obter uma resposta. Tente novamente em instantes.""}",,,
+RNF04-N-05,Qual e a data planejada do proximo marco do projeto PRJ-0442?,"{""detail"":""Não foi possível obter uma resposta. Tente novamente em instantes.""}",,,
+RNF04-N-06,Compare o avanco do projeto PRJ-0442 com o do projeto PRJ-0518.,"{""detail"":""Não foi possível obter uma resposta. Tente novamente em instantes.""}",,,
+RNF04-N-07,Qual e o valor atual da tarifa do metro?,"{""detail"":""Não foi possível obter uma resposta. Tente novamente em instantes.""}",,,
+RNF04-N-08,Qual e o horario de funcionamento da Linha 2-Verde?,"{""detail"":""Não foi possível obter uma resposta. Tente novamente em instantes.""}",,,
+RNF04-N-09,Quantos passageiros foram transportados em julho de 2026?,"{""detail"":""Não foi possível obter uma resposta. Tente novamente em instantes.""}",,,
+RNF04-N-10,As estacoes oferecem Wi-Fi gratuito aos passageiros?,"{""detail"":""Não foi possível obter uma resposta. Tente novamente em instantes.""}",,,
+RNF04-N-11,Qual e a politica para transporte de animais de estimacao?,"{""detail"":""Não foi possível obter uma resposta. Tente novamente em instantes.""}",,,
+RNF04-N-12,Quando a obra da Linha 6-Laranja sera concluida?,"{""detail"":""Não foi possível obter uma resposta. Tente novamente em instantes.""}",,,

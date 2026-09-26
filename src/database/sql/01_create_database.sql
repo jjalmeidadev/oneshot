@@ -404,6 +404,20 @@ CREATE TABLE public.intent_catalog (
     )
 );
 
+CREATE TABLE public.secondary_intents (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    specific_intent_id UUID NOT NULL REFERENCES public.intent_catalog(id) ON DELETE CASCADE,
+    secondary_intent VARCHAR(120) NOT NULL,
+    description TEXT NOT NULL,
+    rag_instruction TEXT NOT NULL,
+    display_message TEXT NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT secondary_intents_unique_association UNIQUE (specific_intent_id, secondary_intent),
+    CONSTRAINT secondary_intents_name_ck CHECK (secondary_intent ~ '^[a-z][a-z0-9_]*$')
+);
+
 CREATE TABLE public.prompt_templates (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     intent_id UUID REFERENCES public.intent_catalog(id) ON DELETE SET NULL,
@@ -434,6 +448,24 @@ CREATE TABLE public.ai_conversations (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT ai_conversations_channel_ck CHECK (channel IN ('teams', 'webchat', 'copilot_studio', 'api', 'teste')),
     CONSTRAINT ai_conversations_status_ck CHECK (conversation_status IN ('ativa', 'finalizada', 'abandonada', 'erro'))
+);
+
+CREATE TABLE public.pending_proactive_suggestions (
+    id UUID PRIMARY KEY,
+    requester_id VARCHAR(120) NOT NULL,
+    external_conversation_id VARCHAR(160) NOT NULL,
+    original_message TEXT NOT NULL,
+    secondary_intent JSONB NOT NULL,
+    sources JSONB NOT NULL DEFAULT '[]'::jsonb,
+    prepared_response TEXT NOT NULL,
+    prepared_model VARCHAR(160) NOT NULL,
+    prepared_interaction_id VARCHAR(1024),
+    expires_at TIMESTAMPTZ NOT NULL,
+    claimed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT pending_proactive_secondary_object_ck CHECK (jsonb_typeof(secondary_intent) = 'object'),
+    CONSTRAINT pending_proactive_sources_array_ck CHECK (jsonb_typeof(sources) = 'array')
 );
 
 CREATE TABLE public.ai_interactions (
@@ -564,8 +596,11 @@ CREATE INDEX idx_users_email ON public.users(email);
 CREATE INDEX idx_access_rules_user_id ON public.access_rules(user_id);
 CREATE INDEX idx_access_rules_role_name ON public.access_rules(role_name);
 CREATE INDEX idx_intent_catalog_macro ON public.intent_catalog(macro_intent);
+CREATE INDEX idx_secondary_intents_specific_intent_id ON public.secondary_intents(specific_intent_id);
 CREATE INDEX idx_prompt_templates_intent_id ON public.prompt_templates(intent_id);
 CREATE INDEX idx_ai_conversations_user_id ON public.ai_conversations(user_id);
+CREATE INDEX idx_pending_proactive_scope ON public.pending_proactive_suggestions(requester_id, external_conversation_id);
+CREATE INDEX idx_pending_proactive_expires_at ON public.pending_proactive_suggestions(expires_at);
 CREATE INDEX idx_ai_interactions_conversation_id ON public.ai_interactions(conversation_id);
 CREATE INDEX idx_ai_interactions_intent_id ON public.ai_interactions(intent_id);
 CREATE INDEX idx_ai_interactions_created_at ON public.ai_interactions(created_at DESC);
@@ -602,8 +637,10 @@ CREATE TRIGGER trg_change_records_updated_at BEFORE UPDATE ON public.change_reco
 CREATE TRIGGER trg_users_updated_at BEFORE UPDATE ON public.users FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_access_rules_updated_at BEFORE UPDATE ON public.access_rules FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_intent_catalog_updated_at BEFORE UPDATE ON public.intent_catalog FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TRIGGER trg_secondary_intents_updated_at BEFORE UPDATE ON public.secondary_intents FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_prompt_templates_updated_at BEFORE UPDATE ON public.prompt_templates FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_ai_conversations_updated_at BEFORE UPDATE ON public.ai_conversations FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TRIGGER trg_pending_proactive_updated_at BEFORE UPDATE ON public.pending_proactive_suggestions FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_ai_interactions_updated_at BEFORE UPDATE ON public.ai_interactions FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_consulted_sources_updated_at BEFORE UPDATE ON public.consulted_sources FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_audit_events_updated_at BEFORE UPDATE ON public.audit_events FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
@@ -628,6 +665,8 @@ COMMENT ON TABLE public.change_records IS 'Registros de mudancas de projeto ou s
 COMMENT ON TABLE public.users IS 'Usuarios simulados ou autenticados via Microsoft Entra ID em evolucao futura.';
 COMMENT ON TABLE public.access_rules IS 'Regras de acesso por usuario, perfil, projeto, subportfolio ou escopo de permissao.';
 COMMENT ON TABLE public.intent_catalog IS 'Catalogo hierarquico de macrointencoes, intencoes especificas, handlers e limiares do classificador.';
+COMMENT ON TABLE public.secondary_intents IS 'Sugestoes proativas vinculadas a intencoes especificas e enviadas ao RAG como proximo passo opcional.';
+COMMENT ON TABLE public.pending_proactive_suggestions IS 'Confirmacoes proativas efemeras, vinculadas a identidade e conversa e compartilhadas entre workers.';
 COMMENT ON TABLE public.prompt_templates IS 'Templates de prompts usados por Copilot Studio, Microsoft 365 Copilot, Power Automate ou PLN local.';
 COMMENT ON TABLE public.ai_conversations IS 'Sessoes conversacionais agrupando interacoes de um usuario em um canal.';
 COMMENT ON TABLE public.ai_interactions IS 'Interacoes processadas pelo agente, incluindo prompt, classificacao, rota, resposta e status.';

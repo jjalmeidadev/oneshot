@@ -44,6 +44,14 @@
     - [2.3.5 Pontos de melhoria](#235-pontos-de-melhoria)
     - [2.3.6 Efetividade das ações da Sprint 2](#236-efetividade-das-ações-da-sprint-2)
     - [2.3.7 Ações de melhoria para a Sprint 4](#237-ações-de-melhoria-para-a-sprint-4)
+  - [2.4 Sprint 4](#24-sprint-4)
+    - [2.4.1 Contexto e critério de apuração](#241-contexto-e-critério-de-apuração)
+    - [2.4.2 Indicadores medidos e resultado das metas](#242-indicadores-medidos-e-resultado-das-metas)
+    - [2.4.3 Entregas e pendências](#243-entregas-e-pendências)
+    - [2.4.4 Pontos fortes](#244-pontos-fortes)
+    - [2.4.5 Pontos de melhoria](#245-pontos-de-melhoria)
+    - [2.4.6 Efetividade das ações da Sprint 3](#246-efetividade-das-ações-da-sprint-3)
+    - [2.4.7 Ações de melhoria para a Sprint 5](#247-ações-de-melhoria-para-a-sprint-5)
 - [3. Matriz de risco](#3-matriz-de-risco)
   - [3.1 Critérios de avaliação](#31-critérios-de-avaliação)
   - [3.2 Registro consolidado e status na Sprint 2](#32-registro-consolidado-e-status-na-sprint-2)
@@ -57,12 +65,19 @@
   - [3.10 Efetividade das respostas aos riscos](#310-efetividade-das-respostas-aos-riscos)
   - [3.11 Matriz probabilidade × impacto da Sprint 3](#311-matriz-probabilidade-impacto-da-sprint-3)
   - [3.12 Três riscos mais críticos no fechamento](#312-três-riscos-mais-críticos-no-fechamento)
+  - [3.13 Registro consolidado e status na Sprint 4](#313-registro-consolidado-e-status-na-sprint-4)
+  - [3.14 Histórico acrescido na Sprint 4](#314-histórico-acrescido-na-sprint-4)
+  - [3.15 Efetividade das respostas aos riscos na Sprint 4](#315-efetividade-das-respostas-aos-riscos-na-sprint-4)
+  - [3.16 Matriz probabilidade × impacto da Sprint 4](#316-matriz-probabilidade-impacto-da-sprint-4)
+  - [3.17 Três riscos mais críticos no fechamento da Sprint 4](#317-três-riscos-mais-críticos-no-fechamento-da-sprint-4)
 - [4. Matriz de papéis e responsabilidades](#4-matriz-de-papéis-e-responsabilidades)
   - [4.1 Matriz da Sprint 1](#41-matriz-da-sprint-1)
   - [4.2 Matriz da Sprint 2](#42-matriz-da-sprint-2)
   - [4.3 Rotação de papéis entre as sprints](#43-rotação-de-papéis-entre-as-sprints)
   - [4.4 Matriz da Sprint 3](#44-matriz-da-sprint-3)
   - [4.5 Rotação e equilíbrio após três sprints](#45-rotação-e-equilíbrio-após-três-sprints)
+  - [4.6 Matriz da Sprint 4](#46-matriz-da-sprint-4)
+  - [4.7 Rotação e equilíbrio após quatro sprints](#47-rotação-e-equilíbrio-após-quatro-sprints)
 - [5. Contrato de convivência, SLA e rituais](#5-contrato-de-convivência-sla-e-rituais)
   - [5.1 Regra de ouro](#51-regra-de-ouro)
   - [5.2 Dailies](#52-dailies)
@@ -73,7 +88,8 @@
   - [5.7 Comunicação oficial](#57-comunicação-oficial)
   - [5.8 Registro de revisões do contrato](#58-registro-de-revisões-do-contrato)
   - [5.9 Revisão após a Sprint 3](#59-revisão-após-a-sprint-3)
-- [6. Planejamento das Sprints 3 e 4](#6-planejamento-das-sprints-3-e-4)
+  - [5.10 Revisão após a Sprint 4](#510-revisão-após-a-sprint-4)
+- [6. Planejamento das Sprints 3, 4 e 5](#6-planejamento-das-sprints-3-4-e-5)
   - [6.1 Visão geral da Sprint 3](#61-visão-geral-da-sprint-3)
   - [6.2 Backlog planejado da Sprint 3](#62-backlog-planejado-da-sprint-3)
     - [Artefato 1 — Desenvolvimento e Documentação Técnica do Projeto](#artefato-1-desenvolvimento-e-documentação-técnica-do-projeto)
@@ -87,6 +103,11 @@
     - [6.4.2 Backlog refinado por resultado](#642-backlog-refinado-por-resultado)
     - [6.4.3 Sequenciamento e dependências](#643-sequenciamento-e-dependências)
     - [6.4.4 Distribuição da capacidade](#644-distribuição-da-capacidade)
+  - [6.5 Planejamento da Sprint 5](#65-planejamento-da-sprint-5)
+    - [6.5.1 Premissas, capacidade e limites](#651-premissas-capacidade-e-limites)
+    - [6.5.2 Backlog refinado por resultado](#652-backlog-refinado-por-resultado)
+    - [6.5.3 Sequenciamento e dependências](#653-sequenciamento-e-dependências)
+    - [6.5.4 Distribuição da capacidade](#654-distribuição-da-capacidade)
 - [7. Gestão do processo de desenvolvimento do grupo](#7-gestão-do-processo-de-desenvolvimento-do-grupo)
   - [7.1 Fluxo de trabalho no Kanban](#71-fluxo-de-trabalho-no-kanban)
   - [7.2 Regras obrigatórias para issues](#72-regras-obrigatórias-para-issues)
@@ -95,10 +116,11 @@
   - [7.5 SLA operacional](#75-sla-operacional)
   - [7.6 Função do scrum master no merge](#76-função-do-scrum-master-no-merge)
   - [7.7 Revisão das políticas após a Sprint 3](#77-revisão-das-políticas-após-a-sprint-3)
+  - [7.8 Revisão das políticas após a Sprint 4](#78-revisão-das-políticas-após-a-sprint-4)
 
 # 1. Introdução
 
-Este documento consolida as práticas de gestão de projeto do G05, cobrindo a evolução das Sprints 1, 2 e 3, a matriz de riscos, a rotação de papéis, o contrato de convivência, o planejamento da Sprint 4 e a gestão do processo de desenvolvimento do grupo.
+Este documento consolida as práticas de gestão de projeto do G05, cobrindo a evolução das Sprints 1 a 4, a matriz de riscos, a rotação de papéis, o contrato de convivência, o planejamento das Sprints 4 e 5 e a gestão do processo de desenvolvimento do grupo.
 
 O arquivo `docs/GestaoConfiguracao.md` centraliza GitFlow, políticas de branches, hooks, gates de integração e versionamento de artefatos técnicos.
 
@@ -112,11 +134,11 @@ Além de registrar o processo, este documento também funciona como acordo opera
 
 Este documento contempla:
 
-- Retrospectivas das Sprints 1, 2 e 3, com indicadores comparáveis e ações verificáveis;
+- Retrospectivas das Sprints 1 a 4, com indicadores comparáveis e ações verificáveis;
 - Matriz de riscos atualizada, com histórico, responsável e data da última revisão;
-- Matrizes de papéis e responsabilidades das três sprints;
+- Matrizes de papéis e responsabilidades das quatro sprints;
 - Contrato de convivência, SLA e rituais;
-- Registro histórico do planejamento da Sprint 3 e planejamento atômico da Sprint 4;
+- Registro histórico do planejamento das Sprints 3 e 4 e planejamento atômico da Sprint 5;
 - Gestão do processo de desenvolvimento, incluindo Kanban, dailies, revisão e merge.
 
 # 2. Análise das sprints
@@ -376,6 +398,191 @@ Quatro das cinco ações falharam total ou parcialmente pelo mesmo motivo identi
 | Criar teste de contrato e ponta a ponta para cada ligação da cadeia mínima | Antes do MR que declara uma integração concluída | Autor e revisor | Evidência separada para frontend→API, áudio→STT→PLN, PLN→Supabase e resposta→frontend |
 | Registrar evidência de execução dos testes planejados | Antes de mover a issue para `Closed` | Responsável pela task | Log, resultado e falha/correção anexados à issue; plano sem execução não conta como teste concluído |
 
+## 2.4 Sprint 4
+
+### 2.4.1 Contexto e critério de apuração
+
+A Sprint 4 teve três artefatos: Desenvolvimento e Documentação Técnica do Projeto, Execução de Testes Sistêmicos e Gestão de Projetos Evolutiva, esta acompanhada da viabilidade financeira. O planejamento da Seção 6.4 comprometeu 58 tasks em 88,5 horas, com uma cadeia de marcos que ia da integridade do repositório ao diagnóstico de qualidade, passando por dados auditáveis, caminho de consulta integrado, ambiente em nuvem e fluxos essenciais do Copilot.
+
+Dois fatos externos mudaram o percurso. O primeiro foi a informação do Metrô de que não disponibilizaria acesso ao Copilot Studio: os fluxos `transacao_gerar_relatorio` e `alerta_prazo_atraso` passaram a ser implementados como workflow guiado no frontend e no backend, com o relatório gerado em DOCX pelo backend e o alerta processado por filas no RabbitMQ. A decisão está registrada na Frente D da Seção 6.4.2 (`b071f16`). O segundo foi a cota diária do provedor gratuito de LLM, que bloqueou a primeira coleta do RNF04 em 21/09 e levou as rodadas de RNF04 e RNF05 a um provedor pago.
+
+O recorte adotado é de **11/09/2026 a 25/09/2026**, sobre `origin/develop`, com apuração final em **25/09/2026, depois da integração do último merge request da sprint** ([!108](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/108), às 16h32). O ponto de partida é `2170a8e`, último commit da linha principal de `develop` antes do recorte, e o estado final é `964cd8c`. O saldo contém 617 arquivos alterados, 90.673 inserções e 8.791 remoções. Evidências versionadas — CSVs das rodadas de carga, respostas coletadas em JSON e relatórios de execução — respondem pela maior parte desse volume e não devem ser lidas como esforço.
+
+Os commits de 10/09 posteriores à apuração da Sprint 3 pertencem ao fechamento daquela sprint e ficam fora dos dois recortes. Em 11/09 entraram quatro merge requests de issues da Sprint 3 ([!79](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/79), [!80](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/80), [!82](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/82) e [!83](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/83)); eles contam nos indicadores por data, mas não como entrega da Sprint 4.
+
+As datas estão convertidas para o fuso de São Paulo, porque os commits de merge gerados pelo GitLab são gravados em UTC e, sem conversão, parte deles mudaria de dia. Os dados de merge request — criação, integração, revisor, squash e primeira revisão — foram extraídos da API do GitLab. Comandos de reprodução do recorte:
+
+```bash
+TZ=America/Sao_Paulo git log origin/develop --since="2026-09-11 00:00:00 -0300" --until="2026-09-25 23:59:59 -0300" --date=format-local:"%Y-%m-%d %H:%M" --pretty=format:"%h|%ad|%an|%P|%s"
+TZ=America/Sao_Paulo git log origin/develop --no-merges --since="2026-09-11 00:00:00 -0300" --until="2026-09-25 23:59:59 -0300" --pretty=format:"%h|%an|%s"
+git diff --shortstat 2170a8e 964cd8c
+```
+
+### 2.4.2 Indicadores medidos e resultado das metas
+
+As metas da Sprint 4 são as que a Seção 2.3.7 manteve ou definiu. Os dois últimos indicadores da tabela são novos e respondem a fatos da própria sprint.
+
+| Indicador | Sprint 1 | Sprint 2 | Sprint 3 | Meta da Sprint 4 | Sprint 4 | Resultado |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Commits no período | 69 | 49 | 30 | — | 107 | — |
+| Commits de entrega sem merge | 23 locais | 22 squash | 15 | — | 75 (58 locais e 17 de squash) | — |
+| Commits de merge | 27 | 23 | 15 | — | 32 (26 MRs e 6 atualizações de branch) | — |
+| Commits nos dois últimos dias ativos | 45 de 69 (65%) | 26 de 49 (53%) | 17 de 30 (56,7%) | ≤ 40% | 41 de 107 (38,3%), em 24–25/09 | ✅ atingida |
+| Commits no dia de maior concentração | 29 de 69 (42%) | 15 de 49 (30%) | 10 de 30 (33,3%) | ≤ 25% | 30 de 107 (28,0%), em 23/09 | ❌ não atingida |
+| Commits de entrega com tipo válido | — | 8 de 22 (36%) | 8 de 15 (53,3%) | 100% | 69 de 75 (92,0%) | ❌ não atingida |
+| Commits de entrega na regra completa do hook | — | 5 de 22 (23%) | 6 de 15 (40%) | 100% | 65 de 75 (86,7%) | ❌ não atingida |
+| Commits de squash na regra completa | 6 de 19 (32%)¹ | 5 de 22 (23%) | não separado | 100% | 8 de 17 (47,1%) | ❌ não atingida |
+| Títulos de MR no padrão da Seção 5.3.1 do `GestaoConfiguracao.md` | — | — | — | validação automática | 7 de 26 (26,9%) | ❌ não atingida |
+| MRs integrados nos dois últimos dias ativos | — | 4 retidos até o fechamento | 9 de 15 (60%) | — | 15 de 26 (57,7%) | ⚠️ leve queda |
+| MRs com primeira revisão depois de 48 h | — | — | não recuperável | 0 | 4 de 26 ([!88](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/88), [!90](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/90), [!91](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/91), [!93](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/93)) | ❌ não atingida |
+| Tasks na faixa G no planejamento | — | 48 de 48 (100%) | 16 de 26 (62%) | ≤ 55% | 31 de 58 (53,4%) | ✅ atingida |
+| Tasks com prioridade Alta | — | não comparável | 23 de 26 (88%) | ≤ 50% | 29 de 58 (50%) | ✅ atingida |
+| Marcadores de conflito em arquivos versionados | não apurado | não apurado | 5 arquivos | 0 | 0 | ✅ atingida |
+| Registros de daily com os quatro campos | — | — | 0 de 3 relatórios | ≥ 90% | registros não fornecidos | ⚪ não verificável |
+| Tasks planejadas excluídas do board | — | — | — | — | 11 de 58 (19%) | novo indicador |
+| Issues com entrega integrada e ainda abertas no corte | — | — | — | — | 6 (5 planejadas e 1 extra) | novo indicador |
+
+¹ Na Sprint 1, o critério contava apenas o tipo; a referência `#N` só passou a compor a regra na Sprint 2.
+
+**A meta dos dois últimos dias foi atingida, mas o indicador deixou de medir o que pretendia.** Pela primeira vez a concentração ficou abaixo de 40%. O trabalho, porém, continuou chegando tarde: de 11 a 21/09 foram 16 commits (15%), nove deles em 11/09 e ligados ao fechamento da Sprint 3; de 22 a 25/09, 91 commits (85%) e 18 dos 26 merge requests (69%). A concentração não diminuiu, mudou de janela — de dois para quatro dias. Por isso a Sprint 5 passa a medir também a fração do trabalho integrada na primeira metade da sprint (Seção 2.4.7).
+
+**A convenção melhorou por um caminho que ninguém planejou.** Nove merge requests foram integrados sem squash e trouxeram para `develop` 58 commits criados localmente, dos quais 57 passam na regra completa do hook — o único fora dela, `ba5f5af`, excede 72 caracteres. Os 17 commits gerados pelo squash no servidor ficaram em 8 na regra completa. O salto de 40% para 86,7% vem, portanto, dos commits que passaram pelo hook, e não de uma melhora no título dos merge requests: apenas 7 dos 26 seguem o padrão da Seção 5.3.1 do `GestaoConfiguracao.md`. O problema, que já se repete há três sprints, está localizado no título do MR, e a ação correspondente — a validação automática — não foi executada.
+
+**A revisão atrasou em quatro merge requests.** [!88](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/88) esperou 65 horas pela primeira revisão, [!91](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/91) 69 horas, [!93](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/93) 52 horas e [!90](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/90) 169 horas, com conflito, até ser integrado em 24/09. Não há registro no GitLab do inventário de quarta-feira que deveria ter exposto esses casos.
+
+**As dailies continuam sem evidência.** Nenhum registro de daily da Sprint 4 foi fornecido para esta apuração. Assim como na Sprint 3, não se conclui que as dailies não ocorreram; conclui-se que o contrato não produziu registro verificável, pela segunda sprint consecutiva.
+
+### 2.4.3 Entregas e pendências
+
+A tabela confronta as 58 tasks planejadas na Seção 6.4.2 com o estado no GitLab e em `origin/develop` no corte. "Excluída" indica issue apagada do GitLab; nenhuma das exclusões tem comentário, decisão registrada ou redistribuição associada.
+
+| Task | Issue | Situação no corte | Evidência ou limite |
+| :---: | :---: | --- | --- |
+| S4-01 | [#191](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/191) | ✅ Entregue | [!81](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/81) removeu os marcadores do `README.md`, do diagrama de componentes e do notebook do classificador |
+| S4-02 | #192 | 🗑️ Excluída; coberta | Marcadores do `.gitignore` removidos em `7503050` ([#131](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/131)) e do `pre-commit` em `531caa2` ([!79](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/79)), fora da issue; uma regra do `.gitignore` perdida numa resolução posterior foi restaurada em `fb15994` |
+| S4-03A | [#193](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/193) | ✅ Entregue | [!81](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/81) |
+| S4-03B | [#194](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/194) | ✅ Entregue | [!81](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/81); o notebook é JSON válido no corte |
+| S4-04 | #195 | ❌ Não entregue; excluída | Nem o `pre-commit` nem a pipeline verificam marcadores; a `develop` fechou sem marcadores por revisão manual |
+| S4-05 | #196 | ❌ Não entregue; excluída | Validação de título inexistente; 7 de 26 títulos de MR no padrão |
+| S4-07 | #197 | 🗑️ Excluída; coberta | Conexão exercida pela integração do [!80](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/80) e pela aplicação do esquema no [!94](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/94) |
+| S4-08 | [#198](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/198) | ✅ Entregue | [!94](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/94) |
+| S4-09 | [#199](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/199) | ✅ Entregue | [!94](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/94) |
+| S4-11 | [#200](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/200) | ✅ Executada | [!98](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/98): 5 aprovados, 3 falharam (D-02, D-03 e D-04) e 4 bloqueados pelo D-01 |
+| S4-12 | [#201](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/201) | ✅ Entregue | [!88](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/88) |
+| S4-13 | [#202](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/202) | ✅ Entregue | [!90](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/90), integrado após sete dias e resolução de conflito |
+| S4-14A | #203 | 🗑️ Excluída; coberta em parte | Contrato 1.1.0, com `trace_id`, publicado pelo [!100](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/100) |
+| S4-14B | #204 | 🗑️ Excluída; coberta em parte | Frontend passou a consumir as referências no [!106](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/106) |
+| S4-15 | [#205](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/205) | ✅ Entregue | [!102](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/102) |
+| S4-16 | #206 | 🗑️ Excluída; coberta | Consulta com recuperação e fontes exercitada no E2E da S4-20 ([!100](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/100)) e no CT-RF05-01 ([!99](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/99)) |
+| S4-17A | [#207](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/207) | ✅ Entregue | [!106](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/106) |
+| S4-19 | [#208](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/208) | ⚠️ Renomeada para "Issue duplicada (ignorar)" e fechada | Cenários de ausência cobertos por CT-RF04-02 e CT-RF05-02 ([!99](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/99)) e por CT-RNF04-N ([!96](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/96)) |
+| S4-20 | [#209](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/209) | ✅ Entregue; issue aberta | [!100](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/100): 5 aprovados e 2 bloqueados |
+| S4-21A | [#210](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/210) | ⚠️ Resultado registrado; issue aberta | Metrô sem acesso ao Copilot Studio, registrado na Frente D (`b071f16`) |
+| S4-22 | [#211](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/211) | ⚠️ Fechada sem MR | `feat/configurar-connector-openapi` não foi integrada e ficou obsoleta com a decisão acima |
+| S4-23A | [#212](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/212) | ✅ Entregue, replanejada | Fluxo guiado do relatório no frontend e no backend ([!92](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/92)), Seção 8.5.10 do `Projeto.md` |
+| S4-23B | [#213](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/213) | ✅ Entregue, replanejada | DOCX gerado pelo backend no lugar do Power Automate ([!92](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/92)) |
+| S4-24A | [#214](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/214) | ✅ Entregue | [!93](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/93) |
+| S4-24B | [#215](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/215) | ✅ Entregue, replanejada | Regra e notificação com scheduler, RabbitMQ e central de notificações ([!93](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/93)), Seção 8.5.11 |
+| S4-25A | #216 | 🗑️ Excluída; obsoleta | O roteamento determinístico `guided_workflow` substituiu o roteamento ao Copilot |
+| S4-25B | #217 | ❌ Não entregue; excluída | Nenhum webhook implementado; o relatório é gerado no backend |
+| S4-25C | #218 | ❌ Não entregue; excluída | O alerta trocou o webhook por AMQP; o barema exige dois webhooks, que voltam na Sprint 5 |
+| S4-26A | [#219](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/219) | ✅ Entregue | [!92](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/92) |
+| S4-26B | [#220](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/220) | ✅ Entregue | [!93](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/93); evidências em `src/backend/evidencias/alerta-prazo-atraso` |
+| S4-27 | [#221](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/221) | ✅ Entregue | [!105](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/105): AWS EC2 com Docker Compose, RabbitMQ e CloudWatch |
+| S4-28 | [#222](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/222) | ✅ Entregue; issue aberta | [!105](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/105) e [!108](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/108); `/health` e `POST /api/chat` pelo túnel (Seção 10.2.10) |
+| S4-29 | [#223](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/223) | ✅ Entregue; issue aberta | [!105](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/105); `GET /` com HTTP 200 pelo túnel |
+| S4-30 | [#224](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/224) | ⚠️ Parcial; issue aberta | Smoke test registrado na Seção 10.2.10; rollback implementado em `scripts/aws/rollback.ps1`, sem execução intencional registrada |
+| S4-30B | #225 | 🗑️ Excluída; coberta | CloudWatch Agent e runbook `aws-operacao.md` ([!105](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/105) e [!108](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/108)) |
+| S4-31 | [#226](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/226) | ✅ Entregue; issue aberta | [!107](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/107): cache VHS implementado e testado localmente; homologação com o Azure real não executada |
+| S4-32A | [#227](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/227) | ✅ Executada | [!99](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/99): 16 casos aprovados e 4 que falharam |
+| S4-32B | [#228](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/228) | ✅ Executada | [!104](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/104): 210 aprovados e 6 `xfail` na confirmação; VHS bloqueado na data da rodada |
+| S4-33 | [#229](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/229) | ✅ Executada | [!103](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/103): 2 aprovados, 2 reprovados e 2 bloqueados |
+| S4-34 | [#230](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/230) | ✅ Executada | [!96](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/96): CT-RNF04-P 12 de 12 e CT-RNF04-N 10 de 12 |
+| S4-35 | [#231](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/231) | ✅ Executada | [!96](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/96): 3ª rodada aprovada, com P95 de até 8,4 s |
+| S4-36 | [#232](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/232) | ✅ Executada; RNF06 reprovado | [!95](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/95): F1-macro 0,8327 e *recall*@3 0,5556 |
+| S4-39 a S4-42 | [#233](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/233) a [#236](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/236) | ✅ Executadas, com ressalvas | [!101](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/101): seis sessões, SUS com mediana 83,75; vagas de gestão e de ferramentas Microsoft vazias |
+| S4-46 e S4-47 | [#237](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/237) e [#238](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/238) | ⚠️ Em revisão; sem artefato versionado | Material da Sprint Review fora do repositório |
+| S4-48A a S4-51B | [#239](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/239) a [#245](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/245) | 🟡 Nesta entrega | — |
+| S4-52A a S4-52C | [#246](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/246) a [#248](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/248) | ⚠️ Em revisão; não integradas | Nenhum commit de viabilidade financeira em `origin/develop` no corte |
+
+> **Nota de atualização — Sprint 5 (25/09/2026).** As linhas S4-25B e
+> S4-25C preservam o estado verdadeiro no fechamento da Sprint 4: naquele
+> corte, nenhum webhook havia sido entregue. Depois desse registro histórico,
+> a Sprint 5 implementou `POST /api/integrations/power-automate/report-results`
+> e `POST /api/integrations/notifications/delivery-results`. O segundo grava
+> outbox e é processado pelo RabbitMQ; o scheduler e AMQP continuam não sendo
+> classificados como webhook. Contratos e evidências: Seção 8.5.12 do
+> `Projeto.md`.
+
+Das 58 tasks, **31 foram entregues ou executadas** com evidência integrada, **9 ficaram parciais ou sem evidência versionada**, **4 não foram entregues**, **7 foram excluídas por estarem cobertas por outra entrega ou obsoletas** e **7 compõem esta entrega de gestão**.
+
+Entraram também cinco issues fora do plano: [#250](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/250) e [#251](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/251) ([!91](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/91) e [!89](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/89)), de acurácia e intenções secundárias; [#253](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/253) ([!97](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/97)), de economia de tokens; [#254](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/254) ([!108](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/108)), de documentação do deploy, integrada e ainda aberta; e [#252](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/252), em revisão e sem MR.
+
+O conjunto sustenta um caminho demonstrável de ponta a ponta: interface → API → classificação → recuperação → resposta → Supabase, por texto e por áudio, com relatório e alerta guiados, publicado na AWS. Três lacunas ficam declaradas e seguem para a Sprint 5: não há controle de acesso por perfil (D-01), não há webhooks e a comparação entre projetos sai parcial, porque a base consultada pelo chat não tem documentos de todos os projetos.
+
+> **Leitura temporal.** A frase anterior é a retrospectiva do corte da Sprint
+> 4 e não descreve mais o estado atual. Na Sprint 5, os dois webhooks foram
+> implementados e testados; a confirmação de entrega foi integrada à outbox e
+> aos handlers RabbitMQ. Integrações reais com Power Automate, Teams e tenant
+> Microsoft continuam opcionais/não homologadas e foram validadas somente com
+> simulador ou double controlado.
+
+### 2.4.4 Pontos fortes
+
+**Testes sistêmicos executados com método e reprodutíveis.** Todos os tipos planejados foram executados: RF01 a RF10 (20 casos, 16 aprovados e 4 que falharam), RNF01 a RNF06, integração (210 aprovados e 6 defeitos conhecidos marcados como `xfail`), E2E textual com RAG e usabilidade com seis participantes externos. Cada rodada tem congelamento prévio, evidência versionada e comando de reprodução. As reprovações foram publicadas como diagnóstico, e não escondidas: o RNF06 reprovou na recuperação com uma massa prospectiva construída justamente para não reaproveitar os casos usados no ajuste.
+
+**O caminho ponta a ponta passou a existir e está publicado.** O risco mais grave da Sprint 3, R14, foi mitigado. Texto e áudio atravessam classificação, recuperação e resposta com persistência correlacionada no Supabase (S4-11, S4-13 e S4-20), relatório e alerta rodam de ponta a ponta, e a aplicação responde na AWS com backend, frontend, RabbitMQ e workers saudáveis (Seção 10.2.10 do `Projeto.md`).
+
+**A arquitetura absorveu a perda do Copilot Studio sem reescrita.** Quando o Metrô informou que não haveria acesso ao ambiente, os dois fluxos essenciais foram reimplementados como workflow guiado sobre o mesmo pipeline de classificação, e o alerta ganhou mensageria real com filas duráveis, *dead-letter queues* e outbox. A troca de provedor de LLM também não alterou as camadas anteriores: no CT-E2E-04, intenção, confiança e fontes ficaram idênticas nos dois modelos.
+
+**O classificador atingiu a meta que faltava.** O F1-macro da intenção específica subiu de 0,7401 para 0,8327 com a [#251](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/251), acima do mínimo de 0,80 do RNF06, e o benchmark de economia de tokens ([#253](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/253)) passou a orientar quais intenções chamam o LLM.
+
+**A autoria ficou distribuída.** Os seis integrantes têm merge requests integrados no recorte, entre três e seis cada, e todos revisaram MRs de outros integrantes.
+
+### 2.4.5 Pontos de melhoria
+
+**O plano deixou de corresponder ao board, sem registro.** Onze tasks planejadas foram apagadas do GitLab, uma foi renomeada para "Issue duplicada (ignorar)" e cinco foram criadas durante a sprint. Parte das exclusões tem justificativa técnica visível no código — cobertura por outra task ou obsolescência depois da decisão sobre o Copilot —, mas nenhuma tem decisão registrada. Duas delas eram as ações de melhoria mais importantes da Sprint 3 (S4-04 e S4-05) e duas eram os webhooks exigidos pelo barema (S4-25B e S4-25C). Excluir uma issue apaga também a evidência de que ela existiu, e a Seção 6.4.2 passou a listar tasks que o board não tem.
+
+**Os controles automáticos prometidos não foram construídos.** Pela terceira sprint consecutiva, a ação sobre o título do MR falhou: a validação não foi configurada e só 7 dos 26 títulos seguem o padrão. O gate de marcadores também não existe. A `develop` fechou sem marcadores porque a revisão manual funcionou nesta sprint, não porque haja uma barreira.
+
+**A distribuição executada divergiu da planejada.** Das 47 tasks planejadas que ainda existem no board, apenas 5 ficaram com o executor previsto na Seção 6.4.4. A carga estimada por responsável no corte vai de 3 h a 20,5 h, contra 14 a 15 h no plano, e as sete tasks de gestão voltaram a se concentrar em uma pessoa, como na Sprint 3. A regra da Seção 6.4.1 — "a atribuição só muda quando a redistribuição e seu efeito na carga forem registrados" — não foi aplicada (Seção 4.6).
+
+**O fechamento administrativo ficou incompleto.** Seis issues com entrega já integrada seguiam abertas no corte, uma foi fechada sem merge request ([#211](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/211)) e um merge request foi integrado sem nenhum comentário ou aprovação registrada ([!100](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/100)). Outros dois foram aprovados sem comentário ([!83](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/83) e [!101](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/101)), contra o checklist do template, e sete não marcaram a exclusão da branch de origem.
+
+**A gestão e a viabilidade financeira ficaram para o último dia.** As tasks de gestão só puderam começar depois do último merge, no próprio dia da release, e a viabilidade financeira (S4-52A a S4-52C) não estava em `develop` no corte. O material da Sprint Review (S4-46 e S4-47) também não tem evidência versionada.
+
+**Defeitos relevantes de produto seguem abertos.** Não há controle de acesso por perfil (D-01), o que bloqueia o RNF02 e derruba o elemento "perfil" do RNF03. A auditoria não grava fora de escopo (D-02) nem `correlation_id` (D-03), e respostas documentais saem sem fonte registrada (D-04). O fluxo guiado viola uma restrição do schema (D-05), dados sensíveis não são bloqueados antes do provedor (D-06), a recuperação reprovou no RNF06 (*recall*@3 de 0,556) e, na usabilidade, perguntas curtas foram recusadas (O1) e o controle da proatividade não foi percebido sem ajuda (O8).
+
+**A documentação voltou a se contradizer.** A Seção 9.2.7 do `Projeto.md` afirma, no DEF-RNF05-01, que "o ambiente do Metrô usará o Copilot Studio com modelos GPT", enquanto a Frente D da Seção 6.4.2 registra que o Metrô não disponibilizará o Copilot Studio. O RNF08 ainda cita o Teams como canal previsto. É o risco R10 materializado outra vez.
+
+### 2.4.6 Efetividade das ações da Sprint 3
+
+| Ação definida na Seção 2.3.7 | Efetividade | Evidência e conclusão |
+| --- | :---: | --- |
+| Configurar validação automática do título do MR | ❌ Não efetiva | A task S4-05 foi excluída do board sem ser executada; 7 de 26 títulos no padrão e 8 de 17 commits de squash na regra completa |
+| Bloquear marcadores de conflito em arquivos rastreados | ⚠️ Parcial | Zero marcadores nos 764 arquivos versionados em `964cd8c`, depois das limpezas de [!79](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/79) e [!81](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/81); o gate não existe (S4-04 excluída) e uma regra do `.gitignore` se perdeu numa resolução de conflito (`fb15994`) |
+| Publicar inventário de MRs e bloqueios na quarta-feira | ❌ Não efetiva | Nenhum inventário registrado no GitLab; quatro MRs esperaram mais de 48 h pela primeira revisão, e [!90](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/90) esperou sete dias |
+| Tornar obrigatório o template completo da daily | ⚪ Não verificável | Nenhum registro de daily fornecido |
+| Refinar antes de mover `Open → Backlog` | ✅ Efetiva no planejamento | Nenhuma task acima de G, 53,4% em G e 50% em Alta; o refinamento, porém, não foi aplicado às mudanças feitas durante a sprint |
+| Criar teste de contrato e ponta a ponta para cada ligação da cadeia mínima | ✅ Efetiva | Contrato da rota textual (S4-12), áudio → STT → PLN (S4-13), PLN → Supabase (S4-11 e CT-E2E-02), resposta → frontend (CT-E2E-01, E2E do frontend na pipeline e testes de referências do [!106](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/106)) |
+| Registrar evidência de execução antes de mover para `Closed` | ⚠️ Parcial | Todas as tasks de teste fechadas têm relatório e evidência versionados; mas seis issues com entrega integrada ficaram abertas, uma foi fechada sem MR e as quatro issues de usabilidade fecharam com DoR e DoD desmarcados |
+
+Duas das sete ações funcionaram, duas em parte e duas falharam; uma não pôde ser verificada. O padrão das sprints anteriores se confirma com um agravante. As ações que dependiam de ser **construídas** (validação de título e gate) não saíram porque as tasks que as construiriam foram apagadas, e não apenas adiadas. As ações que dependiam de **rotina** (inventário e daily) não deixaram evidência. As que funcionaram estavam embutidas no próprio DoD das tasks técnicas. A lição para a Sprint 5 é que ação de processo precisa virar task com critério de aceite no board, e task do board não pode ser excluída sem registro.
+
+### 2.4.7 Ações de melhoria para a Sprint 5
+
+| Ação | Gatilho | Responsável pelo acionamento | Critério verificável |
+| --- | --- | --- | --- |
+| Construir a validação do título do MR e o gate de marcadores como tasks do primeiro dia (S5-01 e S5-02) | Início da sprint, antes do primeiro MR funcional | Executores das tasks | Pipeline falha com título inválido e com marcador real; 100% dos commits de squash na regra completa |
+| Proibir a exclusão de issue planejada: tarefa cancelada é fechada com o motivo e o destino | Mudança de escopo ou identificação de duplicidade | Scrum Master | 0 issues planejadas retornando 404 no fechamento; toda mudança com comentário datado na issue de gestão |
+| Fechar a issue pelo MR com `Closes #N` e conferir no inventário | Abertura do MR | Autor e revisor | 0 issues com MR integrado abertas no corte |
+| Publicar o inventário de MRs como comentário na issue de gestão | Quarta-feira, 30/09, antes da daily | Scrum Master | Comentário publicado; nenhum MR com mais de 48 h sem primeira revisão |
+| Medir a fração do trabalho integrada na primeira metade da sprint | Apuração do fechamento | Responsável pela análise da Sprint 5 | Pelo menos 40% dos merge requests integrados até 01/10 |
+| Registrar a redistribuição de tasks com a nova soma de carga | Troca de assignee | Quem assume a task | Comentário na issue com origem, destino e carga resultante; carga final por pessoa com amplitude de no máximo 2× |
+| Anexar à issue de gestão o registro semanal das dailies | Sexta-feira, 02/10, e fechamento da sprint | Scrum Master | Dois registros semanais anexados, com os quatro campos por integrante |
+| Exigir ao menos um comentário do revisor antes da aprovação | Aprovação do MR | Revisor | 100% dos MRs com comentário de revisão registrado |
+| Adiantar a documentação final e a gestão para antes do último dia | Congelamento de funcionalidades, 02/10 | Executores das Frentes I e J do plano da Sprint 5 | Rascunhos integrados a `develop` até 05/10; o fechamento só acrescenta os dados da própria Sprint 5 |
+
 # 3. Matriz de risco
 
 A partir da Sprint 2, a matriz de risco atualizada passa a ser mantida neste documento. A versão original, produzida no artefato de entendimento de negócio, permanece registrada na Seção 2.7 do `Projeto.md` e não é alterada — é contra ela que a evolução dos itens pode ser conferida.
@@ -576,6 +783,110 @@ Posição vigente dos riscos e oportunidades após a revisão de 10/09/2026.
 
 R04 também possui severidade 20, mas fica imediatamente abaixo dos três escolhidos porque o uso atual é controlado e sintético. Isso não reduz seu impacto potencial; apenas diferencia urgência de tratamento no próximo incremento.
 
+## 3.13 Registro consolidado e status na Sprint 4
+
+Posição vigente no fechamento de 25/09/2026. A variação compara cada item com a posição da Seção 3.8. As reavaliações foram preparadas a partir das evidências da Seção 2.4 e são confirmadas pelos responsáveis de cada item na revisão do merge request desta entrega; divergência apontada nessa revisão altera a linha antes do merge. Quando um risco se concretiza, a probabilidade passa a 5 apenas se o fato ainda estiver ativo no fechamento — um risco materializado e já contornado mantém a probabilidade de voltar a ocorrer.
+
+| ID | Tipo | Risco / oportunidade | P | I | Sev. | Variação | Responsável | Status | Última revisão |
+| :---: | :---: | --- | :---: | :---: | :---: | :---: | --- | --- | :---: |
+| **R01** | 🔴 | Indisponibilidade ou baixa qualidade das informações e documentos para a base | 4 | 5 | **20** | ↑ de 15 | Jaime Almeida | **Materializado** | 25/09/2026 |
+| **R02** | 🔴 | Limitações nas integrações com Teams, Power Platform e ecossistema Microsoft | 5 | 4 | **20** | = | Felipe Neves | **Materializado** | 25/09/2026 |
+| **R03** | 🔴 | Respostas ou classificações inadequadas, imprecisas ou sem fundamento | 4 | 5 | **20** | = | Henrique Diniz | **Materializado** | 25/09/2026 |
+| **R04** | 🔴 | Limitações de autenticação, permissões e acesso por perfil | 5 | 5 | **25** | ↑ de 20 | Wendel Feitosa | **Materializado** | 25/09/2026 |
+| **R05** | 🔴 | Alterações, inconsistências ou desatualização das fontes | 3 | 4 | **12** | = | Leonardo Ramos | Em Monitoramento | 25/09/2026 |
+| **R06** | 🔴 | Indisponibilidade ou baixa participação dos representantes do Metrô | 3 | 4 | **12** | = | Jaime Almeida | Em Monitoramento | 25/09/2026 |
+| **R07** | 🔴 | Ampliação do escopo por novas funcionalidades | 4 | 4 | **16** | ↑ de 12 | Pedro Uchoa | **Materializado** | 25/09/2026 |
+| **R08** | 🔴 | Tempo insuficiente para implementar, validar e documentar | 4 | 4 | **16** | = | Felipe Neves | **Materializado** | 25/09/2026 |
+| **R09** | 🔴 | Sobrecarga ou indisponibilidade de integrantes | 4 | 4 | **16** | = | Henrique Diniz | **Materializado** | 25/09/2026 |
+| **R10** | 🔴 | Divergência semântica entre requisitos, documentação, contratos e comportamento | 4 | 3 | **12** | = | Pedro Uchoa | **Materializado** | 25/09/2026 |
+| **R11** | 🔴 | Entregas prontas retidas fora de `develop` ou integradas tarde | 4 | 4 | **16** | = | Leonardo Ramos | **Materializado** | 25/09/2026 |
+| **R12** | 🔴 | Provedor de LLM não definido nem homologado | 3 | 4 | **12** | ↓ de 16 | Henrique Diniz | Em Monitoramento | 25/09/2026 |
+| **R13** | 🔴 | Marcadores de conflito ou resíduos de merge aceitos no repositório | 3 | 4 | **12** | ↓ de 16 | Pedro Uchoa | Em Monitoramento | 25/09/2026 |
+| **R14** | 🔴 | Ausência de fluxo ponta a ponta demonstrável no fechamento da sprint | 2 | 5 | **10** | ↓ de 25 | Leonardo Ramos | Mitigado | 25/09/2026 |
+| **R15** | 🔴 | Mudança de escopo ou exclusão de tasks sem registro de decisão | 4 | 3 | **12** | novo | Felipe Neves | **Materializado** | 25/09/2026 |
+| **R16** | 🔴 | Ambiente de demonstração dependente de credenciais temporárias e de URL efêmera | 3 | 4 | **12** | novo | Leonardo Ramos | Aberto | 25/09/2026 |
+| **R17** | 🔴 | Alteração indevida ou não auditada de dados do projeto por meio do chat | 4 | 5 | **20** | novo | Wendel Feitosa | Aberto | 25/09/2026 |
+| **R18** | 🔴 | Cota ou custo do provedor externo de LLM interrompendo testes e demonstração | 4 | 3 | **12** | novo | Henrique Diniz | **Materializado** | 25/09/2026 |
+| **O1** | 🟢 | Aproveitamento do ecossistema Microsoft do parceiro | 3 | 4 | **12** | ↓ de 16 | Wendel Feitosa | Em Monitoramento | 25/09/2026 |
+| **O2** | 🟢 | Fontes oficiais e conhecimento do PMO | 4 | 5 | **20** | ↑ de 15 | Leonardo Ramos | Em Monitoramento | 25/09/2026 |
+| **O3** | 🟢 | Arquitetura modular para incorporar novos fluxos | 5 | 5 | **25** | ↑ de 20 | Henrique Diniz | **Materializado** | 25/09/2026 |
+| **O4** | 🟢 | Automação proativa de pendências | 5 | 4 | **20** | ↑ de 16 | Jaime Almeida | **Materializado** | 25/09/2026 |
+| **O5** | 🟢 | Reutilização estruturada do conhecimento institucional | 3 | 4 | **12** | = | Leonardo Ramos | Em Monitoramento | 25/09/2026 |
+| **O6** | 🟢 | Ampliação da capacidade analítica do PMO | 3 | 5 | **15** | = | Pedro Uchoa | Em Monitoramento | 25/09/2026 |
+| **O7** | 🟢 | Pipeline autoral de PLN sustentar o roteamento | 5 | 4 | **20** | ↑ de 16 | Pedro Uchoa | **Materializado** | 25/09/2026 |
+| **O8** | 🟢 | Supabase fornecer base única para integração e testes | 5 | 5 | **25** | ↑ de 20 | Jaime Almeida | **Materializado** | 25/09/2026 |
+| **O9** | 🟢 | Servidor MCP como via de acesso do agente pelo Copilot, sem depender de acesso da equipe ao Copilot Studio | 3 | 4 | **12** | nova | Jaime Almeida | Aberto | 25/09/2026 |
+
+Para oportunidades, **Materializado** indica que o ganho previsto ocorreu e está evidenciado. Os responsáveis dos itens existentes foram mantidos. Os itens novos seguem as frentes exercidas na Sprint 4: gestão para R15, deploy para R16, banco de dados e acesso para R17, testes de RNF para R18 e integrações funcionais para O9.
+
+## 3.14 Histórico acrescido na Sprint 4
+
+Somente itens cuja avaliação mudou ou que receberam fato novo aparecem abaixo. Os históricos anteriores permanecem nas Seções 3.3 e 3.9.
+
+| ID | Sprint | Fato observado | Decisão |
+| :---: | :---: | --- | --- |
+| R01 | 4 | A base consultada pelo chat tem nove extratos recuperáveis e documentos de um único projeto. A comparação do CT-RF06-01 saiu parcial porque o `PRJ-0510` não tem documento na base, e a recuperação reprovou no RNF06 (*recall*@3 de 0,556 nas 72 consultas prospectivas) | Probabilidade de 3 para 4; severidade de 15 para 20; **Materializado** na base sintética. A ampliação do SharePoint simulado com a estrutura disponibilizada pelo Metrô entra na Sprint 5 |
+| R02 | 4 | O Metrô informou que não disponibilizará o Copilot Studio. Os dois fluxos essenciais foram entregues como workflow guiado, e Teams e Power Platform não foram exercitados | Probabilidade de 4 para 5, porque o fato está ativo; impacto de 5 para 4, porque a arquitetura absorveu a mudança sem perda dos fluxos; severidade mantida em 20; **Materializado** |
+| R03 | 4 | A classificação passou do mínimo (F1-macro de 0,8327), mas a recuperação reprovou. O RNF04 aprovou com uma alucinação em 12 casos negativos, e a usabilidade registrou perguntas curtas recusadas (O1) e sugestões sem sustentação nas fontes (O2) | Mantido em 20. O risco migrou da classificação para a recuperação e a fundamentação das sugestões |
+| R04 | 4 | `users` e `access_rules` estão vazias e o backend nunca consulta as regras (D-01). Os casos CV-09 a CV-12 e CT-RNF02-P/N ficaram bloqueados, e o elemento "perfil" do RNF03 reprovou | Probabilidade de 4 para 5; severidade de 20 para 25; **Materializado** |
+| R06 | 4 | O Metrô respondeu sobre o Copilot Studio e disponibilizou a estrutura de SharePoint que servirá de base para a Sprint 5; nenhum representante do parceiro participou da usabilidade, e as vagas de gestão e de ferramentas Microsoft ficaram vazias | Mantido em 12; status de Aberto para Em Monitoramento |
+| R07 | 4 | Entraram tarefas fora do plano ([#250](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/250), [#251](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/251), [#253](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/253) e [#254](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/254)); RF09 e RF10, que a Seção 3.9 mantinha fora do MVP, foram implementados e testados; mensageria e Docker, previstos para a Sprint 5, foram antecipados. O parceiro pediu dez novas capacidades para a Sprint 5 | Probabilidade de 3 para 4; severidade de 12 para 16; **Materializado** |
+| R08 | 4 | 85% dos commits e 69% dos MRs ocorreram entre 22 e 25/09; a gestão só começou depois do último merge, e a viabilidade financeira não entrou em `develop` no corte | Mantido em 16 e **Materializado** |
+| R09 | 4 | Apenas 5 das 47 tasks planejadas que seguem no board ficaram com o executor previsto; a carga estimada no corte variou de 3 h a 20,5 h por responsável, e as sete tasks de gestão voltaram a uma pessoa | Mantido em 16 e **Materializado** |
+| R10 | 4 | O DEF-RNF05-01, na Seção 9.2.7 do `Projeto.md`, afirma que o Metrô usará o Copilot Studio, contrariando a Frente D da Seção 6.4.2; o RNF08 ainda cita o Teams como canal previsto | Mantido em 12 e **Materializado**; conciliação na revisão da arquitetura da Sprint 5 |
+| R11 | 4 | [!90](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/90) esperou sete dias, com conflito; quatro MRs passaram de 48 h sem primeira revisão; 15 dos 26 MRs entraram nos dois últimos dias ativos | Mantido em 16 e **Materializado** |
+| R12 | 4 | A abstração de provedor foi implementada; a bancada usa `gemini-3.7-flash` direto ou pelo OpenRouter, e a troca de modelo não alterou classificação nem fontes (CT-E2E-04). O provedor de produção continua dependendo do Metrô | Probabilidade de 4 para 3; severidade de 16 para 12; status de Aberto para Em Monitoramento |
+| R13 | 4 | Nenhum marcador nos 764 arquivos versionados no corte. O gate não foi implementado, e uma regra do `.gitignore` se perdeu numa resolução de conflito, restaurada em `fb15994` | Probabilidade de 4 para 3; severidade de 16 para 12; Em Monitoramento enquanto não houver barreira automática |
+| R14 | 4 | Texto e áudio atravessam classificação, recuperação e resposta com persistência correlacionada; relatório e alerta rodam de ponta a ponta; a aplicação responde na AWS | Probabilidade de 5 para 2; severidade de 25 para 10; **Mitigado** |
+| R15 | 4 | Onze tasks planejadas foram apagadas e uma foi renomeada, sem decisão registrada | Novo risco materializado, severidade 12 |
+| R16 | 4 | O deploy usa credenciais temporárias do Learner Lab, SSH liberado apenas para o IPv4 do operador e URL efêmera do Cloudflare Quick Tunnel (Seção 10.2.11) | Novo risco, severidade 12; relevante para a apresentação final |
+| R17 | 4 | O parceiro pediu, com ênfase, a alteração de dados diretamente pelo chat, e hoje não há controle de acesso por perfil | Novo risco, severidade 20. A escrita pelo chat só entra depois do controle de acesso (Seção 6.5) |
+| R18 | 4 | A cota do provedor gratuito bloqueou a coleta do RNF04 em 21/09 (13 de 24 perguntas com HTTP 429), e as rodadas foram repetidas com provedor pago | Novo risco materializado, severidade 12 |
+| O1 | 4 | Sem Copilot Studio, o aproveitamento direto do ecossistema Microsoft ficou restrito ao Azure AI Speech | Probabilidade de 4 para 3; severidade de 16 para 12 |
+| O2 | 4 | O Metrô disponibilizou a estrutura de SharePoint usada nas fontes do projeto | Probabilidade de 3 para 4; severidade de 15 para 20 |
+| O3 | 4 | A arquitetura absorveu a troca do Copilot por workflow guiado e a troca de provedor de LLM sem reescrever PLN, RAG ou persistência | Probabilidade de 4 para 5; severidade de 20 para 25; **Materializado** |
+| O4 | 4 | O alerta de prazo passou a rodar de forma autônoma, com scheduler, filas e central de notificações, e a proatividade de RF09 e RF10 foi aprovada nos testes | Probabilidade de 4 para 5; severidade de 16 para 20; **Materializado** |
+| O7 | 4 | F1-macro da intenção específica em 0,8327, acima do mínimo do RNF06 | Probabilidade de 4 para 5; severidade de 16 para 20; **Materializado** |
+| O8 | 4 | Esquema físico aplicado, carga sintética idempotente e persistência correlacionada verificada (CV-01 a CV-04 e CT-E2E-02) | Probabilidade de 4 para 5; severidade de 20 para 25; **Materializado** |
+| O9 | 4 | O parceiro pediu a conexão do agente com o Copilot por MCP | Nova oportunidade, severidade 12 |
+
+## 3.15 Efetividade das respostas aos riscos na Sprint 4
+
+| Item | Resposta definida nas Seções 3.10 e 3.12 | Efetividade | Evidência e próxima decisão |
+| :---: | --- | :---: | --- |
+| R02 | Iniciar o recorte essencial do Copilot com contratos desacoplados e fallback | ⚠️ Parcial | Os contratos desacoplados permitiram entregar relatório e alerta sem o Copilot; o canal corporativo continua indisponível. Na Sprint 5, servidor MCP e avaliação do Teams (Seção 6.5) |
+| R03 | Manter limiares e fallback, executar os casos funcionais e melhorar o classificador com dados reais | ⚠️ Parcial | Classificação aprovada; recuperação reprovada. Na Sprint 5, ampliar a base e reexecutar o RNF06 com massa prospectiva nova |
+| R04 | Diferenciar a urgência, mantendo o uso controlado e sintético | ❌ Não efetiva | O controle nunca foi construído e bloqueou três tasks de teste. Na Sprint 5, identidade e controle de acesso abrem a cadeia crítica |
+| R07 | Limitar o Copilot a dois fluxos e manter RF09 e RF10 fora do MVP | ⚠️ Parcial | O limite de dois fluxos foi respeitado; RF09, RF10 e quatro tarefas fora do plano entraram sem registro. Na Sprint 5, critérios de corte explícitos |
+| R08 | Substituir o marco manual por inventário agendado e gate | ❌ Não efetiva | Nem o inventário nem o gate existiram; a concentração migrou para os quatro últimos dias |
+| R09 | Redistribuir só após comparar a carga estimada | ⚠️ Parcial | O plano estava equilibrado, entre 14 e 15 h por pessoa; a execução divergiu sem registro |
+| R10 | Manter a conferência entre requisito, contrato e comportamento | ⚠️ Parcial | Contradição sobre o Copilot entre `Projeto.md` e `GestaoProjeto.md`, e RNF08 desatualizado |
+| R11 | Varredura final de MRs | ⚠️ Contingência efetiva | Tudo entrou em `develop` até o corte, mas [!90](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/90) ficou sete dias aberto |
+| R13 | Corrigir resíduos e introduzir gate antes do primeiro merge funcional | ⚠️ Parcial | Resíduos corrigidos em 11/09, antes dos merges funcionais; gate não construído |
+| R14 | Fechar ligações em incrementos demonstráveis, com teste de contrato e evidência | ✅ Efetiva | Cada ligação da cadeia mínima tem teste e evidência, e o conjunto está publicado |
+
+## 3.16 Matriz probabilidade × impacto da Sprint 4
+
+Posição vigente dos riscos e oportunidades após a revisão de 25/09/2026.
+
+| P \ I | 1 | 2 | 3 | 4 | 5 |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| **5** | | | | 🔴 R02 · 🟢 O4 · 🟢 O7 | 🔴 R04 · 🟢 O3 · 🟢 O8 |
+| **4** | | | 🔴 R10 · 🔴 R15 · 🔴 R18 | 🔴 R07 · 🔴 R08 · 🔴 R09 · 🔴 R11 | 🔴 R01 · 🔴 R03 · 🔴 R17 · 🟢 O2 |
+| **3** | | | | 🔴 R05 · 🔴 R06 · 🔴 R12 · 🔴 R13 · 🔴 R16 · 🟢 O1 · 🟢 O5 · 🟢 O9 | 🟢 O6 |
+| **2** | | | | | 🔴 R14 |
+| **1** | | | | | |
+
+## 3.17 Três riscos mais críticos no fechamento da Sprint 4
+
+**R04 — autenticação, permissões e acesso por perfil (25).** É o único risco em 25. O defeito D-01 deixou de ser hipótese: não existem perfis no banco nem verificação de autorização no código, e três tasks de teste registraram bloqueio pelo mesmo motivo. O efeito se estende à Sprint 5, porque a capacidade que o parceiro pediu com mais ênfase — alterar dados pelo chat — depende dele. A resposta é abrir a Sprint 5 com a carga de identidades e o controle de acesso, antes de qualquer escrita.
+
+**R17 — alteração indevida ou não auditada de dados pelo chat (20).** É novo e nasce do pedido do parceiro. Sem controle de acesso, confirmação explícita e trilha de alteração, uma escrita pelo chat pode mudar o status ou o prazo de um projeto sem que se saiba quem mudou e por quê. A mitigação está no desenho da Sprint 5: a alteração só é implementada depois do controle de acesso e exige prévia, confirmação, gravação em `change_records` e `audit_events` e teste com perfil negado.
+
+**R03 — respostas inadequadas ou sem fundamento (20).** O risco mudou de lugar: a classificação atingiu o RNF06, mas a recuperação acertou a fonte em apenas 56% das consultas prospectivas, e a usabilidade mostrou sugestões oferecidas sem sustentação nas fontes. A resposta combina a ampliação da base com a estrutura real do SharePoint, a exigência de fonte registrada em toda resposta documental (D-04) e a reexecução do RNF06 com massa nova, sem reaproveitar os casos usados no ajuste.
+
+R01 e R02 também estão em 20. R01 fica abaixo porque sua causa principal, a base com um único projeto, é tratada pela mesma ação que responde a R03. R02 fica abaixo porque a arquitetura já absorveu o impacto nos dois fluxos essenciais, e o que resta é o canal corporativo.
+
 # 4. Matriz de papéis e responsabilidades
 
 A matriz varia a cada sprint. A intenção não é fixar cargos permanentes para o módulo, mas registrar qual frente cada integrante assumiu na sprint corrente, deixando claro quem respondeu por cada artefato e reduzindo centralização de trabalho. As sprints anteriores permanecem registradas para que a rotação seja verificável.
@@ -664,6 +975,47 @@ A distribuição **não foi equilibrada no planejamento**. Felipe recebeu nove i
 
 Na Sprint 4, a matriz recebe nomes somente após a comparação da carga estimada. A distribuição registrada na Seção 6.4 é a base para a criação dos cards: qualquer mudança deve manter a capacidade, registrar a redistribuição e preservar executor e revisor de frentes diferentes. Nenhuma pessoa recebe uma segunda task G simultânea enquanto outra estiver sem task pronta.
 
+## 4.6 Matriz da Sprint 4
+
+A matriz confronta três fontes que não se confundem: a distribuição planejada na Seção 6.4.4, o responsável registrado em cada issue do GitLab no corte de 25/09 e os merge requests de autoria de cada integrante integrados no recorte. A autoria de uma entrega é lida pelo MR e pelos commits, e não pelo responsável da issue. As horas são o teto da estimativa de cada task (G = 2 h, M = 1 h, P = 0,5 h), e não esforço medido.
+
+| Integrante | Frente planejada na Seção 6.4.4 | Issues sob sua responsabilidade no corte | MRs de autoria integrados | Entregas e evidências |
+| --- | --- | --- | --- | --- |
+| Felipe Neves | Copilot e publicação: S4-14B, S4-21A, S4-22, S4-23A, S4-24A, S4-29, S4-39, S4-40 e S4-47 (9 tasks, 14,5 h) | [#191](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/191), [#193](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/193), [#194](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/194), [#200](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/200), [#209](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/209), [#228](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/228), [#229](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/229) e [#239](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/239) a [#245](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/245) (14 issues, 20 h) | [!81](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/81), [!98](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/98), [!100](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/100), [!103](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/103) e [!104](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/104); [!82](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/82) é da Sprint 3 | Limpeza dos marcadores de conflito, validação de persistência e auditoria (S4-11), E2E textual com RAG (S4-20), testes de integração (S4-32B), RNF01 a RNF03 (S4-33) e esta gestão evolutiva |
+| Henrique Diniz | Integridade e deploy: S4-01 a S4-05 (exceto S4-03B), S4-27, S4-28, S4-30, S4-30B, S4-50B e S4-52C (11 tasks, 15 h) | [#230](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/230), [#231](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/231) e [#233](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/233) a [#236](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/236) (6 issues, 11 h) | [!96](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/96) e [!101](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/101); [!79](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/79) é da Sprint 3 | RNF04 e RNF05 em três rodadas, com correções de RAG, pool de conexões e provedor, e usabilidade com seis sessões e reteste do truncamento |
+| Jaime Almeida | Supabase, áudio e Power Automate: S4-07, S4-08, S4-13, S4-23B, S4-25B, S4-26A, S4-31, S4-35 e S4-36 (9 tasks, 15 h) | [#201](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/201), [#202](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/202), [#210](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/210) a [#215](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/215), [#219](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/219), [#220](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/220), [#237](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/237) e [#238](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/238) (12 issues, 20,5 h) | [!88](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/88), [!90](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/90), [!92](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/92) e [!93](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/93) | Classificação na rota textual, áudio → STT → PLN, fluxos de relatório e de alerta com RabbitMQ, e material da Sprint Review em revisão |
+| Leonardo Ramos | Dados, RAG e testes: S4-09, S4-11, S4-16, S4-17A, S4-20, S4-34, S4-41 e S4-46 (8 tasks, 14 h) | [#221](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/221) a [#224](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/224) e [#246](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/246) a [#248](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/248) (7 issues, 11 h), além de [#252](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/252) e [#254](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/254), fora do plano | [!105](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/105) e [!108](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/108); [!80](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/80) e [!83](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/83) são da Sprint 3 | Deploy na AWS com Docker Compose, RabbitMQ e CloudWatch, documentação do deploy e viabilidade financeira em revisão, sem integração no corte |
+| Pedro Uchoa | Integrações cruzadas: S4-03B, S4-12, S4-14A, S4-15, S4-24B, S4-25A, S4-25C, S4-26B, S4-32B e S4-33 (10 tasks, 15 h) | [#205](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/205), [#208](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/208) e [#232](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/232) (3 issues, 3 h), além de [#250](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/250), [#251](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/251) e [#253](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/253), fora do plano (6 h) | [!89](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/89), [!91](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/91), [!95](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/95), [!97](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/97) e [!102](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/102) | Fallback de baixa confiança, RNF06 prospectivo, acurácia da intenção específica, intenções secundárias e economia de tokens |
+| Wendel Feitosa | Gestão, testes funcionais e viabilidade: S4-19, S4-32A, S4-42, S4-48A a S4-51B e S4-52A/B (11 tasks, 15 h) | [#198](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/198), [#199](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/199), [#207](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/207), [#226](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/226) e [#227](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/227) (5 issues, 9 h) | [!94](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/94), [!99](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/99), [!106](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/106) e [!107](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/107) | Esquema físico e carga sintética, referências no schema de resposta, RF01 a RF10 e cache VHS |
+
+**Redistribuição observada.** Das 47 tasks planejadas que seguem no board, apenas cinco ficaram com o executor previsto: S4-13, S4-23B e S4-26A com Jaime, S4-15 com Pedro e S4-32A com Wendel. As principais transferências foram:
+
+- a Frente D inteira, planejada para Felipe e Pedro, foi para Jaime, que também assumiu a preparação da Sprint Review;
+- as tasks de integridade e deploy, planejadas para Henrique, foram para Felipe e Leonardo, e Henrique assumiu RNF04, RNF05 e a usabilidade;
+- as tasks de gestão, planejadas para Wendel, foram para Felipe, e a viabilidade financeira foi para Leonardo;
+- persistência, E2E e testes de integração, planejados para Leonardo e Pedro, foram para Felipe, e o banco e o VHS, planejados para Jaime, foram para Wendel.
+
+Nenhuma dessas transferências tem registro de causa ou de efeito na carga.
+
+**Concentração.** No plano, a carga ia de 14 a 15 horas. No corte, a carga das tasks planejadas vai de 3 h (Pedro) a 20,5 h (Jaime); com as tarefas fora do plano, de 9 h a 20,5 h, uma amplitude de 2,3×. Os merge requests contam outra história: entre três e seis por pessoa, com os seis integrantes revisando trabalho de outros. As duas leituras não se contradizem. A carga estimada mostra que o board não foi mantido como fonte de verdade da distribuição, e os MRs mostram que a produção efetiva ficou distribuída. Registra-se também que Pedro concentrou suas horas em tarefas criadas durante a sprint ([#250](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/250), [#251](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/251) e [#253](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/253)), que responderam diretamente ao RNF06, reprovado na Sprint 3.
+
+**Revisão.** Os 26 MRs do recorte tiveram como revisores Leonardo e Wendel (6 cada), Jaime (5), Felipe (4), Henrique (3) e Pedro (2).
+
+## 4.7 Rotação e equilíbrio após quatro sprints
+
+| Integrante | Sprint 1 | Sprint 2 | Sprint 3 | Sprint 4 | Avaliação da rotação |
+| --- | --- | --- | --- | --- | --- |
+| Felipe Neves | Design e requisitos não funcionais | APIs de voz e planejamento | Implementação de frontend e gestão evolutiva | Qualidade (persistência, E2E, integração e RNF01 a RNF03) e gestão evolutiva | ⚠️ Mudou de implementação para qualidade, mas a gestão evolutiva concentrou-se nele pela segunda sprint seguida |
+| Henrique Diniz | Problema, SWOT e visão técnica | Prototipação e gestão | Implementação e documentação de PLN | Desempenho, fundamentação e usabilidade | ✅ Rotação completa para qualidade e experiência do usuário |
+| Jaime Almeida | Estratégia e estrutura documental | Prototipação e arquitetura | STT, testes e banco | Integrações funcionais (relatório e alerta) e Sprint Review | ✅ Rotação para integração e comunicação |
+| Leonardo Ramos | Gestão, configuração e hooks | Dados, deploy e planejamento | Integração, métricas e usabilidade | Deploy em nuvem e viabilidade financeira | ⚠️ Parcial: voltou ao deploy, que já havia planejado na Sprint 2, desta vez como implementação |
+| Pedro Uchoa | Requisitos e UML | APIs e especificação de PLN | Planejamento de testes e integração | Qualidade do PLN, RNF06 e proatividade | ⚠️ Parcial: voltou ao PLN da Sprint 2, desta vez como implementação e medição |
+| Wendel Feitosa | Fluxos de negócio e riscos | Prototipação e dados | Backend de áudio e plano do VHS | Banco, carga sintética, testes funcionais e implementação do VHS | ⚠️ Parcial: continuidade de dados e do VHS, planejado por ele na Sprint 3 |
+
+Após quatro sprints, todos os integrantes passaram por especificação, implementação e qualidade, e nenhum ficou restrito a uma única natureza de trabalho. O desequilíbrio persistente está em duas frentes: a **gestão evolutiva**, executada por uma única pessoa na Sprint 3 e de novo na Sprint 4, e a **continuidade técnica**, em que três integrantes voltaram na Sprint 4 a temas que já tinham conduzido. A continuidade tem justificativa técnica — quem desenhou o VHS o implementou, e quem reprovou no RNF06 corrigiu a acurácia —, mas reduz a rotação exigida pela matriz.
+
+Para a Sprint 5, a atribuição é feita na planning, a partir da Seção 6.5.4. Três regras se aplicam: as tasks de gestão final são divididas entre pelo menos três integrantes, com executores diferentes de quem conduziu a gestão nas Sprints 3 e 4; ninguém recebe tasks do tema que conduziu na Sprint 4 sem justificativa registrada; e a carga final por pessoa não pode ter amplitude maior que 2×.
+
 # 5. Contrato de convivência, SLA e rituais
 
 O contrato define as regras práticas de trabalho do grupo. Ele prioriza comunicação clara, evidências objetivas, revisão antecipada e fechamento controlado da sprint.
@@ -702,7 +1054,8 @@ Regras:
 - Tarefas sem evidência não devem ser tratadas como concluídas;
 - Impedimentos devem ser sinalizados no mesmo dia em que forem identificados;
 - A daily não é usada apenas para anunciar trabalho previsto: ausência de “O que fiz”, “Evidências” ou “Impedimentos” torna o registro incompleto;
-- O Scrum Master confere o checklist ao final do ritual e menciona os registros incompletos no mesmo tópico, que é o gatilho da correção.
+- O Scrum Master confere o checklist ao final do ritual e menciona os registros incompletos no mesmo tópico, que é o gatilho da correção;
+- Toda sexta-feira, o Scrum Master anexa à issue de gestão da sprint o registro semanal das dailies exportado do Slack, que é a evidência usada na apuração.
 
 ## 5.3 Evidências de entrega
 
@@ -719,7 +1072,8 @@ São evidências válidas:
 - Comentário de revisão;
 - Checklist de DoD preenchido;
 - Resultado de `git grep` sem marcador de conflito nos arquivos alterados;
-- Para integração, log ou teste que atravesse os dois componentes ligados — a existência isolada de ambos não comprova integração.
+- Para integração, log ou teste que atravesse os dois componentes ligados — a existência isolada de ambos não comprova integração;
+- Comentário do revisor no MR indicando o que foi conferido — aprovação sem comentário não conta como revisão.
 
 Critério mínimo: uma tarefa só pode avançar para revisão quando houver evidência suficiente para outro integrante validar o resultado.
 
@@ -729,8 +1083,9 @@ A equipe adota a seguinte regra de fechamento:
 
 | Marco | Prazo | Regra |
 | --- | --- | --- |
-| Inventário de integração | Quarta-feira, antes da daily | Listar MRs abertos, idade, revisor e bloqueio; MR com mais de 48 h precisa de ação registrada. |
+| Inventário de integração | Quarta-feira, antes da daily | Publicar como comentário na issue de gestão da sprint os MRs abertos, com idade, revisor e bloqueio, e as issues com MR integrado que seguem abertas; MR com mais de 48 h sem primeira revisão recebe outro revisor no mesmo dia. |
 | Entrega das tarefas | Até quinta-feira | Cada responsável deve concluir sua parte e disponibilizar evidências. |
+| Encerramento da issue | No merge do MR | O MR declara `Closes #N` para cada issue que entrega; issue com entrega integrada não fica aberta. |
 | Revisão por pares | Até quinta-feira | Outro integrante deve revisar a entrega antes do fechamento. |
 | Ajustes finais | Quinta-feira, após revisão | Correções pequenas podem ser feitas após apontamentos. |
 | Merge para main | Sexta-feira, como cadência padrão | O Scrum Master coordena o merge final da versão validada. Entregas prontas podem ser promovidas antes, desde que sigam MR, pipeline, aprovação e DoD. |
@@ -771,6 +1126,7 @@ As decisões relevantes devem ser registradas em um desses canais oficiais ou na
 Devem ser registrados:
 
 - Mudanças de escopo;
+- Cancelamento, duplicidade ou substituição de task planejada, com o motivo e a issue de destino — a issue é fechada, e nunca excluída;
 - Impedimentos;
 - Decisões técnicas;
 - Alteração de responsável;
@@ -806,7 +1162,27 @@ As regras foram novamente confrontadas com os indicadores da Sprint 3. Quatro aj
 
 Foram mantidas a regra de ouro, o limite de 15 minutos da daily síncrona, os canais oficiais, o SLA de resposta a impedimento, a revisão por pares, a resolução de impasses e a gestão de conflitos. Não houve evidência de que essas regras, em si, precisassem de nova redação. A alteração é de mecanismo: os pontos que falharam passam a possuir gatilho e evidência objetiva.
 
-# 6. Planejamento das Sprints 3 e 4
+## 5.10 Revisão após a Sprint 4
+
+As regras foram confrontadas com os fatos da Seção 2.4. Cinco ajustes foram necessários, todos pelo mesmo motivo que orientou a revisão da Sprint 3: onde a regra dependia de lembrança, ela não produziu evidência. A redação nova já está aplicada nas Seções 5.2, 5.3, 5.4 e 5.7.
+
+| Regra | Redação vigente até a Sprint 4 | Redação para a Sprint 5 | Fato que motivou a mudança | Gatilho e evidência |
+| --- | --- | --- | --- | --- |
+| Registro de mudança de escopo (5.7) | Mudanças de escopo devem ser registradas em canal oficial ou issue | Task planejada **não é excluída**: cancelamento, duplicidade ou substituição é registrado na própria issue, com o motivo e a issue de destino, e a issue é fechada; a mudança é resumida na issue de gestão da sprint | Onze tasks planejadas apagadas e uma renomeada sem registro; duas eram ações de melhoria e duas eram exigência do barema | Gatilho: decisão de cancelar ou fundir uma task. Evidência: comentário datado na issue; 0 issues planejadas com 404 no fechamento |
+| Encerramento de issue (5.4) | Nenhuma entrega é pronta sem evidência e revisão | O MR declara `Closes #N` para cada issue que entrega, e o inventário confere que nenhuma issue com MR integrado fica aberta | Seis issues com entrega integrada abertas no corte e uma fechada sem MR | Gatilho: abertura do MR e inventário de quarta-feira. Evidência: lista de issues fechadas pelo MR |
+| Inventário de integração (5.4) | Lista de MRs antes da daily de quarta-feira | O inventário é publicado como **comentário na issue de gestão da sprint**; MR com mais de 48 h sem primeira revisão recebe outro revisor no mesmo dia | Nenhum inventário registrado; quatro MRs passaram de 48 h, e um esperou sete dias | Gatilho: quarta-feira, antes da daily. Evidência: comentário com MR, idade, revisor e ação |
+| Registro da daily (5.2) | Cada integrante publica os quatro campos no Slack até o início da daily | Mantida, e o Scrum Master anexa à issue de gestão, toda sexta-feira, o registro semanal exportado do Slack | Pela segunda sprint consecutiva, nenhum registro verificável chegou à apuração | Gatilho: sexta-feira. Evidência: anexo na issue de gestão |
+| Revisão por pares (5.3) | Revisão por outro integrante antes do fechamento | A aprovação só vale com ao menos um comentário do revisor que indique o que foi conferido | Um MR integrado sem comentário nem aprovação ([!100](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/100)) e dois aprovados sem comentário ([!83](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/83) e [!101](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/101)) | Gatilho: aprovação do MR. Evidência: comentário do revisor no MR |
+
+Foram mantidas, por não haver fato que justificasse mudança:
+
+- **Regra de ouro (5.1):** nenhuma entrega da sprint foi dada como pronta sem evidência. As issues abertas com entrega integrada são falha de encerramento, não de evidência.
+- **Evidência de integração (5.3):** a regra criada na Sprint 3 funcionou, e cada ligação da cadeia mínima fechou com teste que a atravessa.
+- **Resolução de impasses e gestão de conflitos (5.5 e 5.6):** não houve impasse que exigisse votação nem escalonamento.
+- **Canais oficiais (5.7):** a decisão sobre o Copilot Studio chegou ao grupo e foi registrada no documento de gestão.
+- **Limite de 15 minutos da daily e SLA de impedimento:** não há evidência contrária, até porque não há registro das dailies.
+
+# 6. Planejamento das Sprints 3, 4 e 5
 
 ## 6.1 Visão geral da Sprint 3
 
@@ -964,7 +1340,14 @@ Regras de entrada no board:
 | S4-19 | Automatizar informação ausente e falha de recuperação | FEATURE | M | Média | Wendel | Felipe | S4-15 e S4-16 | Cenários retornam limitação controlada, sem fato não sustentado |
 | S4-20 | Executar E2E textual com RAG e verificar sua persistência | FEATURE | G | Alta | Leonardo | Henrique | S4-12 a S4-17A e S4-19 | Cenário atravessa frontend, API, PLN, recuperação e resposta; referências do backend, conversa, fontes e auditoria são localizadas no Supabase |
 
-#### Frente D — Copilot Studio, Power Automate e webhooks essenciais
+#### Frente D — workflow web, Power Automate e webhooks essenciais
+
+> **Atualização arquitetural:** o Metrô informou que não disponibilizará acesso
+> ao Copilot Studio. As referências a tópico/conector Copilot nas tasks abaixo
+> são preservadas como histórico do planejamento original; sua implementação
+> vigente é o workflow guiado no frontend e backend. O Power Automate permanece
+> como processamento assíncrono opcional, devolvendo JSON por webhook. O DOCX é
+> gerado pelo backend, armazenado no Supabase e baixado no chat.
 
 | ID | Task / descrição | Tipo GitLab | Est. | Prioridade | Executor | Revisor | DoR | DoD |
 | :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- |
@@ -1105,6 +1488,256 @@ As 88,5 horas incluem **3 horas de preparação da Sprint Review**, distribuída
 
 A amplitude de carga é de apenas uma hora, entre 14 e 15 horas por pessoa. Todo executor possui revisor diferente: Felipe é revisado por Wendel; Henrique, por Leonardo; Jaime, por Pedro; Leonardo, por Henrique; Pedro, por Jaime; e Wendel, por Felipe. A revisão não altera a estimativa da task, pois ocorre dentro da capacidade de colaboração e do SLA; se exigir retrabalho material, consome primeiro a reserva explícita. Nenhuma frente técnica ou documental inteira fica sob uma única pessoa, e a rotação desloca Wendel para gestão e testes, Henrique para integridade e deploy, Felipe para Copilot e publicação, Leonardo para dados/RAG e Jaime e Pedro para integrações cruzadas.
 
+## 6.5 Planejamento da Sprint 5
+
+### 6.5.1 Premissas, capacidade e limites
+
+A Sprint 5 vai de **28/09 a 07/10/2026**, data da release 0.5.0, e fecha o módulo. Ela tem três artefatos: Desenvolvimento e Documentação Técnica do Projeto, que consolida as Sprints 3 a 5; Documentação Técnica Final; e Gestão de Projetos Evolutiva com a apresentação final. O planejamento parte de quatro fontes, nesta ordem de precedência:
+
+1. **Barema da Sprint 5.** Do desenvolvimento, só três itens ainda não têm entrega: os dois webhooks, que eram da Sprint 4 e foram excluídos sem execução; a mensageria integrada a eles; e o frontend completo com integração e testes. Somam-se a complementação dos testes, os onze itens da documentação técnica final — incluindo custos, análise financeira, revisão de feedbacks, ODS e o plano de adoção — e os seis itens da gestão final.
+2. **Residual da Sprint 4**, conforme a Seção 2.4.3: controle de acesso por perfil (D-01), defeitos de auditoria e fonte (D-02 a D-06), ocorrências de usabilidade (O1 a O4 e O8), casos funcionais reprovados, RNF06 reprovado na recuperação, RNF07 a RNF12 ainda não executados, homologação do VHS com o provedor real e os controles de pipeline não construídos.
+3. **Pedidos do parceiro:** alterar informações do banco diretamente pelo chat, com ênfase; integração com o Microsoft Teams, se possível; resposta em áudio; lembretes; SharePoint simulado com a estrutura que o Metrô disponibilizou; interface com menos informação na tela; tarefas e calendário do projeto; tabela de-para para reaproveitamento no ecossistema do Metrô; conversão do agente em servidor MCP para conexão com o Copilot; e respostas com elementos visuais, como tabelas e indicadores em destaque.
+4. **Arquitetura vigente:** workflow guiado no frontend e no backend, RabbitMQ para processamento assíncrono, Supabase como base única e AWS EC2 como ambiente de demonstração. O Copilot Studio segue indisponível para a equipe.
+
+**Capacidade.** A Sprint 5 tem oito dias úteis, contra os dez da Sprint 4. A capacidade é proporcional: **77 horas**, cerca de 12,8 horas por integrante. O backlog soma **73 horas** em 54 tasks, com **4 horas de reserva** (5,2%). A reserva é menor que a da Sprint 4 (7,8%) porque o barema e o residual não deixam folga maior sem corte de entrega obrigatória. Em compensação, o plano tem uma linha de corte explícita, que libera até 4,5 horas.
+
+**Critérios de corte.** Se a cadeia crítica atrasar ou a reserva for consumida, as tasks são cortadas nesta ordem, e cada corte é registrado na própria issue e na issue de gestão, sem excluí-la:
+
+1. **Prioridade Baixa (2,5 h):** avaliação do Teams (S5-19), homologação do VHS com o provedor real (S5-35) e usabilidade com perfis não cobertos (S5-34);
+2. **Pedidos do parceiro que reaproveitam dados ou infraestrutura já existentes (2 h):** tarefas e calendário (S5-14) e lembretes (S5-13). Se cortados, entram como aperfeiçoamento futuro documentado (S5-41).
+
+Nenhuma task exigida pelo barema nem a cadeia de alteração de dados pelo chat é cortada. Se o corte não bastar, o grupo registra o bloqueio no mesmo dia e decide o que sai por maioria, conforme a Seção 5.5.
+
+**A alteração de dados pelo chat vem depois do controle de acesso.** É a capacidade que o parceiro pediu com mais ênfase e também a de maior risco (R17). Ela só é implementada depois da carga de identidades e do controle de acesso por perfil, e exige prévia, confirmação explícita, validação, gravação em `change_records` e `audit_events`, desfazer e teste com perfil negado. Essa ordem é a cadeia crítica da sprint.
+
+**Teams e Copilot.** Sem acesso ao Copilot Studio, a conexão com o Copilot é oferecida por um servidor MCP que o próprio Metrô pode registrar no seu ambiente (S5-18). A integração com o Teams é avaliada em uma task curta (S5-19) e só é implementada se houver tenant e registro de aplicativo disponíveis. Em qualquer caso, o caminho fica documentado na tabela de-para (S5-44).
+
+**Atualização do estado dos itens 3 e 4 do barema em 25/09/2026.** O estado
+verificado no repositório é:
+
+| Resultado | Estado comprovado | Limite da comprovação |
+| --- | --- | --- |
+| Webhook de resultado de relatório | Entregue: rota, token, correlação, idempotência e `automation_callbacks`; 24 testes de relatórios aprovados. | Power Automate real não foi executado; o contrato foi exercitado pelo simulador/double. |
+| Webhook de confirmação de entrega | Entregue: rota, token, idempotência, `notification_delivery_callbacks` e outbox; 22 testes de alertas aprovados. | Provedor real não foi executado. |
+| Integração RabbitMQ da confirmação de entrega | Entregue no escopo automatizado: routing key, fila/DLQ, publisher e handler do consumer testados. | Publisher usou double controlado; não houve broker externo nesta rodada. |
+| Microsoft Teams, SharePoint corporativo e Copilot Studio | Não homologados; simulados, opcionais ou fora do runtime ativo. | Não há evidência de tenant real. |
+
+O webhook de relatório permanece síncrono e não foi transformado em produtor
+RabbitMQ. O fluxo assíncrono documentado para S5-11 é o da confirmação de
+entrega: webhook → outbox → RabbitMQ → consumer → banco. O alerta regular ainda
+nasce no scheduler; AMQP, scheduler e consulta REST do frontend não são
+webhooks.
+
+Regras de entrada no board, além das Seções 7.1 a 7.4:
+
+- as issues nascem em `Open`, com milestone `Sprint 05`, natureza (`FEATURE`, `BUG` ou `DOCS`), tamanho, uma prioridade e a área, e **sem responsável**: a atribuição é feita na planning, pelas regras da Seção 6.5.4;
+- não há label `SIZE_PP` no projeto, e nenhuma task foi estimada em PP;
+- uma task cortada ou fundida é fechada com o motivo e o destino, e nunca excluída;
+- implementação, teste direto e documentação específica do mesmo resultado ficam no mesmo card, como na Sprint 4;
+- uma integração só fecha com evidência que atravesse os componentes envolvidos.
+
+### 6.5.2 Backlog refinado por resultado
+
+A materialização no Kanban foi feita pela importação do arquivo [`docs/backlog/sprint-05-issues.csv`](backlog/sprint-05-issues.csv), que usa o formato de importação do GitLab — colunas `title`, `description` e `milestone` — com as labels aplicadas por *quick action* na descrição. O arquivo é a fonte versionada da criação das issues.
+
+A coluna **Origem** liga cada task ao item do barema, ao defeito ou ao pedido do parceiro que a justifica. Os IDs `S5-XX` são citados na descrição de cada issue, e a coluna **Issue** traz o número real do board.
+
+A S5-40 está sem número: a #294, criada para ela na importação, foi excluída do board. Pela regra da Seção 7.1, a task volta ao board e, se tiver sido fundida em outra, é fechada com o motivo e o destino.
+
+#### Frente A — Integridade do repositório e da pipeline
+
+| ID | Issue | Task | Tipo GitLab | Área | Est. | Prioridade | Depende de | Origem | DoR | DoD |
+| :---: | :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- | --- |
+| S5-01 | [#255](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/255) | Adicionar o gate de marcadores e a suíte de integração à pipeline | FEATURE | DEVOPS | M | Média | — | Ação de melhoria da Seção 2.4.7; dívida da S4-04 | Regex da Seção 5.3.3 do GestaoConfiguracao revisada; marcador integration registrado no conftest (S4-32B) | Job e hook falham com marcador real e aceitam saídas como ================ 10 passed; backend-api executa pytest -m integration; evidência de pipeline vermelha e verde anexada ao MR |
+| S5-02 | [#256](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/256) | Validar automaticamente o título do merge request | FEATURE | DEVOPS | M | Média | — | Ação de melhoria da Seção 2.4.7; dívida da S4-05 | Padrão revisado na Seção 5.3.1 do GestaoConfiguracao | Título inválido reprova a pipeline e título válido, com uma ou mais issues, aprova; opção Pipelines must succeed ativada; evidência dos dois casos anexada ao MR |
+
+#### Frente B — Identidade, acesso e alteração de dados pelo chat
+
+| ID | Issue | Task | Tipo GitLab | Área | Est. | Prioridade | Depende de | Origem | DoR | DoD |
+| :---: | :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- | --- |
+| S5-03 | [#257](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/257) | Carregar identidades e regras de acesso sintéticas | FEATURE | DATABASE | M | Alta | — | Defeito D-01 (etapa 1); risco R04 | Modelo de users e access_rules conferido no esquema físico; perfis acordados com a frente de acesso | Duas execuções da carga sem duplicação; cada perfil tem regra por usuário ou papel e escopo verificável por consulta; perfis documentados |
+| S5-04 | [#258](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/258) | Aplicar o controle de acesso por perfil nas consultas e ações | FEATURE | BACKEND | G | Alta | S5-03 | Defeito D-01 (etapa 2); risco R04 | S5-03 concluída; identidade simulada da PoC documentada | Perfil permitido acessa seu escopo e perfil negado recebe erro controlado e auditado; testes automatizados dos dois casos; user_id preenchido nas interações novas |
+| S5-05 | [#259](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/259) | Definir o contrato de alteração de dados do projeto pelo chat | DOCS | BACKEND | M | Alta | S5-03 | Pedido do parceiro (ênfase); risco R17 | Tabelas de projeto, cronograma e riscos conferidas; perfis da S5-03 definidos | Contrato publicado no Projeto.md com entrada, prévia, confirmação, saída, erro e desfazer; cada campo editável tem regra de validação e perfis autorizados |
+| S5-06 | [#260](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/260) | Implementar a alteração de dados do projeto pelo chat com confirmação | FEATURE | BACKEND | G | Alta | S5-04, S5-05 | Pedido do parceiro (ênfase); riscos R04 e R17 | S5-04 integrada; contrato da S5-05 aprovado | Alteração confirmada é gravada com trilha completa; alteração sem permissão ou com valor inválido é recusada sem escrita; testes automatizados de sucesso, negação e desfazer |
+| S5-07 | [#261](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/261) | Exibir prévia, confirmação e histórico da alteração na interface | FEATURE | FRONTEND | M | Média | S5-06 | Pedido do parceiro (ênfase) | Contrato da API da S5-06 estável | Prévia, confirmação, cancelamento e erro tratados na interface; testes de componente dos quatro estados |
+| S5-08 | [#262](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/262) | Testar a alteração pelo chat com perfis permitido e negado | FEATURE | TEST | M | Alta | S5-06, S5-07 | Pedido do parceiro (ênfase); barema de integração frontend-backend | S5-06 e S5-07 integradas; massa sintética com perfis carregada | Quatro cenários com resultado e evidência; trilha localizada no Supabase para cada alteração |
+
+#### Frente C — Webhooks e mensageria
+
+| ID | Issue | Task | Tipo GitLab | Área | Est. | Prioridade | Depende de | Origem | DoR | DoD |
+| :---: | :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- | --- |
+| S5-09 | [#263](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/263) | Implementar o webhook de alteração de documentos do SharePoint simulado | FEATURE | BACKEND | G | Alta | S5-12 | Barema, item 3 (webhooks); risco R05 | Estrutura do SharePoint simulado da S5-12 definida | Payload válido recebe 2xx, inválido é rejeitado e repetição não duplica; rota e payload documentados no Projeto.md com exemplos; testes automatizados dos casos |
+| S5-10 | [#264](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/264) | Implementar o webhook de confirmação de entrega de notificações | FEATURE | BACKEND | M | Média | — | Barema, item 3 (webhooks) | Tabelas de notificação da migração 15 aplicadas | Payload válido recebe 200, assinatura inválida recebe 401 e repetição é idempotente; rota e payload documentados com exemplos; testes automatizados dos casos |
+| S5-11 | [#265](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/265) | Integrar os webhooks às filas do RabbitMQ com produtores e consumidores | FEATURE | BACKEND | G | Alta | S5-09, S5-10 | Barema, item 4 (mensageria) | S5-09 e S5-10 integradas; rabbitMQ disponível no ambiente local e na nuvem | Evento de webhook chega ao consumidor e produz o efeito esperado; mensagem inválida vai para a dead-letter queue; topologia e casos de uso documentados com testes |
+
+**Realização da Frente C.** O planejamento acima é mantido como foi refinado,
+mas a implementação final usa como primeiro webhook o retorno de relatório já
+existente, e não um webhook de alteração do SharePoint. O segundo é a
+confirmação de entrega da S5-10. A S5-11 integra ao RabbitMQ somente o webhook
+de entrega, conforme a restrição de não tornar assíncrono o callback de
+relatório. Foram aprovados 44 testes focados (22 de alertas e 22 de relatórios),
+com publisher testado por double e sem alegação de execução real no ecossistema
+Microsoft. Evidência: [`docs/evidencias/sprint-05/webhooks-rabbitmq.md`](evidencias/sprint-05/webhooks-rabbitmq.md).
+
+#### Frente D — Capacidades pedidas pelo parceiro
+
+| ID | Issue | Task | Tipo GitLab | Área | Est. | Prioridade | Depende de | Origem | DoR | DoD |
+| :---: | :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- | --- |
+| S5-12 | [#266](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/266) | Ampliar o SharePoint simulado com a estrutura disponibilizada pelo Metrô | FEATURE | DATABASE | G | Alta | — | Pedido do parceiro; DEF-RF06-01; riscos R01 e R03 | Material do Metrô disponível ao grupo | Todos os projetos da massa têm documentos recuperáveis; estrutura documentada com a correspondência ao material do Metrô; reindexação reproduzível por comando |
+| S5-13 | [#267](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/267) | Implementar lembretes do projeto sobre a infraestrutura de alertas | FEATURE | BACKEND | M | Média | — | Pedido do parceiro | Infraestrutura de alertas da Seção 8.5.11 funcionando | Lembrete criado pelo chat é entregue no horário; cancelamento e repetição tratados; teste automatizado do fluxo |
+| S5-14 | [#268](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/268) | Exibir tarefas e calendário do projeto no chat | FEATURE | FRONTEND | M | Média | — | Pedido do parceiro | Rotas de leitura do projeto disponíveis | Usuário abre tarefas e calendário a partir do chat; testes de componente das duas visões |
+| S5-15 | [#269](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/269) | Responder com áudio usando Text-to-Speech | FEATURE | BACKEND | G | Média | — | Pedido do parceiro | Credencial do Azure Speech disponível | Resposta textual gera áudio reproduzível; falha do provedor mantém a resposta em texto, com aviso; testes automatizados de sucesso e falha |
+| S5-16 | [#270](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/270) | Estruturar respostas com tabelas, indicadores e destaques | FEATURE | BACKEND | M | Média | — | Pedido do parceiro | Contrato de resposta vigente (1.1.0) conferido | Schema versionado com os novos blocos; testes de contrato para cada bloco |
+| S5-17 | [#271](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/271) | Renderizar tabelas, indicadores em destaque e alertas visuais nas respostas | FEATURE | FRONTEND | G | Média | S5-16 | Pedido do parceiro | Schema da S5-16 estável | Os três blocos são exibidos e acessíveis; testes de componente aprovados |
+| S5-18 | [#272](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/272) | Expor o agente como servidor MCP para conexão com o Copilot | FEATURE | BACKEND | G | Média | — | Pedido do parceiro; oportunidade O9 | Contratos das rotas de consulta, relatório e alerta estáveis | Cliente MCP lista e executa as ferramentas; chamada sem credencial é recusada; passo a passo de conexão com o Copilot documentado |
+| S5-19 | [#273](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/273) | Avaliar a viabilidade da integração com o Microsoft Teams | DOCS | RESEARCH | P | Baixa | — | Pedido do parceiro (se possível); risco R02 | Resposta do Metrô sobre o tenant solicitada | Decisão registrada com requisitos e bloqueios; caminho recomendado incorporado à tabela de-para |
+
+#### Frente E — Frontend completo e integração
+
+| ID | Issue | Task | Tipo GitLab | Área | Est. | Prioridade | Depende de | Origem | DoR | DoD |
+| :---: | :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- | --- |
+| S5-20 | [#274](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/274) | Simplificar a tela do chat e tornar visíveis os controles da proatividade | FEATURE | FRONTEND | G | Alta | — | Pedido do parceiro; ocorrência O8; barema, item 6 | Ocorrências da Seção 9.3.2 conferidas | Tela padrão sem detalhes técnicos visíveis; sugestão com ação de aceitar, recusar e desativar no mesmo lugar; testes de componente atualizados |
+| S5-21 | [#275](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/275) | Garantir responsividade e acessibilidade da interface | FEATURE | FRONTEND | G | Alta | — | Barema, item 6 | Telas da S5-20 definidas | Três larguras sem rolagem horizontal; nenhuma violação crítica na verificação automática; fluxo principal navegável só por teclado |
+| S5-22 | [#276](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/276) | Completar os testes unitários por componente com meta de cobertura | FEATURE | TEST | G | Alta | S5-20, S5-21 | Barema, item 6 | Componentes das S5-20 e S5-21 integrados | Todo componente tem ao menos um teste; cobertura mínima aplicada na pipeline e registrada no MR |
+| S5-23 | [#277](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/277) | Automatizar os testes E2E dos fluxos integrados e das falhas de comunicação | FEATURE | TEST | G | Alta | S5-07, S5-17, S5-20 | Barema, itens 6 e 7 | Funcionalidades congeladas em 02/10 | Fluxos principais aprovados no E2E; falhas de comunicação exibem mensagem controlada; relatório do E2E como artefato da pipeline |
+| S5-24 | [#278](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/278) | Documentar navegabilidade, estratégia de código e testes do frontend | DOCS | DOCUMENTAÇÃO | M | Média | S5-22, S5-23 | Barema, item 6 | Testes das S5-22 e S5-23 executados | Seção do Projeto.md atualizada com fluxos, estratégia e testes; cobertura registrada com a data da medição |
+
+#### Frente F — Correções de qualidade do agente
+
+| ID | Issue | Task | Tipo GitLab | Área | Est. | Prioridade | Depende de | Origem | DoR | DoD |
+| :---: | :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- | --- |
+| S5-25 | [#279](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/279) | Corrigir a auditoria de fora de escopo, correlation_id e fluxo guiado | BUG | BACKEND | G | Alta | — | Defeitos D-02, D-03 e D-05 | Casos xfail correspondentes identificados | Os três xfail passam a aprovar e o marcador é removido; nenhuma interação perdida por violação de restrição |
+| S5-26 | [#280](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/280) | Registrar as fontes das respostas documentais | BUG | BACKEND | M | Alta | — | Defeito D-04 | Ocorrências do D-04 inspecionadas | Nenhuma resposta documental nova sem fonte registrada; teste de regressão aprovado |
+| S5-27 | [#281](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/281) | Bloquear conteúdo sensível antes do envio ao provedor | BUG | BACKEND | M | Alta | — | Defeito D-06; RNF01 | Padrões de dado sensível acordados | CT-RNF01-N aprovado; bloqueio auditado sem expor o dado |
+| S5-28 | [#282](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/282) | Aceitar perguntas curtas e ajustar as fronteiras de intenção | BUG | BACKEND | G | Média | — | Ocorrência O1; DEF-RF02-01; DEF-RF03-01 | Casos O1, CT-RF02-01 e CT-RF03-02 congelados | Os casos congelados passam a ser tratados corretamente; F1-macro do classificador não cai abaixo de 0,80 |
+| S5-29 | [#283](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/283) | Condicionar as sugestões proativas às fontes recuperadas | BUG | BACKEND | M | Média | — | Ocorrências O2, O3 e O4 | Ocorrências O2, O3 e O4 reproduzidas | Os três cenários reproduzidos deixam de ocorrer; testes de regressão aprovados |
+
+#### Frente G — Complementação dos testes sistêmicos
+
+| ID | Issue | Task | Tipo GitLab | Área | Est. | Prioridade | Depende de | Origem | DoR | DoD |
+| :---: | :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- | --- |
+| S5-30 | [#284](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/284) | Reexecutar RNF01 a RNF03 após as correções | FEATURE | TEST | G | Alta | S5-04, S5-25, S5-26, S5-27 | Barema, item 10 | Correções integradas; perfis carregados | Seis casos com resultado e evidência; relatório atualizado sem reescrever a rodada 1 |
+| S5-31 | [#285](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/285) | Executar RNF07 a RNF09 | FEATURE | TEST | G | Média | — | Barema, item 10 | Casos da Seção 9.2.3 revisados; ambiente estável | Seis casos com resultado, ferramenta e evidência; casos não executados identificados com motivo |
+| S5-32 | [#286](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/286) | Executar RNF10 a RNF12 | FEATURE | TEST | G | Média | — | Barema, item 10 | Casos da Seção 9.2.3 revisados | Seis casos com resultado, ferramenta e evidência; casos não executados identificados com motivo |
+| S5-33 | [#287](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/287) | Reexecutar os casos funcionais reprovados e o RNF06 | FEATURE | TEST | M | Média | S5-12, S5-28 | Barema, item 10; RNF06 | Correções das S5-12 e S5-28 integradas | Quatro casos e RNF06 com resultado e evidência; massa do RNF06 congelada antes da medição |
+| S5-34 | [#288](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/288) | Conduzir usabilidade com os perfis ainda não cobertos | FEATURE | TEST | M | Baixa | — | Revisão do MR !101 | Participantes confirmados; interface congelada | Sessões registradas e anonimizadas; ocorrências novas classificadas por severidade |
+| S5-35 | [#289](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/289) | Homologar o cache VHS com o Azure Speech real | FEATURE | TEST | P | Baixa | — | Pendência da S4-31 | Credencial do Azure Speech disponível | Miss e hits medidos separadamente; saída sanitizada anexada às evidências |
+| S5-36 | [#290](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/290) | Consolidar os resultados finais dos testes sistêmicos | DOCS | TEST | M | Alta | S5-30, S5-31, S5-32, S5-33 | Barema, item 10 | Rodadas da Sprint 5 concluídas | Tabela final por requisito com status e evidência; defeitos remanescentes com destino declarado |
+
+#### Frente H — Deploy da versão final
+
+| ID | Issue | Task | Tipo GitLab | Área | Est. | Prioridade | Depende de | Origem | DoR | DoD |
+| :---: | :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- | --- |
+| S5-37 | [#291](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/291) | Publicar a versão final e atualizar o manual de implantação e uso | FEATURE | DEVOPS | M | Média | — | Barema, item 9; risco R16 | Versão congelada em 02/10; credenciais do Learner Lab válidas | Versão final responde na nuvem; rollback exercitado e registrado; manual atualizado |
+
+#### Frente I — Documentação técnica final
+
+| ID | Issue | Task | Tipo GitLab | Área | Est. | Prioridade | Depende de | Origem | DoR | DoD |
+| :---: | :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- | --- |
+| S5-38 | [#292](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/292) | Atualizar componentes, tecnologias e funcionalidades implementadas | DOCS | DOCUMENTAÇÃO | M | Alta | — | Barema da documentação final, itens 1 e 4 | Funcionalidades congeladas em 02/10 | Seções atualizadas no Projeto.md, coerentes com o código; nenhuma funcionalidade descrita sem evidência |
+| S5-39 | [#293](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/293) | Detalhar os custos de implementação da PoC e da solução final | DOCS | DOCUMENTAÇÃO | M | Alta | — | Barema da documentação final, item 2 | Material das S4-52A a S4-52C disponível | Custos de pessoal e tecnologia com premissa, quantidade e valor; poC e solução final separadas |
+| S5-40 | — | Elaborar a análise financeira para o parceiro | DOCS | DOCUMENTAÇÃO | M | Alta | S5-39 | Barema da documentação final, item 3 | Custos da S5-39 consolidados | Projeção com premissas auditáveis; conclusão útil para a decisão do parceiro |
+| S5-41 | [#295](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/295) | Atualizar os benefícios e os aperfeiçoamentos futuros | DOCS | DOCUMENTAÇÃO | M | Média | — | Barema da documentação final, itens 5 e 7 | Resultados dos testes disponíveis | Benefícios ligados a funcionalidades e evidências; aperfeiçoamentos priorizados |
+| S5-42 | [#296](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/296) | Criar o documento de revisão de feedbacks das Sprints 1 a 4 | DOCS | DOCUMENTAÇÃO | M | Alta | — | Barema da documentação final, item 6 | Feedbacks das Sprints 1 a 4 disponíveis | Documento em docs/ com item, sprint e correção; todo item com correção ou justificativa |
+| S5-43 | [#297](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/297) | Revisar a arquitetura e a interação entre os componentes | DOCS | DOCUMENTAÇÃO | G | Alta | S5-11, S5-18 | Barema da documentação final, item 8; risco R10 | Mensageria e MCP integrados | Diagramas atualizados com fonte e imagem; nenhuma contradição entre as seções sobre o canal; RNF08 revisado |
+| S5-44 | [#298](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/298) | Elaborar a tabela de-para para o ecossistema Microsoft do Metrô | DOCS | DOCUMENTAÇÃO | M | Alta | S5-19 | Pedido do parceiro | Componentes da PoC listados | Tabela no Projeto.md com componente, equivalente, reaproveitamento e observação; coerência com a revisão da arquitetura |
+| S5-45 | [#299](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/299) | Revisar o Canvas de proposta de valor e a análise de ODS | DOCS | DOCUMENTAÇÃO | M | Média | — | Barema da documentação final, item 9 | Canvas da Sprint 1 disponível | Canvas atualizado; cada ODS justificado com elemento do projeto, inclusive os ameaçados |
+| S5-46 | [#300](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/300) | Elaborar o mapa de adoção e aculturamento organizacional | DOCS | DOCUMENTAÇÃO | M | Alta | — | Barema da documentação final, item 11.1 | Perfis de acesso da S5-03 definidos | Mapa específico ao Metrô, com públicos, barreiras e ações; seção própria no Projeto.md ou arquivo .md |
+| S5-47 | [#301](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/301) | Definir os mecanismos de incentivo e engajamento | DOCS | DOCUMENTAÇÃO | M | Média | S5-46 | Barema da documentação final, item 11.2 | Mapa da S5-46 disponível | Cada dimensão justificada no contexto do Metrô; indicadores de uso e qualidade propostos |
+| S5-48 | [#302](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/302) | Garantir a conformidade do repositório com o escritório de projetos | DOCS | GESTÃO DE PROJETO E CONFIGURAÇÃO | M | Alta | — | Barema da documentação final, item 10; issue #252 | Todos os MRs da Sprint 5 integrados | Checklist atendido ou com justificativa; nenhuma pendência da auditoria da Sprint 4 sem destino |
+
+#### Frente J — Gestão final e apresentação
+
+| ID | Issue | Task | Tipo GitLab | Área | Est. | Prioridade | Depende de | Origem | DoR | DoD |
+| :---: | :---: | --- | :---: | :---: | :---: | :---: | :---: | --- | --- | --- |
+| S5-49 | [#303](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/303) | Analisar a Sprint 5 e fechar o acompanhamento do módulo | DOCS | GESTÃO DE PROJETO E CONFIGURAÇÃO | M | Média | — | Barema da gestão final, item 1 | Sprint encerrada e MRs integrados | Análise com indicadores, efetividade e ações verificáveis |
+| S5-50 | [#304](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/304) | Analisar a evolução das métricas das Sprints 1 a 5 | DOCS | GESTÃO DE PROJETO E CONFIGURAÇÃO | M | Média | — | Barema da gestão final, item 2 | Indicadores das Sprints 1 a 4 consolidados | Série com gráfico e conclusões por indicador |
+| S5-51 | [#305](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/305) | Consolidar o post mortem de riscos em tabela única | DOCS | GESTÃO DE PROJETO E CONFIGURAÇÃO | G | Média | — | Barema da gestão final, item 3 | Matriz da Sprint 5 atualizada | Tabela única com status final de cada item; análise de materialização, mitigação, oportunidades e eventos não previstos; conclusão sobre a identificação inicial |
+| S5-52 | [#306](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/306) | Redigir a análise post mortem do projeto | DOCS | GESTÃO DE PROJETO E CONFIGURAÇÃO | M | Média | — | Barema da gestão final, item 4 | Análises das S5-49 a S5-51 disponíveis | Post mortem com conquistas, desafios e sugestões |
+| S5-53 | [#307](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/307) | Fechar a matriz de papéis e o contrato de convivência | DOCS | GESTÃO DE PROJETO E CONFIGURAÇÃO | M | Média | — | Barema da gestão final, item 5 | Matriz da Sprint 5 registrada | Rotação e competências evidenciadas; avaliação final de cada acordo |
+| S5-54 | [#308](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/308) | Planejar e construir a apresentação final para stakeholders | DOCS | GESTÃO DE PROJETO E CONFIGURAÇÃO | G | Alta | S5-36, S5-37 | Barema da gestão final, item 6 | Resultados dos testes e versão final disponíveis | Material com objetivos, solução, resultados e aprendizados; contingência da demonstração validada |
+
+### 6.5.3 Sequenciamento e dependências
+
+A cadeia crítica é a alteração de dados pelo chat, porque junta a capacidade mais pedida pelo parceiro ao risco mais alto da matriz:
+
+```text
+S5-03 → S5-04 → S5-05 → S5-06 → S5-07 → S5-08 → S5-30 → S5-36 → S5-49
+```
+
+Em paralelo a ela, e sem depender dela, correm quatro cadeias:
+
+- **Eventos externos e mensageria:** `S5-12 → S5-09`, `S5-10`, e as duas juntas em `S5-11`, que também alimenta a revisão da arquitetura (`S5-43`);
+- **Interface:** `S5-16 → S5-17` e `S5-20 → S5-21 → S5-22 → S5-23 → S5-24`, com o E2E dependendo também das telas de alteração (`S5-07`);
+- **Qualidade do agente:** `S5-25`, `S5-26` e `S5-27` antes de `S5-30`, e `S5-12` e `S5-28` antes de `S5-33`;
+- **Documentação e gestão:** `S5-39 → S5-40`, `S5-46 → S5-47`, `S5-19 → S5-44`, `S5-11` e `S5-18 → S5-43`, e `S5-36` e `S5-37 → S5-54`.
+
+As tasks sem dependência técnica começam no primeiro dia, para não repetir a concentração da Sprint 4: pipeline (S5-01 e S5-02), SharePoint simulado (S5-12), correções de auditoria e fonte (S5-25 a S5-27), revisão de feedbacks (S5-42), Canvas e ODS (S5-45), plano de adoção (S5-46) e os rascunhos da gestão final com os dados das Sprints 1 a 4.
+
+Cadência dos oito dias úteis:
+
+| Período | Resultado obrigatório |
+| --- | --- |
+| 28 e 29/09 | Pipeline com os dois gates; identidades e controle de acesso integrados; contrato de alteração aprovado; SharePoint ampliado; D-02 a D-06 corrigidos |
+| 30/09 e 01/10 | Alteração pelo chat com interface e teste; webhooks integrados às filas; capacidades do parceiro; interface simplificada e acessível; inventário de MRs na quarta-feira, 30/09 |
+| 02/10 | **Congelamento de funcionalidades.** Depois dele só entram correções, testes e documentação; versão final publicada na nuvem |
+| 05/10 | Testes E2E, unitários e reexecuções concluídos e consolidados; documentação técnica final e conformidade do repositório |
+| 06/10 | Apresentação final construída e contingência validada; revisão cruzada da documentação |
+| 07/10 | Fechamento da gestão com os dados da Sprint 5 e release 0.5.0 |
+
+Marcos de controle:
+
+| Marco | Condição de saída |
+| --- | --- |
+| M1 — pipeline confiável | S5-01 e S5-02 concluídas; marcador real e título inválido reprovam o MR |
+| M2 — acesso por perfil | S5-03 e S5-04 concluídas; perfil negado recebe erro controlado e auditado |
+| M3 — escrita segura pelo chat | S5-05 a S5-08 concluídas; alteração permitida, negada, inválida e desfeita com evidência |
+| M4 — eventos externos | S5-09 a S5-11 concluídas; o webhook de relatório produz o efeito síncrono documentado e o webhook de entrega percorre outbox, RabbitMQ e consumer com efeito verificável |
+| M5 — interface completa | S5-14, S5-17 e S5-20 a S5-24 concluídas; responsiva, acessível e coberta por testes unitários e E2E |
+| M6 — qualidade final | S5-25 a S5-36 concluídas; todos os requisitos com resultado final e evidência |
+| M7 — versão final publicada | S5-37 concluída, com rollback exercitado |
+| M8 — documentação final | S5-38 a S5-48 concluídas |
+| M9 — gestão e apresentação | S5-49 a S5-54 concluídas depois do fechamento da janela |
+
+Se um marco atrasar, as tasks dependentes permanecem em `Open`, e a linha de corte da Seção 6.5.1 é acionada antes de qualquer task obrigatória ser comprimida.
+
+### 6.5.4 Distribuição da capacidade
+
+| Faixa | Quantidade | Teto por task | Capacidade máxima |
+| :---: | :---: | :---: | :---: |
+| G | 20 | 2 h | 40 h |
+| M | 32 | 1 h | 32 h |
+| P | 2 | 0,5 h | 1 h |
+| PP | 0 | 0,25 h | 0 h |
+| **Total planejado** | **54** | — | **73 h** |
+| **Reserva explícita** | — | — | **4 h** |
+| **Capacidade da sprint** | — | — | **77 h** |
+
+O backlog ocupa 94,8% da capacidade. Estão em G 20 das 54 tasks (37,0%), abaixo do teto de 55%; têm prioridade Alta 26 (48,1%), abaixo do teto de 50%; Média, 25 (46,3%); e Baixa, 3 (5,6%), que formam o primeiro degrau da linha de corte.
+
+| Frente | Tasks | Carga |
+| --- | :---: | :---: |
+| A — Integridade do repositório e da pipeline | 2 | 2 h |
+| B — Identidade, acesso e alteração de dados pelo chat | 6 | 8 h |
+| C — Webhooks e mensageria | 3 | 5 h |
+| D — Capacidades pedidas pelo parceiro | 8 | 11,5 h |
+| E — Frontend completo e integração | 5 | 9 h |
+| F — Correções de qualidade do agente | 5 | 7 h |
+| G — Complementação dos testes sistêmicos | 7 | 9,5 h |
+| H — Deploy da versão final | 1 | 1 h |
+| I — Documentação técnica final | 11 | 12 h |
+| J — Gestão final e apresentação | 6 | 8 h |
+| **Total** | **54** | **73 h** |
+
+**Atribuição.** As issues foram criadas sem responsável, e a atribuição acontece na planning de 28/09, antes de qualquer card sair de `Open`. A distribuição segue quatro regras, verificadas no inventário de quarta-feira:
+
+- a carga de cada integrante fica entre 11 e 13,5 horas, e a amplitude entre o maior e o menor não passa de 2×;
+- cada task tem um executor e um revisor de outra frente;
+- ninguém é executor de task do tema que conduziu na Sprint 4 sem justificativa registrada na issue; os temas estão na Seção 4.7;
+- as tasks de gestão final (Frente J) são divididas entre pelo menos três integrantes, com executores diferentes de quem conduziu a gestão nas Sprints 3 e 4.
+
+Uma troca de responsável depois da planning exige comentário na issue com origem, destino e a nova carga das duas pessoas (Seção 7.8).
+
 # 7. Gestão do processo de desenvolvimento do grupo
 
 ## 7.1 Fluxo de trabalho no Kanban
@@ -1122,7 +1755,8 @@ Regras:
 - Toda tarefa deve nascer como issue na coluna `Open`;
 - A issue só deve avançar de `Open` para `Backlog` depois de refinada;
 - A issue deve ter responsável único, tipo, estimativa, prioridade e milestone;
-- A atribuição deve reproduzir a distribuição de carga aprovada na Seção 6.4; alterações exigem registro da causa e nova soma por integrante;
+- A atribuição deve reproduzir a distribuição de carga aprovada no planejamento da sprint (Seções 6.4 e 6.5); alterações exigem comentário na issue com origem, destino e nova soma por integrante;
+- Issue planejada não é excluída: quando cancelada, fundida ou substituída, é fechada com comentário que registra o motivo e o destino;
 - O card deve ser atualizado sempre que houver mudança real de estado;
 - Tarefas bloqueadas devem ser sinalizadas como impedimento na daily;
 - Nenhuma tarefa deve ir para `Closed` sem evidência e revisão.
@@ -1212,12 +1846,14 @@ chore(config): ajustar template de issues (#27)
 
 Critérios mínimos para Merge Request:
 
-- Título no formato `<tipo>(<escopo opcional>): <descrição> (#N)`, com mais de três palavras e sem `WIP:` ou `Draft:`;
+- Título no formato `<tipo>(<escopo opcional>): <descrição> (#N)` ou, quando o MR entrega mais de uma issue, `(#N, #M)`, com mais de três palavras e sem `WIP:` ou `Draft:`;
+- `Closes #N` na descrição para cada issue entregue;
+- Exclusão da branch de origem marcada na abertura;
 - Descrição substantiva com as mudanças realizadas;
 - Issue vinculada;
 - Evidências registradas;
 - Reviewer definido;
-- Aprovação por pelo menos um revisor;
+- Aprovação por pelo menos um revisor, precedida de comentário que indique o que foi conferido;
 - Pipeline, testes, lint ou validação manual registrados conforme o tipo de entrega;
 - DoD atendida antes do merge.
 
@@ -1228,7 +1864,8 @@ Critérios mínimos para Merge Request:
 | Atualização de daily | Até o início da daily; ausente registra no mesmo dia | Cada integrante |
 | Registro de impedimento | No mesmo dia da identificação | Responsável pela tarefa |
 | Primeira resposta a impedimento | Até 24 horas | Scrum Master ou responsável pela frente |
-| Inventário de MRs | Quarta-feira antes da daily | Scrum Master |
+| Inventário de MRs, publicado na issue de gestão | Quarta-feira antes da daily | Scrum Master |
+| Registro semanal das dailies na issue de gestão | Sexta-feira | Scrum Master |
 | Primeira revisão de MR | Até 48 horas após abertura | Reviewer definido |
 | Entrega para revisão | Até quinta-feira | Responsável pela tarefa |
 | Revisão por pares | Até quinta-feira | Reviewer definido |
@@ -1265,3 +1902,20 @@ Esta revisão executa a issue [#143](https://git.inteli.edu.br/graduacao/2026-2a
 | Integração | Componentes isolados foram confundidos com fluxo concluído | Exigir teste que atravesse cada fronteira declarada integrada | Log de contrato ou E2E anexado antes de fechar a issue |
 
 As políticas de issue continuam exigindo objetivo, contexto, DoR, DoD, tipo, tamanho, prioridade e milestone. A mudança não reduz campos: acrescenta um gate de qualidade antes do Backlog. As políticas de commit também preservam a regra local existente; a evolução é cobrir o commit de squash criado pelo servidor, que não passa pelos hooks da máquina do autor.
+
+## 7.8 Revisão das políticas após a Sprint 4
+
+Esta revisão executa a issue [#242](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/242) junto com a Seção 5.10, e os ajustes já estão aplicados nas Seções 7.1, 7.4 e 7.5. A política de branches, squash e títulos de MR é detalhada no `GestaoConfiguracao.md`, revisado pela issue [#243](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/243).
+
+| Política | Diagnóstico da Sprint 4 | Ajuste | Gatilho e evidência |
+| --- | --- | --- | --- |
+| Dailies | Nenhum registro fornecido para a apuração | Registro semanal anexado à issue de gestão | Sexta-feira; anexo com os quatro campos por integrante |
+| Issues | Onze tasks planejadas apagadas, uma renomeada e cinco criadas durante a sprint | Proibida a exclusão de issue planejada; cancelamento fechado com motivo e destino; issue nova durante a sprint entra com a mesma DoR e com registro na issue de gestão | Decisão de mudança de escopo; comentário datado |
+| Distribuição | Só 5 de 47 tasks ficaram com o executor planejado; a carga no corte variou de 3 h a 20,5 h | Troca de assignee acompanhada de comentário com origem, destino e nova carga; conferência da amplitude no inventário de quarta | Troca de assignee; amplitude de carga de no máximo 2× |
+| Commits | 57 de 58 commits locais na regra completa, contra 8 de 17 commits de squash | Mantidos os hooks locais; validação do título do MR na pipeline (task S5-02); merge sem squash permitido quando todos os commits da branch passaram pelo hook | Pipeline do MR; relatório de `origin/develop` no fechamento |
+| Merge requests | 7 de 26 títulos no padrão; seis issues abertas após o merge; sete MRs sem exclusão da branch de origem | `Closes #N` obrigatório; exclusão da branch marcada na abertura do MR; padrão de título aceita mais de uma issue | Checklist do template e pipeline; inventário de quarta |
+| Revisão | Um MR integrado sem comentário nem aprovação e dois aprovados sem comentário | Aprovação só com comentário do revisor | Aprovação; comentário no MR |
+| Integração | A regra de teste atravessando cada fronteira funcionou | Mantida | Relatório de teste anexado antes do fechamento |
+| Concentração | Meta dos dois últimos dias atingida, mas 85% dos commits em 22–25/09 | Novo indicador: pelo menos 40% dos MRs da sprint integrados até a metade do período | Apuração do fechamento |
+
+As políticas de issue continuam exigindo objetivo, contexto, DoR, DoD, tipo, tamanho, prioridade e milestone. A mudança da Sprint 4 é sobre o **ciclo de vida** da issue: ela nasce, muda de responsável e termina com registro, e não desaparece do board.

@@ -1,0 +1,20 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF01-02
+Requisito: RF01
+Cenário: Negativo
+Status: APROVADO
+
+Entrada:
+mensagem vazia / composta apenas por espaços
+
+Resultado observado:
+HTTP 422
+code: INVALID_INPUT
+message: Informe uma mensagem de 1 a 20.000 caracteres e parâmetros válidos.
+
+Resultado esperado:
+A solicitação não deve ser encaminhada ao PLN e deve informar a necessidade de uma entrada válida.
+
+Conclusão:
+APROVADO.

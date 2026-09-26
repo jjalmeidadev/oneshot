@@ -1,0 +1,27 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF06-02
+Requisito: RF06
+Cenário: Negativo
+Status: APROVADO
+
+Entrada:
+Compare os riscos dos projetos PRJ-0442 e INEXISTENTE-999
+
+Resultado observado:
+HTTP 200
+A resposta iniciou informando que o contexto não era suficiente para realizar a comparação.
+Somente informações disponíveis para PRJ-0442 foram descritas.
+Nenhum risco foi inventado para INEXISTENTE-999.
+intent.macro: CONSULTA
+intent.specific: comparacao_entre_projetos
+confidence_specific: 0.5239
+entities:
+- PRJ-0442
+- INEXISTENTE-999
+
+Resultado esperado:
+Identificar o dado/projeto ausente e limitar a conclusão.
+
+Conclusão:
+APROVADO.

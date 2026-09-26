@@ -29,67 +29,79 @@ O repositório do projeto segue a seguinte organização:
 
 ```text
 📦 g05
- ┣ 📂 .githooks                       hooks locais para validação de commits e pushes
- ┃ ┣ 📄 commit-msg                    validação do padrão de mensagem de commit
- ┃ ┣ 📄 pre-commit                    validações executadas antes do commit
- ┃ ┗ 📄 pre-push                      validações executadas antes do push
- ┣ 📂 .gitlab                         templates utilizados no GitLab
- ┃ ┣ 📂 issue_templates               modelos de issue do projeto
- ┃ ┃ ┗ 📄 Tarefa.md                   template padrão para tarefas
- ┃ ┗ 📂 merge_request_templates       modelos de merge request do projeto
- ┃   ┗ 📄 Default.md                  template padrão para merge requests
- ┣ 📂 docs                            documentação principal do projeto
- ┃ ┣ 📂 diagrams                      fontes editáveis dos diagramas em PlantUML
- ┃ ┣ 📂 img                           imagens, diagramas, personas, jornadas e materiais visuais
- ┃ ┣ 📄 GestaoConfiguracao.md         GitFlow, políticas de branch, hooks e versionamento
- ┃ ┣ 📄 GestaoProjeto.md              sprints, riscos, papéis, contrato e planejamento
- ┃ ┣ 📄 GuiaPadroesDesenvolvimento.md padrões e convenções de desenvolvimento da equipe
- ┃ ┣ 📄 Index.md                      índice de navegação da documentação
- ┃ ┣ 📄 Manual-instalacao.md          instruções de instalação e execução da solução
- ┃ ┣ 📄 Projeto.md                    documentação principal do produto e da solução
- ┃ ┗ 📄 prototipo-1-roteiro.md        roteiro do primeiro protótipo
- ┣ 📂 scripts                         scripts de apoio ao desenvolvimento e auditoria
- ┃ ┣ 📄 audit-repo.ps1                auditoria da estrutura e conformidade do repositório
- ┃ ┣ 📄 install-hooks.ps1             instalação dos hooks em ambiente Windows
- ┃ ┗ 📄 install-hooks.sh              instalação dos hooks em ambiente Unix/Linux
- ┣ 📂 src                             código-fonte e artefatos técnicos da solução
- ┃ ┣ 📂 backend                       API FastAPI: áudio, PLN, RAG, banco e integrações
- ┃ ┃ ┣ 📂 app
- ┃ ┃ ┃ ┣ 📂 audio                     recebimento, validação e transcrição do áudio
- ┃ ┃ ┃ ┣ 📂 database                  conexão PostgreSQL/Supabase e trilha do RNF03
- ┃ ┃ ┃ ┣ 📂 gemini                    cliente do provedor de LLM
- ┃ ┃ ┃ ┣ 📂 nlp                       núcleo de PLN: pré-processamento, entidades e inferência
- ┃ ┃ ┃ ┣ 📂 rag                       recuperação de contexto em JSON e no banco
- ┃ ┃ ┃ ┣ 📂 tests                     testes automatizados do backend
- ┃ ┃ ┃ ┣ 📄 main.py                   rotas /health, /api/chat e /api/audio
- ┃ ┃ ┃ ┗ 📄 pipeline.py               orquestração da classificação, resposta e rastreabilidade
- ┃ ┃ ┣ 📄 requirements.txt            dependências da API
- ┃ ┃ ┗ 📄 requirements-pln.txt        dependências da inferência do classificador
- ┃ ┣ 📂 frontend                      bancada web em React, TypeScript e Vite
- ┃ ┃ ┣ 📂 e2e                         testes de navegador com Playwright
- ┃ ┃ ┣ 📂 src                         componentes, hooks, estado e cliente HTTP
- ┃ ┃ ┗ 📄 TESTES.md                   matriz e evidências dos testes da interface
- ┃ ┣ 📂 database                      scripts e documentação do banco de dados
- ┃ ┃ ┣ 📂 docs                        dicionário de dados e decisões de modelagem
- ┃ ┃ ┗ 📂 sql
- ┃ ┃   ┣ 📄 01_create_database.sql    criação da estrutura do banco
- ┃ ┃   ┣ 📄 02_initial_data.sql       carga inicial de dados sintéticos
- ┃ ┃   ┣ 📄 03_rollback_data.sql      rollback controlado do baseline
- ┃ ┃   ┗ 📄 04_rag_synthetic_data.sql carga dos extratos consultáveis pelo RAG
- ┃ ┗ 📂 notebooks                     notebooks de experimentação e artefatos treinados
- ┃   ┣ 📂 artefatos                   dataset, catálogo, modelo e métricas da execução
- ┃   ┣ 📄 classificador_intencoes_metro.ipynb  benchmark do classificador de intenções
- ┃   ┗ 📄 preprocessamento_entidades.ipynb     medição do pré-processamento e das entidades
- ┣ 📄 .gitignore                      arquivos e pastas ignorados pelo Git
- ┣ 📄 .gitlab-ci.yml                  pipeline de testes do backend e do frontend
- ┗ 📄 README.md                       visão geral do projeto
+ ┣ 📂 .githooks                       hooks de validação de commits e pushes
+ ┣ 📂 .gitlab                         templates de issues e merge requests
+ ┣ 📂 docs                            documentação, diagramas, evidências, stories e testes
+ ┃ ┣ 📂 backlog                       backlog exportado da Sprint 5
+ ┃ ┣ 📂 diagrams                      fontes editáveis dos diagramas
+ ┃ ┣ 📂 evidencias                    evidências consolidadas por sprint
+ ┃ ┣ 📂 img                           imagens usadas na documentação
+ ┃ ┣ 📂 stories                       stories técnicas de infraestrutura
+ ┃ ┣ 📂 testes                        planos e relatórios de testes
+ ┃ ┣ 📂 usabilidade                   instrumentos e resultados de usabilidade
+ ┃ ┣ 📄 Index.md                      índice de todos os documentos Markdown
+ ┃ ┣ 📄 Manual-instalacao.md          manual completo de instalação e execução
+ ┃ ┗ 📄 Projeto.md                    documentação consolidada do projeto
+ ┣ 📂 infra
+ ┃ ┗ 📂 aws                           CloudFormation, User Data e CloudWatch Agent
+ ┣ 📂 scripts
+ ┃ ┣ 📂 aws                           deploy, atualização e rollback na AWS
+ ┃ ┣ 📄 audit-repo.ps1                auditoria de conformidade do repositório
+ ┃ ┣ 📄 docker-build.ps1              build das imagens da aplicação
+ ┃ ┗ 📄 docker-up.ps1                 inicialização da stack em contêineres
+ ┣ 📂 src
+ ┃ ┣ 📂 agent                         artefatos do workflow de relatório
+ ┃ ┣ 📂 backend                       API FastAPI, PLN, RAG, integrações e testes
+ ┃ ┣ 📂 database                      scripts SQL, documentação e snapshots
+ ┃ ┣ 📂 frontend                      aplicação React principal e testes
+ ┃ ┣ 📂 lp                            landing page e demonstração RAG
+ ┃ ┗ 📂 notebooks                     experimentos, treinamento e artefatos de PLN
+ ┣ 📄 .dockerignore                   exclusões do contexto de build
+ ┣ 📄 .env.example                    variáveis de ambiente de referência
+ ┣ 📄 .gitignore                      arquivos e pastas não versionados
+ ┣ 📄 .gitlab-ci.yml                  pipeline de integração contínua
+ ┣ 📄 compose.prod.yml                stack de execução da aplicação
+ ┣ 📄 compose.rabbitmq.yml            stack isolada do RabbitMQ
+ ┗ 📄 README.md                       visão geral e início rápido
 ```
+
+---
+
+## 🚀 Início rápido
+
+Pré-requisitos: Python 3.12 ou 3.13, Node.js 24 e npm. No PowerShell, execute a partir da raiz do repositório:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install --upgrade pip
+.venv\Scripts\python.exe -m pip install -r src/backend/requirements.txt -r src/backend/requirements-pln.txt
+Copy-Item src/backend/.env.example src/backend/.env
+
+Set-Location src/frontend
+npm ci
+Set-Location ../..
+```
+
+Revise `src/backend/.env` e informe somente as credenciais necessárias para os serviços externos. Em dois terminais separados, inicie o back-end e o front-end:
+
+```powershell
+# Terminal 1 — raiz do repositório
+.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir src/backend --host 127.0.0.1 --port 8000
+
+# Terminal 2 — raiz do repositório
+Set-Location src/frontend
+npm run dev
+```
+
+Abra `http://localhost:5173` e confirme a API em `http://127.0.0.1:8000/health`. Para configuração de banco, execução em contêineres e solução de problemas, consulte o [Manual de instalação](docs/Manual-instalacao.md).
 
 ---
 
 ## 📚 Documentação
 
 A documentação do projeto está organizada de acordo com as diferentes dimensões necessárias para registrar a gestão, o processo de desenvolvimento e a construção do produto.
+
+- [`Index.md`](docs/Index.md) — índice completo dos documentos Markdown versionados no repositório.
 
 ### Gestão do Projeto
 
@@ -106,6 +118,8 @@ A documentação do projeto está organizada de acordo com as diferentes dimens�
 - [`Projeto.md`](docs/Projeto.md) — documentação principal do produto, contemplando o entendimento do projeto e do negócio, problema, visão do produto, proposta de valor, escopo e objetivos estratégicos da solução.
 
 - [`Manual-instalacao.md`](docs/Manual-instalacao.md) — documentação destinada a orientar a preparação do ambiente e os procedimentos necessários para instalação e execução da solução.
+
+- [`webhooks-rabbitmq.md`](docs/evidencias/sprint-05/webhooks-rabbitmq.md) — evidência reproduzível dos dois webhooks, da outbox e do processamento RabbitMQ da Sprint 5.
 
 ---
 

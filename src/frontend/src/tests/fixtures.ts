@@ -38,4 +38,11 @@ export const response: ChatResponse = {
     },
   ],
   pipeline_metrics: { nlp_ms: 3, route_ms: 2 },
+  proactive_suggestion: {
+    suggestion_id: '00000000-0000-0000-0000-000000000250',
+    intent: 'sugerir_agilizacao_projeto',
+    description: 'Identificar o principal gargalo documentado.',
+    display_message: 'Quer que eu sugira uma forma de agilizar o projeto?',
+    requires_confirmation: true,
+  },
 };

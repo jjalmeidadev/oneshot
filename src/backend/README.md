@@ -1,5 +1,8 @@
 # Backend
 
+Contrato de fontes, citações por afirmação, períodos e correlação da auditoria:
+[Referências nas respostas](../../docs/contrato-referencias.md).
+
 API FastAPI do projeto, com chat via Gemini e recuperacao de contexto em listas simuladas do SharePoint.
 
 ## Configuracao
@@ -12,6 +15,10 @@ reduzir a latencia. Falhas transitorias sao repetidas ate tres vezes, com espera
 de 2, 4 e 8 segundos. Esses valores podem ser ajustados em `.env` por meio de
 `GEMINI_THINKING_LEVEL`, `GEMINI_MAX_OUTPUT_TOKENS`, `GEMINI_MAX_RETRIES`,
 `GEMINI_RETRY_BASE_DELAY_SECONDS` e `GEMINI_REQUEST_TIMEOUT_SECONDS`.
+
+O benchmark isolado da hipótese de economia de tokens usa OpenRouter sem trocar
+o provedor do backend. Configure `OPENROUTER_API_KEY` somente no mesmo `.env` e
+consulte o [protocolo e as evidências](../../docs/evidencias/sprint-04/hipotese-tokens/README.md).
 
 Para validar a conectividade com o banco Supabase/PostgreSQL do projeto Oneshot,
 configure `DATABASE_URL` ou `SUPABASE_DATABASE_URL` em `src/backend/.env`. A URL
@@ -73,6 +80,32 @@ consuma a franquia do provedor de transcricao.
 | Requisicoes simultaneas por usuario | 1 |
 
 Todo erro previsto usa o mesmo envelope, sem detalhe tecnico interno, conforme o RNF11.
+
+## Smoke test de audio com banco real
+
+Com `DATABASE_URL` ou `SUPABASE_DATABASE_URL` configurada, execute a partir de
+`src/backend`:
+
+```powershell
+.venv\Scripts\python.exe -m scripts.verify_audio_stt_pln_real_db
+```
+
+O script atravessa `POST /api/audio`, STT controlado, PLN real e persistencia no
+PostgreSQL/Supabase. Ele valida um caso positivo e uma falha controlada, confere
+correlacao e auditoria e remove ao final todos os registros sinteticos criados.
+
+Para validar a mesma cadeia com Azure STT real, forneca um WAV PCM de 16 kHz,
+mono e 16 bits. O provedor gerador posterior fica controlado para isolar o
+escopo audio -> STT -> PLN:
+
+```powershell
+.venv\Scripts\python.exe -m scripts.verify_audio_stt_pln_live `
+  C:\caminho\amostra.wav --expected-term perfil --expected-term artrite
+```
+
+O verificador usa PLN e Supabase reais, confere transcricao, classificacao,
+correlacao e auditoria e remove a conversa sintetica no bloco de limpeza. O
+audio permanece local e nao e copiado para o repositorio.
 O campo `detail` so aparece quando ha algo a informar:
 
 ```json
@@ -169,24 +202,19 @@ extracao de entidades decide **sobre o que**.
 
 | Modulo | Papel |
 | --- | --- |
-| `preprocessing.py` | Normaliza, tokeniza e reduz a radical, na `config_22` da Secao 8.10.3 |
+| `preprocessing.py` | Normaliza o texto do classificador sem remover acentos, negacoes ou stopwords; tambem mantem as rotinas legadas da extracao de entidades |
 | `entities.py` | Identifica projeto, subportfolio, periodo, indicador e demais elementos do dominio |
 | `classifier.py` | Carrega o artefato treinado e define o classificador hierarquico |
 | `inference.py` | Classifica a solicitacao e aplica os limiares de roteamento |
 | `data/lexico_dominio.json` | Vocabulario do portfolio, substituivel quando a base real existir |
 
-**A `config_22` e um contrato, nao uma preferencia.** Os vetorizadores TF-IDF
-serializados em `src/notebooks/artefatos/classificador_intencoes.joblib` foram
-ajustados sobre os tokens que `preprocess_text` produz. Alterar tokenizacao,
-caixa ou stemming invalida o modelo treinado, e o benchmark precisa ser
-reexecutado. O notebook `src/notebooks/preprocessamento_entidades.ipynb`
-compara as duas implementacoes sobre as 5.353 frases do conjunto sintetico e
-falha se houver uma divergencia.
-
-A configuracao selecionada nao exige corpus baixado do NLTK: o tokenizador e
-uma expressao regular e o Snowball e algoritmico. As demais opcoes da grade,
-mantidas para o benchmark continuar reproduzivel, podem pedir
-`nltk.download('punkt')` e `nltk.download('stopwords')`.
+O classificador v2 usa uma normalizacao conservadora: Unicode NFC, letras
+minusculas e espacos normalizados. A funcao `normalizar_portugues` preserva
+acentos, a negacao `nao`/`não` e todas as stopwords, porque esses elementos
+podem inverter ou alterar o sentido em portugues. Os vetorizadores serializados
+foram ajustados com esse contrato; qualquer mudanca nele exige novo treino e
+nova avaliacao. As configuracoes antigas continuam disponiveis apenas para
+reproduzir os benchmarks e a extracao de entidades.
 
 ```python
 from app.nlp.preprocessing import tokenize
@@ -221,7 +249,7 @@ e e carregado por `app.nlp.classifier`:
 from app.nlp.classifier import load_artifact
 
 artefato = load_artifact()
-artefato.limiar_macro, artefato.limiar_intencao   # 0.55, 0.70
+artefato.limiar_macro, artefato.limiar_intencao   # 0.525, 0.350
 len(artefato.intencoes)                            # 31
 ```
 
@@ -240,10 +268,10 @@ artefato para la:
 cd src/backend && .venv/bin/python ../notebooks/migrar_artefato_classificador.py
 ```
 
-O script nao retreina: os pesos, os vetorizadores e os limiares continuam sendo
-os que produziram as metricas da Secao 8.10.3. Com `--verificar` ele apenas
-confere, sem gravar. O artefato versionado ja esta migrado; o script serve para
-qualquer artefato novo que saia do notebook.
+O artefato v2 ja referencia diretamente `app.nlp.classifier`. Para reparar uma
+serializacao nova produzida pelo script de treino, execute
+`treinar_classificador_intencoes_v2.py --reparar-artefato`; a operacao nao
+retreina nem altera pesos, vetorizadores ou limiares.
 
 **A versao do scikit-learn importa.** O artefato foi serializado com a 1.6.1,
 fixada em `requirements.txt`. Carregar com outra versao faz o proprio
@@ -271,44 +299,24 @@ classify("qual a previsão do tempo para amanhã?")
 # macrointencao='FORA_DE_ESCOPO'  intencao=None
 ```
 
-Os dois limiares governam o roteamento. Abaixo de 0,550 na macrointencao, a
+Os dois limiares governam o roteamento. Abaixo de 0,525 na macrointencao, a
 solicitacao recebe a resposta controlada de limitacao. Acima dela, mas abaixo
-de 0,700 na intencao, segue para o fluxo generico da macro em vez de acionar um
-handler incerto. No conjunto de teste isso significa 14 solicitacoes (1,2%) com
-resposta de limitacao e 305 (26,9%) no fluxo generico, e a acuracia entre as
-aceitas sobe de 0,7383 para 0,8775.
+de 0,350 na intencao, segue para o fluxo generico da macro em vez de acionar um
+handler incerto. No conjunto de teste isso representa 10 solicitacoes abaixo do
+limiar macro e 63 abaixo do limiar especifico. Na validacao, a acuracia entre
+as intencoes aceitas foi 0,9010, com cobertura de 94,38%.
 
 A saida nunca anuncia uma macrointencao e um handler de outra. O limiar de
-0,700 ja garante isso — a probabilidade da intencao e conjunta, e acima de 0,5
-as duas coincidem por construcao — mas a verificacao e explicita, para
-recalibrar o limiar para baixo nao quebrar o contrato em silencio.
+0,350 e deliberadamente menor que o valor antigo, mas a verificacao explicita
+de consistencia impede que um handler de outra macrointencao seja acionado.
 
-**O encoder roda em ONNX Runtime, nao em PyTorch.** A representacao vencedora
-combina quatro blocos, e dois deles nao estao no `joblib`: o Word2Vec, em
-`word2vec_portfolio.model`, e o encoder BERT, baixado do Hugging Face na
-primeira execucao e mantido em cache local. O grafo usado e o ONNX publicado no
-proprio repositorio do modelo.
-
-Os embeddings sao identicos aos do `sentence-transformers` — diferenca maxima de
-2,4e-07 — e as metricas do conjunto de teste ficam inalteradas. O que muda e o
-custo:
-
-| | PyTorch | ONNX Runtime |
-| --- | ---: | ---: |
-| Ambiente | 1,1 GB | **427 MB** |
-| Carga do encoder | 6,10 s | **0,33 s** |
-| Latencia por requisicao | 6 ms | **2 ms** |
-| Pico de memoria | **1.118 MB** | 1.355 MB |
-
-O ganho em disco e em carga vem de dispensar `torch` e `transformers`, que
-somavam 780 MB. O custo e memoria: o grafo fp32 ocupa cerca de 240 MB a mais em
-tempo de execucao, e desligar o *memory arena* do onnxruntime nao reduziu isso.
-No deploy em Linux a troca tambem evita uma armadilha: o `pip install torch`
-padrao baixa a variante com CUDA, de cerca de 2,5 GB.
-
-A versao quantizada em int8 reduziria o grafo de 449 MB para 113 MB, mas custa
-0,35 ponto de acuracia e desloca o efeito dos limiares, quebrando a reproducao
-exata dos numeros documentados. Por isso a fp32 foi mantida.
+**A representacao vencedora e hibrida.** Ela concatena TF-IDF de palavras
+(1--2 gramas), TF-IDF de caracteres (3--5 gramas) e embeddings congelados do
+`neuralmind/bert-base-portuguese-cased`, com peso 2,0 para o bloco BERTimbau.
+Cada macrointencao tem um especialista `LinearSVC` (`C=1,0`) calibrado em tres
+dobras. O encoder e carregado por PyTorch e Transformers e mantido em cache
+durante a vida do processo. Esse ganho de qualidade traz custo maior de carga e
+inferencia que a alternativa puramente lexical.
 
 As dependencias ficam em `requirements-pln.txt`, separadas de
 `requirements.txt`, porque quem trabalha so na API de audio nao precisa delas.
@@ -324,13 +332,9 @@ No Windows, use o mesmo interpretador do ambiente local:
 .venv\Scripts\python.exe -m pip install -r requirements.txt -r requirements-pln.txt
 ```
 
-O ambiente exige **Python 3.13 ou anterior**: o `gensim` ainda nao publica wheel
-para o 3.14 e a compilacao a partir do fonte falha.
-
 **A API deve chamar `warmup()` na subida.** O carregamento e preguicoso, o que
-serve aos testes mas faria a primeira pessoa a usar o agente pagar a carga
-inteira dentro da propria requisicao — 0,33 s com ONNX, 6,1 s com PyTorch,
-dentro do orcamento de 10 s do RNF05.
+serve aos testes, mas faria a primeira pessoa a usar o agente pagar a carga do
+BERTimbau dentro da propria requisicao.
 
 ```python
 from app.nlp.inference import get_classifier
@@ -338,9 +342,9 @@ from app.nlp.inference import get_classifier
 get_classifier().warmup()
 ```
 
-A inferencia reproduz os numeros da Secao 8.10.3 sobre o conjunto de teste —
-acuracia 0,7383 e F1-macro 0,7401 na intencao especifica — e os testes falham se
-divergirem.
+A inferencia reproduz sobre o conjunto de teste acuracia 0,839648 e F1-macro
+0,832724 na intencao especifica, alem de 0,981498 e 0,971470 na macrointencao.
+Os testes falham se esses valores divergirem do registro versionado.
 
 ### Avaliacao automatizada do RNF06
 
@@ -351,29 +355,129 @@ teste `app/tests/test_nlp_inference.py`, usando o classificador real de
 `split == teste` de `src/notebooks/artefatos/dataset_intencoes.csv`, sem
 retreinar o modelo, totalizando 1.135 solicitacoes sinteticas.
 
-Resultado atual para a intencao especifica: acuracia 0,7383 e F1 macro 0,7401. O JSON tambem publica precisao, recall e F1 por
-classe, matriz de confusao e classes com pior desempenho.
+Resultado atual para a intencao especifica: acuracia 0,839648 e F1 macro
+0,832724. Para macrointencao: acuracia 0,981498 e F1 macro 0,971470. O JSON
+tambem publica precisao, recall e F1 por classe, matriz de confusao, hashes dos
+dados e do artefato e os pontos de operacao escolhidos somente na validacao.
 
 As cinco classes mais fracas nesta medicao sao:
 
 | Classe | Precisao | Recall | F1 | Suporte |
 | --- | ---: | ---: | ---: | ---: |
-| `analise_tendencia_desempenho` | 0,3846 | 0,2439 | 0,2985 | 41 |
-| `transacao_exportar_dados` | 0,4815 | 0,3514 | 0,4062 | 37 |
-| `consulta_documentos_fonte` | 0,9231 | 0,3000 | 0,4528 | 40 |
-| `consulta_pendencias_projeto` | 0,8125 | 0,3714 | 0,5098 | 35 |
-| `consulta_cronograma_prazo` | 0,4561 | 0,6341 | 0,5306 | 41 |
+| `analise_tendencia_desempenho` | 0,1429 | 0,0244 | 0,0417 | 41 |
+| `consulta_indicadores_kpi` | 0,4474 | 0,8421 | 0,5841 | 38 |
+| `consulta_orcamento_custo` | 0,7059 | 0,6486 | 0,6761 | 37 |
+| `alerta_gerenciar_inscricao` | 1,0000 | 0,5161 | 0,6809 | 31 |
+| `alerta_prazo_atraso` | 0,8077 | 0,6000 | 0,6885 | 35 |
 
-Limitacoes registradas: o conjunto ainda e sintetico, sem validacao com
-solicitacoes reais do dominio; a medicao considera a intencao especifica prevista
-pelo modelo antes dos limiares de roteamento; e classes com baixo suporte ou
-fronteiras proximas entre consulta e transacao concentram parte dos erros.
+Limitacoes registradas: o conjunto ainda e majoritariamente sintetico, sem
+validacao externa com solicitacoes reais do dominio; a medicao principal inclui
+todos os exemplos antes de qualquer abstencao; e a classe
+`analise_tendencia_desempenho` continua muito abaixo das demais, apesar do ganho
+global. Os 1.450 exemplos sinteticos adicionais foram usados exclusivamente no
+treino; validacao e teste permaneceram inalterados.
+
+A avaliacao prospectiva ampliada da issue #232 mede a recuperacao local com 72
+consultas novas, balanceadas entre nove fontes e oito variacoes linguisticas.
+A implementacao e a massa foram congeladas antes da unica execucao. O resultado
+foi recall@3 de 0,555556 (40/72), com intervalo de Wilson de 95% entre 0,440874
+e 0,664609. Embora a classificacao tenha obtido acuracia 0,839648 e F1-macro
+0,832724, o RNF06 esta reprovado porque a recuperacao ficou abaixo de 0,80.
+
+Uma rodada anterior marcou recall@3 de 1,000000 nos 18 casos usados para
+ajustar equivalencias lexicais. Esse valor e mantido somente como teste de
+regressao: como os erros da propria massa orientaram a mudanca, ele nao mede
+generalizacao. Evidencias, hashes, casos e limitacoes estao em
+`../../docs/evidencias/sprint-04/rnf06/`.
+
+Para reproduzir os dois componentes de uma vez, a partir de `src/backend`:
+
+```powershell
+..\..\.venv\Scripts\python.exe scripts\benchmark_rnf06.py
+```
+
+O retorno 0 confirma que os dois limiares foram atingidos. Se algum deles
+regredir, o comando retorna 1 e ainda grava o JSON com todos os casos e a
+conclusao observada.
 
 ## Testes
 
 ```powershell
 cd src/backend
 .venv\Scripts\python.exe -m pytest app/tests
+```
+
+O fluxo transacional de relatórios possui testes em
+`app/tests/test_reports.py`. Ele cobre o workflow guiado, identidade, escopo,
+confirmação, callback idempotente, geração do DOCX e download autenticado. O
+modo `power_automate_simulator` exercita o contrato externo sem tenant. Os
+contratos, estados, variáveis e limites da integração estão documentados em
+[`../agent/support/IMPLEMENTATION.md`](../agent/support/IMPLEMENTATION.md).
+
+### Callback de resultado de relatórios (S5-09)
+
+O webhook `POST /api/integrations/power-automate/report-results` recebe o
+resultado terminal do processamento de um relatório. A chamada exige
+`Content-Type: application/json` e o header `X-Callback-Token`, comparado em
+tempo constante ao segredo `REPORT_CALLBACK_TOKEN`. O corpo correlaciona
+`callback_id`, `execution_id`, `correlation_id` e `flow_run_id`, informa o
+estado terminal e inclui o resultado ou o erro correspondente.
+
+O callback é armazenado em `automation_callbacks`. A primeira chamada e uma
+repetição equivalente retornam `200`, sem novo processamento; o mesmo
+`callback_id` com payload diferente retorna `409`. Token ausente ou inválido
+retorna `401`; execução desconhecida retorna `404` e corpo
+inválido retorna `422`. Esse fluxo é síncrono e não publica evento no RabbitMQ.
+
+### Callback de entrega de notificacoes (S5-10)
+
+O webhook usa `POST /api/integrations/notifications/delivery-results` e exige o
+header `X-Callback-Token`, comparado ao segredo `NOTIFICATION_CALLBACK_TOKEN`.
+O corpo aceita `callback_id` (string), `notification_id` (UUID), `provider`
+(string), `status` (`delivered` ou `failed`), `attempted_at` (data/hora ISO
+8601) e `error_code` (string opcional):
+
+```json
+{
+  "callback_id": "delivery-callback-001",
+  "notification_id": "1674b3e9-ecba-4a78-a50f-848f5eaf0d79",
+  "provider": "simulated",
+  "status": "delivered",
+  "attempted_at": "2026-09-25T12:00:00Z",
+  "error_code": null
+}
+```
+
+A primeira confirmacao valida e sua repeticao identica retornam `200`; o mesmo
+`callback_id` com outro conteudo retorna `409`. Token invalido retorna `401`,
+corpo invalido retorna `422` e notificacao inexistente retorna `404`. Cada
+callback novo e persistido junto a um evento `notification.delivery.received`
+na outbox. O publisher encaminha o evento ao RabbitMQ e o consumer `delivery`
+acrescenta a tentativa de entrega; repeticoes identicas nao duplicam o evento
+nem o processamento.
+
+O contrato completo dos dois webhooks, os códigos HTTP e a topologia AMQP estão
+na [Seção 8.5.12 de Projeto.md](../../docs/Projeto.md#8512-webhooks-e-mensageria-integrados-s5-09-a-s5-11).
+Os comandos e resultados reproduzíveis estão na
+[evidência da Sprint 5](../../docs/evidencias/sprint-05/webhooks-rabbitmq.md).
+
+A fonte de dados do relatório é selecionada por `REPORT_PORTFOLIO_SOURCE`:
+`synthetic` (padrão) lê a massa em `app/reports/data/synthetic_portfolio.json`;
+`database` lê projetos, riscos, marcos, benefícios e mudanças das tabelas reais
+(`projects`, `risk_issue_items`, `project_deliverables_milestones`,
+`project_benefits`, `change_records`, `project_status_updates`,
+`project_progress_updates`). Para o modo `database`, aplique o seed
+`../database/sql/13_seed_portfolio_report_data.sql` (massa em português) e defina
+também `REPORT_REPOSITORY_MODE=database`.
+
+Execução CLI do mesmo serviço, sem depender da interface:
+
+```powershell
+$env:REPORT_CLI_TOKEN = "token-configurado-em-REPORT_SIMULATED_IDENTITIES"
+python -m app.reports.cli --scope-type subportfolio --scope-id sp-modernizacao `
+  --start-date 2026-08-01 --end-date 2026-08-31 `
+  --audience executive_board --purpose monthly_governance `
+  --emphasis schedule --emphasis risks
 ```
 
 Recorte mínimo para a integração PLN/API da task #126:
@@ -410,14 +514,46 @@ teste deve ser convertida para WAV PCM mono a 16 kHz antes do envio ao
 
 ## Integração da bancada web (#131)
 
-`POST /api/chat` aceita `use_intent_classifier` além de `message` e `previous_interaction_id`. Campo ausente ou `true` executa classificação e extração de entidades por padrão; `false` é opt-out explícito para preservar o toggle da interface. A resposta inclui `intent` rico (`macro`, `specific`, confianças, `flow`, `handler` e `alternatives`), `entities`, `pipeline_metrics` (`nlp_ms` e `route_ms`) e `sources[].excerpt` com o trecho recuperado. Perguntas sem confiança suficiente, fora do escopo ou sem rota segura recebem resposta controlada sem chamada ao Gemini.
+`POST /api/chat` aceita `conversation_id`, `use_intent_classifier`, `message` e `previous_interaction_id`. `conversation_id` identifica a conversa; `previous_interaction_id` encadeia o provedor e não é mais reutilizado como ID externo. Campo ausente ou `true` executa classificação e extração de entidades por padrão; `false` é opt-out explícito para preservar o toggle da interface. A resposta inclui `intent` rico (`macro`, `specific`, confianças, `flow`, `handler` e `alternatives`), `entities`, `pipeline_metrics` (`nlp_ms` e `route_ms`) e `sources[].excerpt` com o trecho recuperado. Para `transacao_gerar_relatorio`, inclui `workflow` e não chama Gemini.
 
-`POST /api/audio` aceita também os campos multipart `previous_interaction_id` e `use_intent_classifier`. Depois de validar e transcrever, executa o mesmo pipeline de texto fora do laço assíncrono. Preserva `answer`, retorna `pipeline_status="completed"` e acrescenta `chat` com as fontes completas, intenção rica, entidades, métricas (`validation_ms`, `stt_ms`, `nlp_ms`, `route_ms`, `total_ms`) e ID real da interação. Não são mais gerados IDs de interação fictícios nem respostas provisórias de sucesso.
+`POST /api/chat/proactive-confirmation` aceita exclusivamente `suggestion_id`, `conversation_id` e `decision` (`accept` ou `decline`), sem campo de mensagem livre, e exige o mesmo esquema de autenticação. A chamada principal prepara a resposta secundária junto da resposta principal e armazena esse conteúdo sem exibi-lo. A confirmação só é encontrada quando UUID, identidade e conversa coincidem: `decline` descarta o registro e `accept` libera a resposta preparada, ambos sem nova chamada ao Gemini. A decisão e a resposta liberada continuam registradas na trilha RNF03. Uma sugestão expirada, já decidida ou fora do escopo do solicitante retorna `404`.
 
-O pipeline classifica e gera respostas informativas. A identificação de uma intenção transacional não executa uma alteração em sistemas corporativos. Autorização por perfil, persistência e integração Entra ID continuam dependendo dos módulos e do ambiente previstos para essas entregas.
+Com `DATABASE_URL` ou `SUPABASE_DATABASE_URL`, as sugestões pendentes e suas respostas já preparadas são armazenadas em `pending_proactive_suggestions`, permitindo confirmação por qualquer worker durante o TTL. Bancos existentes precisam da migração `08_add_prepared_proactive_response.sql`. Sem banco configurado, desenvolvimento e testes usam um fallback em memória de processo; esse modo não oferece continuidade após reinício nem balanceamento entre workers e não deve ser usado em produção.
+
+`POST /api/audio` aceita também os campos multipart `previous_interaction_id`, `use_intent_classifier` e `proactivity_enabled`. Depois de validar e transcrever, executa o mesmo pipeline de texto fora do laço assíncrono. Preserva `answer`, retorna `pipeline_status="completed"` e acrescenta `chat` com as fontes completas, intenção rica, eventual sugestão proativa, entidades, métricas (`validation_ms`, `stt_ms`, `nlp_ms`, `route_ms`, `total_ms`) e ID real da interação. Não são mais gerados IDs de interação fictícios nem respostas provisórias de sucesso.
+
+O pipeline classifica e gera respostas informativas. A intenção de relatório inicia um workflow funcional no frontend/backend; outras intenções transacionais ainda não executam alteração em sistemas corporativos. A identidade corporativa Entra ID permanece dependente do ambiente previsto para a implantação.
 
 Com `PLN_WARMUP=1`, a inicialização carrega o classificador antes de aceitar requisições. As chamadas ao modelo são serializadas para evitar carregamentos concorrentes. Uma falha de inicialização exige corrigir dependências/modelos; em testes determinísticos use `PLN_WARMUP=0`.
 
 Erros de configuração e do Gemini são convertidos em mensagens controladas. Entradas textuais inválidas retornam `422` com `error.code=INVALID_INPUT`; detalhes internos de validação não são apresentados ao usuário.
 
 A [documentação do frontend](../frontend/README.md) descreve estrutura, fluxos, contratos, execução e limitações. A [matriz de testes](../frontend/TESTES.md) reúne as evidências da integração S3/S5.
+
+## Alerta autônomo de prazo
+
+`handler:alerta_prazo_atraso` inicia um workflow guiado próprio. Depois da
+confirmação, scheduler, outbox e RabbitMQ avaliam o cronograma em segundo plano
+e gravam notificações internas. O fluxo não depende de Power Automate; apenas a
+confirmação de entrega usa o webhook S5-10 descrito acima. Com PostgreSQL e
+RabbitMQ configurados, execute o publisher com `python -m app.alerts.worker
+publisher` e o consumer com `python -m app.alerts.worker delivery`. Veja [a
+documentação operacional](../agent/support/IMPLEMENTATION.md#3-workflow-alerta_prazo_atraso).
+
+## VHS/cache de transcricao (S4-31)
+
+Cache STT ativo por padrao, TTL 300s e 256 entradas por processo.
+`VHS_ENABLED=0` desativa; reiniciar os workers invalida todos os cassetes.
+O runtime do container fixa um worker de API enquanto o cache não for
+compartilhado. Não escale o serviço `backend` horizontalmente sem substituir o
+VHS por armazenamento distribuído.
+
+Uma identidade válida do áudio pode consultar `GET /api/audio/vhs/metrics`.
+O endpoint não devolve áudio, transcrição, chave ou credencial: informa somente
+o identificador efêmero do worker, topologia, ocupação, contadores, taxa de hit
+e estimativa de chamadas evitadas.
+
+Plano, limites e comandos: [plano VHS](../../docs/testes/sprint4/plano-vhs.md).
+Coleta local: `python scripts/verify_vhs.py` a partir de `src/backend`.
+Validação com Azure real: `python scripts/verify_audio_stt_pln_live.py
+<audio.wav> --expected-term <termo> --repetitions 5`, no ambiente publicado.

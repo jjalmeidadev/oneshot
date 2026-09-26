@@ -1,0 +1,109 @@
+{
+  "origem": "Latencias observadas na coleta do RNF04 (rodada 1). NAO e a rodada Locust exigida pela Secao 9.2.4.",
+  "natureza": "Sequencial, 1 requisicao por vez, sem concorrencia. Serve como indicacao preliminar.",
+  "amostra": 11,
+  "teto_rnf05_consulta_simples_ms": 10000,
+  "latencias_ordenadas_ms": [
+    8654,
+    9306,
+    9861,
+    11744,
+    11749,
+    12245,
+    14505,
+    16231,
+    19856,
+    39119,
+    57230
+  ],
+  "min_ms": 8654,
+  "mediana_ms": 12245,
+  "media_ms": 19136,
+  "max_ms": 57230,
+  "acima_do_teto": 8,
+  "percentual_acima_do_teto": 72.7,
+  "recuperacao_rag": {
+    "min_ms": 999,
+    "mediana_ms": 1107,
+    "max_ms": 1184
+  },
+  "por_caso": [
+    {
+      "id": "RNF04-P-01",
+      "pergunta": "Em quais dias e horarios o transporte de bicicleta e permitido?",
+      "latencia_total_ms": 19856,
+      "latencia_reportada_api_ms": 16388,
+      "recuperacao_ms": 1117
+    },
+    {
+      "id": "RNF04-P-02",
+      "pergunta": "Em qual carro do trem o passageiro deve levar a bicicleta?",
+      "latencia_total_ms": 11749,
+      "latencia_reportada_api_ms": 8159,
+      "recuperacao_ms": 1100
+    },
+    {
+      "id": "RNF04-P-03",
+      "pergunta": "O que fazer quando a leitura do bilhete digital falha na catraca?",
+      "latencia_total_ms": 9861,
+      "latencia_reportada_api_ms": 6351,
+      "recuperacao_ms": 1081
+    },
+    {
+      "id": "RNF04-P-04",
+      "pergunta": "Quais informacoes devem ser registradas no atendimento a um objeto perdido?",
+      "latencia_total_ms": 12245,
+      "latencia_reportada_api_ms": 8539,
+      "recuperacao_ms": 1180
+    },
+    {
+      "id": "RNF04-P-05",
+      "pergunta": "Qual e o procedimento quando uma escada rolante fica indisponivel?",
+      "latencia_total_ms": 11744,
+      "latencia_reportada_api_ms": 8310,
+      "recuperacao_ms": 1176
+    },
+    {
+      "id": "RNF04-P-06",
+      "pergunta": "Como a equipe apoia um passageiro com mobilidade reduzida?",
+      "latencia_total_ms": 8654,
+      "latencia_reportada_api_ms": 4683,
+      "recuperacao_ms": 1184
+    },
+    {
+      "id": "RNF04-P-07",
+      "pergunta": "Qual e o periodo da operacao assistida na Linha 1-Azul?",
+      "latencia_total_ms": 14505,
+      "latencia_reportada_api_ms": 11071,
+      "recuperacao_ms": 1109
+    },
+    {
+      "id": "RNF04-P-08",
+      "pergunta": "Em qual faixa de horario o intervalo entre trens pode ser ampliado na Linha 1-Azul?",
+      "latencia_total_ms": 39119,
+      "latencia_reportada_api_ms": 35425,
+      "recuperacao_ms": 1029
+    },
+    {
+      "id": "RNF04-P-09",
+      "pergunta": "Qual acesso os passageiros devem usar na Estacao Republica durante a manutencao?",
+      "latencia_total_ms": 57230,
+      "latencia_reportada_api_ms": 53718,
+      "recuperacao_ms": 1107
+    },
+    {
+      "id": "RNF04-P-10",
+      "pergunta": "Ate quando vale o comunicado de acesso alternativo da Estacao Republica?",
+      "latencia_total_ms": 16231,
+      "latencia_reportada_api_ms": 12853,
+      "recuperacao_ms": 999
+    },
+    {
+      "id": "RNF04-P-11",
+      "pergunta": "O que a campanha educativa de embarque orienta os passageiros a fazer?",
+      "latencia_total_ms": 9306,
+      "latencia_reportada_api_ms": 5876,
+      "recuperacao_ms": 1019
+    }
+  ]
+}

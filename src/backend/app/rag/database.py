@@ -1,6 +1,7 @@
 """Recuperacao RAG em PostgreSQL/Supabase sobre extratos consultaveis."""
 
 from collections.abc import Callable, Iterable
+from dataclasses import dataclass
 import os
 
 from app.database.connection import (
@@ -8,10 +9,12 @@ from app.database.connection import (
     DatabaseConnectionError,
     open_database_connection,
 )
+from app.nlp.entities import PROJECT_CODE_PATTERN
 from app.nlp.schemas import AudioIntent, PublicEntity
 from app.rag.sharepoint import (
     RetrievedDocument,
     SharePointDocument,
+    attributes_from_metadata,
     _configured_result_limit,
     _meaningful_tokens,
 )
@@ -26,6 +29,14 @@ WITH query_terms AS (
 ),
 entity_terms AS (
     SELECT unnest(%s::text[]) AS term
+),
+requested_projects AS (
+    SELECT p.id
+    FROM public.projects p
+    JOIN (SELECT unnest(%s::text[]) AS term) requested
+        ON lower(p.code) = lower(requested.term)
+        OR lower(p.title) = lower(requested.term)
+        OR lower(p.id::text) = lower(requested.term)
 )
 SELECT
     se.id::text AS extract_id,
@@ -35,11 +46,12 @@ SELECT
     a.title AS artifact_title,
     a.sharepoint_library,
     a.sharepoint_url,
-    COALESCE(a.extracted_at, se.updated_at, se.created_at) AS last_modified,
+    COALESCE(a.metadata ->> 'lastModifiedDateTime', '') AS last_modified,
     se.content_text,
     se.source_locator,
     p.code AS project_code,
     p.title AS project_title,
+    se.metadata AS extract_metadata,
     COALESCE(
         (
             SELECT SUM(
@@ -100,6 +112,10 @@ LEFT JOIN public.projects p ON p.id = COALESCE(se.project_id, a.project_id)
 WHERE
     COALESCE(a.metadata ->> 'mock', se.metadata ->> 'mock') = 'true'
     AND (
+        NOT EXISTS (SELECT 1 FROM requested_projects)
+        OR COALESCE(se.project_id, a.project_id) IN (SELECT id FROM requested_projects)
+    )
+    AND (
         EXISTS (
             SELECT 1
             FROM query_terms
@@ -138,8 +154,10 @@ def retrieve_database_context(
 ) -> list[RetrievedDocument]:
     """Recupera extratos do banco usando pergunta, intencao e entidades."""
 
+    entities = tuple(entities or [])
     query_terms = sorted(_expand_query_terms(query, intent))
-    entity_terms = sorted(_entity_terms(entities or []))
+    entity_terms = sorted(_entity_terms(entities))
+    project_scope = _requested_projects(query, entities)
     if not query_terms and not entity_terms:
         return []
 
@@ -155,13 +173,16 @@ def retrieve_database_context(
                     (
                         query_terms,
                         entity_terms,
+                        project_scope.terms,
                         specific_intent,
                         specific_intent,
                         specific_intent,
                         result_limit,
                     ),
                 )
-                return [_row_to_result(row) for row in cursor.fetchall()]
+                return project_scope.apply(
+                    [_row_to_result(row) for row in cursor.fetchall()]
+                )
         finally:
             connection.close()
     except DatabaseConfigurationError:
@@ -178,12 +199,61 @@ def retrieve_context(
 ) -> list[RetrievedDocument]:
     """Escolhe banco quando configurado e JSON local como fallback explicito."""
 
+    entities = tuple(entities or [])
     if not is_database_rag_configured():
         from app.rag.sharepoint import retrieve_sharepoint_context
 
-        return retrieve_sharepoint_context(query, limit=limit)
+        scope = _requested_projects(query, entities)
+        return scope.apply(retrieve_sharepoint_context(query, limit=limit))
 
     return retrieve_database_context(query, intent=intent, entities=entities, limit=limit)
+
+
+@dataclass(frozen=True)
+class _ProjectScope:
+    """Projetos pedidos na pergunta.
+
+    Codigo explicito restringe sempre: projeto inexistente resulta em
+    abstencao, nunca em fonte de outro projeto. Nome vindo do lexico do NER
+    (linha, estacao, programa) so restringe quando corresponde a um projeto
+    cadastrado; caso contrario continua apenas pontuando a busca.
+    """
+
+    codes: frozenset[str] = frozenset()
+    names: frozenset[str] = frozenset()
+
+    @property
+    def terms(self) -> list[str]:
+        return sorted(self.codes | self.names)
+
+    def apply(self, results: list[RetrievedDocument]) -> list[RetrievedDocument]:
+        if self.codes:
+            return [result for result in results if _project_identifiers(result) & self.codes]
+        if self.names:
+            matching = [result for result in results if _project_identifiers(result) & self.names]
+            return matching or results
+        return results
+
+
+def _requested_projects(query: str, entities: Iterable[PublicEntity]) -> _ProjectScope:
+    # Codigos explicitos funcionam inclusive com classificador desabilitado.
+    codes = set(PROJECT_CODE_PATTERN.findall(query.casefold()))
+    names = set()
+    for entity in entities:
+        value = entity.value.strip().casefold()
+        if entity.type != "projeto" or not value:
+            continue
+        if PROJECT_CODE_PATTERN.fullmatch(value):
+            codes.add(value)
+        else:
+            names.add(value)
+    return _ProjectScope(codes=frozenset(codes), names=frozenset(names))
+
+
+def _project_identifiers(result: RetrievedDocument) -> set[str]:
+    document = result.document
+    return {value.strip().casefold() for value in (
+        document.project_id, document.project_code, document.project_title) if value}
 
 
 def _expand_query_terms(query: str, intent: AudioIntent | None) -> set[str]:
@@ -241,8 +311,13 @@ def _row_to_result(row: object) -> RetrievedDocument:
         artifact_id=_optional_str(value("artifact_id")),
         extract_id=_optional_str(value("extract_id")),
         project_id=_optional_str(value("project_id")),
+        project_code=_optional_str(value("project_code")),
+        project_title=_optional_str(value("project_title")),
         source_locator=_optional_str(value("source_locator")),
         fallback=False,
+        attributes=attributes_from_metadata(value("extract_metadata")),
+        registration_period=(value("extract_metadata") or {}).get("registration_period"),
+        validity=(value("extract_metadata") or {}).get("validity"),
     )
     return RetrievedDocument(
         document=document,
@@ -263,7 +338,8 @@ _ROW_INDEX = {
     "source_locator": 9,
     "project_code": 10,
     "project_title": 11,
-    "score": 12,
+    "extract_metadata": 12,
+    "score": 13,
 }
 
 

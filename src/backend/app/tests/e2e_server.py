@@ -5,6 +5,28 @@ Executar somente em localhost. Não é usado pela aplicação de produção.
 from types import SimpleNamespace
 from time import sleep
 import os
+import json
+import tempfile
+
+# Impede que o .env sobrescreva as identidades/config simuladas definidas abaixo.
+os.environ['G05_DISABLE_DOTENV_OVERRIDE'] = '1'
+os.environ['AUDIO_SIMULATED_IDENTITIES'] = 'e2e-token=e2e-user'
+os.environ['REPORT_SIMULATED_IDENTITIES'] = json.dumps({
+    'e2e-token': {
+        'subject': 'e2e-user',
+        'display_name': 'Usuario E2E',
+        'role': 'pmo',
+        'can_export': True,
+        'allow_all': True,
+    }
+})
+os.environ['REPORT_CALLBACK_TOKEN'] = 'e2e-callback-token'
+os.environ['REPORT_CONFIRMATION_SECRET'] = 'e2e-confirmation-secret'
+os.environ['REPORT_REPOSITORY_MODE'] = 'memory'
+os.environ['REPORT_EXECUTION_MODE'] = 'local'
+os.environ['REPORT_STORAGE_MODE'] = 'local'
+os.environ['REPORT_ARTIFACTS_DIR'] = os.path.join(tempfile.gettempdir(), 'g05-e2e-reports')
+os.environ['PLN_WARMUP'] = '0'
 
 from app.main import app
 from app import pipeline
@@ -12,9 +34,6 @@ from app.audio import transcription
 from app.gemini.client import GeminiAPIError
 from app.gemini.schemas import GeminiChatResponse, GeminiSource, GeminiUsage
 from app.nlp import inference
-
-os.environ['AUDIO_SIMULATED_IDENTITIES'] = 'e2e-token=e2e-user'
-
 
 def generate(request, intent=None, entities=None):
     if request.message == 'falha':
@@ -32,8 +51,20 @@ def generate(request, intent=None, entities=None):
 
 
 def classify(text):
-    return SimpleNamespace(macrointencao='CONSULTA', intencao='consulta_status_projeto',
-        confianca_macro=.95, confianca_intencao=.9, roteada=True, resposta_sugerida=None)
+    if 'relat' in text.casefold():
+        return SimpleNamespace(
+            macrointencao='TRANSACAO', intencao='transacao_gerar_relatorio',
+            confianca_macro=.99, confianca_intencao=.98,
+            fluxo='Workflow guiado de relatorio',
+            handler='handler:transacao_gerar_relatorio', alternativas=[],
+            roteada=True, resposta_sugerida=None,
+        )
+    return SimpleNamespace(
+        macrointencao='CONSULTA', intencao='consulta_status_projeto',
+        confianca_macro=.95, confianca_intencao=.9,
+        fluxo='Consulta de status', handler='handler:consulta_status_projeto',
+        alternativas=[], roteada=True, resposta_sugerida=None,
+    )
 
 
 async def transcribe(data, probe, language):
