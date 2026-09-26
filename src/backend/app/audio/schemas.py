@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 from app.nlp.schemas import AudioIntent, AudioPipelineMetrics, PublicEntity
-from app.gemini.schemas import GeminiChatResponse
+from app.gemini.schemas import GeminiChatResponse, GeminiSource, FactualClaim
+from typing import Literal
+
+MAX_CONVERSATION_ID_LENGTH = 160
 
 
 class AudioTranscription(BaseModel):
@@ -13,7 +16,7 @@ class AudioTranscription(BaseModel):
     duration_seconds: float
 
 
-class AudioAnswerSource(BaseModel):
+class AudioAnswerSource(GeminiSource):
     artifact: str
     section: str
 
@@ -21,11 +24,15 @@ class AudioAnswerSource(BaseModel):
 class AudioAnswer(BaseModel):
     text: str
     sources: list[AudioAnswerSource] = Field(default_factory=list)
+    claims: list[FactualClaim] = Field(default_factory=list)
+    evidence_status: Literal["referenced", "insufficient", "not_applicable"] = "not_applicable"
 
 
 class AudioUploadResponse(BaseModel):
-    conversation_id: str
+    contract_version: Literal["1.1.0"] = "1.1.0"
+    conversation_id: str = Field(max_length=MAX_CONVERSATION_ID_LENGTH)
     interaction_id: str | None
+    trace_id: str | None = None
     transcription: AudioTranscription
     intent: AudioIntent | None
     entities: list[PublicEntity] = Field(default_factory=list)
@@ -33,6 +40,19 @@ class AudioUploadResponse(BaseModel):
     chat: GeminiChatResponse | None = None
     pipeline_metrics: AudioPipelineMetrics = Field(default_factory=AudioPipelineMetrics)
     pipeline_status: str = Field(default="completed", description="Transcrição e resposta concluídas pelo pipeline.")
+
+
+class VhsMetricsResponse(BaseModel):
+    enabled: bool
+    worker_id: str
+    topology: Literal["single-worker-per-container"] = "single-worker-per-container"
+    ttl_seconds: float
+    max_entries: int
+    entries: int
+    pending: int
+    counters: dict[str, int]
+    hit_ratio: float = Field(ge=0, le=1)
+    estimated_provider_calls_avoided: int = Field(ge=0)
 
 
 class AudioErrorDetail(BaseModel):

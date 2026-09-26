@@ -19,7 +19,9 @@
 /** `GeminiChatRequest`. `message` tem min_length=1 e max_length=20000. */
 export type ChatRequest = {
   message: string;
+  conversation_id?: string | null;
   use_intent_classifier?: boolean;
+  proactivity_enabled?: boolean;
   previous_interaction_id?: string | null;
 };
 
@@ -50,10 +52,54 @@ export type ChatSource = {
   last_modified: string;
   score: number;
   excerpt?: string | null;
+  citation_id?: string | null;
+  artifact_id?: string | null;
+  extract_id?: string | null;
+  project_id?: string | null;
+  source_locator?: string | null;
+  registration_period?: { start?: string | null; end?: string | null } | null;
+  validity?: { start?: string | null; end?: string | null } | null;
+  attributes?: Record<string, string>;
+};
+
+export type ClaimEvidence = {
+  citation_id: string;
+  field: 'excerpt' | 'attribute';
+  attribute: string | null;
+  quote: string;
+};
+export type FactualClaim = {
+  text: string;
+  citation_ids: string[];
+  evidence?: ClaimEvidence[];
+};
+export type EvidenceStatus = 'referenced' | 'insufficient' | 'not_applicable';
+
+export type ProactiveSuggestion = {
+  suggestion_id: string;
+  intent: string;
+  description: string;
+  display_message: string;
+  requires_confirmation: boolean;
+};
+
+export type ProactiveDecision = 'accept' | 'decline';
+
+export type ProactiveConfirmationRequest = {
+  suggestion_id: string;
+  conversation_id: string;
+  decision: ProactiveDecision;
+};
+
+export type ProactiveConfirmationResponse = {
+  status: 'accepted' | 'declined';
+  result?: ChatResponse | null;
 };
 
 /** `GeminiChatResponse`. */
 export type ChatResponse = {
+  contract_version?: '1.1.0';
+  trace_id?: string | null;
   intent?: AudioIntent | null;
   entities?: PipelineEntity[];
   pipeline_metrics?: ChatPipelineMetrics;
@@ -64,6 +110,167 @@ export type ChatResponse = {
   retrieval_ms: number;
   usage: ChatUsage;
   sources: ChatSource[];
+  claims?: FactualClaim[];
+  evidence_status?: EvidenceStatus;
+  /** Presente so na resposta secundaria confirmada: analise rotulada, nao fato. */
+  recommendation?: string | null;
+  proactive_suggestion?: ProactiveSuggestion | null;
+  workflow?: WorkflowDirective | null;
+};
+
+export type WorkflowDirective = {
+  kind: 'guided_workflow';
+  action: 'start';
+  workflow: 'transacao_gerar_relatorio' | 'alerta_prazo_atraso';
+  contract_version: string;
+  parameters: Record<string, unknown>;
+};
+
+export type WorkflowStep =
+  | 'scope_type'
+  | 'scope'
+  | 'period'
+  | 'audience'
+  | 'purpose'
+  | 'emphasis'
+  | 'additional_context'
+  | 'confirmation'
+  | 'execution';
+
+export type WorkflowOption = {
+  value: string;
+  label: string;
+  description?: string | null;
+};
+
+export type WorkflowQuestion = {
+  step: WorkflowStep;
+  prompt: string;
+  input_type: 'single_select' | 'multi_select' | 'date_range' | 'text';
+  required: boolean;
+  options: WorkflowOption[];
+};
+
+export type ReportArtifact = {
+  artifact_id: string;
+  file_name: string;
+  content_type: string;
+  size_bytes: number;
+  sha256: string;
+  download_url: string;
+  storage_provider: 'local' | 'supabase';
+  created_at: string;
+};
+
+export type ReportExecution = {
+  contract_version: string;
+  execution_id: string;
+  correlation_id: string;
+  status:
+    | 'queued'
+    | 'processing'
+    | 'completed'
+    | 'completed_with_warnings'
+    | 'failed'
+    | 'blocked'
+    | 'cancelled';
+  status_url: string;
+  artifact?: ReportArtifact | null;
+  warnings: string[];
+  error?: { code: string; message: string } | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type WorkflowSessionResponse = {
+  contract_version: string;
+  session_id: string;
+  workflow: 'transacao_gerar_relatorio';
+  status: 'active' | 'ready_for_confirmation' | 'executing' | 'completed' | 'cancelled';
+  current_step: WorkflowStep;
+  revision: number;
+  question?: WorkflowQuestion | null;
+  answers: Record<string, unknown>;
+  confirmation_summary?: string | null;
+  warnings: string[];
+  execution?: ReportExecution | null;
+};
+
+export type AlertWorkflowStep =
+  'project' | 'threshold' | 'schedule' | 'resend' | 'confirmation' | 'completed';
+
+export type AlertRule = {
+  project_id: string;
+  project_label: string;
+  threshold_days: number;
+  comparison_operator: 'gt' | 'gte';
+  day_basis: 'calendar_days' | 'business_days';
+  trigger_type: 'daily' | 'weekly';
+  evaluation_time: string;
+  weekday?: number | null;
+  timezone: string;
+  resend_interval_days?: number | null;
+};
+
+export type AlertSubscription = {
+  subscription_id: string;
+  correlation_id: string;
+  idempotency_key: string;
+  owner_subject: string;
+  rule: AlertRule;
+  status: 'active' | 'paused' | 'cancelled' | 'blocked';
+  revision: number;
+  next_evaluation_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AlertSubscriptionResponse = {
+  contract_version: string;
+  subscription: AlertSubscription;
+};
+
+export type AlertWorkflowResponse = {
+  contract_version: string;
+  session_id: string;
+  workflow: 'alerta_prazo_atraso';
+  status: 'active' | 'ready_for_confirmation' | 'completed' | 'cancelled';
+  current_step: AlertWorkflowStep;
+  revision: number;
+  question?: {
+    step: AlertWorkflowStep;
+    prompt: string;
+    input_type: 'single_select' | 'number';
+    options: WorkflowOption[];
+  } | null;
+  answers: Record<string, unknown>;
+  confirmation_summary?: string | null;
+  warnings: string[];
+  subscription?: AlertSubscription | null;
+};
+
+export type GuidedWorkflowSession = WorkflowSessionResponse | AlertWorkflowResponse;
+
+export type AlertNotification = {
+  notification_id: string;
+  correlation_id: string;
+  subscription_id: string;
+  occurrence_id: string;
+  recipient_subject: string;
+  project_id: string;
+  item_id: string;
+  title: string;
+  body: string;
+  reference_date: string;
+  overdue_days: number;
+  status: 'pending' | 'available' | 'read' | 'failed';
+  created_at: string;
+  read_at?: string | null;
+};
+
+export type NotificationListResponse = {
+  items: AlertNotification[];
+  unread_count: number;
 };
 
 /* -------------------------------------------------------------------------
@@ -118,8 +325,8 @@ export type AudioPipelineMetrics = ChatPipelineMetrics & {
   total_ms: number;
 };
 
-/** `AudioAnswerSource`. Formato diferente do `ChatSource` da rota de texto. */
-export type AudioAnswerSource = {
+/** Referencia completa com aliases legados; Partial aceita respostas anteriores ao contrato 1.1.0. */
+export type AudioAnswerSource = Partial<ChatSource> & {
   artifact: string;
   section: string;
 };
@@ -128,10 +335,14 @@ export type AudioAnswerSource = {
 export type AudioAnswer = {
   text: string;
   sources: AudioAnswerSource[];
+  claims?: FactualClaim[];
+  evidence_status?: EvidenceStatus;
 };
 
 /** `AudioUploadResponse`. */
 export type AudioUploadResponse = {
+  contract_version?: '1.1.0';
+  trace_id?: string | null;
   chat?: ChatResponse | null;
   conversation_id: string;
   interaction_id: string | null;

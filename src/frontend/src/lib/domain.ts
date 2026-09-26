@@ -19,6 +19,10 @@ import {
   type ChatSource,
   type MacroIntent,
   type PipelineEntity,
+  type GuidedWorkflowSession,
+  type ProactiveSuggestion,
+  type FactualClaim,
+  type EvidenceStatus,
 } from './api/schemas';
 
 /* -------------------------------------------------------------------------
@@ -28,6 +32,15 @@ import {
 export type RetrievedDocument = {
   /** `<lista>:<item>`, por exemplo `base-atendimento:301`. */
   id: string;
+  sourceId?: string;
+  citationId?: string | null;
+  artifactId?: string | null;
+  extractId?: string | null;
+  projectId?: string | null;
+  sourceLocator?: string | null;
+  registrationPeriod?: ChatSource['registration_period'];
+  validity?: ChatSource['validity'];
+  attributes?: Record<string, string>;
   title: string;
   /** Nome de exibicao da lista do SharePoint de origem. */
   listName: string;
@@ -147,6 +160,18 @@ export type TranscriptionInfo = {
   durationSeconds: number;
 };
 
+export type ProactiveSuggestionStatus =
+  'pending' | 'accepting' | 'declining' | 'accepted' | 'declined';
+
+export type ProactiveSuggestionState = {
+  id: string;
+  intent: string;
+  description: string;
+  displayMessage: string;
+  requiresConfirmation: boolean;
+  status: ProactiveSuggestionStatus;
+};
+
 export type ChatMessage = {
   id: string;
   role: MessageRole;
@@ -156,6 +181,10 @@ export type ChatMessage = {
   status: MessageStatus;
   /** Identificador devolvido pelo backend; encadeia o contexto no Gemini. */
   interactionId?: string | null;
+  traceId?: string | null;
+  contractVersion?: string;
+  evidenceStatus?: EvidenceStatus;
+  claims?: FactualClaim[];
   sources?: RetrievedDocument[];
   intent?: IntentResult;
   entities?: ExtractedEntity[];
@@ -166,6 +195,10 @@ export type ChatMessage = {
   error?: string;
   /** `true` quando o classificador estava ligado no envio. */
   intentLayerEnabled?: boolean;
+  /** Sugestao separada da resposta principal e vinculada a uma decisao explicita. */
+  proactiveSuggestion?: ProactiveSuggestionState;
+  /** Estado do fluxo guiado iniciado por esta resposta. */
+  workflow?: GuidedWorkflowSession;
 };
 
 export type ConversationStatus = 'ativa' | 'finalizada' | 'abandonada' | 'erro';
@@ -196,7 +229,18 @@ export function toRetrievedDocument(
   index: number,
 ): RetrievedDocument {
   return {
-    id: source.id,
+    id:
+      source.extract_id ??
+      (source.citation_id ? `${source.id}#${source.citation_id}` : source.id),
+    sourceId: source.id,
+    citationId: source.citation_id,
+    artifactId: source.artifact_id,
+    extractId: source.extract_id,
+    projectId: source.project_id,
+    sourceLocator: source.source_locator,
+    registrationPeriod: source.registration_period,
+    validity: source.validity,
+    attributes: source.attributes,
     title: source.title,
     listName: source.list_name,
     webUrl: source.web_url,
@@ -216,6 +260,19 @@ export function toExtractedEntity(entity: PipelineEntity): ExtractedEntity {
     end: entity.end,
     types: entity.types,
     ambiguous: entity.ambiguous,
+  };
+}
+
+export function toProactiveSuggestion(
+  suggestion: ProactiveSuggestion,
+): ProactiveSuggestionState {
+  return {
+    id: suggestion.suggestion_id,
+    intent: suggestion.intent,
+    description: suggestion.description,
+    displayMessage: suggestion.display_message,
+    requiresConfirmation: suggestion.requires_confirmation,
+    status: 'pending',
   };
 }
 
@@ -264,6 +321,10 @@ export function toAssistantMessage(
     origin: 'text',
     status: 'complete',
     interactionId: response.interaction_id,
+    traceId: response.trace_id,
+    contractVersion: response.contract_version,
+    evidenceStatus: response.evidence_status,
+    claims: response.claims,
     sources: response.sources.map(toRetrievedDocument),
     intent: response.intent ? toIntentResult(response.intent) : undefined,
     entities: (response.entities ?? []).map(toExtractedEntity),
@@ -283,6 +344,9 @@ export function toAssistantMessage(
       totalTokens: response.usage.total_tokens,
     },
     intentLayerEnabled: options.intentLayerEnabled,
+    proactiveSuggestion: response.proactive_suggestion
+      ? toProactiveSuggestion(response.proactive_suggestion)
+      : undefined,
   };
 }
 

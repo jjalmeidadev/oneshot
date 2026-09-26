@@ -1,0 +1,27 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF09-02 — variação A
+Requisito: RF09
+Cenário: Negativo
+Status do caso: APROVADO
+
+Entrada:
+Avise se o projeto PRJ-0442 estiver atrasado
+
+Configuração:
+proactivity_enabled=true
+
+Resultado observado:
+HTTP 200
+intent.macro: ALERTA
+intent.specific: alerta_prazo_atraso
+confidence_specific: 0.7645
+source/project: PRJ-0442
+proactive_suggestion: null
+workflow: null
+
+Resultado esperado:
+Quando não houver intenção secundária compatível, não criar sugestão fictícia.
+
+Conclusão:
+APROVADO.

@@ -11,6 +11,12 @@ from app.gemini.client import (
 )
 from app.gemini.schemas import GeminiChatRequest
 
+BIKE_EVIDENCE = (
+    "Na politica ficticia do MVP, bicicletas sao aceitas aos sabados, domingos e feriados "
+    "durante toda a operacao, e nos dias uteis apos as 20h30. O passageiro deve usar o "
+    "ultimo carro e respeitar a capacidade indicada pela equipe."
+)
+
 
 class FakeResponse:
     def __init__(self, body: dict) -> None:
@@ -43,7 +49,7 @@ def test_generate_chat_response_maps_text_context_and_usage(
                 "steps": [
                     {
                         "type": "model_output",
-                        "content": [{"type": "text", "text": "Resposta de teste"}],
+                        "content": [{"type": "text", "text": BIKE_EVIDENCE + " [Fonte 1]"}],
                     }
                 ],
                 "usage": {
@@ -62,18 +68,19 @@ def test_generate_chat_response_maps_text_context_and_usage(
 
     response = generate_chat_response(
         GeminiChatRequest(
-            message="Ola",
+            message="Posso transportar bicicleta?",
             previous_interaction_id="interaction-1",
         )
     )
 
-    assert response.text == "Resposta de teste"
+    assert response.text == BIKE_EVIDENCE + " [Fonte 1]"
+    assert response.evidence_status == "referenced"
     assert response.interaction_id == "interaction-2"
     assert response.usage.total_tokens == 23
     assert response.latency_ms >= 0
 
     request_body = json.loads(captured_request.data.decode("utf-8"))
-    assert request_body["input"] == "Ola"
+    assert "Pergunta do usuario: Posso transportar bicicleta?" in request_body["input"]
     assert request_body["previous_interaction_id"] == "interaction-1"
     assert request_body["generation_config"] == {
         "max_output_tokens": 512,
@@ -146,7 +153,7 @@ def test_generate_chat_response_retries_with_exponential_backoff(
                 "steps": [
                     {
                         "type": "model_output",
-                        "content": [{"type": "text", "text": "Resposta recuperada"}],
+                        "content": [{"type": "text", "text": BIKE_EVIDENCE + " [Fonte 1]"}],
                     }
                 ],
                 "usage": {},
@@ -157,9 +164,9 @@ def test_generate_chat_response_retries_with_exponential_backoff(
     monkeypatch.setattr("app.gemini.client.urlopen", fake_urlopen)
     monkeypatch.setattr("app.gemini.client.sleep", delays.append)
 
-    response = generate_chat_response(GeminiChatRequest(message="Teste de retry"))
+    response = generate_chat_response(GeminiChatRequest(message="Posso transportar bicicleta?"))
 
-    assert response.text == "Resposta recuperada"
+    assert response.text == BIKE_EVIDENCE + " [Fonte 1]"
     assert attempts == 4
     assert delays == [2.0, 4.0, 8.0]
 
@@ -181,7 +188,7 @@ def test_generate_chat_response_stops_after_configured_retries(
     monkeypatch.setattr("app.gemini.client.sleep", delays.append)
 
     with pytest.raises(GeminiAPIError, match="Nao foi possivel conectar ao Gemini"):
-        generate_chat_response(GeminiChatRequest(message="Teste de falha"))
+        generate_chat_response(GeminiChatRequest(message="bicicleta"))
 
     assert attempts == 3
     assert delays == [2.0, 4.0]
@@ -209,7 +216,7 @@ def test_generate_chat_response_does_not_retry_permanent_http_error(
     monkeypatch.setattr("app.gemini.client.sleep", delays.append)
 
     with pytest.raises(GeminiAPIError, match="Invalid request"):
-        generate_chat_response(GeminiChatRequest(message="Teste invalido"))
+        generate_chat_response(GeminiChatRequest(message="bicicleta"))
 
     assert attempts == 1
     assert delays == []

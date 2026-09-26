@@ -1,0 +1,28 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF09-02 — variação B
+Requisito: RF09
+Cenário: Negativo
+Status do caso: APROVADO
+
+Etapa 1:
+Nova consulta elegível de prazo com proatividade ativa.
+
+Resultado da sugestão:
+intent: sugerir_recuperacao_prazo
+suggestion_id: dcdba689-381b-4d8c-a52e-18adb7aae4fc
+requires_confirmation: true
+
+Etapa 2:
+POST /api/chat/proactive-confirmation
+decision: decline
+
+Resultado observado:
+HTTP 200
+{"status":"declined","result":null}
+
+Resultado esperado:
+A recusa deve encerrar a sugestão sem executar a ação secundária.
+
+Conclusão:
+APROVADO.
