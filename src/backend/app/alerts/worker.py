@@ -10,10 +10,12 @@ from datetime import date
 from typing import Any
 
 from dotenv import load_dotenv
+from pydantic import ValidationError
 
-from app.alerts.messaging import Message, RabbitMQBroker
-from app.alerts.repository import get_alert_repository
-from app.alerts.schemas import AlertNotification
+from app.alerts.errors import AlertMessageError
+from app.alerts.messaging import DELIVERY_ROUTING_KEY, Message, RabbitMQBroker
+from app.alerts.repository import AlertRepository, get_alert_repository
+from app.alerts.schemas import AlertNotification, NotificationDeliveryEvent
 from app.alerts.service import get_alert_service
 from app.database.connection import open_database_connection
 
@@ -42,6 +44,30 @@ async def run_notifier() -> None:
 
     try:
         await broker.consume("alert.notification.requested", handle)
+    finally:
+        await broker.close()
+
+
+def process_delivery_message(
+    message: Message, repository: AlertRepository | None = None
+) -> bool:
+    try:
+        event = NotificationDeliveryEvent.model_validate(message.__dict__)
+    except ValidationError as error:
+        raise AlertMessageError() from error
+    return (repository or get_alert_repository()).record_delivery_attempt(
+        event.payload
+    )
+
+
+async def run_delivery_consumer() -> None:
+    broker = RabbitMQBroker()
+
+    async def handle(message: Message) -> None:
+        process_delivery_message(message)
+
+    try:
+        await broker.consume(DELIVERY_ROUTING_KEY, handle)
     finally:
         await broker.close()
 
@@ -138,12 +164,13 @@ async def run_publisher() -> None:
 
 def main() -> int:
     load_dotenv()
-    parser=argparse.ArgumentParser(); parser.add_argument("command",choices=["schedule-once","scheduler","publisher-once","publisher","evaluator","notifier"]); args=parser.parse_args()
+    parser=argparse.ArgumentParser(); parser.add_argument("command",choices=["schedule-once","scheduler","publisher-once","publisher","evaluator","notifier","delivery"]); args=parser.parse_args()
     if args.command=="schedule-once": get_alert_service().schedule_due(); return 0
     if args.command=="scheduler": asyncio.run(run_scheduler()); return 0
     if args.command=="publisher-once": print(json.dumps({"published":asyncio.run(publish_outbox_once())})); return 0
     if args.command=="publisher": asyncio.run(run_publisher()); return 0
     if args.command=="notifier": asyncio.run(run_notifier()); return 0
+    if args.command=="delivery": asyncio.run(run_delivery_consumer()); return 0
     asyncio.run(run_evaluator()); return 0
 
 

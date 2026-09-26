@@ -23,6 +23,15 @@ class ReportAccessDeniedError(ReportError):
         )
 
 
+class ReportCallbackUnauthorizedError(ReportError):
+    def __init__(self) -> None:
+        super().__init__(
+            "REPORT_CALLBACK_UNAUTHORIZED",
+            "Token de callback invalido.",
+            401,
+        )
+
+
 class ReportConflictError(ReportError):
     def __init__(self, message: str) -> None:
         super().__init__("REPORT_CONFLICT", message, 409)

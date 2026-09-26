@@ -78,6 +78,13 @@ bloqueio; a passagem pelas filas está nas execuções de ponta a ponta.
 | Callback | Não se aplica: o fluxo não recebe retorno de sistema externo. Não usa Copilot Studio, Power Automate, Teams, e-mail nem webhook; a interface usa REST e os processos, AMQP |
 | Segredos | Nenhum token, senha ou chave nos arquivos; a identidade aparece só pelo sujeito simulado |
 
+> **Nota temporal:** a linha `Callback` descreve somente a execução histórica
+> de 22/09/2026. Na Sprint 5 foi adicionado, depois dessa coleta, o webhook de
+> confirmação de entrega chamado pelo provedor/simulador. A geração do alerta
+> continua sendo iniciada pelo scheduler; REST, outbox e AMQP não são
+> webhooks. Consulte a
+> [evidência posterior](../../../../docs/evidencias/sprint-05/webhooks-rabbitmq.md).
+
 ## Como reproduzir
 
 A partir de `src/backend`, com `SUPABASE_DATABASE_URL` e

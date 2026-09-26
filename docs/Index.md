@@ -37,6 +37,10 @@ Este arquivo indexa todos os documentos Markdown versionados no repositório. Os
 - [Evidência do RNF06](evidencias/sprint-04/rnf06/README.md)
 - [Evidências de VHS/cache](evidencias/sprint-04/vhs/README.md)
 
+### Evidências da Sprint 5
+
+- [Webhooks e integração RabbitMQ](evidencias/sprint-05/webhooks-rabbitmq.md)
+
 ### Planejamento e relatórios de testes
 
 - [Plano de VHS/cache de Speech-to-Text](testes/sprint4/plano-vhs.md)

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import json
 import os
 from abc import ABC, abstractmethod
@@ -11,12 +13,19 @@ from functools import lru_cache
 from threading import RLock
 from typing import Any
 
-from app.alerts.errors import AlertConfigurationError, AlertConflictError, AlertNotFoundError
+from app.alerts.errors import (
+    AlertConfigurationError,
+    AlertConflictError,
+    AlertNotFoundError,
+    NotificationNotFoundError,
+)
 from app.alerts.schemas import (
     AlertEvaluation,
     AlertNotification,
     AlertSubscription,
     AlertWorkflowSession,
+    NotificationDeliveryCallbackRequest,
+    NotificationDeliveryCallbackResponse,
     NotificationStatus,
 )
 from app.database.connection import open_database_connection
@@ -51,6 +60,18 @@ class AlertRepository(ABC):
     @abstractmethod
     def mark_read(self, notification_id: str, recipient: str, read_at: datetime) -> AlertNotification: ...
     @abstractmethod
+    def save_delivery_callback(
+        self,
+        value: NotificationDeliveryCallbackResponse,
+        payload_hash: str,
+        callback_payload: dict[str, Any],
+        event_id: str,
+    ) -> NotificationDeliveryCallbackResponse: ...
+    @abstractmethod
+    def record_delivery_attempt(
+        self, callback: NotificationDeliveryCallbackRequest
+    ) -> bool: ...
+    @abstractmethod
     def enqueue(self, event_id: str, event_type: str, correlation_id: str, payload: dict[str, Any]) -> None: ...
     @abstractmethod
     def create_workflow(self, value: AlertWorkflowSession) -> None: ...
@@ -68,6 +89,8 @@ class InMemoryAlertRepository(AlertRepository):
         self._episodes: set[str] = set()
         self._evaluations: dict[str, AlertEvaluation] = {}
         self._workflows: dict[str, AlertWorkflowSession] = {}
+        self.delivery_callbacks: dict[str, dict[str, Any]] = {}
+        self.delivery_attempts: list[dict[str, Any]] = []
         self.outbox: list[dict[str, Any]] = []
         self._lock = RLock()
 
@@ -151,6 +174,88 @@ class InMemoryAlertRepository(AlertRepository):
             item.status = NotificationStatus.READ
             item.read_at = read_at
             return deepcopy(item)
+
+    def save_delivery_callback(
+        self,
+        value: NotificationDeliveryCallbackResponse,
+        payload_hash: str,
+        callback_payload: dict[str, Any],
+        event_id: str,
+    ) -> NotificationDeliveryCallbackResponse:
+        with self._lock:
+            notification_id = str(value.notification_id)
+            if notification_id not in self._notifications:
+                raise NotificationNotFoundError()
+            existing = self.delivery_callbacks.get(value.callback_id)
+            if existing is not None:
+                if not hmac.compare_digest(existing["payload_hash"], payload_hash):
+                    raise AlertConflictError(
+                        "O identificador do callback pertence a outro retorno."
+                    )
+                return deepcopy(existing["value"])
+            self.delivery_callbacks[value.callback_id] = {
+                "payload_hash": payload_hash,
+                "callback_payload": deepcopy(callback_payload),
+                "value": deepcopy(value),
+            }
+            notification = self._notifications[notification_id]
+            self.outbox.append(
+                {
+                    "event_id": event_id,
+                    "event_type": "notification.delivery.received",
+                    "correlation_id": notification.correlation_id,
+                    "payload": deepcopy(callback_payload),
+                }
+            )
+            return deepcopy(value)
+
+    def record_delivery_attempt(
+        self, callback: NotificationDeliveryCallbackRequest
+    ) -> bool:
+        with self._lock:
+            notification_id = str(callback.notification_id)
+            if notification_id not in self._notifications:
+                raise NotificationNotFoundError()
+            persisted = self.delivery_callbacks.get(callback.callback_id)
+            if (
+                persisted is None
+                or str(persisted["value"].notification_id) != notification_id
+                or not hmac.compare_digest(
+                    persisted["payload_hash"], _delivery_payload_hash(callback)
+                )
+            ):
+                raise AlertConflictError(
+                    "O callback do evento nao corresponde ao retorno persistido."
+                )
+            if any(
+                item["callback_id"] == callback.callback_id
+                for item in self.delivery_attempts
+            ):
+                return False
+            attempt_number = 1 + max(
+                (
+                    item["attempt_number"]
+                    for item in self.delivery_attempts
+                    if item["notification_id"] == notification_id
+                ),
+                default=0,
+            )
+            self.delivery_attempts.append(
+                {
+                    "notification_id": notification_id,
+                    "callback_id": callback.callback_id,
+                    "channel": callback.provider,
+                    "attempt_number": attempt_number,
+                    "status": (
+                        "available"
+                        if callback.status.value == "delivered"
+                        else "failed"
+                    ),
+                    "error_code": callback.error_code,
+                    "attempted_at": callback.attempted_at,
+                }
+            )
+            return True
 
     def enqueue(self, event_id: str, event_type: str, correlation_id: str, payload: dict[str, Any]) -> None:
         with self._lock:
@@ -305,6 +410,137 @@ class PostgresAlertRepository(AlertRepository):
         self._execute("UPDATE public.alert_notifications SET status='read',read_at=%s,notification_payload=%s::jsonb WHERE notification_id=%s::uuid", (read_at,_json(value),notification_id))
         return value
 
+    def save_delivery_callback(
+        self,
+        value: NotificationDeliveryCallbackResponse,
+        payload_hash: str,
+        callback_payload: dict[str, Any],
+        event_id: str,
+    ) -> NotificationDeliveryCallbackResponse:
+        connection = self._connection()
+        try:
+            with connection.cursor() as cursor:
+                # Serializa o mesmo callback_id entre requisicoes concorrentes.
+                cursor.execute(
+                    "SELECT pg_advisory_xact_lock(hashtextextended(%s,0))",
+                    (value.callback_id,),
+                )
+                cursor.execute(
+                    "SELECT notification_payload FROM public.alert_notifications "
+                    "WHERE notification_id=%s::uuid FOR UPDATE",
+                    (str(value.notification_id),),
+                )
+                notification_row = cursor.fetchone()
+                if notification_row is None:
+                    raise NotificationNotFoundError()
+                row_notification = notification_row[0]
+                cursor.execute(
+                    "SELECT payload_hash,callback_payload,received_at "
+                    "FROM public.notification_delivery_callbacks "
+                    "WHERE callback_id=%s",
+                    (value.callback_id,),
+                )
+                row = cursor.fetchone()
+                if row is not None:
+                    if not hmac.compare_digest(row[0], payload_hash):
+                        raise AlertConflictError(
+                            "O identificador do callback pertence a outro retorno."
+                        )
+                    stored = dict(row[1])
+                    stored["received_at"] = row[2]
+                    return NotificationDeliveryCallbackResponse.model_validate(stored)
+                cursor.execute(
+                    """INSERT INTO public.notification_delivery_callbacks
+                    (callback_id,notification_id,payload_hash,callback_payload,received_at)
+                    VALUES (%s,%s::uuid,%s,%s::jsonb,%s)""",
+                    (
+                        value.callback_id,
+                        str(value.notification_id),
+                        payload_hash,
+                        json.dumps(callback_payload, ensure_ascii=False),
+                        value.received_at,
+                    ),
+                )
+                cursor.execute(
+                    """INSERT INTO public.message_outbox
+                    (event_id,event_type,correlation_id,payload)
+                    VALUES (%s::uuid,'notification.delivery.received',%s,%s::jsonb)""",
+                    (
+                        event_id,
+                        str(row_notification["correlation_id"]),
+                        json.dumps(callback_payload, ensure_ascii=False),
+                    ),
+                )
+            connection.commit()
+            return value
+        except (AlertConflictError, NotificationNotFoundError):
+            connection.rollback()
+            raise
+        except Exception as error:
+            connection.rollback()
+            raise AlertConfigurationError() from error
+        finally:
+            connection.close()
+
+    def record_delivery_attempt(
+        self, callback: NotificationDeliveryCallbackRequest
+    ) -> bool:
+        connection = self._connection()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT 1 FROM public.alert_notifications "
+                    "WHERE notification_id=%s::uuid FOR UPDATE",
+                    (str(callback.notification_id),),
+                )
+                if cursor.fetchone() is None:
+                    raise NotificationNotFoundError()
+                cursor.execute(
+                    "SELECT payload_hash FROM public.notification_delivery_callbacks "
+                    "WHERE callback_id=%s AND notification_id=%s::uuid",
+                    (callback.callback_id, str(callback.notification_id)),
+                )
+                callback_row = cursor.fetchone()
+                if callback_row is None or not hmac.compare_digest(
+                    callback_row[0], _delivery_payload_hash(callback)
+                ):
+                    raise AlertConflictError(
+                        "O callback do evento nao corresponde ao retorno persistido."
+                    )
+                cursor.execute(
+                    "SELECT COALESCE(MAX(attempt_number),0)+1 "
+                    "FROM public.notification_delivery_attempts "
+                    "WHERE notification_id=%s::uuid",
+                    (str(callback.notification_id),),
+                )
+                attempt_number = cursor.fetchone()[0]
+                cursor.execute(
+                    """INSERT INTO public.notification_delivery_attempts
+                    (notification_id,callback_id,channel,attempt_number,status,error_code,attempted_at)
+                    VALUES (%s::uuid,%s,%s,%s,%s,%s,%s)
+                    ON CONFLICT DO NOTHING""",
+                    (
+                        str(callback.notification_id),
+                        callback.callback_id,
+                        callback.provider,
+                        attempt_number,
+                        "available" if callback.status.value == "delivered" else "failed",
+                        callback.error_code,
+                        callback.attempted_at,
+                    ),
+                )
+                created = cursor.rowcount > 0
+            connection.commit()
+            return created
+        except (AlertConflictError, NotificationNotFoundError):
+            connection.rollback()
+            raise
+        except Exception as error:
+            connection.rollback()
+            raise AlertConfigurationError() from error
+        finally:
+            connection.close()
+
     def enqueue(self, event_id: str, event_type: str, correlation_id: str, payload: dict[str, Any]) -> None:
         self._execute("""INSERT INTO public.message_outbox (event_id,event_type,correlation_id,payload) VALUES (%s::uuid,%s,%s,%s::jsonb) ON CONFLICT (event_id) DO NOTHING""", (event_id,event_type,correlation_id,json.dumps(payload,default=str)))
 
@@ -371,3 +607,11 @@ def reset_alert_repository() -> None:
 def _json(value: Any) -> str:
     if hasattr(value,"model_dump"): value=value.model_dump(mode="json")
     return json.dumps(value,ensure_ascii=False,sort_keys=True,default=str)
+
+
+def _delivery_payload_hash(callback: NotificationDeliveryCallbackRequest) -> str:
+    payload = callback.model_dump(mode="json")
+    canonical = json.dumps(
+        payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()

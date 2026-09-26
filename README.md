@@ -119,6 +119,8 @@ A documentação do projeto está organizada de acordo com as diferentes dimens�
 
 - [`Manual-instalacao.md`](docs/Manual-instalacao.md) — documentação destinada a orientar a preparação do ambiente e os procedimentos necessários para instalação e execução da solução.
 
+- [`webhooks-rabbitmq.md`](docs/evidencias/sprint-05/webhooks-rabbitmq.md) — evidência reproduzível dos dois webhooks, da outbox e do processamento RabbitMQ da Sprint 5.
+
 ---
 
 ## 🔎 Prioridades do MVP

@@ -11,7 +11,12 @@ from app.alerts.errors import AlertConfigurationError
 
 EXCHANGE="metro.alerts"
 DEAD_LETTER_EXCHANGE="metro.alerts.dlx"
-ROUTING_KEYS=("alert.evaluation.requested","alert.notification.requested")
+DELIVERY_ROUTING_KEY = "notification.delivery.received"
+ROUTING_KEYS = (
+    "alert.evaluation.requested",
+    "alert.notification.requested",
+    DELIVERY_ROUTING_KEY,
+)
 
 
 @dataclass(frozen=True)

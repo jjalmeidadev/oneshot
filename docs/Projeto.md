@@ -3519,7 +3519,7 @@ Navegador React
 
 O `GET /health` verifica se o processo FastAPI terminou de iniciar. O caminho de texto e o caminho posterior à transcrição de áudio convergem em `app/pipeline.py`, portanto classificação, recuperação de contexto e geração não possuem implementações paralelas. O front-end transforma o contrato HTTP em mensagens, fontes, indicadores de intenção e estados de carregamento, mas não acessa Azure ou Gemini diretamente e não recebe suas credenciais.
 
-O PostgreSQL/Supabase está conectado de forma opcional: quando `DATABASE_URL` ou `SUPABASE_DATABASE_URL` está configurada, o backend consulta os extratos persistidos e registra conversa, interação, intenção, rota, fontes, workflows, execuções, inscrições, avaliações, notificações, artefatos e auditoria. Sem configuração, consultas, relatórios e alertas podem usar dados sintéticos e repositórios em memória. O fluxo `transacao_gerar_relatorio` executa integralmente em modo local; seu adaptador de Power Automate é opcional e depende das credenciais e do endpoint do ambiente. O fluxo `alerta_prazo_atraso` é executado pelo próprio backend com RabbitMQ e não depende de Power Automate, Copilot Studio ou webhook. Microsoft Entra ID, SharePoint corporativo e Teams não integram a execução atual. Conversas e preferências permanecem na sessão do navegador; somente o tema pode ser persistido localmente.
+O PostgreSQL/Supabase está conectado de forma opcional: quando `DATABASE_URL` ou `SUPABASE_DATABASE_URL` está configurada, o backend consulta os extratos persistidos e registra conversa, interação, intenção, rota, fontes, workflows, execuções, inscrições, avaliações, notificações, artefatos e auditoria. Sem configuração, consultas, relatórios e alertas podem usar dados sintéticos e repositórios em memória. O fluxo `transacao_gerar_relatorio` executa integralmente em modo local; seu adaptador de Power Automate é opcional e depende das credenciais e do endpoint do ambiente. A geração de alertas é disparada pelo scheduler e processada pelo backend com RabbitMQ, sem depender de Power Automate ou Copilot Studio. Separadamente, um provedor ou simulador pode confirmar a entrega de uma notificação pelo webhook da Seção 8.5.12; o navegador não chama esse webhook. Microsoft Entra ID, SharePoint corporativo e Teams não integram a execução atual. Conversas e preferências permanecem na sessão do navegador; somente o tema pode ser persistido localmente.
 
 ### 8.5.2 Arquitetura executável
 
@@ -3605,7 +3605,7 @@ O cliente aplica limite de 120 segundos e permite cancelamento por `AbortControl
 | RAG de SharePoint simulado | `rag/sharepoint.py` pesquisa exports JSON versionados e inclui rótulos de fonte no prompt. | `rag/data/sharepoint/` ou `SHAREPOINT_MOCK_DATA_DIR`. | Não acessa o tenant corporativo nem sincroniza alterações do SharePoint. |
 | Classificador local | `nlp/` carrega o `joblib` e o encoder BERTimbau via PyTorch/Transformers; `PLN_WARMUP=1` antecipa a carga. | Artefatos em `src/notebooks/artefatos/`; encoder obtido do repositório de modelo indicado na Seção 8.11 (`requirements-pln.txt`). | A primeira instalação/carga pode exigir internet e cache local; não executa transações. |
 | Identidade do áudio | `audio/security.py` resolve o Bearer token por um mapa simulado e limita uma transcrição ativa por identidade. | `AUDIO_SIMULATED_IDENTITIES`, por exemplo `token-local=usuario-local`. | Não valida JWT do Entra ID e não aplica as regras da tabela `access_rules`. |
-| RabbitMQ | `alerts/messaging.py` publica e consome eventos persistentes de avaliação e notificação, com confirmação manual e DLQ. | `RABBITMQ_URL` e `compose.rabbitmq.yml`. | Necessário para o alerta assíncrono persistente; AMQP não é webhook. |
+| RabbitMQ | `alerts/messaging.py` publica e consome eventos persistentes de avaliação, criação de notificação e confirmação de entrega, com confirmação manual e DLQ. | `RABBITMQ_URL` e `compose.rabbitmq.yml`. | Necessário para o alerta assíncrono persistente; AMQP, scheduler e outbox não são webhooks. A rodada documental usa double controlado, não broker externo. |
 
 O SharePoint corporativo, Entra ID, Teams e Copilot Studio aparecem nos desenhos e no modelo-alvo, mas não possuem adaptador ativo nesta versão. Power Automate possui um adaptador opcional apenas para relatórios; o modo local não depende dele e o alerta não o utiliza. As demais intenções transacionais continuam sem escrita externa. Essa distinção evita interpretar a bancada como um canal de produção ou como evidência de autorização corporativa.
 
@@ -3641,7 +3641,7 @@ A opção `ON_ERROR_STOP` faz o processo terminar na primeira falha em vez de co
 
 O banco possui integração opcional no backend. Com `DATABASE_URL` ou `SUPABASE_DATABASE_URL`, a recuperação consulta os extratos PostgreSQL e a rastreabilidade persiste conversas, interações, classificação, rota, fontes, workflows e auditoria; sem URL configurada, a aplicação continua reproduzível com dados sintéticos e repositórios em memória. A interface ainda mantém o histórico geral de conversa apenas em memória, sem reidratação.
 
-Sobre o baseline, migrations incrementais especializam os dois workflows. Para relatórios, `05`, `07`, `09` e `11` cobrem execuções, artefatos, callbacks, sessões, respostas, bucket privado e RLS; os scripts `manage_report_infrastructure.py` e `manage_report_security.py` aplicam e verificam essa infraestrutura. Para alertas, `15_alert_deadline_flow.sql` cria inscrições, avaliações, ocorrências, notificações, tentativas de entrega e outbox, além de habilitar RLS e revogar acesso direto de `anon` e `authenticated`; `16_rollback_alert_deadline_flow.sql` é o rollback e `scripts/manage_alert_infrastructure.py` oferece `apply`, `status` e `rollback`. Assim, memória e dados sintéticos são modos de desenvolvimento, não substitutos da integração persistente já implementada.
+Sobre o baseline, migrations incrementais especializam os dois workflows. Para relatórios, `05`, `07`, `09` e `11` cobrem execuções, artefatos, callbacks, sessões, respostas, bucket privado e RLS; os scripts `manage_report_infrastructure.py` e `manage_report_security.py` aplicam e verificam essa infraestrutura. Para alertas, `15_alert_deadline_flow.sql` cria inscrições, avaliações, ocorrências, notificações, tentativas de entrega e outbox; `17_notification_delivery_callbacks.sql` persiste os callbacks de entrega; e `18_notification_delivery_attempt_callback.sql` liga cada tentativa processada ao `callback_id` com unicidade. Todas as tabelas internas relevantes usam RLS e não concedem acesso direto a `anon` ou `authenticated`. `16_rollback_alert_deadline_flow.sql` é o rollback do núcleo original e `scripts/manage_alert_infrastructure.py` oferece `apply`, `status` e `rollback`. Assim, memória e dados sintéticos são modos de desenvolvimento, não substitutos da integração persistente já implementada.
 
 ### 8.5.7 Front-end: componentes e comportamento
 
@@ -3762,8 +3762,11 @@ avaliação na outbox; o publisher as envia ao RabbitMQ; o evaluator revalida o
 acesso e compara o cronograma; e o notifier disponibiliza, de forma idempotente,
 a notificação na central interna da aplicação.
 
-O fluxo não usa Copilot Studio, Power Automate, Teams, e-mail ou webhook. A
-comunicação entre processos usa AMQP e as ações da interface usam REST. Filas
+O disparo e a geração do alerta não usam Copilot Studio, Power Automate, Teams,
+e-mail ou webhook: partem do scheduler. A confirmação posterior de entrega pode
+ser recebida do provedor/simulador pelo segundo webhook descrito na Seção
+8.5.12. A comunicação entre processos usa AMQP e as ações da interface usam
+REST; a central consulta notificações pela API e nunca chama o webhook. Filas
 duráveis, confirmação manual, dead-letter queues, backoff da outbox,
 `episode_key` única e IDs de correlação protegem contra perda e duplicação. O
 usuário pode pausar, retomar ou cancelar a inscrição e marcar notificações como
@@ -3771,7 +3774,8 @@ lidas.
 
 No banco, `15_alert_deadline_flow.sql` cria `alert_subscriptions`,
 `alert_evaluations`, `alert_occurrences`, `alert_notifications`,
-`notification_delivery_attempts` e `message_outbox`, todas protegidas por RLS e
+`notification_delivery_attempts`, `notification_delivery_callbacks` e
+`message_outbox`, protegidas por RLS e
 sem acesso direto dos papéis públicos. A API e os workers usam a conexão segura
 do backend. O frontend está em `components/chat/alert-workflow-card.tsx` e
 `components/notifications/notification-center.tsx`; a implementação operacional
@@ -3781,6 +3785,234 @@ As execuções de ponta a ponta, com casos elegíveis e não elegíveis, repeti�
 armazenamento e auditoria correlacionada, estão em
 [`src/backend/evidencias/alerta-prazo-atraso/`](../src/backend/evidencias/alerta-prazo-atraso/README.md),
 junto da reexecução da regra com o código final e da saída dos testes.
+
+### 8.5.12 Webhooks e mensageria integrados (S5-09 a S5-11)
+
+O estado atual possui **dois webhooks HTTP**. O primeiro recebe o resultado do
+processamento opcional de relatório. O segundo recebe a confirmação de entrega
+de uma notificação e inicia seu processamento assíncrono pela outbox. O
+scheduler que solicita avaliações, os eventos AMQP e as consultas REST do
+frontend são mecanismos diferentes e não são chamados de webhook.
+
+#### Webhook 1 — resultado do relatório
+
+**Finalidade.** Receber do Power Automate ou do simulador o estado terminal e o
+JSON estruturado de uma execução criada anteriormente. A rota correlaciona o
+retorno à execução, valida sua idempotência, atualiza o estado, gera o DOCX no
+backend quando há sucesso e persiste o callback.
+
+| Item | Contrato |
+| --- | --- |
+| Método e rota | `POST /api/integrations/power-automate/report-results` |
+| Header obrigatório | `X-Callback-Token: <token>` |
+| Variável de ambiente | `REPORT_CALLBACK_TOKEN` |
+| Content-Type | `application/json` |
+| Persistência | `automation_callbacks` e atualização de `report_executions` |
+| Autenticação atual | Token compartilhado comparado em tempo constante. Token inválido retorna `401`. |
+
+| Campo | Tipo | Obrigatório | Descrição |
+| --- | --- | :---: | --- |
+| `contract_version` | literal `"1.0"` | Não | Versão do contrato; assume `1.0`. |
+| `callback_id` | string, 8–160 | Sim | Identificador idempotente global do retorno. |
+| `execution_id` | string, 1–160 | Sim | Execução de relatório previamente criada. |
+| `correlation_id` | string, 1–120 | Sim | Deve ser igual ao da execução. |
+| `flow_run_id` | string, 1–160 | Sim | Identificador da execução no fluxo externo/simulador. |
+| `status` | enum | Sim | Estado terminal: `completed`, `completed_with_warnings`, `failed`, `blocked` ou `cancelled`. |
+| `result` | objeto ou `null` | Condicional | Obrigatório nos estados concluídos; contém `schema_version` e resultados estruturados opcionais. |
+| `warnings` | array de strings | Não | Até 50 advertências controladas. |
+| `error_code` | string ou `null` | Condicional | Obrigatório em `failed` e `blocked`. |
+| `error_message` | string ou `null` | Não | Mensagem controlada, até 500 caracteres. |
+
+Exemplo completo de requisição bem-sucedida:
+
+```http
+POST /api/integrations/power-automate/report-results HTTP/1.1
+Content-Type: application/json
+X-Callback-Token: <REPORT_CALLBACK_TOKEN>
+
+{
+  "contract_version": "1.0",
+  "callback_id": "callback-report-001",
+  "execution_id": "9b13d80d-2b0f-4fd6-a01f-c73f86ef6105",
+  "correlation_id": "c95e6931-9cb2-452f-b8e9-d2ab86753cf8",
+  "flow_run_id": "flow-run-001",
+  "status": "completed",
+  "result": {"schema_version": "1.0"},
+  "warnings": [],
+  "error_code": null,
+  "error_message": null
+}
+```
+
+Exemplo resumido de resposta `200`:
+
+```json
+{
+  "contract_version": "1.0",
+  "execution_id": "9b13d80d-2b0f-4fd6-a01f-c73f86ef6105",
+  "correlation_id": "c95e6931-9cb2-452f-b8e9-d2ab86753cf8",
+  "status": "completed",
+  "status_url": "/api/report-requests/9b13d80d-2b0f-4fd6-a01f-c73f86ef6105",
+  "artifact": {"artifact_id": "<id>", "file_name": "relatorio.docx", "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "size_bytes": 1024, "sha256": "<64 caracteres hexadecimais>", "download_url": "/api/report-requests/9b13d80d-2b0f-4fd6-a01f-c73f86ef6105/artifact", "storage_provider": "local", "created_at": "2026-09-25T12:00:01Z"},
+  "warnings": [],
+  "error": null,
+  "created_at": "2026-09-25T11:59:00Z",
+  "updated_at": "2026-09-25T12:00:01Z"
+}
+```
+
+| Código | Quando ocorre |
+| :---: | --- |
+| `200` | Primeiro callback válido ou repetição idêntica. |
+| `401` | `X-Callback-Token` ausente ou inválido. |
+| `404` | `execution_id` inexistente. |
+| `409` | Correlação divergente, estado terminal incompatível ou mesmo `callback_id` com payload diferente. |
+| `422` | Campos, tipos, status ou condicionais inválidos; campos extras também são rejeitados. |
+| `503` | Token de callback não configurado ou repositório/dependência indisponível. |
+| `500` | Falha inesperada não classificada; não é usada como resposta normal do domínio. |
+
+**Idempotência e processamento.** O backend serializa o payload validado de
+forma canônica, calcula SHA-256 e consulta `automation_callbacks`. O mesmo
+`callback_id` e o mesmo hash retornam a execução já processada com `200`; hash
+diferente retorna `409`. Em sucesso, o resultado estruturado é validado contra
+o snapshot autorizado, o DOCX é renderizado e a execução é concluída. Em falha,
+o estado e o erro controlado são persistidos. Esse webhook permanece síncrono e
+**não publica no RabbitMQ**.
+
+#### Webhook 2 — confirmação de entrega de notificação
+
+**Finalidade.** Receber de um provedor ou simulador a confirmação de uma
+notificação existente. O navegador não chama esta rota: ele apenas lista e
+marca notificações como lidas pelas APIs da central.
+
+| Item | Contrato |
+| --- | --- |
+| Método e rota | `POST /api/integrations/notifications/delivery-results` |
+| Header obrigatório | `X-Callback-Token: <token>` |
+| Variável de ambiente | `NOTIFICATION_CALLBACK_TOKEN` |
+| Content-Type | `application/json` |
+| Persistência de entrada | `notification_delivery_callbacks` |
+| Autenticação atual | Token compartilhado comparado em tempo constante; ausente ou inválido retorna `401`. |
+| Processamento | Callback e evento são gravados atomicamente; a tentativa é criada pelo consumer. |
+
+| Campo | Tipo | Obrigatório | Descrição |
+| --- | --- | :---: | --- |
+| `callback_id` | string, 8–160 | Sim | Chave idempotente do retorno. |
+| `notification_id` | UUID | Sim | Notificação existente em `alert_notifications`. |
+| `provider` | string, 1–80 | Sim | Provedor ou double, por exemplo `simulated`. |
+| `status` | enum | Sim | `delivered` ou `failed`. |
+| `attempted_at` | data/hora ISO 8601 | Sim | Momento informado pelo provedor. |
+| `error_code` | string ou `null` | Não | Código da falha, quando houver. |
+
+Exemplo completo:
+
+```http
+POST /api/integrations/notifications/delivery-results HTTP/1.1
+Content-Type: application/json
+X-Callback-Token: <NOTIFICATION_CALLBACK_TOKEN>
+
+{
+  "callback_id": "delivery-callback-001",
+  "notification_id": "1674b3e9-ecba-4a78-a50f-848f5eaf0d79",
+  "provider": "simulated",
+  "status": "delivered",
+  "attempted_at": "2026-09-25T12:00:00Z",
+  "error_code": null
+}
+```
+
+Exemplo de resposta `200`:
+
+```json
+{
+  "callback_id": "delivery-callback-001",
+  "notification_id": "1674b3e9-ecba-4a78-a50f-848f5eaf0d79",
+  "provider": "simulated",
+  "status": "delivered",
+  "attempted_at": "2026-09-25T12:00:00Z",
+  "error_code": null,
+  "received_at": "2026-09-25T12:00:01Z"
+}
+```
+
+| Código | Quando ocorre |
+| :---: | --- |
+| `200` | Callback novo persistido e enfileirado, ou repetição idêntica. |
+| `401` | `X-Callback-Token` ausente ou inválido. |
+| `404` | `notification_id` não existe. |
+| `409` | Mesmo `callback_id` com payload diferente. |
+| `422` | UUID, status, data, tipo ou campo extra inválido. |
+| `503` | `NOTIFICATION_CALLBACK_TOKEN` ausente ou persistência indisponível. |
+| `500` | Falha inesperada não classificada; não é usada como resposta normal do domínio. |
+
+**Idempotência e processamento.** A rota calcula SHA-256 do payload canônico.
+Na primeira chamada, `notification_delivery_callbacks` e o evento de outbox são
+gravados na mesma operação lógica — sob o mesmo lock em memória e na mesma
+transação PostgreSQL. Uma repetição idêntica devolve o `received_at` original e
+não cria outro evento. Conteúdo diferente com a mesma chave retorna `409`. O
+consumer compara novamente o payload ao hash persistido e usa `callback_id`
+único em `notification_delivery_attempts`: `delivered` é armazenado no estado
+interno `available`; `failed` e `error_code` são preservados.
+
+#### Topologia RabbitMQ
+
+| Elemento | Valor e responsabilidade |
+| --- | --- |
+| Exchange principal | `metro.alerts`, tipo `topic`, durável. |
+| Dead-letter exchange | `metro.alerts.dlx`, tipo `direct`, durável. |
+| Routing keys/filas | `alert.evaluation.requested`, `alert.notification.requested` e `notification.delivery.received`; uma fila durável por chave. |
+| DLQs | `<routing-key>.dead`, ligadas à DLX com a mesma routing key. |
+| Produtor de avaliação | Scheduler → repository/outbox. |
+| Produtor de notificação | Evaluator → repository/outbox. |
+| Produtor de entrega | Webhook 2 → callback + outbox na mesma operação. |
+| Publisher | `python -m app.alerts.worker publisher`; reivindica a outbox com `FOR UPDATE SKIP LOCKED` e publica mensagens persistentes. |
+| Consumers | `evaluator`, `notifier` e `delivery`, executados por `app.alerts.worker`. |
+| Confirmação | `incoming.process(...)` confirma somente quando o handler termina sem exceção. |
+| Retry do publisher | Falha volta a `pending` com atraso de `30 s × tentativas`; após cinco tentativas fica `failed`, com `last_error`. |
+| Retry do consumer | Primeira falha é reenfileirada; uma falha após redelivery é rejeitada e roteada à DLQ. |
+
+O envelope publicado contém `event_id` (UUID e `message_id` AMQP),
+`event_type="notification.delivery.received"`, `correlation_id` herdado da
+notificação e `payload`. O payload repete somente os campos validados do
+callback: `callback_id`, `notification_id`, `provider`, `status`,
+`attempted_at` e `error_code`. O consumer valida novamente esse envelope antes
+de acessar o callback persistido.
+
+Fluxo completo da confirmação de entrega:
+
+```text
+provedor/simulador
+  -> POST /api/integrations/notifications/delivery-results
+  -> autenticação + schema + hash idempotente
+  -> notification_delivery_callbacks + message_outbox (mesma operação)
+  -> publisher
+  -> exchange metro.alerts / notification.delivery.received
+  -> fila notification.delivery.received
+  -> consumer delivery revalida envelope e payload
+  -> notification_delivery_attempts (callback_id único)
+  -> ACK; em falha, retry e depois notification.delivery.received.dead
+```
+
+O fluxo regular do alerta continua diferente: scheduler → outbox →
+`alert.evaluation.requested` → evaluator → outbox →
+`alert.notification.requested` → notifier → central. A interface usa
+`GET /api/notifications` e `POST /api/notifications/{id}/read`; AMQP e
+scheduler não são webhooks.
+
+#### Testes e limites comprovados
+
+Em 25/09/2026, os comandos focados aprovaram **22 testes de alertas** e **24
+testes de relatórios** (46 no total). Eles cobrem sucesso, autenticação inválida,
+payload inválido, repetição, conflito, ausência do recurso, persistência em
+memória, outbox, routing keys, publisher com double, consumers de sucesso/falha
+e evento inválido. O registro reproduzível está em
+[`docs/evidencias/sprint-05/webhooks-rabbitmq.md`](evidencias/sprint-05/webhooks-rabbitmq.md).
+
+Não houve execução real de Power Automate, Teams, SharePoint corporativo ou
+Copilot Studio. O modo `power_automate_simulator` e doubles controlados validam
+os contratos. Nesta rodada, o publisher RabbitMQ também foi testado com double,
+sem conexão a broker externo; portanto a documentação não usa esses testes como
+evidência de homologação Microsoft ou de tráfego RabbitMQ em produção.
 
 ## 8.6 Requisitos das APIs de voz (STT/TTS)
 
@@ -6379,6 +6611,11 @@ sudo /usr/local/bin/m7-compose-up
 ```
 
 `m7-compose-up` valida a presença das variáveis, confirma que a URL AMQP corresponde às credenciais do RabbitMQ e inicia `rabbitmq`, `backend`, `frontend`, `scheduler`, `publisher`, `evaluator` e `notifier`. O arquivo instalado foi conferido como `root:root` modo `0600`.
+
+> **Nota temporal — Sprint 5:** esse registro descreve o deploy anterior ao
+> webhook de confirmação. O `compose.prod.yml` atual também declara o consumer
+> `delivery`, mas não houve nova execução na AWS que comprove esse contêiner no
+> ambiente publicado.
 
 O frontend permaneceu em `127.0.0.1:80`; o backend e o broker não publicam portas no host. O health check interno foi executado antes de criar qualquer acesso externo:
 

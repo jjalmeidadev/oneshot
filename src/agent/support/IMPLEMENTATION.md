@@ -133,8 +133,10 @@ Para persistência real, use `REPORT_REPOSITORY_MODE=database`, configure
 
 ### 3.1 Escopo e fluxo funcional
 
-O alerta é inteiramente operado pelo projeto. Não depende de Copilot Studio,
-Power Automate, Teams, e-mail ou webhook.
+O disparo e a geração do alerta são inteiramente operados pelo projeto e não
+dependem de Copilot Studio, Power Automate, Teams, e-mail ou webhook. A
+confirmação posterior de entrega pode chegar pelo webhook descrito na Seção
+8.5.12 de `docs/Projeto.md`.
 
 1. `POST /api/chat` classifica `alerta_prazo_atraso` e devolve a diretiva.
 2. O frontend inicia uma sessão própria e coleta projeto, limiar, frequência e
@@ -182,9 +184,11 @@ O exchange durável `metro.alerts` publica em:
 | --- | --- | --- |
 | `alert.evaluation.requested` | scheduler/outbox | evaluator |
 | `alert.notification.requested` | evaluator/outbox | notifier |
+| `notification.delivery.received` | webhook de entrega/outbox | delivery |
 
 Cada fila possui dead-letter no exchange `metro.alerts.dlx`. As mensagens são
-persistentes, usam confirmação manual e fazem uma nova entrega antes da DLQ.
+persistentes, são confirmadas pelo contexto `incoming.process(...)` somente
+depois do handler concluir e fazem uma nova entrega antes da DLQ.
 Falhas de publicação permanecem na outbox com backoff. O publisher reivindica
 lotes no PostgreSQL com `FOR UPDATE SKIP LOCKED`, permitindo mais de uma
 instância sem publicar o mesmo item simultaneamente. Após cinco tentativas o
