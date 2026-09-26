@@ -1,0 +1,66 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF09-01 — confirmação
+Requisito: RF09
+Decisão: accept
+Status do caso: FALHOU na rodada; APROVADO no reteste (CT-RF09-01-reteste.txt)
+
+Endpoint:
+POST /api/chat/proactive-confirmation
+
+conversation_id:
+ct-rf09-01
+
+suggestion_id:
+d35a5245-0b2f-49b2-8b04-7c67ab1dd512
+
+Resultado observado:
+HTTP 200
+status: accepted
+
+result.text:
+**Resposta principal:** O prazo de vigência do projeto PRJ-0442 é de **2026-08-24 a 2026-08-28**
+
+result.model:
+google/gemini-3.7-flash
+
+result.latency_ms:
+4507
+
+result.retrieval_ms:
+0
+
+result.usage.input_tokens:
+441
+result.usage.output_tokens:
+508
+result.usage.thought_tokens:
+463
+result.usage.total_tokens:
+949
+
+result.intent:
+null
+
+result.proactive_suggestion:
+null
+
+result.workflow:
+null
+
+Conclusão:
+FALHOU. A sugestão somente foi processada após confirmação explícita, mas a resposta ao aceite foi cortada:
+dos 508 tokens de saída, 463 foram de raciocínio, com o limite de 512. O texto para depois da primeira
+linha, sem ponto final, e a ação sugerida (avaliar o ponto crítico do cronograma e sugerir a recuperação)
+não chegou ao usuário. A rodada não registrou o motivo de parada, mas 508 tokens é o valor de todas as
+respostas encerradas pelo limite de 512 no reteste do truncamento (evidencias/reteste-truncamento), e
+nenhuma resposta completa chegou a esse valor.
+
+Defeito:
+DEF-RNF04-02 — o raciocínio do modelo consome o limite de tokens de saída (Seção 9.2.7 do Projeto.md).
+Depois da correção (limite de 1024 e aviso quando a resposta é interrompida), o caso foi reexecutado:
+ver CT-RF09-01-reteste.txt.
+
+Observação:
+`result.intent=null` é o formato da resposta ao aceite: a intenção confirmada vai no prompt e não é
+devolvida nesse campo.

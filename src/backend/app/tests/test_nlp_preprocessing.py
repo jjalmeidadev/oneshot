@@ -5,6 +5,7 @@ import pytest
 from app.nlp.preprocessing import (
     REGEX_TOKEN_PATTERN,
     SELECTED_CONFIG,
+    normalizar_portugues,
     preprocess_text,
     tokenize,
     tokenize_all,
@@ -35,6 +36,14 @@ class TestSelectedConfiguration:
         assert tokenize("Qual é o STATUS?") == preprocess_text(
             "Qual é o STATUS?", **SELECTED_CONFIG
         )
+
+    def test_v2_normalization_preserves_accents_and_negation(self) -> None:
+        assert normalizar_portugues("  NÃO remova a previsão  ") == (
+            "não remova a previsão"
+        )
+
+    def test_v2_normalization_composes_unicode_without_dropping_accent(self) -> None:
+        assert normalizar_portugues("PREVISA\u0303O") == "previsão"
 
 
 class TestSelectedConfigurationBehaviour:

@@ -37,6 +37,27 @@ export function formatTime(value: string | Date | null | undefined): string {
   return date ? TIME_ONLY.format(date) : '—';
 }
 
+/**
+ * Periodo `{start, end}` de uma fonte (registro ou vigencia). Data sem horario
+ * e lida no fuso local: `new Date('2026-09-01')` seria meia-noite UTC e
+ * apareceria como 31/08 no Brasil. Valor que nao for data e exibido como veio.
+ */
+export function formatPeriod(period: {
+  start?: string | null;
+  end?: string | null;
+}): string {
+  return `${formatPeriodEdge(period.start, 'Início não informado')} — ${formatPeriodEdge(period.end, 'Fim não informado')}`;
+}
+
+function formatPeriodEdge(value: string | null | undefined, missing: string): string {
+  if (!value) return missing;
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  const date = dateOnly
+    ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]))
+    : toDate(value);
+  return date ? DATE_ONLY.format(date) : value;
+}
+
 /** Rotulo relativo usado nos grupos da barra lateral. */
 export function relativeDayLabel(value: string | Date): string {
   const date = toDate(value);

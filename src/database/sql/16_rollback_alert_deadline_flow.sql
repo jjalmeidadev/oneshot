@@ -1,0 +1,10 @@
+BEGIN;
+DROP TABLE IF EXISTS public.message_outbox;
+DROP TABLE IF EXISTS public.notification_delivery_attempts;
+DROP TABLE IF EXISTS public.alert_notifications;
+DROP TABLE IF EXISTS public.alert_occurrences;
+DROP TABLE IF EXISTS public.alert_evaluations;
+DROP TABLE IF EXISTS public.alert_subscriptions;
+ALTER TABLE public.workflow_sessions DROP CONSTRAINT IF EXISTS workflow_sessions_name_ck;
+ALTER TABLE public.workflow_sessions ADD CONSTRAINT workflow_sessions_name_ck CHECK (workflow_name IN ('transacao_gerar_relatorio'));
+COMMIT;

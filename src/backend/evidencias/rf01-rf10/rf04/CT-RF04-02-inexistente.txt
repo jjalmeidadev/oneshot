@@ -1,0 +1,32 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF04-02
+Requisito: RF04
+Cenário: Negativo
+Status: APROVADO
+
+Entrada:
+Qual é o prazo do projeto INEXISTENTE-999?
+
+Resultado observado:
+HTTP 200
+A resposta declarou explicitamente que o contexto não possui informação para INEXISTENTE-999.
+intent: CONSULTA / consulta_cronograma_prazo
+confidence_specific: 0.8859
+entity.projeto: INEXISTENTE-999
+
+Fontes recuperadas:
+- Atendimento a objeto perdido — score 2.0
+- conteúdo relacionado a PRJ-0442 — score 2.0
+
+Comportamento:
+As fontes não relacionadas não foram apresentadas como se pertencessem ao projeto inexistente.
+
+Resultado esperado:
+Não inventar recuperação para projeto inexistente e comunicar a ausência.
+
+Conclusão:
+APROVADO.
+
+Observação:
+Há ruído de retrieval de baixo score, corretamente limitado pela camada de resposta.

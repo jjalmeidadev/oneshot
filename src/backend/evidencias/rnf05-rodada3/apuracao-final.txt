@@ -1,0 +1,8 @@
+rodada       rota        amostras falhas       P95  veredito
+baseline-estendida comparacao        82      0    8400ms  aprovado — P95 8400 ms dentro do teto de 20000 ms
+baseline-estendida simples          181      0    7600ms  aprovado — P95 7600 ms dentro do teto de 10000 ms
+carga        comparacao        78      0    7600ms  aprovado — P95 7600 ms dentro do teto de 20000 ms
+carga        simples          245      0    7300ms  aprovado — P95 7300 ms dentro do teto de 10000 ms
+
+RNF05: ATENDIDO
+codigo de saida: 0

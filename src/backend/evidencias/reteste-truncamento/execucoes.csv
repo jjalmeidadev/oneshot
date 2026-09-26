@@ -1,0 +1,77 @@
+pergunta,limite,latencia_ms,truncada,vazia,tokens_saida,tokens_raciocinio
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,512,3456,False,False,265,0
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,1024,2670,False,False,219,0
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,1024,2857,False,False,200,0
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,512,4948,True,False,508,491
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,1024,5640,False,False,629,451
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,512,2905,False,False,219,0
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,512,2854,False,False,212,0
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,1024,3358,False,False,195,0
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,512,3030,False,False,223,0
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,1024,3406,False,False,218,0
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,512,3461,False,False,217,0
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,1024,3273,False,False,184,0
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,512,3180,False,False,231,0
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,1024,3267,False,False,214,0
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,1024,5227,False,False,528,338
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,512,2850,False,False,213,0
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,1024,6411,False,False,717,487
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,512,5044,False,False,202,0
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,1024,3181,False,False,201,0
+me fale sobre os riscos e avancos da linha azul ou sobre algum projeto,512,2904,False,False,212,0
+Em quais dias e horarios o transporte de bicicleta e permitido?,1024,2533,False,False,129,0
+Em quais dias e horarios o transporte de bicicleta e permitido?,512,2354,False,False,115,0
+Em quais dias e horarios o transporte de bicicleta e permitido?,1024,2568,False,False,115,0
+Em quais dias e horarios o transporte de bicicleta e permitido?,512,2557,False,False,133,0
+Como funciona o bilhete digital no celular?,1024,2672,False,False,138,0
+Como funciona o bilhete digital no celular?,512,3222,False,False,142,0
+Como funciona o bilhete digital no celular?,1024,2657,False,False,139,0
+Como funciona o bilhete digital no celular?,512,2767,False,False,127,0
+Qual e o procedimento para registrar um objeto perdido?,1024,3277,False,False,160,0
+Qual e o procedimento para registrar um objeto perdido?,512,2936,False,False,157,0
+Qual e o procedimento para registrar um objeto perdido?,1024,2814,False,False,145,0
+Qual e o procedimento para registrar um objeto perdido?,512,2692,False,False,164,0
+O que a equipe faz quando uma escada rolante fica indisponivel?,1024,2648,False,False,129,0
+O que a equipe faz quando uma escada rolante fica indisponivel?,512,3002,False,False,170,0
+O que a equipe faz quando uma escada rolante fica indisponivel?,512,2468,False,False,124,0
+O que a equipe faz quando uma escada rolante fica indisponivel?,1024,3240,False,False,157,0
+Como e feito o apoio a passageiro com mobilidade reduzida?,1024,3011,False,False,169,0
+Como e feito o apoio a passageiro com mobilidade reduzida?,512,2457,False,False,154,0
+Como e feito o apoio a passageiro com mobilidade reduzida?,1024,2896,False,False,140,0
+Como e feito o apoio a passageiro com mobilidade reduzida?,512,2776,False,False,162,0
+Qual e o periodo da operacao assistida na Linha 1-Azul?,1024,3241,False,False,100,0
+Qual e o periodo da operacao assistida na Linha 1-Azul?,512,2253,False,False,91,0
+Qual e o periodo da operacao assistida na Linha 1-Azul?,1024,2826,False,False,117,0
+Qual e o periodo da operacao assistida na Linha 1-Azul?,512,2382,False,False,86,0
+Existe acesso alternativo previsto na Estacao Republica?,512,2985,False,False,149,0
+Existe acesso alternativo previsto na Estacao Republica?,1024,2017,False,False,110,0
+Existe acesso alternativo previsto na Estacao Republica?,512,2765,False,False,116,0
+Existe acesso alternativo previsto na Estacao Republica?,1024,3437,False,False,112,0
+Como registrar uma reclamacao ou sugestao?,512,2878,False,False,140,0
+Como registrar uma reclamacao ou sugestao?,1024,2695,False,False,122,0
+Como registrar uma reclamacao ou sugestao?,1024,2631,False,False,126,0
+Como registrar uma reclamacao ou sugestao?,512,2456,False,False,119,0
+O que e a campanha educativa de embarque?,1024,4476,False,False,395,311
+O que e a campanha educativa de embarque?,512,4121,False,False,395,312
+O que e a campanha educativa de embarque?,512,2558,False,False,87,0
+O que e a campanha educativa de embarque?,1024,2212,False,False,88,0
+Qual e o status do comunicado de operacao assistida?,1024,2664,False,False,64,0
+Qual e o status do comunicado de operacao assistida?,512,4431,False,False,390,328
+Qual e o status do comunicado de operacao assistida?,1024,3030,False,False,62,0
+Qual e o status do comunicado de operacao assistida?,512,2433,False,False,60,0
+Compare o avanco fisico do PRJ-0442 com o do PRJ-0518.,1024,4402,False,False,402,249
+Compare o avanco fisico do PRJ-0442 com o do PRJ-0518.,512,3964,False,False,352,234
+Compare o avanco fisico do PRJ-0442 com o do PRJ-0518.,1024,4140,False,False,296,203
+Compare o avanco fisico do PRJ-0442 com o do PRJ-0518.,512,4784,False,False,423,263
+"Entre o PRJ-0442 e o PRJ-0518, qual esta mais proximo do prazo planejado?",1024,4559,False,False,504,386
+"Entre o PRJ-0442 e o PRJ-0518, qual esta mais proximo do prazo planejado?",512,4375,True,False,508,425
+"Entre o PRJ-0442 e o PRJ-0518, qual esta mais proximo do prazo planejado?",512,5087,True,False,508,421
+"Entre o PRJ-0442 e o PRJ-0518, qual esta mais proximo do prazo planejado?",1024,3168,False,False,140,0
+Quero comparar os riscos do PRJ-0442 com os riscos do PRJ-0518.,512,5620,False,False,500,251
+Quero comparar os riscos do PRJ-0442 com os riscos do PRJ-0518.,1024,5628,False,False,489,263
+Quero comparar os riscos do PRJ-0442 com os riscos do PRJ-0518.,1024,5118,False,False,426,241
+Quero comparar os riscos do PRJ-0442 com os riscos do PRJ-0518.,512,4678,True,False,508,490
+Compare o custo previsto dos projetos PRJ-0442 e PRJ-0518.,512,3030,False,False,226,165
+Compare o custo previsto dos projetos PRJ-0442 e PRJ-0518.,1024,2602,False,False,82,0
+Compare o custo previsto dos projetos PRJ-0442 e PRJ-0518.,1024,2520,False,False,68,0
+Compare o custo previsto dos projetos PRJ-0442 e PRJ-0518.,512,1898,False,False,74,0

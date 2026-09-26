@@ -1,0 +1,1082 @@
+{
+  "ambiente": {
+    "encoder": "neuralmind/bert-base-portuguese-cased",
+    "encoder_revisao": "94d69c95f98f7d5b2a8700c420230ae10def0baa",
+    "joblib": "1.6.0",
+    "numpy": "2.5.2",
+    "python": "3.13.15",
+    "scikit_learn": "1.6.1",
+    "sistema": "Windows-11-10.0.26200-SP0",
+    "torch": "2.13.0+cpu",
+    "transformers": "5.16.1"
+  },
+  "classificacao": {
+    "acuracia": 0.839648,
+    "criterio_f1_macro_minimo": 0.8,
+    "f1_macro": 0.832724,
+    "modelo": "classificador_intencoes.joblib + BERTimbau congelado",
+    "piores_classes": [
+      {
+        "classe": "analise_tendencia_desempenho",
+        "f1": 0.041667,
+        "precisao": 0.142857,
+        "recall": 0.02439,
+        "suporte": 41
+      },
+      {
+        "classe": "consulta_indicadores_kpi",
+        "f1": 0.587156,
+        "precisao": 0.450704,
+        "recall": 0.842105,
+        "suporte": 38
+      },
+      {
+        "classe": "consulta_orcamento_custo",
+        "f1": 0.676056,
+        "precisao": 0.705882,
+        "recall": 0.648649,
+        "suporte": 37
+      },
+      {
+        "classe": "alerta_gerenciar_inscricao",
+        "f1": 0.680851,
+        "precisao": 1.0,
+        "recall": 0.516129,
+        "suporte": 31
+      },
+      {
+        "classe": "alerta_prazo_atraso",
+        "f1": 0.688525,
+        "precisao": 0.807692,
+        "recall": 0.6,
+        "suporte": 35
+      }
+    ],
+    "quantidade": 1135,
+    "sem_retreino": true,
+    "status": "aprovado"
+  },
+  "commit_execucao": "c627dd26525472d9ca3e2a9592abbca15059d5aa",
+  "conclusao": {
+    "observacao": "Ao menos um criterio do RNF06 ou de confiabilidade falhou.",
+    "regra": "aprovado quando F1-macro e recall@3 atingirem 0,80",
+    "status": "reprovado",
+    "status_confiabilidade": "reprovado",
+    "status_rnf06": "reprovado"
+  },
+  "executado_em": "2026-09-23T13:55:14-03:00",
+  "integridade_massas": [
+    {
+      "caminho": "src/notebooks/artefatos/dataset_intencoes.csv",
+      "integro": true,
+      "sha256_esperado": "262398d0ee093ef1c7b305765d50f2ecf7b62fcd23c7b9169f7c16fad7e4473d",
+      "sha256_observado": "262398d0ee093ef1c7b305765d50f2ecf7b62fcd23c7b9169f7c16fad7e4473d"
+    },
+    {
+      "caminho": "src/notebooks/artefatos/consultas_sinteticas_issue_251.csv",
+      "integro": true,
+      "sha256_esperado": "701288c3be7a862121bd3da7a93dd5f34608c67983ee2d8ef9e8f6816ad51aaa",
+      "sha256_observado": "701288c3be7a862121bd3da7a93dd5f34608c67983ee2d8ef9e8f6816ad51aaa"
+    },
+    {
+      "caminho": "src/notebooks/artefatos/classificador_intencoes.joblib",
+      "integro": true,
+      "sha256_esperado": "ea5eb249bdc53d192ac9c0157303e0d8d62ab59fe32285628bac0547e5141b08",
+      "sha256_observado": "ea5eb249bdc53d192ac9c0157303e0d8d62ab59fe32285628bac0547e5141b08"
+    },
+    {
+      "caminho": "src/backend/app/rag/data/sharepoint/base_atendimento.json",
+      "integro": true,
+      "sha256_esperado": "6e18536a7fb60457941594ebee9ba1f284755ac2e3c5ff7d4b2e579edb7c1ab8",
+      "sha256_observado": "6e18536a7fb60457941594ebee9ba1f284755ac2e3c5ff7d4b2e579edb7c1ab8"
+    },
+    {
+      "caminho": "src/backend/app/rag/data/sharepoint/comunicados_servico.json",
+      "integro": true,
+      "sha256_esperado": "d8fc529cbe9eeb14c1e671ac2863da38b5af1a6be97de8e4cae7eab4c26e24b7",
+      "sha256_observado": "d8fc529cbe9eeb14c1e671ac2863da38b5af1a6be97de8e4cae7eab4c26e24b7"
+    },
+    {
+      "caminho": "src/backend/app/rag/data/sharepoint/procedimentos_operacionais.json",
+      "integro": true,
+      "sha256_esperado": "1b7aa37690ac200c73e1cfe79c1f8aa123ee579b284b109a02c74d4613cf93ce",
+      "sha256_observado": "1b7aa37690ac200c73e1cfe79c1f8aa123ee579b284b109a02c74d4613cf93ce"
+    },
+    {
+      "caminho": "src/backend/app/tests/data/rnf06_retrieval_holdout_v2.json",
+      "integro": true,
+      "sha256_esperado": "077fd845a359215c88f35d04b91963649430850a4ef491cc5f5cfe5b9f2e9a64",
+      "sha256_observado": "077fd845a359215c88f35d04b91963649430850a4ef491cc5f5cfe5b9f2e9a64"
+    },
+    {
+      "caminho": "src/backend/app/rag/sharepoint.py",
+      "integro": true,
+      "sha256_esperado": "a94108e5fefc2a4dc1a3cd1f246dae84b1f0959ea7b56959eede811855c41591",
+      "sha256_observado": "a94108e5fefc2a4dc1a3cd1f246dae84b1f0959ea7b56959eede811855c41591"
+    }
+  ],
+  "issue": 232,
+  "protocolo": {
+    "limitacao": "A massa foi criada internamente e não houve cegamento organizacional; a validade é prospectiva porque a implementação foi congelada antes da massa e não será ajustada após o resultado.",
+    "manifesto": "docs\\evidencias\\sprint-04\\rnf06\\massa-congelada-v2.json",
+    "tipo_avaliacao": "holdout_prospectivo_nao_cego"
+  },
+  "recuperacao": {
+    "casos": [
+      {
+        "consulta": "O QR code do título de viagem no telefone não foi aceito na entrada",
+        "estrato": "parafrase",
+        "fontes_esperadas": [
+          "base-atendimento:301"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-001",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "A passagem eletrônica no smartphone falhou ao liberar meu acesso",
+        "estrato": "sinonimo_novo",
+        "fontes_esperadas": [
+          "base-atendimento:301"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:202"
+        ],
+        "id": "CT-RNF06-H2-002",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Meu celular não deixa passar pelo bloqueio da estação",
+        "estrato": "coloquial",
+        "fontes_esperadas": [
+          "base-atendimento:301"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:202",
+          "base-atendimento:301",
+          "procedimentos-operacionais:101"
+        ],
+        "id": "CT-RNF06-H2-003",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "O bilhete digtal aparece cortado na tela e não passa",
+        "estrato": "erro_leve",
+        "fontes_esperadas": [
+          "base-atendimento:301"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:301"
+        ],
+        "id": "CT-RNF06-H2-004",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Minha tela está escura e o leitor não reconhece o código; o que faço?",
+        "estrato": "formulacao_implicita",
+        "fontes_esperadas": [
+          "base-atendimento:301"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:301"
+        ],
+        "id": "CT-RNF06-H2-005",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "QR no telefone recusado",
+        "estrato": "consulta_curta",
+        "fontes_esperadas": [
+          "base-atendimento:301"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-006",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Estou na estação e preciso entrar, mas o código eletrônico exibido no aparelho não é reconhecido pelo leitor",
+        "estrato": "consulta_longa",
+        "fontes_esperadas": [
+          "base-atendimento:301"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:202",
+          "base-atendimento:301",
+          "procedimentos-operacionais:101"
+        ],
+        "id": "CT-RNF06-H2-007",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Devo aumentar o brilho para o código ficar totalmente visível?",
+        "estrato": "detalhe_operacional",
+        "fontes_esperadas": [
+          "base-atendimento:301"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:301"
+        ],
+        "id": "CT-RNF06-H2-008",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Como formalizo uma manifestação sobre a qualidade do atendimento?",
+        "estrato": "parafrase",
+        "fontes_esperadas": [
+          "base-atendimento:302"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:101"
+        ],
+        "id": "CT-RNF06-H2-009",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Quero enviar uma crítica e receber número de acompanhamento",
+        "estrato": "sinonimo_novo",
+        "fontes_esperadas": [
+          "base-atendimento:302"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-010",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Onde deixo meu feedback sobre o metrô?",
+        "estrato": "coloquial",
+        "fontes_esperadas": [
+          "base-atendimento:302"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-011",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Preciso registra uma reclamaçao do atendimento",
+        "estrato": "erro_leve",
+        "fontes_esperadas": [
+          "base-atendimento:302"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:302",
+          "procedimentos-operacionais:101"
+        ],
+        "id": "CT-RNF06-H2-012",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Fui mal atendido ontem e gostaria que o caso fosse acompanhado",
+        "estrato": "formulacao_implicita",
+        "fontes_esperadas": [
+          "base-atendimento:302"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-013",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Canal para manifestação",
+        "estrato": "consulta_curta",
+        "fontes_esperadas": [
+          "base-atendimento:302"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:302"
+        ],
+        "id": "CT-RNF06-H2-014",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Desejo relatar uma experiência ruim, informando estação, dia e horário sem colocar dados pessoais desnecessários",
+        "estrato": "consulta_longa",
+        "fontes_esperadas": [
+          "base-atendimento:302"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:302",
+          "comunicados-servico:202"
+        ],
+        "id": "CT-RNF06-H2-015",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Quais informações preciso fornecer para obter o protocolo da ocorrência?",
+        "estrato": "detalhe_operacional",
+        "fontes_esperadas": [
+          "base-atendimento:302"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:101"
+        ],
+        "id": "CT-RNF06-H2-016",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Em quais períodos posso embarcar levando minha bicicleta?",
+        "estrato": "parafrase",
+        "fontes_esperadas": [
+          "base-atendimento:303"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:303"
+        ],
+        "id": "CT-RNF06-H2-017",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "É permitido viajar com uma magrela nos fins de semana?",
+        "estrato": "sinonimo_novo",
+        "fontes_esperadas": [
+          "base-atendimento:303"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:303"
+        ],
+        "id": "CT-RNF06-H2-018",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Dá para entrar no trem com a bike hoje?",
+        "estrato": "coloquial",
+        "fontes_esperadas": [
+          "base-atendimento:303"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:303",
+          "comunicados-servico:203"
+        ],
+        "id": "CT-RNF06-H2-019",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Posso leva bicleta no feriado?",
+        "estrato": "erro_leve",
+        "fontes_esperadas": [
+          "base-atendimento:303"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-020",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Estou de duas rodas e preciso usar o metrô depois do trabalho",
+        "estrato": "formulacao_implicita",
+        "fontes_esperadas": [
+          "base-atendimento:303"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-021",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Horário para ciclistas",
+        "estrato": "consulta_curta",
+        "fontes_esperadas": [
+          "base-atendimento:303"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-022",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Vou retornar para casa em um dia útil depois das oito e meia da noite e quero transportar minha bicicleta",
+        "estrato": "consulta_longa",
+        "fontes_esperadas": [
+          "base-atendimento:303"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:303"
+        ],
+        "id": "CT-RNF06-H2-023",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Quem leva bicicleta deve ocupar o último carro?",
+        "estrato": "detalhe_operacional",
+        "fontes_esperadas": [
+          "base-atendimento:303"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:303"
+        ],
+        "id": "CT-RNF06-H2-024",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "A espera pelas composições da Linha 1 vai aumentar à noite?",
+        "estrato": "parafrase",
+        "fontes_esperadas": [
+          "comunicados-servico:201"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:201"
+        ],
+        "id": "CT-RNF06-H2-025",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Haverá maior demora entre os veículos por causa dos ensaios de sinais?",
+        "estrato": "sinonimo_novo",
+        "fontes_esperadas": [
+          "comunicados-servico:201"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-026",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "O metrô azul vai passar mais devagar no fim do dia?",
+        "estrato": "coloquial",
+        "fontes_esperadas": [
+          "comunicados-servico:201"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:201"
+        ],
+        "id": "CT-RNF06-H2-027",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Vai ter demora na lina azul depois das 22h?",
+        "estrato": "erro_leve",
+        "fontes_esperadas": [
+          "comunicados-servico:201"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:201"
+        ],
+        "id": "CT-RNF06-H2-028",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Preciso prever tempo extra de viagem antes do encerramento da operação",
+        "estrato": "formulacao_implicita",
+        "fontes_esperadas": [
+          "comunicados-servico:201"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:201"
+        ],
+        "id": "CT-RNF06-H2-029",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Espera noturna na Linha 1",
+        "estrato": "consulta_curta",
+        "fontes_esperadas": [
+          "comunicados-servico:201"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:201"
+        ],
+        "id": "CT-RNF06-H2-030",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Durante a operação assistida, quero saber se a frequência das composições muda entre dez da noite e o fechamento",
+        "estrato": "consulta_longa",
+        "fontes_esperadas": [
+          "comunicados-servico:201"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:201",
+          "base-atendimento:303"
+        ],
+        "id": "CT-RNF06-H2-031",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Os testes de sinalização exigem avisar tempo adicional de viagem?",
+        "estrato": "detalhe_operacional",
+        "fontes_esperadas": [
+          "comunicados-servico:201"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:201"
+        ],
+        "id": "CT-RNF06-H2-032",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Qual entrada devo usar enquanto uma passagem da República estiver fechada?",
+        "estrato": "parafrase",
+        "fontes_esperadas": [
+          "comunicados-servico:202"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:202"
+        ],
+        "id": "CT-RNF06-H2-033",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Existe outra rota para acessar a estação próxima à Praça da República?",
+        "estrato": "sinonimo_novo",
+        "fontes_esperadas": [
+          "comunicados-servico:202"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:202",
+          "procedimentos-operacionais:102"
+        ],
+        "id": "CT-RNF06-H2-034",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Por qual lado eu entro na República durante a obra?",
+        "estrato": "coloquial",
+        "fontes_esperadas": [
+          "comunicados-servico:202"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:202"
+        ],
+        "id": "CT-RNF06-H2-035",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "A entrada da estaçao Republica mudou por manutençao?",
+        "estrato": "erro_leve",
+        "fontes_esperadas": [
+          "comunicados-servico:202"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:202"
+        ],
+        "id": "CT-RNF06-H2-036",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Cheguei ao portão bloqueado e preciso localizar outro caminho",
+        "estrato": "formulacao_implicita",
+        "fontes_esperadas": [
+          "comunicados-servico:202"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-037",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Entrada pela Rua do Arouche",
+        "estrato": "consulta_curta",
+        "fontes_esperadas": [
+          "comunicados-servico:202"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:202"
+        ],
+        "id": "CT-RNF06-H2-038",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Vou usar as linhas Vermelha e Amarela e quero saber o caminho sinalizado enquanto ocorre a manutenção",
+        "estrato": "consulta_longa",
+        "fontes_esperadas": [
+          "comunicados-servico:202"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:202"
+        ],
+        "id": "CT-RNF06-H2-039",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Até quando o acesso alternativo da República ficará sinalizado?",
+        "estrato": "detalhe_operacional",
+        "fontes_esperadas": [
+          "comunicados-servico:202"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:202"
+        ],
+        "id": "CT-RNF06-H2-040",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "É preciso esperar as pessoas saírem antes de embarcar?",
+        "estrato": "parafrase",
+        "fontes_esperadas": [
+          "comunicados-servico:203"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-041",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Qual é a etiqueta correta ao entrar na composição pela plataforma?",
+        "estrato": "sinonimo_novo",
+        "fontes_esperadas": [
+          "comunicados-servico:203"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-042",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Tenho que deixar o pessoal descer primeiro?",
+        "estrato": "coloquial",
+        "fontes_esperadas": [
+          "comunicados-servico:203"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-043",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Como fazo para não atrapalhar o desenbarque?",
+        "estrato": "erro_leve",
+        "fontes_esperadas": [
+          "comunicados-servico:203"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-044",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "As portas abriram e há gente tentando entrar e sair ao mesmo tempo",
+        "estrato": "formulacao_implicita",
+        "fontes_esperadas": [
+          "comunicados-servico:203"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:203"
+        ],
+        "id": "CT-RNF06-H2-045",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Prioridade de saída do trem",
+        "estrato": "consulta_curta",
+        "fontes_esperadas": [
+          "comunicados-servico:203"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-046",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Na hora de embarcar, quero saber onde aguardar para não bloquear o fluxo das pessoas que deixam o carro",
+        "estrato": "consulta_longa",
+        "fontes_esperadas": [
+          "comunicados-servico:203"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-047",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "A faixa próxima às portas deve permanecer livre?",
+        "estrato": "detalhe_operacional",
+        "fontes_esperadas": [
+          "comunicados-servico:203"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:203"
+        ],
+        "id": "CT-RNF06-H2-048",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Perdi um pertence durante a viagem; como faço a busca?",
+        "estrato": "parafrase",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:101"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:201"
+        ],
+        "id": "CT-RNF06-H2-049",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Encontrei uma bolsa esquecida e quero entregá-la ao responsável",
+        "estrato": "sinonimo_novo",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:101"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-050",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Esqueci meu guarda-chuva no metrô, e agora?",
+        "estrato": "coloquial",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:101"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-051",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Onde procuro um pertence perdidio na estaçao?",
+        "estrato": "erro_leve",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:101"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:202"
+        ],
+        "id": "CT-RNF06-H2-052",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "A mochila não está mais comigo desde que desembarquei",
+        "estrato": "formulacao_implicita",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:101"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:101"
+        ],
+        "id": "CT-RNF06-H2-053",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Central de pertences",
+        "estrato": "consulta_curta",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:101"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-054",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Quero informar local, horário e características de algo que desapareceu durante meu deslocamento",
+        "estrato": "consulta_longa",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:101"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:303",
+          "comunicados-servico:201",
+          "procedimentos-operacionais:101"
+        ],
+        "id": "CT-RNF06-H2-055",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Recebo protocolo mesmo quando o item ainda não foi localizado?",
+        "estrato": "detalhe_operacional",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:101"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:101"
+        ],
+        "id": "CT-RNF06-H2-056",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Como solicitar assistência para uma pessoa com dificuldade de locomoção?",
+        "estrato": "parafrase",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:102"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-057",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Preciso de suporte para um viajante com deficiência física",
+        "estrato": "sinonimo_novo",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:102"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-058",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Tem alguém para ajudar quem anda com dificuldade?",
+        "estrato": "coloquial",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:102"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-059",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Preciso de rota acessivel para cadeirante",
+        "estrato": "erro_leve",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:102"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-060",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Não consigo usar escadas e preciso chegar à plataforma",
+        "estrato": "formulacao_implicita",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:102"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-061",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Auxílio para locomoção",
+        "estrato": "consulta_curta",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:102"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-062",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Minha acompanhante usa cadeira de rodas e precisamos confirmar uma rota sem barreiras até a estação de destino",
+        "estrato": "consulta_longa",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:102"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:102",
+          "comunicados-servico:202"
+        ],
+        "id": "CT-RNF06-H2-063",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "A equipe de destino é avisada para receber o passageiro?",
+        "estrato": "detalhe_operacional",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:102"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:102",
+          "base-atendimento:303"
+        ],
+        "id": "CT-RNF06-H2-064",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Como proceder quando o equipamento que liga os andares para de operar?",
+        "estrato": "parafrase",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:103"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:103"
+        ],
+        "id": "CT-RNF06-H2-065",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "A escada mecânica está quebrada; existe outro percurso?",
+        "estrato": "sinonimo_novo",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:103"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:103"
+        ],
+        "id": "CT-RNF06-H2-066",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "A escada travou, por onde eu vou?",
+        "estrato": "coloquial",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:103"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:103"
+        ],
+        "id": "CT-RNF06-H2-067",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "Escada rolante fora de funsionamento",
+        "estrato": "erro_leve",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:103"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:103"
+        ],
+        "id": "CT-RNF06-H2-068",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "O caminho automático entre os pisos está parado e preciso de uma alternativa",
+        "estrato": "formulacao_implicita",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:103"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-069",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Equipamento de subida parado",
+        "estrato": "consulta_curta",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:103"
+        ],
+        "fontes_recuperadas": [],
+        "id": "CT-RNF06-H2-070",
+        "recall": 0.0,
+        "status": "reprovado"
+      },
+      {
+        "consulta": "Ao chegar à estação encontrei o equipamento de circulação vertical desligado e preciso saber qual rota acessível seguir",
+        "estrato": "consulta_longa",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:103"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:102",
+          "comunicados-servico:202",
+          "procedimentos-operacionais:103"
+        ],
+        "id": "CT-RNF06-H2-071",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "consulta": "É necessário abrir chamado de manutenção e atualizar o aviso ao passageiro?",
+        "estrato": "detalhe_operacional",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:103"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:103",
+          "procedimentos-operacionais:102"
+        ],
+        "id": "CT-RNF06-H2-072",
+        "recall": 1.0,
+        "status": "aprovado"
+      }
+    ],
+    "confiabilidade": {
+      "criterio_limite_inferior_minimo": 0.8,
+      "limite_inferior": 0.440874,
+      "limite_superior": 0.664609,
+      "metodo": "intervalo de Wilson bilateral de 95%",
+      "status": "reprovado"
+    },
+    "criterio_recall_at_3_minimo": 0.8,
+    "fontes_relevantes": 72,
+    "fontes_relevantes_recuperadas": 40,
+    "por_estrato": {
+      "coloquial": {
+        "recall_at_3": 0.555556,
+        "recuperadas": 5,
+        "relevantes": 9
+      },
+      "consulta_curta": {
+        "recall_at_3": 0.333333,
+        "recuperadas": 3,
+        "relevantes": 9
+      },
+      "consulta_longa": {
+        "recall_at_3": 0.888889,
+        "recuperadas": 8,
+        "relevantes": 9
+      },
+      "detalhe_operacional": {
+        "recall_at_3": 0.888889,
+        "recuperadas": 8,
+        "relevantes": 9
+      },
+      "erro_leve": {
+        "recall_at_3": 0.555556,
+        "recuperadas": 5,
+        "relevantes": 9
+      },
+      "formulacao_implicita": {
+        "recall_at_3": 0.444444,
+        "recuperadas": 4,
+        "relevantes": 9
+      },
+      "parafrase": {
+        "recall_at_3": 0.444444,
+        "recuperadas": 4,
+        "relevantes": 9
+      },
+      "sinonimo_novo": {
+        "recall_at_3": 0.333333,
+        "recuperadas": 3,
+        "relevantes": 9
+      }
+    },
+    "quantidade_casos": 72,
+    "recall_at_3": 0.555556,
+    "status": "reprovado",
+    "top_k": 3
+  }
+}

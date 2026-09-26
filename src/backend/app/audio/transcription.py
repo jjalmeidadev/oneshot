@@ -14,13 +14,17 @@ from __future__ import annotations
 
 import asyncio
 import os
+import json
+from hashlib import sha256
 from dataclasses import dataclass
 from urllib.parse import urlencode, urlparse
+from uuid import uuid4
 
 import httpx
 
 from app.audio.errors import NoSpeechDetectedError
 from app.audio.validation import AudioProbe
+from app.audio.vhs import ResponseCache
 
 AZURE_SPEECH_RESOURCE_ENV = "AZURE_SPEECH_RESOURCE"
 AZURE_SPEECH_ENDPOINT_ENV = "AZURE_SPEECH_ENDPOINT"
@@ -71,7 +75,34 @@ class Transcription:
     duration_seconds: float
 
 
+response_cache: ResponseCache[Transcription] = ResponseCache()
+VHS_WORKER_ID = uuid4().hex
+
+
 async def transcribe(
+    data: bytes, probe: AudioProbe, language: str = DEFAULT_LANGUAGE
+) -> Transcription:
+    """Reproduz somente transcricoes validas; VHS_ENABLED=0 desativa o cache."""
+    if os.getenv("VHS_ENABLED", "1").strip() == "0":
+        return await _transcribe_provider(data, probe, language)
+    endpoint = os.getenv(AZURE_SPEECH_ENDPOINT_ENV, "").strip()
+    resource = os.getenv(AZURE_SPEECH_RESOURCE_ENV, "").strip()
+    credential = os.getenv(AZURE_SPEECH_KEY_ENV, "").strip()
+    if not (endpoint or resource) or not credential:
+        raise SttProviderUnavailable("Azure Speech nao configurado.")
+    # O digest isola recursos e rotacoes de credencial sem guardar o segredo.
+    context = json.dumps([
+        "azure-stt-v1", _azure_stt_url(endpoint=endpoint, resource=resource,
+                                       language=language),
+        _content_type(probe), probe.duration_seconds, credential,
+    ], ensure_ascii=True).encode()
+    cache_key = sha256(context + b"\0" + data).hexdigest()
+    return await response_cache.get_or_record(
+        cache_key, lambda: _transcribe_provider(data, probe, language)
+    )
+
+
+async def _transcribe_provider(
     data: bytes, probe: AudioProbe, language: str = DEFAULT_LANGUAGE
 ) -> Transcription:
     """Transcreve o audio validado com Azure AI Speech.
@@ -102,6 +133,8 @@ async def transcribe(
         payload = response.json()
     except ValueError as error:
         raise SttProviderError("Azure Speech retornou JSON invalido.") from error
+    if not isinstance(payload, dict):
+        raise SttProviderError("Azure Speech retornou resposta invalida.")
 
     text, confidence = _extract_transcription(payload)
     if not text:

@@ -1,0 +1,39 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF06-01
+Requisito: RF06
+Cenário: Positivo
+Status: FALHOU
+
+Entrada:
+Compare os prazos e riscos dos projetos PRJ-0442 e PRJ-0510
+
+Resultado observado:
+HTTP 200
+intent.macro: CONSULTA
+intent.specific: comparacao_entre_projetos
+confidence_specific: 0.7847
+entities.projeto:
+- PRJ-0442
+- PRJ-0510
+
+Resposta/contexto:
+A resposta discutiu somente PRJ-0442, incluindo prazo 24/08/2026–28/08/2026 e risco/teste operacional.
+Não apresentou comparação efetiva com PRJ-0510.
+
+Fontes:
+- conteúdo PRJ-0442 — score 7.0
+- Atendimento a objeto perdido — score 1.0
+
+Pré-condição de massa:
+O seed 13_seed_portfolio_report_data.sql grava progresso, riscos e marcos de PRJ-0442, PRJ-0510 e PRJ-0587 em tabelas estruturadas, que só o módulo de relatórios lê.
+A recuperação do chat (app/rag/database.py) consulta apenas source_extracts. Nessa base há 1 extrato de PRJ-0442, 8 sem projeto e nenhum de PRJ-0510; nenhum extrato cita "0510" no texto (consulta de leitura em 24/09/2026).
+
+Resultado esperado:
+Distinguir ambos os projetos, abordar prazo e risco e apontar dados/fontes para os dois.
+
+Conclusão:
+FALHOU.
+
+Defeito:
+DEF-RF06-01 — a base consultada pelo chat não tem documento de PRJ-0510, e o chat não lê as tabelas estruturadas; a comparação sai só com PRJ-0442.

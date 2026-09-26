@@ -1,9 +1,9 @@
 """Persistencia de rastreabilidade RNF03 para interacoes do pipeline."""
 
-from collections.abc import Callable
 import json
 import os
 import re
+from collections.abc import Callable
 from typing import Any
 
 from app.database.connection import open_database_connection
@@ -32,7 +32,9 @@ def trace_interaction(
     entities: list[PublicEntity],
     processing_ms: int,
     channel: str = "api",
+    external_conversation_id: str | None = None,
     error_message: str | None = None,
+    requester_id: str | None = None,
     connect: Callable[..., Any] | None = None,
 ) -> str | None:
     """Grava conversa, interacao, fontes persistidas e eventos de auditoria."""
@@ -44,8 +46,16 @@ def trace_interaction(
         connection = open_database_connection(connect=connect)
         try:
             with connection.cursor() as cursor:
+                user_id = _find_user_id(cursor, requester_id)
                 intent_id = _find_intent_id(cursor, intent)
-                conversation_id = _get_or_create_conversation(cursor, request, channel)
+                conversation_id = _get_or_create_conversation(
+                    cursor,
+                    request,
+                    channel,
+                    external_conversation_id=external_conversation_id,
+                    user_id=user_id,
+                    requester_id=requester_id,
+                )
                 status = _processing_status(intent, response, error_message)
                 limitation_response = _limitation_response(intent, response, error_message)
                 interaction_id = _insert_interaction(
@@ -55,11 +65,19 @@ def trace_interaction(
                     response=response,
                     intent=intent,
                     intent_id=intent_id,
+                    user_id=user_id,
                     status=status,
                     limitation_response=limitation_response,
                     processing_ms=processing_ms,
                 )
                 _insert_consulted_sources(cursor, interaction_id, response)
+                _insert_out_of_scope_request(
+                    cursor,
+                    interaction_id=interaction_id,
+                    request=request,
+                    response=response,
+                    intent=intent,
+                )
                 _insert_audit_events(
                     cursor,
                     interaction_id=interaction_id,
@@ -69,6 +87,8 @@ def trace_interaction(
                     entities=entities,
                     status=status,
                     error_message=error_message,
+                    user_id=user_id,
+                    requester_id=requester_id,
                 )
             _commit(connection)
             return interaction_id
@@ -99,12 +119,31 @@ def _find_intent_id(cursor: Any, intent: AudioIntent | None) -> str | None:
     return _first(cursor.fetchone())
 
 
+def _find_user_id(cursor: Any, requester_id: str | None) -> str | None:
+    if not requester_id:
+        return None
+    cursor.execute(
+        """
+        SELECT id::text
+        FROM public.users
+        WHERE entra_object_id = %s AND is_active = TRUE
+        LIMIT 1;
+        """,
+        (requester_id,),
+    )
+    return _first(cursor.fetchone())
+
+
 def _get_or_create_conversation(
     cursor: Any,
     request: GeminiChatRequest,
     channel: str,
+    *,
+    external_conversation_id: str | None = None,
+    user_id: str | None,
+    requester_id: str | None,
 ) -> str:
-    external_id = request.previous_interaction_id
+    external_id = external_conversation_id or request.conversation_id
     if external_id:
         cursor.execute(
             """
@@ -112,11 +151,12 @@ def _get_or_create_conversation(
             FROM public.ai_conversations
             WHERE channel = %s
               AND external_conversation_id = %s
+              AND metadata->>'requester_id' IS NOT DISTINCT FROM %s
               AND conversation_status = 'ativa'
             ORDER BY started_at DESC
             LIMIT 1;
             """,
-            (channel, external_id),
+            (channel, external_id, requester_id),
         )
         row = cursor.fetchone()
         if row:
@@ -125,17 +165,23 @@ def _get_or_create_conversation(
     cursor.execute(
         """
         INSERT INTO public.ai_conversations (
+            user_id,
             channel,
             external_conversation_id,
             metadata
         )
-        VALUES (%s, %s, %s::jsonb)
+        VALUES (%s, %s, %s, %s::jsonb)
         RETURNING id::text;
         """,
         (
+            user_id,
             channel,
             external_id,
-            _json({"source": "backend_pipeline", "rn_f": "RNF03"}),
+            _json({
+                "source": "backend_pipeline",
+                "rn_f": "RNF03",
+                "requester_id": requester_id,
+            }),
         ),
     )
     return str(_first(cursor.fetchone()))
@@ -149,6 +195,7 @@ def _insert_interaction(
     response: GeminiChatResponse | None,
     intent: AudioIntent | None,
     intent_id: str | None,
+    user_id: str | None,
     status: str,
     limitation_response: str | None,
     processing_ms: int,
@@ -170,10 +217,11 @@ def _insert_interaction(
             response_text,
             limitation_response,
             processing_status,
-            processing_ms
+            processing_ms,
+            user_id
         )
         VALUES (
-            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::jsonb, %s, %s, %s, %s
+            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::jsonb, %s, %s, %s, %s, %s
         )
         RETURNING id::text;
         """,
@@ -193,6 +241,7 @@ def _insert_interaction(
             limitation_response,
             status,
             processing_ms,
+            user_id,
         ),
     )
     return str(_first(cursor.fetchone()))
@@ -208,6 +257,11 @@ def _insert_consulted_sources(
 
     for order, source in enumerate(response.trace_sources, start=1):
         metadata = dict(source.get("metadata") or {})
+        metadata["evidence_status"] = response.evidence_status
+        metadata["claims"] = [
+            claim.model_dump() for claim in response.claims
+            if metadata.get("citation_id") in claim.citation_ids
+        ]
         if metadata.get("fallback"):
             continue
 
@@ -244,6 +298,62 @@ def _insert_consulted_sources(
         )
 
 
+def _insert_out_of_scope_request(
+    cursor: Any,
+    *,
+    interaction_id: str,
+    request: GeminiChatRequest,
+    response: GeminiChatResponse | None,
+    intent: AudioIntent | None,
+) -> None:
+    """Enfileira para curadoria apenas perguntas sem contexto recuperável."""
+
+    if not response or response.model != "rag-retriever" or response.sources:
+        return
+
+    cursor.execute(
+        """
+        INSERT INTO public.out_of_scope_requests (
+            interaction_id,
+            user_prompt,
+            predicted_macro_intent,
+            predicted_specific_intent,
+            confidence,
+            reason
+        )
+        VALUES (%s, %s, %s, %s, %s, %s);
+        """,
+        (
+            interaction_id,
+            request.message,
+            intent.macro if intent else None,
+            intent.specific if intent and intent.specific else None,
+            _out_of_scope_confidence(intent),
+            _out_of_scope_reason(intent),
+        ),
+    )
+
+
+def _out_of_scope_confidence(intent: AudioIntent | None) -> float | None:
+    if not intent:
+        return None
+    if intent.macro == "INDEFINIDA":
+        return intent.confidence_macro
+    if not intent.specific and intent.macro != "FORA_DE_ESCOPO":
+        return intent.confidence_specific
+    return intent.confidence_macro
+
+
+def _out_of_scope_reason(intent: AudioIntent | None) -> str:
+    if not intent:
+        return "sem_classificacao_e_sem_contexto_rag"
+    if intent.macro == "FORA_DE_ESCOPO":
+        return "macrointencao_fora_de_escopo_e_sem_contexto_rag"
+    if intent.macro == "INDEFINIDA" or not intent.specific:
+        return "baixa_confianca_e_sem_contexto_rag"
+    return "sem_contexto_rag"
+
+
 def _insert_audit_events(
     cursor: Any,
     *,
@@ -254,6 +364,8 @@ def _insert_audit_events(
     entities: list[PublicEntity],
     status: str,
     error_message: str | None,
+    user_id: str | None,
+    requester_id: str | None,
 ) -> None:
     events = [
         (
@@ -264,6 +376,7 @@ def _insert_audit_events(
                 "message_length": len(request.message),
                 "has_response": response is not None,
                 "processing_status": status,
+                "requester_id": requester_id,
             },
         )
     ]
@@ -286,18 +399,37 @@ def _insert_audit_events(
         )
 
     if response is not None:
-        events.append(
-            (
-                "database_rag_sources_retrieved",
-                "database",
-                "sucesso" if response.sources else "pendente",
-                {
-                    "source_count": len(response.sources),
-                    "persistent_source_count": _persistent_source_count(response),
-                    "retrieval_ms": response.retrieval_ms,
-                },
+        if response.workflow:
+            events.append(
+                (
+                    "guided_workflow_dispatched",
+                    "guided_workflow",
+                    "pendente",
+                    {
+                        "action": response.workflow.action,
+                        "workflow": response.workflow.workflow,
+                        "contract_version": response.workflow.contract_version,
+                    },
+                )
             )
-        )
+        else:
+            events.append(
+                (
+                    "database_rag_sources_retrieved",
+                    "database",
+                    "sucesso" if response.sources and response.evidence_status != "insufficient" else "pendente",
+                    {
+                        "source_count": len(response.sources),
+                        "persistent_source_count": _persistent_source_count(response),
+                        "retrieval_ms": response.retrieval_ms,
+                        "provider_interaction_id": response.interaction_id,
+                        "evidence_status": response.evidence_status,
+                        "claims": [claim.model_dump() for claim in response.claims],
+                        "recommendation": response.recommendation,
+                        "sources": [source.model_dump() for source in response.sources],
+                    },
+                )
+            )
 
     if error_message:
         events.append(
@@ -326,11 +458,19 @@ def _insert_audit_events(
                 event_type,
                 component,
                 event_status,
+                user_id,
                 event_payload
             )
-            VALUES (%s, %s, %s, %s, %s::jsonb);
+            VALUES (%s, %s, %s, %s, %s, %s::jsonb);
             """,
-            (interaction_id, event_type, component, event_status, _json(payload)),
+            (
+                interaction_id,
+                event_type,
+                component,
+                event_status,
+                user_id,
+                _json(payload),
+            ),
         )
 
 
@@ -361,10 +501,8 @@ def _limitation_response(
 ) -> str | None:
     if error_message:
         return _safe_error_message(error_message)
-    if response and (
-        response.model in {"classificador-local", "rag-retriever"}
-        or (intent and intent.macro in {"FORA_DE_ESCOPO", "INDEFINIDA"})
-    ):
+    if response and (response.evidence_status == "insufficient"
+                     or response.model in {"classificador-local", "rag-retriever"}):
         return response.text
     return None
 
@@ -373,10 +511,12 @@ def _route_taken(
     intent: AudioIntent | None,
     response: GeminiChatResponse | None,
 ) -> str:
-    if intent and intent.macro in {"FORA_DE_ESCOPO", "INDEFINIDA"}:
-        return "fora_escopo"
+    if response and response.workflow and response.workflow.action == "start":
+        return "guided_workflow"
     if response and response.sources:
         return "sharepoint_query"
+    if intent and intent.macro in {"FORA_DE_ESCOPO", "INDEFINIDA"}:
+        return "fora_escopo"
     if intent and intent.macro == "CONSULTA":
         return "sharepoint_query"
     return "analise_local"

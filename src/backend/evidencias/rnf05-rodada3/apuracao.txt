@@ -1,0 +1,8 @@
+rodada       rota        amostras falhas       P95  veredito
+baseline     comparacao        37      0    8200ms  inconclusivo — 37 amostras, abaixo do minimo de 40; estender a rodada
+baseline     simples          159      0    7600ms  aprovado — P95 7600 ms dentro do teto de 10000 ms
+carga        comparacao        78      0    7600ms  aprovado — P95 7600 ms dentro do teto de 20000 ms
+carga        simples          245      0    7300ms  aprovado — P95 7300 ms dentro do teto de 10000 ms
+
+RNF05: INCONCLUSIVO
+codigo de saida: 2

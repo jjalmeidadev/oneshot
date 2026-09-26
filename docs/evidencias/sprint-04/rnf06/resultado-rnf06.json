@@ -1,0 +1,368 @@
+{
+  "ambiente": {
+    "encoder": "neuralmind/bert-base-portuguese-cased",
+    "encoder_revisao": "94d69c95f98f7d5b2a8700c420230ae10def0baa",
+    "joblib": "1.6.0",
+    "numpy": "2.5.2",
+    "python": "3.13.15",
+    "scikit_learn": "1.6.1",
+    "sistema": "Windows-11-10.0.26200-SP0",
+    "torch": "2.13.0+cpu",
+    "transformers": "5.16.1"
+  },
+  "classificacao": {
+    "acuracia": 0.839648,
+    "criterio_f1_macro_minimo": 0.8,
+    "f1_macro": 0.832724,
+    "modelo": "classificador_intencoes.joblib + BERTimbau congelado",
+    "piores_classes": [
+      {
+        "classe": "analise_tendencia_desempenho",
+        "f1": 0.041667,
+        "precisao": 0.142857,
+        "recall": 0.02439,
+        "suporte": 41
+      },
+      {
+        "classe": "consulta_indicadores_kpi",
+        "f1": 0.587156,
+        "precisao": 0.450704,
+        "recall": 0.842105,
+        "suporte": 38
+      },
+      {
+        "classe": "consulta_orcamento_custo",
+        "f1": 0.676056,
+        "precisao": 0.705882,
+        "recall": 0.648649,
+        "suporte": 37
+      },
+      {
+        "classe": "alerta_gerenciar_inscricao",
+        "f1": 0.680851,
+        "precisao": 1.0,
+        "recall": 0.516129,
+        "suporte": 31
+      },
+      {
+        "classe": "alerta_prazo_atraso",
+        "f1": 0.688525,
+        "precisao": 0.807692,
+        "recall": 0.6,
+        "suporte": 35
+      }
+    ],
+    "quantidade": 1135,
+    "sem_retreino": true,
+    "status": "aprovado"
+  },
+  "commit_execucao": "3a489a30c8c805e160e465cba8c7db669aec5f3c",
+  "conclusao": {
+    "observacao": "Os dois criterios do RNF06 foram atingidos.",
+    "regra": "aprovado somente quando as duas metricas atingirem seus limiares",
+    "status": "aprovado"
+  },
+  "executado_em": "2026-09-23T13:05:26-03:00",
+  "integridade_massas": [
+    {
+      "caminho": "src/notebooks/artefatos/dataset_intencoes.csv",
+      "integro": true,
+      "sha256_esperado": "262398d0ee093ef1c7b305765d50f2ecf7b62fcd23c7b9169f7c16fad7e4473d",
+      "sha256_observado": "262398d0ee093ef1c7b305765d50f2ecf7b62fcd23c7b9169f7c16fad7e4473d"
+    },
+    {
+      "caminho": "src/notebooks/artefatos/consultas_sinteticas_issue_251.csv",
+      "integro": true,
+      "sha256_esperado": "701288c3be7a862121bd3da7a93dd5f34608c67983ee2d8ef9e8f6816ad51aaa",
+      "sha256_observado": "701288c3be7a862121bd3da7a93dd5f34608c67983ee2d8ef9e8f6816ad51aaa"
+    },
+    {
+      "caminho": "src/notebooks/artefatos/classificador_intencoes.joblib",
+      "integro": true,
+      "sha256_esperado": "ea5eb249bdc53d192ac9c0157303e0d8d62ab59fe32285628bac0547e5141b08",
+      "sha256_observado": "ea5eb249bdc53d192ac9c0157303e0d8d62ab59fe32285628bac0547e5141b08"
+    },
+    {
+      "caminho": "src/backend/app/rag/data/sharepoint/base_atendimento.json",
+      "integro": true,
+      "sha256_esperado": "6e18536a7fb60457941594ebee9ba1f284755ac2e3c5ff7d4b2e579edb7c1ab8",
+      "sha256_observado": "6e18536a7fb60457941594ebee9ba1f284755ac2e3c5ff7d4b2e579edb7c1ab8"
+    },
+    {
+      "caminho": "src/backend/app/rag/data/sharepoint/comunicados_servico.json",
+      "integro": true,
+      "sha256_esperado": "d8fc529cbe9eeb14c1e671ac2863da38b5af1a6be97de8e4cae7eab4c26e24b7",
+      "sha256_observado": "d8fc529cbe9eeb14c1e671ac2863da38b5af1a6be97de8e4cae7eab4c26e24b7"
+    },
+    {
+      "caminho": "src/backend/app/rag/data/sharepoint/procedimentos_operacionais.json",
+      "integro": true,
+      "sha256_esperado": "1b7aa37690ac200c73e1cfe79c1f8aa123ee579b284b109a02c74d4613cf93ce",
+      "sha256_observado": "1b7aa37690ac200c73e1cfe79c1f8aa123ee579b284b109a02c74d4613cf93ce"
+    },
+    {
+      "caminho": "src/backend/app/tests/data/rnf06_retrieval_cases.json",
+      "integro": true,
+      "sha256_esperado": "9d0065c0e80705131333b87191c595d6c58d07ebe9c23f0d577f370a21448d55",
+      "sha256_observado": "9d0065c0e80705131333b87191c595d6c58d07ebe9c23f0d577f370a21448d55"
+    }
+  ],
+  "issue": 232,
+  "recuperacao": {
+    "casos": [
+      {
+        "cenario": "positivo",
+        "consulta": "Como usar o bilhete digital na catraca?",
+        "fontes_esperadas": [
+          "base-atendimento:301"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:301"
+        ],
+        "id": "CT-RNF06-P-01",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "cenario": "positivo",
+        "consulta": "Onde registrar sugestoes e reclamacoes?",
+        "fontes_esperadas": [
+          "base-atendimento:302"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:302"
+        ],
+        "id": "CT-RNF06-P-02",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "cenario": "positivo",
+        "consulta": "Posso transportar bicicleta no sabado?",
+        "fontes_esperadas": [
+          "base-atendimento:303"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:303"
+        ],
+        "id": "CT-RNF06-P-03",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "cenario": "positivo",
+        "consulta": "Qual o intervalo entre trens na Linha Azul durante os testes de sinalizacao?",
+        "fontes_esperadas": [
+          "comunicados-servico:201"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:201"
+        ],
+        "id": "CT-RNF06-P-04",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "cenario": "positivo",
+        "consulta": "Qual acesso alternativo esta disponivel na Estacao Republica?",
+        "fontes_esperadas": [
+          "comunicados-servico:202"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:202"
+        ],
+        "id": "CT-RNF06-P-05",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "cenario": "positivo",
+        "consulta": "Como aguardar o desembarque antes de entrar no trem?",
+        "fontes_esperadas": [
+          "comunicados-servico:203"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:203"
+        ],
+        "id": "CT-RNF06-P-06",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "cenario": "positivo",
+        "consulta": "Como registrar um objeto perdido?",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:101"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:101"
+        ],
+        "id": "CT-RNF06-P-07",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "cenario": "positivo",
+        "consulta": "Como apoiar passageiro com mobilidade reduzida?",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:102"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:102"
+        ],
+        "id": "CT-RNF06-P-08",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "cenario": "positivo",
+        "consulta": "O que fazer quando a escada rolante esta indisponivel?",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:103"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:103"
+        ],
+        "id": "CT-RNF06-P-09",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "cenario": "desafio_lexical",
+        "consulta": "Meu passe no celular nao funciona na barreira",
+        "fontes_esperadas": [
+          "base-atendimento:301"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:301"
+        ],
+        "id": "CT-RNF06-N-01",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "cenario": "desafio_lexical",
+        "consulta": "Quero abrir uma queixa sobre o servico",
+        "fontes_esperadas": [
+          "base-atendimento:302"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:302"
+        ],
+        "id": "CT-RNF06-N-02",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "cenario": "desafio_lexical",
+        "consulta": "Posso levar bike no domingo?",
+        "fontes_esperadas": [
+          "base-atendimento:303"
+        ],
+        "fontes_recuperadas": [
+          "base-atendimento:303"
+        ],
+        "id": "CT-RNF06-N-03",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "cenario": "desafio_lexical",
+        "consulta": "Os comboios vao atrasar no fim da noite?",
+        "fontes_esperadas": [
+          "comunicados-servico:201"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:201"
+        ],
+        "id": "CT-RNF06-N-04",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "cenario": "desafio_lexical",
+        "consulta": "Por onde entro perto do Arouche?",
+        "fontes_esperadas": [
+          "comunicados-servico:202"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:202"
+        ],
+        "id": "CT-RNF06-N-05",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "cenario": "desafio_lexical",
+        "consulta": "Devo dar passagem a quem esta saindo do vagao?",
+        "fontes_esperadas": [
+          "comunicados-servico:203"
+        ],
+        "fontes_recuperadas": [
+          "comunicados-servico:203"
+        ],
+        "id": "CT-RNF06-N-06",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "cenario": "desafio_lexical",
+        "consulta": "Achei uma mochila; onde devolvo?",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:101"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:101"
+        ],
+        "id": "CT-RNF06-N-07",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "cenario": "desafio_lexical",
+        "consulta": "Preciso de ajuda com cadeira de rodas",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:102"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:102"
+        ],
+        "id": "CT-RNF06-N-08",
+        "recall": 1.0,
+        "status": "aprovado"
+      },
+      {
+        "cenario": "desafio_lexical",
+        "consulta": "A escada parou de funcionar; como sigo viagem?",
+        "fontes_esperadas": [
+          "procedimentos-operacionais:103"
+        ],
+        "fontes_recuperadas": [
+          "procedimentos-operacionais:103"
+        ],
+        "id": "CT-RNF06-N-09",
+        "recall": 1.0,
+        "status": "aprovado"
+      }
+    ],
+    "criterio_recall_at_3_minimo": 0.8,
+    "fontes_relevantes": 18,
+    "fontes_relevantes_recuperadas": 18,
+    "por_cenario": {
+      "desafio_lexical": {
+        "recall_at_3": 1.0,
+        "recuperadas": 9,
+        "relevantes": 9
+      },
+      "positivo": {
+        "recall_at_3": 1.0,
+        "recuperadas": 9,
+        "relevantes": 9
+      }
+    },
+    "quantidade_casos": 18,
+    "recall_at_3": 1.0,
+    "status": "aprovado",
+    "top_k": 3
+  }
+}

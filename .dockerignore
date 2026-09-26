@@ -1,0 +1,29 @@
+# Secrets and local runtime configuration must never enter a build context.
+**/.env
+**/.env.*
+**/.aws
+**/.ssh
+**/*secret*
+**/*credential*
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+
+# Repository and local development state.
+.git
+**/.git
+**/.venv
+**/venv
+**/node_modules
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/.coverage
+**/coverage
+**/dist
+**/.runtime
+**/.ipynb_checkpoints
+tmp
+src/lp

@@ -1,0 +1,28 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF05-02
+Requisito: RF05
+Cenário: Negativo
+Status: APROVADO
+
+Entrada:
+Quem é o patrocinador do projeto PRJ-0442?
+
+Resultado observado:
+HTTP 200
+A resposta declarou que o contexto era insuficiente e que não havia informação sobre o patrocinador.
+Nenhum nome foi inventado.
+intent.macro: CONSULTA
+intent.specific: consulta_responsavel_equipe
+confidence_specific: 0.9479
+entity criterio/responsavel: o patrocinador
+entity.projeto: PRJ-0442
+
+Fontes:
+fonte PRJ-0442 com score 6.0 e fontes genéricas de baixo score.
+
+Resultado esperado:
+Informar indisponibilidade sem completar a resposta com suposição.
+
+Conclusão:
+APROVADO.

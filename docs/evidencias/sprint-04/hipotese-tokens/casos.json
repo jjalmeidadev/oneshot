@@ -1,0 +1,23 @@
+[
+  {
+    "id": "consulta_status",
+    "prompt": "Há novidade sobre a execução do Projeto Aurora fictício?",
+    "sources": [
+      {
+        "id": "projeto:aurora-ficticio",
+        "title": "Status do Projeto Aurora — cenário fictício",
+        "content": "Massa sintética: o Projeto Aurora está em execução, com avanço físico hipotético de 42% e revisão fictícia registrada em setembro de 2026."
+      }
+    ]
+  },
+  {
+    "id": "transacao_relatorio",
+    "prompt": "Gere um relatório executivo do programa de acessibilidade",
+    "sources": []
+  },
+  {
+    "id": "fora_escopo",
+    "prompt": "Qual é a previsão do tempo de amanhã?",
+    "sources": []
+  }
+]

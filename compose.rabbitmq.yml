@@ -1,0 +1,20 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4.1-management-alpine
+    hostname: metro-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: metro
+      RABBITMQ_DEFAULT_PASS: metro-local
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+volumes:
+  rabbitmq-data:

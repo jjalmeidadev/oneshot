@@ -1,0 +1,15 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0 -- .venv/bin/python
+rootdir: src/backend
+plugins: anyio-4.15.0, locust-2.46.6
+collecting ... collected 7 items
+
+app/tests/test_e2e_textual_rag_s4_20.py::test_resposta_traz_texto_e_modelo PASSED [ 14%]
+app/tests/test_e2e_textual_rag_s4_20.py::test_camada_de_pln_foi_exercitada PASSED [ 28%]
+app/tests/test_e2e_textual_rag_s4_20.py::test_interacao_foi_persistida_no_supabase PASSED [ 42%]
+app/tests/test_e2e_textual_rag_s4_20.py::test_conversa_da_interacao_existe PASSED [ 57%]
+app/tests/test_e2e_textual_rag_s4_20.py::test_fontes_da_resposta_foram_persistidas PASSED [ 71%]
+app/tests/test_e2e_textual_rag_s4_20.py::test_auditoria_da_interacao_foi_registrada PASSED [ 85%]
+app/tests/test_e2e_textual_rag_s4_20.py::test_resposta_permite_localizar_a_interacao_no_banco PASSED [100%]
+
+============================== 7 passed in 45.46s ==============================

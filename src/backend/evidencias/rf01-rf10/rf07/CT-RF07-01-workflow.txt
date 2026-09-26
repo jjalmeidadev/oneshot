@@ -1,0 +1,43 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF07-01
+Requisito: RF07
+Cenário: Positivo
+Status: APROVADO
+
+Entrada:
+Gere um relatório de acompanhamento do projeto PRJ-0442
+
+Resultado observado:
+HTTP 200
+model: workflow-router
+latency_ms: 0
+retrieval_ms: 0
+usage.input_tokens: 0
+usage.output_tokens: 0
+usage.thought_tokens: 0
+usage.total_tokens: 0
+sources: []
+intent.macro: TRANSACAO
+intent.specific: transacao_gerar_relatorio
+confidence_specific: 0.8773
+handler: handler:transacao_gerar_relatorio
+
+workflow.kind: guided_workflow
+workflow.action: start
+workflow.workflow: transacao_gerar_relatorio
+workflow.contract_version: 1.0
+workflow.parameters.scope_candidates[0].type: projeto
+workflow.parameters.scope_candidates[0].value: PRJ-0442
+
+Comportamento:
+O sistema solicitou confirmação/complementação de escopo, período, audiência, finalidade e ênfase.
+
+Resultado esperado:
+Rota automatizada recebe intenção/parâmetros estruturados e expõe estado sem chamada LLM.
+
+Conclusão:
+APROVADO.
+
+Nota:
+O estado observado foi `start`; esta evidência não afirma que o relatório final foi concluído.

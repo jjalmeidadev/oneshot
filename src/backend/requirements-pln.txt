@@ -1,23 +1,12 @@
-# Dependencias da inferencia do classificador de intencoes.
+# Dependências da inferência do classificador de intenções v2 (#251).
 #
-# Estao separadas de requirements.txt porque o encoder BERT e o Word2Vec nao
-# sao necessarios a quem trabalha apenas na API de audio.
-#
-# O encoder roda em ONNX Runtime, e nao em PyTorch. O grafo e o publicado no
-# proprio repositorio do modelo e produz embeddings identicos aos do
-# sentence-transformers, com as metricas do conjunto de teste reproduzidas sem
-# alteracao. A escolha evita arrastar torch e transformers, que somavam 780 MB,
-# reduz a carga do encoder de 6,1 s para 0,33 s e dispensa cuidado com o wheel
-# de CUDA no deploy em Linux. Em troca, o pico de memoria sobe cerca de 240 MB.
-#
-# Requer Python 3.13 ou anterior: o gensim ainda nao publica wheel para o 3.14
-# e a compilacao a partir do fonte falha.
+# O artefato combina TF-IDF com embeddings congelados do BERTimbau. Torch e
+# Transformers ficam separados de requirements.txt porque são necessários
+# apenas quando o classificador de intenções está habilitado.
 #
 #   .venv/bin/python -m pip install -r requirements-pln.txt
 #
-# Sem elas, os testes de inferencia sao pulados com a razao declarada.
+# Requer Python 3.13 ou anterior.
 
-gensim==4.4.0
-huggingface_hub==1.30.0
-onnxruntime==1.29.0
-tokenizers==0.23.2
+torch==2.13.0
+transformers==5.16.1

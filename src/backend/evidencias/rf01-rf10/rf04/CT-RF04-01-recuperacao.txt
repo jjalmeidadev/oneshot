@@ -1,0 +1,33 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF04-01
+Requisito: RF04
+Cenário: Positivo
+Status: APROVADO
+
+Entrada:
+Qual é o prazo do projeto PRJ-0442?
+
+Resultado observado:
+HTTP 200
+Resposta: vigência 2026-08-24 a 2026-08-28 [Fonte 1]
+intent: CONSULTA / consulta_cronograma_prazo
+confidence_specific: 0.9443
+
+Fonte 1:
+title: Operacao assistida na Linha Azul
+list_name: Comunicados de Servico / PRJ-0442
+score: 8.0
+
+Fonte 2:
+title: Atendimento a objeto perdido
+score: 2.0
+
+Resultado esperado:
+Recuperar trecho relacionado ao projeto e disponibilizá-lo como contexto.
+
+Conclusão:
+APROVADO.
+
+Observação:
+A segunda fonte é ruído de recuperação, mas a fonte principal é pertinente ao projeto.
