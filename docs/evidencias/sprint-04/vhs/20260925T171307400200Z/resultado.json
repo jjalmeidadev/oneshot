@@ -1,0 +1,671 @@
+{
+  "exit_code": 0,
+  "scenarios": [
+    {
+      "scenario": "test_record_and_hit",
+      "status": "aprovado",
+      "seconds": "2.152",
+      "metrics": {
+        "http_calls": "1",
+        "hit": "1",
+        "miss": "1",
+        "record": "1",
+        "expired": "0",
+        "invalidation": "0",
+        "eviction": "0",
+        "provider_call": "1",
+        "provider_error": "0",
+        "coalesced": "0"
+      }
+    },
+    {
+      "scenario": "test_miss_different_audio",
+      "status": "aprovado",
+      "seconds": "1.687",
+      "metrics": {
+        "http_calls": "2",
+        "hit": "0",
+        "miss": "2",
+        "record": "2",
+        "expired": "0",
+        "invalidation": "0",
+        "eviction": "0",
+        "provider_call": "2",
+        "provider_error": "0",
+        "coalesced": "0"
+      }
+    },
+    {
+      "scenario": "test_language_and_resource_isolation",
+      "status": "aprovado",
+      "seconds": "1.987",
+      "metrics": {
+        "http_calls": "3",
+        "hit": "0",
+        "miss": "3",
+        "record": "3",
+        "expired": "0",
+        "invalidation": "0",
+        "eviction": "0",
+        "provider_call": "3",
+        "provider_error": "0",
+        "coalesced": "0"
+      }
+    },
+    {
+      "scenario": "test_expiration",
+      "status": "aprovado",
+      "seconds": "1.678",
+      "metrics": {
+        "http_calls": "2",
+        "hit": "1",
+        "miss": "2",
+        "record": "2",
+        "expired": "1",
+        "invalidation": "0",
+        "eviction": "0",
+        "provider_call": "2",
+        "provider_error": "0",
+        "coalesced": "0"
+      }
+    },
+    {
+      "scenario": "test_invalidation",
+      "status": "aprovado",
+      "seconds": "1.280",
+      "metrics": {
+        "http_calls": "2",
+        "hit": "0",
+        "miss": "2",
+        "record": "2",
+        "expired": "0",
+        "invalidation": "1",
+        "eviction": "0",
+        "provider_call": "2",
+        "provider_error": "0",
+        "coalesced": "0"
+      }
+    },
+    {
+      "scenario": "test_provider_error_and_recovery[400-payload0-502-STT_PROVIDER_ERROR]",
+      "status": "aprovado",
+      "seconds": "1.949",
+      "metrics": {
+        "http_calls": "3",
+        "hit": "1",
+        "miss": "3",
+        "record": "1",
+        "expired": "0",
+        "invalidation": "0",
+        "eviction": "0",
+        "provider_call": "3",
+        "provider_error": "2",
+        "coalesced": "0"
+      }
+    },
+    {
+      "scenario": "test_provider_error_and_recovery[503-payload1-503-STT_PROVIDER_UNAVAILABLE]",
+      "status": "aprovado",
+      "seconds": "1.697",
+      "metrics": {
+        "http_calls": "3",
+        "hit": "1",
+        "miss": "3",
+        "record": "1",
+        "expired": "0",
+        "invalidation": "0",
+        "eviction": "0",
+        "provider_call": "3",
+        "provider_error": "2",
+        "coalesced": "0"
+      }
+    },
+    {
+      "scenario": "test_provider_error_and_recovery[429-payload2-429-RATE_LIMITED]",
+      "status": "aprovado",
+      "seconds": "1.903",
+      "metrics": {
+        "http_calls": "3",
+        "hit": "1",
+        "miss": "3",
+        "record": "1",
+        "expired": "0",
+        "invalidation": "0",
+        "eviction": "0",
+        "provider_call": "3",
+        "provider_error": "2",
+        "coalesced": "0"
+      }
+    },
+    {
+      "scenario": "test_provider_error_and_recovery[200-payload3-422-NO_SPEECH_DETECTED]",
+      "status": "aprovado",
+      "seconds": "1.867",
+      "metrics": {
+        "http_calls": "3",
+        "hit": "1",
+        "miss": "3",
+        "record": "1",
+        "expired": "0",
+        "invalidation": "0",
+        "eviction": "0",
+        "provider_call": "3",
+        "provider_error": "2",
+        "coalesced": "0"
+      }
+    },
+    {
+      "scenario": "test_provider_error_and_recovery[200-payload4-502-STT_PROVIDER_ERROR]",
+      "status": "aprovado",
+      "seconds": "2.710",
+      "metrics": {
+        "http_calls": "3",
+        "hit": "1",
+        "miss": "3",
+        "record": "1",
+        "expired": "0",
+        "invalidation": "0",
+        "eviction": "0",
+        "provider_call": "3",
+        "provider_error": "2",
+        "coalesced": "0"
+      }
+    },
+    {
+      "scenario": "test_provider_error_and_recovery[200-payload5-502-STT_PROVIDER_ERROR]",
+      "status": "aprovado",
+      "seconds": "3.307",
+      "metrics": {
+        "http_calls": "3",
+        "hit": "1",
+        "miss": "3",
+        "record": "1",
+        "expired": "0",
+        "invalidation": "0",
+        "eviction": "0",
+        "provider_call": "3",
+        "provider_error": "2",
+        "coalesced": "0"
+      }
+    },
+    {
+      "scenario": "test_disabled",
+      "status": "aprovado",
+      "seconds": "2.635",
+      "metrics": {
+        "http_calls": "2",
+        "hit": "0",
+        "miss": "0",
+        "record": "0",
+        "expired": "0",
+        "invalidation": "0",
+        "eviction": "0",
+        "provider_call": "0",
+        "provider_error": "0",
+        "coalesced": "0"
+      }
+    },
+    {
+      "scenario": "test_transport_failure[timeout-503]",
+      "status": "aprovado",
+      "seconds": "2.566",
+      "metrics": {
+        "http_calls": "2",
+        "hit": "0",
+        "miss": "2",
+        "record": "0",
+        "expired": "0",
+        "invalidation": "0",
+        "eviction": "0",
+        "provider_call": "2",
+        "provider_error": "2",
+        "coalesced": "0"
+      }
+    },
+    {
+      "scenario": "test_transport_failure[invalid_json-502]",
+      "status": "aprovado",
+      "seconds": "1.940",
+      "metrics": {
+        "http_calls": "2",
+        "hit": "0",
+        "miss": "2",
+        "record": "0",
+        "expired": "0",
+        "invalidation": "0",
+        "eviction": "0",
+        "provider_call": "2",
+        "provider_error": "2",
+        "coalesced": "0"
+      }
+    },
+    {
+      "scenario": "test_capacity",
+      "status": "aprovado",
+      "seconds": "2.222",
+      "metrics": {
+        "http_calls": "3",
+        "hit": "0",
+        "miss": "3",
+        "record": "3",
+        "expired": "0",
+        "invalidation": "0",
+        "eviction": "2",
+        "provider_call": "3",
+        "provider_error": "0",
+        "coalesced": "0"
+      }
+    },
+    {
+      "scenario": "test_concurrent_repetitions",
+      "status": "aprovado",
+      "seconds": "0.022",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_invalidation_during_request",
+      "status": "aprovado",
+      "seconds": "0.004",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_valid_wav_is_accepted",
+      "status": "aprovado",
+      "seconds": "0.034",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_valid_ogg_opus_is_accepted",
+      "status": "aprovado",
+      "seconds": "0.005",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_extensible_wav_with_pcm_subformat_is_accepted",
+      "status": "aprovado",
+      "seconds": "0.032",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_browser_opus_at_48khz_is_accepted",
+      "status": "aprovado",
+      "seconds": "0.002",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_opus_duration_discounts_pre_skip",
+      "status": "aprovado",
+      "seconds": "0.002",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_audio_at_the_duration_limit_is_accepted",
+      "status": "aprovado",
+      "seconds": "0.755",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_unknown_binary_is_rejected",
+      "status": "aprovado",
+      "seconds": "0.004",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_wrong_sample_rate_is_rejected",
+      "status": "aprovado",
+      "seconds": "0.063",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_stereo_is_rejected",
+      "status": "aprovado",
+      "seconds": "0.020",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_eight_bit_depth_is_rejected",
+      "status": "aprovado",
+      "seconds": "0.004",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_non_pcm_wav_codec_is_rejected",
+      "status": "aprovado",
+      "seconds": "0.019",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_stereo_opus_is_rejected",
+      "status": "aprovado",
+      "seconds": "0.004",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_ogg_without_opus_stream_is_rejected",
+      "status": "aprovado",
+      "seconds": "0.004",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_too_long_wav_is_rejected",
+      "status": "aprovado",
+      "seconds": "0.695",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_too_large_file_is_rejected",
+      "status": "aprovado",
+      "seconds": "0.004",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_silent_recording_is_rejected",
+      "status": "aprovado",
+      "seconds": "0.016",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_data_lookup_follows_the_riff_chunk_structure",
+      "status": "aprovado",
+      "seconds": "0.016",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_wav_without_audio_data_is_rejected",
+      "status": "aprovado",
+      "seconds": "0.002",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_missing_audio_field_returns_400",
+      "status": "aprovado",
+      "seconds": "0.007",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_request_without_multipart_body_returns_400",
+      "status": "aprovado",
+      "seconds": "0.006",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_conversation_id_longer_than_database_contract_returns_400",
+      "status": "aprovado",
+      "seconds": "0.012",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_unsupported_format_returns_400",
+      "status": "aprovado",
+      "seconds": "0.010",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_too_long_audio_returns_400",
+      "status": "aprovado",
+      "seconds": "0.487",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_request_without_authorization_returns_401",
+      "status": "aprovado",
+      "seconds": "0.014",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_token_outside_the_simulated_identities_returns_401",
+      "status": "aprovado",
+      "seconds": "0.014",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_too_large_file_returns_413",
+      "status": "aprovado",
+      "seconds": "0.023",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_oversized_upload_returns_413_before_draining_the_stream",
+      "status": "aprovado",
+      "seconds": "0.005",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_silent_audio_returns_422",
+      "status": "aprovado",
+      "seconds": "0.085",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_concurrent_request_for_the_same_user_returns_429",
+      "status": "aprovado",
+      "seconds": "0.034",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_provider_quota_exceeded_returns_429",
+      "status": "aprovado",
+      "seconds": "0.032",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_concurrency_slot_is_released_after_a_rejected_request",
+      "status": "aprovado",
+      "seconds": "0.013",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_provider_failure_returns_502",
+      "status": "aprovado",
+      "seconds": "0.022",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_provider_unavailable_returns_503",
+      "status": "aprovado",
+      "seconds": "0.031",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_valid_wav_upload_returns_200_with_transcription",
+      "status": "aprovado",
+      "seconds": "0.061",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_valid_ogg_upload_returns_200",
+      "status": "aprovado",
+      "seconds": "0.014",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_generates_conversation_id_when_absent",
+      "status": "aprovado",
+      "seconds": "0.040",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_returns_the_real_transcription_when_the_provider_answers",
+      "status": "aprovado",
+      "seconds": "0.045",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_audio_response_exposes_intent_entities_and_pipeline_metrics",
+      "status": "aprovado",
+      "seconds": "0.049",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_audio_out_of_scope_uses_rag_and_returns_controlled_answer",
+      "status": "aprovado",
+      "seconds": "0.031",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_transcribes_valid_wav_with_azure_detailed_response",
+      "status": "aprovado",
+      "seconds": "0.041",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_transcribes_ogg_with_opus_content_type",
+      "status": "aprovado",
+      "seconds": "0.005",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_prefers_configured_regional_endpoint",
+      "status": "aprovado",
+      "seconds": "0.020",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_missing_azure_configuration_is_unavailable",
+      "status": "aprovado",
+      "seconds": "0.033",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_quota_exceeded_is_rate_limited",
+      "status": "aprovado",
+      "seconds": "0.050",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_transient_status_is_unavailable",
+      "status": "aprovado",
+      "seconds": "0.559",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_permanent_error_is_not_retried",
+      "status": "aprovado",
+      "seconds": "0.019",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_retry_reuses_the_same_http_client",
+      "status": "aprovado",
+      "seconds": "0.531",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_recognition_error_is_a_provider_failure",
+      "status": "aprovado",
+      "seconds": "0.023",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_permanent_provider_error_is_failed",
+      "status": "aprovado",
+      "seconds": "0.025",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_no_match_from_provider_is_no_speech",
+      "status": "aprovado",
+      "seconds": "0.022",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_timeout_is_unavailable",
+      "status": "aprovado",
+      "seconds": "0.528",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_error_body_never_carries_the_framework_validation_detail",
+      "status": "aprovado",
+      "seconds": "0.006",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_detail_is_omitted_when_there_is_nothing_to_report",
+      "status": "aprovado",
+      "seconds": "0.006",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_format_detail_does_not_leak_container_vocabulary",
+      "status": "aprovado",
+      "seconds": "0.012",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_no_response_exposes_internal_identifiers[401]",
+      "status": "aprovado",
+      "seconds": "0.012",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_no_response_exposes_internal_identifiers[200-ou-erro-de-conteudo]",
+      "status": "aprovado",
+      "seconds": "0.015",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_simulated_map_yields_the_declared_entra_object_id",
+      "status": "aprovado",
+      "seconds": "0.002",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_identity_is_derived_and_stable_without_the_simulated_map",
+      "status": "aprovado",
+      "seconds": "0.002",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_different_tokens_yield_different_identities",
+      "status": "aprovado",
+      "seconds": "0.002",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_invalid_authorization_header_is_rejected[ausente]",
+      "status": "aprovado",
+      "seconds": "0.002",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_invalid_authorization_header_is_rejected[vazio]",
+      "status": "aprovado",
+      "seconds": "0.002",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_invalid_authorization_header_is_rejected[bearer-sem-token]",
+      "status": "aprovado",
+      "seconds": "0.002",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_invalid_authorization_header_is_rejected[esquema-errado]",
+      "status": "aprovado",
+      "seconds": "0.002",
+      "metrics": {}
+    },
+    {
+      "scenario": "test_concurrency_is_keyed_by_identity_not_by_token",
+      "status": "aprovado",
+      "seconds": "0.002",
+      "metrics": {}
+    },
+    {
+      "scenario": "Azure real / S4-28",
+      "status": "nao executado",
+      "reason": "Rodada local controlada; requer ambiente publicado e audio de fala autorizado."
+    },
+    {
+      "scenario": "Copilot / S4-22",
+      "status": "nao executado",
+      "reason": "Conector e autenticacao publicados nao exercitados nesta rodada."
+    },
+    {
+      "scenario": "RNF05 e usabilidade",
+      "status": "nao executado",
+      "reason": "Testes funcionais locais nao medem carga nem uso humano."
+    }
+  ]
+}

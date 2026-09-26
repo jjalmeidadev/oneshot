@@ -51,6 +51,14 @@ Use o ambiente virtual preparado conforme o README do backend. Os testes do clas
 
 O pipeline `.gitlab-ci.yml` automatiza testes unitários, verificações do frontend, testes determinísticos da API e testes de navegador. A aprovação local não comprova a execução do pipeline remoto; consulte seu resultado na merge request.
 
+## Evidência do alerta de prazo
+
+Os testes `alert-workflow-card.test.tsx` e `notification-center.test.tsx`
+validam a conclusão acessível do workflow e o resumo de notificações. A suíte
+TypeScript também verifica os contratos discriminados de relatório e alerta.
+O fluxo de mensageria AMQP deve ser validado separadamente com Docker Engine e
+RabbitMQ ativos, porque os testes de componente não inicializam infraestrutura.
+
 ## Limites da evidência
 
 Os testes de navegador usam o backend real e validam o arquivo WAV enviado, mas substituem as bordas de Azure, Gemini e classificação por respostas determinísticas. A classificação local também foi executada separadamente com o modelo real. Não havia credenciais para comprovar chamadas reais de Azure e Gemini; essa validação deve ser realizada no ambiente configurado antes da publicação.

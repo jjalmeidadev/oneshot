@@ -2,6 +2,15 @@
 
 A interface web em React 19 e TypeScript permite testar o agente por texto ou áudio, exibir a resposta, consultar as fontes e inspecionar a classificação. A entrega da issue #131 integra a base visual da MR !72 aos endpoints existentes. A interface corporativa prevista no projeto continua sendo o Microsoft Teams; esta aplicação é a bancada web de desenvolvimento e validação.
 
+## Alertas proativos
+
+Quando o classificador devolve `alerta_prazo_atraso`, a interface abre o card
+guiado para projeto, limiar, recorrência, repetição e confirmação. A central
+“Alertas” consulta notificações persistentes a cada 30 segundos, anuncia a
+quantidade não lida e permite marcar notificações, pausar, retomar ou cancelar
+inscrições. Toda ação usa o token da sessão e as APIs internas; não há webhook
+nem dependência de Power Automate.
+
 ## Instalação e execução
 
 Requisitos: Node.js 24, npm, Python 3.12 ou 3.13 e acesso às dependências documentadas. Os comandos abaixo partem da raiz do repositório, no PowerShell:
@@ -12,7 +21,7 @@ python -m venv .venv
 Copy-Item src/backend/.env.example src/backend/.env
 ```
 
-Edite o arquivo local `.env`: informe `GEMINI_API_KEY`, o recurso e a chave Azure Speech. Não versione credenciais. Configure `AUDIO_SIMULATED_IDENTITIES` como `token-local=usuario-local` para a bancada. O campo **Token de acesso para áudio**, na barra lateral, recebe esse token; ele permanece somente na memória da sessão. Não informe a chave do Azure nem a chave do Gemini nesse campo.
+Edite o arquivo local `.env`: informe `GEMINI_API_KEY`, o recurso e a chave Azure Speech. Não versione credenciais. Configure as identidades simuladas de áudio e relatório para a bancada. O campo **Token de acesso da sessão**, na barra lateral, recebe esse token; ele permanece somente na memória da sessão. Não informe a chave do Azure, Gemini ou Supabase nesse campo.
 
 `PLN_WARMUP=1` prepara o classificador na inicialização. A primeira execução baixa o encoder ONNX publicado no repositório Hugging Face documentado pelo backend. Aguarde a aplicação concluir a inicialização antes de abrir a bancada. Sem esse ajuste, a carga acontece na primeira pergunta com classificação habilitada.
 
@@ -39,39 +48,47 @@ Abra `http://localhost:5173`. O Vite encaminha `/api` e `/health` para `http://1
 3. Durante a chamada, o chat anuncia processamento e impede envios duplicados. **Interromper resposta** aborta a espera HTTP e descarta respostas tardias. Uma chamada já recebida pelo provedor pode continuar no backend.
 4. Para voz, informe o token da bancada, clique no microfone, permita a captura, grave e use **Concluir gravação**. Ouça a prévia antes de clicar em **Enviar áudio**. **Descartar** elimina a captura. A gravação para em 60 segundos e é convertida para WAV PCM mono, 16 bits, 16 kHz, com corte por amostras e limite de 2 MB.
 5. A transcrição aparece como mensagem do usuário e a resposta como mensagem do agente. As fontes numeradas abaixo da resposta abrem o documento correspondente; a aba **Resposta** mostra métricas e classificação fornecidas pela API.
-6. **Nova conversa** inicia outro contexto. A barra lateral permite buscar, selecionar e excluir conversas da sessão. Trocar de conversa cancela a espera atual; uma resposta atrasada não é inserida na conversa selecionada depois.
-7. Em telas menores que 1024 px, o botão **Abrir conversas** abre o menu em diálogo; **Documentos** abre o painel à direita. **Escape** fecha os diálogos. No desktop, os três painéis ficam lado a lado.
-8. O tema segue a preferência do sistema até uma escolha explícita. A escolha de tema pode ser persistida; mensagens e token não são gravados no armazenamento do navegador.
+6. Quando o PLN identifica `transacao_gerar_relatorio`, o chat abre um cartão
+   guiado. Selecione escopo, período, público, finalidade e ênfases, revise a
+   confirmação e acompanhe o processamento. Ao concluir, o DOCX é baixado pelo
+   botão **Baixar no chat**; não há redirecionamento para SharePoint.
+7. **Nova conversa** inicia outro contexto. A barra lateral permite buscar, selecionar e excluir conversas da sessão. Trocar de conversa cancela a espera atual; uma resposta atrasada não é inserida na conversa selecionada depois.
+8. Em telas menores que 1024 px, o botão **Abrir conversas** abre o menu em diálogo; **Documentos** abre o painel à direita. **Escape** fecha os diálogos. No desktop, os três painéis ficam lado a lado.
+9. O tema segue a preferência do sistema até uma escolha explícita. A escolha de tema pode ser persistida; mensagens e token não são gravados no armazenamento do navegador.
 
 O histórico é da sessão em memória: recarregar a página o apaga. O backend documentado não possui rotas de persistência de conversas. Foram removidos os contratos propostos que lançavam exceção e os cenários fictícios de produção; o encadeamento real usa `previous_interaction_id` por conversa.
 
 ## Estrutura e estratégia do código
 
-| Camada                           | Responsabilidade e componentes                                                                                                                                                          |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/App.tsx` e `state/`         | Provedores de tema e chat; reducer para conversas, fontes e estados; controle de concorrência e cancelamento.                                                                           |
-| `components/layout/`             | `AppShell` organiza desktop e diálogos móveis; `ThemeToggle` alterna o tema.                                                                                                            |
-| `components/sidebar/`            | `ConversationSidebar`, `ConversationItem` e `UserCard`: busca, seleção, exclusão e token da sessão.                                                                                     |
-| `components/chat/`               | `ChatHeader`, `ChatEmptyState`, `MessageList`, `MessageBubble`, `MarkdownMessage`, `IntentBadge`, `SourceCitations` e `TypingIndicator`: entrada no fluxo e apresentação de resultados. |
-| `components/composer/`           | `Composer`, `IntentToggle`, `AudioButton`, `RecordingBar` e `RecordingPreview`: texto, gravação, revisão e envio.                                                                       |
-| `components/documents/`          | `DocumentPanel`, `DocumentCard`, `DocumentViewer` e `ResponseDetails`: fontes, trechos e métricas.                                                                                      |
-| `components/ui/`                 | Primitivos Radix, botões, campos, diálogos, abas, indicadores e tooltips reutilizados pelos componentes de domínio.                                                                     |
-| `hooks/`                         | Captura e liberação do microfone, tamanho do campo, largura da tela e preferência de tema.                                                                                              |
-| `lib/api/`                       | Contratos HTTP, cancelamento, prazo máximo de espera e mensagens de erro controladas.                                                                                                   |
-| `lib/domain.ts` e `lib/audio.ts` | Conversão de schemas para a interface e conversão de áudio para o contrato aceito.                                                                                                      |
-| `data/prompts.ts`                | Sugestões de perguntas; não contém respostas nem histórico simulado.                                                                                                                    |
+| Camada                           | Responsabilidade e componentes                                                                                      |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `src/App.tsx` e `state/`         | Provedores de tema e chat; reducer para conversas, fontes e estados; controle de concorrência e cancelamento.       |
+| `components/layout/`             | `AppShell` organiza desktop e diálogos móveis; `ThemeToggle` alterna o tema.                                        |
+| `components/sidebar/`            | `ConversationSidebar`, `ConversationItem` e `UserCard`: busca, seleção, exclusão e token da sessão.                 |
+| `components/chat/`               | Mensagens, intenção, fontes e `ReportWorkflowCard`, que conduz o relatório e oferece o DOCX no próprio chat.        |
+| `components/composer/`           | `Composer`, `IntentToggle`, `AudioButton`, `RecordingBar` e `RecordingPreview`: texto, gravação, revisão e envio.   |
+| `components/documents/`          | `DocumentPanel`, `DocumentCard`, `DocumentViewer` e `ResponseDetails`: fontes, trechos e métricas.                  |
+| `components/ui/`                 | Primitivos Radix, botões, campos, diálogos, abas, indicadores e tooltips reutilizados pelos componentes de domínio. |
+| `hooks/`                         | Captura e liberação do microfone, tamanho do campo, largura da tela e preferência de tema.                          |
+| `lib/api/`                       | Contratos HTTP, cancelamento, prazo máximo de espera e mensagens de erro controladas.                               |
+| `lib/domain.ts` e `lib/audio.ts` | Conversão de schemas para a interface e conversão de áudio para o contrato aceito.                                  |
+| `data/prompts.ts`                | Sugestões de perguntas; não contém respostas nem histórico simulado.                                                |
 
 Os componentes recebem propriedades ou consomem o contexto; as chamadas HTTP ficam na camada de API. O backend concentra classificação e geração em `app/pipeline.py`, compartilhada por texto e áudio. O upload realiza validação e transcrição antes de executar o pipeline em uma thread, preservando o atendimento assíncrono. O build separa Markdown e animações em módulos próprios.
 
 ## Contratos de integração
 
-| Endpoint          | Entrada enviada                                                                                                                                                      | Resultado usado                                                                                                                                                                                    |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `POST /api/chat`  | JSON: `message`, `previous_interaction_id`, `use_intent_classifier`.                                                                                                 | `text`, `interaction_id`, `intent` rico, `entities`, `pipeline_metrics`, `sources`, `usage`, `model`, `latency_ms`, `retrieval_ms`.                                                                |
-| `POST /api/audio` | Multipart: `audio`, `conversation_id`, `language`, `previous_interaction_id`, `use_intent_classifier`; `Authorization: Bearer <token>`. O navegador gera o boundary. | `transcription`, `conversation_id`, `interaction_id`, `intent` rico, `entities`, `pipeline_metrics`, `answer`, `chat`, `pipeline_status=completed`. `chat` usa o mesmo schema da resposta textual. |
-| `GET /health`     | Sem corpo; verificação operacional.                                                                                                                                  | `status=ok` após a inicialização. Não certifica credenciais dos provedores.                                                                                                                        |
+| Endpoint                                 | Entrada enviada                                                                                                                                                      | Resultado usado                                                                                                                                                                                    |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST /api/chat`                         | JSON: `message`, `conversation_id`, `previous_interaction_id`, `use_intent_classifier`.                                                                              | Resposta textual e, para relatório, diretiva `workflow`.                                                                                                                                           |
+| `POST /api/audio`                        | Multipart: `audio`, `conversation_id`, `language`, `previous_interaction_id`, `use_intent_classifier`; `Authorization: Bearer <token>`. O navegador gera o boundary. | `transcription`, `conversation_id`, `interaction_id`, `intent` rico, `entities`, `pipeline_metrics`, `answer`, `chat`, `pipeline_status=completed`. `chat` usa o mesmo schema da resposta textual. |
+| `/api/workflow-sessions/*`               | Token Bearer, revisão, etapa, valor e `client_action_id`.                                                                                                            | Pergunta seguinte, confirmação, execução, alertas e artefato.                                                                                                                                      |
+| `GET /api/report-requests/{id}/artifact` | Token Bearer da sessão.                                                                                                                                              | Blob DOCX privado usado pelo botão de download.                                                                                                                                                    |
+| `GET /health`                            | Sem corpo; verificação operacional.                                                                                                                                  | `status=ok` após a inicialização. Não certifica credenciais dos provedores.                                                                                                                        |
 
 `GeminiSource.excerpt` acompanha o conteúdo recuperado que fundamentou a resposta. As fontes preservam ID, título, lista, URL, data e score; não se inventam fontes quando a lista estiver vazia. A interface usa `handler`, `flow`, `alternatives`, `entities` e `pipeline_metrics` quando enviados pela API, com fallback para respostas antigas. O formato legado `answer.sources` do áudio é preservado, enquanto `chat.sources` fornece os metadados completos para a interface. Uma resposta de limitação pode não trazer `interaction_id`; nesse caso o último contexto válido da conversa é mantido.
+
+O modo proatividade começa desligado. Ele só pode ser ativado com a classificação de intenção habilitada e exige o token da sessão nos fluxos de texto e áudio. Quando o backend retorna `proactive_suggestion`, a interface mantém a resposta principal, registra o estado pendente e apresenta ações explícitas para aceitar ou recusar. A recusa encerra o bloco sem resposta secundária; a aceitação usa a rota dedicada, envia identidade e conversa e nunca transforma “sim” em uma nova mensagem comum. Interromper a requisição ou trocar de conversa restaura o bloco para o estado pendente, permitindo nova tentativa.
 
 ### Validações e erros
 

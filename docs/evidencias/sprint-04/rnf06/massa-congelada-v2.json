@@ -1,0 +1,67 @@
+{
+  "issue": 232,
+  "congelado_em": "2026-09-23T13:51:19-03:00",
+  "tipo_avaliacao": "holdout_prospectivo_nao_cego",
+  "commit_implementacao": "73e36def87e31b66a731d0d0939f9f6174b62206",
+  "criterios": {
+    "classificacao_f1_macro_minimo": 0.8,
+    "recuperacao_recall_at_3_minimo": 0.8,
+    "recuperacao_limite_inferior_wilson_95_minimo": 0.8,
+    "regra_rnf06": "aprovado quando F1-macro e recall@3 atingirem 0,80",
+    "regra_confiabilidade": "confiavel nesta massa quando o limite inferior de Wilson de 95% para recall@3 atingir 0,80"
+  },
+  "restricoes": [
+    "executar uma unica vez antes de qualquer novo ajuste do recuperador",
+    "nao remover, reescrever ou reclassificar casos apos observar o resultado",
+    "nao alterar a implementacao congelada para esta rodada",
+    "publicar casos falhos e limitacoes sem ocultacao"
+  ],
+  "classificacao": {
+    "split": "teste",
+    "quantidade": 1135,
+    "arquivos": [
+      {
+        "caminho": "src/notebooks/artefatos/dataset_intencoes.csv",
+        "sha256": "262398d0ee093ef1c7b305765d50f2ecf7b62fcd23c7b9169f7c16fad7e4473d"
+      },
+      {
+        "caminho": "src/notebooks/artefatos/consultas_sinteticas_issue_251.csv",
+        "sha256": "701288c3be7a862121bd3da7a93dd5f34608c67983ee2d8ef9e8f6816ad51aaa"
+      },
+      {
+        "caminho": "src/notebooks/artefatos/classificador_intencoes.joblib",
+        "sha256": "ea5eb249bdc53d192ac9c0157303e0d8d62ab59fe32285628bac0547e5141b08"
+      }
+    ]
+  },
+  "recuperacao": {
+    "metrica": "recall@3 micro com uma fonte relevante por consulta",
+    "quantidade_casos": 72,
+    "quantidade_fontes": 9,
+    "casos_por_fonte": 8,
+    "tipos_variacao": 8,
+    "implementacao": {
+      "caminho": "src/backend/app/rag/sharepoint.py",
+      "sha256": "a94108e5fefc2a4dc1a3cd1f246dae84b1f0959ea7b56959eede811855c41591"
+    },
+    "massa": {
+      "caminho": "src/backend/app/tests/data/rnf06_retrieval_holdout_v2.json",
+      "sha256": "077fd845a359215c88f35d04b91963649430850a4ef491cc5f5cfe5b9f2e9a64"
+    },
+    "fontes": [
+      {
+        "caminho": "src/backend/app/rag/data/sharepoint/base_atendimento.json",
+        "sha256": "6e18536a7fb60457941594ebee9ba1f284755ac2e3c5ff7d4b2e579edb7c1ab8"
+      },
+      {
+        "caminho": "src/backend/app/rag/data/sharepoint/comunicados_servico.json",
+        "sha256": "d8fc529cbe9eeb14c1e671ac2863da38b5af1a6be97de8e4cae7eab4c26e24b7"
+      },
+      {
+        "caminho": "src/backend/app/rag/data/sharepoint/procedimentos_operacionais.json",
+        "sha256": "1b7aa37690ac200c73e1cfe79c1f8aa123ee579b284b109a02c74d4613cf93ce"
+      }
+    ]
+  },
+  "limitacao": "A massa foi criada internamente e não houve cegamento organizacional; a validade é prospectiva porque a implementação foi congelada antes da massa e não será ajustada após o resultado."
+}

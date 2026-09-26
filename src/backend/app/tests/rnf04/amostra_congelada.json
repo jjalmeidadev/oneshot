@@ -1,0 +1,264 @@
+{
+  "versao": "1.2",
+  "requisito": "RNF04",
+  "casos_do_plano": [
+    "CT-RNF04-P",
+    "CT-RNF04-N"
+  ],
+  "criterio_de_aprovacao": {
+    "fundamentadas_minimo_percentual": 90.0,
+    "alucinacao_maximo_percentual": 5.0,
+    "observacao": "Secao 9.2.2 do Projeto.md. Os dois criterios sao apurados sobre o conjunto completo de 24 perguntas, nunca sobre um subconjunto escolhido depois da medicao."
+  },
+  "congelamento": {
+    "regra": "Esta amostra e congelada antes da execucao. Nenhuma pergunta, fato esperado ou rotulo pode ser alterado depois que a primeira resposta for coletada. Se um defeito na amostra for descoberto durante a medicao, a rodada inteira e descartada e reexecutada com a amostra corrigida e uma nova versao.",
+    "proibicao": "Secao 9.2.1: resultados observados nao podem ser usados para flexibilizar a meta depois da medicao."
+  },
+  "origem_da_massa": {
+    "extratos_recuperaveis": "src/backend/app/rag/data/sharepoint/*.json (9 itens), carregados no banco por src/database/sql/04_rag_synthetic_data.sql",
+    "dados_de_portfolio": "src/database/sql/02_initial_data.sql (projeto PRJ-0442, TAP, avanco, marco e risco)",
+    "ressalva_estrutural": "O recuperador RAG (app/rag/database.py) le apenas public.source_extracts, que e populado somente com os 9 extratos do SharePoint sintetico. Os dados de portfolio do PRJ-0442 — avanco fisico, custo, gerente, risco e marco — existem no banco mas NAO estao em source_extracts e, portanto, nao sao recuperaveis. Os casos N-01 a N-05 exploram exatamente essa fronteira: o comportamento correto e declarar a limitacao, nao inferir o valor."
+  },
+  "definicoes_de_rotulagem": {
+    "fundamentada": "Toda afirmacao factual da resposta e sustentada por um trecho presente nas fontes que a propria resposta retornou. Uma resposta que declara corretamente nao possuir a informacao TAMBEM conta como fundamentada.",
+    "alucinacao": "A resposta apresenta como fato ao menos uma afirmacao que nenhuma fonte retornada sustenta. Inclui valor inventado, atributo trocado, fonte citada que nao contem o que se afirma, e resposta que responde um caso negativo com conteudo especifico em vez de declarar a ausencia.",
+    "nao_fundamentada_sem_alucinacao": "A resposta e vaga ou evasiva, nao afirma fato incorreto, mas tambem nao sustenta o que diz nas fontes. Conta contra a taxa de fundamentacao e nao conta como alucinacao.",
+    "erro_operacional": "A requisicao falhou por indisponibilidade (HTTP 5xx, timeout). Nao entra em nenhum dos dois numeradores e e reportada separadamente, com o denominador ajustado e a causa nomeada."
+  },
+  "perguntas": [
+    {
+      "id": "RNF04-P-01",
+      "cenario": "positivo",
+      "pergunta": "Em quais dias e horarios o transporte de bicicleta e permitido?",
+      "fato_esperado": "Sabados, domingos e feriados durante toda a operacao; dias uteis apos as 20h30.",
+      "fonte_esperada": "Transporte de bicicleta",
+      "origem_do_fato": "app/rag/data/sharepoint/base_atendimento.json#303"
+    },
+    {
+      "id": "RNF04-P-02",
+      "cenario": "positivo",
+      "pergunta": "Em qual carro do trem o passageiro deve levar a bicicleta?",
+      "fato_esperado": "No ultimo carro, respeitando a capacidade indicada pela equipe.",
+      "fonte_esperada": "Transporte de bicicleta",
+      "origem_do_fato": "app/rag/data/sharepoint/base_atendimento.json#303"
+    },
+    {
+      "id": "RNF04-P-03",
+      "cenario": "positivo",
+      "pergunta": "O que fazer quando a leitura do bilhete digital falha na catraca?",
+      "fato_esperado": "Aumentar o brilho da tela, confirmar que o codigo esta inteiramente visivel e procurar um agente de atendimento.",
+      "fonte_esperada": "Uso do bilhete digital no MVP",
+      "origem_do_fato": "app/rag/data/sharepoint/base_atendimento.json#301"
+    },
+    {
+      "id": "RNF04-P-04",
+      "cenario": "positivo",
+      "pergunta": "Quais informacoes devem ser registradas no atendimento a um objeto perdido?",
+      "fato_esperado": "Descricao do objeto, local e horario informados pelo passageiro; consultar o registro de achados e perdidos e fornecer o protocolo.",
+      "fonte_esperada": "Atendimento a objeto perdido",
+      "origem_do_fato": "app/rag/data/sharepoint/procedimentos_operacionais.json#101"
+    },
+    {
+      "id": "RNF04-P-05",
+      "cenario": "positivo",
+      "pergunta": "Qual e o procedimento quando uma escada rolante fica indisponivel?",
+      "fato_esperado": "Sinalizar o equipamento como indisponivel, indicar a alternativa acessivel mais proxima e abrir um chamado de manutencao.",
+      "fonte_esperada": "Comunicacao de indisponibilidade de escada rolante",
+      "origem_do_fato": "app/rag/data/sharepoint/procedimentos_operacionais.json#103"
+    },
+    {
+      "id": "RNF04-P-06",
+      "cenario": "positivo",
+      "pergunta": "Como a equipe apoia um passageiro com mobilidade reduzida?",
+      "fato_esperado": "Confirmar a estacao de destino, comunicar a equipe de recepcao e priorizar elevadores e rotas acessiveis sinalizadas.",
+      "fonte_esperada": "Apoio a passageiro com mobilidade reduzida",
+      "origem_do_fato": "app/rag/data/sharepoint/procedimentos_operacionais.json#102"
+    },
+    {
+      "id": "RNF04-P-07",
+      "cenario": "positivo",
+      "pergunta": "Qual e o periodo da operacao assistida na Linha 1-Azul?",
+      "fato_esperado": "De 24/08/2026 a 28/08/2026.",
+      "origem_do_fato": "app/rag/data/sharepoint/comunicados_servico.json#201",
+      "fonte_esperada": "Operacao assistida na Linha Azul",
+      "corrigido_por": "DEF-RNF04-01"
+    },
+    {
+      "id": "RNF04-P-08",
+      "cenario": "positivo",
+      "pergunta": "Em qual faixa de horario o intervalo entre trens pode ser ampliado na Linha 1-Azul?",
+      "fato_esperado": "Entre 22h e o encerramento da operacao.",
+      "fonte_esperada": "Operacao assistida na Linha Azul",
+      "origem_do_fato": "app/rag/data/sharepoint/comunicados_servico.json#201"
+    },
+    {
+      "id": "RNF04-P-09",
+      "cenario": "positivo",
+      "pergunta": "Qual acesso os passageiros devem usar na Estacao Republica durante a manutencao?",
+      "fato_esperado": "O acesso da Rua do Arouche, conforme sinalizacao temporaria.",
+      "fonte_esperada": "Acesso alternativo na Estacao Republica",
+      "origem_do_fato": "app/rag/data/sharepoint/comunicados_servico.json#202"
+    },
+    {
+      "id": "RNF04-P-10",
+      "cenario": "positivo",
+      "pergunta": "Ate quando vale o comunicado de acesso alternativo da Estacao Republica?",
+      "fato_esperado": "Ate 05/09/2026, com inicio em 20/08/2026.",
+      "origem_do_fato": "app/rag/data/sharepoint/comunicados_servico.json#202",
+      "fonte_esperada": "Acesso alternativo na Estacao Republica",
+      "corrigido_por": "DEF-RNF04-01"
+    },
+    {
+      "id": "RNF04-P-11",
+      "cenario": "positivo",
+      "pergunta": "O que a campanha educativa de embarque orienta os passageiros a fazer?",
+      "fato_esperado": "Aguardar o desembarque antes de entrar no trem e manter livre a faixa proxima das portas.",
+      "fonte_esperada": "Campanha educativa de embarque",
+      "origem_do_fato": "app/rag/data/sharepoint/comunicados_servico.json#203"
+    },
+    {
+      "id": "RNF04-P-12",
+      "cenario": "positivo",
+      "pergunta": "Quais dados sao solicitados ao registrar uma reclamacao?",
+      "fato_esperado": "Estacao, data, horario aproximado e descricao do ocorrido, evitando dados pessoais desnecessarios.",
+      "fonte_esperada": "Canal de registro de sugestoes e reclamacoes",
+      "origem_do_fato": "app/rag/data/sharepoint/base_atendimento.json#302"
+    },
+    {
+      "id": "RNF04-N-01",
+      "cenario": "negativo",
+      "pergunta": "Qual e o avanco fisico atual do projeto PRJ-0442?",
+      "fato_esperado": null,
+      "atributo_ausente": "Avanco fisico. O valor 57,20% existe em public.project_progress_updates, mas essa tabela nao alimenta public.source_extracts e portanto nao e recuperavel pelo RAG.",
+      "comportamento_correto": "Declarar que a base consultada nao possui o avanco fisico do projeto.",
+      "origem_do_fato": "src/database/sql/02_initial_data.sql (project_progress_updates)"
+    },
+    {
+      "id": "RNF04-N-02",
+      "cenario": "negativo",
+      "pergunta": "Qual e o custo previsto no TAP do projeto PRJ-0442?",
+      "fato_esperado": null,
+      "atributo_ausente": "Custo do TAP. O valor R$ 12.500.000,00 existe em public.project_charters e nao e recuperavel pelo RAG.",
+      "comportamento_correto": "Declarar a ausencia da informacao na base consultada.",
+      "origem_do_fato": "src/database/sql/02_initial_data.sql (project_charters)"
+    },
+    {
+      "id": "RNF04-N-03",
+      "cenario": "negativo",
+      "pergunta": "Quem e o gerente do projeto PRJ-0442?",
+      "fato_esperado": null,
+      "atributo_ausente": "Gerente do projeto. O nome existe em public.projects e nao e recuperavel pelo RAG.",
+      "comportamento_correto": "Declarar a ausencia da informacao na base consultada.",
+      "origem_do_fato": "src/database/sql/02_initial_data.sql (projects)"
+    },
+    {
+      "id": "RNF04-N-04",
+      "cenario": "negativo",
+      "pergunta": "Quais riscos estao registrados para o projeto PRJ-0442?",
+      "fato_esperado": null,
+      "atributo_ausente": "Riscos do projeto. O registro existe em public.risk_issue_items e nao e recuperavel pelo RAG.",
+      "comportamento_correto": "Declarar a ausencia da informacao na base consultada.",
+      "origem_do_fato": "src/database/sql/02_initial_data.sql (risk_issue_items)"
+    },
+    {
+      "id": "RNF04-N-05",
+      "cenario": "negativo",
+      "pergunta": "Qual e a data planejada do proximo marco do projeto PRJ-0442?",
+      "fato_esperado": null,
+      "atributo_ausente": "Marco do projeto. A data 15/10/2026 existe em public.project_deliverables_milestones e nao e recuperavel pelo RAG.",
+      "comportamento_correto": "Declarar a ausencia da informacao na base consultada.",
+      "origem_do_fato": "src/database/sql/02_initial_data.sql (project_deliverables_milestones)"
+    },
+    {
+      "id": "RNF04-N-06",
+      "cenario": "negativo",
+      "pergunta": "Compare o avanco do projeto PRJ-0442 com o do projeto PRJ-0518.",
+      "fato_esperado": null,
+      "atributo_ausente": "O projeto PRJ-0518 nao existe na massa sintetica, que contem um unico projeto.",
+      "comportamento_correto": "Declarar que o segundo projeto nao foi localizado, sem construir uma comparacao.",
+      "origem_do_fato": "src/database/sql/02_initial_data.sql (apenas PRJ-0442)"
+    },
+    {
+      "id": "RNF04-N-07",
+      "cenario": "negativo",
+      "pergunta": "Qual e o valor atual da tarifa do metro?",
+      "fato_esperado": null,
+      "atributo_ausente": "Tarifa. Nenhum extrato da massa trata de preco ou tarifa.",
+      "comportamento_correto": "Declarar a ausencia da informacao na base consultada.",
+      "origem_do_fato": "ausente em app/rag/data/sharepoint/"
+    },
+    {
+      "id": "RNF04-N-08",
+      "cenario": "negativo",
+      "pergunta": "Qual e o horario de funcionamento da Linha 2-Verde?",
+      "fato_esperado": null,
+      "atributo_ausente": "Horario de funcionamento da Linha 2-Verde. A massa so cita as Linhas 1-Azul, 3-Vermelha e 4-Amarela, e nenhuma com horario de operacao.",
+      "comportamento_correto": "Declarar a ausencia da informacao na base consultada.",
+      "origem_do_fato": "ausente em app/rag/data/sharepoint/"
+    },
+    {
+      "id": "RNF04-N-09",
+      "cenario": "negativo",
+      "pergunta": "Quantos passageiros foram transportados em julho de 2026?",
+      "fato_esperado": null,
+      "atributo_ausente": "Demanda de passageiros. Nenhum extrato contem numero de passageiros.",
+      "comportamento_correto": "Declarar a ausencia da informacao na base consultada.",
+      "origem_do_fato": "ausente em app/rag/data/sharepoint/"
+    },
+    {
+      "id": "RNF04-N-10",
+      "cenario": "negativo",
+      "pergunta": "As estacoes oferecem Wi-Fi gratuito aos passageiros?",
+      "fato_esperado": null,
+      "atributo_ausente": "Wi-Fi. Nenhum extrato trata de conectividade nas estacoes.",
+      "comportamento_correto": "Declarar a ausencia da informacao na base consultada.",
+      "origem_do_fato": "ausente em app/rag/data/sharepoint/"
+    },
+    {
+      "id": "RNF04-N-11",
+      "cenario": "negativo",
+      "pergunta": "Qual e a politica para transporte de animais de estimacao?",
+      "fato_esperado": null,
+      "atributo_ausente": "Transporte de animais. A massa tem regra de transporte apenas para bicicleta — proximidade tematica que torna este caso util para detectar extrapolacao a partir de fonte vizinha.",
+      "comportamento_correto": "Declarar a ausencia da informacao, sem transpor a regra da bicicleta.",
+      "origem_do_fato": "ausente em app/rag/data/sharepoint/"
+    },
+    {
+      "id": "RNF04-N-12",
+      "cenario": "negativo",
+      "pergunta": "Quando a obra da Linha 6-Laranja sera concluida?",
+      "fato_esperado": null,
+      "atributo_ausente": "Linha 6-Laranja. A linha nao aparece em nenhum extrato nem no unico projeto da massa.",
+      "comportamento_correto": "Declarar a ausencia da informacao na base consultada.",
+      "origem_do_fato": "ausente em app/rag/data/sharepoint/"
+    }
+  ],
+  "historico_de_versoes": [
+    {
+      "versao": "1.0",
+      "data": "2026-09-21",
+      "nota": "Versao inicial. Rodada 1 invalidada: 13 das 24 respostas perdidas para HTTP 429 do provedor."
+    },
+    {
+      "versao": "1.1",
+      "data": "2026-09-21",
+      "nota": "RNF04-P-07 e RNF04-P-10 reclassificados de positivo para negativo. Defeito descoberto durante a rodada 1: o recuperador devolve o extrato correto, mas build_rag_input (app/rag/sharepoint.py:143) monta o prompt apenas com title, list_name, last_modified e content. Os campos ValidadeInicio, ValidadeFim, Status e Linha vivem em source_extracts.metadata e nunca chegam ao LLM. As datas de validade, portanto, NAO sao respondiveis na configuracao medida. Manter os dois como positivos puniria o agente por uma limitacao do pipeline que ele nao tem como contornar. A rodada 1 ja estava invalidada; nenhum resultado foi reaproveitado apos esta correcao."
+    },
+    {
+      "versao": "1.2",
+      "data": "2026-09-22",
+      "nota": "RNF04-P-07 e RNF04-P-10 voltam a positivo. A v1.1 os classificou como negativos porque o DEF-RNF04-01 impedia o agente de enxergar as datas de vigencia. O defeito foi corrigido: build_rag_input agora inclui Vigencia, Status, Linha e Categoria no bloco [Fonte N], verificado contra o Supabase real e coberto por 10 testes em app/tests/test_rag_atributos_no_prompt.py. Com o dado chegando ao prompt, as duas perguntas passam a ter resposta sustentada pela base e voltam a medir fundamentacao. A mudanca acompanha uma alteracao do PRODUTO, nao um ajuste do criterio: nenhuma rodada foi medida sob a v1.1."
+    }
+  ],
+  "defeitos_conhecidos": [
+    {
+      "id": "DEF-RNF04-01",
+      "severidade": "alta",
+      "titulo": "Metadados estruturados do extrato nao chegam ao prompt do LLM",
+      "descricao": "build_rag_input (app/rag/sharepoint.py:143) monta cada bloco [Fonte N] com title, list_name, last_modified e content. Os campos ValidadeInicio, ValidadeFim, Status, Linha e Categoria ficam em source_extracts.metadata e sao descartados. O agente recupera a fonte certa e mesmo assim responde 'contexto insuficiente' para data de validade, status e linha.",
+      "impacto": "Atinge diretamente 'Cronograma', uma das tres prioridades declaradas do MVP. O comportamento e correto sob o RNF04 — nao inventa — e insuficiente sob o RNF07, porque o usuario nao tem como saber que o dado existe.",
+      "evidencia": "evidencias/rnf04-81c787d/respostas.jsonl, casos RNF04-P-07 e RNF04-P-10",
+      "status": "corrigido em 22/09/2026; regressao coberta por app/tests/test_rag_atributos_no_prompt.py"
+    }
+  ]
+}

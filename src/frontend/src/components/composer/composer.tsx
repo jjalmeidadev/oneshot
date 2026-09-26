@@ -3,6 +3,7 @@ import { useEffect, useRef, type ChangeEvent, type KeyboardEvent } from 'react';
 
 import { AudioButton } from '@/components/composer/audio-button';
 import { IntentToggle } from '@/components/composer/intent-toggle';
+import { ProactivityToggle } from '@/components/composer/proactivity-toggle';
 import { RecordingBar, RecordingPreview } from '@/components/composer/recording-bar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,6 +30,8 @@ export function Composer({
   isSending,
   intentLayerEnabled,
   onIntentLayerChange,
+  proactivityEnabled,
+  onProactivityChange,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -39,6 +42,8 @@ export function Composer({
   isSending: boolean;
   intentLayerEnabled: boolean;
   onIntentLayerChange: (enabled: boolean) => void;
+  proactivityEnabled: boolean;
+  onProactivityChange: (enabled: boolean) => void;
 }) {
   const recorder = useAudioRecorder();
   const previousConversation = useRef(conversationId);
@@ -79,11 +84,18 @@ export function Composer({
   return (
     <div className="border-t border-border bg-surface px-3 py-3 sm:px-4">
       <div className="mx-auto flex max-w-3xl flex-col gap-2.5">
-        <IntentToggle
-          enabled={intentLayerEnabled}
-          onChange={onIntentLayerChange}
-          disabled={isSending}
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <IntentToggle
+            enabled={intentLayerEnabled}
+            onChange={onIntentLayerChange}
+            disabled={isSending}
+          />
+          <ProactivityToggle
+            enabled={proactivityEnabled}
+            onChange={onProactivityChange}
+            disabled={isSending || !intentLayerEnabled}
+          />
+        </div>
 
         {isRecording && (
           <RecordingBar

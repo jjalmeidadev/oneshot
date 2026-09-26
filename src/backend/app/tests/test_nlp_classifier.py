@@ -46,11 +46,14 @@ class TestArtefatoCarregavel:
         )
 
         assert resultado.returncode == 0, resultado.stderr
-        assert "Híbrido completo" in resultado.stdout
+        assert "BERTimbau" in resultado.stdout
 
     def test_o_modelo_referencia_o_modulo_e_nao_o_notebook(self, artefato) -> None:
         assert type(artefato.modelo).__module__ == "app.nlp.classifier"
-        assert artefato.tfidf_palavras.analyzer.__module__ == "app.nlp.classifier"
+        assert (
+            artefato.tfidf_palavras.preprocessor.__module__
+            == "app.nlp.preprocessing"
+        )
 
     def test_ausencia_do_arquivo_e_reportada_com_a_saida(self, tmp_path: Path) -> None:
         with pytest.raises(FileNotFoundError, match="migrar_artefato_classificador"):
@@ -73,8 +76,8 @@ class TestConteudoDoArtefato:
         assert artefato.config_preprocessamento == dict(SELECTED_CONFIG)
 
     def test_limiares_sao_os_calibrados_na_validacao(self, artefato) -> None:
-        assert artefato.limiar_macro == pytest.approx(0.550)
-        assert artefato.limiar_intencao == pytest.approx(0.700)
+        assert artefato.limiar_macro == pytest.approx(0.525)
+        assert artefato.limiar_intencao == pytest.approx(0.350)
 
     def test_catalogo_tem_as_trinta_e_uma_intencoes(self, artefato) -> None:
         assert len(artefato.intencoes) == 31
@@ -85,14 +88,13 @@ class TestConteudoDoArtefato:
     ) -> None:
         assert set(artefato.intencao2macro.values()) <= set(MACRO_INTENTS)
 
-    def test_representacao_declara_os_quatro_blocos_hibridos(self, artefato) -> None:
+    def test_representacao_declara_os_tres_blocos_hibridos(self, artefato) -> None:
         assert artefato.blocos_da_representacao == [
-            "svd_palavra",
-            "svd_char",
-            "w2v",
-            "bert",
+            "tfidf_palavra",
+            "tfidf_char",
+            "bertimbau",
         ]
-        assert set(artefato.scalers) == set(artefato.blocos_da_representacao)
+        assert artefato.scalers == {"bertimbau": pytest.approx(2.0)}
 
 
 class TestModeloHierarquico:

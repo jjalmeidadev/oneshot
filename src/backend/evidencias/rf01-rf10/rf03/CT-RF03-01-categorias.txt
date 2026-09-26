@@ -1,0 +1,58 @@
+TIPO DE REGISTRO: REGISTRO CONSOLIDADO
+
+Caso: CT-RF03-01
+Requisito: RF03
+Cenário: Positivo
+Status: APROVADO
+
+Observação de preparação:
+O catálogo inspecionado contém intenções, categorias e fluxos, mas não um campo explícito de "frase de teste cadastrada". Foram usadas frases representativas alinhadas às descrições do catálogo.
+
+[CONSULTA]
+Entrada:
+Qual é o prazo do projeto PRJ-0442?
+
+Observado:
+HTTP 200
+macro: CONSULTA
+specific: consulta_cronograma_prazo
+confidence_macro: 0.9993
+confidence_specific: 0.9443
+flow: RecuperadorInformacao -> Estruturador de Resposta
+handler: handler:consulta_cronograma_prazo
+
+[TRANSACAO]
+Entrada:
+Gere um relatório de acompanhamento do projeto PRJ-0442
+
+Observado:
+HTTP 200
+macro: TRANSACAO
+specific: transacao_gerar_relatorio
+confidence_specific: 0.8773
+flow: Executor de Transação -> Confirmação -> Registro
+model: workflow-router
+usage.total_tokens: 0
+workflow.kind: guided_workflow
+workflow.action: start
+workflow.workflow: transacao_gerar_relatorio
+workflow.contract_version: 1.0
+scope: PRJ-0442
+
+[ALERTA]
+Entrada:
+Avise se o projeto PRJ-0442 estiver atrasado
+
+Observado:
+HTTP 200
+macro: ALERTA
+specific: alerta_prazo_atraso
+confidence_specific: 0.7645
+flow: Motor de Regras -> Notificação
+source/project: PRJ-0442
+
+Resultado esperado:
+O catálogo deve demonstrar consulta, transação e alerta, com intenção/categoria/rota.
+
+Conclusão:
+APROVADO.

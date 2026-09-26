@@ -126,6 +126,10 @@ class TestPatternEntities:
     def test_does_not_treat_a_short_acronym_as_a_project_code(self) -> None:
         assert extract_entities("ok-123") == []
 
+    def test_does_not_cut_a_project_code_out_of_a_compound_code(self) -> None:
+        assert "projeto" not in [tipo for tipo, _ in tipos_e_valores(
+            "qual o procedimento POP-MVP-001?")]
+
 
 class TestOverlapResolution:
     def test_longest_term_wins(self) -> None:

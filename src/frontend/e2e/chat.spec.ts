@@ -1,5 +1,15 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { readFile } from 'node:fs/promises';
+
+async function authenticateForReports(
+  page: import('@playwright/test').Page,
+  mobile: boolean,
+) {
+  if (mobile) await page.getByRole('button', { name: 'Abrir conversas' }).click();
+  await page.getByLabel('Token de acesso da sessão').fill('e2e-token');
+  if (mobile) await page.getByRole('button', { name: 'Fechar menu' }).click();
+}
 
 test('texto, fontes, métricas e navegação responsiva', async ({ page }, testInfo) => {
   await page.goto('/');
@@ -52,7 +62,7 @@ test('gravação sintética, WAV, upload e resposta pelo backend', async ({
   await page.goto('/');
   if (testInfo.project.name === 'mobile')
     await page.getByRole('button', { name: 'Abrir conversas' }).click();
-  await page.getByLabel('Token de acesso para áudio').fill('e2e-token');
+  await page.getByLabel('Token de acesso da sessão').fill('e2e-token');
   if (testInfo.project.name === 'mobile')
     await page.getByRole('button', { name: 'Fechar menu' }).click();
   await page.getByRole('button', { name: 'Gravar pergunta em áudio' }).click();
@@ -103,4 +113,44 @@ test('acessibilidade automática e tema nos dois tamanhos', async ({
       nodes: v.nodes.map((n) => n.failureSummary),
     })),
   ).toEqual([]);
+});
+
+test('PLN inicia fluxo guiado e entrega DOCX baixavel no chat', async ({
+  page,
+}, testInfo) => {
+  await page.goto('/');
+  await authenticateForReports(page, testInfo.project.name === 'mobile');
+
+  const input = page.getByRole('textbox', { name: 'Mensagem para o agente' });
+  await input.fill('gere um relatorio executivo');
+  await input.press('Enter');
+
+  await expect(page.getByText(/abranger um projeto ou um subportfolio/i)).toBeVisible();
+  await page.getByRole('button', { name: 'Projeto', exact: true }).click();
+  await page.getByRole('button', { name: /PRJ-0442/ }).click();
+  await page.getByLabel('Inicio').fill('2026-08-01');
+  await page.getByLabel('Fim').fill('2026-08-31');
+  await page.getByRole('button', { name: 'Continuar', exact: true }).click();
+  await page.getByRole('button', { name: 'Diretoria', exact: true }).click();
+  await page.getByRole('button', { name: 'Governanca mensal', exact: true }).click();
+  await page.getByText('Cronograma', { exact: true }).click();
+  await page.getByText('Riscos', { exact: true }).click();
+  await page.getByRole('button', { name: 'Continuar', exact: true }).click();
+  await page
+    .getByPlaceholder('Contexto adicional (opcional)')
+    .fill('Destacar o proximo marco.');
+  await page.getByRole('button', { name: 'Adicionar e continuar' }).click();
+  await expect(page.getByText('Revise antes de gerar')).toBeVisible();
+  await page.getByRole('button', { name: 'Confirmar e gerar DOCX' }).click();
+
+  const downloadButton = page.getByRole('button', { name: /Baixar no chat/ });
+  await expect(downloadButton).toBeVisible({ timeout: 20_000 });
+  const downloadPromise = page.waitForEvent('download');
+  await downloadButton.click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/\.docx$/i);
+  const artifactPath = await download.path();
+  expect(artifactPath).not.toBeNull();
+  const bytes = await readFile(artifactPath!);
+  expect(bytes.subarray(0, 2).toString()).toBe('PK');
 });

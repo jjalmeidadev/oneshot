@@ -24,6 +24,7 @@ from __future__ import annotations
 
 from types import MappingProxyType
 from typing import Callable, Iterable, Sequence
+import unicodedata
 
 from nltk.stem import RSLPStemmer, SnowballStemmer
 from nltk.tokenize import RegexpTokenizer, WhitespaceTokenizer, wordpunct_tokenize
@@ -47,6 +48,18 @@ SELECTED_CONFIG = MappingProxyType(
 )
 
 _STEMMER_CACHE: dict[tuple[str, str], object] = {}
+
+
+def normalizar_portugues(texto: str) -> str:
+    """Normaliza caixa, Unicode e espaços sem remover informação semântica.
+
+    Acentos, negações e demais stopwords são preservados. Esta é a função
+    usada pelos TF-IDFs do classificador v2 e precisa permanecer importável
+    para que o artefato serializado seja carregado fora do notebook.
+    """
+
+    texto = unicodedata.normalize("NFC", str(texto)).lower()
+    return " ".join(texto.split())
 
 
 def preprocess_text(

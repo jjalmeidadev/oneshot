@@ -60,7 +60,7 @@ npm ci
 Set-Location ../..
 ```
 
-Não use `npm install` para uma reprodução limpa, pois ele pode alterar o lock. O encoder ONNX é obtido do repositório de modelo documentado na Seção 8.11 de `Projeto.md` quando o classificador é carregado pela primeira vez.
+Não use `npm install` para uma reprodução limpa, pois ele pode alterar o lock. O BERTimbau é obtido do repositório de modelo documentado na Seção 8.11 de `Projeto.md` quando o classificador é carregado pela primeira vez. Modelo e tokenizador usam a mesma revisão imutável declarada em `PLN_BERT_REVISION`; o valor deve ser o SHA hexadecimal completo, com 40 caracteres, de um commit do Hugging Face. Branches e tags mutáveis, como `main`, são recusadas na inicialização.
 
 # 4. Configuração
 
@@ -75,10 +75,14 @@ Edite somente `src/backend/.env` e não versione credenciais. Para exercitar tod
 ```dotenv
 GEMINI_API_KEY=<chave-do-google-ai-studio>
 GEMINI_MODEL=gemini-3.7-flash
+OPENROUTER_API_KEY=<chave-usada-somente-no-benchmark-de-tokens>
+OPENROUTER_MODEL=google/gemini-3.1-flash-lite
 AZURE_SPEECH_RESOURCE=<nome-do-recurso>
 AZURE_SPEECH_KEY=<chave-do-azure-speech>
 AUDIO_SIMULATED_IDENTITIES=token-local=usuario-local
 PLN_WARMUP=1
+PLN_BERT_MODEL=neuralmind/bert-base-portuguese-cased
+PLN_BERT_REVISION=94d69c95f98f7d5b2a8700c420230ae10def0baa
 ```
 
 Use `AZURE_SPEECH_ENDPOINT` quando o portal fornecer um endpoint regional explícito. Os timeouts, retentativas, limite de fontes e diretório alternativo de dados simulados possuem valores documentados no próprio `.env.example`.
@@ -144,7 +148,7 @@ O Playwright inicia servidores exclusivos nas portas 5174 e 8001 e usa provedore
 5. Informe `token-local` no campo de token, acione o microfone, conceda a permissão, grave uma frase, conclua e ouça a prévia. Envie o áudio; o esperado é receber a transcrição e a resposta na mesma conversa.
 6. Inicie uma solicitação e use **Interromper resposta**. O indicador deve parar e um retorno tardio não deve ser inserido na conversa.
 7. Reduza a janela abaixo de 1024 px. Conversas e documentos devem abrir em diálogos; `Escape` deve fechá-los. Alterne também os temas claro e escuro.
-8. Recarregue a página e confirme a limitação conhecida: conversas e token são apagados, pois ainda não existe persistência no back-end.
+8. Recarregue a página e confirme a limitação conhecida: conversas e token são apagados, pois o frontend ainda não reidrata o histórico, mesmo quando a trilha técnica é persistida pelo backend.
 
 Se as chaves externas não estiverem disponíveis, os passos de texto que exigem geração e o áudio real devem apresentar indisponibilidade controlada. Use `npm run test:e2e` para validar o mesmo fluxo com fronteiras determinísticas.
 
@@ -156,16 +160,64 @@ Defina uma URL de um banco de desenvolvimento e aplique os scripts na ordem:
 $env:DATABASE_URL = "postgresql://usuario:senha@localhost:5432/metro_poc"
 psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/01_create_database.sql
 psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/02_initial_data.sql
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/06_verify_secondary_intents.sql
 ```
 
-O modelo e a carga sintética podem ser inspecionados independentemente, mas não alteram as respostas da API atual. `03_rollback_data.sql` remove o baseline e só deve ser aplicado em banco descartável ou após um backup.
+Para atualizar um banco que já possui o baseline, execute `05_add_secondary_intents.sql` e reexecute `02_initial_data.sql` antes da verificação. A carga associa as 13 intenções específicas de consulta a sugestões proativas sem criar duplicatas; `06_verify_secondary_intents.sql` valida leitura, FK, unicidade e reexecução dentro de uma transação descartada ao final.
+
+Depois, execute `07_add_pending_proactive_suggestions.sql` para habilitar o armazenamento compartilhado das confirmações entre workers. Em produção, `DATABASE_URL` ou `SUPABASE_DATABASE_URL` deve permanecer configurada; o fallback em memória existe apenas para desenvolvimento local com um único processo.
+
+Se a tabela de sugestões já existia, execute também
+`08_add_prepared_proactive_response.sql`. A migração acrescenta a resposta
+secundária preparada na chamada principal e elimina pendências antigas que não
+podem ser confirmadas sem uma nova inferência.
+
+## 8.1 Benchmark de economia de tokens
+
+Com `OPENROUTER_API_KEY` configurada apenas em `src/backend/.env`, execute:
+
+```powershell
+Set-Location src/backend
+python scripts/benchmark_token_hypothesis.py
+```
+
+O comando usa os três prompts congelados em
+`docs/evidencias/sprint-04/hipotese-tokens/casos.json`, persiste os JSONs brutos
+e produz `resultado.json`. O protocolo completo explica as variantes, a fórmula
+e os limites da conclusão. Tempo de resposta não faz parte dessa medição.
+
+Para reproduzir o teste de idempotência, execute `02_initial_data.sql` duas vezes consecutivas e então execute `06_verify_secondary_intents.sql`. O resultado esperado continua sendo 13 associações ativas, sem duplicatas ou registros órfãos.
+
+Com a URL configurada, a API consulta os extratos persistidos, resolve a intenção secundária no catálogo e registra a trilha mínima de conversas, classificação, rota, fontes e auditoria. Sem a URL, usa os fallbacks JSON locais e não tenta abrir conexão. `03_rollback_data.sql` remove o baseline e só deve ser aplicado em banco descartável ou após um backup.
+
+## 8.2 Relatórios com dados do banco (opcional)
+
+O fluxo de geração de relatório pode ler o portfólio da massa sintética em JSON (padrão) ou das tabelas reais do PostgreSQL. Para usar o banco, aplique também os scripts de relatório e o seed de portfólio, e ative a fonte `database`:
+
+```powershell
+# Estrutura e workflow de relatório
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/05_report_generation.sql
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/07_guided_report_workflow.sql
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/11_secure_report_workflow_tables.sql
+# Massa de portfólio (projetos, riscos, marcos, benefícios) em português
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f src/database/sql/13_seed_portfolio_report_data.sql
+```
+
+No `.env` do backend, ative a leitura do banco:
+
+```dotenv
+REPORT_REPOSITORY_MODE=database
+REPORT_PORTFOLIO_SOURCE=database
+```
+
+Sem essas variáveis, os relatórios usam a massa sintética em JSON e o repositório em memória, mantendo o backend reproduzível sem banco. Os scripts `08`, `12` e `14` são os rollbacks correspondentes (workflow, segurança e seed de portfólio) e só devem ser aplicados em banco descartável ou após backup. O armazenamento do DOCX no Supabase Storage exige `REPORT_STORAGE_MODE=supabase`, `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`; sem isso, o artefato é gravado localmente.
 
 # 9. Solução de problemas
 
 | Sintoma | Verificação e correção |
 | --- | --- |
 | `python` aponta para 3.14 | Instale Python 3.12 ou 3.13, recrie `.venv` e reinstale as dependências. |
-| Erro ao carregar o classificador | Confirme `requirements-pln.txt`, acesso ao cache/repositório do encoder e compatibilidade do artefato com scikit-learn 1.6.1. |
+| Erro ao carregar o classificador | Confirme `requirements-pln.txt`, a revisão `PLN_BERT_REVISION`, o acesso ao cache/repositório do encoder e a compatibilidade do artefato com scikit-learn 1.6.1. |
 | API não fica pronta com `PLN_WARMUP=1` | Aguarde a primeira obtenção do encoder ou use temporariamente `PLN_WARMUP=0` para isolar a inicialização. |
 | Chat devolve indisponibilidade | Confira `GEMINI_API_KEY`, acesso de rede, modelo, timeout e limite do provedor. |
 | Áudio devolve 401 | Envie o token mapeado em `AUDIO_SIMULATED_IDENTITIES`; não informe a chave do Azure na interface. |

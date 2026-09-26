@@ -3,11 +3,14 @@ from types import SimpleNamespace
 import pytest
 from fastapi.testclient import TestClient
 
+from app.audio import transcription
 from app.database.tracing import TraceabilityError, trace_interaction
 from app.gemini.client import GeminiAPIError
 from app.gemini.schemas import GeminiChatRequest, GeminiChatResponse, GeminiUsage
 from app.main import app
+from app.nlp.inference import get_classifier
 from app.nlp.schemas import AudioIntent, IntentAlternative, PublicEntity
+from test_audio_upload import AUTH_HEADER, _build_wav, transcricao_fixa
 
 
 class FakeCursor:
@@ -124,6 +127,221 @@ def _response_with_db_source() -> GeminiChatResponse:
     )
 
 
+#: Marcado pela #228 (S4-32B): este arquivo cruza fronteira entre
+#: componentes (API, modelo, banco ou servico externo). Rodar so estes com
+#: `pytest -m integration`.
+pytestmark = pytest.mark.integration
+
+
+def test_chat_real_classifier_contract_and_minimal_persistence(monkeypatch):
+    monkeypatch.setenv("PLN_WARMUP", "0")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
+    cursor = FakeCursor(
+        fetch_values=[
+            ("intent-1",),
+            ("conversation-1",),
+            ("interaction-1",),
+        ]
+    )
+    connection = FakeConnection(cursor)
+    provider_calls = []
+
+    def fake_provider(request, intent=None, entities=None):
+        provider_calls.append((request, intent, entities))
+        return _response_with_db_source()
+
+    monkeypatch.setattr("app.pipeline.generate_chat_response", fake_provider)
+    monkeypatch.setattr(
+        "app.database.tracing.open_database_connection",
+        lambda **_kwargs: connection,
+    )
+
+    with TestClient(app) as client:
+        result = client.post(
+            "/api/chat",
+            json={
+                "message": "qual é o status da extensão da Linha 5-Lilás?",
+                "use_intent_classifier": True,
+            },
+        )
+
+    assert result.status_code == 200
+    data = result.json()
+    intent = data["intent"]
+    artifact = get_classifier().artefato
+    assert artifact.limiar_macro == pytest.approx(0.525)
+    assert artifact.limiar_intencao == pytest.approx(0.350)
+    assert intent["macro"] == "CONSULTA"
+    assert intent["specific"] == "consulta_status_projeto"
+    assert intent["confidence_macro"] >= artifact.limiar_macro
+    assert intent["confidence_specific"] >= artifact.limiar_intencao
+    assert intent["flow"] == "RecuperadorInformacao -> Estruturador de Resposta"
+    assert intent["handler"] == "handler:consulta_status_projeto"
+    assert data["pipeline_metrics"]["nlp_ms"] >= 0
+    assert data["pipeline_metrics"]["route_ms"] >= 0
+    assert provider_calls[0][1].specific == "consulta_status_projeto"
+
+    interaction_call = next(
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.ai_interactions" in query
+    )
+    assert interaction_call[4] == intent["macro"]
+    assert interaction_call[5] == intent["confidence_macro"]
+    assert interaction_call[6] == intent["specific"]
+    assert interaction_call[7] == intent["confidence_specific"]
+    assert interaction_call[8] == intent["handler"]
+    assert interaction_call[9] == "sharepoint_query"
+    assert connection.committed is True
+    assert any(
+        params[1:4] == ("pln_intent_classified", "pln", "sucesso")
+        for query, params in cursor.calls
+        if "INSERT INTO public.audit_events" in query
+    )
+
+
+def test_audio_real_classifier_contract_and_minimal_persistence(monkeypatch):
+    transcript = "qual é o status da extensão da Linha 5-Lilás?"
+    external_conversation_id = "s4-13-audio-success"
+    monkeypatch.setenv("PLN_WARMUP", "0")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
+    monkeypatch.setenv("AUDIO_SIMULATED_IDENTITIES", "token-de-teste=usuario-teste")
+    cursor = FakeCursor(
+        fetch_values=[
+            None,
+            ("intent-1",),
+            None,
+            ("conversation-1",),
+            ("interaction-1",),
+        ]
+    )
+    connection = FakeConnection(cursor)
+    provider_calls = []
+
+    def fake_provider(request, intent=None, entities=None):
+        provider_calls.append((request, intent, entities))
+        return _response_with_db_source()
+
+    monkeypatch.setattr(
+        transcription,
+        "transcribe",
+        transcricao_fixa(text=transcript, confidence=.97, duration_seconds=1),
+    )
+    monkeypatch.setattr("app.pipeline.generate_chat_response", fake_provider)
+    monkeypatch.setattr(
+        "app.database.tracing.open_database_connection",
+        lambda **_kwargs: connection,
+    )
+
+    with TestClient(app) as client:
+        result = client.post(
+            "/api/audio",
+            files={"audio": ("teste.wav", _build_wav(), "audio/wav")},
+            headers=AUTH_HEADER,
+            data={
+                "conversation_id": external_conversation_id,
+                "use_intent_classifier": "true",
+            },
+        )
+
+    assert result.status_code == 200
+    data = result.json()
+    intent = data["intent"]
+    assert data["transcription"]["text"] == transcript
+    assert intent["macro"] == "CONSULTA"
+    assert intent["specific"] == "consulta_status_projeto"
+    assert provider_calls[0][0].message == transcript
+    assert provider_calls[0][1].specific == "consulta_status_projeto"
+    conversation_call = next(
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.ai_conversations" in query
+    )
+    assert conversation_call[1] == "api"
+    assert conversation_call[2] == external_conversation_id
+
+    interaction_call = next(
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.ai_interactions" in query
+    )
+    assert interaction_call[4] == intent["macro"]
+    assert interaction_call[6] == intent["specific"]
+    assert interaction_call[8] == intent["handler"]
+    assert connection.committed is True
+    assert any(
+        params[1:4] == ("pln_intent_classified", "pln", "sucesso")
+        for query, params in cursor.calls
+        if "INSERT INTO public.audit_events" in query
+    )
+
+
+def test_audio_classifier_failure_is_persisted_and_correlated(monkeypatch):
+    external_conversation_id = "s4-13-audio-classifier-failure"
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
+    monkeypatch.setenv("AUDIO_SIMULATED_IDENTITIES", "token-de-teste=usuario-teste")
+    cursor = FakeCursor(
+        fetch_values=[
+            None,
+            None,
+            ("conversation-1",),
+            ("interaction-1",),
+        ]
+    )
+    connection = FakeConnection(cursor)
+
+    def fail_classifier(_text):
+        raise RuntimeError("private-model-path")
+
+    monkeypatch.setattr(
+        transcription,
+        "transcribe",
+        transcricao_fixa(text="prazo", confidence=.97, duration_seconds=1),
+    )
+    monkeypatch.setattr("app.nlp.inference.classify", fail_classifier)
+    monkeypatch.setattr(
+        "app.pipeline.generate_chat_response",
+        lambda *_args, **_kwargs: pytest.fail("Provedor nao deveria ser chamado"),
+    )
+    monkeypatch.setattr(
+        "app.database.tracing.open_database_connection",
+        lambda **_kwargs: connection,
+    )
+
+    with TestClient(app) as client:
+        result = client.post(
+            "/api/audio",
+            files={"audio": ("teste.wav", _build_wav(), "audio/wav")},
+            headers=AUTH_HEADER,
+            data={
+                "conversation_id": external_conversation_id,
+                "use_intent_classifier": "true",
+            },
+        )
+
+    assert result.status_code == 503
+    assert result.json()["error"]["code"] == "PROCESSING_UNAVAILABLE"
+    conversation_call = next(
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.ai_conversations" in query
+    )
+    assert conversation_call[2] == external_conversation_id
+    interaction_call = next(
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.ai_interactions" in query
+    )
+    assert interaction_call[2] == "prazo"
+    assert interaction_call[13] == "erro"
+    assert connection.committed is True
+    assert any(
+        params[1:4] == ("pipeline_controlled_failure", "api", "falha")
+        for query, params in cursor.calls
+        if "INSERT INTO public.audit_events" in query
+    )
+
+
 def test_trace_interaction_records_interaction_and_consulted_sources(monkeypatch):
     monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
     cursor = FakeCursor(
@@ -184,6 +402,15 @@ def test_trace_interaction_records_rf08_absence_as_limitation(monkeypatch):
     )
     assert interaction_call[12] == response.text
     assert interaction_call[13] == "processado"
+    out_of_scope_call = next(
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.out_of_scope_requests" in query
+    )
+    assert out_of_scope_call[0] == "interaction-1"
+    assert out_of_scope_call[1] == "prazo do projeto inexistente"
+    assert out_of_scope_call[2:4] == ("CONSULTA", "consulta_cronograma_prazo")
+    assert out_of_scope_call[5] == "sem_contexto_rag"
 
 
 @pytest.mark.parametrize(
@@ -239,16 +466,26 @@ def test_trace_interaction_normalizes_macro_intent_for_database_check(
         (SimpleNamespace(macrointencao="INDEFINIDA", intencao=None, confianca_macro=0.3, confianca_intencao=0.0, fluxo="", handler="limitacao", alternativas=[], roteada=False, resposta_sugerida="Reformule"), "sem_confianca"),
     ],
 )
-def test_chat_limited_by_classifier_traces_without_calling_provider(
+def test_low_confidence_uses_generic_rag_and_preserves_classification_trace(
     monkeypatch,
     classification,
     status,
 ):
     traces = []
+    provider_calls = []
     monkeypatch.setattr("app.nlp.inference.classify", lambda _text: classification)
     monkeypatch.setattr(
         "app.pipeline.generate_chat_response",
-        lambda *_args, **_kwargs: pytest.fail("Gemini/RAG nao deveria ser chamado"),
+        lambda *_args, **kwargs: (
+            provider_calls.append(kwargs)
+            or GeminiChatResponse(
+                text="Essa solicitação não está no escopo da base de conhecimento disponível.",
+                model="rag-retriever",
+                latency_ms=0,
+                usage=GeminiUsage(),
+                sources=[],
+            )
+        ),
     )
     monkeypatch.setattr(
         "app.pipeline.trace_interaction",
@@ -260,7 +497,8 @@ def test_chat_limited_by_classifier_traces_without_calling_provider(
 
     assert result.status_code == 200
     assert traces
-    assert traces[0]["response"].model == "classificador-local"
+    assert provider_calls[0]["intent"] is None
+    assert traces[0]["response"].model == "rag-retriever"
     assert traces[0]["intent"].macro == classification.macrointencao
 
 
@@ -347,3 +585,40 @@ def test_traceability_error_message_is_sanitized(monkeypatch):
     assert str(error.value) == "Nao foi possivel registrar a rastreabilidade."
     assert "secret-token" not in str(error.value)
     assert "stack trace" not in str(error.value)
+
+
+def test_workflow_directive_is_traced_as_guided_workflow(monkeypatch):
+    from app.reports.schemas import WorkflowDirective
+
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
+    cursor = FakeCursor(fetch_values=[("intent-1",), ("conversation-1",), ("interaction-1",)])
+    connection = FakeConnection(cursor)
+    response = GeminiChatResponse(
+        text="Iniciar dialogo guiado.",
+        model="workflow-router",
+        latency_ms=0,
+        usage=GeminiUsage(),
+        workflow=WorkflowDirective(),
+    )
+
+    trace_interaction(
+        request=GeminiChatRequest(message="gere um relatorio"),
+        response=response,
+        intent=_intent("TRANSACAO", "transacao_gerar_relatorio"),
+        entities=[],
+        processing_ms=1,
+        connect=_connect(connection),
+    )
+
+    interaction_call = next(
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.ai_interactions" in query
+    )
+    assert interaction_call[9] == "guided_workflow"
+    assert any(
+        params[1:4]
+        == ("guided_workflow_dispatched", "guided_workflow", "pendente")
+        for query, params in cursor.calls
+        if "INSERT INTO public.audit_events" in query
+    )

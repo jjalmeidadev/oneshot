@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS public.consulted_sources CASCADE;
 DROP TABLE IF EXISTS public.ai_interactions CASCADE;
 DROP TABLE IF EXISTS public.ai_conversations CASCADE;
 DROP TABLE IF EXISTS public.prompt_templates CASCADE;
+DROP TABLE IF EXISTS public.secondary_intents CASCADE;
 DROP TABLE IF EXISTS public.intent_catalog CASCADE;
 DROP TABLE IF EXISTS public.access_rules CASCADE;
 DROP TABLE IF EXISTS public.users CASCADE;

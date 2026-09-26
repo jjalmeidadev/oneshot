@@ -1,0 +1,68 @@
+{
+  "request": {
+    "model": "google/gemini-3.1-flash-lite",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Voce e um assistente do Metro em um ambiente de demonstracao. Os trechos abaixo vieram de listas simuladas do SharePoint e sao dados ficticios para o MVP. Use-os quando forem pertinentes, cite as fontes no formato [Fonte N] e informe quando o contexto nao for suficiente. Nao apresente esses dados como informacao operacional real.\n\nIntencao primaria validada: macro=CONSULTA; especifica=consulta_status_projeto; handler=handler:consulta_status_projeto\n\nContexto recuperado:\n[Fonte 1] Status do Projeto Aurora — cenário fictício\nLista: Massa controlada\nAtualizado em: 2026-09-23\nConteudo: Massa sintética: o Projeto Aurora está em execução, com avanço físico hipotético de 42% e revisão fictícia registrada em setembro de 2026.\n\nPergunta do usuario: Há novidade sobre a execução do Projeto Aurora fictício?\n\nProatividade preparada na mesma inferencia: gere a resposta principal e tambem uma resposta secundaria que ficara oculta ate a confirmacao do usuario. A resposta secundaria deve apenas analisar ou recomendar; nao execute alteracoes externas. Responda somente com um objeto JSON valido, sem bloco Markdown, com as chaves primary_response e prepared_secondary_response.\nIntencao secundaria: sugerir_agilizacao_projeto\nInstrucao secundaria: Depois da resposta principal, identifique nas fontes o principal gargalo do projeto e sugira uma unica acao objetiva para agiliza-lo. Cite a evidencia e nao invente recomendacao quando faltar suporte."
+      }
+    ],
+    "temperature": 0,
+    "max_tokens": 256
+  },
+  "response": {
+    "id": "gen-1790190439-GKn9CHgh93SiXNiZtyUn",
+    "object": "chat.completion",
+    "created": 1790190439,
+    "model": "google/gemini-3.1-flash-lite",
+    "provider": "Google",
+    "system_fingerprint": null,
+    "service_tier": "default",
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "STOP",
+        "message": {
+          "role": "assistant",
+          "content": "{\n\"primary_response\": \"Com base nos dados de demonstração, o Projeto Aurora encontra-se atualmente em fase de execução, apresentando um avanço físico hipotético de 42%, conforme registrado na atualização de 23 de setembro de 2026 [Fonte 1]. Ressalto que estas informações são fictícias e destinadas exclusivamente a este ambiente de teste.\",\n\"prepared_secondary_response\": \"Análise: O contexto fornecido na [Fonte 1] limita-se ao status de execução e percentual de avanço, não detalhando cronogramas, impedimentos ou gargalos específicos. Recomendação: Como não há dados sobre gargalos no registro atual, recomendo a consulta ao relatório de riscos ou à lista de pendências do projeto para identificar pontos de estrangulamento antes de definir uma ação de agilização.\"\n}",
+          "refusal": null,
+          "reasoning": null,
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "signature": "AY89a181Hlt/jIqGSwCr3ieyLoOW4DkIXrxJ0qMKpY0tEM8wt7Q9RSUSgrBVqs4XfppFcFcutmy41RizShwLhHNb4spTkWpDiJpxgxdPAayd9/k=",
+              "format": "google-gemini-v1",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 343,
+      "completion_tokens": 180,
+      "total_tokens": 523,
+      "cost": 0.00035575,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00035575,
+        "upstream_inference_prompt_cost": 8.575e-05,
+        "upstream_inference_completions_cost": 0.00027
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "skipped": false
+}
