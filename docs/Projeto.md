@@ -3911,8 +3911,7 @@ entidades extraídas e métricas do percurso de áudio e PLN, mantendo RNF05
 rastreável no contrato HTTP e RNF11 com mensagens controladas para entradas sem
 rota segura. No exemplo, `chat` omite `intent`, `entities` e `pipeline_metrics`,
 que repetem os objetos do nível superior; `answer.sources` também omite os
-campos nulos. O contrato completo das referências está em
-[Referências nas respostas](contrato-referencias.md).
+campos nulos. O contrato completo das referências é descrito a seguir.
 
 ```json
 {
@@ -5228,9 +5227,8 @@ continua pendente da entrega específica.
 Exemplo resumido do contrato textual exposto por `POST /api/chat`. Cada linha
 do texto reproduz integralmente um trecho ou atributo da fonte citada, e a
 evidência que a sustenta acompanha a resposta em `claims`; sem evidência
-verificável, a resposta volta com `evidence_status: "insufficient"`. Campos,
-regras de validação e sugestão proativa estão em
-[Referências nas respostas](contrato-referencias.md).
+verificável, a resposta volta com `evidence_status: "insufficient"`. Os campos,
+as regras de validação e a sugestão proativa estão consolidados nesta seção.
 
 ```json
 {
@@ -6208,7 +6206,7 @@ O primeiro deploy usava AWS Systems Manager para toda a operação remota. A EC2
 - ECR privado para as imagens de backend e frontend;
 - CloudWatch Agent e logs locais com rotação.
 
-Não foi aberta entrada HTTP pública no Security Group. O Cloudflare estabelece conexões de saída e encaminha as requisições para o frontend ligado ao *loopback*. O [handoff do primeiro deploy](deploy-aws-learner-lab-handoff.md) e o [replanejamento](deploy-aws-learner-lab-replan.md) registram a transição entre as duas arquiteturas.
+Não foi aberta entrada HTTP pública no Security Group. O Cloudflare estabelece conexões de saída e encaminha as requisições para o frontend ligado ao *loopback*. A transição entre as duas arquiteturas está consolidada nesta seção.
 
 ### 10.2.2 Preparação dos contêineres
 
@@ -6502,7 +6500,7 @@ sudo /usr/local/bin/m7-compose stop
 
 Não se deve usar `docker compose down -v` enquanto os volumes de RabbitMQ ou artefatos ainda forem necessários. Mesmo com a EC2 parada, EBS, ECR e CloudWatch continuam armazenados e podem gerar custo. As principais limitações permanecem sendo as credenciais temporárias do Learner Lab, o SSH dependente do IP do operador, a URL temporária do Cloudflare e a ausência de autenticação adequada para divulgação pública.
 
-Os procedimentos detalhados de diagnóstico, atualização, rollback e encerramento permanecem no [runbook AWS](aws-operacao.md) e no [runbook Docker](docker-operacao.md). O histórico das decisões está no [handoff inicial](deploy-aws-learner-lab-handoff.md), no [replanejamento](deploy-aws-learner-lab-replan.md) e nas stories de [infraestrutura AWS](stories/phase-4-aws-mvp.md), [substituição da EC2](stories/phase-4-ec2-ssh-replacement-preparation.md) e [workers/atualização](stories/phase-4-alert-workers-local-update.md).
+Os procedimentos detalhados de diagnóstico, atualização, rollback e encerramento, assim como o histórico das decisões de implantação, estão consolidados nesta seção e nas stories de [infraestrutura AWS](stories/phase-4-aws-mvp.md), [substituição da EC2](stories/phase-4-ec2-ssh-replacement-preparation.md) e [workers/atualização](stories/phase-4-alert-workers-local-update.md).
 
 # 11. Análise de Viabilidade Financeira
 
@@ -6698,4 +6696,4 @@ Nas premissas adotadas, a entrega é financeiramente viável pelo preço de **R$
 - Robert Half. [Desenvolvedor(a) full-stack júnior](https://www.roberthalf.com/br/pt/vagas-detalhes/desenvolvedora-full-stack-junior). Acesso em: 25 set. 2026.
 - Supabase. [Preços](https://supabase.com/pricing). Acesso em: 25 set. 2026.
 
-<p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">[nome do projeto]</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">INTELI, [aluno 1], [aluno 2], [aluno 3], [aluno 4], [aluno 5], [aluno 6], [aluno 7]</a> is licensed under <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">Attribution 4.0 International<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"></a></p>
+<p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">Agente de IA para o Portfólio de Projetos do Metrô</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">Oneshot</a>, <a href="https://www.inteli.edu.br/">Inteli</a>, <a href="https://www.linkedin.com/in/ntsfelipe/">Felipe Neves</a>, <a href="https://www.linkedin.com/in/henrique-rodrigues-diniz-b7b011319/">Henrique Diniz</a>, <a href="https://www.linkedin.com/in/jaimeandradedealmeida/">Jaime Almeida</a>, <a href="https://www.linkedin.com/in/leonardoramosvieira">Leonardo Ramos</a>, <a href="https://www.linkedin.com/in/pedro-uchoaa/">Pedro Uchoa</a> e <a href="https://www.linkedin.com/in/wendel-feitosa-975bb1346/">Wendel Feitosa</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="license noopener noreferrer">Attribution 4.0 International</a>.</p>
