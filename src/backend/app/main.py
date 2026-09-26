@@ -164,6 +164,9 @@ async def handle_request_validation_error(
     if (
         request.url.path.startswith("/api/alert-")
         or request.url.path.startswith("/api/notifications")
+        or request.url.path.startswith(
+            "/api/integrations/notifications/delivery-results"
+        )
     ):
         return JSONResponse(
             status_code=422,

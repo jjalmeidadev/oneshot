@@ -5,10 +5,12 @@ from fastapi import APIRouter, Header, Response, status
 from app.alerts.schemas import (
     AlertNotification, AlertSubscriptionResponse, AlertWorkflowResponse,
     AnswerAlertWorkflowRequest, ChangeSubscriptionRequest,
-    ConfirmAlertWorkflowRequest, NotificationListResponse,
+    ConfirmAlertWorkflowRequest, NotificationDeliveryCallbackRequest,
+    NotificationDeliveryCallbackResponse, NotificationListResponse,
     StartAlertWorkflowRequest, SubscriptionStatus,
 )
 from app.alerts.service import get_alert_service
+from app.alerts.security import validate_notification_callback_token
 from app.alerts.workflow import get_alert_workflow_service
 from app.reports.security import resolve_report_identity
 
@@ -80,3 +82,16 @@ def list_notifications(authorization: str|None=Header(default=None)) -> Notifica
 @router.post("/notifications/{notification_id}/read",response_model=AlertNotification)
 def read_notification(notification_id: str,authorization: str|None=Header(default=None)) -> AlertNotification:
     return get_alert_service().mark_notification_read(notification_id,resolve_report_identity(authorization))
+
+
+@router.post(
+    "/integrations/notifications/delivery-results",
+    response_model=NotificationDeliveryCallbackResponse,
+    summary="Receber confirmacao idempotente de entrega de notificacao",
+)
+def receive_notification_delivery_result(
+    callback: NotificationDeliveryCallbackRequest,
+    callback_token: str | None = Header(default=None, alias="X-Callback-Token"),
+) -> NotificationDeliveryCallbackResponse:
+    validate_notification_callback_token(callback_token)
+    return get_alert_service().apply_delivery_callback(callback)

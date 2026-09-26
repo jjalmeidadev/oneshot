@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import date, datetime, time
 from enum import Enum
 from typing import Any, Literal
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -56,6 +57,11 @@ class NotificationStatus(str, Enum):
     PENDING = "pending"
     AVAILABLE = "available"
     READ = "read"
+    FAILED = "failed"
+
+
+class DeliveryStatus(str, Enum):
+    DELIVERED = "delivered"
     FAILED = "failed"
 
 
@@ -179,6 +185,26 @@ class AlertNotification(StrictModel):
 class NotificationListResponse(StrictModel):
     items: list[AlertNotification]
     unread_count: int
+
+
+class NotificationDeliveryCallbackRequest(StrictModel):
+    callback_id: str = Field(min_length=8, max_length=160)
+    notification_id: UUID
+    provider: str = Field(min_length=1, max_length=80)
+    status: DeliveryStatus
+    attempted_at: datetime
+    error_code: str | None = Field(default=None, min_length=1, max_length=120)
+
+
+class NotificationDeliveryCallbackResponse(NotificationDeliveryCallbackRequest):
+    received_at: datetime
+
+
+class NotificationDeliveryEvent(StrictModel):
+    event_id: UUID
+    event_type: Literal["notification.delivery.received"]
+    correlation_id: str = Field(min_length=1, max_length=120)
+    payload: NotificationDeliveryCallbackRequest
 
 
 class AlertWorkflowStep(str, Enum):

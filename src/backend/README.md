@@ -414,6 +414,53 @@ modo `power_automate_simulator` exercita o contrato externo sem tenant. Os
 contratos, estados, variáveis e limites da integração estão documentados em
 [`../agent/support/IMPLEMENTATION.md`](../agent/support/IMPLEMENTATION.md).
 
+### Callback de resultado de relatórios (S5-09)
+
+O webhook `POST /api/integrations/power-automate/report-results` recebe o
+resultado terminal do processamento de um relatório. A chamada exige
+`Content-Type: application/json` e o header `X-Callback-Token`, comparado em
+tempo constante ao segredo `REPORT_CALLBACK_TOKEN`. O corpo correlaciona
+`callback_id`, `execution_id`, `correlation_id` e `flow_run_id`, informa o
+estado terminal e inclui o resultado ou o erro correspondente.
+
+O callback é armazenado em `automation_callbacks`. A primeira chamada e uma
+repetição equivalente retornam `200`, sem novo processamento; o mesmo
+`callback_id` com payload diferente retorna `409`. Token ausente ou inválido
+retorna `401`; execução desconhecida retorna `404` e corpo
+inválido retorna `422`. Esse fluxo é síncrono e não publica evento no RabbitMQ.
+
+### Callback de entrega de notificacoes (S5-10)
+
+O webhook usa `POST /api/integrations/notifications/delivery-results` e exige o
+header `X-Callback-Token`, comparado ao segredo `NOTIFICATION_CALLBACK_TOKEN`.
+O corpo aceita `callback_id` (string), `notification_id` (UUID), `provider`
+(string), `status` (`delivered` ou `failed`), `attempted_at` (data/hora ISO
+8601) e `error_code` (string opcional):
+
+```json
+{
+  "callback_id": "delivery-callback-001",
+  "notification_id": "1674b3e9-ecba-4a78-a50f-848f5eaf0d79",
+  "provider": "simulated",
+  "status": "delivered",
+  "attempted_at": "2026-09-25T12:00:00Z",
+  "error_code": null
+}
+```
+
+A primeira confirmacao valida e sua repeticao identica retornam `200`; o mesmo
+`callback_id` com outro conteudo retorna `409`. Token invalido retorna `401`,
+corpo invalido retorna `422` e notificacao inexistente retorna `404`. Cada
+callback novo e persistido junto a um evento `notification.delivery.received`
+na outbox. O publisher encaminha o evento ao RabbitMQ e o consumer `delivery`
+acrescenta a tentativa de entrega; repeticoes identicas nao duplicam o evento
+nem o processamento.
+
+O contrato completo dos dois webhooks, os códigos HTTP e a topologia AMQP estão
+na [Seção 8.5.12 de Projeto.md](../../docs/Projeto.md#8512-webhooks-e-mensageria-integrados-s5-09-a-s5-11).
+Os comandos e resultados reproduzíveis estão na
+[evidência da Sprint 5](../../docs/evidencias/sprint-05/webhooks-rabbitmq.md).
+
 A fonte de dados do relatório é selecionada por `REPORT_PORTFOLIO_SOURCE`:
 `synthetic` (padrão) lê a massa em `app/reports/data/synthetic_portfolio.json`;
 `database` lê projetos, riscos, marcos, benefícios e mudanças das tabelas reais
@@ -487,8 +534,11 @@ A [documentação do frontend](../frontend/README.md) descreve estrutura, fluxos
 
 `handler:alerta_prazo_atraso` inicia um workflow guiado próprio. Depois da
 confirmação, scheduler, outbox e RabbitMQ avaliam o cronograma em segundo plano
-e gravam notificações internas. Não há dependência de Power Automate nem
-webhook. Veja [a documentação operacional](../agent/support/IMPLEMENTATION.md#3-workflow-alerta_prazo_atraso).
+e gravam notificações internas. O fluxo não depende de Power Automate; apenas a
+confirmação de entrega usa o webhook S5-10 descrito acima. Com PostgreSQL e
+RabbitMQ configurados, execute o publisher com `python -m app.alerts.worker
+publisher` e o consumer com `python -m app.alerts.worker delivery`. Veja [a
+documentação operacional](../agent/support/IMPLEMENTATION.md#3-workflow-alerta_prazo_atraso).
 
 ## VHS/cache de transcricao (S4-31)
 

@@ -1,9 +1,18 @@
+import asyncio
+import sys
 from datetime import date, datetime, timedelta, timezone
+from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
 
-from app.alerts.errors import AlertConflictError
+from app.alerts.errors import AlertConflictError, AlertMessageError
+from app.alerts.messaging import (
+    DELIVERY_ROUTING_KEY,
+    ROUTING_KEYS,
+    Message,
+    RabbitMQBroker,
+)
 from app.alerts.repository import InMemoryAlertRepository
 from app.alerts.repository import reset_alert_repository
 from app.alerts.schemas import (
@@ -20,6 +29,7 @@ from app.alerts.service import AlertService
 from app.alerts.service import get_alert_service
 from app.alerts.source import ScheduleSource, get_schedule_source
 from app.alerts.workflow import AlertWorkflowService, get_alert_workflow_service
+from app.alerts.worker import process_delivery_message
 from app.main import app
 from app.reports.security import ReportIdentity
 
@@ -244,3 +254,253 @@ def test_http_contract_configures_and_lists_alert(monkeypatch):
         listed = client.get("/api/alert-subscriptions", headers=headers)
         assert listed.status_code == 200
         assert len(listed.json()) == 1
+
+
+@pytest.fixture
+def delivery_callback_context(monkeypatch):
+    monkeypatch.setenv("ALERT_REPOSITORY_MODE", "memory")
+    monkeypatch.setenv("ALERT_SCHEDULE_SOURCE", "synthetic")
+    monkeypatch.setenv("NOTIFICATION_CALLBACK_TOKEN", "notification-test-token")
+    reset_alert_repository()
+    get_schedule_source.cache_clear()
+    get_alert_service.cache_clear()
+    repository = get_alert_service().repository
+    notification = AlertNotification(
+        notification_id="1674b3e9-ecba-4a78-a50f-848f5eaf0d79",
+        correlation_id="delivery-correlation",
+        subscription_id="delivery-subscription",
+        occurrence_id="delivery-occurrence",
+        recipient_subject="delivery-user",
+        project_id="PRJ-1",
+        item_id="delivery-item",
+        title="Entrega pendente",
+        body="Notificacao usada no contrato de callback.",
+        reference_date=date(2026, 9, 25),
+        overdue_days=1,
+        created_at=datetime(2026, 9, 25, 11, tzinfo=timezone.utc),
+    )
+    assert repository.create_notification(notification, "delivery-episode") is True
+    payload = {
+        "callback_id": "delivery-callback-001",
+        "notification_id": notification.notification_id,
+        "provider": "simulated",
+        "status": "delivered",
+        "attempted_at": "2026-09-25T12:00:00Z",
+        "error_code": None,
+    }
+    with TestClient(app) as client:
+        yield client, repository, payload
+    reset_alert_repository()
+    get_alert_service.cache_clear()
+
+
+def test_delivery_callback_succeeds(delivery_callback_context):
+    client, repository, payload = delivery_callback_context
+    response = client.post(
+        "/api/integrations/notifications/delivery-results",
+        headers={"X-Callback-Token": "notification-test-token"},
+        json=payload,
+    )
+    assert response.status_code == 200
+    assert response.json()["callback_id"] == payload["callback_id"]
+    assert response.json()["status"] == "delivered"
+    assert response.json()["received_at"]
+    assert len(repository.outbox) == 1
+    event = repository.outbox[0]
+    assert event["event_type"] == DELIVERY_ROUTING_KEY
+    assert event["payload"] == payload
+    assert event["correlation_id"] == "delivery-correlation"
+    assert repository.delivery_attempts == []
+
+
+def test_delivery_callback_rejects_invalid_token(delivery_callback_context):
+    client, _, payload = delivery_callback_context
+    response = client.post(
+        "/api/integrations/notifications/delivery-results",
+        headers={"X-Callback-Token": "wrong-token"},
+        json=payload,
+    )
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "NOTIFICATION_CALLBACK_UNAUTHORIZED"
+
+
+def test_delivery_callback_rejects_invalid_payload(delivery_callback_context):
+    client, _, payload = delivery_callback_context
+    response = client.post(
+        "/api/integrations/notifications/delivery-results",
+        headers={"X-Callback-Token": "notification-test-token"},
+        json={**payload, "notification_id": "not-a-uuid", "unexpected": True},
+    )
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "ALERT_INVALID_INPUT"
+
+
+def test_delivery_callback_is_idempotent(delivery_callback_context):
+    client, repository, payload = delivery_callback_context
+    first = client.post(
+        "/api/integrations/notifications/delivery-results",
+        headers={"X-Callback-Token": "notification-test-token"},
+        json=payload,
+    )
+    repeated = client.post(
+        "/api/integrations/notifications/delivery-results",
+        headers={"X-Callback-Token": "notification-test-token"},
+        json=payload,
+    )
+    assert first.status_code == repeated.status_code == 200
+    assert first.json() == repeated.json()
+    assert len(repository.delivery_callbacks) == 1
+    assert len(repository.outbox) == 1
+    message = Message(**repository.outbox[0])
+    assert process_delivery_message(message, repository) is True
+    assert process_delivery_message(message, repository) is False
+    assert len(repository.delivery_attempts) == 1
+
+
+def test_delivery_callback_rejects_conflicting_callback_id(
+    delivery_callback_context,
+):
+    client, _, payload = delivery_callback_context
+    headers = {"X-Callback-Token": "notification-test-token"}
+    assert client.post(
+        "/api/integrations/notifications/delivery-results",
+        headers=headers,
+        json=payload,
+    ).status_code == 200
+    response = client.post(
+        "/api/integrations/notifications/delivery-results",
+        headers=headers,
+        json={**payload, "status": "failed", "error_code": "PROVIDER_ERROR"},
+    )
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "ALERT_CONFLICT"
+
+
+def test_delivery_callback_rejects_unknown_notification(
+    delivery_callback_context,
+):
+    client, _, payload = delivery_callback_context
+    response = client.post(
+        "/api/integrations/notifications/delivery-results",
+        headers={"X-Callback-Token": "notification-test-token"},
+        json={
+            **payload,
+            "callback_id": "delivery-callback-unknown",
+            "notification_id": "b74a1986-b955-49d7-a922-6bd1c6125df0",
+        },
+    )
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "NOTIFICATION_NOT_FOUND"
+
+
+def test_delivery_callback_persists_payload_in_memory(delivery_callback_context):
+    client, repository, payload = delivery_callback_context
+    response = client.post(
+        "/api/integrations/notifications/delivery-results",
+        headers={"X-Callback-Token": "notification-test-token"},
+        json=payload,
+    )
+    stored = repository.delivery_callbacks[payload["callback_id"]]
+    assert response.status_code == 200
+    assert len(stored["payload_hash"]) == 64
+    assert stored["callback_payload"] == payload
+    received_at = datetime.fromisoformat(
+        response.json()["received_at"].replace("Z", "+00:00")
+    )
+    assert stored["value"].received_at == received_at
+
+
+def test_rabbitmq_topology_keeps_existing_routes_and_adds_delivery():
+    assert ROUTING_KEYS == (
+        "alert.evaluation.requested",
+        "alert.notification.requested",
+        "notification.delivery.received",
+    )
+
+
+def test_publisher_uses_delivery_routing_key_without_real_rabbitmq(monkeypatch):
+    class ExchangeDouble:
+        def __init__(self):
+            self.routing_keys = []
+
+        async def publish(self, _message, routing_key):
+            self.routing_keys.append(routing_key)
+
+    broker = RabbitMQBroker("amqp://unused")
+    exchange = ExchangeDouble()
+    broker.exchange = exchange
+    monkeypatch.setitem(
+        sys.modules,
+        "aio_pika",
+        SimpleNamespace(
+            Message=lambda **values: values,
+            DeliveryMode=SimpleNamespace(PERSISTENT=2),
+        ),
+    )
+    asyncio.run(
+        broker.publish(
+            Message(
+                event_id="d0af886f-8438-4540-a773-4aa33015139b",
+                event_type=DELIVERY_ROUTING_KEY,
+                correlation_id="delivery-correlation",
+                payload={},
+            )
+        )
+    )
+    assert exchange.routing_keys == [DELIVERY_ROUTING_KEY]
+
+
+def test_delivery_consumer_records_success(delivery_callback_context):
+    client, repository, payload = delivery_callback_context
+    response = client.post(
+        "/api/integrations/notifications/delivery-results",
+        headers={"X-Callback-Token": "notification-test-token"},
+        json=payload,
+    )
+    assert response.status_code == 200
+    assert process_delivery_message(Message(**repository.outbox[0]), repository)
+    assert repository.delivery_attempts == [
+        {
+            "notification_id": payload["notification_id"],
+            "callback_id": payload["callback_id"],
+            "channel": "simulated",
+            "attempt_number": 1,
+            "status": "available",
+            "error_code": None,
+            "attempted_at": datetime(2026, 9, 25, 12, tzinfo=timezone.utc),
+        }
+    ]
+
+
+def test_delivery_consumer_records_failure(delivery_callback_context):
+    client, repository, payload = delivery_callback_context
+    failed = {
+        **payload,
+        "callback_id": "delivery-callback-failed",
+        "status": "failed",
+        "error_code": "PROVIDER_UNAVAILABLE",
+    }
+    response = client.post(
+        "/api/integrations/notifications/delivery-results",
+        headers={"X-Callback-Token": "notification-test-token"},
+        json=failed,
+    )
+    assert response.status_code == 200
+    assert process_delivery_message(Message(**repository.outbox[0]), repository)
+    attempt = repository.delivery_attempts[0]
+    assert attempt["status"] == "failed"
+    assert attempt["error_code"] == "PROVIDER_UNAVAILABLE"
+
+
+def test_delivery_consumer_rejects_invalid_event(delivery_callback_context):
+    _, repository, _ = delivery_callback_context
+    invalid = Message(
+        event_id="not-a-uuid",
+        event_type=DELIVERY_ROUTING_KEY,
+        correlation_id="delivery-correlation",
+        payload={"callback_id": "incomplete-callback"},
+    )
+    with pytest.raises(AlertMessageError) as error:
+        process_delivery_message(invalid, repository)
+    assert error.value.code == "ALERT_INVALID_MESSAGE"
+    assert repository.delivery_attempts == []

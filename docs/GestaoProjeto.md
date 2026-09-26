@@ -505,11 +505,27 @@ A tabela confronta as 58 tasks planejadas na Seção 6.4.2 com o estado no GitLa
 | S4-48A a S4-51B | [#239](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/239) a [#245](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/245) | 🟡 Nesta entrega | — |
 | S4-52A a S4-52C | [#246](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/246) a [#248](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/248) | ⚠️ Em revisão; não integradas | Nenhum commit de viabilidade financeira em `origin/develop` no corte |
 
+> **Nota de atualização — Sprint 5 (25/09/2026).** As linhas S4-25B e
+> S4-25C preservam o estado verdadeiro no fechamento da Sprint 4: naquele
+> corte, nenhum webhook havia sido entregue. Depois desse registro histórico,
+> a Sprint 5 implementou `POST /api/integrations/power-automate/report-results`
+> e `POST /api/integrations/notifications/delivery-results`. O segundo grava
+> outbox e é processado pelo RabbitMQ; o scheduler e AMQP continuam não sendo
+> classificados como webhook. Contratos e evidências: Seção 8.5.12 do
+> `Projeto.md`.
+
 Das 58 tasks, **31 foram entregues ou executadas** com evidência integrada, **9 ficaram parciais ou sem evidência versionada**, **4 não foram entregues**, **7 foram excluídas por estarem cobertas por outra entrega ou obsoletas** e **7 compõem esta entrega de gestão**.
 
 Entraram também cinco issues fora do plano: [#250](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/250) e [#251](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/251) ([!91](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/91) e [!89](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/89)), de acurácia e intenções secundárias; [#253](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/253) ([!97](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/97)), de economia de tokens; [#254](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/254) ([!108](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/merge_requests/108)), de documentação do deploy, integrada e ainda aberta; e [#252](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/252), em revisão e sem MR.
 
 O conjunto sustenta um caminho demonstrável de ponta a ponta: interface → API → classificação → recuperação → resposta → Supabase, por texto e por áudio, com relatório e alerta guiados, publicado na AWS. Três lacunas ficam declaradas e seguem para a Sprint 5: não há controle de acesso por perfil (D-01), não há webhooks e a comparação entre projetos sai parcial, porque a base consultada pelo chat não tem documentos de todos os projetos.
+
+> **Leitura temporal.** A frase anterior é a retrospectiva do corte da Sprint
+> 4 e não descreve mais o estado atual. Na Sprint 5, os dois webhooks foram
+> implementados e testados; a confirmação de entrega foi integrada à outbox e
+> aos handlers RabbitMQ. Integrações reais com Power Automate, Teams e tenant
+> Microsoft continuam opcionais/não homologadas e foram validadas somente com
+> simulador ou double controlado.
 
 ### 2.4.4 Pontos fortes
 
@@ -1496,6 +1512,22 @@ Nenhuma task exigida pelo barema nem a cadeia de alteração de dados pelo chat 
 
 **Teams e Copilot.** Sem acesso ao Copilot Studio, a conexão com o Copilot é oferecida por um servidor MCP que o próprio Metrô pode registrar no seu ambiente (S5-18). A integração com o Teams é avaliada em uma task curta (S5-19) e só é implementada se houver tenant e registro de aplicativo disponíveis. Em qualquer caso, o caminho fica documentado na tabela de-para (S5-44).
 
+**Atualização do estado dos itens 3 e 4 do barema em 25/09/2026.** O estado
+verificado no repositório é:
+
+| Resultado | Estado comprovado | Limite da comprovação |
+| --- | --- | --- |
+| Webhook de resultado de relatório | Entregue: rota, token, correlação, idempotência e `automation_callbacks`; 24 testes de relatórios aprovados. | Power Automate real não foi executado; o contrato foi exercitado pelo simulador/double. |
+| Webhook de confirmação de entrega | Entregue: rota, token, idempotência, `notification_delivery_callbacks` e outbox; 22 testes de alertas aprovados. | Provedor real não foi executado. |
+| Integração RabbitMQ da confirmação de entrega | Entregue no escopo automatizado: routing key, fila/DLQ, publisher e handler do consumer testados. | Publisher usou double controlado; não houve broker externo nesta rodada. |
+| Microsoft Teams, SharePoint corporativo e Copilot Studio | Não homologados; simulados, opcionais ou fora do runtime ativo. | Não há evidência de tenant real. |
+
+O webhook de relatório permanece síncrono e não foi transformado em produtor
+RabbitMQ. O fluxo assíncrono documentado para S5-11 é o da confirmação de
+entrega: webhook → outbox → RabbitMQ → consumer → banco. O alerta regular ainda
+nasce no scheduler; AMQP, scheduler e consulta REST do frontend não são
+webhooks.
+
 Regras de entrada no board, além das Seções 7.1 a 7.4:
 
 - as issues nascem em `Open`, com milestone `Sprint 05`, natureza (`FEATURE`, `BUG` ou `DOCS`), tamanho, uma prioridade e a área, e **sem responsável**: a atribuição é feita na planning, pelas regras da Seção 6.5.4;
@@ -1537,6 +1569,15 @@ A S5-40 está sem número: a #294, criada para ela na importação, foi excluíd
 | S5-09 | [#263](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/263) | Implementar o webhook de alteração de documentos do SharePoint simulado | FEATURE | BACKEND | G | Alta | S5-12 | Barema, item 3 (webhooks); risco R05 | Estrutura do SharePoint simulado da S5-12 definida | Payload válido recebe 2xx, inválido é rejeitado e repetição não duplica; rota e payload documentados no Projeto.md com exemplos; testes automatizados dos casos |
 | S5-10 | [#264](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/264) | Implementar o webhook de confirmação de entrega de notificações | FEATURE | BACKEND | M | Média | — | Barema, item 3 (webhooks) | Tabelas de notificação da migração 15 aplicadas | Payload válido recebe 200, assinatura inválida recebe 401 e repetição é idempotente; rota e payload documentados com exemplos; testes automatizados dos casos |
 | S5-11 | [#265](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/265) | Integrar os webhooks às filas do RabbitMQ com produtores e consumidores | FEATURE | BACKEND | G | Alta | S5-09, S5-10 | Barema, item 4 (mensageria) | S5-09 e S5-10 integradas; rabbitMQ disponível no ambiente local e na nuvem | Evento de webhook chega ao consumidor e produz o efeito esperado; mensagem inválida vai para a dead-letter queue; topologia e casos de uso documentados com testes |
+
+**Realização da Frente C.** O planejamento acima é mantido como foi refinado,
+mas a implementação final usa como primeiro webhook o retorno de relatório já
+existente, e não um webhook de alteração do SharePoint. O segundo é a
+confirmação de entrega da S5-10. A S5-11 integra ao RabbitMQ somente o webhook
+de entrega, conforme a restrição de não tornar assíncrono o callback de
+relatório. Foram aprovados 44 testes focados (22 de alertas e 22 de relatórios),
+com publisher testado por double e sem alegação de execução real no ecossistema
+Microsoft. Evidência: [`docs/evidencias/sprint-05/webhooks-rabbitmq.md`](evidencias/sprint-05/webhooks-rabbitmq.md).
 
 #### Frente D — Capacidades pedidas pelo parceiro
 
@@ -1651,7 +1692,7 @@ Marcos de controle:
 | M1 — pipeline confiável | S5-01 e S5-02 concluídas; marcador real e título inválido reprovam o MR |
 | M2 — acesso por perfil | S5-03 e S5-04 concluídas; perfil negado recebe erro controlado e auditado |
 | M3 — escrita segura pelo chat | S5-05 a S5-08 concluídas; alteração permitida, negada, inválida e desfeita com evidência |
-| M4 — eventos externos | S5-09 a S5-11 concluídas; os dois webhooks publicam nas filas e os consumidores produzem efeito verificável |
+| M4 — eventos externos | S5-09 a S5-11 concluídas; o webhook de relatório produz o efeito síncrono documentado e o webhook de entrega percorre outbox, RabbitMQ e consumer com efeito verificável |
 | M5 — interface completa | S5-14, S5-17 e S5-20 a S5-24 concluídas; responsiva, acessível e coberta por testes unitários e E2E |
 | M6 — qualidade final | S5-25 a S5-36 concluídas; todos os requisitos com resultado final e evidência |
 | M7 — versão final publicada | S5-37 concluída, com rollback exercitado |

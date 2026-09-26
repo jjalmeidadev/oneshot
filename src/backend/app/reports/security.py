@@ -8,7 +8,11 @@ import os
 from dataclasses import dataclass
 from typing import Any
 
-from app.reports.errors import ReportAccessDeniedError, ReportConfigurationError
+from app.reports.errors import (
+    ReportAccessDeniedError,
+    ReportCallbackUnauthorizedError,
+    ReportConfigurationError,
+)
 from app.reports.schemas import ReportScope, ScopeType
 
 
@@ -113,4 +117,4 @@ def validate_callback_token(value: str | None) -> None:
     if not expected:
         raise ReportConfigurationError()
     if value is None or not hmac.compare_digest(value, expected):
-        raise ReportAccessDeniedError()
+        raise ReportCallbackUnauthorizedError()

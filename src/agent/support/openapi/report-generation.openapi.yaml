@@ -169,7 +169,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExecutionResponse'
-        '403':
+        '401':
           $ref: '#/components/responses/ControlledError'
         '409':
           $ref: '#/components/responses/ControlledError'

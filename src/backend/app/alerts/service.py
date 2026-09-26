@@ -22,6 +22,8 @@ from app.alerts.schemas import (
     CreateAlertRequest,
     EvaluationOutcome,
     NotificationListResponse,
+    NotificationDeliveryCallbackRequest,
+    NotificationDeliveryCallbackResponse,
     NotificationStatus,
     PrepareAlertRequest,
     PrepareAlertResponse,
@@ -209,6 +211,22 @@ class AlertService:
 
     def mark_notification_read(self, notification_id: str, identity: ReportIdentity) -> AlertNotification:
         return self.repository.mark_read(notification_id, identity.subject, _now())
+
+    def apply_delivery_callback(
+        self, callback: NotificationDeliveryCallbackRequest
+    ) -> NotificationDeliveryCallbackResponse:
+        payload = callback.model_dump(mode="json")
+        payload_hash = hashlib.sha256(
+            json.dumps(
+                payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+            ).encode("utf-8")
+        ).hexdigest()
+        value = NotificationDeliveryCallbackResponse(
+            **callback.model_dump(), received_at=_now()
+        )
+        return self.repository.save_delivery_callback(
+            value, payload_hash, payload, str(uuid4())
+        )
 
     def _notify(self, subscription: AlertSubscription, item: ScheduleItem, overdue: int, reference: date) -> None:
         # O bucket de reenvio e ancorado na virada do limiar (primeira notificacao = 0),

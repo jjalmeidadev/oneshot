@@ -34,6 +34,8 @@ services:
       REPORT_STORAGE_MODE: local
       REPORT_PORTFOLIO_SOURCE: synthetic
       REPORT_SIMULATED_IDENTITIES: "${REPORT_SIMULATED_IDENTITIES:-}"
+      REPORT_CALLBACK_TOKEN: "${REPORT_CALLBACK_TOKEN:-}"
+      NOTIFICATION_CALLBACK_TOKEN: "${NOTIFICATION_CALLBACK_TOKEN:-}"
       REPORT_ARTIFACTS_DIR: /var/lib/m7/reports
       GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
       GEMINI_MODEL: "${GEMINI_MODEL:-gemini-3.7-flash}"
@@ -178,6 +180,27 @@ services:
     cap_drop: [ALL]
     mem_limit: 512m
     cpus: 0.5
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
+
+  delivery:
+    image: *backend-image
+    command: [python, -m, app.alerts.worker, delivery]
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment: *alert-environment
+    networks: [app-private]
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    mem_limit: 256m
+    cpus: 0.25
     logging:
       driver: json-file
       options: {max-size: 10m, max-file: "3"}

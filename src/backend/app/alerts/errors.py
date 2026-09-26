@@ -19,6 +19,31 @@ class AlertNotFoundError(AlertError):
         super().__init__("ALERT_NOT_FOUND", "Alerta nao encontrado.", 404)
 
 
+class NotificationNotFoundError(AlertError):
+    def __init__(self) -> None:
+        super().__init__(
+            "NOTIFICATION_NOT_FOUND", "Notificacao nao encontrada.", 404
+        )
+
+
+class NotificationCallbackUnauthorizedError(AlertError):
+    def __init__(self) -> None:
+        super().__init__(
+            "NOTIFICATION_CALLBACK_UNAUTHORIZED",
+            "Token de callback invalido.",
+            401,
+        )
+
+
+class AlertMessageError(AlertError):
+    def __init__(self) -> None:
+        super().__init__(
+            "ALERT_INVALID_MESSAGE",
+            "Evento de alerta invalido.",
+            422,
+        )
+
+
 class AlertConflictError(AlertError):
     def __init__(self, message: str) -> None:
         super().__init__("ALERT_CONFLICT", message, 409)

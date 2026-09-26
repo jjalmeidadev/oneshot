@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.reports.cli import main as report_cli_main
-from app.reports.repository import reset_report_repository
+from app.reports.repository import get_report_repository, reset_report_repository
 from app.reports.service import _confirmation_secret, reset_report_service
 from app.reports.schemas import ReportArtifact
 from app.reports.storage import ArtifactStore
@@ -226,13 +226,47 @@ def test_power_automate_callback_is_authenticated_and_idempotent(monkeypatch):
             headers=CALLBACK_HEADER,
         )
 
-    assert denied.status_code == 403
+    assert denied.status_code == 401
+    assert denied.json()["error"]["code"] == "REPORT_CALLBACK_UNAUTHORIZED"
     assert accepted.status_code == 200
     assert accepted.json()["status"] == "completed"
+    assert get_report_repository().callback_payload_hash(callback["callback_id"])
     assert repeated.status_code == 200
     assert repeated.json()["execution_id"] == execution["execution_id"]
     assert conflicted.status_code == 409
     assert conflicted.json()["error"]["code"] == "REPORT_CONFLICT"
+
+
+def test_power_automate_callback_rejects_invalid_payload():
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/integrations/power-automate/report-results",
+            headers=CALLBACK_HEADER,
+            json={"callback_id": "short", "unexpected": True},
+        )
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "REPORT_INVALID_INPUT"
+
+
+def test_power_automate_callback_rejects_unknown_execution():
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/integrations/power-automate/report-results",
+            headers=CALLBACK_HEADER,
+            json={
+                "contract_version": "1.0",
+                "callback_id": "callback-report-unknown",
+                "execution_id": "bc436aed-b4fc-443c-ab5f-7564c89664a1",
+                "correlation_id": "correlation-unknown",
+                "flow_run_id": "flow-run-unknown",
+                "status": "completed",
+                "result": {"schema_version": "1.0"},
+            },
+        )
+
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "REPORT_NOT_FOUND"
 
 
 def test_power_automate_simulator_exercises_callback_contract(monkeypatch):

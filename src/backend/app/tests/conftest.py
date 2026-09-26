@@ -64,6 +64,7 @@ VARIAVEIS_DE_AMBIENTE_NEUTRALIZADAS = (
     "REPORT_STORAGE_MODE",
     "REPORT_REPOSITORY_MODE",
     "REPORT_SIMULATED_IDENTITIES",
+    "NOTIFICATION_CALLBACK_TOKEN",
     # Aquecimento do classificador: manter desligado deixa a suite rapida e
     # independente do download do BERTimbau.
     "PLN_WARMUP",
