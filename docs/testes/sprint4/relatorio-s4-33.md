@@ -138,3 +138,32 @@ O `conftest.py` da suíte zera as variáveis de ambiente do produto antes de cad
 **RNF03 reprova por dois dos cinco elementos do critério.** Horário, intenção e resposta são registrados em 100% das interações, e a falha também é auditada corretamente. Faltam o perfil, que depende do D-01, e as fontes, que dependem do D-04.
 
 Nenhuma das três reprovações é lacuna de teste: as três apontam para funcionalidade que não existe. As correções estão identificadas, com dono de área definido, e duas delas já estavam no backlog da Sprint 5 antes desta rodada.
+
+---
+
+## 9. Rodada 2 — S5-30 (#284), diagnóstico antes da integração das dependências
+
+**Congelamento da rodada.** Em 29/09/2026, às 14:56:04 UTC, a branch `test/reexecutar-rnf01-rnf03` estava no commit `10333c4` (mesmo commit de `develop`). A massa local tinha 9 documentos sintéticos; o banco compartilhado continha 2.801 interações. As contagens abaixo são um retrato desse instante e podem mudar com o tráfego do ambiente.
+
+**Condição de entrada.** S5-04, S5-26 e S5-27 não estavam integradas ao código desta branch; S5-25 estava em branch separada. O banco não tinha perfis nem regras de acesso ativos. Esta rodada mede o estado efetivo, mas ainda não constitui a reexecução *após as correções* exigida pela S5-30.
+
+**Execução.** De `src/backend`, com o `.env` local e acesso somente de leitura ao banco:
+
+```powershell
+.venv/Scripts/python.exe -m pytest --noconftest app/tests/test_rnf01_rnf03_s4_33.py -q -rx
+```
+
+O `--noconftest` evita que a fixture geral apague as variáveis de banco. Nenhuma credencial, pergunta ou resposta do banco foi impressa. Resultado bruto: **3 passed, 5 xfailed, 1 failed**; os nove testes implementam os seis casos, pois RNF01-P e RNF03-P têm mais de uma verificação cada.
+
+| Caso | Resultado da rodada 2 | Evidência | Estado |
+|---|---|---|---|
+| CT-RNF01-P | Os dois testes da massa e do prompt aprovaram | `pytest`: 2 passed; 9 documentos sintéticos | **Aprovado** |
+| CT-RNF01-N | O marcador sensível ainda chega ao prompt; D-06 permanece | `pytest`: xfailed estrito | **Reprovado** |
+| CT-RNF02-P | 0 perfis exigidos e 0 regras de acesso ativos | `pytest`: xfailed estrito; consultas agregadas ao banco | **Bloqueado** |
+| CT-RNF02-N | 0 eventos de negativa por perfil | `pytest`: xfailed estrito; consulta agregada ao banco | **Bloqueado** |
+| CT-RNF03-P | 2 interações processadas sem intenção macro no teste original; 21 respostas documentais sem fonte; 2.801 interações sem `user_id` | `pytest`: 1 failed e 2 xfailed; consultas agregadas ao banco | **Reprovado** |
+| CT-RNF03-N | As 89 interações com erro têm evento de auditoria de falha | `pytest`: 1 passed; 89/89 em consulta agregada | **Aprovado** |
+
+**Marcadores.** Nenhum dos cinco xfails foi removido: todos continuam representando falhas ou dependências ausentes nesta branch. O teste de horário/intenção/resposta também reprova sobre dois registros sem intenção macro. A correção do contrato de classificador opcional feita na S5-25 está em outra branch e ainda não integra este checkout.
+
+**Próxima execução necessária.** Integrar as quatro dependências, carregar os perfis, conferir o bloqueio antes do provedor e executar novamente os seis casos sobre novas interações controladas. A rodada 1 nas seções 1–8 foi preservada integralmente.
