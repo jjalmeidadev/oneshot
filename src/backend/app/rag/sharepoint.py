@@ -4,7 +4,7 @@ import re
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import AbstractSet, TYPE_CHECKING
 
 from app.nlp.schemas import AudioIntent
 
@@ -235,12 +235,24 @@ def retrieve_sharepoint_context(
     query: str,
     documents: list[SharePointDocument] | None = None,
     limit: int | None = None,
+    allowed_project_ids: AbstractSet[str] | None = None,
 ) -> list[RetrievedDocument]:
     query_tokens = _semantic_tokens(query)
     if not query_tokens:
         return []
 
     candidates = documents if documents is not None else load_sharepoint_documents()
+    if allowed_project_ids is not None:
+        allowed = {str(value).casefold() for value in allowed_project_ids}
+        candidates = [
+            document
+            for document in candidates
+            if document.project_id
+            and (
+                document.project_id.casefold() in allowed
+                or (document.project_code or "").casefold() in allowed
+            )
+        ]
     scored: list[RetrievedDocument] = []
 
     for document in candidates:

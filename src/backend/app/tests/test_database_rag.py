@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from uuid import UUID
 
 import pytest
 
@@ -7,6 +8,7 @@ from app.gemini.client import GeminiAPIError, generate_chat_response
 from app.gemini.schemas import GeminiChatRequest
 from app.nlp.schemas import AudioIntent, PublicEntity
 from app.rag.database import retrieve_context, retrieve_database_context
+from app.security import AccessContext, AccessGrant
 from test_gemini_client import FakeResponse
 
 
@@ -73,6 +75,38 @@ def _entity(value: str, entity_type: str = "projeto") -> PublicEntity:
         end=len(value),
         types=[entity_type],
     )
+
+
+def _project_access(project_id: str) -> AccessContext:
+    value = UUID(project_id)
+    return AccessContext(
+        user_id=UUID("6e7d0df0-c96a-4076-b241-64f78a05997a"),
+        auth_subject=UUID("762a2bde-87b8-413f-8656-958a2f380574"),
+        role_name="equipe_projeto",
+        allowed_subportfolio_ids=frozenset(),
+        allowed_project_ids=frozenset({value}),
+        can_read=True,
+        can_write=True,
+        can_export=True,
+        grants=(AccessGrant("projeto", None, value, True, True, True),),
+    )
+
+
+def test_database_filters_allowed_projects_in_sql_before_ranking(monkeypatch):
+    project_id = "fe091a56-310d-4465-8a13-5940d5765e1e"
+    monkeypatch.setenv("DATABASE_URL", "postgresql://test.invalid/postgres")
+    connect, connection = _connect_with_rows([])
+
+    retrieve_database_context(
+        "status do projeto",
+        connect=connect,
+        access_context=_project_access(project_id),
+    )
+
+    assert "COALESCE(se.project_id, a.project_id) = ANY(access.project_ids)" in (
+        connection.cursor_instance.executed_query
+    )
+    assert connection.cursor_instance.params[3] == [UUID(project_id)]
 
 
 def test_retrieves_source_extracts_from_database(monkeypatch):

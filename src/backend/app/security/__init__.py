@@ -1,0 +1,51 @@
+"""Autenticacao e autorizacao centrais do backend."""
+
+from app.security.access import (
+    AccessGrant,
+    AccessContext,
+    AccessProfileResponse,
+    AccessError,
+    AccessProfileNotConfiguredError,
+    AuthenticationRequiredError,
+    InvalidAccessTokenError,
+    OutOfScopeForProfileError,
+    PostgresAccessRepository,
+    SupabaseAuthVerifier,
+    UserInactiveError,
+    audit_authorization_denial,
+    access_profile_from_context,
+    authorize_message_scope,
+    authorize_operation,
+    resolve_access_context,
+)
+from app.security.http import (
+    audit_request_denial,
+    get_access_context,
+    require_export_access,
+    require_read_access,
+    require_write_access,
+)
+
+__all__ = [
+    "AccessGrant",
+    "AccessContext",
+    "AccessProfileResponse",
+    "AccessError",
+    "AccessProfileNotConfiguredError",
+    "AuthenticationRequiredError",
+    "InvalidAccessTokenError",
+    "OutOfScopeForProfileError",
+    "PostgresAccessRepository",
+    "SupabaseAuthVerifier",
+    "UserInactiveError",
+    "audit_authorization_denial",
+    "access_profile_from_context",
+    "audit_request_denial",
+    "authorize_message_scope",
+    "authorize_operation",
+    "get_access_context",
+    "require_export_access",
+    "require_read_access",
+    "require_write_access",
+    "resolve_access_context",
+]

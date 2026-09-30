@@ -4,6 +4,7 @@ import pytest
 
 from app.nlp.schemas import AudioIntent
 from app.rag.sharepoint import (
+    SharePointDocument,
     build_rag_input,
     load_sharepoint_documents,
     retrieve_sharepoint_context,
@@ -58,6 +59,44 @@ def test_does_not_inject_context_for_unrelated_question() -> None:
 
     assert results == []
     assert build_rag_input("Pergunta geral", results) == "Pergunta geral"
+
+
+def test_filters_out_of_scope_sources_before_building_model_context() -> None:
+    documents = [
+        SharePointDocument(
+            source_id="allowed",
+            title="Status permitido",
+            list_name="Projetos",
+            content="status permitido",
+            web_url="https://example.invalid/allowed",
+            last_modified="2026-09-29",
+            search_text="status projeto permitido",
+            project_id="fe091a56-310d-4465-8a13-5940d5765e1e",
+            project_code="PRJ-0442",
+        ),
+        SharePointDocument(
+            source_id="denied",
+            title="Status restrito",
+            list_name="Projetos",
+            content="conteudo que nao pode chegar ao modelo",
+            web_url="https://example.invalid/denied",
+            last_modified="2026-09-29",
+            search_text="status projeto restrito",
+            project_id="3162119e-f361-4907-9358-6d32a4e91909",
+            project_code="PRJ-0510",
+        ),
+    ]
+
+    results = retrieve_sharepoint_context(
+        "status projeto",
+        documents=documents,
+        allowed_project_ids={"PRJ-0442"},
+    )
+    prompt = build_rag_input("status projeto", results)
+
+    assert [result.document.source_id for result in results] == ["allowed"]
+    assert "status permitido" in prompt
+    assert "conteudo que nao pode chegar ao modelo" not in prompt
 
 
 @pytest.mark.parametrize(
