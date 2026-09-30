@@ -2,17 +2,16 @@ import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readFile } from 'node:fs/promises';
 
-async function authenticateForReports(
-  page: import('@playwright/test').Page,
-  mobile: boolean,
-) {
-  if (mobile) await page.getByRole('button', { name: 'Abrir conversas' }).click();
-  await page.getByLabel('Token de acesso da sessão').fill('e2e-token');
-  if (mobile) await page.getByRole('button', { name: 'Fechar menu' }).click();
+async function authenticate(page: import('@playwright/test').Page) {
+  await page.getByLabel('Persona').selectOption('pmo');
+  await page.getByLabel('Access token JWT').fill('e2e-token');
+  await page.getByRole('button', { name: 'Entrar' }).click();
+  await expect(page.getByLabel('Mensagem para o agente')).toBeVisible();
 }
 
 test('texto, fontes, métricas e navegação responsiva', async ({ page }, testInfo) => {
   await page.goto('/');
+  await authenticate(page);
   const input = page.getByRole('textbox', { name: 'Mensagem para o agente' });
   await input.fill('prazo');
   await page.getByRole('button', { name: 'Enviar mensagem' }).click();
@@ -37,6 +36,7 @@ test('texto, fontes, métricas e navegação responsiva', async ({ page }, testI
 
 test('falha controlada, recuperação e interrupção', async ({ page }) => {
   await page.goto('/');
+  await authenticate(page);
   const input = page.getByRole('textbox', { name: 'Mensagem para o agente' });
   await input.fill('falha');
   await input.press('Enter');
@@ -56,15 +56,9 @@ test('falha controlada, recuperação e interrupção', async ({ page }) => {
   ).toHaveCount(0);
 });
 
-test('gravação sintética, WAV, upload e resposta pelo backend', async ({
-  page,
-}, testInfo) => {
+test('gravação sintética, WAV, upload e resposta pelo backend', async ({ page }) => {
   await page.goto('/');
-  if (testInfo.project.name === 'mobile')
-    await page.getByRole('button', { name: 'Abrir conversas' }).click();
-  await page.getByLabel('Token de acesso da sessão').fill('e2e-token');
-  if (testInfo.project.name === 'mobile')
-    await page.getByRole('button', { name: 'Fechar menu' }).click();
+  await authenticate(page);
   await page.getByRole('button', { name: 'Gravar pergunta em áudio' }).click();
   await expect(page.getByRole('button', { name: 'Concluir gravação' })).toBeVisible();
   // O sinal sintético precisa de amostras suficientes para validar a duração.
@@ -83,6 +77,7 @@ test('acessibilidade automática e tema nos dois tamanhos', async ({
   page,
 }, testInfo) => {
   await page.goto('/');
+  await authenticate(page);
   if (testInfo.project.name === 'mobile')
     await page.getByRole('button', { name: 'Abrir conversas' }).click();
   const results = await new AxeBuilder({ page })
@@ -115,11 +110,9 @@ test('acessibilidade automática e tema nos dois tamanhos', async ({
   ).toEqual([]);
 });
 
-test('PLN inicia fluxo guiado e entrega DOCX baixavel no chat', async ({
-  page,
-}, testInfo) => {
+test('PLN inicia fluxo guiado e entrega DOCX baixavel no chat', async ({ page }) => {
   await page.goto('/');
-  await authenticateForReports(page, testInfo.project.name === 'mobile');
+  await authenticate(page);
 
   const input = page.getByRole('textbox', { name: 'Mensagem para o agente' });
   await input.fill('gere um relatorio executivo');
@@ -153,4 +146,29 @@ test('PLN inicia fluxo guiado e entrega DOCX baixavel no chat', async ({
   expect(artifactPath).not.toBeNull();
   const bytes = await readFile(artifactPath!);
   expect(bytes.subarray(0, 2).toString()).toBe('PK');
+});
+
+test('valida persona, envia Bearer e limpa o chat no logout', async ({ page }, testInfo) => {
+  await page.goto('/');
+  await expect(page.getByLabel('Access token JWT')).toBeVisible();
+  await expect(page.getByLabel('Mensagem para o agente')).toHaveCount(0);
+  await authenticate(page);
+
+  const input = page.getByLabel('Mensagem para o agente');
+  await input.fill('sessao temporaria');
+  await page.getByRole('button', { name: 'Enviar mensagem' }).click();
+  await expect(
+    page.getByRole('log').getByText('Resposta para: sessao temporaria.', {
+      exact: false,
+    }),
+  ).toBeVisible();
+
+  if (testInfo.project.name === 'mobile') {
+    await page.getByRole('button', { name: 'Abrir conversas' }).click();
+  }
+  await page.getByRole('button', { name: 'Sair' }).click();
+  await expect(page.getByLabel('Access token JWT')).toBeVisible();
+  await expect(
+    page.getByText('Resposta para: sessao temporaria.', { exact: false }),
+  ).toHaveCount(0);
 });

@@ -1,6 +1,7 @@
 export * from './client';
 export * from './constants';
 export * from './schemas';
+export * from './access';
 export {
   sendChatMessage,
   confirmProactiveSuggestion,
