@@ -16,6 +16,8 @@ from app.alerts.schemas import (
 )
 from app.alerts.service import AlertService, get_alert_service
 from app.reports.security import ReportIdentity
+from app.reports.security import can_access_scope
+from app.reports.schemas import ScopeType
 
 STEPS = [AlertWorkflowStep.PROJECT, AlertWorkflowStep.THRESHOLD, AlertWorkflowStep.SCHEDULE, AlertWorkflowStep.RESEND]
 
@@ -42,7 +44,13 @@ class AlertWorkflowService:
         if value.status != AlertWorkflowStatus.ACTIVE or value.current_step != request.step or value.revision != request.revision: raise AlertConflictError("A etapa informada nao corresponde ao workflow atual.")
         answer=self._validate(request.step,request.value)
         if request.step == AlertWorkflowStep.PROJECT:
-            allowed = {item["id"] for item in self.alerts.source.list_projects()}
+            allowed = {
+                item["id"]
+                for item in self.alerts.source.list_projects()
+                if can_access_scope(
+                    identity, ScopeType.PROJECT, item["id"], operation="write"
+                )
+            }
             if answer not in allowed:
                 raise AlertConflictError("O projeto informado nao esta disponivel.")
         previous=value.revision; value.answers[request.step.value]=answer; value.action_ids.append(request.client_action_id); value.revision+=1; value.updated_at=_now()
@@ -70,17 +78,23 @@ class AlertWorkflowService:
 
     def response(self,value: AlertWorkflowSession,identity: ReportIdentity) -> AlertWorkflowResponse:
         subscription=self.alerts.get(value.subscription_id,identity) if value.subscription_id else None
-        return AlertWorkflowResponse(session_id=value.session_id,status=value.status,current_step=value.current_step,revision=value.revision,question=self._question(value),answers=value.answers,confirmation_summary=value.prepared.confirmation_summary if value.prepared else None,warnings=value.prepared.warnings if value.prepared else [],subscription=subscription)
+        return AlertWorkflowResponse(session_id=value.session_id,status=value.status,current_step=value.current_step,revision=value.revision,question=self._question(value, identity),answers=value.answers,confirmation_summary=value.prepared.confirmation_summary if value.prepared else None,warnings=value.prepared.warnings if value.prepared else [],subscription=subscription)
 
     def _authorized(self,session_id: str,identity: ReportIdentity) -> AlertWorkflowSession:
         value=self.repository.get_workflow(session_id)
         if value.requested_by != identity.subject: raise AlertAccessDeniedError()
         return value
 
-    def _question(self,value: AlertWorkflowSession) -> AlertWorkflowQuestion | None:
+    def _question(self,value: AlertWorkflowSession, identity: ReportIdentity) -> AlertWorkflowQuestion | None:
         if value.status != AlertWorkflowStatus.ACTIVE: return None
         if value.current_step==AlertWorkflowStep.PROJECT:
-            options=[AlertWorkflowOption(value=item["id"],label=item["label"]) for item in self.alerts.source.list_projects()]
+            options=[
+                AlertWorkflowOption(value=item["id"], label=item["label"])
+                for item in self.alerts.source.list_projects()
+                if can_access_scope(
+                    identity, ScopeType.PROJECT, item["id"], operation="write"
+                )
+            ]
             return AlertWorkflowQuestion(step=value.current_step,prompt="Qual projeto deve ser monitorado?",input_type="single_select",options=options)
         if value.current_step==AlertWorkflowStep.THRESHOLD: return AlertWorkflowQuestion(step=value.current_step,prompt="Depois de quantos dias corridos de atraso devo avisar?",input_type="number")
         if value.current_step==AlertWorkflowStep.SCHEDULE: return AlertWorkflowQuestion(step=value.current_step,prompt="Com que frequencia devo verificar?",input_type="single_select",options=[AlertWorkflowOption(value="daily",label="Diariamente as 08:00"),AlertWorkflowOption(value="weekly",label="Toda segunda as 08:00")])
