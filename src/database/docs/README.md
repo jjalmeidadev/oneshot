@@ -14,6 +14,8 @@ Os scripts atuais sao:
 - `../sql/06_verify_secondary_intents.sql`: verifica leitura, unicidade, integridade referencial e reexecucao da carga sem persistir dados de teste.
 - `../sql/07_add_pending_proactive_suggestions.sql`: cria o armazenamento compartilhado das sugestões pendentes;
 - `../sql/08_add_prepared_proactive_response.sql`: adiciona a resposta secundária preparada na chamada principal e remove pendências legadas incompatíveis.
+- `../sql/19_auth_access_foundation.sql`: adiciona o perfil `consulta`, garante unicidade de regras de acesso com `NULLS NOT DISTINCT`, documenta o vinculo com Supabase Auth e protege `secondary_intents` com RLS sem policies permissivas;
+- `../sql/20_rollback_auth_access_foundation.sql`: reverte especificamente a fundacao da migration 19 sem remover tabelas ou dados e bloqueia a reversao se ja existirem usuarios `consulta`.
 
 ## Banco-alvo
 
@@ -117,6 +119,14 @@ psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM public.project_artifacts WHERE met
 psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM public.source_extracts WHERE metadata ->> 'source_file' IN ('base_atendimento.json', 'comunicados_servico.json', 'procedimentos_operacionais.json');"
 ```
 
+## Carga de identidades e acessos da S5-03
+
+A criação idempotente das quatro identidades sintéticas do MVP, dos usuários
+públicos, das regras individuais e do escopo de demonstração está documentada
+em [`s5-03-carga-acessos.md`](s5-03-carga-acessos.md). A criação em
+`auth.users` usa exclusivamente a Admin API oficial do Supabase; a documentação
+inclui o modo `--dry-run`, as variáveis exigidas e consultas por identificador.
+
 ## Verificacao S4-08 e S4-09 no Supabase
 
 No PowerShell, com `DATABASE_URL` ou `SUPABASE_DATABASE_URL` definido apenas
@@ -131,10 +141,11 @@ O comando aplica o baseline em um banco vazio, executa `02_initial_data.sql` e
 registra um evento em `audit_events`. A evidencia sem segredos e gravada em
 `docs/evidencias/` com o mesmo `correlation_id`.
 
-O baseline atual deve retornar **27 tabelas, 46 indices explicitos e 27
+O baseline atual deve retornar **27 tabelas, 47 indices explicitos e 27
 triggers**. A expectativa anterior de 25/43/25 era do modelo antes das duas
 evolucoes posteriores: `secondary_intents` (+1/+1/+1) e
-`pending_proactive_suggestions` (+1/+2/+1). A reexecucao de
+`pending_proactive_suggestions` (+1/+2/+1); a fundacao de acesso acrescenta
+um indice unico em `access_rules`. A reexecucao de
 `01_create_database.sql` e um erro esperado, pois ele e um baseline para banco
 vazio; a idempotencia requerida e comprovada pela carga repetida.
 

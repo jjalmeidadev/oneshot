@@ -2732,6 +2732,26 @@ As principais regras de integridade do modelo lógico são:
 - perguntas fora do catálogo devem gerar registros em out_of_scope_requests;
 - leituras, classificações, consultas a fontes, respostas do Copilot e acionamentos de fluxos devem gerar eventos em audit_events.
 
+### 4.3.1 Matriz de acesso do MVP
+
+No MVP, a identidade autenticada vem do Supabase Auth. O UUID do claim `sub`
+é persistido como texto em `public.users.entra_object_id`, enquanto a
+autorização é resolvida por regras associadas ao usuário em
+`public.access_rules`. Papéis e permissões não são mantidos em
+`user_metadata` nem em custom claims do JWT nesta etapa.
+
+| Perfil funcional | `role_name` interno | Escopo da regra | Referência da carga | Leitura | Escrita | Exportação |
+|---|---|---|---|:---:|:---:|:---:|
+| PMO | `pmo` | Portfólio | Todo o portfólio | Sim | Não | Sim |
+| Líder de subportfólio | `lider_subportfolio` | Subportfólio | `MOD` | Sim | Não | Sim |
+| Gerente de projeto | `equipe_projeto` | Projeto | `PRJ-0442` | Sim | Sim | Sim |
+| Consulta | `consulta` | Projeto | `PRJ-0510` | Sim | Não | Não |
+
+A massa da S5-03 também cria o subportfólio `DEMO-ACESSO` e o projeto
+`PRJ-DEMO-ACESSO`, ambos identificados explicitamente como sintéticos. Como a
+regra do líder aponta somente para `MOD`, esse segundo subportfólio permite
+validar a negação cruzada sem usar dados reais.
+
 ## 4.4 Modelo Físico de Dados
 
 O modelo físico corresponde à implementação real do banco de dados. Para o MVP, ele foi materializado em um script SQL executável para PostgreSQL 14+, contendo tipos de dados exatos, tamanhos de campos, chaves primárias, chaves estrangeiras, restrições, índices e comentários.
