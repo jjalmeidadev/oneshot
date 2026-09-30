@@ -62,9 +62,9 @@ describe('Sessão de acesso em memória', () => {
   });
 
   it('abre a aplicação quando persona e perfil real correspondem sem expor o token', async () => {
-    const fetch = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify(profile('pmo')), { status: 200 }),
-    );
+    const fetch = vi
+      .fn()
+      .mockResolvedValue(new Response(JSON.stringify(profile('pmo')), { status: 200 }));
     vi.stubGlobal('fetch', fetch);
     render(<App />);
 
@@ -134,13 +134,14 @@ describe('Sessão de acesso em memória', () => {
       if (background) return Promise.resolve(background);
       if (url.includes('/access/me')) {
         const authorization = (init?.headers as Record<string, string>)?.Authorization;
-        const selected = authorization === 'Bearer jwt-consulta'
-          ? profile('consulta', {
-              display_name: '[DEMO] Consulta',
-              scope_label: 'Projeto PRJ-0510',
-              can_export: false,
-            })
-          : profile('pmo');
+        const selected =
+          authorization === 'Bearer jwt-consulta'
+            ? profile('consulta', {
+                display_name: '[DEMO] Consulta',
+                scope_label: 'Projeto PRJ-0510',
+                can_export: false,
+              })
+            : profile('pmo');
         return Promise.resolve(new Response(JSON.stringify(selected)));
       }
       return Promise.resolve(new Response(JSON.stringify(chatResponse)));
@@ -213,9 +214,9 @@ describe('Sessão de acesso em memória', () => {
   });
 
   it('recarregar a árvore exige nova entrada e o formulário funciona por teclado', async () => {
-    const fetch = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify(profile('pmo')), { status: 200 }),
-    );
+    const fetch = vi
+      .fn()
+      .mockResolvedValue(new Response(JSON.stringify(profile('pmo')), { status: 200 }));
     vi.stubGlobal('fetch', fetch);
     const view = render(<App />);
     expect(screen.getByLabelText('Persona')).toHaveFocus();

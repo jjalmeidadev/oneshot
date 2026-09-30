@@ -39,9 +39,9 @@ describe('AppShell, barra lateral, sessão e tema', () => {
   it('integra envio, fontes, busca, seleção, exclusão e tema', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockImplementation((url: string) =>
-        Promise.resolve(successfulResponse(url)),
-      ),
+      vi
+        .fn()
+        .mockImplementation((url: string) => Promise.resolve(successfulResponse(url))),
     );
     render(<App />);
     await authenticate();
@@ -72,15 +72,18 @@ describe('AppShell, barra lateral, sessão e tema', () => {
   });
 
   it('UserCard mostra perfil sem token e AppShell anuncia falhas', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockImplementation((url: string) => {
-      if (url.includes('/access/me')) {
-        return Promise.resolve(new Response(JSON.stringify(accessProfile)));
-      }
-      if (url.includes('/notifications') || url.includes('/alert-subscriptions')) {
-        return Promise.resolve(successfulResponse(url));
-      }
-      return Promise.reject(new TypeError('private error'));
-    }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((url: string) => {
+        if (url.includes('/access/me')) {
+          return Promise.resolve(new Response(JSON.stringify(accessProfile)));
+        }
+        if (url.includes('/notifications') || url.includes('/alert-subscriptions')) {
+          return Promise.resolve(successfulResponse(url));
+        }
+        return Promise.reject(new TypeError('private error'));
+      }),
+    );
     render(<App />);
     await authenticate();
     expect(screen.getByText('[DEMO] PMO')).toBeVisible();
@@ -106,9 +109,9 @@ describe('AppShell, barra lateral, sessão e tema', () => {
     );
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockImplementation((url: string) =>
-        Promise.resolve(successfulResponse(url)),
-      ),
+      vi
+        .fn()
+        .mockImplementation((url: string) => Promise.resolve(successfulResponse(url))),
     );
     render(<App />);
     await authenticate();

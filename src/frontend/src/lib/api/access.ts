@@ -1,10 +1,6 @@
 import { API_BASE_URL, parseError } from './client';
 
-export type ProfileKey =
-  | 'pmo'
-  | 'lider_subportfolio'
-  | 'gerente_projeto'
-  | 'consulta';
+export type ProfileKey = 'pmo' | 'lider_subportfolio' | 'gerente_projeto' | 'consulta';
 
 export type AccessProfile = {
   display_name: string;

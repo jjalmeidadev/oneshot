@@ -137,18 +137,25 @@ describe('Estado e integração do chat', () => {
     await act(async () => {
       await authenticated.result.current.sendAudio(new Blob(['wav']));
     });
-    expect(authenticated.result.current.activeConversation?.messages[0].origin).toBe('audio');
+    expect(authenticated.result.current.activeConversation?.messages[0].origin).toBe(
+      'audio',
+    );
     expect(authenticated.result.current.activeConversation?.messages[0].content).toBe(
       'pergunta falada',
     );
-    expect(authenticated.result.current.activeConversation?.messages[1].content).toBe(response.text);
-    expect(authenticated.result.current.activeConversation?.messages[1].entities?.[0].value).toBe(
-      'Projeto Linha Verde',
+    expect(authenticated.result.current.activeConversation?.messages[1].content).toBe(
+      response.text,
     );
-    expect(authenticated.result.current.activeConversation?.messages[1].metrics?.sttMs).toBe(3);
-    expect(authenticated.result.current.activeConversation?.messages[1].metrics?.backendTotalMs).toBe(
-      12,
-    );
+    expect(
+      authenticated.result.current.activeConversation?.messages[1].entities?.[0].value,
+    ).toBe('Projeto Linha Verde');
+    expect(
+      authenticated.result.current.activeConversation?.messages[1].metrics?.sttMs,
+    ).toBe(3);
+    expect(
+      authenticated.result.current.activeConversation?.messages[1].metrics
+        ?.backendTotalMs,
+    ).toBe(12);
   });
   it('aceita somente a sugestão vinculada e acrescenta a resposta confirmada', async () => {
     const confirmed = {

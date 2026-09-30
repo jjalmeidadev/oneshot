@@ -148,7 +148,9 @@ test('PLN inicia fluxo guiado e entrega DOCX baixavel no chat', async ({ page })
   expect(bytes.subarray(0, 2).toString()).toBe('PK');
 });
 
-test('valida persona, envia Bearer e limpa o chat no logout', async ({ page }, testInfo) => {
+test('valida persona, envia Bearer e limpa o chat no logout', async ({
+  page,
+}, testInfo) => {
   await page.goto('/');
   await expect(page.getByLabel('Access token JWT')).toBeVisible();
   await expect(page.getByLabel('Mensagem para o agente')).toHaveCount(0);

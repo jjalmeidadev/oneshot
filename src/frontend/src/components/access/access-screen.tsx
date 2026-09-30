@@ -105,7 +105,10 @@ export function AccessScreen() {
           </div>
 
           {message && (
-            <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm text-danger">
+            <p
+              role="alert"
+              className="rounded-lg bg-danger-soft p-3 text-sm text-danger"
+            >
               {message}
             </p>
           )}

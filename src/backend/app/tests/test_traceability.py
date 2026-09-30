@@ -246,10 +246,8 @@ def test_audio_real_classifier_contract_and_minimal_persistence(monkeypatch):
     external_conversation_id = "s4-13-audio-success"
     monkeypatch.setenv("PLN_WARMUP", "0")
     monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
-    monkeypatch.setenv("AUDIO_SIMULATED_IDENTITIES", "token-de-teste=usuario-teste")
     cursor = FakeCursor(
         fetch_values=[
-            None,
             ("intent-1",),
             None,
             ("conversation-1",),
@@ -320,10 +318,8 @@ def test_audio_real_classifier_contract_and_minimal_persistence(monkeypatch):
 def test_audio_classifier_failure_is_persisted_and_correlated(monkeypatch):
     external_conversation_id = "s4-13-audio-classifier-failure"
     monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
-    monkeypatch.setenv("AUDIO_SIMULATED_IDENTITIES", "token-de-teste=usuario-teste")
     cursor = FakeCursor(
         fetch_values=[
-            None,
             None,
             ("conversation-1",),
             ("interaction-1",),
