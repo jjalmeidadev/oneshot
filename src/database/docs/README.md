@@ -121,11 +121,9 @@ psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM public.source_extracts WHERE metad
 
 ## Carga de identidades e acessos da S5-03
 
-A criação idempotente das quatro identidades sintéticas do MVP, dos usuários
-públicos, das regras individuais e do escopo de demonstração está documentada
-em [`s5-03-carga-acessos.md`](s5-03-carga-acessos.md). A criação em
-`auth.users` usa exclusivamente a Admin API oficial do Supabase; a documentação
-inclui o modo `--dry-run`, as variáveis exigidas e consultas por identificador.
+A autenticação, a carga idempotente das identidades sintéticas e o controle por
+perfil e escopo estão consolidados na
+[Seção 4.3.1 do Projeto](../../../docs/Projeto.md#431-autenticação-e-controle-de-acesso-do-mvp).
 
 ## Verificacao S4-08 e S4-09 no Supabase
 
