@@ -43,7 +43,10 @@ from app.security.access import (
     AccessGrant,
     AuthenticationRequiredError,
     InvalidAccessTokenError,
+    PasswordLoginResponse,
+    access_profile_from_context,
 )
+import app.main as main_module
 from app.security.http import get_access_context
 
 E2E_AUTH_SUBJECT = UUID('00000000-0000-0000-0000-000000000101')
@@ -70,6 +73,15 @@ E2E_ACCESS_CONTEXT = AccessContext(
     display_name='Usuario E2E',
     email='usuario.e2e@oneshot.example.com',
 )
+
+
+def authenticate_e2e_persona(profile_key, password):
+    if profile_key != 'pmo' or password != 'e2e-password':
+        raise InvalidAccessTokenError()
+    return PasswordLoginResponse(
+        access_token='e2e-token',
+        profile=access_profile_from_context(E2E_ACCESS_CONTEXT),
+    )
 
 
 def resolve_e2e_access(
@@ -124,4 +136,5 @@ async def transcribe(data, probe, language):
 pipeline.generate_chat_response = generate
 inference.classify = classify
 transcription.transcribe = transcribe
+main_module.authenticate_persona = authenticate_e2e_persona
 app.dependency_overrides[get_access_context] = resolve_e2e_access

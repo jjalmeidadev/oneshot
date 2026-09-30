@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 
 async function authenticate(page: import('@playwright/test').Page) {
   await page.getByLabel('Persona').selectOption('pmo');
-  await page.getByLabel('Access token JWT').fill('e2e-token');
+  await page.getByLabel('Senha', { exact: true }).fill('e2e-password');
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page.getByLabel('Mensagem para o agente')).toBeVisible();
 }
@@ -148,11 +148,11 @@ test('PLN inicia fluxo guiado e entrega DOCX baixavel no chat', async ({ page })
   expect(bytes.subarray(0, 2).toString()).toBe('PK');
 });
 
-test('valida persona, envia Bearer e limpa o chat no logout', async ({
+test('autentica a persona, envia Bearer e limpa o chat no logout', async ({
   page,
 }, testInfo) => {
   await page.goto('/');
-  await expect(page.getByLabel('Access token JWT')).toBeVisible();
+  await expect(page.getByLabel('Senha', { exact: true })).toBeVisible();
   await expect(page.getByLabel('Mensagem para o agente')).toHaveCount(0);
   await authenticate(page);
 
@@ -169,7 +169,7 @@ test('valida persona, envia Bearer e limpa o chat no logout', async ({
     await page.getByRole('button', { name: 'Abrir conversas' }).click();
   }
   await page.getByRole('button', { name: 'Sair' }).click();
-  await expect(page.getByLabel('Access token JWT')).toBeVisible();
+  await expect(page.getByLabel('Senha', { exact: true })).toBeVisible();
   await expect(
     page.getByText('Resposta para: sessao temporaria.', { exact: false }),
   ).toHaveCount(0);

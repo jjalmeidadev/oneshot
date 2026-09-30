@@ -19,7 +19,7 @@ from typing import Any, Literal, Protocol
 from uuid import UUID, uuid4
 
 import httpx
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.database.connection import open_database_connection
 
@@ -31,11 +31,23 @@ PROJECT_REFERENCE_PATTERN = re.compile(
     re.IGNORECASE,
 )
 AccessOperation = Literal["read", "write", "export"]
+ProfileKey = Literal[
+    "pmo",
+    "lider_subportfolio",
+    "gerente_projeto",
+    "consulta",
+]
 PROFILE_KEYS = {
     "pmo": "pmo",
     "lider_subportfolio": "lider_subportfolio",
     "equipe_projeto": "gerente_projeto",
     "consulta": "consulta",
+}
+PERSONA_EMAILS: dict[ProfileKey, str] = {
+    "pmo": "mvp.pmo@oneshot.example.com",
+    "lider_subportfolio": "mvp.lider-subportfolio@oneshot.example.com",
+    "gerente_projeto": "mvp.gerente-projeto@oneshot.example.com",
+    "consulta": "mvp.consulta@oneshot.example.com",
 }
 logger = logging.getLogger(__name__)
 
@@ -68,6 +80,24 @@ class InvalidAccessTokenError(AccessError):
             "INVALID_ACCESS_TOKEN",
             "O token de acesso e invalido ou expirou.",
             401,
+        )
+
+
+class InvalidCredentialsError(AccessError):
+    def __init__(self) -> None:
+        super().__init__(
+            "INVALID_CREDENTIALS",
+            "Persona ou senha inválida.",
+            401,
+        )
+
+
+class AuthenticationUnavailableError(AccessError):
+    def __init__(self) -> None:
+        super().__init__(
+            "AUTHENTICATION_UNAVAILABLE",
+            "O serviço de autenticação está indisponível. Tente novamente.",
+            503,
         )
 
 
@@ -162,6 +192,20 @@ class AccessProfileResponse(BaseModel):
     can_export: bool
 
 
+class PasswordLoginRequest(BaseModel):
+    """Credenciais mínimas aceitas pela entrada simplificada do MVP."""
+
+    profile_key: ProfileKey
+    password: str = Field(min_length=1, max_length=256)
+
+
+class PasswordLoginResponse(BaseModel):
+    """JWT temporário e perfil verificado devolvidos após o login."""
+
+    access_token: str
+    profile: AccessProfileResponse
+
+
 class TokenVerifier(Protocol):
     def verify(self, access_token: str) -> AuthIdentity: ...
 
@@ -216,6 +260,60 @@ class SupabaseAuthVerifier:
         except (KeyError, TypeError, ValueError) as error:
             raise InvalidAccessTokenError() from error
         return AuthIdentity(subject=subject)
+
+
+class SupabasePasswordAuthenticator:
+    """Troca e-mail sintético e senha por um JWT no Supabase Auth."""
+
+    def __init__(
+        self,
+        supabase_url: str | None = None,
+        public_key: str | None = None,
+        *,
+        client: httpx.Client | None = None,
+    ) -> None:
+        self._supabase_url = (supabase_url or os.getenv("SUPABASE_URL", "")).strip()
+        self._public_key = public_key or _public_api_key()
+        self._client = client
+        if not self._supabase_url:
+            raise RuntimeError("Configure SUPABASE_URL no ambiente do backend.")
+        if not self._public_key:
+            raise RuntimeError(
+                "Configure SUPABASE_PUBLISHABLE_KEY ou SUPABASE_ANON_KEY no backend."
+            )
+        if _is_privileged_key(self._public_key):
+            raise RuntimeError("Use uma chave publicavel, nunca uma secret/service role.")
+
+    def sign_in(self, email: str, password: str) -> str:
+        owned_client = self._client is None
+        client = self._client or httpx.Client(timeout=AUTH_TIMEOUT_SECONDS)
+        try:
+            response = client.post(
+                self._supabase_url.rstrip("/") + "/auth/v1/token",
+                params={"grant_type": "password"},
+                headers={
+                    "apikey": self._public_key,
+                    "Content-Type": "application/json",
+                },
+                json={"email": email, "password": password},
+            )
+        except httpx.HTTPError as error:
+            raise AuthenticationUnavailableError() from error
+        finally:
+            if owned_client:
+                client.close()
+
+        if response.status_code in {400, 401}:
+            raise InvalidCredentialsError()
+        if response.status_code != 200:
+            raise AuthenticationUnavailableError()
+        try:
+            access_token = str(response.json()["access_token"]).strip()
+        except (KeyError, TypeError, ValueError) as error:
+            raise AuthenticationUnavailableError() from error
+        if not access_token:
+            raise AuthenticationUnavailableError()
+        return access_token
 
 
 class PostgresAccessRepository:
@@ -355,6 +453,35 @@ def resolve_access_context(
     access_token = _bearer_token(authorization)
     identity = (verifier or SupabaseAuthVerifier()).verify(access_token)
     return (repository or PostgresAccessRepository()).resolve(identity.subject)
+
+
+def authenticate_persona(
+    profile_key: ProfileKey,
+    password: str,
+    *,
+    authenticator: SupabasePasswordAuthenticator | None = None,
+    verifier: TokenVerifier | None = None,
+    repository: AccessRepository | None = None,
+) -> PasswordLoginResponse:
+    """Autentica a conta fixa da persona e confirma seu perfil no domínio."""
+
+    try:
+        password_authenticator = authenticator or SupabasePasswordAuthenticator()
+    except RuntimeError as error:
+        raise AuthenticationUnavailableError() from error
+    access_token = password_authenticator.sign_in(
+        PERSONA_EMAILS[profile_key],
+        password,
+    )
+    context = resolve_access_context(
+        f"Bearer {access_token}",
+        verifier=verifier,
+        repository=repository,
+    )
+    profile = access_profile_from_context(context)
+    if profile.profile_key != profile_key:
+        raise InvalidCredentialsError()
+    return PasswordLoginResponse(access_token=access_token, profile=profile)
 
 
 def authorize_operation(

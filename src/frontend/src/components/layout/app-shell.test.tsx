@@ -17,14 +17,16 @@ const accessProfile = {
 
 async function authenticate() {
   await userEvent.selectOptions(screen.getByLabelText('Persona'), 'pmo');
-  await userEvent.type(screen.getByLabelText('Access token JWT'), 'test-token');
+  await userEvent.type(screen.getByLabelText('Senha'), 'test-password');
   await userEvent.click(screen.getByRole('button', { name: 'Entrar' }));
   await screen.findByLabelText('Mensagem para o agente');
 }
 
 function successfulResponse(url: string): Response {
-  if (url.includes('/access/me')) {
-    return new Response(JSON.stringify(accessProfile));
+  if (url.includes('/access/login')) {
+    return new Response(
+      JSON.stringify({ access_token: 'test-token', profile: accessProfile }),
+    );
   }
   if (url.includes('/notifications')) {
     return new Response(JSON.stringify({ items: [], unread_count: 0 }));
@@ -75,8 +77,8 @@ describe('AppShell, barra lateral, sessão e tema', () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockImplementation((url: string) => {
-        if (url.includes('/access/me')) {
-          return Promise.resolve(new Response(JSON.stringify(accessProfile)));
+        if (url.includes('/access/login')) {
+          return Promise.resolve(successfulResponse(url));
         }
         if (url.includes('/notifications') || url.includes('/alert-subscriptions')) {
           return Promise.resolve(successfulResponse(url));
@@ -88,7 +90,7 @@ describe('AppShell, barra lateral, sessão e tema', () => {
     await authenticate();
     expect(screen.getByText('[DEMO] PMO')).toBeVisible();
     expect(screen.getByText('Portfólio completo')).toBeVisible();
-    expect(document.body).not.toHaveTextContent('test-token');
+    expect(document.body).not.toHaveTextContent('test-password');
     expect(window.localStorage.getItem('test-token')).toBeNull();
     fireEvent.change(screen.getByRole('textbox', { name: 'Mensagem para o agente' }), {
       target: { value: 'prazo' },

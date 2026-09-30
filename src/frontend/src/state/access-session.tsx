@@ -11,7 +11,7 @@ import {
 
 import {
   ApiError,
-  getCurrentAccessProfile,
+  loginWithPassword,
   type AccessProfile,
   type ProfileKey,
 } from '@/lib/api';
@@ -30,12 +30,12 @@ type ValidatedSession = {
   sessionKey: string;
 };
 
-type LoginResult = { ok: true } | { ok: false; clearToken: boolean };
+type LoginResult = { ok: true } | { ok: false; clearPassword: boolean };
 
 type AccessSessionValue = {
   session: ValidatedSession | null;
   entryMessage: string | null;
-  login: (profileKey: ProfileKey, accessToken: string) => Promise<LoginResult>;
+  login: (profileKey: ProfileKey, password: string) => Promise<LoginResult>;
   logout: () => void;
 };
 
@@ -60,16 +60,19 @@ export function AccessSessionProvider({ children }: { children: ReactNode }) {
   );
 
   const login = useCallback(
-    async (profileKey: ProfileKey, accessToken: string): Promise<LoginResult> => {
+    async (profileKey: ProfileKey, password: string): Promise<LoginResult> => {
       setEntryMessage(null);
       try {
-        const profile = await getCurrentAccessProfile(accessToken);
+        const { access_token: accessToken, profile } = await loginWithPassword(
+          profileKey,
+          password,
+        );
         if (profile.profile_key !== profileKey) {
           setSession(null);
           setEntryMessage(
-            `O token informado pertence ao perfil ${PROFILE_LABELS[profile.profile_key]}, mas foi selecionado ${PROFILE_LABELS[profileKey]}.`,
+            `A conta autenticada pertence ao perfil ${PROFILE_LABELS[profile.profile_key]}, mas foi selecionado ${PROFILE_LABELS[profileKey]}.`,
           );
-          return { ok: false, clearToken: true };
+          return { ok: false, clearPassword: true };
         }
         setSession({
           accessToken,
@@ -81,10 +84,10 @@ export function AccessSessionProvider({ children }: { children: ReactNode }) {
         setSession(null);
         setEntryMessage(
           error instanceof ApiError && error.status === 401
-            ? 'O token informado é inválido ou expirou.'
-            : 'Não foi possível validar o acesso. Tente novamente.',
+            ? 'Persona ou senha inválida.'
+            : 'Não foi possível autenticar. Tente novamente.',
         );
-        return { ok: false, clearToken: true };
+        return { ok: false, clearPassword: true };
       }
     },
     [],

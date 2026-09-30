@@ -17,13 +17,19 @@ from app.security import (
     AccessGrant,
     AccessContext,
     AccessProfileNotConfiguredError,
+    AuthenticationUnavailableError,
     AuthenticationRequiredError,
+    InvalidCredentialsError,
     InvalidAccessTokenError,
+    PasswordLoginResponse,
     PostgresAccessRepository,
+    SupabasePasswordAuthenticator,
     SupabaseAuthVerifier,
     UserInactiveError,
     OutOfScopeForProfileError,
     audit_authorization_denial,
+    access_profile_from_context,
+    authenticate_persona,
     authorize_message_scope,
     authorize_operation,
     get_access_context,
@@ -120,6 +126,18 @@ class RepositoryDouble:
         return self.result
 
 
+@dataclass
+class PasswordAuthenticatorDouble:
+    access_token: str = "jwt-gerado"
+    email: str | None = None
+    password: str | None = None
+
+    def sign_in(self, email, password):
+        self.email = email
+        self.password = password
+        return self.access_token
+
+
 def base_context(role_name="pmo"):
     return AccessContext(
         user_id=PUBLIC_USER_ID,
@@ -205,6 +223,78 @@ def test_token_valido_e_role_do_cliente_ignorado():
     assert requests[0].url.path == "/auth/v1/user"
     assert requests[0].headers["authorization"] == "Bearer token-valido"
     assert requests[0].headers["apikey"] == "sb_publishable_test"
+
+
+def test_login_por_persona_mapeia_email_e_confirma_perfil():
+    authenticator = PasswordAuthenticatorDouble()
+
+    response = authenticate_persona(
+        "pmo",
+        "senha-digitada",
+        authenticator=authenticator,
+        verifier=VerifierDouble(IdentityDouble(AUTH_SUBJECT)),
+        repository=RepositoryDouble(base_context()),
+    )
+
+    assert authenticator.email == "mvp.pmo@oneshot.example.com"
+    assert authenticator.password == "senha-digitada"
+    assert response.access_token == "jwt-gerado"
+    assert response.profile.profile_key == "pmo"
+
+
+def test_login_recusa_conta_que_nao_corresponde_a_persona():
+    with pytest.raises(InvalidCredentialsError):
+        authenticate_persona(
+            "pmo",
+            "senha-digitada",
+            authenticator=PasswordAuthenticatorDouble(),
+            verifier=VerifierDouble(IdentityDouble(AUTH_SUBJECT)),
+            repository=RepositoryDouble(base_context(role_name="consulta")),
+        )
+
+
+def test_login_supabase_traduz_senha_invalida_sem_expor_resposta():
+    requests = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(400, json={"error_description": "detalhe privado"})
+
+    authenticator = SupabasePasswordAuthenticator(
+        "https://lykmrtukumqfdrwqkjzq.supabase.co",
+        "sb_publishable_test",
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+
+    with pytest.raises(InvalidCredentialsError) as error:
+        authenticator.sign_in("mvp.pmo@oneshot.example.com", "senha-incorreta")
+
+    assert error.value.code == "INVALID_CREDENTIALS"
+    assert "privado" not in error.value.message
+    assert requests[0].url.path == "/auth/v1/token"
+    assert requests[0].url.params["grant_type"] == "password"
+    assert requests[0].headers["apikey"] == "sb_publishable_test"
+    assert json.loads(requests[0].content) == {
+        "email": "mvp.pmo@oneshot.example.com",
+        "password": "senha-incorreta",
+    }
+
+
+def test_login_supabase_traduz_indisponibilidade():
+    authenticator = SupabasePasswordAuthenticator(
+        "https://lykmrtukumqfdrwqkjzq.supabase.co",
+        "sb_publishable_test",
+        client=httpx.Client(
+            transport=httpx.MockTransport(
+                lambda _request: httpx.Response(503, json={"message": "offline"})
+            )
+        ),
+    )
+
+    with pytest.raises(AuthenticationUnavailableError) as error:
+        authenticator.sign_in("mvp.pmo@oneshot.example.com", "senha")
+
+    assert error.value.status_code == 503
 
 
 def test_token_ausente():
@@ -611,6 +701,46 @@ def test_access_me_rejeita_token_ausente():
 
     assert response.status_code == 401
     assert response.json()["error"]["code"] == "AUTHENTICATION_REQUIRED"
+
+
+def test_access_login_e_publico_e_devolve_token_e_perfil(monkeypatch):
+    expected = PasswordLoginResponse(
+        access_token="jwt-gerado",
+        profile=access_profile_from_context(base_context()),
+    )
+    calls = []
+
+    def login(profile_key, password):
+        calls.append((profile_key, password))
+        return expected
+
+    monkeypatch.setattr("app.main.authenticate_persona", login)
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/access/login",
+            json={"profile_key": "pmo", "password": "senha-digitada"},
+        )
+
+    assert response.status_code == 200
+    assert response.json() == expected.model_dump()
+    assert response.headers["cache-control"] == "no-store"
+    assert calls == [("pmo", "senha-digitada")]
+
+
+def test_access_login_rejeita_entrada_incompleta_com_erro_controlado():
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/access/login",
+            json={"profile_key": "pmo", "password": ""},
+        )
+
+    assert response.status_code == 422
+    assert response.json() == {
+        "error": {
+            "code": "INVALID_INPUT",
+            "message": "Selecione uma persona e informe a senha.",
+        }
+    }
 
 
 def test_access_me_rejeita_token_invalido():

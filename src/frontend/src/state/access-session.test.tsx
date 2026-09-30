@@ -29,10 +29,17 @@ function profile(
   };
 }
 
-async function enter(profileKey: ProfileKey = 'pmo', token = 'jwt-secret') {
+async function enter(profileKey: ProfileKey = 'pmo', password = 'senha-secreta') {
   await userEvent.selectOptions(screen.getByLabelText('Persona'), profileKey);
-  await userEvent.type(screen.getByLabelText('Access token JWT'), token);
+  await userEvent.type(screen.getByLabelText('Senha'), password);
   await userEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+}
+
+function loginResponse(profileKey: ProfileKey = 'pmo', accessToken = 'jwt-secret') {
+  return new Response(
+    JSON.stringify({ access_token: accessToken, profile: profile(profileKey) }),
+    { status: 200 },
+  );
 }
 
 function backgroundResponse(url: string): Response | null {
@@ -46,7 +53,7 @@ function backgroundResponse(url: string): Response | null {
 }
 
 describe('Sessão de acesso em memória', () => {
-  it('não monta a aplicação antes da validação e exige persona e token', async () => {
+  it('não monta a aplicação antes da validação e exige persona e senha', async () => {
     const fetch = vi.fn();
     vi.stubGlobal('fetch', fetch);
     render(<App />);
@@ -55,43 +62,47 @@ describe('Sessão de acesso em memória', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Entrar' }));
 
     expect(screen.getByRole('alert')).toHaveTextContent(
-      'Selecione uma persona e informe o token',
+      'Selecione uma persona e informe a senha',
     );
     expect(fetch).not.toHaveBeenCalled();
     expect(screen.getByLabelText('Persona')).toHaveFocus();
   });
 
-  it('abre a aplicação quando persona e perfil real correspondem sem expor o token', async () => {
-    const fetch = vi
-      .fn()
-      .mockResolvedValue(new Response(JSON.stringify(profile('pmo')), { status: 200 }));
+  it('abre a aplicação quando persona e perfil real correspondem sem expor a senha', async () => {
+    const fetch = vi.fn().mockResolvedValue(loginResponse());
     vi.stubGlobal('fetch', fetch);
     render(<App />);
 
-    await enter('pmo', 'jwt-secret');
+    await enter('pmo', 'senha-secreta');
 
     expect(await screen.findByLabelText('Mensagem para o agente')).toBeVisible();
     expect(screen.getByText('[DEMO] Usuario')).toBeVisible();
     expect(screen.getByText('PMO')).toBeVisible();
     expect(screen.getByText('Portfólio completo')).toBeVisible();
-    expect(document.body).not.toHaveTextContent('jwt-secret');
-    expect(screen.queryByLabelText('Access token JWT')).not.toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent('senha-secreta');
+    expect(screen.queryByLabelText('Senha')).not.toBeInTheDocument();
     expect(window.localStorage.length).toBe(0);
     expect(window.sessionStorage.length).toBe(0);
-    expect(fetch.mock.calls[0][1].headers.Authorization).toBe('Bearer jwt-secret');
+    expect(fetch.mock.calls[0][0]).toContain('/access/login');
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({
+      profile_key: 'pmo',
+      password: 'senha-secreta',
+    });
+    expect(fetch.mock.calls[0][1].headers.Authorization).toBeUndefined();
   });
 
-  it('recusa token válido de outra persona e descarta o valor informado', async () => {
+  it('recusa resposta com outra persona e descarta a senha informada', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue(
         new Response(
-          JSON.stringify(
-            profile('gerente_projeto', {
+          JSON.stringify({
+            access_token: 'jwt-gerente',
+            profile: profile('gerente_projeto', {
               display_name: '[DEMO] Gerente de Projeto',
               scope_label: 'Projeto PRJ-0442',
             }),
-          ),
+          }),
         ),
       ),
     );
@@ -100,19 +111,19 @@ describe('Sessão de acesso em memória', () => {
     await enter('pmo');
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'pertence ao perfil Gerente de projeto, mas foi selecionado PMO',
+      'conta autenticada pertence ao perfil Gerente de projeto, mas foi selecionado PMO',
     );
-    expect(screen.getByLabelText('Access token JWT')).toHaveValue('');
+    expect(screen.getByLabelText('Senha')).toHaveValue('');
     expect(screen.queryByLabelText('Mensagem para o agente')).not.toBeInTheDocument();
   });
 
-  it('mantém a entrada para token inválido e limpa o campo', async () => {
+  it('mantém a entrada para credenciais inválidas e limpa o campo', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue(
         new Response(
           JSON.stringify({
-            error: { code: 'INVALID_ACCESS_TOKEN', message: 'controlada' },
+            error: { code: 'INVALID_CREDENTIALS', message: 'controlada' },
           }),
           { status: 401 },
         ),
@@ -123,25 +134,28 @@ describe('Sessão de acesso em memória', () => {
     await enter('consulta');
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'token informado é inválido ou expirou',
+      'Persona ou senha inválida',
     );
-    expect(screen.getByLabelText('Access token JWT')).toHaveValue('');
+    expect(screen.getByLabelText('Senha')).toHaveValue('');
   });
 
   it('logout desmonta o ChatStore e remove a conversa da persona anterior', async () => {
     const fetch = vi.fn().mockImplementation((url: string, init?: RequestInit) => {
       const background = backgroundResponse(url);
       if (background) return Promise.resolve(background);
-      if (url.includes('/access/me')) {
-        const authorization = (init?.headers as Record<string, string>)?.Authorization;
+      if (url.includes('/access/login')) {
+        const credentials = JSON.parse(String(init?.body));
         const selected =
-          authorization === 'Bearer jwt-consulta'
-            ? profile('consulta', {
-                display_name: '[DEMO] Consulta',
-                scope_label: 'Projeto PRJ-0510',
-                can_export: false,
-              })
-            : profile('pmo');
+          credentials.profile_key === 'consulta'
+            ? {
+                access_token: 'jwt-consulta',
+                profile: profile('consulta', {
+                  display_name: '[DEMO] Consulta',
+                  scope_label: 'Projeto PRJ-0510',
+                  can_export: false,
+                }),
+              }
+            : { access_token: 'jwt-pmo', profile: profile('pmo') };
         return Promise.resolve(new Response(JSON.stringify(selected)));
       }
       return Promise.resolve(new Response(JSON.stringify(chatResponse)));
@@ -156,7 +170,7 @@ describe('Sessão de acesso em memória', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Sair' }));
     expect(screen.queryByText(chatResponse.text)).not.toBeInTheDocument();
-    await enter('consulta', 'jwt-consulta');
+    await enter('consulta', 'senha-consulta');
     expect(await screen.findByText('[DEMO] Consulta')).toBeVisible();
     expect(screen.queryByText(chatResponse.text)).not.toBeInTheDocument();
   });
@@ -165,8 +179,8 @@ describe('Sessão de acesso em memória', () => {
     const fetch401 = vi.fn().mockImplementation((url: string) => {
       const background = backgroundResponse(url);
       if (background) return Promise.resolve(background);
-      if (url.includes('/access/me')) {
-        return Promise.resolve(new Response(JSON.stringify(profile('pmo'))));
+      if (url.includes('/access/login')) {
+        return Promise.resolve(loginResponse());
       }
       return Promise.resolve(
         new Response(
@@ -190,8 +204,8 @@ describe('Sessão de acesso em memória', () => {
     const fetch403 = vi.fn().mockImplementation((url: string) => {
       const background = backgroundResponse(url);
       if (background) return Promise.resolve(background);
-      if (url.includes('/access/me')) {
-        return Promise.resolve(new Response(JSON.stringify(profile('pmo'))));
+      if (url.includes('/access/login')) {
+        return Promise.resolve(loginResponse());
       }
       return Promise.resolve(
         new Response(
@@ -214,21 +228,19 @@ describe('Sessão de acesso em memória', () => {
   });
 
   it('recarregar a árvore exige nova entrada e o formulário funciona por teclado', async () => {
-    const fetch = vi
-      .fn()
-      .mockResolvedValue(new Response(JSON.stringify(profile('pmo')), { status: 200 }));
+    const fetch = vi.fn().mockResolvedValue(loginResponse());
     vi.stubGlobal('fetch', fetch);
     const view = render(<App />);
     expect(screen.getByLabelText('Persona')).toHaveFocus();
     await userEvent.selectOptions(screen.getByLabelText('Persona'), 'pmo');
     await userEvent.tab();
-    await userEvent.type(screen.getByLabelText('Access token JWT'), 'keyboard-jwt');
+    await userEvent.type(screen.getByLabelText('Senha'), 'senha-teclado');
     await userEvent.keyboard('{Enter}');
     expect(await screen.findByLabelText('Mensagem para o agente')).toBeVisible();
 
     view.unmount();
     render(<App />);
-    expect(screen.getByLabelText('Access token JWT')).toHaveValue('');
+    expect(screen.getByLabelText('Senha')).toHaveValue('');
     expect(screen.queryByLabelText('Mensagem para o agente')).not.toBeInTheDocument();
   });
 });

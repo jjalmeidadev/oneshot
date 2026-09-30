@@ -10,7 +10,7 @@ from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.requests import Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from starlette.concurrency import run_in_threadpool
 
 from app.audio.errors import (
@@ -62,9 +62,12 @@ from app.security import (
     AccessContext,
     AccessError,
     AccessProfileResponse,
+    PasswordLoginRequest,
+    PasswordLoginResponse,
     OutOfScopeForProfileError,
     audit_request_denial,
     access_profile_from_context,
+    authenticate_persona,
     authorize_message_scope,
     get_access_context,
     require_read_access,
@@ -172,6 +175,16 @@ async def handle_request_validation_error(
                 }
             },
         )
+    if request.url.path == "/api/access/login":
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": {
+                    "code": "INVALID_INPUT",
+                    "message": "Selecione uma persona e informe a senha.",
+                }
+            },
+        )
     if request.url.path == "/api/chat":
         return JSONResponse(status_code=422, content={"error": {"code": "INVALID_INPUT", "message": "Informe uma mensagem de 1 a 20.000 caracteres e parâmetros válidos."}})
     if (
@@ -228,6 +241,17 @@ def get_current_access_profile(
     """Retorna somente a identidade de exibicao e o resumo de acesso atual."""
 
     return access_profile_from_context(access)
+
+
+@app.post("/api/access/login", response_model=PasswordLoginResponse)
+def login_with_password(
+    credentials: PasswordLoginRequest,
+    response: Response,
+) -> PasswordLoginResponse:
+    """Autentica uma das quatro contas sintéticas sem expor e-mail no cliente."""
+
+    response.headers["Cache-Control"] = "no-store"
+    return authenticate_persona(credentials.profile_key, credentials.password)
 
 
 @app.get("/api/audio/vhs/metrics", response_model=VhsMetricsResponse)

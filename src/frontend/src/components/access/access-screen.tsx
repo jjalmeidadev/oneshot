@@ -10,8 +10,8 @@ const PROFILE_KEYS = Object.keys(PROFILE_LABELS) as ProfileKey[];
 export function AccessScreen() {
   const { entryMessage, login } = useAccessSession();
   const [profileKey, setProfileKey] = useState<ProfileKey | ''>('');
-  const [accessToken, setAccessToken] = useState('');
-  const [showToken, setShowToken] = useState(false);
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const profileRef = useRef<HTMLSelectElement>(null);
@@ -19,16 +19,16 @@ export function AccessScreen() {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setValidationMessage(null);
-    if (!profileKey || !accessToken.trim()) {
-      setValidationMessage('Selecione uma persona e informe o token de acesso.');
+    if (!profileKey || !password) {
+      setValidationMessage('Selecione uma persona e informe a senha.');
       profileRef.current?.focus();
       return;
     }
     setLoading(true);
-    const result = await login(profileKey, accessToken.trim());
+    const result = await login(profileKey, password);
     setLoading(false);
     if (!result.ok) {
-      if (result.clearToken) setAccessToken('');
+      if (result.clearPassword) setPassword('');
       profileRef.current?.focus();
     }
   };
@@ -45,10 +45,7 @@ export function AccessScreen() {
             className="h-10 w-auto rounded"
           />
           <div>
-            <h1 className="text-xl font-semibold text-fg">Agente de Portfólio</h1>
-            <p className="text-sm text-fg-muted">
-              O acesso e o escopo são confirmados pelo perfil vinculado ao token.
-            </p>
+            <h1 className="text-xl font-semibold text-fg">ONESHOT</h1>
           </div>
         </div>
 
@@ -76,32 +73,29 @@ export function AccessScreen() {
           </div>
 
           <div>
-            <label htmlFor="access-token" className="text-sm font-medium text-fg">
-              Access token JWT
+            <label htmlFor="access-password" className="text-sm font-medium text-fg">
+              Senha
             </label>
             <div className="relative mt-1.5">
               <input
-                id="access-token"
+                id="access-password"
                 required
-                type={showToken ? 'text' : 'password'}
-                autoComplete="off"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
                 spellCheck={false}
-                value={accessToken}
-                onChange={(event) => setAccessToken(event.target.value)}
-                className="h-11 w-full rounded-lg border border-border bg-surface px-3 pr-12 font-mono text-sm text-fg outline-none focus:border-primary focus:ring-2 focus:ring-ring"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className="h-11 w-full rounded-lg border border-border bg-surface px-3 pr-12 text-sm text-fg outline-none focus:border-primary focus:ring-2 focus:ring-ring"
               />
               <button
                 type="button"
-                onClick={() => setShowToken((value) => !value)}
+                onClick={() => setShowPassword((value) => !value)}
                 className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-fg-muted hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label={showToken ? 'Ocultar token' : 'Mostrar token'}
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
               >
-                {showToken ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-            <p className="mt-1 text-xs text-fg-muted">
-              O token fica somente na memória e será descartado ao sair ou recarregar.
-            </p>
           </div>
 
           {message && (
@@ -115,7 +109,7 @@ export function AccessScreen() {
 
           <Button type="submit" size="lg" className="w-full" disabled={loading}>
             <LogIn size={18} />
-            {loading ? 'Validando acesso...' : 'Entrar'}
+            {loading ? 'Entrando...' : 'Entrar'}
           </Button>
         </form>
       </section>

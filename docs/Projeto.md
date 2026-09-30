@@ -2773,8 +2773,10 @@ executada novamente sem criar contas, usuários ou regras duplicadas. A
 `SUPABASE_SERVICE_ROLE_KEY` é necessária somente nesse comando administrativo;
 ela não é aceita como token de usuário e nunca é enviada ao frontend.
 
-As quatro senhas são configuradas separadamente para permitir testes reais de
-cada persona, sem versionar seus valores:
+As quatro senhas são configuradas separadamente para criar ou atualizar as
+contas sintéticas pela carga, sem versionar seus valores. No uso normal, a
+pessoa informa a senha na tela; o backend não lê essas quatro variáveis para
+compará-la, pois a validação é feita pelo próprio Supabase Auth:
 
 ```ini
 SUPABASE_URL=https://<projeto>.supabase.co
@@ -2789,7 +2791,19 @@ MVP_AUTH_CONSULTA_PASSWORD=<senha-da-consulta>
 
 #### Fluxo de autenticação no backend
 
-As rotas interativas exigem `Authorization: Bearer <JWT>`. A dependência
+`POST /api/access/login` é a única rota interativa pública de autenticação. Ela
+recebe a persona e a senha, traduz a persona para o e-mail fixo da respectiva
+conta sintética e solicita uma sessão ao endpoint de senha do Supabase Auth.
+O navegador não precisa conhecer os e-mails das contas. Credenciais incorretas
+retornam `401 INVALID_CREDENTIALS`, enquanto indisponibilidade do provedor
+retorna `503 AUTHENTICATION_UNAVAILABLE`, sem propagar detalhes internos.
+
+Após receber o JWT, o backend também resolve `public.users` e
+`public.access_rules` e confirma que o perfil autenticado corresponde à persona
+selecionada. Só então devolve o token e o resumo seguro do perfil. A senha não é
+persistida nem registrada pela aplicação.
+
+As demais rotas interativas exigem `Authorization: Bearer <JWT>`. A dependência
 central em `app/security/access.py` executa o seguinte fluxo:
 
 1. extrai o Bearer token e rejeita cabeçalhos ausentes ou malformados;
@@ -2831,18 +2845,21 @@ do contexto enviado ao gerador.
 #### Entrada no frontend e ciclo da sessão
 
 Antes de montar a aplicação, a interface apresenta uma tela simples em que a
-pessoa escolhe a persona esperada e informa um JWT obtido no Supabase. O token é
-validado pelo endpoint `GET /api/access/me`, que devolve somente nome, e-mail,
-papel, perfil, descrição do escopo e permissões. A persona selecionada serve
-para conferir se foi usado o token correto; ela nunca concede ou altera acesso.
+pessoa escolhe a persona e informa sua senha. O frontend envia as credenciais
+uma única vez para `POST /api/access/login`; o endpoint autentica no Supabase,
+confere a persona contra o perfil resolvido no banco e devolve o JWT junto de
+nome, e-mail, papel, descrição do escopo e permissões. A persona selecionada
+somente identifica qual conta sintética deve ser autenticada; ela nunca concede
+ou altera acesso.
 
-O JWT permanece apenas no estado React durante a sessão. Ele não é gravado em
-`localStorage`, `sessionStorage`, cookie, URL ou conteúdo visível do DOM. O
-cliente inclui o Bearer token em todas as chamadas protegidas. Ao sair ou
-receber `401`, a aplicação aborta requisições em andamento, desmonta o estado do
-chat e remove os dados da sessão. Um `403` mantém a sessão e exibe uma mensagem
-controlada de acesso negado, permitindo que a pessoa continue usando as ações
-que seu perfil possui.
+A senha é descartada assim que a tentativa termina. O JWT permanece apenas no
+estado React durante a sessão e não é gravado em `localStorage`,
+`sessionStorage`, cookie, URL ou conteúdo visível do DOM. O cliente inclui o
+Bearer token em todas as chamadas protegidas. Ao sair ou receber `401`, a
+aplicação aborta requisições em andamento, desmonta o estado do chat e remove os
+dados da sessão. Um `403` mantém a sessão e exibe uma mensagem controlada de
+acesso negado, permitindo que a pessoa continue usando as ações que seu perfil
+possui.
 
 #### Auditoria e rastreabilidade
 
@@ -3699,6 +3716,8 @@ O front-end consome somente rotas de mesma origem. Em desenvolvimento, o Vite en
 | Método e rota | Entrada | Saída utilizada pela interface | Observações de reprodução |
 | --- | --- | --- | --- |
 | `GET /health` | Sem corpo ou autenticação. | `{"status":"ok"}`. | Confirma a inicialização do processo; não testa Azure, Gemini ou a disponibilidade dos dados. |
+| `POST /api/access/login` | JSON com `profile_key` e `password`; sem Bearer. | JWT temporário e resumo do perfil autenticado. | A persona é mapeada para uma conta sintética fixa, mas a senha é validada exclusivamente pelo Supabase Auth. |
+| `GET /api/access/me` | Bearer JWT do Supabase Auth. | Nome, e-mail, papel, escopo e permissões. | Permanece disponível para consultar uma sessão já autenticada. |
 | `POST /api/chat` | Bearer JWT e JSON com `message` (1 a 20.000 caracteres), `previous_interaction_id` opcional e `use_intent_classifier` booleano. | Texto, ID da interação, modelo, latências, consumo, intenção opcional e lista de fontes. | Exige identidade ativa e permissão de leitura no escopo solicitado. O ID anterior mantém o encadeamento lógico da conversa. |
 | `POST /api/audio` | Multipart com arquivo `audio`; `conversation_id`, `language`, `previous_interaction_id` e `use_intent_classifier` opcionais; cabeçalho `Authorization: Bearer <token>`. | Transcrição, conversa, interação, intenção, resposta resumida, resposta completa em `chat` e `pipeline_status`. | O navegador envia WAV PCM mono, 16 bits e 16 kHz. O back-end revalida o conteúdo e aceita uma requisição simultânea por identidade. |
 | `/api/workflow-sessions` e `/api/report-requests` | Respostas guiadas, revisão, ação idempotente e confirmação assinada. | Estado da sessão, execução e download autenticado do DOCX. | O modo local é completo; a automação externa é opcional. |
