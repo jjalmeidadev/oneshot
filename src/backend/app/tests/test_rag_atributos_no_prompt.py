@@ -13,6 +13,11 @@ suficiente para informar as datas — que estavam no registro recuperado.
 Estes testes existem para que a correcao nao regrida silenciosamente.
 """
 
+import pytest
+
+# Preserva a cobertura anterior do backend-api na selecao por marcador (#255).
+pytestmark = pytest.mark.integration
+
 from app.rag.sharepoint import (
     RetrievedDocument,
     SharePointDocument,
