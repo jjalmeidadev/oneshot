@@ -7,6 +7,12 @@ conflict-markers:
   image: python:3.13-bookworm
   script:
     - python -m unittest discover -s scripts/tests -v
+    # Sondagem negativa explicita: altera somente o indice descartavel do runner.
+    - |
+      if [ "${CONFLICT_MARKERS_PROBE:-0}" = "1" ]; then
+        printf '<<<<<<< HEAD\n' > .conflict-marker-probe
+        git add -f -- .conflict-marker-probe
+      fi
     - sh scripts/check-conflict-markers.sh
 
 frontend-unit:
