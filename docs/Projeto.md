@@ -6386,6 +6386,20 @@ publica mediana/P95 sem expor áudio ou transcrição e remove a conversa sinté
 do banco ao final. A homologação externa só é considerada aprovada após a saída
 sanitizada dessa execução ser anexada às evidências.
 
+**Execução contra o Azure real.** O roteiro foi executado com o Azure AI Speech
+e o PostgreSQL reais do projeto, repetindo cinco vezes o mesmo áudio de fala em
+português. O critério congelado do plano foi atendido integralmente:
+`provider_call=1`, `miss=1`, `record=1`, `hit=4` e `provider_error=0`, com
+quatro chamadas evitadas e taxa de hit de 80%. O miss custou 1.540 ms na ida ao
+provedor; os quatro hits foram servidos entre 0,11 e 0,19 ms, com transcrições
+idênticas. Duas execuções independentes produziram os mesmos hashes de áudio e
+de transcrição. A transcrição real foi classificada como `CONSULTA` /
+`consulta_status_projeto`, e a interação sintética foi removida do banco sem
+resíduo. A rodada partiu do ambiente local de desenvolvimento; a mesma coleta
+na imagem publicada acompanha a publicação da versão final. Resultados,
+latências e hashes estão nas
+[evidências da homologação com Azure real](evidencias/sprint-05/vhs-azure-real/README.md).
+
 # 10. Procedimentos de Implantação
 
 O deploy da Sprint 4 foi realizado no AWS Academy Learner Lab e teve como objetivo disponibilizar a PoC para testes da equipe e do cliente sem depender de infraestrutura corporativa do Metrô. O processo combinou Supabase PostgreSQL, imagens Docker privadas no Amazon ECR, uma instância EC2 gerenciada por CloudFormation e um Cloudflare Quick Tunnel para fornecer acesso HTTPS temporário.
