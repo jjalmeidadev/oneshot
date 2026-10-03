@@ -4933,7 +4933,7 @@ O desempenho por macrointenção no teste é homogêneo, com precisão entre 0,9
 | FORA_DE_ESCOPO | 0,932 | 0,891 | 0,911 | 46 |
 | TRANSACAO | 0,955 | 0,957 | 0,956 | 395 |
 
-**Aderência ao RNF06.** O requisito exige F1-macro igual ou superior a 0,80 na classificação de intenções. No nível de macrointenção o critério é atendido com folga (0,9477). No nível de intenção específica, **não é**: 0,7401 está abaixo do limiar exigido. É por isso que o limiar de confiança existe — ele converte a incerteza em fluxo genérico em vez de handler errado. Fechar essa lacuna é trabalho da Sprint 3.
+**Aderência ao RNF06.** O requisito exige F1-macro igual ou superior a 0,80 na classificação de intenções. No nível de macrointenção o critério é atendido com folga (0,9477). No nível de intenção específica, **não é**: 0,7401 está abaixo do limiar exigido. É por isso que o limiar de confiança existe — ele converte a incerteza em fluxo genérico em vez de handler errado. A lacuna foi fechada pela versão 2 do classificador, que atingiu F1-macro de 0,8327 na intenção específica (Seção 8.10.7).
 
 **Efeito prático dos limiares no teste.** Aplicando 0,550 e 0,700 aos 1.135 pedidos do conjunto de teste:
 

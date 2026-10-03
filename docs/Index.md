@@ -21,6 +21,7 @@ Este arquivo indexa todos os documentos Markdown versionados no repositório. Os
 | [Projeto.md](Projeto.md) | Documentação consolidada do produto, requisitos, solução técnica, testes, implantação e viabilidade. |
 | [Manual-instalacao.md](Manual-instalacao.md) | Instalação, configuração, execução e solução de problemas. |
 | [prototipo-1-roteiro.md](prototipo-1-roteiro.md) | Roteiro do protótipo reativo sob demanda. |
+| [RevisaoFeedbacks.md](RevisaoFeedbacks.md) | Feedbacks recebidos nas sprints, com a sprint de origem e a correção realizada ou a justificativa. |
 
 ### Gestão e processo de desenvolvimento
 
