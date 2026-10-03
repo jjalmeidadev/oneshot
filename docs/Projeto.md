@@ -275,6 +275,11 @@
     - [13.1.1 Público-alvo principal](#1311-público-alvo-principal)
     - [13.1.2 Barreiras culturais e técnicas esperadas](#1312-barreiras-culturais-e-técnicas-esperadas)
     - [13.1.3 Ações de onboarding e educação](#1313-ações-de-onboarding-e-educação)
+  - [13.2 Mecanismos de incentivo e engajamento](#132-mecanismos-de-incentivo-e-engajamento)
+    - [13.2.1 Utilidade e ganho de produtividade](#1321-utilidade-e-ganho-de-produtividade)
+    - [13.2.2 Governança e voz ativa](#1322-governança-e-voz-ativa)
+    - [13.2.3 Comunidade e reconhecimento](#1323-comunidade-e-reconhecimento)
+    - [13.2.4 Indicadores de uso e qualidade](#1324-indicadores-de-uso-e-qualidade)
 - [Referências](#referências)
 
 # 1. Introdução
@@ -7031,6 +7036,69 @@ Cada ação responde a uma barreira da tabela anterior. Parte delas já está no
 | 3 | `diretoria` | Entregar o resumo executivo mensal gerado pelo agente junto do material habitual, sem pedir que a diretoria opere o chat | Diretoria consultando o agente diretamente, sem intermediação do PMO |
 
 O piloto começa pelo **Mapa de Benefícios**, o mesmo documento escolhido como piloto das transações do agente na Seção 2.9: é o artefato de entrada do ciclo de vida do projeto, o PMO já conhece o fluxo, e os fluxos AS-IS e TO-BE da Seção 2.6 mostram onde o trabalho muda. Começar por um documento conhecido reduz o que o usuário precisa aprender ao mesmo tempo.
+
+
+## 13.2 Mecanismos de incentivo e engajamento
+
+A adoção contínua depende do que cada pessoa ganha ao mudar sua forma de trabalhar. As três dimensões abaixo foram desenhadas para o modelo de trabalho do PMO do Metrô, e, sempre que possível, cada mecanismo aponta para um dado que a solução já registra, para que o engajamento possa ser acompanhado em vez de presumido. Os mecanismos que dependem de algo ainda não construído estão identificados como tal.
+
+### 13.2.1 Utilidade e ganho de produtividade
+
+O ganho é diferente para cada perfil, porque o trabalho que o agente substitui é diferente.
+
+| Perfil | O que deixa de fazer | O que passa a ter |
+| --- | --- | --- |
+| `pmo` | Compilar o balanço mensal a partir de SharePoint, listas, Power BI e planilhas, e cobrar atualização pessoa por pessoa | Uma consulta única sobre projetos e subportfólios, o relatório executivo gerado a partir dos dados consolidados e o alerta de prazo cobrando no seu lugar |
+| `lider_subportfolio` | Cruzar Power BI, documentos e relatos de líderes para investigar um desvio antes da reunião | Comparação entre projetos e alerta quando um marco atrasa além do limite que ele mesmo configurou |
+| `equipe_projeto` | Responder a cobranças avulsas e preencher formulários estáticos | Pendências que chegam pelo alerta, com o item exato a atualizar, e configuração por fluxo guiado no chat |
+| `diretoria` | Ler documentos extensos ou esperar a consolidação manual do PMO | Resumo executivo que indica a origem de cada número |
+
+Dois resultados medidos sustentam esse ganho desde já: a resposta chega em tempo de conversa, com P95 de consulta simples entre 7,0 e 7,6 s, e 91,67% das respostas são fundamentadas nas fontes (Seção 9.2). A redução do tempo para encontrar uma informação, prevista na matriz de objetivos da Seção 2.4 com meta de 50%, depende da comparação entre a busca manual e a consulta ao agente sobre os mesmos casos; essa comparação é feita no piloto e entra como indicador na Seção 13.2.4.
+
+### 13.2.2 Governança e voz ativa
+
+O usuário precisa ver que o que ele reporta muda o agente. Os mecanismos abaixo transformam uso em melhoria.
+
+| Mecanismo | Como funciona | Dado que o alimenta |
+| --- | --- | --- |
+| Perguntas não atendidas viram backlog | Toda solicitação classificada como fora de escopo já é gravada pelo backend. Uma vez por mês, o PMO revisa essas perguntas e decide quais são lacunas do agente e quais estão de fato fora do escopo | `out_of_scope_requests` |
+| Avaliação de cada resposta no próprio chat | A construir. O usuário marca a resposta como útil ou não útil e, no segundo caso, escolhe o motivo: fonte errada, informação incompleta ou pergunta mal entendida | Campo de avaliação a acrescentar à interação em `ai_interactions` |
+| Curadoria da base de conhecimento com o PMO | O léxico do domínio e o catálogo de intenções foram construídos para serem substituídos pela base real sem alterar código. A curadoria decide o que entra; uma intenção nova exige retreino e reavaliação pelo protocolo da Seção 8.10, e por isso é decisão de governança, e não ajuste de configuração | `lexico_dominio.json`, `intent_catalog` |
+| Grupo de usuários-chave | Um multiplicador por subportfólio, mais o PMO, prioriza a cada trimestre as melhorias seguintes, partindo da lista priorizada da Seção 12.2 | Ata da priorização |
+| Indicadores publicados | Os indicadores da Seção 13.2.4 são divulgados mensalmente ao grupo de usuários-chave, inclusive os que pioraram | Painel mensal |
+
+A combinação dos dois primeiros mecanismos responde à barreira mais grave da Seção 13.1.2: a desconfiança nasce de respostas sem lastro, e o PMO passa a ver, com dados, onde o agente erra e o que foi feito a respeito.
+
+### 13.2.3 Comunidade e reconhecimento
+
+| Mecanismo | Como funciona |
+| --- | --- |
+| Rede de multiplicadores | Um usuário de referência por subportfólio, escolhido entre os primeiros a adotar, conduz a primeira sessão da própria equipe na fase 2 do onboarding e é o primeiro contato para dúvidas |
+| Reconhecimento dos primeiros adotantes | Os participantes do piloto têm o nome registrado na comunicação do PMO e voto na primeira priorização trimestral |
+| Destaque à qualidade dos dados | O agente já sabe quando um dado está velho: um item de cronograma sem atualização há mais de 45 dias é marcado como desatualizado, e o alerta de prazo deixa de concluir sobre ele. O percentual de projetos atualizados por subportfólio é publicado no painel mensal, e o subportfólio com maior completude é destacado na reunião do PMO |
+| Biblioteca de perguntas por perfil | Um canal no Teams reúne as perguntas que funcionaram, organizadas por perfil, e alimenta o cartão de exemplos entregue no onboarding |
+
+O destaque à qualidade dos dados tem um efeito que vai além da adoção: o agente responde melhor quanto mais atualizada estiver a base, e o reconhecimento dá ao líder de projeto um motivo próprio para manter o dado em dia, e não apenas a cobrança do PMO.
+
+### 13.2.4 Indicadores de uso e qualidade
+
+Os indicadores de uso e de qualidade dos dados vêm de tabelas que o backend já preenche, sem coleta manual. Os de qualidade das respostas exigem avaliação amostral, como a feita no RNF04; a avaliação no chat ainda precisa ser construída; e a comparação com a busca manual é feita sobre os mesmos casos no piloto. As metas de qualidade repetem as dos requisitos não funcionais, e os indicadores de uso partem de uma linha de base medida nas quatro primeiras semanas do piloto.
+
+| Indicador | Dimensão | Meta | Fonte |
+| --- | --- | --- | --- |
+| Usuários ativos por perfil, por semana | Uso | Crescimento a cada fase do onboarding | `ai_interactions` cruzada com `users` |
+| Usuários que voltam a usar em quatro semanas | Uso | Linha de base no piloto | `ai_interactions` |
+| Subportfólios com multiplicador ativo | Comunidade | Todos os subportfólios da fase 2 | Registro do grupo de usuários-chave |
+| Respostas fundamentadas nas fontes | Qualidade | ≥ 90% (RNF04) | `consulted_sources` e avaliação amostral |
+| Taxa de alucinação | Qualidade | ≤ 5% (RNF04) | Avaliação amostral |
+| Solicitações compreendidas ou orientadas para reformulação | Qualidade | ≥ 80% (Seção 2.4) | `ai_interactions` e `out_of_scope_requests` |
+| P95 de consulta simples | Qualidade | ≤ 10 s (RNF05) | Métricas de etapa devolvidas pela API |
+| Respostas avaliadas como não úteis | Qualidade | Tendência de queda | Avaliação no chat, a construir |
+| Sugestões proativas aceitas sobre oferecidas | Utilidade | Linha de base no piloto | `pending_proactive_suggestions` |
+| Tempo para encontrar uma informação, comparado à busca manual | Produtividade | Redução de 50% (Seção 2.4) | Comparação sobre os mesmos casos no piloto |
+| Projetos com dados atualizados nos últimos 45 dias | Qualidade dos dados | Crescimento por subportfólio | Regra de frescor do alerta |
+
+Os quatro indicadores de qualidade com meta definida já têm linha de base medida na Seção 9.2. Quando um deles cair abaixo da meta por duas medições seguidas, a expansão para a fase seguinte do onboarding é suspensa até a causa ser tratada — regra que impede que a adoção avance sobre uma confiança que o próprio agente esteja corroendo.
 
 
 # Referências
