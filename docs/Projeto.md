@@ -267,6 +267,9 @@
   - [11.7 Defesa das premissas e dos valores](#117-defesa-das-premissas-e-dos-valores)
   - [11.8 Fluxo de caixa sintético](#118-fluxo-de-caixa-sintético)
   - [11.9 Conclusão da viabilidade](#119-conclusão-da-viabilidade)
+- [12. Benefícios Entregues e Aperfeiçoamentos Futuros](#12-benefícios-entregues-e-aperfeiçoamentos-futuros)
+  - [12.1 Benefícios entregues](#121-benefícios-entregues)
+  - [12.2 Aperfeiçoamentos futuros](#122-aperfeiçoamentos-futuros)
 - [Referências](#referências)
 
 # 1. Introdução
@@ -6906,6 +6909,62 @@ O fluxo confirma que todos os pagamentos mapeados podem ser liquidados e que o s
 ## 11.9 Conclusão da viabilidade
 
 Nas premissas adotadas, a entrega é financeiramente viável pelo preço de **R$ 192.195,11**. Esse valor paga os R$ 115.400,00 de custos diretos, os R$ 15.771,36 de despesas operacionais, os R$ 5.684,09 de juros, o imposto único estimado em R$ 30.270,73 e o lucro de R$ 25.068,93. O empréstimo de R$ 131.171,36 resolve o descasamento entre os pagamentos do desenvolvimento e o recebimento final, enquanto a inclusão dos juros na formação do preço preserva o lucro desejado de 15% após a quitação. Portanto, a viabilidade depende de cumprir o prazo, controlar o uso das ferramentas e receber do cliente na data contratada.
+
+# 12. Benefícios Entregues e Aperfeiçoamentos Futuros
+
+Esta seção registra o valor que a prova de conceito entrega ao PMO do Metrô e prioriza as melhorias que ficam para depois do módulo. Cada benefício está ligado à funcionalidade que o produz e à evidência que o sustenta, de modo que nenhum deles depende de declaração: todos remetem a uma medição ou a um registro de execução do próprio documento.
+
+## 12.1 Benefícios entregues
+
+Os Business Drivers da Seção 2.10 definiram quatro resultados esperados: agilizar o acesso às informações (BD01), ampliar a capacidade de análise (BD02), aumentar a confiabilidade das respostas (BD03) e tornar a interação mais acessível (BD04). A tabela mostra o que foi efetivamente entregue para cada um.
+
+| Benefício entregue | Funcionalidade que o produz | Evidência | Driver |
+| --- | --- | --- | :---: |
+| Consulta ao portfólio em linguagem comum, sem conhecer a estrutura dos documentos | Pipeline de PLN com entrada por texto e por voz (Seções 8.7, 8.8 e 8.11) | No teste de usabilidade, a pergunta em linguagem comum funcionou sem comando técnico nas seis sessões, e a transcrição por voz preservou a intenção em todas elas (Seção 9.3.2) | BD04 |
+| Identificação confiável do que foi pedido | Classificador hierárquico de intenções, versão 2 (Seção 8.10.7) | F1-macro de 0,8327 na intenção específica, sobre 1.135 solicitações de teste mantidas fechadas durante a seleção, acima do mínimo de 0,80 (Seção 9.2) | BD01, BD04 |
+| Respostas que indicam a origem e declaram o que não sabem | Recuperação com citação de fonte e resposta controlada quando falta informação (Seção 8.5) | 91,67% de respostas fundamentadas e 4,17% de alucinação na amostra avaliada às cegas, dentro dos limites de 90% e 5% do RNF04 (Seção 9.2) | BD03 |
+| Resposta em tempo de conversa | Pipeline completo de classificação, recuperação e geração | P95 de consulta simples entre 7,0 e 7,6 s, contra teto de 10 s do RNF05, sem erro em 1.379 requisições (Seção 9.2) | BD01 |
+| Relatório executivo sem redação manual | Despacho determinístico de `transacao_gerar_relatorio`, sem LLM na decisão da rota (Seção 8.5.10) | Geração rastreável com webhook de resultado e entrega pela fila (Seções 8.5.10 e 8.5.12) | BD02 |
+| Fim da cobrança manual de prazos | Alerta autônomo de atraso, configurado por fluxo guiado no chat (Seção 8.5.11) | Execução registrada em `src/backend/evidencias/alerta-prazo-atraso/` | BD01 |
+| Próximo passo sugerido sem perda de controle | Sugestão proativa com confirmação explícita e controle de ativação | Nenhuma sugestão é executada sem confirmação, e desativar as sugestões não altera a resposta principal (RF09 e RF10, Seção 3.1) | BD02 |
+| Menos espera e menos custo no provedor de voz | Cache VHS de transcrições (Seção 9.4) | Contra o Azure real, quatro de cinco envios repetidos foram servidos do cache em cerca de 0,1 ms, contra 1.540 ms da chamada ao provedor (Seção 9.4.2) | BD01 |
+| Solução demonstrável fora da máquina da equipe | Publicação em AWS EC2, com banco no Supabase (Seção 10.2) | Aplicação validada pela rede externa ao fim da Sprint 4 (Seção 10.2.10) | — |
+
+**O que os benefícios ainda não comprovam.** Três limites acompanham a leitura da tabela. O primeiro é que o RNF06 consolidado segue reprovado pela recuperação: a classificação passou, mas o *recall*@3 das fontes ficou em 0,556, contra o mínimo de 0,80 (Seção 9.2). O benefício de identificar o que foi pedido está entregue; o de encontrar sempre a fonte certa, ainda não. O segundo é que a percepção declarada no SUS, com média de 86,25, é mais favorável do que a observação das tarefas: nenhum participante concluiu sem dificuldade os cenários de informação ausente e de sugestão proativa (Seção 9.3.2). O terceiro é que todas as medições usam massa sintética, com um único projeto, em ambiente de demonstração, e não o portfólio real nem o ambiente corporativo do Metrô.
+
+## 12.2 Aperfeiçoamentos futuros
+
+A ordem segue dois critérios, nesta precedência. Primeiro vem o que hoje reprova um requisito ou impede o uso pelo PMO, porque nenhum ganho novo compensa uma resposta que não encontra a fonte certa. Depois vêm os pedidos do parceiro com menor custo de construção, porque reaproveitam infraestrutura que já existe.
+
+**Prioridade 1 — reprovam requisito ou impedem o uso real**
+
+| # | Aperfeiçoamento | Motivo | Ponto de partida |
+| :---: | --- | --- | --- |
+| 1 | Base documental de portfólio para a recuperação | Reprova a recuperação do RNF06 (*recall*@3 de 0,556). A massa tem um único projeto, e as listas simuladas do SharePoint ainda tratam de atendimento ao passageiro, não de portfólio | Pedido do parceiro de reproduzir a estrutura do SharePoint do Metrô; o contrato de leitura das listas já existe (Seção 8.5) |
+| 2 | Medição com solicitações reais do PMO | Classificação e recuperação foram medidas em frases sintéticas derivadas de templates; o desempenho com perguntas reais não é conhecido | Protocolo de avaliação reutilizável das Seções 8.10.1 e 9.2 |
+| 3 | Usabilidade com os perfis ainda não cobertos | As vagas de gestão de projetos, análise de indicadores e ferramentas Microsoft ficaram sem participante; as respostas não foram avaliadas por quem acompanha o portfólio na rotina | Roteiro, planilha e SUS da Seção 9.3.1 |
+| 4 | Homologação no ambiente corporativo | Entra ID, Azure e Teams dependem do provisionamento da GTI; a coleta do VHS na imagem publicada acompanha a publicação final | Roteiros das Seções 9.4.2 e 10.2 |
+
+**Prioridade 2 — pedidos do parceiro que reaproveitam infraestrutura existente**
+
+| # | Aperfeiçoamento | O que já existe | O que falta |
+| :---: | --- | --- | --- |
+| 5 | Lembretes do projeto | Agendador, filas e central de notificações do alerta de prazo (Seção 8.5.11) | Intenção de lembrete, fluxo guiado e disparo por horário, e não por condição de atraso |
+| 6 | Tarefas e calendário do projeto no chat | Dados em `schedule_items` e `project_deliverables_milestones` (Seção 4.4) | Rota de leitura por projeto e as visões de lista e de calendário |
+| 7 | Agente exposto como servidor MCP | Rotas de consulta, relatório e alerta com contrato estável | Ferramentas MCP com autenticação, para o próprio Metrô conectar o agente ao Copilot sem depender do Copilot Studio, hoje indisponível para a equipe |
+| 8 | Integração com o Microsoft Teams | Contrato OpenAPI e arquitetura com o Teams como canal previsto (Seção 5.2) | Canal publicado no tenant do Metrô, após homologação |
+
+Os itens 5 e 6 estavam na linha de corte do planejamento da Sprint 5, que previa registrá-los aqui caso não coubessem na capacidade (Seção 6.5.1 do `GestaoProjeto.md`).
+
+**Prioridade 3 — evolução técnica**
+
+| # | Aperfeiçoamento | Motivo |
+| :---: | --- | --- |
+| 9 | Cache VHS compartilhado entre réplicas | O cache é hoje em memória e por processo, com validade de 300 s; não sobrevive a reinício e impede escalar a API horizontalmente sem perder os acertos |
+| 10 | Lock do classificador restrito ao carregamento | O lock global serializa todas as classificações, embora só o carregamento dos artefatos precise dele; a medição da Seção 8.11.8 mostrou vazão até 2,3 vezes maior sem ele |
+| 11 | Ajuste supervisionado do encoder | O encoder é usado congelado, como extrator de atributos; o ajuste para as intenções do projeto depende de GPU |
+| 12 | Integração com o Power BI | Evolução prevista desde o Canvas da Seção 2.9, para levar os indicadores do agente aos painéis que o PMO já usa |
+
 
 # Referências
 
