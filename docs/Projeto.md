@@ -270,6 +270,11 @@
 - [12. Benefícios Entregues e Aperfeiçoamentos Futuros](#12-benefícios-entregues-e-aperfeiçoamentos-futuros)
   - [12.1 Benefícios entregues](#121-benefícios-entregues)
   - [12.2 Aperfeiçoamentos futuros](#122-aperfeiçoamentos-futuros)
+- [13. Plano de Adoção e Mobilização do Ecossistema](#13-plano-de-adoção-e-mobilização-do-ecossistema)
+  - [13.1 Mapa de adoção e aculturamento organizacional](#131-mapa-de-adoção-e-aculturamento-organizacional)
+    - [13.1.1 Público-alvo principal](#1311-público-alvo-principal)
+    - [13.1.2 Barreiras culturais e técnicas esperadas](#1312-barreiras-culturais-e-técnicas-esperadas)
+    - [13.1.3 Ações de onboarding e educação](#1313-ações-de-onboarding-e-educação)
 - [Referências](#referências)
 
 # 1. Introdução
@@ -6964,6 +6969,68 @@ Os itens 5 e 6 estavam na linha de corte do planejamento da Sprint 5, que previa
 | 10 | Lock do classificador restrito ao carregamento | O lock global serializa todas as classificações, embora só o carregamento dos artefatos precise dele; a medição da Seção 8.11.8 mostrou vazão até 2,3 vezes maior sem ele |
 | 11 | Ajuste supervisionado do encoder | O encoder é usado congelado, como extrator de atributos; o ajuste para as intenções do projeto depende de GPU |
 | 12 | Integração com o Power BI | Evolução prevista desde o Canvas da Seção 2.9, para levar os indicadores do agente aos painéis que o PMO já usa |
+
+
+# 13. Plano de Adoção e Mobilização do Ecossistema
+
+O agente só gera valor se o PMO, os líderes e a diretoria do Metrô passarem a usá-lo na rotina, e o principal obstáculo para isso não é técnico. A Seção 2.2 registra que experiências anteriores do parceiro com IA generativa falharam porque as respostas nem sempre estavam fundamentadas na documentação oficial, e que isso reduziu a confiança das equipes. A adoção, portanto, parte de uma confiança já quebrada naquele PMO, e não de um terreno neutro. Esta seção descreve quem vai usar o agente, o que deve travar cada público e o que a solução faz, na prática, para destravar.
+
+## 13.1 Mapa de adoção e aculturamento organizacional
+
+### 13.1.1 Público-alvo principal
+
+O público é definido pelos perfis de acesso do modelo de dados, e não por cargos genéricos. Cada usuário tem um `role_name` na tabela `users`, e as regras de `access_rules` delimitam, por subportfólio ou por projeto, o que ele pode ler, alterar e exportar (Seção 4.4). As personas da Seção 2.5 correspondem a esses perfis.
+
+| Perfil no sistema | Quem é no Metrô | Persona | O que faz com o agente | Alcance da permissão |
+| --- | --- | --- | --- | --- |
+| `pmo` | Analistas do PMO Corporativo, responsáveis pela consolidação e pela qualidade dos dados do portfólio | Mariana | Consolida o balanço mensal, confere consistência, gera o relatório executivo e configura alertas de prazo | Portfólio inteiro, com leitura e exportação |
+| `lider_subportfolio` | Gerentes de portfólio de cada subportfólio | Carlos | Prepara reuniões de acompanhamento, compara projetos, investiga desvios e recebe alertas | Projetos do próprio subportfólio |
+| `equipe_projeto` | Líderes e equipes que alimentam os documentos de cada projeto | — | Consulta o próprio projeto e responde às pendências de atualização | Projetos em que atua |
+| `diretoria` | Diretoria de Planejamento e Gestão Estratégica | Roberto | Lê resumos executivos com fonte, sem navegar nos documentos | Visão consolidada, sem edição |
+| `gti` | Gerência de Tecnologia da Informação | — | Homologa o ambiente, provisiona Entra ID, Azure e Teams e opera a solução | Infraestrutura, não o conteúdo do portfólio |
+| `admin` | Equipe de sustentação do agente | — | Mantém catálogo de intenções, léxico do domínio e regras de acesso | Configuração do agente |
+
+O público de **entrada** é o PMO. É ali que a dor central do projeto se concentra — a consolidação manual do balanço mensal, descrita na jornada de Mariana — e é o perfil com maior afinidade tecnológica e com acesso ao portfólio inteiro, o que permite medir o ganho antes de expandir. Os líderes de subportfólio entram em seguida, porque dependem de dados que o PMO já validou. A diretoria entra por último, quando já houver histórico de respostas confiáveis: é o público que menos tolera erro e o que tem menos tempo para aprender uma ferramenta nova.
+
+### 13.1.2 Barreiras culturais e técnicas esperadas
+
+As barreiras abaixo foram extraídas de fatos do próprio projeto — do diagnóstico do problema, das restrições do parceiro e do que foi observado no teste de usabilidade da Seção 9.3 —, e não de uma lista genérica de resistência à mudança.
+
+| Barreira | Tipo | Público mais afetado | De onde vem |
+| --- | --- | --- | --- |
+| Desconfiança em resposta gerada por IA | Cultural | PMO e diretoria | Experiência anterior do Metrô com IA generativa sem lastro documental (Seção 2.2) |
+| Receio de expor dado confidencial | Cultural e técnica | Todos, sobretudo a GTI | Restrição de que dado sensível de projeto não trafegue por serviço não homologado (Seção 2.1, RNF01) |
+| Medo de perder o controle do próprio trabalho | Cultural | PMO e equipes de projeto | A consolidação é a atividade do PMO; uma ferramenta que a executa pode ser lida como substituição, e não como apoio |
+| Receio de alteração indevida de dados | Cultural e técnica | `pmo`, `lider_subportfolio` | Um agente que escreve no portfólio, por linguagem natural, sem que a pessoa veja o que vai mudar |
+| Não saber o que perguntar nem como | Técnica | `equipe_projeto` e quem tem pouca familiaridade com agentes | No teste, um participante procurou um menu de comandos antes de digitar, e perguntas curtas sobre temas da base foram recusadas (ocorrência O1, Seção 9.3.2) |
+| Não perceber a fonte nem o controle da sugestão | Técnica | Todos | Dois participantes não viram a fonte citada na primeira leitura; o controle da proatividade não foi percebido sem ajuda (O8) |
+| Mais uma ferramenta na rotina | Cultural | Diretoria e líderes | O PMO já opera SharePoint, Excel, Power BI e Teams; uma interface nova compete por atenção |
+| Ciclo longo de homologação | Técnica e organizacional | GTI e patrocinadores | A adoção de tecnologia nova depende de provisionamento da GTI e de aprovação de compliance (Seção 2.1) |
+
+### 13.1.3 Ações de onboarding e educação
+
+Cada ação responde a uma barreira da tabela anterior. Parte delas já está no comportamento do agente, e o onboarding consiste em torná-las visíveis; a outra parte é organizacional e depende do patrocínio do PMO.
+
+**O que o próprio agente já faz para educar**
+
+| Ação | Barreira atendida | Como funciona |
+| --- | --- | --- |
+| Toda resposta cita a fonte e declara quando não sabe | Desconfiança em IA | A resposta remete ao documento consultado e, sem informação suficiente, declara o limite em vez de completar (RF08). É a resposta direta à experiência anterior do PMO, e por isso o onboarding começa por ela |
+| Classificação antes da geração | Receio de expor dado | A solicitação é classificada localmente, e só o contexto estruturado e validado segue para a camada generativa; fora de escopo recebe resposta controlada, sem chamar o provedor (Seção 8.11.5) |
+| Prévia com confirmação assinada antes de criar alerta ou relatório | Receio de alteração indevida | O agente mostra o resumo do que será criado e só executa após confirmação explícita. A confirmação carrega uma assinatura da prévia exibida, e o backend recusa confirmar uma versão diferente da que a pessoa viu (Seções 8.5.10 e 8.5.11) |
+| Sugestão sempre opcional e desativável | Medo de perder o controle | Nenhuma sugestão é executada sem confirmação, e o controle de proatividade desliga as sugestões sem alterar a resposta principal (RF09 e RF10) |
+| Fluxo guiado em vez de formulário | Não saber o que perguntar | Relatório e alerta são configurados por perguntas sucessivas no chat, com opções a escolher, como no alerta de prazo (Seção 8.5.11) |
+
+**O que a implantação precisa fazer**
+
+| Fase | Público | Ação | Critério para avançar |
+| :---: | --- | --- | --- |
+| 0 | `gti` | Homologar o ambiente: Entra ID, recurso Azure e canal no Teams. Apresentar à GTI e ao compliance a fronteira de confidencialidade e a trilha de auditoria do RNF03 | Ambiente homologado e perfis carregados a partir do Entra ID |
+| 1 | `pmo` e um subportfólio piloto | Sessão de apresentação de 30 minutos centrada em três demonstrações: a fonte citada, a declaração de limite e a prévia antes da escrita. Distribuir um cartão de perguntas de exemplo por perfil | Uso recorrente pelo PMO e indicadores de qualidade da Seção 13.2.4 dentro da meta por quatro semanas |
+| 2 | `lider_subportfolio` e `equipe_projeto` | Expandir por subportfólio, um de cada vez, com o multiplicador do subportfólio conduzindo a primeira sessão da própria equipe | Subportfólio com multiplicador ativo e pendências de atualização respondidas pelo agente |
+| 3 | `diretoria` | Entregar o resumo executivo mensal gerado pelo agente junto do material habitual, sem pedir que a diretoria opere o chat | Diretoria consultando o agente diretamente, sem intermediação do PMO |
+
+O piloto começa pelo **Mapa de Benefícios**, o mesmo documento escolhido como piloto das transações do agente na Seção 2.9: é o artefato de entrada do ciclo de vida do projeto, o PMO já conhece o fluxo, e os fluxos AS-IS e TO-BE da Seção 2.6 mostram onde o trabalho muda. Começar por um documento conhecido reduz o que o usuário precisa aprender ao mesmo tempo.
 
 
 # Referências
