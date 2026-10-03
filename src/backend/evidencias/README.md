@@ -66,7 +66,7 @@ Nenhuma rodada foi apagada. As que não valem continuam aqui, com o motivo.
 | [`rnf05-rodada3/`](rnf05-rodada3/RELATORIO.md) | 22/09 | `gemini-3.7-flash` via OpenRouter | ✅ **3ª rodada do RNF05**, com protocolo congelado antes da execução. Linha de base estendida pela regra de amostra mínima, registrada antes do resultado da carga. |
 | [`rnf05-rodada3/cache-frio/`](rnf05-rodada3/cache-frio/RELATORIO.md) | 23/09 | `gemini-3.7-flash` via OpenRouter | ✅ **3ª rodada, cache frio**: API reiniciada e medida sem aquecimento, com 1 e 5 usuários. Mesmo código da 3ª rodada. |
 | [`campanha-37flash/`](campanha-37flash/arvore-medida.md) | 22/09 | — | Impressão digital do código medido nas rodadas definitivas. |
-| [`graficos_rnf05.ipynb`](graficos_rnf05.ipynb) | 22/09 | — | Gera as Figuras 27 e 28 do `Projeto.md` a partir dos CSVs do Locust deste diretório. |
+| [`graficos_rnf05.ipynb`](graficos_rnf05.ipynb) | 22/09 | — | Gera as Figuras 28 e 29 do `Projeto.md` a partir dos CSVs do Locust deste diretório. |
 
 ## Defeitos encontrados
 

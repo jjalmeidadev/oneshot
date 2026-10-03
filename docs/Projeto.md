@@ -60,6 +60,8 @@
   - [2.8 Ideação](#28-ideação)
     - [2.8.1 Descrição das Features Priorizadas](#281-descrição-das-features-priorizadas)
   - [2.9 Canvas de Proposta de Valor](#29-canvas-de-proposta-de-valor)
+    - [2.9.1 Revisão do Canvas após a implementação](#291-revisão-do-canvas-após-a-implementação)
+    - [2.9.2 Objetivos de Desenvolvimento Sustentável](#292-objetivos-de-desenvolvimento-sustentável)
   - [2.10 Business Drivers](#210-business-drivers)
     - [2.10.1 Business Drivers do Projeto](#2101-business-drivers-do-projeto)
     - [2.10.2 Indicadores Computacionais](#2102-indicadores-computacionais)
@@ -1365,6 +1367,57 @@ Ficam como evolução prevista a integração com o portfólio real do Metrô, a
 
 Dessa forma, nosso principal objetivo é auxiliar o Metrô a otimizar a gestão de seu portfólio de projetos por meio de um agente inteligente, conversacional e integrado ao ambiente corporativo já utilizado pela organização. A solução fortalece a governança, reduz retrabalho, melhora a qualidade dos dados e apoia decisões mais rápidas e assertivas, contribuindo para uma gestão de projetos mais eficiente, padronizada e orientada por informações confiáveis.
 
+### 2.9.1 Revisão do Canvas após a implementação
+
+O Canvas da Figura 12 representa a proposta de valor completa definida na Sprint 1. Esta revisão confronta cada bloco com o que a prova de conceito efetivamente entregou e com o que a implementação ensinou sobre o cliente. O perfil do cliente muda pouco, porque as necessidades do PMO não mudaram. O mapa de valor muda mais, porque passa a mostrar o que existe, e não o que se pretendia construir.
+
+<div align="center">
+  <img src="img/canvas-proposta-valor-revisado.svg" alt="Canvas de Proposta de Valor revisado, com o mapa de valor entregue pela prova de conceito à esquerda e o perfil do cliente à direita, cada item marcado como mantido, revisado ou novo" width="100%">
+  <p><strong>Figura 13</strong> - Canvas de Proposta de Valor revisado após a implementação.</p>
+  <sup>Fonte: Material produzido pelos autores, 2026, a partir do Canvas da Sprint 1 e das evidências das Seções 8, 9 e 10.</sup>
+</div>
+
+Os itens não listados abaixo foram mantidos sem alteração, porque continuam descrevendo o cliente ou foram entregues como previstos: o agente conversacional com PLN, a automação dos relatórios do portfólio e o destaque de riscos e marcos críticos, que o relatório executivo entrega em seção própria de riscos e pontos de atenção.
+
+| Bloco | Sprint 1 | Revisão | Motivo |
+| --- | --- | --- | --- |
+| Dores | — | Desconfiança em IA sem fonte citada *(novo)* | A experiência anterior do Metrô com IA generativa sem lastro documental (Seção 2.2) é a dor mais decisiva para a adoção e não aparecia no canvas |
+| Ganhos | — | Confiança no número apresentado *(novo)* | Ganho correspondente à nova dor: o PMO precisa sustentar cada número com sua origem ao responder à diretoria (Seção 2.5.2) |
+| Tarefas do cliente | Consolidar status para a diretoria | Consolidar o balanço mensal do portfólio | A jornada de Mariana mostrou que a tarefa concreta é o balanço mensal, que concentra o esforço manual descrito na Seção 2.2 |
+| Produtos e serviços | Entrada de status por texto ou voz | Consulta por texto ou por voz | Foi entregue a consulta por voz, com transcrição pelo Azure AI Speech (Seção 8.8); a atualização de status por voz não foi construída |
+| Produtos e serviços | Geração de relatórios executivos | Relatório executivo e alerta de prazo | O alerta autônomo de prazo foi entregue junto do relatório (Seções 8.5.10 e 8.5.11) |
+| Analgésicos | Entrevista guiada para documentos | Fluxo guiado no chat para configurar relatório e alerta | O fluxo guiado existe, mas para relatório e alerta; o preenchimento assistido do Termo de Abertura e do Mapa de Benefícios não foi construído e passa para a Seção 12.2 |
+| Analgésicos | Cobrança de atualizações via Teams | Alerta que cobra prazos na central de notificações | A cobrança é automática, mas chega pela central de notificações da interface web; o canal Teams depende de homologação (Seção 12.2) |
+| Analgésicos | Redução do retrabalho do PMO | Resposta com fonte citada e limite declarado *(novo)* | O item original descrevia um resultado, e não um mecanismo. A citação de fonte é o analgésico da nova dor, com 91,67% de respostas fundamentadas (Seção 9.2) |
+| Criadores de ganho | Acelera a tomada de decisão | Resposta em tempo de conversa | A promessa genérica passou a ter medida: P95 de 7,0 a 7,6 s na consulta simples (Seção 9.2) |
+| Criadores de ganho | — | Próximo passo sugerido, com confirmação *(novo)* | A sugestão proativa, explorada na prototipação da Seção 3.8, foi implementada sob controle do usuário (RF09 e RF10) |
+
+**A lacuna mais visível entre a proposta e a entrega.** A dor "cronogramas com inconsistências" permanece no perfil do cliente, mas o mapa de valor não tem mais um analgésico direto para ela. A validação que a atenderia, descrita no texto do Canvas da Sprint 1 — soma dos pesos do cronograma em 100%, coerência de datas e presença de campos obrigatórios —, faz parte do preenchimento assistido de documentos, que não foi construído. O encaixe entre o mapa de valor e o perfil do cliente é, por isso, mais forte nas dores ligadas à consulta e ao reporte do que nas ligadas ao registro dos dados.
+
+### 2.9.2 Objetivos de Desenvolvimento Sustentável
+
+A análise abaixo parte dos elementos do próprio projeto, e não da lista dos dezessete objetivos da Agenda 2030 (Nações Unidas Brasil, 2026). Para cada objetivo, indica-se a meta a que o projeto se relaciona e o elemento que sustenta a relação. A distinção entre contribuição direta e indireta é deliberada: o agente apoia a gestão de um portfólio de projetos, e não executa os projetos.
+
+**Objetivos atendidos**
+
+| ODS | Meta | Elemento do projeto | Natureza da contribuição |
+| --- | :---: | --- | --- |
+| 16 — Paz, justiça e instituições eficazes | 16.6 — instituições eficazes, responsáveis e transparentes | O Metrô é uma empresa pública. O agente cita a fonte de cada resposta, declara quando não sabe, respeita os perfis de acesso e registra cada interação em trilha de auditoria (`ai_interactions`, `consulted_sources` e `audit_events`) | **Direta.** Uma decisão sobre o portfólio público passa a ter registro de qual informação a sustentou e de quem a consultou |
+| 9 — Indústria, inovação e infraestrutura | 9.1 — infraestrutura de qualidade, confiável e resiliente | O agente apoia a governança do portfólio de projetos de infraestrutura de transporte do Metrô, com alerta autônomo de prazo, relatório executivo com riscos e consulta fundamentada | **Indireta.** O agente não constrói infraestrutura, mas encurta o tempo entre um desvio de prazo ou um risco e a decisão sobre ele, que é onde atrasos de obra se acumulam |
+| 11 — Cidades e comunidades sustentáveis | 11.2 — sistemas de transporte seguros, acessíveis e sustentáveis | O portfólio apoiado reúne projetos de expansão e modernização do transporte metropolitano de São Paulo | **Indireta e mais distante.** Depende de o ganho de gestão se converter em entregas mais próximas do prazo. O projeto não mede esse efeito e o registra como hipótese |
+
+**Objetivos potencialmente ameaçados**
+
+| ODS | Meta | Como o projeto pode ameaçá-lo | O que o projeto faz a respeito |
+| --- | :---: | --- | --- |
+| 8 — Trabalho decente e crescimento econômico | 8.5 — emprego pleno, produtivo e decente | Automatizar a consolidação, que é a atividade central do analista do PMO, pode ser lido como substituição da função ou reduzi-la a revisar o que o agente produz | O desenho mantém a pessoa como quem decide: o fluxo TO-BE da Seção 2.6 deixa ao líder iniciar, revisar e aprovar, e relatório e alerta exigem confirmação. O plano de adoção trata a consolidação como tempo liberado para análise (Seção 13). O destino desse tempo é decisão do Metrô, e não da solução |
+| 10 — Redução das desigualdades | 10.2 — inclusão de todos | No teste de usabilidade, as quatro dicas do moderador foram todas para participantes de familiaridade média ou baixa com agentes conversacionais (Seção 9.3.2). Numa equipe, o ganho tende a se concentrar em quem já é fluente nesse tipo de ferramenta | Fluxos guiados com opções a escolher, cartão de perguntas por perfil e multiplicadores por subportfólio (Seção 13.1.3) |
+| 16 — Paz, justiça e instituições eficazes | 16.6 — instituições responsáveis e transparentes | O mesmo objetivo que o projeto atende pode ser ameaçado por ele. A taxa de alucinação medida é de 4,17% (Seção 9.2), e uma resposta errada apresentada com fonte citada pode dar aparência de lastro a uma decisão mal fundamentada numa empresa pública | Limite de 5% de alucinação no RNF04, fonte verificável em cada resposta e indicador mensal que suspende a expansão do uso quando sai da meta (Seção 13.2.4) |
+| 7 — Energia limpa e acessível | 7.3 — eficiência energética | Cada consulta consome energia na inferência local do encoder de linguagem e na chamada ao provedor generativo, e o consumo cresce com a adoção | A classificação local decide antes de chamar o modelo generativo, solicitações fora de escopo não chegam ao provedor e o cache VHS evitou quatro de cinco transcrições repetidas (Seções 8.11.5 e 9.4.2). O consumo energético não foi medido |
+
+**Leitura de conjunto.** A contribuição mais sólida do projeto é para o ODS 16, porque decorre de mecanismos que existem e foram medidos — fonte citada, trilha de auditoria e controle de acesso —, e não de uma cadeia de efeitos. A mesma solidez vale para a principal ameaça, que incide sobre o mesmo objetivo: é a confiabilidade das respostas que sustenta a contribuição, e é ela que precisa ser acompanhada depois da implantação. As contribuições aos ODS 9 e 11 são reais, mas indiretas, e não devem ser apresentadas como resultado do projeto sem medição posterior.
+
+
 ---
 
 ## 2.10 Business Drivers
@@ -1695,7 +1748,7 @@ A modelagem considera a `Solicitacao` como elemento de entrada do sistema. Cada 
   <img src="img/modelagem-estatica.png" alt="Modelagem estática inicial dos requisitos funcionais" width="100%">
 </div>
 
-<p align="center"><strong>Figura 13</strong> - Modelagem estática inicial dos requisitos funcionais.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 14</strong> - Modelagem estática inicial dos requisitos funcionais.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/modelagem-estatica.puml`](diagrams/modelagem-estatica.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -1736,7 +1789,7 @@ Este cenário representa uma solicitação como **"Qual o prazo do projeto XPTO?
   <img src="img/sequencia-cenario-1.png" alt="Cenário 1 — Consulta de informação de um projeto" width="100%">
 </div>
 
-<p align="center"><strong>Figura 14</strong> - Cenário 1 — Consulta de informação de um projeto.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 15</strong> - Cenário 1 — Consulta de informação de um projeto.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-cenario-1.puml`](diagrams/sequencia-cenario-1.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -1754,7 +1807,7 @@ Este cenário representa uma solicitação como **"Compare os riscos e os prazos
   <img src="img/sequencia-cenario-2.png" alt="Cenário 2 — Análise e comparação entre projetos" width="100%">
 </div>
 
-<p align="center"><strong>Figura 15</strong> - Cenário 2 — Análise e comparação entre projetos.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 16</strong> - Cenário 2 — Análise e comparação entre projetos.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-cenario-2.puml`](diagrams/sequencia-cenario-2.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -1772,7 +1825,7 @@ Este cenário representa o comportamento do pipeline após identificar a intenç
   <img src="img/sequencia-cenario-3.png" alt="Cenário 3 — Roteamento híbrido e sugestão proativa" width="100%">
 </div>
 
-<p align="center"><strong>Figura 16</strong> - Cenário 3 — Roteamento híbrido e sugestão proativa.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 17</strong> - Cenário 3 — Roteamento híbrido e sugestão proativa.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-cenario-3.puml`](diagrams/sequencia-cenario-3.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -1896,11 +1949,11 @@ O esboço traduz a divisão em dois pilares definida pelo parceiro no Termo de A
 
 ### 3.3.2 Diagrama de Componentes (UML)
 
-A Figura 17 representa os componentes da solução e suas conexões. O diagrama mostra a **estrutura**, isto é, quais componentes se conectam a quais e em que sentido. A sequência de uma solicitação típica está descrita em 3.3.3.
+A Figura 18 representa os componentes da solução e suas conexões. O diagrama mostra a **estrutura**, isto é, quais componentes se conectam a quais e em que sentido. A sequência de uma solicitação típica está descrita em 3.3.3.
 
 ![Diagrama de componentes da solução, organizado nas camadas de interface humano-computador, lógica de negócio (Pilar 1 e Pilar 2), acesso a dados e serviços, e camada transversal](img/componentes-mvp.png)
 
-<p align="center"><strong>Figura 17</strong> - Visão inicial da solução técnica: diagrama de componentes do MVP sobre dados sintéticos.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 18</strong> - Visão inicial da solução técnica: diagrama de componentes do MVP sobre dados sintéticos.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/componentes-mvp.puml`](diagrams/componentes-mvp.puml). Para regerar a imagem é necessário ter o PlantUML e o Graphviz instalados:
 
@@ -2669,7 +2722,7 @@ As principais entidades conceituais do MVP são:
   <img src="img/modelo-conceitual.png" alt="Modelo conceitual de dados" width="100%">
 </div>
 
-<p align="center"><strong>Figura 18</strong> - Modelo conceitual de dados.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 19</strong> - Modelo conceitual de dados.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/modelo-conceitual.puml`](diagrams/modelo-conceitual.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -2715,7 +2768,7 @@ Para manter o escopo adequado ao MVP e incorporar o inventário do parceiro, a m
   <img src="img/modelo-logico.png" alt="Modelo lógico de dados" width="100%">
 </div>
 
-<p align="center"><strong>Figura 19</strong> - Modelo lógico de dados.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 20</strong> - Modelo lógico de dados.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/modelo-logico.puml`](diagrams/modelo-logico.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -2791,7 +2844,7 @@ O que a Sprint 2 acrescentou foi a camada que faltava: o **domínio persistido**
   <img src="img/classes-consolidado.png" alt="Diagrama de classes consolidado, com o pipeline de processamento, a interação e governança, o conhecimento consultável e o domínio do portfólio" width="100%">
 </div>
 
-<p align="center"><strong>Figura 20</strong> - Diagrama de classes consolidado, unindo o pipeline de processamento e o domínio persistido.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 21</strong> - Diagrama de classes consolidado, unindo o pipeline de processamento e o domínio persistido.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/classes-consolidado.puml`](diagrams/classes-consolidado.puml). Para regerar a imagem, com PlantUML e Graphviz instalados:
 
@@ -2863,11 +2916,11 @@ A partir dessa classificação, a conversa é encaminhada para a capacidade corr
 
 Solicitações associadas a **funcionalidades ou fluxos específicos** são encaminhadas a um **workflow guiado do backend**: o frontend conduz as perguntas estruturadas consumindo a API de sessões e, após a confirmação, o backend executa a operação localmente ou aciona o **Power Automate** por HTTP como fronteira assíncrona opcional, recebendo o resultado por webhook. O modo local/simulador mantém o fluxo executável sem depender do ambiente corporativo.
 
-A Figura 21 apresenta a arquitetura-alvo, na qual a orquestração dos fluxos funcionais é assumida por Microsoft Copilot Studio e Power Automate sobre os serviços corporativos. No runtime atualmente implementado, os componentes mantêm responsabilidades distintas: o **PLN interpreta e roteia**, o **RAG recupera conhecimento**, o **LLM gera respostas fundamentadas a partir do contexto recuperado** e os **workflows guiados do backend executam e orquestram os fluxos funcionais associados às intenções**, com Power Automate opcional e Supabase Storage para os artefatos gerados. Identidade, configuração e rastreabilidade atravessam os demais componentes.
+A Figura 22 apresenta a arquitetura-alvo, na qual a orquestração dos fluxos funcionais é assumida por Microsoft Copilot Studio e Power Automate sobre os serviços corporativos. No runtime atualmente implementado, os componentes mantêm responsabilidades distintas: o **PLN interpreta e roteia**, o **RAG recupera conhecimento**, o **LLM gera respostas fundamentadas a partir do contexto recuperado** e os **workflows guiados do backend executam e orquestram os fluxos funcionais associados às intenções**, com Power Automate opcional e Supabase Storage para os artefatos gerados. Identidade, configuração e rastreabilidade atravessam os demais componentes.
 
 <div align="center">
   <img src="img/componentes-metro-5.2.png" alt="Diagrama de componentes da arquitetura-alvo da solução" width="100%">
-  <p><strong>Figura 21</strong> - Diagrama de componentes da arquitetura-alvo da solução (visão de evolução corporativa; o runtime atual está descrito no texto desta seção e detalhado na Seção 8.5).</p>
+  <p><strong>Figura 22</strong> - Diagrama de componentes da arquitetura-alvo da solução (visão de evolução corporativa; o runtime atual está descrito no texto desta seção e detalhado na Seção 8.5).</p>
   <sup>Fonte: Material produzido pelos autores, 2026.</sup>
 </div>
 
@@ -2974,7 +3027,7 @@ No contexto do MVP, a fonte utilizada para validação é a **base sintética as
   <img src="img/sequencia-rag-consulta.png" alt="Sequência: consulta documental via RAG" width="100%">
 </div>
 
-<p align="center"><strong>Figura 22</strong> - Sequência: consulta documental via RAG.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 23</strong> - Sequência: consulta documental via RAG.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-rag-consulta.puml`](diagrams/sequencia-rag-consulta.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -2996,7 +3049,7 @@ Assim como no cenário anterior, o MVP utiliza a **base sintética associada ao 
   <img src="img/sequencia-rag-comparacao.png" alt="Sequência: análise e comparação entre projetos via RAG" width="100%">
 </div>
 
-<p align="center"><strong>Figura 23</strong> - Sequência: análise e comparação entre projetos via RAG.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 24</strong> - Sequência: análise e comparação entre projetos via RAG.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-rag-comparacao.puml`](diagrams/sequencia-rag-comparacao.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -3024,7 +3077,7 @@ papel é desempenhado pelo próprio backend.
   <img src="img/sequencia-copilot-fluxo.png" alt="Sequência: direcionamento para fluxo funcional via Copilot Studio" width="100%">
 </div>
 
-<p align="center"><strong>Figura 24</strong> - Sequência: direcionamento para fluxo funcional via Copilot Studio.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 25</strong> - Sequência: direcionamento para fluxo funcional via Copilot Studio.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-copilot-fluxo.puml`](diagrams/sequencia-copilot-fluxo.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -3046,7 +3099,7 @@ Este cenário demonstra a entrada por áudio utilizando a API de **Azure AI Spee
   <img src="img/sequencia-voz-stt.png" alt="Sequência: entrada por voz com Speech-to-Text" width="100%">
 </div>
 
-<p align="center"><strong>Figura 25</strong> - Sequência: entrada por voz com Speech-to-Text.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 26</strong> - Sequência: entrada por voz com Speech-to-Text.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-voz-stt.puml`](diagrams/sequencia-voz-stt.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -3094,13 +3147,13 @@ Como o provedor de LLM externo ainda não está definido nem homologado, conform
 
 ## 6.1 Diagrama de implantação da UML
 
-A Figura 26 apresenta a visão de implantação da PoC. O diagrama separa o ambiente atualmente viável para o MVP dos componentes que dependem de desenvolvimento posterior ou provisionamento pela GTI.
+A Figura 27 apresenta a visão de implantação da PoC. O diagrama separa o ambiente atualmente viável para o MVP dos componentes que dependem de desenvolvimento posterior ou provisionamento pela GTI.
 
 <div align="center">
   <img src="img/implantacao-poc.png" alt="Diagrama de implantação planejada da PoC" width="100%">
 </div>
 
-<p align="center"><strong>Figura 26</strong> - Diagrama de implantação planejada da PoC.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 27</strong> - Diagrama de implantação planejada da PoC.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/implantacao-poc.puml`](diagrams/implantacao-poc.puml).
 
@@ -6068,7 +6121,7 @@ Executados em 22 e 23/09/2026 por Henrique Diniz. O índice completo das rodadas
 | `rnf04/avaliar_rnf04.py` | Apura fundamentação e alucinação com numerador e denominador explícitos | Aplica o critério sobre o conjunto completo, nunca sobre um subconjunto escolhido depois |
 | `executar_rodada_rnf.sh` | Encadeia a coleta do RNF04 e as três rodadas do RNF05 numa campanha | Reproduz a execução completa com um comando |
 | SQL em `public.ai_interactions` | Compara o tempo do pipeline, gravado pela auditoria do RNF03, com o tempo do cliente | Separa o custo do sistema do custo do que vem depois do pipeline, sem instrumentação nova |
-| [`evidencias/graficos_rnf05.ipynb`](../src/backend/evidencias/graficos_rnf05.ipynb) | Gera as Figuras 27 e 28 a partir dos CSVs versionados | Nenhum número das figuras é digitado à mão |
+| [`evidencias/graficos_rnf05.ipynb`](../src/backend/evidencias/graficos_rnf05.ipynb) | Gera as Figuras 28 e 29 a partir dos CSVs versionados | Nenhum número das figuras é digitado à mão |
 | OpenRouter | Chama o `gemini-3.7-flash` em plano pago | Mesmo modelo da bancada, sem o limite de 20 requisições por dia do *Free Tier*; o adaptador envia exatamente o mesmo texto que o Gemini direto receberia |
 
 **Comandos do RNF04**, a partir de `src/backend`, com a API no ar como na Seção 9.2.4. Os do RNF05 estão no item 6 da revisão do protocolo, na mesma seção.
@@ -6103,21 +6156,21 @@ Executados em 22 e 23/09/2026 por Henrique Diniz. O índice completo das rodadas
 
 **Estados usados na tabela.** *Aprovado* e *reprovado* comparam o observado com o critério; *validado* indica o cenário negativo que reprovou, como exigido; *inconclusivo* é a janela com menos de 40 amostras em alguma rota, que não aprova nem reprova; *bloqueado* é a execução impedida por dependência externa; *não executado*, o caso que não chegou a rodar.
 
-A Figura 27 compara o P95 de cada rodada positiva com o teto do requisito. As barras vermelhas são as rodadas reprovadas: na 1ª, a comparação com um usuário teve 10 amostras e o P95 coincidiu com a pior requisição; na 2ª, houve um erro com um usuário e P95 simples de 11,0 s com cinco. Na 3ª, com cache quente e com cache frio, todas as rotas ficaram abaixo do teto, com pelo menos 64 amostras cada.
+A Figura 28 compara o P95 de cada rodada positiva com o teto do requisito. As barras vermelhas são as rodadas reprovadas: na 1ª, a comparação com um usuário teve 10 amostras e o P95 coincidiu com a pior requisição; na 2ª, houve um erro com um usuário e P95 simples de 11,0 s com cinco. Na 3ª, com cache quente e com cache frio, todas as rotas ficaram abaixo do teto, com pelo menos 64 amostras cada.
 
 <div align="center">
   <img src="img/rnf05-p95-rodadas.png" alt="P95 da consulta simples e da comparação em cada rodada positiva do RNF05, contra os tetos de 10 e 20 segundos" width="100%">
 </div>
 
-<p align="center"><strong>Figura 27</strong> - RNF05: P95 medido pelo cliente em cada rodada positiva.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
+<p align="center"><strong>Figura 28</strong> - RNF05: P95 medido pelo cliente em cada rodada positiva.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
 
-A Figura 28 abre os percentis da 3ª rodada. As quatro curvas positivas ficam abaixo dos tetos até o P95; a comparação com um usuário tem uma requisição de 13,5 s, que aparece no P99 e no máximo, ainda abaixo do teto de 20 s. A curva do cenário negativo fica acima de 30 s em todos os percentis: a medição enxerga a violação.
+A Figura 29 abre os percentis da 3ª rodada. As quatro curvas positivas ficam abaixo dos tetos até o P95; a comparação com um usuário tem uma requisição de 13,5 s, que aparece no P99 e no máximo, ainda abaixo do teto de 20 s. A curva do cenário negativo fica acima de 30 s em todos os percentis: a medição enxerga a violação.
 
 <div align="center">
   <img src="img/rnf05-rodada3-percentis.png" alt="Mediana, P90, P95, P99 e máximo de cada janela e rota da 3ª rodada do RNF05, com o cenário negativo acima dos tetos" width="100%">
 </div>
 
-<p align="center"><strong>Figura 28</strong> - RNF05: percentis da 3ª rodada por janela e rota, com o cenário negativo.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
+<p align="center"><strong>Figura 29</strong> - RNF05: percentis da 3ª rodada por janela e rota, com o cenário negativo.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
 
 **Registros das execuções aprovadas.** Saídas dos apuradores, reproduzíveis a partir dos arquivos de evidência.
 
@@ -6209,42 +6262,42 @@ O planejamento prevê a realização dos testes com pelo menos cinco usuários e
 
 A planilha de execução funciona como instrumento de campo para o moderador e os observadores. A aba "Registro dos testes" organiza os cenários em blocos sequenciais, mantendo o mesmo padrão visual do modelo do grupo: título da tarefa, descrição da atividade, resultado geral, cinco etapas observáveis e campo de observações por usuário. A aba "Ocorrências" concentra problemas identificados durante as sessões, incluindo tarefa relacionada, severidade, resumo do ocorrido, potenciais melhorias e participante afetado. Dessa forma, o artefato permite registrar tanto o desempenho objetivo em cada etapa quanto evidências qualitativas de dificuldade, dúvida, hesitação, necessidade de ajuda ou quebra de confiança.
 
-As Figuras 29 a 33 apresentam os principais recortes da planilha criada para conduzir e registrar os testes. Esses prints documentam como o roteiro foi operacionalizado em tarefas observáveis, permitindo que diferentes avaliadores registrem os resultados de forma padronizada.
+As Figuras 30 a 34 apresentam os principais recortes da planilha criada para conduzir e registrar os testes. Esses prints documentam como o roteiro foi operacionalizado em tarefas observáveis, permitindo que diferentes avaliadores registrem os resultados de forma padronizada.
 
 <div align="center">
   <img src="img/testes-usabilidade-p1e2.png" alt="Planilha de testes de usabilidade com os cenários 1 e 2" width="900">
-  <p><strong>Figura 29</strong> - Registro dos cenários 1 e 2 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 30</strong> - Registro dos cenários 1 e 2 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 29 apresenta os dois primeiros cenários do roteiro: entrada em linguagem natural e consulta de status ou prazo. Esses cenários validam se o usuário consegue iniciar a interação com o agente sem comandos técnicos e se consegue interpretar uma resposta objetiva, incluindo a verificação da fonte indicada.
+A Figura 30 apresenta os dois primeiros cenários do roteiro: entrada em linguagem natural e consulta de status ou prazo. Esses cenários validam se o usuário consegue iniciar a interação com o agente sem comandos técnicos e se consegue interpretar uma resposta objetiva, incluindo a verificação da fonte indicada.
 
 <div align="center">
   <img src="img/testes-usabilidade-p3e4.png" alt="Planilha de testes de usabilidade com os cenários 3 e 4" width="900">
-  <p><strong>Figura 30</strong> - Registro dos cenários 3 e 4 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 31</strong> - Registro dos cenários 3 e 4 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 30 mostra os cenários voltados à consulta de riscos e à análise comparativa entre projetos. Nessa parte do teste, o observador registra se o participante consegue escolher o tema da consulta, compreender as informações retornadas, pedir detalhes quando necessário e avaliar se a comparação apresentada apoia a tomada de decisão.
+A Figura 31 mostra os cenários voltados à consulta de riscos e à análise comparativa entre projetos. Nessa parte do teste, o observador registra se o participante consegue escolher o tema da consulta, compreender as informações retornadas, pedir detalhes quando necessário e avaliar se a comparação apresentada apoia a tomada de decisão.
 
 <div align="center">
   <img src="img/testes-usabilidade-p5e6.png" alt="Planilha de testes de usabilidade com os cenários 5 e 6" width="900">
-  <p><strong>Figura 31</strong> - Registro dos cenários 5 e 6 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 32</strong> - Registro dos cenários 5 e 6 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 31 registra os cenários de informação ausente ou fora de escopo e de sugestão proativa. Esses testes são importantes para avaliar confiança e controle: o agente deve declarar limites quando não houver informação suficiente e, quando sugerir um próximo passo, deve deixar claro que a ação depende da confirmação do usuário.
+A Figura 32 registra os cenários de informação ausente ou fora de escopo e de sugestão proativa. Esses testes são importantes para avaliar confiança e controle: o agente deve declarar limites quando não houver informação suficiente e, quando sugerir um próximo passo, deve deixar claro que a ação depende da confirmação do usuário.
 
 <div align="center">
   <img src="img/testes-usabilidade-p7.png" alt="Planilha de testes de usabilidade com o cenário 7" width="900">
-  <p><strong>Figura 32</strong> - Registro do cenário 7 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 33</strong> - Registro do cenário 7 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 32 apresenta o cenário de entrada por voz. O objetivo desse bloco é observar se o participante consegue acionar a entrada por áudio, formular uma pergunta curta, conferir a transcrição e obter uma resposta coerente, mantendo o mesmo fluxo previsto para solicitações textuais.
+A Figura 33 apresenta o cenário de entrada por voz. O objetivo desse bloco é observar se o participante consegue acionar a entrada por áudio, formular uma pergunta curta, conferir a transcrição e obter uma resposta coerente, mantendo o mesmo fluxo previsto para solicitações textuais.
 
 <div align="center">
   <img src="img/testes-usabilidade-ocorrencias.png" alt="Planilha de ocorrências dos testes de usabilidade" width="900">
-  <p><strong>Figura 33</strong> - Aba de ocorrências dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 34</strong> - Aba de ocorrências dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 33 apresenta a aba de ocorrências, usada para consolidar problemas identificados durante as sessões. O registro separado por tarefa, severidade, descrição do ocorrido, melhoria potencial e participante afetado permite priorizar correções após os testes, distinguindo falhas críticas de ajustes menores de clareza ou interface.
+A Figura 34 apresenta a aba de ocorrências, usada para consolidar problemas identificados durante as sessões. O registro separado por tarefa, severidade, descrição do ocorrido, melhoria potencial e participante afetado permite priorizar correções após os testes, distinguindo falhas críticas de ajustes menores de clareza ou interface.
 
 Os perfis desejados são:
 
@@ -6334,7 +6387,7 @@ Quatro dicas do moderador foram necessárias, todas nos cenários 5 e 6 e todas 
   <img src="img/usabilidade-resultado-por-cenario.png" alt="Resultado de cada cenário do teste de usabilidade, com a distribuição dos seis participantes entre concluído, concluído com dificuldade e falhou" width="100%">
 </div>
 
-<p align="center"><strong>Figura 34</strong> - Resultado por cenário do teste de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos dados anonimizados das seis sessões.</sup></p>
+<p align="center"><strong>Figura 35</strong> - Resultado por cenário do teste de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos dados anonimizados das seis sessões.</sup></p>
 
 **Ocorrências.**
 
@@ -6963,6 +7016,7 @@ A ordem segue dois critérios, nesta precedência. Primeiro vem o que hoje repro
 | 6 | Tarefas e calendário do projeto no chat | Dados em `schedule_items` e `project_deliverables_milestones` (Seção 4.4) | Rota de leitura por projeto e as visões de lista e de calendário |
 | 7 | Agente exposto como servidor MCP | Rotas de consulta, relatório e alerta com contrato estável | Ferramentas MCP com autenticação, para o próprio Metrô conectar o agente ao Copilot sem depender do Copilot Studio, hoje indisponível para a equipe |
 | 8 | Integração com o Microsoft Teams | Contrato OpenAPI e arquitetura com o Teams como canal previsto (Seção 5.2) | Canal publicado no tenant do Metrô, após homologação |
+| 9 | Preenchimento assistido de documentos | Fluxo guiado do alerta e do relatório; tabelas `project_charters` e `project_benefits` no modelo físico (Seção 4.4) | Entrevista guiada para o Termo de Abertura e o Mapa de Benefícios, com validação das regras do cronograma — soma dos pesos em 100% e coerência de datas —, promessa do Canvas da Sprint 1 ainda não construída (Seção 2.9.1) |
 
 Os itens 5 e 6 estavam na linha de corte do planejamento da Sprint 5, que previa registrá-los aqui caso não coubessem na capacidade (Seção 6.5.1 do `GestaoProjeto.md`).
 
@@ -6970,10 +7024,10 @@ Os itens 5 e 6 estavam na linha de corte do planejamento da Sprint 5, que previa
 
 | # | Aperfeiçoamento | Motivo |
 | :---: | --- | --- |
-| 9 | Cache VHS compartilhado entre réplicas | O cache é hoje em memória e por processo, com validade de 300 s; não sobrevive a reinício e impede escalar a API horizontalmente sem perder os acertos |
-| 10 | Lock do classificador restrito ao carregamento | O lock global serializa todas as classificações, embora só o carregamento dos artefatos precise dele; a medição da Seção 8.11.8 mostrou vazão até 2,3 vezes maior sem ele |
-| 11 | Ajuste supervisionado do encoder | O encoder é usado congelado, como extrator de atributos; o ajuste para as intenções do projeto depende de GPU |
-| 12 | Integração com o Power BI | Evolução prevista desde o Canvas da Seção 2.9, para levar os indicadores do agente aos painéis que o PMO já usa |
+| 10 | Cache VHS compartilhado entre réplicas | O cache é hoje em memória e por processo, com validade de 300 s; não sobrevive a reinício e impede escalar a API horizontalmente sem perder os acertos |
+| 11 | Lock do classificador restrito ao carregamento | O lock global serializa todas as classificações, embora só o carregamento dos artefatos precise dele; a medição da Seção 8.11.8 mostrou vazão até 2,3 vezes maior sem ele |
+| 12 | Ajuste supervisionado do encoder | O encoder é usado congelado, como extrator de atributos; o ajuste para as intenções do projeto depende de GPU |
+| 13 | Integração com o Power BI | Evolução prevista desde o Canvas da Seção 2.9, para levar os indicadores do agente aos painéis que o PMO já usa |
 
 
 # 13. Plano de Adoção e Mobilização do Ecossistema
@@ -7126,5 +7180,6 @@ Os quatro indicadores de qualidade com meta definida já têm linha de base medi
 - Robert Half. [Guia Salarial 2026](https://www.roberthalf.com/br/pt/insights/salary-guide). Acesso em: 25 set. 2026.
 - Robert Half. [Desenvolvedor(a) full-stack júnior](https://www.roberthalf.com/br/pt/vagas-detalhes/desenvolvedora-full-stack-junior). Acesso em: 25 set. 2026.
 - Supabase. [Preços](https://supabase.com/pricing). Acesso em: 25 set. 2026.
+- Nações Unidas Brasil. [Os Objetivos de Desenvolvimento Sustentável no Brasil](https://brasil.un.org/pt-br/sdgs). Acesso em: 3 out. 2026.
 
 <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">Agente de IA para o Portfólio de Projetos do Metrô</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">Oneshot</a>, <a href="https://www.inteli.edu.br/">Inteli</a>, <a href="https://www.linkedin.com/in/ntsfelipe/">Felipe Neves</a>, <a href="https://www.linkedin.com/in/henrique-rodrigues-diniz-b7b011319/">Henrique Diniz</a>, <a href="https://www.linkedin.com/in/jaimeandradedealmeida/">Jaime Almeida</a>, <a href="https://www.linkedin.com/in/leonardoramosvieira">Leonardo Ramos</a>, <a href="https://www.linkedin.com/in/pedro-uchoaa/">Pedro Uchoa</a> e <a href="https://www.linkedin.com/in/wendel-feitosa-975bb1346/">Wendel Feitosa</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="license noopener noreferrer">Attribution 4.0 International</a>.</p>
