@@ -361,7 +361,7 @@ CREATE TABLE public.users (
     metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT users_role_ck CHECK (role_name IN ('diretoria', 'pmo', 'lider_subportfolio', 'equipe_projeto', 'gti', 'admin'))
+    CONSTRAINT users_role_ck CHECK (role_name IN ('diretoria', 'pmo', 'lider_subportfolio', 'equipe_projeto', 'consulta', 'gti', 'admin'))
 );
 
 CREATE TABLE public.access_rules (
@@ -595,6 +595,9 @@ CREATE INDEX idx_change_records_subportfolio_status ON public.change_records(sub
 CREATE INDEX idx_users_email ON public.users(email);
 CREATE INDEX idx_access_rules_user_id ON public.access_rules(user_id);
 CREATE INDEX idx_access_rules_role_name ON public.access_rules(role_name);
+CREATE UNIQUE INDEX uq_access_rules_subject_scope
+    ON public.access_rules (user_id, role_name, subportfolio_id, project_id, permission_scope)
+    NULLS NOT DISTINCT;
 CREATE INDEX idx_intent_catalog_macro ON public.intent_catalog(macro_intent);
 CREATE INDEX idx_secondary_intents_specific_intent_id ON public.secondary_intents(specific_intent_id);
 CREATE INDEX idx_prompt_templates_intent_id ON public.prompt_templates(intent_id);
@@ -663,9 +666,11 @@ COMMENT ON TABLE public.risk_issue_items IS 'Riscos e problemas de projeto ou su
 COMMENT ON TABLE public.risk_issue_history IS 'Historico de mudancas de status e criticidade de riscos e problemas.';
 COMMENT ON TABLE public.change_records IS 'Registros de mudancas de projeto ou subportfolio, com impactos e status de aprovacao.';
 COMMENT ON TABLE public.users IS 'Usuarios simulados ou autenticados via Microsoft Entra ID em evolucao futura.';
-COMMENT ON TABLE public.access_rules IS 'Regras de acesso por usuario, perfil, projeto, subportfolio ou escopo de permissao.';
+COMMENT ON COLUMN public.users.entra_object_id IS 'No MVP, armazena como texto o UUID auth.users.id recebido no claim JWT sub; nao armazena permissao nem custom claim.';
+COMMENT ON TABLE public.access_rules IS 'Regras de acesso por usuario, perfil, projeto, subportfolio ou escopo de permissao. No MVP, a autorizacao usa regras por user_id; role_name permanece para compatibilidade.';
+COMMENT ON INDEX public.uq_access_rules_subject_scope IS 'Impede regras duplicadas para o mesmo sujeito e escopo; NULLS NOT DISTINCT trata alvos nulos como iguais.';
 COMMENT ON TABLE public.intent_catalog IS 'Catalogo hierarquico de macrointencoes, intencoes especificas, handlers e limiares do classificador.';
-COMMENT ON TABLE public.secondary_intents IS 'Sugestoes proativas vinculadas a intencoes especificas e enviadas ao RAG como proximo passo opcional.';
+COMMENT ON TABLE public.secondary_intents IS 'Sugestoes proativas internas, lidas pelo backend via PostgreSQL. RLS sem policies bloqueia acesso direto pela Data API.';
 COMMENT ON TABLE public.pending_proactive_suggestions IS 'Confirmacoes proativas efemeras, vinculadas a identidade e conversa e compartilhadas entre workers.';
 COMMENT ON TABLE public.prompt_templates IS 'Templates de prompts usados por Copilot Studio, Microsoft 365 Copilot, Power Automate ou PLN local.';
 COMMENT ON TABLE public.ai_conversations IS 'Sessoes conversacionais agrupando interacoes de um usuario em um canal.';
@@ -674,5 +679,8 @@ COMMENT ON TABLE public.consulted_sources IS 'Fontes consultadas para compor uma
 COMMENT ON TABLE public.audit_events IS 'Eventos de auditoria tecnica e funcional gerados durante o processamento.';
 COMMENT ON TABLE public.out_of_scope_requests IS 'Solicitacoes fora do escopo suportado, registradas para revisao e evolucao do catalogo.';
 COMMENT ON TABLE public.intent_test_cases IS 'Casos de teste rotulados para avaliacao do classificador de intencoes.';
+
+REVOKE ALL ON TABLE public.secondary_intents FROM anon, authenticated;
+ALTER TABLE public.secondary_intents ENABLE ROW LEVEL SECURITY;
 
 COMMIT;

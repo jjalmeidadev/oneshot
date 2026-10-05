@@ -589,7 +589,23 @@ class PostgresAlertRepository(AlertRepository):
 
     @staticmethod
     def _audit(cursor: Any, event_type: str, correlation_id: str, payload: dict[str, Any], component: str) -> None:
-        cursor.execute("INSERT INTO public.audit_events (event_type,component,event_status,event_payload,correlation_id) VALUES (%s,%s,'sucesso',%s::jsonb,%s)", (event_type,component,json.dumps(payload),correlation_id))
+        cursor.execute(
+            """
+            INSERT INTO public.audit_events (
+                event_type, component, event_status, event_payload,
+                correlation_id, user_id
+            ) VALUES (
+                %s, %s, 'sucesso', %s::jsonb, %s,
+                (SELECT u.id
+                   FROM public.users u
+                   JOIN public.alert_subscriptions s
+                     ON s.owner_subject = u.entra_object_id
+                  WHERE s.correlation_id = %s AND u.is_active = TRUE
+                  LIMIT 1)
+            )
+            """,
+            (event_type, component, json.dumps(payload), correlation_id, correlation_id),
+        )
 
 
 @lru_cache(maxsize=1)

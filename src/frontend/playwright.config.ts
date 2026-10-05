@@ -17,6 +17,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     launchOptions: {
+      executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
       args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'],
     },
   },
