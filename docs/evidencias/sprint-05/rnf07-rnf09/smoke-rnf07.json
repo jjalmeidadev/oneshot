@@ -1,0 +1,12 @@
+{
+  "purpose": "Aquecimento fora da amostra, ap?s in?cio do backend fora do sandbox",
+  "http_status": 502,
+  "request": {
+    "message": "Quais orienta??es existem para o embarque no trem?",
+    "use_intent_classifier": true,
+    "proactivity_enabled": false
+  },
+  "response": {
+    "detail": "Não foi possível obter uma resposta. Tente novamente em instantes."
+  }
+}
