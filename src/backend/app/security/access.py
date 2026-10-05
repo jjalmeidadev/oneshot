@@ -248,11 +248,15 @@ class SupabaseAuthVerifier:
                 },
             )
         except httpx.HTTPError as error:
-            raise InvalidAccessTokenError() from error
+            # Queda ou timeout do Auth nao diz nada sobre o token: responder
+            # 401 faria o frontend encerrar uma sessao valida.
+            raise AuthenticationUnavailableError() from error
         finally:
             if owned_client:
                 client.close()
 
+        if response.status_code >= 500:
+            raise AuthenticationUnavailableError()
         if response.status_code != 200:
             raise InvalidAccessTokenError()
         try:

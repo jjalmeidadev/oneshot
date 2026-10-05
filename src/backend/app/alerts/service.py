@@ -51,7 +51,7 @@ class AlertService:
         authorize_scope(
             identity,
             ReportScope(type=ScopeType.PROJECT, id=request.rule.project_id),
-            operation="write",
+            operation="read",
         )
         now = _now()
         prepared = PreparedAlert(
@@ -83,7 +83,7 @@ class AlertService:
         authorize_scope(
             identity,
             ReportScope(type=ScopeType.PROJECT, id=prepared.request.rule.project_id),
-            operation="write",
+            operation="read",
         )
         now = _now()
         subscription = AlertSubscription(
@@ -159,7 +159,7 @@ class AlertService:
             authorize_scope(
                 worker_identity,
                 ReportScope(type=ScopeType.PROJECT, id=value.rule.project_id),
-                operation="write",
+                operation="read",
             )
         except Exception as error:
             previous = value.revision

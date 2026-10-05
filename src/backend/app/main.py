@@ -298,8 +298,10 @@ def create_chat_response(
 )
 def create_proactive_confirmation(
     request: ProactiveConfirmationRequest,
-    access: WriteAccess,
+    access: ReadAccess,
 ) -> ProactiveConfirmationResponse:
+    # A resposta secundaria so analisa ou recomenda e nao grava dado de
+    # projeto; aceitar a sugestao exige leitura, como a pergunta original.
     try:
         return process_proactive_confirmation(
             request,

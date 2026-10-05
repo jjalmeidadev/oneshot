@@ -843,3 +843,164 @@ def test_access_me_retorna_somente_perfil_atual(
     assert "user_id" not in serialized
     assert "service_role" not in serialized
     assert "validado" not in serialized
+
+
+# ==========================================================================
+# Ajustes da revisao do MR (S5-03/S5-04)
+# ==========================================================================
+
+
+def _rotas_que_exigem(dependencia):
+    from fastapi.routing import APIRoute
+
+    def dependencias(dependant):
+        for sub in dependant.dependencies:
+            yield sub.call
+            yield from dependencias(sub)
+
+    from app.alerts.router import router as alerts_router
+    from app.reports.router import router as reports_router
+
+    # Os routers incluidos nao aparecem achatados em `app.routes` nesta versao
+    # do FastAPI; as rotas sao lidas de cada router de origem.
+    rotas = [*app.routes, *alerts_router.routes, *reports_router.routes]
+    return {
+        (route.path, method)
+        for route in rotas
+        if isinstance(route, APIRoute)
+        for method in route.methods
+        if dependencia in set(dependencias(route.dependant))
+    }
+
+
+def test_proatividade_e_alertas_exigem_leitura_e_nao_escrita():
+    """A sugestao so analisa, e alerta e preferencia do proprio usuario."""
+
+    from app.security import require_read_access, require_write_access
+
+    escrita = _rotas_que_exigem(require_write_access)
+    leitura = _rotas_que_exigem(require_read_access)
+
+    assert ("/api/chat/proactive-confirmation", "POST") in leitura
+    assert not any(path.startswith("/api/alert") for path, _ in escrita)
+    assert not any(path.startswith("/api/notifications") for path, _ in escrita)
+    assert ("/api/chat/proactive-confirmation", "POST") not in escrita
+    assert ("/api/alert-workflow-sessions", "POST") in leitura
+
+
+def test_perfil_sem_escrita_aceita_sugestao_proativa(monkeypatch):
+    from app.gemini.schemas import ProactiveConfirmationResponse
+
+    consulta = scoped_context("consulta", scope="projeto", project_codes=("PRJ-0510",))
+    app.dependency_overrides[get_access_context] = lambda: consulta
+    monkeypatch.setattr(
+        "app.main.process_proactive_confirmation",
+        lambda *_a, **_k: ProactiveConfirmationResponse(status="declined"),
+    )
+    try:
+        with TestClient(app) as client:
+            response = client.post(
+                "/api/chat/proactive-confirmation",
+                headers={"Authorization": "Bearer validado"},
+                json={
+                    "suggestion_id": "00000000-0000-0000-0000-000000000250",
+                    "conversation_id": "conversa",
+                    "decision": "decline",
+                },
+            )
+    finally:
+        app.dependency_overrides.pop(get_access_context, None)
+
+    assert response.status_code == 200
+
+
+def test_documento_institucional_vale_para_todos_os_perfis():
+    """Documento sem projeto (procedimento, comunicado) nao e escopo de ninguem."""
+
+    from app.rag.sharepoint import SharePointDocument, retrieve_sharepoint_context
+
+    def documento(source_id, project_id=None, project_code=None):
+        return SharePointDocument(
+            source_id=source_id,
+            title="Procedimento de objeto perdido",
+            list_name="Procedimentos",
+            content="Objeto perdido deve ser entregue no balcao de atendimento.",
+            web_url="https://mock.sharepoint.local/item",
+            last_modified="2026-09-09T12:00:00Z",
+            search_text="objeto perdido balcao atendimento",
+            project_id=project_id,
+            project_code=project_code,
+        )
+
+    documentos = [
+        documento("institucional:1"),
+        documento("projeto:0442", str(PROJECT_0442_ID), "PRJ-0442"),
+        documento("projeto:0510", str(PROJECT_0510_ID), "PRJ-0510"),
+    ]
+
+    resultado = retrieve_sharepoint_context(
+        "objeto perdido",
+        documents=documentos,
+        allowed_project_ids={"prj-0510"},
+    )
+
+    assert {r.document.source_id for r in resultado} == {
+        "institucional:1",
+        "projeto:0510",
+    }
+
+
+def test_consulta_sql_aceita_documento_sem_projeto():
+    from app.rag.database import RAG_DATABASE_QUERY
+
+    sem_comentarios = "\n".join(
+        linha.split("--")[0] for linha in RAG_DATABASE_QUERY.splitlines()
+    )
+    filtro = " ".join(sem_comentarios.split())
+    assert (
+        "access.project_ids IS NULL "
+        "OR COALESCE(se.project_id, a.project_id) IS NULL "
+        "OR COALESCE(se.project_id, a.project_id) = ANY(access.project_ids)"
+    ) in filtro
+
+
+@pytest.mark.parametrize(
+    "resposta",
+    [
+        httpx.ConnectError("Auth fora do ar"),
+        httpx.Response(503, json={"message": "unavailable"}),
+    ],
+)
+def test_queda_do_auth_nao_vira_token_invalido(resposta):
+    def handler(_request: httpx.Request) -> httpx.Response:
+        if isinstance(resposta, Exception):
+            raise resposta
+        return resposta
+
+    verifier = SupabaseAuthVerifier(
+        "https://lykmrtukumqfdrwqkjzq.supabase.co",
+        "sb_publishable_test",
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+
+    with pytest.raises(AuthenticationUnavailableError) as error:
+        verifier.verify("token")
+    assert error.value.status_code == 503
+
+
+def test_revalidacao_de_relatorio_nega_usuario_inativo(monkeypatch):
+    from app.reports.errors import ReportAccessDeniedError
+    from app.reports.security import resolve_report_identity_by_subject
+
+    monkeypatch.setenv(
+        "REPORT_SIMULATED_IDENTITIES",
+        json.dumps({"legado": {"subject": str(AUTH_SUBJECT), "can_export": True}}),
+    )
+
+    def inativo(_self, _subject):
+        raise UserInactiveError()
+
+    monkeypatch.setattr(PostgresAccessRepository, "resolve", inativo)
+
+    with pytest.raises(ReportAccessDeniedError):
+        resolve_report_identity_by_subject(str(AUTH_SUBJECT))

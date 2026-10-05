@@ -18,6 +18,7 @@ from app.reports.schemas import ReportScope, ScopeType
 from app.security.access import (
     AccessContext,
     AccessOperation,
+    AccessProfileNotConfiguredError,
     PostgresAccessRepository,
     authorize_operation,
 )
@@ -78,9 +79,13 @@ def resolve_report_identity_by_subject(subject: str) -> ReportIdentity:
         return report_identity_from_access_context(
             PostgresAccessRepository().resolve(UUID(subject))
         )
-    except Exception:
-        # Compatibilidade temporaria com jobs e massas antigas da PoC.
+    except (ValueError, AccessProfileNotConfiguredError):
+        # Compatibilidade temporaria com jobs e massas antigas da PoC: so o
+        # sujeito sem perfil no banco cai nas identidades legadas. Usuario
+        # inativo ou falha de banco continuam negando a revalidacao.
         pass
+    except Exception as error:
+        raise ReportAccessDeniedError() from error
 
     for payload in _configured_identities().values():
         identity = _identity_from_payload(payload)

@@ -48,7 +48,7 @@ class AlertWorkflowService:
                 item["id"]
                 for item in self.alerts.source.list_projects()
                 if can_access_scope(
-                    identity, ScopeType.PROJECT, item["id"], operation="write"
+                    identity, ScopeType.PROJECT, item["id"], operation="read"
                 )
             }
             if answer not in allowed:
@@ -92,7 +92,7 @@ class AlertWorkflowService:
                 AlertWorkflowOption(value=item["id"], label=item["label"])
                 for item in self.alerts.source.list_projects()
                 if can_access_scope(
-                    identity, ScopeType.PROJECT, item["id"], operation="write"
+                    identity, ScopeType.PROJECT, item["id"], operation="read"
                 )
             ]
             return AlertWorkflowQuestion(step=value.current_step,prompt="Qual projeto deve ser monitorado?",input_type="single_select",options=options)

@@ -21,11 +21,13 @@ from app.alerts.security import validate_notification_callback_token
 from app.alerts.service import get_alert_service
 from app.alerts.workflow import get_alert_workflow_service
 from app.reports.security import report_identity_from_access_context
-from app.security import AccessContext, require_read_access, require_write_access
+from app.security import AccessContext, require_read_access
 
 router = APIRouter(prefix="/api", tags=["alertas"])
+# Inscricao, pausa e leitura de notificacao sao preferencias do proprio usuario
+# e nao alteram dado de projeto: exigem leitura no escopo do projeto, e o
+# servico confere que a inscricao pertence a quem a altera.
 ReadAccess = Annotated[AccessContext, Depends(require_read_access)]
-WriteAccess = Annotated[AccessContext, Depends(require_write_access)]
 
 
 @router.post(
@@ -35,7 +37,7 @@ WriteAccess = Annotated[AccessContext, Depends(require_write_access)]
 )
 def start_alert_workflow(
     request: StartAlertWorkflowRequest,
-    access: WriteAccess,
+    access: ReadAccess,
 ) -> AlertWorkflowResponse:
     return get_alert_workflow_service().start(
         request, report_identity_from_access_context(access)
@@ -62,7 +64,7 @@ def get_alert_workflow(
 def answer_alert_workflow(
     session_id: str,
     request: AnswerAlertWorkflowRequest,
-    access: WriteAccess,
+    access: ReadAccess,
 ) -> AlertWorkflowResponse:
     return get_alert_workflow_service().answer(
         session_id, request, report_identity_from_access_context(access)
@@ -77,7 +79,7 @@ def confirm_alert_workflow(
     session_id: str,
     request: ConfirmAlertWorkflowRequest,
     response: Response,
-    access: WriteAccess,
+    access: ReadAccess,
 ) -> AlertWorkflowResponse:
     value = get_alert_workflow_service().confirm(
         session_id, request, report_identity_from_access_context(access)
@@ -92,7 +94,7 @@ def confirm_alert_workflow(
 )
 def cancel_alert_workflow(
     session_id: str,
-    access: WriteAccess,
+    access: ReadAccess,
 ) -> AlertWorkflowResponse:
     return get_alert_workflow_service().cancel(
         session_id, report_identity_from_access_context(access)
@@ -146,7 +148,7 @@ def _change(
 def pause_alert_subscription(
     subscription_id: str,
     request: ChangeSubscriptionRequest,
-    access: WriteAccess,
+    access: ReadAccess,
 ) -> AlertSubscriptionResponse:
     return _change(subscription_id, SubscriptionStatus.PAUSED, request, access)
 
@@ -158,7 +160,7 @@ def pause_alert_subscription(
 def resume_alert_subscription(
     subscription_id: str,
     request: ChangeSubscriptionRequest,
-    access: WriteAccess,
+    access: ReadAccess,
 ) -> AlertSubscriptionResponse:
     return _change(subscription_id, SubscriptionStatus.ACTIVE, request, access)
 
@@ -170,7 +172,7 @@ def resume_alert_subscription(
 def cancel_alert_subscription(
     subscription_id: str,
     request: ChangeSubscriptionRequest,
-    access: WriteAccess,
+    access: ReadAccess,
 ) -> AlertSubscriptionResponse:
     return _change(subscription_id, SubscriptionStatus.CANCELLED, request, access)
 
@@ -185,7 +187,7 @@ def list_notifications(access: ReadAccess) -> NotificationListResponse:
 @router.post("/notifications/{notification_id}/read", response_model=AlertNotification)
 def read_notification(
     notification_id: str,
-    access: WriteAccess,
+    access: ReadAccess,
 ) -> AlertNotification:
     return get_alert_service().mark_notification_read(
         notification_id, report_identity_from_access_context(access)

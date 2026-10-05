@@ -118,6 +118,9 @@ WHERE
     COALESCE(a.metadata ->> 'mock', se.metadata ->> 'mock') = 'true'
     AND (
         access.project_ids IS NULL
+        -- Documento sem projeto e institucional (procedimentos, comunicados,
+        -- politicas de atendimento) e vale para todos os perfis.
+        OR COALESCE(se.project_id, a.project_id) IS NULL
         OR COALESCE(se.project_id, a.project_id) = ANY(access.project_ids)
     )
     AND (

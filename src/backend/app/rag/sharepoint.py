@@ -247,11 +247,10 @@ def retrieve_sharepoint_context(
         candidates = [
             document
             for document in candidates
-            if document.project_id
-            and (
-                document.project_id.casefold() in allowed
-                or (document.project_code or "").casefold() in allowed
-            )
+            # Documento sem projeto e institucional e vale para todos os perfis.
+            if not document.project_id
+            or document.project_id.casefold() in allowed
+            or (document.project_code or "").casefold() in allowed
         ]
     scored: list[RetrievedDocument] = []
 
