@@ -1,6 +1,15 @@
 stages:
   - test
 
+validar-titulo-mr:
+  stage: test
+  image: alpine:3.22
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  script:
+    - sh scripts/test-validate-mr-title.sh
+    - sh scripts/validate-mr-title.sh
+
 frontend-unit:
   stage: test
   image: node:24-bookworm
