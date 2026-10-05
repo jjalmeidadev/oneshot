@@ -18,6 +18,7 @@ from app.gemini.schemas import (
 )
 from app.nlp.schemas import AudioIntent, PublicEntity
 from app.rag.database import retrieve_context
+from app.rag.errors import RagSourceError
 from app.rag.proactive_confirmation import (
     PendingProactiveSuggestion,
     claim_pending_suggestion,
@@ -86,6 +87,11 @@ def generate_chat_response(
     except (DatabaseConfigurationError, DatabaseConnectionError) as error:
         raise GeminiAPIError(
             "Nao foi possivel recuperar contexto no banco de dados.",
+            status_code=503,
+        ) from error
+    except RagSourceError as error:
+        raise GeminiAPIError(
+            "Não foi possível carregar a origem de dados configurada.",
             status_code=503,
         ) from error
     retrieval_ms = round((perf_counter() - retrieval_started_at) * 1000)
