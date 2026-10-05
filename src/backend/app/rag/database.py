@@ -105,7 +105,8 @@ SELECT
             )
         THEN 1.0
         ELSE 0.0
-    END AS score
+    END AS score,
+    a.confidentiality_level
 FROM public.source_extracts se
 JOIN public.project_artifacts a ON a.id = se.artifact_id
 LEFT JOIN public.projects p ON p.id = COALESCE(se.project_id, a.project_id)
@@ -290,7 +291,7 @@ def _row_to_result(row: object) -> RetrievedDocument:
     else:
         value = (
             lambda key, default=None: row[_ROW_INDEX[key]]
-            if key in _ROW_INDEX
+            if key in _ROW_INDEX and _ROW_INDEX[key] < len(row)
             else default
         )
 
@@ -318,6 +319,7 @@ def _row_to_result(row: object) -> RetrievedDocument:
         attributes=attributes_from_metadata(value("extract_metadata")),
         registration_period=(value("extract_metadata") or {}).get("registration_period"),
         validity=(value("extract_metadata") or {}).get("validity"),
+        confidentiality_level=_optional_str(value("confidentiality_level")),
     )
     return RetrievedDocument(
         document=document,
@@ -340,6 +342,7 @@ _ROW_INDEX = {
     "project_title": 11,
     "extract_metadata": 12,
     "score": 13,
+    "confidentiality_level": 14,
 }
 
 
