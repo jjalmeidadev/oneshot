@@ -42,9 +42,7 @@ export async function sendChatMessage(input: SendMessageInput): Promise<ChatResp
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(input.proactivityEnabled
-        ? { Authorization: `Bearer ${input.accessToken}` }
-        : {}),
+      Authorization: `Bearer ${input.accessToken}`,
     },
     body: JSON.stringify(body),
     signal: input.signal,

@@ -122,6 +122,7 @@
   - [4.1 Especificação da Base de Dados](#41-especificação-da-base-de-dados)
   - [4.2 Modelo Conceitual de Dados](#42-modelo-conceitual-de-dados)
   - [4.3 Modelo Lógico de Dados](#43-modelo-lógico-de-dados)
+    - [4.3.1 Autenticação e controle de acesso do MVP](#431-autenticação-e-controle-de-acesso-do-mvp)
   - [4.4 Modelo Físico de Dados](#44-modelo-físico-de-dados)
 - [5. Solução Técnica (Design)](#5-solução-técnica-design)
   - [5.1 Diagrama de Classes](#51-diagrama-de-classes)
@@ -1882,7 +1883,7 @@ Os requisitos não funcionais definem os atributos de qualidade que a solução 
 | ID | Categoria | Requisito Não Funcional | Critério de verificação | Prioridade | Status |
 | :---: | --- | --- | --- | :---: | :---: |
 | RNF01 | Confidencialidade | A solução não deve processar dados reais ou sensíveis do portfólio em serviços externos não homologados pelo Metrô. No MVP, o desenvolvimento e os testes devem utilizar dados sintéticos ou anonimizados. | Verificar que 100% da base utilizada na prova de conceito é sintética ou anonimizada e que o pipeline não depende do envio de dados sensíveis para serviços externos não homologados. | Muito Alta | Não iniciado |
-| RNF02 | Controle de acesso | A solução deve respeitar os limites de permissão e acesso à informação de cada perfil de usuário. | Validar, em cenários simulados, que 100% das respostas retornadas a usuários com perfis distintos estejam compatíveis com suas permissões e responsabilidades. | Muito Alta | Não iniciado |
+| RNF02 | Controle de acesso | A solução deve respeitar os limites de permissão e acesso à informação de cada perfil de usuário. | Validar, em cenários simulados, que 100% das respostas retornadas a usuários com perfis distintos estejam compatíveis com suas permissões e responsabilidades. | Muito Alta | Atendido no MVP com Supabase Auth, regras por perfil e escopo, testes automatizados e validação real |
 | RNF03 | Rastreabilidade | A solução deve registrar as consultas realizadas, a intenção classificada, as fontes consultadas e a resposta retornada, permitindo auditoria técnica das interações. | Verificar que 100% das interações testadas geram registros estruturados contendo identificação do usuário ou perfil simulado, carimbo de tempo, intenção identificada, documentos recuperados e resposta produzida. | Muito Alta | Não iniciado |
 | RNF04 | Confiabilidade das respostas | As respostas geradas pelo agente devem ser fundamentadas nas informações recuperadas dos dados disponíveis, evitando apresentar como fato informações não sustentadas pela base. | Em testes com dados sintéticos, atingir taxa de respostas fundamentadas igual ou superior a 90% e taxa de alucinação igual ou inferior a 5% nas solicitações pertencentes ao escopo do MVP. | Muito Alta | Atendido na Sprint 4 |
 | RNF05 | Desempenho | O pipeline deve processar solicitações textuais em tempo compatível com uma interação conversacional. | Em ambiente de MVP, responder consultas simples em até 10 segundos e análises comparativas em até 20 segundos, considerando o tempo entre o recebimento da solicitação pela API e o retorno da resposta estruturada. | Alta | Atendido na Sprint 4 (3ª rodada) |
@@ -2798,6 +2799,160 @@ As principais regras de integridade do modelo lógico são:
 - perguntas fora do catálogo devem gerar registros em out_of_scope_requests;
 - leituras, classificações, consultas a fontes, respostas do Copilot e acionamentos de fluxos devem gerar eventos em audit_events.
 
+### 4.3.1 Autenticação e controle de acesso do MVP
+
+Para atender ao RNF02 sem introduzir a complexidade de uma solução corporativa
+de identidade, o MVP utiliza o **Supabase Auth** para autenticar quatro usuários
+sintéticos e as tabelas `public.users` e `public.access_rules` para autorizar
+cada operação. A implementação separa as duas responsabilidades: o JWT prova
+quem fez a requisição, enquanto as regras persistidas no PostgreSQL determinam
+o que essa pessoa pode fazer e quais projetos pode consultar.
+
+O desenho foi orientado pelas perguntas das personas fornecidas pelo parceiro.
+Cada perfil recebeu o menor conjunto de permissões e o menor escopo necessário
+para demonstrar seus casos de uso:
+
+| Perfil funcional | `role_name` interno | Escopo da regra | Referência da carga | Leitura | Escrita | Exportação |
+|---|---|---|---|:---:|:---:|:---:|
+| PMO | `pmo` | Portfólio | Todo o portfólio | Sim | Não | Sim |
+| Líder de subportfólio | `lider_subportfolio` | Subportfólio | `MOD` | Sim | Não | Sim |
+| Gerente de projeto | `equipe_projeto` | Projeto | `PRJ-0442` | Sim | Sim | Sim |
+| Consulta | `consulta` | Projeto | `PRJ-0510` | Sim | Não | Não |
+
+A massa da S5-03 também cria o subportfólio `DEMO-ACESSO` e o projeto
+`PRJ-DEMO-ACESSO`, ambos identificados explicitamente como sintéticos. Como a
+regra do líder aponta somente para `MOD`, esse segundo subportfólio permite
+validar a negação cruzada sem usar dados reais.
+
+#### Modelo de identidade e carga sintética
+
+Cada conta é criada em `auth.users` pela API administrativa do Supabase. O UUID
+do claim `sub` é persistido como texto em `public.users.entra_object_id`; essa é
+a ligação entre a identidade autenticada e o usuário de domínio. A função e o
+escopo não são obtidos de `user_metadata`, de campos enviados pelo navegador ou
+de custom claims do token: o backend sempre consulta `public.access_rules`.
+
+A carga é executada por `src/backend/scripts/seed_mvp_access.py` e
+combina a API administrativa do Auth com uma transação no PostgreSQL. Ela usa
+chaves naturais estáveis e operações de atualização/inserção para que possa ser
+executada novamente sem criar contas, usuários ou regras duplicadas. A
+`SUPABASE_SERVICE_ROLE_KEY` é necessária somente nesse comando administrativo;
+ela não é aceita como token de usuário e nunca é enviada ao frontend.
+
+As quatro senhas são configuradas separadamente para criar ou atualizar as
+contas sintéticas pela carga, sem versionar seus valores. No uso normal, a
+pessoa informa a senha na tela; o backend não lê essas quatro variáveis para
+compará-la, pois a validação é feita pelo próprio Supabase Auth:
+
+```ini
+SUPABASE_URL=https://<projeto>.supabase.co
+SUPABASE_PUBLISHABLE_KEY=<chave-publicavel>
+DATABASE_URL=postgresql://<usuario>:<senha>@<host>:5432/<banco>
+SUPABASE_SERVICE_ROLE_KEY=<somente-para-a-carga>
+MVP_AUTH_PMO_PASSWORD=<senha-do-pmo>
+MVP_AUTH_SUBPORTFOLIO_LEADER_PASSWORD=<senha-do-lider>
+MVP_AUTH_PROJECT_MANAGER_PASSWORD=<senha-do-gerente>
+MVP_AUTH_CONSULTA_PASSWORD=<senha-da-consulta>
+```
+
+#### Fluxo de autenticação no backend
+
+`POST /api/access/login` é a única rota interativa pública de autenticação. Ela
+recebe a persona e a senha, traduz a persona para o e-mail fixo da respectiva
+conta sintética e solicita uma sessão ao endpoint de senha do Supabase Auth.
+O navegador não precisa conhecer os e-mails das contas. Credenciais incorretas
+retornam `401 INVALID_CREDENTIALS`, enquanto indisponibilidade do provedor
+retorna `503 AUTHENTICATION_UNAVAILABLE`, sem propagar detalhes internos.
+
+Após receber o JWT, o backend também resolve `public.users` e
+`public.access_rules` e confirma que o perfil autenticado corresponde à persona
+selecionada. Só então devolve o token e o resumo seguro do perfil. A senha não é
+persistida nem registrada pela aplicação.
+
+As demais rotas interativas exigem `Authorization: Bearer <JWT>`. A dependência
+central em `app/security/access.py` executa o seguinte fluxo:
+
+1. extrai o Bearer token e rejeita cabeçalhos ausentes ou malformados;
+2. valida o token no servidor com `GET /auth/v1/user`, usando apenas
+   `SUPABASE_PUBLISHABLE_KEY` ou `SUPABASE_ANON_KEY` para identificar o projeto;
+3. usa exclusivamente o `sub` retornado pelo Supabase para localizar
+   `public.users.entra_object_id`;
+4. exige que o usuário e ao menos uma regra de acesso estejam ativos;
+5. constrói um `AccessContext` tipado com o usuário interno, papel, permissões e
+   projetos alcançados pelo escopo da regra.
+
+Tokens expirados ou inválidos retornam `401 UNAUTHENTICATED`. Um usuário válido
+sem cadastro ativo retorna `403 USER_NOT_PROVISIONED`; sem regra ativa, retorna
+`403 ACCESS_RULES_NOT_CONFIGURED`. Chaves administrativas `sb_secret_*` e JWTs
+com papel `service_role` são recusados explicitamente nessa fronteira.
+
+#### Autorização por operação e escopo
+
+O backend converte cada ação em uma permissão de `leitura`, `escrita` ou
+`exportacao`. O escopo `portfolio` alcança todos os projetos; o escopo
+`subportfolio` é expandido somente para seus projetos; e o escopo `project`
+alcança apenas o identificador ou código configurado. Uma referência explícita
+a outro projeto é recusada com `403 OUT_OF_SCOPE_FOR_PROFILE` antes de qualquer
+recuperação ou chamada ao modelo de linguagem.
+
+Essa verificação protege chat, confirmação proativa, áudio, métricas de voz,
+solicitações e artefatos de relatório, workflows e inscrições de alerta e a
+central de notificações. `GET /health` permanece público. Os callbacks técnicos
+de relatório e entrega de notificação continuam usando seu próprio
+`X-Callback-Token`, pois representam comunicação máquina a máquina.
+
+O controle também foi levado à recuperação de contexto. No PostgreSQL, a
+consulta filtra `project_id` antes do ranqueamento. No fallback que lê os JSONs
+do SharePoint simulado, os documentos são filtrados em memória antes da
+pontuação, da montagem do prompt, das fontes e da resposta. Dessa forma, um
+conteúdo fora do escopo não é apenas ocultado na interface: ele não participa
+do contexto enviado ao gerador.
+
+#### Entrada no frontend e ciclo da sessão
+
+Antes de montar a aplicação, a interface apresenta uma tela simples em que a
+pessoa escolhe a persona e informa sua senha. O frontend envia as credenciais
+uma única vez para `POST /api/access/login`; o endpoint autentica no Supabase,
+confere a persona contra o perfil resolvido no banco e devolve o JWT junto de
+nome, e-mail, papel, descrição do escopo e permissões. A persona selecionada
+somente identifica qual conta sintética deve ser autenticada; ela nunca concede
+ou altera acesso.
+
+A senha é descartada assim que a tentativa termina. O JWT permanece apenas no
+estado React durante a sessão e não é gravado em `localStorage`,
+`sessionStorage`, cookie, URL ou conteúdo visível do DOM. O cliente inclui o
+Bearer token em todas as chamadas protegidas. Ao sair ou receber `401`, a
+aplicação aborta requisições em andamento, desmonta o estado do chat e remove os
+dados da sessão. Um `403` mantém a sessão e exibe uma mensagem controlada de
+acesso negado, permitindo que a pessoa continue usando as ações que seu perfil
+possui.
+
+#### Auditoria e rastreabilidade
+
+Após a resolução da identidade, o UUID de `public.users.id` acompanha as novas
+conversas e interações e preenche `ai_interactions.user_id` e
+`audit_events.user_id`. Negativas geram o evento
+`authorization.access_denied`, com status `bloqueado`, correlação, operação e
+escopo solicitado. Uma falha ao gravar a auditoria é registrada como erro
+operacional, mas nunca transforma uma negação em permissão.
+
+#### Validação e limite assumido para o MVP
+
+A carga foi executada duas vezes no mesmo projeto Supabase sem aumentar as
+contagens: permaneceram quatro identidades Auth, quatro usuários públicos e
+quatro regras ativas. A matriz real confirmou que cada persona realizou as
+leituras, escritas ou exportações prometidas e recebeu negação controlada nos
+casos fora de sua permissão ou escopo. Também foram verificados quatro registros
+de interação com `user_id`, doze eventos de auditoria associados e sete
+negações, sem interação criada para pedidos recusados. A jornada de navegador
+teve 12 cenários aprovados, complementada por testes do backend e do frontend.
+
+Para manter o recorte objetivo, o MVP provisiona **uma regra ativa por usuário**.
+Combinações de várias regras com permissões divergentes não fazem parte desta
+entrega. A integração futura com Microsoft Entra ID poderá substituir a origem
+da identidade, preservando a resolução central de contexto, o modelo de escopo
+e a auditoria já implementados.
+
 ## 4.4 Modelo Físico de Dados
 
 O modelo físico corresponde à implementação real do banco de dados. Para o MVP, ele foi materializado em um script SQL executável para PostgreSQL 14+, contendo tipos de dados exatos, tamanhos de campos, chaves primárias, chaves estrangeiras, restrições, índices e comentários.
@@ -3011,7 +3166,7 @@ plantuml -charset UTF-8 -tpng -o ../img docs/diagrams/<arquivo>.puml
 ```
 
 
-Os diagramas de sequência desta seção detalham a ordem das interações entre os principais componentes da solução na arquitetura-alvo, na qual o canal é o Microsoft Teams, a identidade vem do Microsoft Entra ID e a orquestração de fluxos funcionais usa o Copilot Studio. No runtime atualmente implementado, o canal é o chat web, a identidade é simulada pelo token da bancada e os fluxos funcionais são conduzidos pelos workflows guiados do backend, com Power Automate como fronteira assíncrona opcional; o núcleo autoral de PLN, o catálogo de intenções, a arquitetura RAG, a geração pelo LLM e o Speech-to-Text permanecem idênticos nos dois cenários.
+Os diagramas de sequência desta seção detalham a ordem das interações entre os principais componentes da solução na arquitetura-alvo, na qual o canal é o Microsoft Teams, a identidade vem do Microsoft Entra ID e a orquestração de fluxos funcionais usa o Copilot Studio. No runtime atualmente implementado, o canal é o chat web, a identidade é validada por JWT do Supabase Auth e os fluxos funcionais são conduzidos pelos workflows guiados do backend, com Power Automate como fronteira assíncrona opcional; o núcleo autoral de PLN, o catálogo de intenções, a arquitetura RAG, a geração pelo LLM e o Speech-to-Text permanecem idênticos nos dois cenários.
 
 A seleção dos cenários considera os caminhos centrais da solução: consultas documentais fundamentadas, análises comparativas, direcionamento para fluxos funcionais e entrada por voz. Em todos os casos, o PLN permanece responsável pela interpretação e classificação da solicitação, enquanto o catálogo de intenções determina a capacidade que deverá processá-la. A partir desse roteamento, a solicitação segue para a recuperação e geração de resposta ou para o workflow guiado correspondente no backend.
 
@@ -3117,7 +3272,7 @@ Os quatro cenários apresentados cobrem os principais caminhos de interação da
 
 Em todos os cenários, o núcleo de PLN permanece como ponto comum de interpretação e decisão. A diferença entre os caminhos ocorre somente após a identificação e validação da intenção: consultas e análises documentais seguem para recuperação de contexto e geração de resposta, enquanto intenções funcionais são encaminhadas para o workflow guiado associado no backend.
 
-Os cenários também incorporam os requisitos transversais de **identidade, autorização e rastreabilidade**. Na arquitetura-alvo, a autenticação por Microsoft Entra ID antecede as operações protegidas; no runtime atual a identidade é simulada e o token da bancada habilita voz e relatórios. Em ambos os casos, o acesso às fontes ou serviços deve respeitar as permissões aplicáveis e os eventos relevantes da interação são registrados na trilha de auditoria. No caso de fontes corporativas, a autorização efetiva deve permanecer alinhada ao modelo de permissões do ambiente do Metrô.
+Os cenários também incorporam os requisitos transversais de **identidade, autorização e rastreabilidade**. No runtime atual, o Supabase Auth valida o JWT antes das operações protegidas e `access_rules` restringe permissões e projetos; na arquitetura-alvo, o Microsoft Entra ID poderá substituir o provedor de identidade sem remover essa camada de autorização. Em ambos os casos, o acesso às fontes ou serviços deve respeitar as permissões aplicáveis e os eventos relevantes da interação são registrados na trilha de auditoria. No caso de fontes corporativas, a autorização efetiva deve permanecer alinhada ao modelo de permissões do ambiente do Metrô.
 
 Por fim, a utilização da **base sintética / índice vetorial** nos cenários de recuperação explicita a delimitação do MVP. A arquitetura permanece preparada para receber as fontes corporativas, inclusive SharePoint, em uma evolução posterior, sem fazer da integração com o portfólio real uma dependência da validação inicial.
 
@@ -3138,7 +3293,7 @@ O escopo atual de implantação contempla:
 | Núcleo de PLN | Definido conceitualmente e avaliado no notebook do classificador | Responsável por classificar intenções e orientar o roteamento da solicitação. |
 | Banco de dados | Supabase Cloud | Persistência dos dados sintéticos, catálogo, interações e auditoria. |
 | Armazenamento | Supabase Storage | Área prevista para documentos sintéticos e, futuramente, artefatos do modelo. |
-| Autenticação | Microsoft Entra ID | Mecanismo previsto para autenticação do usuário no MVP. |
+| Autenticação | Supabase Auth no MVP; Microsoft Entra ID como evolução | Validação server-side do JWT e resolução das permissões em `access_rules`; a troca futura do provedor preserva a autorização de domínio. |
 | Orquestração | Copilot Studio | Integração prevista para tópicos e fluxos conversacionais. |
 | Automação | Power Automate | Evolução para execução de fluxos funcionais sobre dados sintéticos ou homologados. |
 | Docker e pipeline de deploy | Fora do escopo atual | Evolução futura, quando houver serviço suficientemente estável para empacotamento e publicação automatizada. |
@@ -3598,7 +3753,7 @@ A visão completa de diretórios está na Seção 8.1. Para acompanhar uma requi
 | Cliente HTTP | `src/frontend/src/lib/api/` | Serializa JSON ou multipart, aplica prazo máximo, interpreta schemas e converte erros em mensagens seguras. |
 | API | `src/backend/app/main.py` | Expõe saúde, chat e áudio; valida o contrato externo e normaliza erros. |
 | Orquestração | `src/backend/app/pipeline.py` | Executa classificação opcional, resposta controlada fora de escopo e geração fundamentada. |
-| Voz | `src/backend/app/audio/` | Autentica a identidade simulada, limita concorrência, valida WAV e chama o Azure Speech-to-Text. |
+| Voz | `src/backend/app/audio/` | Usa a identidade Supabase já resolvida, limita concorrência por usuário, valida WAV e chama o Azure Speech-to-Text. |
 | Recuperação | `src/backend/app/rag/sharepoint.py` | Carrega exports JSON, ranqueia trechos e monta contexto com fontes declaradas. |
 | Geração | `src/backend/app/gemini/` | Chama o Gemini com timeout e retentativas e mapeia texto, uso, latência e fontes. |
 | PLN | `src/backend/app/nlp/` | Carrega artefatos treinados, extrai entidades e classifica macrointenção e intenção específica. |
@@ -3618,7 +3773,7 @@ Com o servidor local na porta padrão, ficam disponíveis:
 | ReDoc | `http://127.0.0.1:8000/redoc` | Contratos em formato de leitura. |
 | OpenAPI JSON | `http://127.0.0.1:8000/openapi.json` | Especificação utilizável por clientes e testes de contrato. |
 
-O título, a descrição e a versão exibidos são definidos na instância `FastAPI` em `app/main.py`. A referência automática demonstra o contrato exposto, mas não substitui as condições de operação registradas a seguir: o teste interativo de áudio exige um token simulado e credenciais válidas do Azure, enquanto o chat que chega ao Gemini requer a respectiva chave.
+O título, a descrição e a versão exibidos são definidos na instância `FastAPI` em `app/main.py`. A referência automática demonstra o contrato exposto, mas não substitui as condições de operação registradas a seguir: as rotas interativas exigem um JWT válido do Supabase Auth; o teste de áudio também depende das credenciais do Azure, enquanto o chat que chega ao Gemini requer a respectiva chave.
 
 ### 8.5.4 APIs consumidas pelo front-end
 
@@ -3627,11 +3782,13 @@ O front-end consome somente rotas de mesma origem. Em desenvolvimento, o Vite en
 | Método e rota | Entrada | Saída utilizada pela interface | Observações de reprodução |
 | --- | --- | --- | --- |
 | `GET /health` | Sem corpo ou autenticação. | `{"status":"ok"}`. | Confirma a inicialização do processo; não testa Azure, Gemini ou a disponibilidade dos dados. |
-| `POST /api/chat` | JSON com `message` (1 a 20.000 caracteres), `previous_interaction_id` opcional e `use_intent_classifier` booleano. | Texto, ID da interação, modelo, latências, consumo, intenção opcional e lista de fontes. | Não exige Bearer token na versão atual. O ID anterior mantém o encadeamento lógico da conversa. |
+| `POST /api/access/login` | JSON com `profile_key` e `password`; sem Bearer. | JWT temporário e resumo do perfil autenticado. | A persona é mapeada para uma conta sintética fixa, mas a senha é validada exclusivamente pelo Supabase Auth. |
+| `GET /api/access/me` | Bearer JWT do Supabase Auth. | Nome, e-mail, papel, escopo e permissões. | Permanece disponível para consultar uma sessão já autenticada. |
+| `POST /api/chat` | Bearer JWT e JSON com `message` (1 a 20.000 caracteres), `previous_interaction_id` opcional e `use_intent_classifier` booleano. | Texto, ID da interação, modelo, latências, consumo, intenção opcional e lista de fontes. | Exige identidade ativa e permissão de leitura no escopo solicitado. O ID anterior mantém o encadeamento lógico da conversa. |
 | `POST /api/audio` | Multipart com arquivo `audio`; `conversation_id`, `language`, `previous_interaction_id` e `use_intent_classifier` opcionais; cabeçalho `Authorization: Bearer <token>`. | Transcrição, conversa, interação, intenção, resposta resumida, resposta completa em `chat` e `pipeline_status`. | O navegador envia WAV PCM mono, 16 bits e 16 kHz. O back-end revalida o conteúdo e aceita uma requisição simultânea por identidade. |
 | `/api/workflow-sessions` e `/api/report-requests` | Respostas guiadas, revisão, ação idempotente e confirmação assinada. | Estado da sessão, execução e download autenticado do DOCX. | O modo local é completo; a automação externa é opcional. |
 | `/api/alert-workflow-sessions` e `/api/alert-subscriptions` | Configuração, confirmação e comandos de ciclo de vida da inscrição. | Estado da sessão e da inscrição recorrente. | O processamento posterior ocorre nos workers do projeto. |
-| `GET /api/notifications` e `POST /api/notifications/{id}/read` | Token de identidade simulado no ambiente local. | Lista de notificações e confirmação de leitura. | A central consulta periodicamente a API; não recebe webhook. |
+| `GET /api/notifications` e `POST /api/notifications/{id}/read` | Bearer JWT do Supabase Auth. | Lista de notificações e confirmação de leitura. | A central consulta periodicamente a API; não recebe webhook. |
 
 Uma chamada textual pode ser reproduzida sem o front-end, depois de iniciar o FastAPI e configurar o Gemini:
 
@@ -3645,6 +3802,7 @@ $body = @{
 $response = Invoke-RestMethod `
   -Method Post `
   -Uri http://127.0.0.1:8000/api/chat `
+  -Headers @{ Authorization = "Bearer $env:MVP_USER_JWT" } `
   -ContentType "application/json" `
   -Body $body
 
@@ -3670,10 +3828,10 @@ O cliente aplica limite de 120 segundos e permite cancelamento por `AbortControl
 | Gemini | `gemini/client.py` gera a resposta a partir da pergunta e do contexto recuperado, com timeout e backoff. | `GEMINI_API_KEY`, modelo, limite de saída, nível de raciocínio, timeout e retentativas. | Sem chave, o chat que precisa de geração devolve indisponibilidade controlada. |
 | RAG de SharePoint simulado | `rag/sharepoint.py` pesquisa exports JSON versionados e inclui rótulos de fonte no prompt. | `rag/data/sharepoint/` ou `SHAREPOINT_MOCK_DATA_DIR`. | Não acessa o tenant corporativo nem sincroniza alterações do SharePoint. |
 | Classificador local | `nlp/` carrega o `joblib` e o encoder BERTimbau via PyTorch/Transformers; `PLN_WARMUP=1` antecipa a carga. | Artefatos em `src/notebooks/artefatos/`; encoder obtido do repositório de modelo indicado na Seção 8.11 (`requirements-pln.txt`). | A primeira instalação/carga pode exigir internet e cache local; não executa transações. |
-| Identidade do áudio | `audio/security.py` resolve o Bearer token por um mapa simulado e limita uma transcrição ativa por identidade. | `AUDIO_SIMULATED_IDENTITIES`, por exemplo `token-local=usuario-local`. | Não valida JWT do Entra ID e não aplica as regras da tabela `access_rules`. |
+| Identidade e acesso | `security/access.py` valida o JWT no Supabase Auth, resolve `public.users` e aplica `access_rules`; o áudio limita uma transcrição ativa por usuário. | `SUPABASE_URL` e `SUPABASE_PUBLISHABLE_KEY` ou `SUPABASE_ANON_KEY`. | O Entra ID permanece como evolução; o MVP usa identidades e escopos sintéticos. |
 | RabbitMQ | `alerts/messaging.py` publica e consome eventos persistentes de avaliação, criação de notificação e confirmação de entrega, com confirmação manual e DLQ. | `RABBITMQ_URL` e `compose.rabbitmq.yml`. | Necessário para o alerta assíncrono persistente; AMQP, scheduler e outbox não são webhooks. A rodada documental usa double controlado, não broker externo. |
 
-O SharePoint corporativo, Entra ID, Teams e Copilot Studio aparecem nos desenhos e no modelo-alvo, mas não possuem adaptador ativo nesta versão. Power Automate possui um adaptador opcional apenas para relatórios; o modo local não depende dele e o alerta não o utiliza. As demais intenções transacionais continuam sem escrita externa. Essa distinção evita interpretar a bancada como um canal de produção ou como evidência de autorização corporativa.
+O SharePoint corporativo, Entra ID, Teams e Copilot Studio aparecem nos desenhos e no modelo-alvo, mas não possuem adaptador ativo nesta versão. O Supabase Auth é o provedor de identidade operacional do MVP. Power Automate possui um adaptador opcional apenas para relatórios; o modo local não depende dele e o alerta não o utiliza. As demais intenções transacionais continuam sem escrita externa. Essa distinção evita interpretar a bancada como um canal de produção ou como evidência de autorização corporativa.
 
 ### 8.5.6 Banco de dados: modelo e integrações operacionais
 
@@ -3715,7 +3873,7 @@ A bancada usa React 19, TypeScript e Vite. `App.tsx` instala `ThemeProvider` e `
 
 | Área | Responsabilidade observável |
 | --- | --- |
-| `components/sidebar/` | Criação, busca, seleção e exclusão de conversas da sessão, além do token simulado usado por áudio, relatórios e alertas. |
+| `components/sidebar/` | Criação, busca, seleção e exclusão de conversas da sessão, além da exibição da identidade, persona e escopo resolvidos. |
 | `components/chat/` | Estado vazio, histórico, Markdown seguro, classificação, fontes, workflows guiados, confirmação, progresso e download de relatório. |
 | `components/notifications/` | Central de notificações, contagem de não lidas e gestão de inscrições de alerta. |
 | `components/composer/` | Entrada de texto, alternância da validação de intenção, captura, prévia, descarte e envio de áudio. |
@@ -3735,7 +3893,7 @@ A rastreabilidade entre ação, estado e contrato ajuda a localizar uma alteraç
 
 Essa cadeia também define onde testar: componentes verificam a apresentação, a store verifica concorrência e associação à conversa, o cliente verifica serialização e erros, e o Playwright atravessa as quatro camadas pelo comportamento observável.
 
-O envio por texto aceita uma sugestão ou mensagem digitada, usa `Enter` para enviar e `Shift+Enter` para nova linha. O envio por voz requer o token da bancada, permissão do microfone, conclusão da gravação e confirmação da prévia. A captura para em 60 segundos; o navegador converte o sinal para o formato aceito antes do upload. Durante qualquer chamada, a interface bloqueia duplicidade e oferece interrupção.
+O envio por texto aceita uma sugestão ou mensagem digitada, usa `Enter` para enviar e `Shift+Enter` para nova linha. O envio por voz requer uma sessão autenticada, permissão do microfone, conclusão da gravação e confirmação da prévia. A captura para em 60 segundos; o navegador converte o sinal para o formato aceito antes do upload. Durante qualquer chamada, a interface bloqueia duplicidade e oferece interrupção.
 
 Cada conversa mantém seu último `interaction_id`, mensagens, fontes e preferências enquanto a página permanece aberta. Criar ou selecionar outra conversa cancela a espera corrente, e o identificador interno da requisição impede que um retorno atrasado seja inserido no destino errado. A busca e a exclusão alteram apenas o estado local. Recarregar a página remove histórico e token; o tema é a única preferência com persistência prevista.
 
@@ -3747,9 +3905,9 @@ O back-end usa FastAPI e Pydantic. Na inicialização, `lifespan` lê `PLN_WARMU
 
 Em `POST /api/chat`, Pydantic remove espaços externos e rejeita mensagem vazia ou acima de 20.000 caracteres. `process_message` classifica somente quando solicitado. Uma classificação não roteável encerra o fluxo com uma resposta local e segura; as demais entradas seguem para recuperação de contexto e Gemini. Erros de configuração ou do provedor são convertidos em indisponibilidade ou falha controlada, sem expor detalhes internos.
 
-Em `POST /api/audio`, a identidade simulada é resolvida antes da leitura. O arquivo é lido em blocos de 64 KiB e interrompido assim que ultrapassa o teto, evitando manter em memória um upload que será recusado. Depois da validação e do Azure STT, a transcrição é entregue ao mesmo pipeline do chat por meio de uma thread, para não bloquear o laço assíncrono. A resposta combina o resultado de voz com o contrato completo do chat.
+Em `POST /api/audio`, a identidade Supabase e seu escopo são resolvidos antes da leitura. O arquivo é lido em blocos de 64 KiB e interrompido assim que ultrapassa o teto, evitando manter em memória um upload que será recusado. Depois da validação e do Azure STT, a transcrição é entregue ao mesmo pipeline do chat por meio de uma thread, para não bloquear o laço assíncrono. A resposta combina o resultado de voz com o contrato completo do chat.
 
-O RAG consulta o PostgreSQL quando configurado e usa como fallback explícito dados sintéticos substituíveis por diretório; em ambos os casos, pontua a correspondência e injeta somente resultados relevantes com identificação da fonte. O cliente Gemini controla timeout e retentativas de falhas transitórias. A rastreabilidade registra no banco o contrato de classificação, a rota, as fontes e os eventos de auditoria; autorização por perfil continua como fronteira de implementação futura.
+O RAG consulta o PostgreSQL quando configurado e usa como fallback explícito dados sintéticos substituíveis por diretório; em ambos os casos, restringe os projetos pelo `AccessContext` antes de pontuar a correspondência e injeta somente resultados relevantes com identificação da fonte. O cliente Gemini controla timeout e retentativas de falhas transitórias. A rastreabilidade registra no banco o usuário, o contrato de classificação, a rota, as fontes e os eventos de auditoria; negativas de autorização também geram eventos correlacionados.
 
 Para isolar uma falha sem confundir disponibilidade do processo com disponibilidade dos provedores, use os checkpoints na ordem:
 
@@ -4370,12 +4528,13 @@ O corpo de erro segue estrutura única, para que o canal possa exibir a mensagem
 | `502 Bad Gateway` | `PROCESSING_PROVIDER_ERROR` | A transcrição foi concluída, mas o provedor de resposta falhou de forma controlada. |
 | `503 Service Unavailable` | `PROCESSING_UNAVAILABLE` | A transcrição foi concluída, mas o pipeline de PLN ou geração está indisponível. |
 
-O código `403 OUT_OF_SCOPE_FOR_PROFILE`, previsto para a autorização por
-`access_rules`, ainda não é retornado por esta rota: essa verificação depende
-da persistência e será acrescentada em tarefa própria. Os erros do endpoint
-usam sempre o envelope acima; o campo opcional `detail` contém somente dados
-seguros da própria requisição, como tipo de mídia recebido, duração ou limite
-de tamanho, e nunca detalhes internos do servidor.
+O código `403 OUT_OF_SCOPE_FOR_PROFILE` é retornado quando a transcrição ou a
+solicitação referencia explicitamente um projeto fora do escopo definido em
+`access_rules`. A negação ocorre antes de recuperar contexto ou chamar o modelo
+de linguagem. Os erros do endpoint usam sempre o envelope acima; o campo
+opcional `detail` contém somente dados seguros da própria requisição, como tipo
+de mídia recebido, duração ou limite de tamanho, e nunca detalhes internos do
+servidor.
 
 ### 8.7.7 Situação de implementação
 
@@ -4383,14 +4542,13 @@ O endpoint está implementado em `src/backend/app/main.py` e pode ser consultado
 também pela documentação interativa do FastAPI (`/docs`). Ele valida o
 `Authorization: Bearer <TOKEN>`, aceita uma solicitação em processamento por
 usuário e realiza todas as validações locais antes de qualquer integração
-externa. Na prova de conceito, quando a variável `AUDIO_SIMULATED_IDENTITIES`
-não é configurada, qualquer token Bearer não vazio identifica o usuário de
-forma estável; quando ela é configurada, apenas os tokens mapeados são aceitos.
+externa. O token é validado pelo Supabase Auth e associado a um usuário público
+ativo e às respectivas regras de acesso, conforme a Seção 4.3.1.
 
 O upload, a validação, a transcrição, o encaminhamento ao pipeline de PLN e os
 retornos de erro desta seção estão concluídos para a prova de conceito. A
-autorização de escopo corporativa e a persistência continuam fora desta entrega;
-respostas aprovadas retornam `pipeline_status` igual a `completed`.
+autorização sintética por perfil e projeto integra esta entrega; respostas
+aprovadas retornam `pipeline_status` igual a `completed`.
 
 ## 8.8 Speech-to-Text
 
@@ -5750,7 +5908,7 @@ As evidências desta execução são mantidas em `src/backend/evidencias/rf01-rf
 | Recuperação                         | RAG sobre os extratos documentais sintéticos (`source_extracts`, no Supabase)     |
 | Projetos utilizados                 | `PRJ-0442` e `PRJ-0510`                                                           |
 | Projeto inexistente de controle     | `INEXISTENTE-999`                                                                 |
-| Autenticação da proatividade        | Bearer de identidade simulada configurado no ambiente; valor não versionado       |
+| Autenticação da proatividade        | Bearer JWT do Supabase Auth; valor não versionado                                  |
 | Reteste do CT-RF09-01               | 24/09/2026, commit `c793983`, limite de 1024 tokens                               |
 
 A execução utilizou os estados `APROVADO`, `FALHOU`, `BLOQUEADO` e `NÃO EXECUTADO`. Os testes não foram alterados para forçar aprovação. Quando o caminho estava disponível e a resposta divergiu do critério funcional, o caso foi registrado como `FALHOU`. Os comandos para reproduzir os casos de API estão no README da pasta de evidências.
@@ -5858,7 +6016,7 @@ A falha de CT-RF08-01 decorre da mesma causa raiz identificada em CT-RF06-01 e, 
 | CT-RF09-01 | Positivo | Proatividade ativa; consulta `Qual é o prazo do projeto PRJ-0442?`; registro da sugestão; confirmação com `accept`. | Resposta principal normal; sugestão separada e opcional; nenhuma execução antes da confirmação; processamento após aceite. | A resposta principal foi preservada e retornou `sugerir_recuperacao_prazo`, `requires_confirmation=true`. A confirmação em `/api/chat/proactive-confirmation` retornou HTTP `200` e `status=accepted`, mas a resposta ao aceite foi cortada e a ação sugerida não chegou ao usuário. No reteste, as cinco respostas ao aceite chegaram inteiras. | **FALHOU** na rodada; **APROVADO** no reteste | `src/backend/evidencias/rf01-rf10/rf09/CT-RF09-01-sugestao.txt`, `CT-RF09-01-accept.txt` e `CT-RF09-01-reteste.txt` |
 | CT-RF09-02 | Negativo | \(a\) alerta sem secundária compatível; (b) nova sugestão elegível seguida de `decline`.                            | \(a\) nenhuma sugestão fictícia; (b) recusa encerra a sugestão sem executar a ação secundária.                             | \(a\) `proactive_suggestion=null`; (b) HTTP `200`, `status=declined` e `result=null`.                                                                                                                  | **APROVADO** | `src/backend/evidencias/rf01-rf10/rf09/CT-RF09-02-sem-secundaria.txt` e `CT-RF09-02-decline.txt` |
 
-A proatividade exige identidade. Tentativas de preparação sem Bearer válido retornaram `401` e foram tratadas como falha de pré-condição da execução, não como falha funcional. A rodada válida utilizou a identidade simulada configurada no ambiente sem registrar o valor do token.
+A proatividade exige identidade. Tentativas de preparação sem Bearer válido retornaram `401` e foram tratadas como falha de pré-condição da execução, não como falha funcional. A rodada válida utilizou uma identidade autenticada configurada no ambiente sem registrar o valor do token.
 
 Na rodada, a resposta ao aceite do CT-RF09-01 parou depois da primeira linha, sem a ação de recuperação: dos 508 tokens de saída, 463 foram de raciocínio, com o limite de 512. A rodada não registrou o motivo de parada, mas 508 tokens é o valor de todas as respostas encerradas pelo limite de 512 no reteste do truncamento da Seção 9.2.7, e nenhuma resposta completa chegou a esse valor. É o `DEF-RNF04-02`, registrado nessa seção. O `result.intent=null` não indica falha, porque a resposta ao aceite não traz esse campo; a intenção confirmada vai no prompt.
 
@@ -5890,7 +6048,7 @@ Além das falhas funcionais, a execução revelou cinco pontos que não alterara
 
 1.  **Ruído de recuperação:** fontes não relacionadas apareceram em algumas consultas com score baixo. Nos casos aprovados, a resposta final não atribuiu esse conteúdo ao projeto solicitado.
 2.  **Sensibilidade lexical:** formulações semanticamente equivalentes de consulta de status produziram classificações diferentes, formalizadas em DEF-RF02-01.
-3.  **Proatividade autenticada:** o caminho proativo exige identidade válida. Respostas `401` durante a preparação foram resolvidas com a identidade simulada prevista pela PoC.
+3.  **Proatividade autenticada:** o caminho proativo exige identidade válida. Respostas `401` durante a preparação foram resolvidas com um JWT válido do Supabase Auth.
 4.  **Incidente de provedor:** uma tentativa anterior com a configuração inicial encontrou HTTP `429`. A rodada funcional válida foi repetida com OpenRouter e `google/gemini-3.7-flash`; o incidente permanece apenas como histórico de execução.
 5.  **Resposta cortada no CT-RF10-02:** a resposta da comparação terminou no meio da frase, com 508 tokens de saída, pelo mesmo `DEF-RNF04-02`. O status não muda: o corte não depende do controle de proatividade, e a resposta já tinha declarado a insuficiência do contexto antes de parar.
 
@@ -6451,6 +6609,20 @@ com Azure real repete um áudio autorizado, mede miss e hits separadamente,
 publica mediana/P95 sem expor áudio ou transcrição e remove a conversa sintética
 do banco ao final. A homologação externa só é considerada aprovada após a saída
 sanitizada dessa execução ser anexada às evidências.
+
+**Execução contra o Azure real.** O roteiro foi executado com o Azure AI Speech
+e o PostgreSQL reais do projeto, repetindo cinco vezes o mesmo áudio de fala em
+português. O critério congelado do plano foi atendido integralmente:
+`provider_call=1`, `miss=1`, `record=1`, `hit=4` e `provider_error=0`, com
+quatro chamadas evitadas e taxa de hit de 80%. O miss custou 1.540 ms na ida ao
+provedor; os quatro hits foram servidos entre 0,11 e 0,19 ms, com transcrições
+idênticas. Duas execuções independentes produziram os mesmos hashes de áudio e
+de transcrição. A transcrição real foi classificada como `CONSULTA` /
+`consulta_status_projeto`, e a interação sintética foi removida do banco sem
+resíduo. A rodada partiu do ambiente local de desenvolvimento; a mesma coleta
+na imagem publicada acompanha a publicação da versão final. Resultados,
+latências e hashes estão nas
+[evidências da homologação com Azure real](evidencias/sprint-05/vhs-azure-real/README.md).
 
 # 10. Procedimentos de Implantação
 

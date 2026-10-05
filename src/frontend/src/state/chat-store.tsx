@@ -62,7 +62,6 @@ type State = {
   /** Painel deslizante, em telas estreitas. Fechado por padrao. */
   documentSheetOpen: boolean;
   sidebarOpen: boolean;
-  accessToken: string;
 };
 
 type Action =
@@ -83,7 +82,6 @@ type Action =
   | { type: 'set-document-panel'; open: boolean }
   | { type: 'set-document-sheet'; open: boolean }
   | { type: 'set-sidebar'; open: boolean }
-  | { type: 'set-token'; token: string }
   | { type: 'update-workflow'; workflow: GuidedWorkflowSession };
 
 function createConversation(): Conversation {
@@ -213,9 +211,6 @@ function reducer(state: State, action: Action): State {
     case 'set-sidebar':
       return { ...state, sidebarOpen: action.open };
 
-    case 'set-token':
-      return { ...state, accessToken: action.token };
-
     case 'update-workflow':
       return {
         ...state,
@@ -247,7 +242,6 @@ function initialState(): State {
     documentPanelOpen: true,
     documentSheetOpen: false,
     sidebarOpen: false,
-    accessToken: '',
   };
 }
 
@@ -285,7 +279,6 @@ type ChatStoreValue = {
   setDocumentPanelOpen: (open: boolean) => void;
   setDocumentSheetOpen: (open: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
-  setAccessToken: (token: string) => void;
   answerWorkflow: (
     workflow: GuidedWorkflowSession,
     step: WorkflowStep | AlertWorkflowStep,
@@ -298,7 +291,13 @@ type ChatStoreValue = {
 
 const ChatStoreContext = createContext<ChatStoreValue | null>(null);
 
-export function ChatStoreProvider({ children }: { children: ReactNode }) {
+export function ChatStoreProvider({
+  children,
+  accessToken,
+}: {
+  children: ReactNode;
+  accessToken: string;
+}) {
   const [state, dispatch] = useReducer(reducer, undefined, initialState);
 
   const view = state;
@@ -382,7 +381,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
         });
         return false;
       }
-      if (input instanceof Blob && !state.accessToken.trim()) {
+      if (input instanceof Blob && !accessToken.trim()) {
         dispatch({
           type: 'set-status',
           status: 'error',
@@ -393,7 +392,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
       if (
         typeof input === 'string' &&
         state.proactivityEnabled &&
-        !state.accessToken.trim()
+        !accessToken.trim()
       ) {
         dispatch({
           type: 'set-status',
@@ -429,7 +428,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
           response = await sendChatMessage({
             message: text,
             conversationId: conversation.id,
-            accessToken: state.accessToken,
+            accessToken,
             previousInteractionId: conversation.lastInteractionId,
             useIntentClassifier: state.intentLayerEnabled,
             proactivityEnabled: state.proactivityEnabled,
@@ -440,7 +439,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
             audio: input,
             filename: 'gravacao.wav',
             conversationId: conversation.id,
-            accessToken: state.accessToken,
+            accessToken,
             previousInteractionId: conversation.lastInteractionId,
             useIntentClassifier: state.intentLayerEnabled,
             proactivityEnabled: state.proactivityEnabled,
@@ -476,7 +475,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
           pipelineMetrics,
         });
         if (response.workflow) {
-          if (!state.accessToken.trim()) {
+          if (!accessToken.trim()) {
             throw new Error('REPORT_ACCESS_TOKEN_REQUIRED');
           }
           assistantMessage.workflow = await (
@@ -487,7 +486,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
             conversationId: conversation.id,
             interactionId: response.interaction_id,
             parameters: response.workflow.parameters,
-            accessToken: state.accessToken,
+            accessToken,
           });
         }
         dispatch({
@@ -511,7 +510,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
     },
     [
       activeConversation,
-      state.accessToken,
+      accessToken,
       state.intentLayerEnabled,
       state.proactivityEnabled,
     ],
@@ -544,7 +543,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
         const confirmation = await confirmProactiveSuggestion({
           suggestionId: suggestion.id,
           conversationId: activeConversation.id,
-          accessToken: state.accessToken,
+          accessToken,
           decision,
           signal: controller.signal,
         });
@@ -598,14 +597,14 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
         }
       }
     },
-    [activeConversation, state.accessToken, state.intentLayerEnabled],
+    [activeConversation, accessToken, state.intentLayerEnabled],
   );
 
   const requireAccessToken = useCallback(() => {
-    const token = state.accessToken.trim();
+    const token = accessToken.trim();
     if (!token) throw new Error('REPORT_ACCESS_TOKEN_REQUIRED');
     return token;
-  }, [state.accessToken]);
+  }, [accessToken]);
 
   const pollWorkflow = useCallback(async (sessionId: string, accessToken: string) => {
     workflowPolls.current.get(sessionId)?.abort();
@@ -724,7 +723,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
       documentPanelOpen: state.documentPanelOpen,
       documentSheetOpen: state.documentSheetOpen,
       sidebarOpen: state.sidebarOpen,
-      accessToken: state.accessToken,
+      accessToken,
       activeSources,
       selectedDocument,
       sendMessage,
@@ -751,7 +750,6 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
       setDocumentPanelOpen: (open) => dispatch({ type: 'set-document-panel', open }),
       setDocumentSheetOpen: (open) => dispatch({ type: 'set-document-sheet', open }),
       setSidebarOpen: (open) => dispatch({ type: 'set-sidebar', open }),
-      setAccessToken: (token) => dispatch({ type: 'set-token', token }),
       answerWorkflow,
       confirmWorkflow,
       cancelWorkflow,
@@ -769,7 +767,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
       state.documentPanelOpen,
       state.documentSheetOpen,
       state.sidebarOpen,
-      state.accessToken,
+      accessToken,
       sendMessage,
       sendAudio,
       resolveProactiveSuggestion,

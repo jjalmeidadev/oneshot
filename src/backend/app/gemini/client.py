@@ -29,6 +29,7 @@ from app.rag.proactivity import SecondaryIntent, resolve_secondary_intent
 from app.rag.sharepoint import build_rag_input
 from app.security.sensitive_data import SensitiveDataReport, protect_documents, scan
 from app.gemini.evidence import ValidatedAnswer, validate_evidence
+from app.security.access import AccessContext
 
 GEMINI_INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions"
 DEFAULT_MODEL = "gemini-3.7-flash"
@@ -88,6 +89,7 @@ def generate_chat_response(
     intent: AudioIntent | None = None,
     entities: list[PublicEntity] | None = None,
     requester_id: str | None = None,
+    access_context: AccessContext | None = None,
 ) -> GeminiChatResponse:
     api_key = _api_key()
 
@@ -98,6 +100,7 @@ def generate_chat_response(
             request.message,
             intent=intent,
             entities=entities or [],
+            access_context=access_context,
         )
     except (DatabaseConfigurationError, DatabaseConnectionError) as error:
         raise GeminiAPIError(

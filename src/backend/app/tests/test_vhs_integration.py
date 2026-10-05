@@ -82,7 +82,7 @@ def test_metrics_reject_unauthenticated_access(provider):
         response = client.get("/api/audio/vhs/metrics")
 
     assert response.status_code == 401
-    assert response.json()["error"]["code"] == "UNAUTHENTICATED"
+    assert response.json()["error"]["code"] == "AUTHENTICATION_REQUIRED"
 
 
 def test_container_runtime_uses_one_api_worker():

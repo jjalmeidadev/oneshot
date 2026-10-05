@@ -36,6 +36,7 @@ def trace_interaction(
     error_message: str | None = None,
     requester_id: str | None = None,
     security_report: dict | None = None,
+    user_id: str | None = None,
     connect: Callable[..., Any] | None = None,
 ) -> str | None:
     """Grava conversa, interacao, fontes persistidas e eventos de auditoria."""
@@ -47,14 +48,14 @@ def trace_interaction(
         connection = open_database_connection(connect=connect)
         try:
             with connection.cursor() as cursor:
-                user_id = _find_user_id(cursor, requester_id)
+                resolved_user_id = user_id or _find_user_id(cursor, requester_id)
                 intent_id = _find_intent_id(cursor, intent)
                 conversation_id = _get_or_create_conversation(
                     cursor,
                     request,
                     channel,
                     external_conversation_id=external_conversation_id,
-                    user_id=user_id,
+                    user_id=resolved_user_id,
                     requester_id=requester_id,
                 )
                 status = _processing_status(intent, response, error_message)
@@ -66,7 +67,7 @@ def trace_interaction(
                     response=response,
                     intent=intent,
                     intent_id=intent_id,
-                    user_id=user_id,
+                    user_id=resolved_user_id,
                     status=status,
                     limitation_response=limitation_response,
                     processing_ms=processing_ms,
@@ -88,7 +89,7 @@ def trace_interaction(
                     entities=entities,
                     status=status,
                     error_message=error_message,
-                    user_id=user_id,
+                    user_id=resolved_user_id,
                     requester_id=requester_id,
                     security_report=security_report
                     or (response.security_report if response else None),
