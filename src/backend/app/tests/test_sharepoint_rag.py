@@ -1,8 +1,10 @@
 from pathlib import Path
+import json
 
 import pytest
 
 from app.nlp.schemas import AudioIntent
+from app.rag.errors import RagSourceError
 from app.rag.sharepoint import (
     build_rag_input,
     load_sharepoint_documents,
@@ -13,6 +15,50 @@ from app.rag.sharepoint import (
 DATA_DIR = (
     Path(__file__).resolve().parents[1] / "rag" / "data" / "sharepoint"
 )
+
+
+@pytest.mark.parametrize("payload", [[], {}, {"value": {}}, {"value": [None]},
+                                    {"value": [{"fields": []}]},
+                                    {"list": [], "value": []}])
+def test_rejects_invalid_source_structure(tmp_path, payload):
+    (tmp_path / "source.json").write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(RagSourceError, match="Estrutura inválida"):
+        load_sharepoint_documents(tmp_path)
+
+
+def test_empty_export_is_valid_but_empty_directory_is_not(tmp_path):
+    with pytest.raises(RagSourceError, match="não contém arquivos JSON"):
+        load_sharepoint_documents(tmp_path)
+    (tmp_path / "source.json").write_text('{"value": []}', encoding="utf-8")
+    assert load_sharepoint_documents(tmp_path) == []
+
+
+def test_rejects_unreadable_source_without_exposing_path(tmp_path):
+    (tmp_path / "private-source.json").write_bytes(b"\xff")
+    with pytest.raises(RagSourceError) as error:
+        load_sharepoint_documents(tmp_path)
+    assert str(tmp_path) not in str(error.value)
+    assert "private-source" not in str(error.value)
+
+
+def test_chat_returns_503_for_invalid_source_without_calling_llm(monkeypatch, tmp_path):
+    from fastapi.testclient import TestClient
+    from app.main import app
+
+    monkeypatch.setenv("SHAREPOINT_MOCK_DATA_DIR", str(tmp_path / "private-missing"))
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+
+    def unexpected_llm(*args, **kwargs):
+        pytest.fail("Origem inválida não deve chamar o provedor")
+
+    monkeypatch.setattr("app.gemini.client._call_llm", unexpected_llm)
+    with TestClient(app) as client:
+        response = client.post("/api/chat", json={
+            "message": "Como registrar objeto perdido?", "use_intent_classifier": False,
+        })
+    assert response.status_code == 503
+    assert "private-missing" not in response.text
+    assert "RagSourceError" not in response.text
 
 
 #: Marcado pela #228 (S4-32B): este arquivo cruza fronteira entre
