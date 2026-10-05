@@ -21,7 +21,7 @@ python -m venv .venv
 Copy-Item src/backend/.env.example src/backend/.env
 ```
 
-Edite o arquivo local `.env`: informe `GEMINI_API_KEY`, o recurso e a chave Azure Speech. Não versione credenciais. Configure as identidades simuladas de áudio e relatório para a bancada. O campo **Token de acesso da sessão**, na engrenagem **Ajustes do agente** (canto superior direito do chat), recebe esse token; ele permanece somente na memória da sessão. Não informe a chave do Azure, Gemini ou Supabase nesse campo.
+Edite o arquivo local `.env`: informe `GEMINI_API_KEY`, o recurso e a chave Azure Speech. Não versione credenciais. Para entrar na bancada, selecione uma das quatro personas sintéticas e informe a senha cadastrada para a respectiva conta no Supabase Auth. O backend obtém o JWT e o frontend o mantém somente na memória da sessão. Nunca informe chaves do Azure, Gemini ou Supabase na tela de login. Depois da entrada, nome, perfil, escopo e o botão **Sair** ficam na engrenagem **Ajustes do agente**, no canto superior direito do chat.
 
 `PLN_WARMUP=1` prepara o classificador na inicialização. A primeira execução baixa o encoder ONNX publicado no repositório Hugging Face documentado pelo backend. Aguarde a aplicação concluir a inicialização antes de abrir a bancada. Sem esse ajuste, a carga acontece na primeira pergunta com classificação habilitada.
 
@@ -44,9 +44,9 @@ Abra `http://localhost:5173`. O Vite encaminha `/api` e `/health` para `http://1
 ## Uso e navegabilidade
 
 1. Digite uma pergunta ou selecione uma sugestão. **Enter** envia; **Shift + Enter** quebra a linha. A interface recusa texto vazio ou acima de 20.000 caracteres.
-2. A engrenagem **Ajustes do agente**, no canto superior direito, reúne os controles que estendem o modelo e os dados técnicos: **Validação de intenção**, **Sugestões proativas**, **Mostrar detalhes técnicos** e o token da sessão. A tela padrão não exibe detalhes técnicos; ligar **Mostrar detalhes técnicos** traz de volta o selo de intenção, o modelo, a data e o canal da conversa e a aba **Resposta** do painel de fontes. O controle **Validação de intenção** liga ou desliga a classificação local. Quando ligado, os limiares de 0,55 e 0,70 orientam a apresentação da classificação. Perguntas fora de escopo ou sem confiança suficiente recebem resposta controlada sem chamar o Gemini. Identificar uma intenção não significa executar uma transação no portfólio.
+2. A engrenagem **Ajustes do agente**, no canto superior direito, reúne os controles que estendem o modelo e os dados técnicos: **Validação de intenção**, **Sugestões proativas**, **Mostrar detalhes técnicos** e o perfil da sessão, com o botão **Sair**. A tela padrão não exibe detalhes técnicos; ligar **Mostrar detalhes técnicos** traz de volta o selo de intenção, o modelo, a data e o canal da conversa e a aba **Resposta** do painel de fontes. O controle **Validação de intenção** liga ou desliga a classificação local. Quando ligado, os limiares de 0,55 e 0,70 orientam a apresentação da classificação. Perguntas fora de escopo ou sem confiança suficiente recebem resposta controlada sem chamar o Gemini. Identificar uma intenção não significa executar uma transação no portfólio.
 3. Durante a chamada, o chat anuncia processamento e impede envios duplicados. **Interromper resposta** aborta a espera HTTP e descarta respostas tardias. Uma chamada já recebida pelo provedor pode continuar no backend.
-4. Para voz, informe o token da bancada, clique no microfone, permita a captura, grave e use **Concluir gravação**. Ouça a prévia antes de clicar em **Enviar áudio**. **Descartar** elimina a captura. A gravação para em 60 segundos e é convertida para WAV PCM mono, 16 bits, 16 kHz, com corte por amostras e limite de 2 MB.
+4. Para voz, entre com uma persona que tenha acesso, clique no microfone, permita a captura, grave e use **Concluir gravação**. Ouça a prévia antes de clicar em **Enviar áudio**. **Descartar** elimina a captura. A gravação para em 60 segundos e é convertida para WAV PCM mono, 16 bits e 16 kHz, com corte por amostras e limite de 2 MB.
 5. A transcrição aparece como mensagem do usuário e a resposta como mensagem do agente. As fontes numeradas abaixo da resposta abrem o documento correspondente no painel **Fontes**, que começa fechado; no modo técnico, a aba **Resposta** mostra métricas e classificação fornecidas pela API. O sino ao lado da engrenagem abre as notificações de alerta.
 6. Quando o PLN identifica `transacao_gerar_relatorio`, o chat abre um cartão
    guiado. Selecione escopo, período, público, finalidade e ênfases, revise a
@@ -64,8 +64,8 @@ O histórico é da sessão em memória: recarregar a página o apaga. O backend 
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `src/App.tsx` e `state/`         | Provedores de tema e chat; reducer para conversas, fontes e estados; controle de concorrência e cancelamento.       |
 | `components/layout/`             | `AppShell` organiza desktop e diálogos móveis; `ThemeToggle` alterna o tema.                                        |
-| `components/sidebar/`            | `ConversationSidebar`, `ConversationItem` e `UserCard`: busca, seleção, exclusão e campo do token da sessão.        |
-| `components/settings/`           | `AgentSettings`: engrenagem com validação de intenção, sugestões proativas, modo técnico e token da sessão.         |
+| `components/sidebar/`            | `ConversationSidebar`, `ConversationItem` e `UserCard`: busca, seleção e exclusão; `UserCard` mostra o perfil.      |
+| `components/settings/`           | `AgentSettings`: engrenagem com validação de intenção, sugestões proativas, modo técnico e perfil da sessão.        |
 | `components/chat/`               | Mensagens, intenção, fontes e `ReportWorkflowCard`, que conduz o relatório e oferece o DOCX no próprio chat.        |
 | `components/composer/`           | `Composer`, `AudioButton`, `RecordingBar` e `RecordingPreview`: texto, gravação, revisão e envio.                   |
 | `components/documents/`          | `DocumentPanel`, `DocumentCard`, `DocumentViewer` e `ResponseDetails`: fontes, trechos e métricas.                  |

@@ -38,6 +38,14 @@ async function expectNoAxeViolations(page: Page, state: string) {
   ).toEqual([]);
 }
 
+/** Entrada por persona da S5-04; a senha da bancada E2E e fixa no e2e_server. */
+async function authenticate(page: Page) {
+  await page.getByLabel('Persona').selectOption('pmo');
+  await page.getByLabel('Senha', { exact: true }).fill('e2e-password');
+  await page.getByRole('button', { name: 'Entrar' }).click();
+  await expect(page.getByLabel('Mensagem para o agente')).toBeVisible();
+}
+
 async function ask(page: Page, text: string) {
   const input = page.getByRole('textbox', { name: 'Mensagem para o agente' });
   await input.fill(text);
@@ -53,6 +61,10 @@ for (const scheme of ['light', 'dark'] as const) {
   }) => {
     await page.emulateMedia({ colorScheme: scheme });
     await page.goto('/');
+    await expect(page.getByLabel('Persona')).toBeVisible();
+    await expectNoHorizontalScroll(page);
+    await expectNoAxeViolations(page, 'entrada');
+    await authenticate(page);
     await expectNoHorizontalScroll(page);
     await expectNoAxeViolations(page, 'vazio');
 
@@ -79,17 +91,25 @@ for (const scheme of ['light', 'dark'] as const) {
 test('fluxo principal só pelo teclado', async ({ page }, testInfo) => {
   const wide = testInfo.project.name === 'desktop';
   await page.goto('/');
-  // Espera a interface montar antes do primeiro Tab.
-  await expect(
-    page.getByRole('textbox', { name: 'Mensagem para o agente' }),
-  ).toBeVisible();
+
+  // Entrada: a persona ja vem focada; letra escolhe a opcao, Tab vai a senha.
+  const persona = page.getByLabel('Persona');
+  await expect(persona).toBeFocused();
+  await page.keyboard.press('p');
+  await expect(persona).toHaveValue('pmo');
+  await page.keyboard.press('Tab');
+  await expect(page.getByLabel('Senha', { exact: true })).toBeFocused();
+  await page.keyboard.type('e2e-password');
+  await page.keyboard.press('Enter');
+  const input = page.getByRole('textbox', { name: 'Mensagem para o agente' });
+  await expect(input).toBeVisible();
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
 
   // O primeiro Tab revela o atalho que leva direto ao campo de mensagem.
   await page.keyboard.press('Tab');
   const skip = page.getByRole('link', { name: 'Pular para o campo de mensagem' });
   await expect(skip).toBeFocused();
   await page.keyboard.press('Enter');
-  const input = page.getByRole('textbox', { name: 'Mensagem para o agente' });
   await expect(input).toBeFocused();
 
   await page.keyboard.type('prazo');

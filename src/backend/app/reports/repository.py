@@ -465,8 +465,12 @@ class PostgresReportRepository(ReportRepository):
             """
             INSERT INTO public.audit_events (
                 event_type, component, event_status, event_payload,
-                occurred_at, correlation_id
-            ) VALUES (%s, %s, %s, %s::jsonb, %s, %s);
+                occurred_at, correlation_id, user_id
+            ) VALUES (
+                %s, %s, %s, %s::jsonb, %s, %s,
+                (SELECT id FROM public.users
+                  WHERE entra_object_id = %s AND is_active = TRUE LIMIT 1)
+            );
             """,
             (
                 event.event_type,
@@ -481,6 +485,7 @@ class PostgresReportRepository(ReportRepository):
                 ),
                 event.occurred_at,
                 execution.correlation_id,
+                execution.requested_by,
             ),
         )
 

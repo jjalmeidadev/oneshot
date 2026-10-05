@@ -2,17 +2,19 @@ import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readFile } from 'node:fs/promises';
 
-/** O token fica na engrenagem de ajustes, no cabeçalho, nos dois tamanhos. */
+/** Entrada pela tela de persona; o perfil depois fica na engrenagem de ajustes. */
 async function authenticate(page: import('@playwright/test').Page) {
-  await page.getByRole('button', { name: 'Ajustes do agente' }).click();
-  await page.getByLabel('Token de acesso da sessão').fill('e2e-token');
-  await page.keyboard.press('Escape');
+  await page.getByLabel('Persona').selectOption('pmo');
+  await page.getByLabel('Senha', { exact: true }).fill('e2e-password');
+  await page.getByRole('button', { name: 'Entrar' }).click();
+  await expect(page.getByLabel('Mensagem para o agente')).toBeVisible();
 }
 
 test('texto, fontes, modo técnico e navegação responsiva', async ({
   page,
 }, testInfo) => {
   await page.goto('/');
+  await authenticate(page);
   const input = page.getByRole('textbox', { name: 'Mensagem para o agente' });
   await input.fill('prazo');
   await page.getByRole('button', { name: 'Enviar mensagem' }).click();
@@ -42,6 +44,7 @@ test('texto, fontes, modo técnico e navegação responsiva', async ({
 
 test('falha controlada, recuperação e interrupção', async ({ page }) => {
   await page.goto('/');
+  await authenticate(page);
   const input = page.getByRole('textbox', { name: 'Mensagem para o agente' });
   await input.fill('falha');
   await input.press('Enter');
@@ -82,6 +85,7 @@ test('acessibilidade automática e tema nas três larguras', async ({
   page,
 }, testInfo) => {
   await page.goto('/');
+  await authenticate(page);
   if (testInfo.project.name !== 'desktop')
     await page.getByRole('button', { name: 'Abrir conversas' }).click();
   const results = await new AxeBuilder({ page })
@@ -150,4 +154,29 @@ test('PLN inicia fluxo guiado e entrega DOCX baixavel no chat', async ({ page })
   expect(artifactPath).not.toBeNull();
   const bytes = await readFile(artifactPath!);
   expect(bytes.subarray(0, 2).toString()).toBe('PK');
+});
+
+test('autentica a persona, envia Bearer e limpa o chat no logout', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByLabel('Senha', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Mensagem para o agente')).toHaveCount(0);
+  await authenticate(page);
+
+  const input = page.getByLabel('Mensagem para o agente');
+  await input.fill('sessao temporaria');
+  await page.getByRole('button', { name: 'Enviar mensagem' }).click();
+  await expect(
+    page.getByRole('log').getByText('Resposta para: sessao temporaria.', {
+      exact: false,
+    }),
+  ).toBeVisible();
+
+  // O perfil e o "Sair" ficam na engrenagem de ajustes, em todas as larguras.
+  await page.getByRole('button', { name: 'Ajustes do agente' }).click();
+  await expect(page.getByRole('region', { name: 'Sessão' })).toContainText('PMO');
+  await page.getByRole('button', { name: 'Sair' }).click();
+  await expect(page.getByLabel('Senha', { exact: true })).toBeVisible();
+  await expect(
+    page.getByText('Resposta para: sessao temporaria.', { exact: false }),
+  ).toHaveCount(0);
 });

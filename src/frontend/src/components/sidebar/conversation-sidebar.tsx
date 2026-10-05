@@ -71,7 +71,7 @@ export function ConversationSidebar({ onClose }: { onClose?: () => void }) {
           className="h-7 w-auto rounded-sm"
         />
         <span className="min-w-0 flex-1 truncate text-xs font-semibold text-fg">
-          Agente de Portfólio
+          ONESHOT
         </span>
         {onClose && (
           <Button

@@ -1,6 +1,8 @@
 """Rotas HTTP do contrato de geracao de relatorios."""
 
-from fastapi import APIRouter, BackgroundTasks, Header, Response, status
+from typing import Annotated
+
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, Response, status
 
 from app.reports.schemas import (
     CreateReportRequest,
@@ -13,9 +15,17 @@ from app.reports.schemas import (
     StartWorkflowRequest,
     WorkflowSessionResponse,
 )
-from app.reports.security import resolve_report_identity, validate_callback_token
+from app.reports.security import (
+    report_identity_from_access_context,
+    validate_callback_token,
+)
 from app.reports.service import get_report_service
 from app.reports.workflow import get_workflow_service
+from app.security import (
+    AccessContext,
+    require_export_access,
+    require_read_access,
+)
 
 router = APIRouter(prefix="/api", tags=["relatorios"])
 
@@ -27,9 +37,9 @@ router = APIRouter(prefix="/api", tags=["relatorios"])
 )
 def prepare_report_request(
     request: PrepareReportRequest,
-    authorization: str | None = Header(default=None),
+    access: Annotated[AccessContext, Depends(require_export_access)],
 ) -> PrepareReportResponse:
-    identity = resolve_report_identity(authorization)
+    identity = report_identity_from_access_context(access)
     return get_report_service().prepare(request, identity)
 
 
@@ -43,9 +53,9 @@ def create_report_request(
     request: CreateReportRequest,
     background_tasks: BackgroundTasks,
     response: Response,
-    authorization: str | None = Header(default=None),
+    access: Annotated[AccessContext, Depends(require_export_access)],
 ) -> ReportExecutionResponse:
-    identity = resolve_report_identity(authorization)
+    identity = report_identity_from_access_context(access)
     service = get_report_service()
     execution, created = service.create(request, identity)
     if not created:
@@ -66,9 +76,9 @@ def create_report_request(
 )
 def get_report_request(
     execution_id: str,
-    authorization: str | None = Header(default=None),
+    access: Annotated[AccessContext, Depends(require_read_access)],
 ) -> ReportExecutionResponse:
-    identity = resolve_report_identity(authorization)
+    identity = report_identity_from_access_context(access)
     service = get_report_service()
     return service.response(service.get(execution_id, identity))
 
@@ -79,9 +89,9 @@ def get_report_request(
 )
 def download_report_artifact(
     execution_id: str,
-    authorization: str | None = Header(default=None),
+    access: Annotated[AccessContext, Depends(require_export_access)],
 ) -> Response:
-    identity = resolve_report_identity(authorization)
+    identity = report_identity_from_access_context(access)
     service = get_report_service()
     execution = service.get(execution_id, identity)
     artifact = service.artifact_content(execution_id, identity)
@@ -117,9 +127,9 @@ def receive_report_callback(
 )
 def start_workflow_session(
     request: StartWorkflowRequest,
-    authorization: str | None = Header(default=None),
+    access: Annotated[AccessContext, Depends(require_export_access)],
 ) -> WorkflowSessionResponse:
-    identity = resolve_report_identity(authorization)
+    identity = report_identity_from_access_context(access)
     return get_workflow_service().start(request, identity)
 
 
@@ -130,9 +140,9 @@ def start_workflow_session(
 )
 def get_workflow_session(
     session_id: str,
-    authorization: str | None = Header(default=None),
+    access: Annotated[AccessContext, Depends(require_read_access)],
 ) -> WorkflowSessionResponse:
-    identity = resolve_report_identity(authorization)
+    identity = report_identity_from_access_context(access)
     return get_workflow_service().get(session_id, identity)
 
 
@@ -144,9 +154,9 @@ def get_workflow_session(
 def answer_workflow_session(
     session_id: str,
     request: AnswerWorkflowRequest,
-    authorization: str | None = Header(default=None),
+    access: Annotated[AccessContext, Depends(require_export_access)],
 ) -> WorkflowSessionResponse:
-    identity = resolve_report_identity(authorization)
+    identity = report_identity_from_access_context(access)
     return get_workflow_service().answer(session_id, request, identity)
 
 
@@ -161,9 +171,9 @@ def confirm_workflow_session(
     request: ConfirmWorkflowRequest,
     background_tasks: BackgroundTasks,
     response: Response,
-    authorization: str | None = Header(default=None),
+    access: Annotated[AccessContext, Depends(require_export_access)],
 ) -> WorkflowSessionResponse:
-    identity = resolve_report_identity(authorization)
+    identity = report_identity_from_access_context(access)
     workflow = get_workflow_service()
     result, created = workflow.confirm(session_id, request, identity)
     if not created:
@@ -188,7 +198,7 @@ def confirm_workflow_session(
 )
 def cancel_workflow_session(
     session_id: str,
-    authorization: str | None = Header(default=None),
+    access: Annotated[AccessContext, Depends(require_export_access)],
 ) -> WorkflowSessionResponse:
-    identity = resolve_report_identity(authorization)
+    identity = report_identity_from_access_context(access)
     return get_workflow_service().cancel(session_id, identity)

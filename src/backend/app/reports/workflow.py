@@ -228,8 +228,12 @@ class PostgresWorkflowRepository(WorkflowRepository):
             """
             INSERT INTO public.audit_events (
                 event_type, component, event_status, event_payload,
-                occurred_at, correlation_id
-            ) VALUES (%s, 'guided_workflow', %s, %s::jsonb, %s, %s);
+                occurred_at, correlation_id, user_id
+            ) VALUES (
+                %s, 'guided_workflow', %s, %s::jsonb, %s, %s,
+                (SELECT id FROM public.users
+                  WHERE entra_object_id = %s AND is_active = TRUE LIMIT 1)
+            );
             """,
             (
                 event_type,
@@ -244,6 +248,7 @@ class PostgresWorkflowRepository(WorkflowRepository):
                 ),
                 session.updated_at,
                 session.correlation_id,
+                session.requested_by,
             ),
         )
 
