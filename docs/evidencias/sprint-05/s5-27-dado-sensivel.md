@@ -59,7 +59,7 @@ Os 28 casos novos cobrem:
 - o bloqueio da pergunta pela API, de texto e de áudio, sem classificação e sem chamada;
 - a auditoria sem o dado.
 
-Para a suíte do job `backend-api`, os arquivos novos foram incluídos no `.gitlab-ci.yml`. Resultado local: 304 aprovados. Os 3 testes com classificador real dependem do `requirements-pln.txt` (torch) e falham no ambiente sem essas dependências, antes e depois desta mudança.
+Para a suíte do job `backend-api`, os arquivos novos foram incluídos no `.gitlab-ci.yml`. Resultado local, já com a develop da autenticação: 373 aprovados (a develop sozinha tem 342). Os 3 testes com classificador real dependem do `requirements-pln.txt` (torch) e falham no ambiente sem essas dependências, antes e depois desta mudança.
 
 ## Limitações
 
