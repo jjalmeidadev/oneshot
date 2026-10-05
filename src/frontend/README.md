@@ -21,7 +21,7 @@ python -m venv .venv
 Copy-Item src/backend/.env.example src/backend/.env
 ```
 
-Edite o arquivo local `.env`: informe `GEMINI_API_KEY`, o recurso e a chave Azure Speech. Não versione credenciais. Configure as identidades simuladas de áudio e relatório para a bancada. O campo **Token de acesso da sessão**, na barra lateral, recebe esse token; ele permanece somente na memória da sessão. Não informe a chave do Azure, Gemini ou Supabase nesse campo.
+Edite o arquivo local `.env`: informe `GEMINI_API_KEY`, o recurso e a chave Azure Speech. Não versione credenciais. Configure as identidades simuladas de áudio e relatório para a bancada. O campo **Token de acesso da sessão**, na engrenagem **Ajustes do agente** (canto superior direito do chat), recebe esse token; ele permanece somente na memória da sessão. Não informe a chave do Azure, Gemini ou Supabase nesse campo.
 
 `PLN_WARMUP=1` prepara o classificador na inicialização. A primeira execução baixa o encoder ONNX publicado no repositório Hugging Face documentado pelo backend. Aguarde a aplicação concluir a inicialização antes de abrir a bancada. Sem esse ajuste, a carga acontece na primeira pergunta com classificação habilitada.
 
@@ -44,16 +44,16 @@ Abra `http://localhost:5173`. O Vite encaminha `/api` e `/health` para `http://1
 ## Uso e navegabilidade
 
 1. Digite uma pergunta ou selecione uma sugestão. **Enter** envia; **Shift + Enter** quebra a linha. A interface recusa texto vazio ou acima de 20.000 caracteres.
-2. O controle **Validação de intenção** liga ou desliga a classificação local. Quando ligado, os limiares de 0,55 e 0,70 orientam a apresentação da classificação. Perguntas fora de escopo ou sem confiança suficiente recebem resposta controlada sem chamar o Gemini. Identificar uma intenção não significa executar uma transação no portfólio.
+2. A engrenagem **Ajustes do agente**, no canto superior direito, reúne os controles que estendem o modelo e os dados técnicos: **Validação de intenção**, **Sugestões proativas**, **Mostrar detalhes técnicos** e o token da sessão. A tela padrão não exibe detalhes técnicos; ligar **Mostrar detalhes técnicos** traz de volta o selo de intenção, o modelo, a data e o canal da conversa e a aba **Resposta** do painel de fontes. O controle **Validação de intenção** liga ou desliga a classificação local. Quando ligado, os limiares de 0,55 e 0,70 orientam a apresentação da classificação. Perguntas fora de escopo ou sem confiança suficiente recebem resposta controlada sem chamar o Gemini. Identificar uma intenção não significa executar uma transação no portfólio.
 3. Durante a chamada, o chat anuncia processamento e impede envios duplicados. **Interromper resposta** aborta a espera HTTP e descarta respostas tardias. Uma chamada já recebida pelo provedor pode continuar no backend.
 4. Para voz, informe o token da bancada, clique no microfone, permita a captura, grave e use **Concluir gravação**. Ouça a prévia antes de clicar em **Enviar áudio**. **Descartar** elimina a captura. A gravação para em 60 segundos e é convertida para WAV PCM mono, 16 bits, 16 kHz, com corte por amostras e limite de 2 MB.
-5. A transcrição aparece como mensagem do usuário e a resposta como mensagem do agente. As fontes numeradas abaixo da resposta abrem o documento correspondente; a aba **Resposta** mostra métricas e classificação fornecidas pela API.
+5. A transcrição aparece como mensagem do usuário e a resposta como mensagem do agente. As fontes numeradas abaixo da resposta abrem o documento correspondente no painel **Fontes**, que começa fechado; no modo técnico, a aba **Resposta** mostra métricas e classificação fornecidas pela API. O sino ao lado da engrenagem abre as notificações de alerta.
 6. Quando o PLN identifica `transacao_gerar_relatorio`, o chat abre um cartão
    guiado. Selecione escopo, período, público, finalidade e ênfases, revise a
    confirmação e acompanhe o processamento. Ao concluir, o DOCX é baixado pelo
    botão **Baixar no chat**; não há redirecionamento para SharePoint.
 7. **Nova conversa** inicia outro contexto. A barra lateral permite buscar, selecionar e excluir conversas da sessão. Trocar de conversa cancela a espera atual; uma resposta atrasada não é inserida na conversa selecionada depois.
-8. Em telas menores que 1024 px, o botão **Abrir conversas** abre o menu em diálogo; **Documentos** abre o painel à direita. **Escape** fecha os diálogos. No desktop, os três painéis ficam lado a lado.
+8. Em telas menores que 1024 px, o botão **Abrir conversas** abre o menu em diálogo; **Fontes** abre o painel à direita. **Escape** fecha os diálogos. No desktop, os três painéis ficam lado a lado.
 9. O tema segue a preferência do sistema até uma escolha explícita. A escolha de tema pode ser persistida; mensagens e token não são gravados no armazenamento do navegador.
 
 O histórico é da sessão em memória: recarregar a página o apaga. O backend documentado não possui rotas de persistência de conversas. Foram removidos os contratos propostos que lançavam exceção e os cenários fictícios de produção; o encadeamento real usa `previous_interaction_id` por conversa.
@@ -64,9 +64,10 @@ O histórico é da sessão em memória: recarregar a página o apaga. O backend 
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `src/App.tsx` e `state/`         | Provedores de tema e chat; reducer para conversas, fontes e estados; controle de concorrência e cancelamento.       |
 | `components/layout/`             | `AppShell` organiza desktop e diálogos móveis; `ThemeToggle` alterna o tema.                                        |
-| `components/sidebar/`            | `ConversationSidebar`, `ConversationItem` e `UserCard`: busca, seleção, exclusão e token da sessão.                 |
+| `components/sidebar/`            | `ConversationSidebar`, `ConversationItem` e `UserCard`: busca, seleção, exclusão e campo do token da sessão.        |
+| `components/settings/`           | `AgentSettings`: engrenagem com validação de intenção, sugestões proativas, modo técnico e token da sessão.         |
 | `components/chat/`               | Mensagens, intenção, fontes e `ReportWorkflowCard`, que conduz o relatório e oferece o DOCX no próprio chat.        |
-| `components/composer/`           | `Composer`, `IntentToggle`, `AudioButton`, `RecordingBar` e `RecordingPreview`: texto, gravação, revisão e envio.   |
+| `components/composer/`           | `Composer`, `AudioButton`, `RecordingBar` e `RecordingPreview`: texto, gravação, revisão e envio.                   |
 | `components/documents/`          | `DocumentPanel`, `DocumentCard`, `DocumentViewer` e `ResponseDetails`: fontes, trechos e métricas.                  |
 | `components/ui/`                 | Primitivos Radix, botões, campos, diálogos, abas, indicadores e tooltips reutilizados pelos componentes de domínio. |
 | `hooks/`                         | Captura e liberação do microfone, tamanho do campo, largura da tela e preferência de tema.                          |
@@ -88,7 +89,7 @@ Os componentes recebem propriedades ou consomem o contexto; as chamadas HTTP fic
 
 `GeminiSource.excerpt` acompanha o conteúdo recuperado que fundamentou a resposta. As fontes preservam ID, título, lista, URL, data e score; não se inventam fontes quando a lista estiver vazia. A interface usa `handler`, `flow`, `alternatives`, `entities` e `pipeline_metrics` quando enviados pela API, com fallback para respostas antigas. O formato legado `answer.sources` do áudio é preservado, enquanto `chat.sources` fornece os metadados completos para a interface. Uma resposta de limitação pode não trazer `interaction_id`; nesse caso o último contexto válido da conversa é mantido.
 
-O modo proatividade começa desligado. Ele só pode ser ativado com a classificação de intenção habilitada e exige o token da sessão nos fluxos de texto e áudio. Quando o backend retorna `proactive_suggestion`, a interface mantém a resposta principal, registra o estado pendente e apresenta ações explícitas para aceitar ou recusar. A recusa encerra o bloco sem resposta secundária; a aceitação usa a rota dedicada, envia identidade e conversa e nunca transforma “sim” em uma nova mensagem comum. Interromper a requisição ou trocar de conversa restaura o bloco para o estado pendente, permitindo nova tentativa.
+O modo proatividade começa desligado. Ele só pode ser ativado com a classificação de intenção habilitada e exige o token da sessão nos fluxos de texto e áudio. Quando o backend retorna `proactive_suggestion`, a interface mantém a resposta principal, registra o estado pendente e apresenta, no card **Ação sugerida**, ações explícitas para aceitar, recusar ou **Não sugerir mais** (recusa a sugestão atual e desliga o modo, que volta pela engrenagem). A recusa encerra o bloco sem resposta secundária; a aceitação usa a rota dedicada, envia identidade e conversa e nunca transforma “sim” em uma nova mensagem comum. Interromper a requisição ou trocar de conversa restaura o bloco para o estado pendente, permitindo nova tentativa.
 
 ### Validações e erros
 

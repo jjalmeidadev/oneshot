@@ -22,6 +22,8 @@ export function MessageList({
   selectedSourceId,
   onSelectSource,
   onResolveProactiveSuggestion,
+  onDisableProactivity,
+  showTechnicalDetails = false,
 }: {
   messages: ChatMessage[];
   isSending: boolean;
@@ -32,6 +34,8 @@ export function MessageList({
     messageId: string,
     decision: ProactiveDecision,
   ) => void;
+  onDisableProactivity?: () => void;
+  showTechnicalDetails?: boolean;
 }) {
   const viewportRef = useRef<HTMLDivElement>(null);
 
@@ -58,6 +62,8 @@ export function MessageList({
               selectedSourceId={selectedSourceId}
               onSelectSource={onSelectSource}
               onResolveProactiveSuggestion={onResolveProactiveSuggestion}
+              onDisableProactivity={onDisableProactivity}
+              showTechnicalDetails={showTechnicalDetails}
             />
           </motion.div>
         ))}
@@ -67,7 +73,7 @@ export function MessageList({
             <motion.div {...ENTRY}>
               <TypingIndicator
                 label={
-                  intentLayerEnabled
+                  showTechnicalDetails && intentLayerEnabled
                     ? 'Classificando a intenção e consultando as fontes…'
                     : 'Consultando as fontes…'
                 }

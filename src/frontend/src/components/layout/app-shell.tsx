@@ -5,8 +5,9 @@ import { ChatHeader } from '@/components/chat/chat-header';
 import { MessageList } from '@/components/chat/message-list';
 import { Composer } from '@/components/composer/composer';
 import { DocumentPanel } from '@/components/documents/document-panel';
-import { ConversationSidebar } from '@/components/sidebar/conversation-sidebar';
 import { NotificationCenter } from '@/components/notifications/notification-center';
+import { AgentSettings } from '@/components/settings/agent-settings';
+import { ConversationSidebar } from '@/components/sidebar/conversation-sidebar';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useIsDesktop } from '@/hooks/use-media-query';
 import { useChatStore } from '@/state/chat-store';
@@ -15,15 +16,17 @@ import { cn } from '@/lib/utils';
 /**
  * Disposicao dos tres paineis.
  *
- *   +--------------+-----------------------------+------------------+
- *   |  conversas   |  cabecalho da conversa      |  documentos      |
- *   |  (esquerda)  |  mensagens                  |  recuperados     |
- *   |              |  toggle de intencao         |  pelo RAG        |
- *   |              |  campo de texto + audio     |  (direita)       |
- *   +--------------+-----------------------------+------------------+
+ *   +--------------+------------------------------------+-------------+
+ *   |  conversas   |  titulo        Fontes  sino  ajustes|  fontes     |
+ *   |  (esquerda)  |  mensagens                          |  da resposta|
+ *   |              |  campo de texto + audio             |  (direita,  |
+ *   |              |                                     |  fechado)   |
+ *   +--------------+------------------------------------+-------------+
  *
- * Abaixo de 1024 px, a barra lateral e o painel de documentos viram paineis
- * deslizantes; o chat ocupa a largura toda.
+ * A tela padrao nao mostra detalhes tecnicos (S5-20): validacao de intencao,
+ * proatividade, modo tecnico e token ficam na engrenagem de ajustes, e o painel
+ * de fontes so abre quando o usuario pede. Abaixo de 1024 px, a barra lateral e
+ * o painel de fontes viram paineis deslizantes; o chat ocupa a largura toda.
  */
 export function AppShell() {
   const {
@@ -33,6 +36,10 @@ export function AppShell() {
     setIntentLayerEnabled,
     proactivityEnabled,
     setProactivityEnabled,
+    showTechnicalDetails,
+    setShowTechnicalDetails,
+    accessToken,
+    setAccessToken,
     activeSources,
     selectedDocument,
     selectDocument,
@@ -95,7 +102,6 @@ export function AppShell() {
           'flex min-w-0 flex-1 flex-col overflow-hidden bg-surface lg:rounded-xl lg:border lg:border-border lg:shadow-panel',
         )}
       >
-        <NotificationCenter />
         <ChatHeader
           conversation={activeConversation}
           sourceCount={activeSources.length}
@@ -106,6 +112,23 @@ export function AppShell() {
               : setDocumentSheetOpen(true)
           }
           onOpenSidebar={() => setSidebarOpen(true)}
+          showTechnicalDetails={showTechnicalDetails}
+          actions={
+            <>
+              <NotificationCenter />
+              <AgentSettings
+                intentLayerEnabled={intentLayerEnabled}
+                onIntentLayerChange={setIntentLayerEnabled}
+                proactivityEnabled={proactivityEnabled}
+                onProactivityChange={setProactivityEnabled}
+                showTechnicalDetails={showTechnicalDetails}
+                onShowTechnicalDetailsChange={setShowTechnicalDetails}
+                accessToken={accessToken}
+                onAccessTokenChange={setAccessToken}
+                disabled={isSending}
+              />
+            </>
+          }
         />
 
         <div className="min-h-0 flex-1">
@@ -124,6 +147,8 @@ export function AppShell() {
               onResolveProactiveSuggestion={(messageId, decision) => {
                 void resolveProactiveSuggestion(messageId, decision);
               }}
+              onDisableProactivity={() => setProactivityEnabled(false)}
+              showTechnicalDetails={showTechnicalDetails}
             />
           )}
         </div>
@@ -144,10 +169,6 @@ export function AppShell() {
           onSubmit={() => submit()}
           onStop={stop}
           isSending={isSending}
-          intentLayerEnabled={intentLayerEnabled}
-          onIntentLayerChange={setIntentLayerEnabled}
-          proactivityEnabled={proactivityEnabled}
-          onProactivityChange={setProactivityEnabled}
         />
       </main>
 
@@ -158,6 +179,7 @@ export function AppShell() {
             selectedDocument={selectedDocument}
             onSelect={selectDocument}
             lastAssistantMessage={lastAssistantMessage}
+            showResponseDetails={showTechnicalDetails}
           />
         </div>
       )}
@@ -165,13 +187,14 @@ export function AppShell() {
       {!isDesktop && (
         <Dialog open={documentSheetOpen} onOpenChange={setDocumentSheetOpen}>
           <DialogContent side="right" className="p-0">
-            <DialogTitle className="sr-only">Documentos recuperados</DialogTitle>
+            <DialogTitle className="sr-only">Fontes da resposta</DialogTitle>
             <div className="h-full pt-8">
               <DocumentPanel
                 documents={activeSources}
                 selectedDocument={selectedDocument}
                 onSelect={selectDocument}
                 lastAssistantMessage={lastAssistantMessage}
+                showResponseDetails={showTechnicalDetails}
               />
             </div>
           </DialogContent>

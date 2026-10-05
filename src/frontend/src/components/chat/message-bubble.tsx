@@ -17,6 +17,8 @@ export function MessageBubble({
   selectedSourceId,
   onSelectSource,
   onResolveProactiveSuggestion,
+  onDisableProactivity,
+  showTechnicalDetails = false,
 }: {
   message: ChatMessage;
   selectedSourceId: string | null;
@@ -25,6 +27,9 @@ export function MessageBubble({
     messageId: string,
     decision: ProactiveDecision,
   ) => void;
+  onDisableProactivity?: () => void;
+  /** Modo tecnico: selo de intencao e modelo no rodape da resposta. */
+  showTechnicalDetails?: boolean;
 }) {
   if (message.role === 'user') {
     return <UserMessage message={message} />;
@@ -36,6 +41,8 @@ export function MessageBubble({
       selectedSourceId={selectedSourceId}
       onSelectSource={onSelectSource}
       onResolveProactiveSuggestion={onResolveProactiveSuggestion}
+      onDisableProactivity={onDisableProactivity}
+      showTechnicalDetails={showTechnicalDetails}
     />
   );
 }
@@ -84,6 +91,8 @@ function AssistantMessage({
   selectedSourceId,
   onSelectSource,
   onResolveProactiveSuggestion,
+  onDisableProactivity,
+  showTechnicalDetails = false,
 }: {
   message: ChatMessage;
   selectedSourceId: string | null;
@@ -92,6 +101,9 @@ function AssistantMessage({
     messageId: string,
     decision: ProactiveDecision,
   ) => void;
+  onDisableProactivity?: () => void;
+  /** Modo tecnico: selo de intencao e modelo no rodape da resposta. */
+  showTechnicalDetails?: boolean;
 }) {
   const isError = message.status === 'error';
 
@@ -140,18 +152,19 @@ function AssistantMessage({
           <ProactiveSuggestion
             suggestion={message.proactiveSuggestion}
             onResolve={(decision) => onResolveProactiveSuggestion(message.id, decision)}
+            onDisable={onDisableProactivity}
           />
         )}
 
         <div className="mt-2.5 flex flex-wrap items-center gap-2 text-2xs text-fg-subtle">
           <span>{formatTime(message.createdAt)}</span>
-          {message.intent && (
+          {showTechnicalDetails && message.intent && (
             <>
               <span aria-hidden>·</span>
               <IntentBadge intent={message.intent} />
             </>
           )}
-          {message.metrics && (
+          {showTechnicalDetails && message.metrics && (
             <>
               <span aria-hidden>·</span>
               <span className="font-mono">{message.metrics.model}</span>
