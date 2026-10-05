@@ -2,14 +2,15 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 from time import perf_counter
+from typing import Annotated
 from uuid import uuid4
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.requests import Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from starlette.concurrency import run_in_threadpool
 
 from app.audio.errors import (
@@ -28,7 +29,7 @@ from app.audio.schemas import (
     VhsMetricsResponse,
 )
 from app.audio import transcription
-from app.audio.security import resolve_identity, single_request_per_identity
+from app.audio.security import single_request_per_identity
 from app.audio.service import process_audio_upload
 from app.audio.validation import DEFAULT_MAX_SIZE_BYTES
 from app.database.connection import close_database_pool
@@ -57,6 +58,21 @@ from app.reports.errors import ReportError
 from app.reports.router import router as reports_router
 from app.alerts.errors import AlertError
 from app.alerts.router import router as alerts_router
+from app.security import (
+    AccessContext,
+    AccessError,
+    AccessProfileResponse,
+    PasswordLoginRequest,
+    PasswordLoginResponse,
+    OutOfScopeForProfileError,
+    audit_request_denial,
+    access_profile_from_context,
+    authenticate_persona,
+    authorize_message_scope,
+    get_access_context,
+    require_read_access,
+    require_write_access,
+)
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
 
@@ -93,6 +109,9 @@ app = FastAPI(
 )
 app.include_router(reports_router)
 app.include_router(alerts_router)
+ReadAccess = Annotated[AccessContext, Depends(require_read_access)]
+WriteAccess = Annotated[AccessContext, Depends(require_write_access)]
+AuthenticatedAccess = Annotated[AccessContext, Depends(get_access_context)]
 
 
 @app.exception_handler(AudioError)
@@ -104,6 +123,8 @@ def handle_audio_error(_request: Request, error: AudioError) -> JSONResponse:
 
 @app.exception_handler(ReportError)
 def handle_report_error(_request: Request, error: ReportError) -> JSONResponse:
+    if error.status_code == 403:
+        audit_request_denial(_request)
     return JSONResponse(
         status_code=error.status_code,
         content={"error": {"code": error.code, "message": error.message}},
@@ -112,10 +133,21 @@ def handle_report_error(_request: Request, error: ReportError) -> JSONResponse:
 
 @app.exception_handler(AlertError)
 def handle_alert_error(_request: Request, error: AlertError) -> JSONResponse:
+    if error.status_code == 403:
+        audit_request_denial(_request)
     return JSONResponse(
         status_code=error.status_code,
         content={"error": {"code": error.code, "message": error.message}},
     )
+
+
+@app.exception_handler(AccessError)
+def handle_access_error(_request: Request, error: AccessError) -> JSONResponse:
+    """Preserva codigos publicos estaveis sem expor detalhes de Auth ou banco."""
+
+    if isinstance(error, OutOfScopeForProfileError):
+        audit_request_denial(_request, error)
+    return JSONResponse(status_code=error.status_code, content=error.to_payload())
 
 
 @app.exception_handler(RequestValidationError)
@@ -140,6 +172,16 @@ async def handle_request_validation_error(
                         "Informe uma sugestão válida e uma decisão de aceitar "
                         "ou recusar."
                     ),
+                }
+            },
+        )
+    if request.url.path == "/api/access/login":
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": {
+                    "code": "INVALID_INPUT",
+                    "message": "Selecione uma persona e informe a senha.",
                 }
             },
         )
@@ -192,13 +234,32 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+@app.get("/api/access/me", response_model=AccessProfileResponse)
+def get_current_access_profile(
+    access: AuthenticatedAccess,
+) -> AccessProfileResponse:
+    """Retorna somente a identidade de exibicao e o resumo de acesso atual."""
+
+    return access_profile_from_context(access)
+
+
+@app.post("/api/access/login", response_model=PasswordLoginResponse)
+def login_with_password(
+    credentials: PasswordLoginRequest,
+    response: Response,
+) -> PasswordLoginResponse:
+    """Autentica uma das quatro contas sintéticas sem expor e-mail no cliente."""
+
+    response.headers["Cache-Control"] = "no-store"
+    return authenticate_persona(credentials.profile_key, credentials.password)
+
+
 @app.get("/api/audio/vhs/metrics", response_model=VhsMetricsResponse)
 def get_vhs_metrics(
-    authorization: str | None = Header(default=None),
+    access: ReadAccess,
 ) -> VhsMetricsResponse:
     """Expõe somente contadores agregados a uma identidade autenticada."""
 
-    resolve_identity(authorization)
     snapshot = transcription.response_cache.snapshot()
     return VhsMetricsResponse(
         enabled=os.getenv("VHS_ENABLED", "1").strip() != "0",
@@ -210,17 +271,15 @@ def get_vhs_metrics(
 @app.post("/api/chat", response_model=GeminiChatResponse)
 def create_chat_response(
     request: GeminiChatRequest,
-    authorization: str | None = Header(default=None),
+    access: ReadAccess,
 ) -> GeminiChatResponse:
     try:
-        identity = (
-            resolve_identity(authorization)
-            if authorization or request.proactivity_enabled
-            else None
-        )
+        authorize_message_scope(access, request.message)
         return process_message(
             request,
-            requester_id=identity.object_id if identity else None,
+            requester_id=str(access.auth_subject),
+            user_id=str(access.user_id),
+            access_context=access,
         )
     except GeminiConfigurationError as error:
         raise HTTPException(status_code=503, detail="O serviço de processamento está indisponível. Tente novamente em instantes.") from error
@@ -239,13 +298,15 @@ def create_chat_response(
 )
 def create_proactive_confirmation(
     request: ProactiveConfirmationRequest,
-    authorization: str | None = Header(default=None),
+    access: ReadAccess,
 ) -> ProactiveConfirmationResponse:
+    # A resposta secundaria so analisa ou recomenda e nao grava dado de
+    # projeto; aceitar a sugestao exige leitura, como a pergunta original.
     try:
-        identity = resolve_identity(authorization)
         return process_proactive_confirmation(
             request,
-            requester_id=identity.object_id,
+            requester_id=str(access.auth_subject),
+            user_id=str(access.user_id),
         )
     except PendingSuggestionNotFound as error:
         raise HTTPException(
@@ -277,16 +338,19 @@ def create_proactive_confirmation(
 def create_audio_chat_response(
     request: GeminiChatRequest,
     conversation_id: str,
-    requester_id: str | None = None,
+    access_context: AccessContext,
 ) -> GeminiChatResponse:
     """Executa o pipeline comum preservando o envelope de erro da rota de audio."""
 
     try:
+        authorize_message_scope(access_context, request.message)
         return process_message(
             request,
             channel="api",
             external_conversation_id=conversation_id,
-            requester_id=requester_id,
+            requester_id=str(access_context.auth_subject),
+            user_id=str(access_context.user_id),
+            access_context=access_context,
         )
     except GeminiConfigurationError as error:
         raise ProcessingUnavailableError() from error
@@ -301,6 +365,7 @@ def create_audio_chat_response(
     summary="Enviar audio para transcricao e processamento",
 )
 async def create_audio_upload(
+    access: ReadAccess,
     audio: UploadFile | None = File(default=None),
     conversation_id: str | None = Form(
         default=None,
@@ -310,16 +375,14 @@ async def create_audio_upload(
     previous_interaction_id: str | None = Form(default=None, max_length=1024),
     use_intent_classifier: bool = Form(default=True),
     proactivity_enabled: bool = Form(default=False),
-    authorization: str | None = Header(default=None),
 ) -> AudioUploadResponse:
     started_at = perf_counter()
-    identity = resolve_identity(authorization)
     resolved_conversation_id = conversation_id or str(uuid4())
 
     if audio is None:
         raise AudioMissingError()
 
-    with single_request_per_identity(identity):
+    with single_request_per_identity(access.user_id):
         data = await _read_upload(audio)
         if not data:
             raise AudioMissingError()
@@ -338,7 +401,7 @@ async def create_audio_upload(
                 proactivity_enabled=proactivity_enabled,
             ),
             resolved_conversation_id,
-            identity.object_id,
+            access,
         )
         return AudioUploadResponse(
             conversation_id=resolved_conversation_id,

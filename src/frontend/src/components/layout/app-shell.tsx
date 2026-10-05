@@ -8,6 +8,7 @@ import { DocumentPanel } from '@/components/documents/document-panel';
 import { NotificationCenter } from '@/components/notifications/notification-center';
 import { AgentSettings } from '@/components/settings/agent-settings';
 import { ConversationSidebar } from '@/components/sidebar/conversation-sidebar';
+import { UserCard } from '@/components/sidebar/user-card';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useIsDesktop } from '@/hooks/use-media-query';
 import { useChatStore } from '@/state/chat-store';
@@ -24,7 +25,7 @@ import { cn } from '@/lib/utils';
  *   +--------------+------------------------------------+-------------+
  *
  * A tela padrao nao mostra detalhes tecnicos (S5-20): validacao de intencao,
- * proatividade, modo tecnico e token ficam na engrenagem de ajustes, e o painel
+ * proatividade, modo tecnico e perfil da sessao ficam na engrenagem de ajustes, e o painel
  * de fontes so abre quando o usuario pede. Abaixo de 1024 px, a barra lateral e
  * o painel de fontes viram paineis deslizantes; o chat ocupa a largura toda.
  */
@@ -38,8 +39,6 @@ export function AppShell() {
     setProactivityEnabled,
     showTechnicalDetails,
     setShowTechnicalDetails,
-    accessToken,
-    setAccessToken,
     activeSources,
     selectedDocument,
     selectDocument,
@@ -123,8 +122,7 @@ export function AppShell() {
                 onProactivityChange={setProactivityEnabled}
                 showTechnicalDetails={showTechnicalDetails}
                 onShowTechnicalDetailsChange={setShowTechnicalDetails}
-                accessToken={accessToken}
-                onAccessTokenChange={setAccessToken}
+                session={<UserCard />}
                 disabled={isSending}
               />
             </>

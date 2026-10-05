@@ -114,7 +114,7 @@ def test_prepare_requires_authorized_scope():
         )
 
     assert response.status_code == 403
-    assert response.json()["error"]["code"] == "REPORT_ACCESS_DENIED"
+    assert response.json()["error"]["code"] == "OUT_OF_SCOPE_FOR_PROFILE"
 
 
 def test_prepare_returns_confirmable_versioned_contract():

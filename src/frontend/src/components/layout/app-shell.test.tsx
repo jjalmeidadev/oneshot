@@ -4,17 +4,49 @@ import { describe, it, expect, vi } from 'vitest';
 import App from '@/App';
 import { response } from '@/tests/fixtures';
 
+const accessProfile = {
+  display_name: '[DEMO] PMO',
+  email: 'mvp.pmo@oneshot.example.com',
+  role_name: 'pmo',
+  profile_key: 'pmo',
+  scope_label: 'Portfólio completo',
+  can_read: true,
+  can_write: false,
+  can_export: true,
+};
+
+async function authenticate() {
+  await userEvent.selectOptions(screen.getByLabelText('Persona'), 'pmo');
+  await userEvent.type(screen.getByLabelText('Senha'), 'test-password');
+  await userEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+  await screen.findByLabelText('Mensagem para o agente');
+}
+
+function successfulResponse(url: string): Response {
+  if (url.includes('/access/login')) {
+    return new Response(
+      JSON.stringify({ access_token: 'test-token', profile: accessProfile }),
+    );
+  }
+  if (url.includes('/notifications')) {
+    return new Response(JSON.stringify({ items: [], unread_count: 0 }));
+  }
+  if (url.includes('/alert-subscriptions')) {
+    return new Response(JSON.stringify([]));
+  }
+  return new Response(JSON.stringify(response));
+}
+
 describe('AppShell, barra lateral, sessão e tema', () => {
   it('integra envio, fontes, busca, seleção, exclusão e tema', async () => {
     vi.stubGlobal(
       'fetch',
       vi
         .fn()
-        .mockImplementation(() =>
-          Promise.resolve(new Response(JSON.stringify(response))),
-        ),
+        .mockImplementation((url: string) => Promise.resolve(successfulResponse(url))),
     );
     render(<App />);
+    await authenticate();
     const input = screen.getByRole('textbox', { name: 'Mensagem para o agente' });
     fireEvent.change(input, { target: { value: 'prazo' } });
     fireEvent.keyDown(input, { key: 'Enter' });
@@ -42,16 +74,32 @@ describe('AppShell, barra lateral, sessão e tema', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Usar tema claro' }));
     expect(document.documentElement).not.toHaveClass('dark');
   });
-  it('UserCard guarda token apenas na sessão e AppShell anuncia falhas', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('private error')));
-    render(<App />);
-    await userEvent.click(screen.getByRole('button', { name: 'Ajustes do agente' }));
-    fireEvent.change(screen.getByLabelText('Token de acesso da sessão'), {
-      target: { value: 'test-token' },
-    });
-    expect(screen.getByLabelText('Token de acesso da sessão')).toHaveValue(
-      'test-token',
+  it('perfil aparece na engrenagem, sem campo de token, e AppShell anuncia falhas', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((url: string) => {
+        if (
+          url.includes('/access/login') ||
+          url.includes('/notifications') ||
+          url.includes('/alert-subscriptions')
+        ) {
+          return Promise.resolve(successfulResponse(url));
+        }
+        return Promise.reject(new TypeError('private error'));
+      }),
     );
+    render(<App />);
+    await authenticate();
+    expect(screen.queryByText('[DEMO] PMO')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Ajustes do agente' }));
+    const ajustes = screen.getByRole('dialog', { name: 'Ajustes do agente' });
+    expect(within(ajustes).getByText('[DEMO] PMO')).toBeVisible();
+    expect(within(ajustes).getByText('PMO · Portfólio completo')).toBeVisible();
+    expect(within(ajustes).getByRole('button', { name: 'Sair' })).toBeVisible();
+    expect(
+      screen.queryByLabelText('Token de acesso da sessão'),
+    ).not.toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent('test-password');
     expect(window.localStorage.getItem('test-token')).toBeNull();
     await userEvent.keyboard('{Escape}');
     fireEvent.change(screen.getByRole('textbox', { name: 'Mensagem para o agente' }), {
@@ -60,21 +108,31 @@ describe('AppShell, barra lateral, sessão e tema', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Enviar mensagem' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível');
   });
+  it('sair pela engrenagem volta para a tela de entrada', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockImplementation((url: string) => Promise.resolve(successfulResponse(url))),
+    );
+    render(<App />);
+    await authenticate();
+    await userEvent.click(screen.getByRole('button', { name: 'Ajustes do agente' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Sair' }));
+    expect(await screen.findByLabelText('Persona')).toBeVisible();
+    expect(screen.queryByLabelText('Mensagem para o agente')).not.toBeInTheDocument();
+  });
   it('tela padrão sem detalhes técnicos, que voltam pelo modo técnico', async () => {
     vi.stubGlobal(
       'fetch',
       vi
         .fn()
-        .mockImplementation(() =>
-          Promise.resolve(new Response(JSON.stringify(response))),
-        ),
+        .mockImplementation((url: string) => Promise.resolve(successfulResponse(url))),
     );
     render(<App />);
+    await authenticate();
     expect(screen.queryByRole('switch')).not.toBeInTheDocument();
     expect(screen.queryByText(/Validação de intenção/)).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText('Token de acesso da sessão'),
-    ).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Fontes da resposta/ })).toHaveAttribute(
       'aria-pressed',
       'false',
@@ -111,7 +169,14 @@ describe('AppShell, barra lateral, sessão e tema', () => {
           removeEventListener: vi.fn(),
         }) as unknown as MediaQueryList,
     );
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockImplementation((url: string) => Promise.resolve(successfulResponse(url))),
+    );
     render(<App />);
+    await authenticate();
     await userEvent.click(screen.getByRole('button', { name: 'Abrir conversas' }));
     expect(screen.getByRole('dialog', { name: 'Conversas' })).toBeVisible();
     await userEvent.keyboard('{Escape}');

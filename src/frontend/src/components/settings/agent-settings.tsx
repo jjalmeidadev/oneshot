@@ -1,7 +1,6 @@
 import { Code2, Layers, Settings, Sparkles, type LucideIcon } from 'lucide-react';
 import { useId, type ReactNode } from 'react';
 
-import { UserCard } from '@/components/sidebar/user-card';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
@@ -13,7 +12,7 @@ import { cn } from '@/lib/utils';
  *
  * Centraliza o que antes ficava espalhado pela tela: os controles que estendem
  * a capacidade do modelo (validacao de intencao e sugestoes proativas), o modo
- * tecnico e o token da sessao. A proatividade continua controlavel tambem no
+ * tecnico e o perfil da sessao autenticada. A proatividade continua controlavel tambem no
  * proprio card da sugestao, que e onde o usuario a percebe (ocorrencia O8).
  */
 export function AgentSettings({
@@ -23,8 +22,7 @@ export function AgentSettings({
   onProactivityChange,
   showTechnicalDetails,
   onShowTechnicalDetailsChange,
-  accessToken,
-  onAccessTokenChange,
+  session,
   disabled = false,
 }: {
   intentLayerEnabled: boolean;
@@ -33,8 +31,8 @@ export function AgentSettings({
   onProactivityChange: (enabled: boolean) => void;
   showTechnicalDetails: boolean;
   onShowTechnicalDetailsChange: (enabled: boolean) => void;
-  accessToken: string;
-  onAccessTokenChange: (token: string) => void;
+  /** Perfil da sessao autenticada (nome, escopo e "Sair"). */
+  session?: ReactNode;
   /** Bloqueia as trocas de modo enquanto uma resposta esta em andamento. */
   disabled?: boolean;
 }) {
@@ -79,14 +77,17 @@ export function AgentSettings({
           />
         </div>
 
-        <Separator className="my-3" />
-
-        <div className="px-1 pb-1">
-          <UserCard
-            accessToken={accessToken}
-            onAccessTokenChange={onAccessTokenChange}
-          />
-        </div>
+        {session && (
+          <>
+            <Separator className="my-3" />
+            <section aria-label="Sessão" className="px-1 pb-1">
+              <p className="pb-2 text-2xs font-semibold uppercase tracking-wide text-fg-subtle">
+                Sessão
+              </p>
+              {session}
+            </section>
+          </>
+        )}
       </PopoverContent>
     </Popover>
   );

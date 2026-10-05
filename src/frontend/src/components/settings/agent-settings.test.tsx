@@ -12,8 +12,6 @@ function setup(overrides: Partial<Parameters<typeof AgentSettings>[0]> = {}) {
     onProactivityChange: vi.fn(),
     showTechnicalDetails: false,
     onShowTechnicalDetailsChange: vi.fn(),
-    accessToken: '',
-    onAccessTokenChange: vi.fn(),
     ...overrides,
   };
   render(<AgentSettings {...props} />);
@@ -29,7 +27,7 @@ describe('AgentSettings', () => {
     expect(screen.getAllByRole('switch')).toHaveLength(3);
   });
 
-  it('encaminha as trocas de modo e do token', async () => {
+  it('encaminha as trocas de modo', async () => {
     const props = setup();
     await userEvent.click(screen.getByRole('button', { name: 'Ajustes do agente' }));
     await userEvent.click(
@@ -39,11 +37,9 @@ describe('AgentSettings', () => {
     await userEvent.click(
       screen.getByRole('switch', { name: 'Mostrar detalhes técnicos' }),
     );
-    await userEvent.type(screen.getByLabelText('Token de acesso da sessão'), 'x');
     expect(props.onIntentLayerChange).toHaveBeenCalledWith(false);
     expect(props.onProactivityChange).toHaveBeenCalledWith(true);
     expect(props.onShowTechnicalDetailsChange).toHaveBeenCalledWith(true);
-    expect(props.onAccessTokenChange).toHaveBeenCalledWith('x');
   });
 
   it('bloqueia a proatividade sem a validação de intenção', async () => {
@@ -62,5 +58,18 @@ describe('AgentSettings', () => {
     expect(
       screen.getByRole('switch', { name: 'Mostrar detalhes técnicos' }),
     ).toBeEnabled();
+  });
+
+  it('mostra o perfil da sessão numa seção própria', async () => {
+    setup({ session: <p>[DEMO] PMO</p> });
+    await userEvent.click(screen.getByRole('button', { name: 'Ajustes do agente' }));
+    const sessao = screen.getByRole('region', { name: 'Sessão' });
+    expect(sessao).toHaveTextContent('[DEMO] PMO');
+  });
+
+  it('sem sessão, não mostra a seção', async () => {
+    setup();
+    await userEvent.click(screen.getByRole('button', { name: 'Ajustes do agente' }));
+    expect(screen.queryByRole('region', { name: 'Sessão' })).not.toBeInTheDocument();
   });
 });
