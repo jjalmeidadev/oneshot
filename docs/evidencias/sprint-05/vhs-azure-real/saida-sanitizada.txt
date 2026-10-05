@@ -1,0 +1,40 @@
+# Saida sanitizada — homologacao do VHS com Azure AI Speech real
+# Executado em 2026-10-03, a partir de src/backend, commit-base 10333c4.
+# Python 3.13.15, macOS 26.6.2 arm64, httpx 0.28.1, fastapi 0.141.1.
+# Nenhum token, chave, audio ou transcricao em texto e publicado: somente hashes.
+
+## 1. Roteiro do plano (audio -> Azure STT real -> PLN -> PostgreSQL)
+$ python scripts/verify_audio_stt_pln_live.py <audio.wav> --expected-term <termo> --repetitions 5
+
+LIVE_AUDIO_SHA256=ce6cd19e03cc1e54565d6b913ee347929be060c777f044331d18ec4a4725eb1f
+LIVE_STT_TRANSCRIPT_SHA256=2b07eaa35c46f892366cc0daa271163719d12c41da9e6ff55f430302d5969cbb
+LIVE_PLN_MACRO=CONSULTA
+LIVE_PLN_SPECIFIC=consulta_status_projeto
+LIVE_VHS_WORKER_ID=c3647fc502c34a4f83cbcc39db99e6f9
+LIVE_VHS_REPETITIONS=5
+LIVE_VHS_PROVIDER_CALLS=1
+LIVE_VHS_CALLS_AVOIDED=4
+LIVE_VHS_HIT_RATIO=0.8000
+LIVE_VHS_MISS_STT_MS=1562
+LIVE_VHS_HIT_STT_MEDIAN_MS=0.0
+LIVE_VHS_HIT_STT_P95_MS=0
+LIVE_DB_CORRELATION_OK=True
+LIVE_DB_AUDIT_OK=True
+LIVE_DB_CLEANUP_OK=True
+LIVE_DB_RESIDUE_COUNT=0
+
+## 2. Coleta isolada do VHS (transcription.transcribe chamado 5 vezes, cache vazio)
+envio 1:   1540.27 ms   tipo=MISS (Azure real)
+envio 2:      0.19 ms   tipo=HIT (cache)
+envio 3:      0.13 ms   tipo=HIT (cache)
+envio 4:      0.12 ms   tipo=HIT (cache)
+envio 5:      0.11 ms   tipo=HIT (cache)
+
+transcricoes identicas nos 5 envios: True
+sha256 do audio       : ce6cd19e03cc1e54565d6b913ee347929be060c777f044331d18ec4a4725eb1f
+sha256 da transcricao : 2b07eaa35c46f892366cc0daa271163719d12c41da9e6ff55f430302d5969cbb
+
+contadores do VHS (delta desta rodada):
+{"hit": 4, "miss": 1, "record": 1, "expired": 0, "invalidation": 0,
+ "eviction": 0, "provider_call": 1, "provider_error": 0, "coalesced": 0}
+hit_ratio: 0.8 | chamadas evitadas: 4
