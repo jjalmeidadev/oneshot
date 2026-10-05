@@ -1,0 +1,9 @@
+{
+  "health_http": 200,
+  "openapi_http": 200,
+  "contract_errors": [],
+  "architecture_reference": "src/agent/README.md",
+  "copilot_removed_from_runtime": true,
+  "criterion": "Seção 9.2.3 exige Teams/Copilot/SharePoint/Azure previstos",
+  "scope": "ASGI local com lifespan; sem homologação no tenant Microsoft"
+}
