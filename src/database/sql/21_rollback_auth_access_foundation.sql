@@ -1,5 +1,5 @@
 -- Rollback especifico e sem remocao de tabelas ou dados para
--- 19_auth_access_foundation.sql.
+-- 20_auth_access_foundation.sql.
 -- Interrompe sem alterar o schema se usuarios com role_name = 'consulta'
 -- tiverem sido criados depois da migration.
 

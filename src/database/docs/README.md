@@ -14,8 +14,8 @@ Os scripts atuais sao:
 - `../sql/06_verify_secondary_intents.sql`: verifica leitura, unicidade, integridade referencial e reexecucao da carga sem persistir dados de teste.
 - `../sql/07_add_pending_proactive_suggestions.sql`: cria o armazenamento compartilhado das sugestões pendentes;
 - `../sql/08_add_prepared_proactive_response.sql`: adiciona a resposta secundária preparada na chamada principal e remove pendências legadas incompatíveis.
-- `../sql/19_auth_access_foundation.sql`: adiciona o perfil `consulta`, garante unicidade de regras de acesso com `NULLS NOT DISTINCT`, documenta o vinculo com Supabase Auth e protege `secondary_intents` com RLS sem policies permissivas;
-- `../sql/20_rollback_auth_access_foundation.sql`: reverte especificamente a fundacao da migration 19 sem remover tabelas ou dados e bloqueia a reversao se ja existirem usuarios `consulta`.
+- `../sql/20_auth_access_foundation.sql`: adiciona o perfil `consulta`, garante unicidade de regras de acesso com `NULLS NOT DISTINCT`, documenta o vinculo com Supabase Auth e protege `secondary_intents` com RLS sem policies permissivas;
+- `../sql/21_rollback_auth_access_foundation.sql`: reverte especificamente a fundacao da migration 20 sem remover tabelas ou dados e bloqueia a reversao se ja existirem usuarios `consulta`.
 
 ## Banco-alvo
 
