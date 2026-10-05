@@ -58,7 +58,7 @@ def test_references_survive_provider_api_and_audit(monkeypatch, evidence, provid
     provider_response(monkeypatch, provider, "O prazo e 30/09/2026. [Fonte 1]")
     fetch_values = [("intent-17",), ("conversation-17",), ("trace-17",)]
     if channel == "audio":
-        fetch_values = [None, ("intent-17",), None, ("conversation-17",), ("trace-17",)]
+        fetch_values = [("intent-17",), None, ("conversation-17",), ("trace-17",)]
     cursor = FakeCursor(fetch_values=fetch_values)
     connection = FakeConnection(cursor)
 

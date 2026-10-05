@@ -25,6 +25,7 @@ from app.nlp.schemas import (
     IntentAlternative,
     PublicEntity,
 )
+from app.security.access import AccessContext
 
 _classifier_lock = Lock()
 logger = logging.getLogger(__name__)
@@ -44,6 +45,8 @@ def process_message(
     channel: str = "api",
     external_conversation_id: str | None = None,
     requester_id: str | None = None,
+    user_id: str | None = None,
+    access_context: AccessContext | None = None,
 ) -> GeminiChatResponse:
     route_started_at = perf_counter()
     intent = None
@@ -74,6 +77,7 @@ def process_message(
                 external_conversation_id=external_conversation_id,
                 error_message=str(error),
                 requester_id=requester_id,
+                user_id=user_id,
             )
             raise GeminiConfigurationError("Classificador indisponivel.") from error
 
@@ -103,6 +107,7 @@ def process_message(
                 channel=channel,
                 external_conversation_id=external_conversation_id,
                 requester_id=requester_id,
+                user_id=user_id,
             )
             return response
 
@@ -119,6 +124,8 @@ def process_message(
                 intent=intent,
                 entities=entities,
                 processing_ms=response.pipeline_metrics.route_ms,
+                requester_id=requester_id,
+                user_id=user_id,
             )
             return response
 
@@ -126,6 +133,7 @@ def process_message(
         provider_kwargs = {
             "intent": None if fallback_to_rag else intent,
             "entities": entities,
+            "access_context": access_context,
         }
         if requester_id is not None and request.proactivity_enabled:
             provider_kwargs["requester_id"] = requester_id
@@ -141,6 +149,7 @@ def process_message(
             external_conversation_id=external_conversation_id,
             error_message=str(error),
             requester_id=requester_id,
+            user_id=user_id,
         )
         raise
 
@@ -159,6 +168,7 @@ def process_message(
         channel=channel,
         external_conversation_id=external_conversation_id,
         requester_id=requester_id,
+        user_id=user_id,
     )
     return response
 
@@ -167,6 +177,7 @@ def process_proactive_confirmation(
     request: ProactiveConfirmationRequest,
     *,
     requester_id: str,
+    user_id: str | None = None,
 ) -> ProactiveConfirmationResponse:
     """Confirma a sugestao e registra a resposta secundaria no RNF03."""
 
@@ -196,6 +207,7 @@ def process_proactive_confirmation(
         entities=[],
         processing_ms=_elapsed_ms(started_at),
         requester_id=requester_id,
+        user_id=user_id,
     )
     return execution.response
 
@@ -320,6 +332,7 @@ def _trace_safely(
     external_conversation_id: str | None = None,
     error_message: str | None = None,
     requester_id: str | None = None,
+    user_id: str | None = None,
 ) -> None:
     try:
         trace_id = trace_interaction(
@@ -332,6 +345,7 @@ def _trace_safely(
             external_conversation_id=external_conversation_id,
             error_message=error_message,
             requester_id=requester_id,
+            user_id=user_id,
         )
         if response is not None:
             response.trace_id = trace_id

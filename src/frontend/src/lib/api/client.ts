@@ -12,6 +12,7 @@
  */
 
 import type { AudioErrorEnvelope, DetailErrorEnvelope } from './schemas';
+import { notifyUnauthorized } from './session-events';
 
 export const API_BASE_URL = '/api';
 
@@ -83,7 +84,9 @@ export async function requestJson<T>(
   const response = await fetch(`${API_BASE_URL}${path}`, { ...init, signal });
 
   if (!response.ok) {
-    throw await parseError(response);
+    const error = await parseError(response);
+    if (response.status === 401) notifyUnauthorized();
+    throw error;
   }
 
   return (await response.json()) as T;

@@ -133,6 +133,47 @@ def _response_with_db_source() -> GeminiChatResponse:
 pytestmark = pytest.mark.integration
 
 
+def test_trace_uses_resolved_public_user_id_without_second_lookup(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://test.invalid/postgres")
+    public_user_id = "6e7d0df0-c96a-4076-b241-64f78a05997a"
+    cursor = FakeCursor(fetch_values=[("conversation-1",), ("interaction-1",)])
+    connection = FakeConnection(cursor)
+
+    trace_interaction(
+        request=GeminiChatRequest(
+            message="status", use_intent_classifier=False
+        ),
+        response=_response_with_db_source(),
+        intent=None,
+        entities=[],
+        processing_ms=5,
+        requester_id="762a2bde-87b8-413f-8656-958a2f380574",
+        user_id=public_user_id,
+        connect=_connect(connection),
+    )
+
+    assert not any("FROM public.users" in query for query, _ in cursor.calls)
+    conversation_params = next(
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.ai_conversations" in query
+    )
+    interaction_params = next(
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.ai_interactions" in query
+    )
+    audit_params = [
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.audit_events" in query
+    ]
+    assert conversation_params[0] == public_user_id
+    assert interaction_params[-1] == public_user_id
+    assert audit_params
+    assert all(public_user_id in params for params in audit_params)
+
+
 def test_chat_real_classifier_contract_and_minimal_persistence(monkeypatch):
     monkeypatch.setenv("PLN_WARMUP", "0")
     monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
@@ -146,7 +187,7 @@ def test_chat_real_classifier_contract_and_minimal_persistence(monkeypatch):
     connection = FakeConnection(cursor)
     provider_calls = []
 
-    def fake_provider(request, intent=None, entities=None):
+    def fake_provider(request, intent=None, entities=None, **_kwargs):
         provider_calls.append((request, intent, entities))
         return _response_with_db_source()
 
@@ -205,10 +246,8 @@ def test_audio_real_classifier_contract_and_minimal_persistence(monkeypatch):
     external_conversation_id = "s4-13-audio-success"
     monkeypatch.setenv("PLN_WARMUP", "0")
     monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
-    monkeypatch.setenv("AUDIO_SIMULATED_IDENTITIES", "token-de-teste=usuario-teste")
     cursor = FakeCursor(
         fetch_values=[
-            None,
             ("intent-1",),
             None,
             ("conversation-1",),
@@ -218,7 +257,7 @@ def test_audio_real_classifier_contract_and_minimal_persistence(monkeypatch):
     connection = FakeConnection(cursor)
     provider_calls = []
 
-    def fake_provider(request, intent=None, entities=None):
+    def fake_provider(request, intent=None, entities=None, **_kwargs):
         provider_calls.append((request, intent, entities))
         return _response_with_db_source()
 
@@ -279,10 +318,8 @@ def test_audio_real_classifier_contract_and_minimal_persistence(monkeypatch):
 def test_audio_classifier_failure_is_persisted_and_correlated(monkeypatch):
     external_conversation_id = "s4-13-audio-classifier-failure"
     monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
-    monkeypatch.setenv("AUDIO_SIMULATED_IDENTITIES", "token-de-teste=usuario-teste")
     cursor = FakeCursor(
         fetch_values=[
-            None,
             None,
             ("conversation-1",),
             ("interaction-1",),

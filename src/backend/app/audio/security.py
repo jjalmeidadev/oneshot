@@ -101,8 +101,8 @@ def _derived_object_id(token: str) -> str:
 class single_request_per_identity:
     """Reserva a vaga de processamento do usuario enquanto o audio e tratado."""
 
-    def __init__(self, identity: CorporateIdentity) -> None:
-        self._object_id = identity.object_id
+    def __init__(self, identity: CorporateIdentity | object) -> None:
+        self._object_id = str(getattr(identity, "object_id", identity))
 
     def __enter__(self) -> "single_request_per_identity":
         with _active_identities_lock:
