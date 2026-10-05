@@ -9,6 +9,7 @@ import { MarkdownMessage } from './chat/markdown-message';
 import { MessageBubble } from './chat/message-bubble';
 import { MessageList } from './chat/message-list';
 import { SourceCitations } from './chat/source-citations';
+import { ProactiveSuggestion } from './chat/proactive-suggestion';
 import { IntentBadge } from './chat/intent-badge';
 import { Composer } from './composer/composer';
 import { AudioButton } from './composer/audio-button';
@@ -61,7 +62,7 @@ describe('Componentes de chat', () => {
     );
     await userEvent.click(screen.getByRole('button', { name: 'Abrir conversas' }));
     await userEvent.click(
-      screen.getByRole('button', { name: 'Fontes da resposta (1)' }),
+      screen.getByRole('button', { name: /Fontes\s*1\s*da última resposta/ }),
     );
     expect(open).toHaveBeenCalledOnce();
     expect(toggle).toHaveBeenCalledOnce();
@@ -179,6 +180,24 @@ describe('Componentes de chat', () => {
     expect(within(card).getByText(/Sugestões desligadas/)).toBeVisible();
     expect(within(card).getByText('Ajustes do agente')).toBeVisible();
   });
+  it('Sugestão leva o foco ao resultado quando os botões somem', async () => {
+    const suggestion = message.proactiveSuggestion!;
+    const { rerender } = mount(
+      <ProactiveSuggestion suggestion={suggestion} onResolve={vi.fn()} />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Aceitar sugestão' }));
+    rerender(
+      <TooltipProvider>
+        <ProactiveSuggestion
+          suggestion={{ ...suggestion, status: 'accepted' }}
+          onResolve={vi.fn()}
+        />
+      </TooltipProvider>,
+    );
+    expect(
+      screen.getByText('Sugestão aceita e executada.').parentElement,
+    ).toHaveFocus();
+  });
   it('MessageBubble esconde intenção e modelo fora do modo técnico', () => {
     const props = {
       message,
@@ -235,6 +254,13 @@ describe('Componentes de entrada', () => {
     expect(
       screen.getByRole('button', { name: 'Gravar pergunta em áudio' }),
     ).toBeDisabled();
+  });
+  it('Composer marca o campo como inválido acima do limite', () => {
+    mount(<Composer {...props} value={'x'.repeat(20001)} />);
+    const input = screen.getByRole('textbox', { name: 'Mensagem para o agente' });
+    expect(input).toHaveAttribute('id', 'mensagem-para-o-agente');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input).toHaveAccessibleDescription(/20\.001/);
   });
   it('Composer não exibe controles técnicos nem atalhos por padrão', () => {
     mount(<Composer {...props} />);
@@ -305,7 +331,7 @@ describe('Documentos e conversas', () => {
         lastAssistantMessage={message}
       />,
     );
-    expect(screen.getByRole('region', { name: 'Fontes da resposta' })).toBeVisible();
+    expect(screen.getByRole('heading', { name: /Fontes da resposta/ })).toBeVisible();
     expect(screen.queryByRole('tab', { name: 'Resposta' })).not.toBeInTheDocument();
     expect(screen.queryByText('teste')).not.toBeInTheDocument();
   });

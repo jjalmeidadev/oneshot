@@ -25,6 +25,11 @@ export default defineConfig({
       name: 'desktop',
       use: { browserName: 'chromium', viewport: { width: 1440, height: 900 } },
     },
+    // Tablet em retrato: abaixo de 1024 px, conversas e fontes deslizam (S5-21).
+    {
+      name: 'tablet',
+      use: { browserName: 'chromium', viewport: { width: 768, height: 1024 } },
+    },
     {
       name: 'mobile',
       use: { browserName: 'chromium', viewport: { width: 390, height: 844 } },

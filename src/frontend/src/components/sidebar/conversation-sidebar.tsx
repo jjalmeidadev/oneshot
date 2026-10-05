@@ -63,7 +63,7 @@ export function ConversationSidebar({ onClose }: { onClose?: () => void }) {
   const groups = useMemo(() => groupByDay(filtered), [filtered]);
 
   return (
-    <aside className="flex h-full w-full flex-col bg-surface">
+    <nav aria-label="Conversas" className="flex h-full w-full flex-col bg-surface">
       <div className="flex items-center gap-2 px-3 pb-2 pt-3">
         <img
           src="/logo-metro-sp.png"
@@ -148,6 +148,6 @@ export function ConversationSidebar({ onClose }: { onClose?: () => void }) {
         <span className="text-2xs text-fg-subtle">Tema</span>
         <ThemeToggle />
       </div>
-    </aside>
+    </nav>
   );
 }

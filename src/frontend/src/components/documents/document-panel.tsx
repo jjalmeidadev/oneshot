@@ -17,6 +17,9 @@ import type { ChatMessage, RetrievedDocument } from '@/lib/domain';
  * documento selecionado abre logo abaixo, com os metadados que a API entrega.
  * A aba "Resposta", com latencia, tokens e o resultado do classificador, so
  * existe no modo tecnico (S5-20); fora dele o painel mostra apenas as fontes.
+ *
+ * O painel nao declara landmark proprio: quem o envolve decide (o `aside` no
+ * layout de tres colunas ou o dialogo nos paineis deslizantes).
  */
 export function DocumentPanel({
   documents,
@@ -24,12 +27,18 @@ export function DocumentPanel({
   onSelect,
   lastAssistantMessage,
   showResponseDetails = false,
+  showHeading = true,
 }: {
   documents: RetrievedDocument[];
   selectedDocument: RetrievedDocument | null;
   onSelect: (id: string) => void;
   lastAssistantMessage: ChatMessage | null;
   showResponseDetails?: boolean;
+  /**
+   * Falso quando quem envolve o painel ja tem o titulo (o `DialogTitle` do
+   * painel deslizante), para nao haver dois titulos "Fontes da resposta".
+   */
+  showHeading?: boolean;
 }) {
   const sources = (
     <SourceList
@@ -41,26 +50,27 @@ export function DocumentPanel({
 
   if (!showResponseDetails) {
     return (
-      <section
-        aria-label="Fontes da resposta"
-        className="flex h-full flex-col bg-surface"
-      >
-        <h2 className="flex items-center gap-1.5 px-4 pb-2 pt-3.5 text-xs font-semibold text-fg">
-          <BookOpen size={14} className="text-primary" />
-          Fontes da resposta
-          {documents.length > 0 && (
-            <span className="rounded bg-muted px-1 font-mono text-[10px] text-fg-muted">
-              {documents.length}
-            </span>
-          )}
-        </h2>
+      <div className="flex h-full flex-col bg-surface">
+        {showHeading && (
+          <h2 className="flex items-center gap-1.5 px-4 pb-2 pt-3.5 text-xs font-semibold text-fg">
+            <BookOpen size={14} className="text-primary" aria-hidden />
+            Fontes da resposta
+            {documents.length > 0 && (
+              <span className="rounded bg-muted px-1 font-mono text-[10px] text-fg-muted">
+                {documents.length}
+              </span>
+            )}
+          </h2>
+        )}
         <div className="flex min-h-0 flex-1 flex-col">{sources}</div>
-      </section>
+      </div>
     );
   }
 
   return (
     <Tabs defaultValue="sources" className="flex h-full flex-col bg-surface">
+      {/* Mantem a hierarquia de titulos: as secoes da aba Resposta sao h3. */}
+      {showHeading && <h2 className="sr-only">Fontes da resposta</h2>}
       <div className="px-3 pb-2 pt-3">
         <TabsList className="w-full">
           <TabsTrigger value="sources" className="flex-1">

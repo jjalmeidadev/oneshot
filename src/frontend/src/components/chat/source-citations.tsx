@@ -50,7 +50,7 @@ export function SourceCitations({
               onClick={() => onSelect(source.id)}
               title={`${source.title} — ${source.listName}`}
               className={cn(
-                'inline-flex max-w-[19rem] items-center gap-1.5 rounded-lg border px-2 py-1 text-left text-2xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                'inline-flex min-w-0 max-w-full items-center sm:max-w-[19rem] gap-1.5 rounded-lg border px-2 py-1 text-left text-2xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 selected
                   ? 'border-primary bg-primary-soft text-primary'
                   : 'border-border bg-surface text-fg hover:border-primary/50 hover:bg-primary-soft/40',

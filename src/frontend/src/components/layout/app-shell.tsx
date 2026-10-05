@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { BookOpen } from 'lucide-react';
+import { useRef, useState } from 'react';
 
 import { ChatEmptyState } from '@/components/chat/chat-empty-state';
 import { ChatHeader } from '@/components/chat/chat-header';
@@ -9,7 +10,7 @@ import { NotificationCenter } from '@/components/notifications/notification-cent
 import { AgentSettings } from '@/components/settings/agent-settings';
 import { ConversationSidebar } from '@/components/sidebar/conversation-sidebar';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { useIsDesktop } from '@/hooks/use-media-query';
+import { useIsDesktop, useIsWide } from '@/hooks/use-media-query';
 import { useChatStore } from '@/state/chat-store';
 import { cn } from '@/lib/utils';
 
@@ -25,8 +26,12 @@ import { cn } from '@/lib/utils';
  *
  * A tela padrao nao mostra detalhes tecnicos (S5-20): validacao de intencao,
  * proatividade, modo tecnico e token ficam na engrenagem de ajustes, e o painel
- * de fontes so abre quando o usuario pede. Abaixo de 1024 px, a barra lateral e
- * o painel de fontes viram paineis deslizantes; o chat ocupa a largura toda.
+ * de fontes so abre quando o usuario pede.
+ *
+ * Pontos de quebra (S5-21, ver `hooks/use-media-query.ts`): abaixo de 1024 px,
+ * conversas e fontes viram paineis deslizantes e o chat ocupa a largura toda;
+ * de 1024 a 1279 px, so as fontes deslizam; a partir de 1280 px, os tres
+ * paineis ficam lado a lado.
  */
 export function AppShell() {
   const {
@@ -62,6 +67,26 @@ export function AppShell() {
   const setDraft = (value: string) =>
     setDrafts((current) => ({ ...current, [draftId]: value }));
   const isDesktop = useIsDesktop();
+  const isWide = useIsWide();
+
+  // Os paineis deslizantes abrem por botoes que nao sao `DialogTrigger`; ao
+  // fechar, o foco volta para quem os abriu, e nao para o inicio da pagina.
+  const returnFocus = useRef<HTMLElement | null>(null);
+  const rememberFocus = () => {
+    returnFocus.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  };
+  const restoreFocus = (event: Event) => {
+    if (returnFocus.current?.isConnected) {
+      event.preventDefault();
+      returnFocus.current.focus();
+    }
+    returnFocus.current = null;
+  };
+  const openSourcesSheet = () => {
+    rememberFocus();
+    setDocumentSheetOpen(true);
+  };
 
   const messages = activeConversation?.messages ?? [];
   const isSending = status === 'sending';
@@ -80,17 +105,38 @@ export function AppShell() {
     });
   };
 
-  const showDocumentPanel = isDesktop && documentPanelOpen;
+  const showDocumentPanel = isWide && documentPanelOpen;
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-app p-0 lg:gap-3 lg:p-3">
+    <div className="flex h-dvh w-full overflow-hidden bg-app p-0 lg:gap-3 lg:p-3">
+      <a
+        href="#mensagem-para-o-agente"
+        onClick={(event) => {
+          // A ancora so rola a pagina; o atalho precisa levar o foco ao campo.
+          const field = document.getElementById('mensagem-para-o-agente');
+          if (field) {
+            event.preventDefault();
+            field.focus();
+          }
+        }}
+        className="sr-only z-50 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-fg focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+      >
+        Pular para o campo de mensagem
+      </a>
+
       {isDesktop ? (
-        <div className="w-72 shrink-0 overflow-hidden rounded-xl border border-border shadow-panel">
+        <div className="w-64 shrink-0 overflow-hidden rounded-xl border border-border shadow-panel xl:w-72">
           <ConversationSidebar />
         </div>
       ) : (
         <Dialog open={sidebarOpen} onOpenChange={setSidebarOpen}>
-          <DialogContent side="left" showClose={false} className="p-0">
+          <DialogContent
+            side="left"
+            showClose={false}
+            className="p-0"
+            aria-describedby={undefined}
+            onCloseAutoFocus={restoreFocus}
+          >
             <DialogTitle className="sr-only">Conversas</DialogTitle>
             <ConversationSidebar onClose={() => setSidebarOpen(false)} />
           </DialogContent>
@@ -105,13 +151,14 @@ export function AppShell() {
         <ChatHeader
           conversation={activeConversation}
           sourceCount={activeSources.length}
-          documentPanelOpen={isDesktop ? documentPanelOpen : documentSheetOpen}
+          documentPanelOpen={isWide ? documentPanelOpen : documentSheetOpen}
           onToggleDocumentPanel={() =>
-            isDesktop
-              ? setDocumentPanelOpen(!documentPanelOpen)
-              : setDocumentSheetOpen(true)
+            isWide ? setDocumentPanelOpen(!documentPanelOpen) : openSourcesSheet()
           }
-          onOpenSidebar={() => setSidebarOpen(true)}
+          onOpenSidebar={() => {
+            rememberFocus();
+            setSidebarOpen(true);
+          }}
           showTechnicalDetails={showTechnicalDetails}
           actions={
             <>
@@ -142,7 +189,7 @@ export function AppShell() {
               selectedSourceId={selectedDocument?.id ?? null}
               onSelectSource={(id) => {
                 selectDocument(id);
-                if (!isDesktop) setDocumentSheetOpen(true);
+                if (!isWide) openSourcesSheet();
               }}
               onResolveProactiveSuggestion={(messageId, decision) => {
                 void resolveProactiveSuggestion(messageId, decision);
@@ -173,7 +220,10 @@ export function AppShell() {
       </main>
 
       {showDocumentPanel && (
-        <div className="w-80 shrink-0 overflow-hidden rounded-xl border border-border shadow-panel xl:w-96">
+        <aside
+          aria-label="Fontes da resposta"
+          className="w-80 shrink-0 overflow-hidden rounded-xl border border-border shadow-panel 2xl:w-96"
+        >
           <DocumentPanel
             documents={activeSources}
             selectedDocument={selectedDocument}
@@ -181,15 +231,24 @@ export function AppShell() {
             lastAssistantMessage={lastAssistantMessage}
             showResponseDetails={showTechnicalDetails}
           />
-        </div>
+        </aside>
       )}
 
-      {!isDesktop && (
+      {!isWide && (
         <Dialog open={documentSheetOpen} onOpenChange={setDocumentSheetOpen}>
-          <DialogContent side="right" className="p-0">
-            <DialogTitle className="sr-only">Fontes da resposta</DialogTitle>
-            <div className="h-full pt-8">
+          <DialogContent
+            side="right"
+            className="p-0"
+            aria-describedby={undefined}
+            onCloseAutoFocus={restoreFocus}
+          >
+            <DialogTitle className="flex h-12 shrink-0 items-center gap-1.5 px-4 text-xs">
+              <BookOpen size={14} className="text-primary" aria-hidden />
+              Fontes da resposta
+            </DialogTitle>
+            <div className="min-h-0 flex-1">
               <DocumentPanel
+                showHeading={false}
                 documents={activeSources}
                 selectedDocument={selectedDocument}
                 onSelect={selectDocument}

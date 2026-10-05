@@ -73,7 +73,7 @@ export function Composer({
   };
 
   return (
-    <div className="border-t border-border bg-surface px-3 py-3 sm:px-4">
+    <div className="border-t border-border bg-surface px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:px-4">
       <div className="mx-auto flex max-w-3xl flex-col gap-2.5">
         {isRecording && (
           <RecordingBar
@@ -123,9 +123,13 @@ export function Composer({
             onKeyDown={handleKeyDown}
             rows={1}
             disabled={isRecording}
-            placeholder="Pergunte sobre projetos, cronogramas, TAPs ou documentos…"
+            id="mensagem-para-o-agente"
+            placeholder="Pergunte sobre projetos, prazos ou documentos…"
             aria-label="Mensagem para o agente"
-            className="max-h-[200px] flex-1 self-center py-1.5"
+            aria-describedby={overLimit ? 'mensagem-limite' : undefined}
+            aria-invalid={overLimit || undefined}
+            // 16 px no celular evita o zoom automatico do iOS ao focar o campo.
+            className="max-h-[200px] flex-1 resize-none self-center py-1.5 text-base sm:text-sm"
           />
 
           {isSending ? (
@@ -153,6 +157,8 @@ export function Composer({
 
         {value.length > CHAT_MESSAGE_MAX_LENGTH * 0.8 && (
           <p
+            id="mensagem-limite"
+            aria-live="polite"
             className={cn(
               'px-1 text-right text-2xs',
               overLimit ? 'text-danger' : 'text-fg-subtle',

@@ -53,7 +53,7 @@ Abra `http://localhost:5173`. O Vite encaminha `/api` e `/health` para `http://1
    confirmação e acompanhe o processamento. Ao concluir, o DOCX é baixado pelo
    botão **Baixar no chat**; não há redirecionamento para SharePoint.
 7. **Nova conversa** inicia outro contexto. A barra lateral permite buscar, selecionar e excluir conversas da sessão. Trocar de conversa cancela a espera atual; uma resposta atrasada não é inserida na conversa selecionada depois.
-8. Em telas menores que 1024 px, o botão **Abrir conversas** abre o menu em diálogo; **Fontes** abre o painel à direita. **Escape** fecha os diálogos. No desktop, os três painéis ficam lado a lado.
+8. A interface tem três faixas de largura. Abaixo de 1024 px (celular e tablet), o botão **Abrir conversas** abre o menu em diálogo e **Fontes** abre o painel deslizante à direita. De 1024 a 1279 px, as conversas ficam fixas e as fontes continuam deslizantes, para o chat não ficar espremido. A partir de 1280 px, os três painéis ficam lado a lado. **Escape** fecha os diálogos e devolve o foco ao botão que os abriu.
 9. O tema segue a preferência do sistema até uma escolha explícita. A escolha de tema pode ser persistida; mensagens e token não são gravados no armazenamento do navegador.
 
 O histórico é da sessão em memória: recarregar a página o apaga. O backend documentado não possui rotas de persistência de conversas. Foram removidos os contratos propostos que lançavam exceção e os cenários fictícios de produção; o encadeamento real usa `previous_interaction_id` por conversa.
@@ -100,7 +100,7 @@ O modo proatividade começa desligado. Ele só pode ser ativado com a classifica
 
 ## Acessibilidade e responsividade
 
-Campos e botões têm nomes acessíveis; mensagens usam `role=log`, `aria-live` e `aria-busy`; erros usam `role=alert`. Os diálogos Radix oferecem navegação por teclado e fechamento por Escape. O foco dos botões de classificação e transcrição permanece visível. As cores secundárias e o tema escuro foram ajustados para corrigir as violações de contraste encontradas pelo axe. A aplicação respeita `prefers-reduced-motion`.
+O primeiro Tab revela **Pular para o campo de mensagem**, que leva o foco direto ao campo. A lista de mensagens recebe foco para ser rolada pelas setas, e o card de sugestão leva o foco ao resultado quando os botões somem. Campos e botões têm nomes acessíveis, com o texto visível contido no nome (WCAG 2.5.3); mensagens usam `role=log`, `aria-live` e `aria-busy`; erros usam `role=alert`. Os diálogos Radix oferecem navegação por teclado e fechamento por Escape. O foco dos botões de classificação e transcrição permanece visível. As cores secundárias e o tema escuro foram ajustados para corrigir as violações de contraste encontradas pelo axe. A aplicação respeita `prefers-reduced-motion`.
 
 Os testes automatizados cobrem 1440 × 900 e 390 × 844 em Chromium. Esse recorte não equivale a uma auditoria manual completa com leitores de tela nem garante outros navegadores.
 

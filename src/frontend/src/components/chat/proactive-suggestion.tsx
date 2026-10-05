@@ -1,5 +1,5 @@
 import { BellOff, Check, LoaderCircle, Sparkles, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import type { ProactiveDecision } from '@/lib/api';
@@ -25,12 +25,26 @@ export function ProactiveSuggestion({
   onDisable?: () => void;
 }) {
   const [disabledHere, setDisabledHere] = useState(false);
+  const [actedHere, setActedHere] = useState(false);
+  const statusRef = useRef<HTMLDivElement>(null);
   const resolving =
     suggestion.status === 'accepting' || suggestion.status === 'declining';
   const resolved = suggestion.status === 'accepted' || suggestion.status === 'declined';
 
+  // Os botoes somem quando a sugestao e resolvida. Se o usuario agiu por aqui,
+  // o foco vai para o resultado, em vez de cair no inicio da pagina.
+  useEffect(() => {
+    if (resolved && actedHere) statusRef.current?.focus();
+  }, [resolved, actedHere]);
+
+  const resolve = (decision: ProactiveDecision) => {
+    setActedHere(true);
+    onResolve(decision);
+  };
+
   const disable = () => {
     setDisabledHere(true);
+    setActedHere(true);
     onDisable?.();
     if (suggestion.status === 'pending') onResolve('decline');
   };
@@ -55,7 +69,7 @@ export function ProactiveSuggestion({
           <Button
             type="button"
             size="sm"
-            onClick={() => onResolve('accept')}
+            onClick={() => resolve('accept')}
             disabled={resolving}
           >
             {suggestion.status === 'accepting' ? (
@@ -69,7 +83,7 @@ export function ProactiveSuggestion({
             type="button"
             size="sm"
             variant="outline"
-            onClick={() => onResolve('decline')}
+            onClick={() => resolve('decline')}
             disabled={resolving}
           >
             {suggestion.status === 'declining' ? (
@@ -94,20 +108,35 @@ export function ProactiveSuggestion({
           )}
         </div>
       ) : (
-        <p className="mt-3 text-xs font-medium text-fg-muted" role="status">
-          {suggestion.status === 'accepted'
-            ? 'Sugestão aceita e executada.'
-            : 'Sugestão recusada sem execução.'}
-        </p>
+        <div
+          ref={statusRef}
+          tabIndex={-1}
+          className="mt-3 space-y-2 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <p className="text-xs font-medium text-fg-muted" role="status">
+            {suggestion.status === 'accepted'
+              ? 'Sugestão aceita e executada.'
+              : 'Sugestão recusada sem execução.'}
+          </p>
+          {disabledHere && <DisabledNotice />}
+        </div>
       )}
 
-      {disabledHere && (
-        <p className="mt-2 text-xs text-fg-muted" role="status">
-          Sugestões desligadas. Para religar, use{' '}
-          <span className="font-medium text-fg">Ajustes do agente</span> no canto
-          superior direito.
-        </p>
+      {disabledHere && !resolved && (
+        <div className="mt-2">
+          <DisabledNotice />
+        </div>
       )}
     </section>
+  );
+}
+
+function DisabledNotice() {
+  return (
+    <p className="text-xs text-fg-muted" role="status">
+      Sugestões desligadas. Para religar, use{' '}
+      <span className="font-medium text-fg">Ajustes do agente</span> no canto superior
+      direito.
+    </p>
   );
 }
