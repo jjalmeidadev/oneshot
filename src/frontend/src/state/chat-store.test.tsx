@@ -260,4 +260,12 @@ describe('Estado e integração do chat', () => {
     ).toBe('pending');
     expect(result.current.status).toBe('idle');
   });
+
+  it('começa com a tela enxuta: sem modo técnico e com o painel de fontes fechado', () => {
+    const { result } = renderHook(useChatStore, { wrapper: AuthenticatedWrapper });
+    expect(result.current.showTechnicalDetails).toBe(false);
+    expect(result.current.documentPanelOpen).toBe(false);
+    act(() => result.current.setShowTechnicalDetails(true));
+    expect(result.current.showTechnicalDetails).toBe(true);
+  });
 });

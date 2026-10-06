@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readFile } from 'node:fs/promises';
 
+/** Entrada pela tela de persona; o perfil depois fica na engrenagem de ajustes. */
 async function authenticate(page: import('@playwright/test').Page) {
   await page.getByLabel('Persona').selectOption('pmo');
   await page.getByLabel('Senha', { exact: true }).fill('e2e-password');
@@ -9,7 +10,9 @@ async function authenticate(page: import('@playwright/test').Page) {
   await expect(page.getByLabel('Mensagem para o agente')).toBeVisible();
 }
 
-test('texto, fontes, métricas e navegação responsiva', async ({ page }, testInfo) => {
+test('texto, fontes, modo técnico e navegação responsiva', async ({
+  page,
+}, testInfo) => {
   await page.goto('/');
   await authenticate(page);
   const input = page.getByRole('textbox', { name: 'Mensagem para o agente' });
@@ -18,15 +21,20 @@ test('texto, fontes, métricas e navegação responsiva', async ({ page }, testI
   await expect(
     page.getByRole('log').getByText('Resposta para: prazo.', { exact: false }),
   ).toBeVisible();
-  await page.getByRole('button', { name: /Documentos recuperados/ }).click();
-  if (testInfo.project.name === 'desktop')
-    await page.getByRole('button', { name: /Documentos recuperados/ }).click();
+  // Tela padrão: sem modelo nem métricas; o painel de fontes começa fechado.
+  await expect(page.getByText('provedor-de-teste', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('switch')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Ajustes do agente' }).click();
+  await page.getByRole('switch', { name: 'Mostrar detalhes técnicos' }).click();
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: /da última resposta/ }).click();
   await expect(page.getByText('Trecho de teste: entrega em dezembro.')).toBeVisible();
   await page.getByRole('tab', { name: 'Resposta', exact: true }).click();
   await expect(
     page.getByText('provedor-de-teste', { exact: true }).last(),
   ).toBeVisible();
-  if (testInfo.project.name === 'mobile') await page.keyboard.press('Escape');
+  // Abaixo de 1280 px as fontes abrem como painel deslizante.
+  if (testInfo.project.name !== 'desktop') await page.keyboard.press('Escape');
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -73,12 +81,12 @@ test('gravação sintética, WAV, upload e resposta pelo backend', async ({ page
   ).toBeVisible();
 });
 
-test('acessibilidade automática e tema nos dois tamanhos', async ({
+test('acessibilidade automática e tema nas três larguras', async ({
   page,
 }, testInfo) => {
   await page.goto('/');
   await authenticate(page);
-  if (testInfo.project.name === 'mobile')
+  if (testInfo.project.name !== 'desktop')
     await page.getByRole('button', { name: 'Abrir conversas' }).click();
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
@@ -148,9 +156,7 @@ test('PLN inicia fluxo guiado e entrega DOCX baixavel no chat', async ({ page })
   expect(bytes.subarray(0, 2).toString()).toBe('PK');
 });
 
-test('autentica a persona, envia Bearer e limpa o chat no logout', async ({
-  page,
-}, testInfo) => {
+test('autentica a persona, envia Bearer e limpa o chat no logout', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByLabel('Senha', { exact: true })).toBeVisible();
   await expect(page.getByLabel('Mensagem para o agente')).toHaveCount(0);
@@ -165,9 +171,9 @@ test('autentica a persona, envia Bearer e limpa o chat no logout', async ({
     }),
   ).toBeVisible();
 
-  if (testInfo.project.name === 'mobile') {
-    await page.getByRole('button', { name: 'Abrir conversas' }).click();
-  }
+  // O perfil e o "Sair" ficam na engrenagem de ajustes, em todas as larguras.
+  await page.getByRole('button', { name: 'Ajustes do agente' }).click();
+  await expect(page.getByRole('region', { name: 'Sessão' })).toContainText('PMO');
   await page.getByRole('button', { name: 'Sair' }).click();
   await expect(page.getByLabel('Senha', { exact: true })).toBeVisible();
   await expect(

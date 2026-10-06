@@ -55,9 +55,15 @@ type State = {
   intentLayerEnabled: boolean;
   /** Sugestao secundaria fundamentada, controlada pelo usuario. */
   proactivityEnabled: boolean;
+  /**
+   * Modo tecnico: exibe selo de intencao, modelo, subtitulo da conversa e a aba
+   * de metricas. Desligado por padrao, porque o parceiro pediu menos informacao
+   * na tela (S5-20).
+   */
+  showTechnicalDetails: boolean;
   /** Documento aberto no painel da direita. */
   selectedDocumentId: string | null;
-  /** Painel lateral fixo, em telas largas. Aberto por padrao. */
+  /** Painel lateral fixo, em telas largas. Fechado por padrao; abre ao clicar numa fonte. */
   documentPanelOpen: boolean;
   /** Painel deslizante, em telas estreitas. Fechado por padrao. */
   documentSheetOpen: boolean;
@@ -78,6 +84,7 @@ type Action =
   | { type: 'set-status'; status: ChatStatus; error?: string | null }
   | { type: 'toggle-intent-layer'; enabled: boolean }
   | { type: 'toggle-proactivity'; enabled: boolean }
+  | { type: 'toggle-technical-details'; enabled: boolean }
   | { type: 'select-document'; id: string | null }
   | { type: 'set-document-panel'; open: boolean }
   | { type: 'set-document-sheet'; open: boolean }
@@ -195,6 +202,9 @@ function reducer(state: State, action: Action): State {
     case 'toggle-proactivity':
       return { ...state, proactivityEnabled: action.enabled };
 
+    case 'toggle-technical-details':
+      return { ...state, showTechnicalDetails: action.enabled };
+
     case 'select-document':
       return {
         ...state,
@@ -238,8 +248,9 @@ function initialState(): State {
     error: null,
     intentLayerEnabled: true,
     proactivityEnabled: false,
+    showTechnicalDetails: false,
     selectedDocumentId: null,
-    documentPanelOpen: true,
+    documentPanelOpen: false,
     documentSheetOpen: false,
     sidebarOpen: false,
   };
@@ -256,6 +267,7 @@ type ChatStoreValue = {
   error: string | null;
   intentLayerEnabled: boolean;
   proactivityEnabled: boolean;
+  showTechnicalDetails: boolean;
   documentPanelOpen: boolean;
   documentSheetOpen: boolean;
   sidebarOpen: boolean;
@@ -275,6 +287,7 @@ type ChatStoreValue = {
   deleteConversation: (id: string) => void;
   setIntentLayerEnabled: (enabled: boolean) => void;
   setProactivityEnabled: (enabled: boolean) => void;
+  setShowTechnicalDetails: (enabled: boolean) => void;
   selectDocument: (id: string | null) => void;
   setDocumentPanelOpen: (open: boolean) => void;
   setDocumentSheetOpen: (open: boolean) => void;
@@ -720,6 +733,7 @@ export function ChatStoreProvider({
       error: view.error,
       intentLayerEnabled: state.intentLayerEnabled,
       proactivityEnabled: state.proactivityEnabled,
+      showTechnicalDetails: state.showTechnicalDetails,
       documentPanelOpen: state.documentPanelOpen,
       documentSheetOpen: state.documentSheetOpen,
       sidebarOpen: state.sidebarOpen,
@@ -746,6 +760,8 @@ export function ChatStoreProvider({
         dispatch({ type: 'toggle-intent-layer', enabled }),
       setProactivityEnabled: (enabled) =>
         dispatch({ type: 'toggle-proactivity', enabled }),
+      setShowTechnicalDetails: (enabled) =>
+        dispatch({ type: 'toggle-technical-details', enabled }),
       selectDocument: (id) => dispatch({ type: 'select-document', id }),
       setDocumentPanelOpen: (open) => dispatch({ type: 'set-document-panel', open }),
       setDocumentSheetOpen: (open) => dispatch({ type: 'set-document-sheet', open }),
@@ -764,6 +780,7 @@ export function ChatStoreProvider({
       selectedDocument,
       state.intentLayerEnabled,
       state.proactivityEnabled,
+      state.showTechnicalDetails,
       state.documentPanelOpen,
       state.documentSheetOpen,
       state.sidebarOpen,

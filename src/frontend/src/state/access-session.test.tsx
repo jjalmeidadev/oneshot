@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -52,6 +52,12 @@ function backgroundResponse(url: string): Response | null {
   return null;
 }
 
+/** Abre a engrenagem de ajustes, onde fica o perfil da sessao. */
+async function openSession() {
+  await userEvent.click(screen.getByRole('button', { name: 'Ajustes do agente' }));
+  await screen.findByRole('region', { name: 'Sessão' });
+}
+
 describe('Sessão de acesso em memória', () => {
   it('não monta a aplicação antes da validação e exige persona e senha', async () => {
     const fetch = vi.fn();
@@ -76,9 +82,10 @@ describe('Sessão de acesso em memória', () => {
     await enter('pmo', 'senha-secreta');
 
     expect(await screen.findByLabelText('Mensagem para o agente')).toBeVisible();
+    // O perfil fica na engrenagem de ajustes (S5-20), e nao na barra lateral.
+    await openSession();
     expect(screen.getByText('[DEMO] Usuario')).toBeVisible();
-    expect(screen.getByText('PMO')).toBeVisible();
-    expect(screen.getByText('Portfólio completo')).toBeVisible();
+    expect(screen.getByText('PMO · Portfólio completo')).toBeVisible();
     expect(document.body).not.toHaveTextContent('senha-secreta');
     expect(screen.queryByLabelText('Senha')).not.toBeInTheDocument();
     expect(window.localStorage.length).toBe(0);
@@ -166,11 +173,15 @@ describe('Sessão de acesso em memória', () => {
     const composer = await screen.findByLabelText('Mensagem para o agente');
     fireEvent.change(composer, { target: { value: 'prazo' } });
     await userEvent.click(screen.getByRole('button', { name: 'Enviar mensagem' }));
-    expect(await screen.findByText(chatResponse.text)).toBeVisible();
+    // A mensagem entra com animacao de opacidade; espera ela terminar.
+    await waitFor(() => expect(screen.getByText(chatResponse.text)).toBeVisible());
 
+    await openSession();
     await userEvent.click(screen.getByRole('button', { name: 'Sair' }));
     expect(screen.queryByText(chatResponse.text)).not.toBeInTheDocument();
     await enter('consulta', 'senha-consulta');
+    await screen.findByLabelText('Mensagem para o agente');
+    await openSession();
     expect(await screen.findByText('[DEMO] Consulta')).toBeVisible();
     expect(screen.queryByText(chatResponse.text)).not.toBeInTheDocument();
   });
@@ -224,6 +235,7 @@ describe('Sessão de acesso em memória', () => {
     });
     await userEvent.click(screen.getByRole('button', { name: 'Enviar mensagem' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('não tem acesso');
+    await openSession();
     expect(screen.getByRole('button', { name: 'Sair' })).toBeVisible();
   });
 

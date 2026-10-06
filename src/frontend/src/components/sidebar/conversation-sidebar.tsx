@@ -3,7 +3,6 @@ import { useMemo, useState } from 'react';
 
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { ConversationItem } from '@/components/sidebar/conversation-item';
-import { UserCard } from '@/components/sidebar/user-card';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -64,7 +63,7 @@ export function ConversationSidebar({ onClose }: { onClose?: () => void }) {
   const groups = useMemo(() => groupByDay(filtered), [filtered]);
 
   return (
-    <aside className="flex h-full w-full flex-col bg-surface">
+    <nav aria-label="Conversas" className="flex h-full w-full flex-col bg-surface">
       <div className="flex items-center gap-2 px-3 pb-2 pt-3">
         <img
           src="/logo-metro-sp.png"
@@ -145,14 +144,10 @@ export function ConversationSidebar({ onClose }: { onClose?: () => void }) {
 
       <Separator />
 
-      <div className="space-y-2 p-2">
-        <div className="flex items-center gap-1">
-          <div className="min-w-0 flex-1">
-            <UserCard />
-          </div>
-          <ThemeToggle />
-        </div>
+      <div className="flex items-center justify-between gap-1 p-2 pl-3">
+        <span className="text-2xs text-fg-subtle">Tema</span>
+        <ThemeToggle />
       </div>
-    </aside>
+    </nav>
   );
 }

@@ -61,7 +61,7 @@ export function AccessScreen() {
               required
               value={profileKey}
               onChange={(event) => setProfileKey(event.target.value as ProfileKey | '')}
-              className="mt-1.5 h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm text-fg outline-none focus:border-primary focus:ring-2 focus:ring-ring"
+              className="mt-1.5 h-11 w-full rounded-lg border border-border bg-surface px-3 text-base text-fg outline-none sm:text-sm focus:border-primary focus:ring-2 focus:ring-ring"
             >
               <option value="">Selecione uma persona</option>
               {PROFILE_KEYS.map((key) => (
@@ -85,7 +85,7 @@ export function AccessScreen() {
                 spellCheck={false}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                className="h-11 w-full rounded-lg border border-border bg-surface px-3 pr-12 text-sm text-fg outline-none focus:border-primary focus:ring-2 focus:ring-ring"
+                className="h-11 w-full rounded-lg border border-border bg-surface px-3 pr-12 text-base text-fg outline-none sm:text-sm focus:border-primary focus:ring-2 focus:ring-ring"
               />
               <button
                 type="button"

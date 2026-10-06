@@ -2,8 +2,6 @@ import { AlertTriangle, ArrowUp, Square } from 'lucide-react';
 import { useEffect, useRef, type ChangeEvent, type KeyboardEvent } from 'react';
 
 import { AudioButton } from '@/components/composer/audio-button';
-import { IntentToggle } from '@/components/composer/intent-toggle';
-import { ProactivityToggle } from '@/components/composer/proactivity-toggle';
 import { RecordingBar, RecordingPreview } from '@/components/composer/recording-bar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,9 +14,10 @@ import { cn } from '@/lib/utils';
 /**
  * Area de composicao.
  *
- * Ordem dos elementos, de cima para baixo: toggle da camada de intencao,
- * barra de gravacao (quando ativa) e o campo de texto com o botao de audio a
- * esquerda e o de envio a direita.
+ * Ordem dos elementos, de cima para baixo: barra de gravacao (quando ativa) e o
+ * campo de texto com o botao de audio a esquerda e o de envio a direita. Os
+ * controles de validacao de intencao e proatividade ficam na engrenagem de
+ * ajustes do cabecalho (S5-20).
  */
 export function Composer({
   value,
@@ -28,10 +27,6 @@ export function Composer({
   conversationId = null,
   onStop,
   isSending,
-  intentLayerEnabled,
-  onIntentLayerChange,
-  proactivityEnabled,
-  onProactivityChange,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -40,10 +35,6 @@ export function Composer({
   conversationId?: string | null;
   onStop: () => void;
   isSending: boolean;
-  intentLayerEnabled: boolean;
-  onIntentLayerChange: (enabled: boolean) => void;
-  proactivityEnabled: boolean;
-  onProactivityChange: (enabled: boolean) => void;
 }) {
   const recorder = useAudioRecorder();
   const previousConversation = useRef(conversationId);
@@ -82,21 +73,8 @@ export function Composer({
   };
 
   return (
-    <div className="border-t border-border bg-surface px-3 py-3 sm:px-4">
+    <div className="border-t border-border bg-surface px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:px-4">
       <div className="mx-auto flex max-w-3xl flex-col gap-2.5">
-        <div className="flex flex-wrap items-center gap-2">
-          <IntentToggle
-            enabled={intentLayerEnabled}
-            onChange={onIntentLayerChange}
-            disabled={isSending}
-          />
-          <ProactivityToggle
-            enabled={proactivityEnabled}
-            onChange={onProactivityChange}
-            disabled={isSending || !intentLayerEnabled}
-          />
-        </div>
-
         {isRecording && (
           <RecordingBar
             elapsedSeconds={recorder.elapsedSeconds}
@@ -145,9 +123,13 @@ export function Composer({
             onKeyDown={handleKeyDown}
             rows={1}
             disabled={isRecording}
-            placeholder="Pergunte sobre projetos, cronogramas, TAPs ou documentos…"
+            id="mensagem-para-o-agente"
+            placeholder="Pergunte sobre projetos, prazos ou documentos…"
             aria-label="Mensagem para o agente"
-            className="max-h-[200px] flex-1 self-center py-1.5"
+            aria-describedby={overLimit ? 'mensagem-limite' : undefined}
+            aria-invalid={overLimit || undefined}
+            // 16 px no celular evita o zoom automatico do iOS ao focar o campo.
+            className="max-h-[200px] flex-1 resize-none self-center py-1.5 text-base sm:text-sm"
           />
 
           {isSending ? (
@@ -173,23 +155,18 @@ export function Composer({
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-3 px-1">
-          <p className="text-2xs text-fg-subtle">
-            <kbd className="rounded border border-border bg-muted px-1 font-sans">
-              Enter
-            </kbd>{' '}
-            envia ·{' '}
-            <kbd className="rounded border border-border bg-muted px-1 font-sans">
-              Shift + Enter
-            </kbd>{' '}
-            quebra linha
+        {value.length > CHAT_MESSAGE_MAX_LENGTH * 0.8 && (
+          <p
+            id="mensagem-limite"
+            aria-live="polite"
+            className={cn(
+              'px-1 text-right text-2xs',
+              overLimit ? 'text-danger' : 'text-fg-subtle',
+            )}
+          >
+            {formatNumber(value.length)} / {formatNumber(CHAT_MESSAGE_MAX_LENGTH)}
           </p>
-          {value.length > CHAT_MESSAGE_MAX_LENGTH * 0.8 && (
-            <p className={cn('text-2xs', overLimit ? 'text-danger' : 'text-fg-subtle')}>
-              {formatNumber(value.length)} / {formatNumber(CHAT_MESSAGE_MAX_LENGTH)}
-            </p>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

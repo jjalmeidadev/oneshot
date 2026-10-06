@@ -9,10 +9,16 @@ import {
   type AlertNotification,
   type AlertSubscription,
 } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useChatStore } from '@/state/chat-store';
 
 const POLL_INTERVAL_MS = 30_000;
 
+/**
+ * Sino de alertas no cabecalho do chat (S5-20). Antes ocupava uma faixa
+ * inteira acima da conversa; agora abre as notificacoes num painel suspenso.
+ */
 export function NotificationCenter() {
   const { accessToken } = useChatStore();
   const [items, setItems] = useState<AlertNotification[]>([]);
@@ -64,49 +70,61 @@ export function NotificationCenter() {
     await refresh();
   }
 
+  const label =
+    unread > 0
+      ? `Alertas: ${unread} ${unread === 1 ? 'notificação não lida' : 'notificações não lidas'}`
+      : 'Alertas: nenhuma notificação não lida';
+
   return (
-    <details className="relative border-b border-border bg-surface px-4 py-2 text-sm">
-      <summary
-        className="ml-auto flex w-fit cursor-pointer list-none items-center gap-2 rounded-md px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        aria-label={`${unread} notificacoes nao lidas`}
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" size="icon-sm" aria-label={label} className="relative">
+          <Bell size={16} />
+          {unread > 0 && (
+            <span
+              aria-hidden
+              className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-semibold leading-none text-white"
+            >
+              {unread > 9 ? '9+' : unread}
+            </span>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        aria-label="Alertas"
+        className="max-h-[min(28rem,calc(100vh-6rem))] w-[min(26rem,calc(100vw-1.5rem))] overflow-auto"
       >
-        <Bell size={16} />
-        <span>Alertas</span>
-        {unread > 0 && (
-          <span
-            aria-live="polite"
-            className="rounded-full bg-danger px-2 py-0.5 text-2xs text-white"
-          >
-            {unread}
-          </span>
-        )}
-      </summary>
-      <div className="absolute right-3 top-11 z-30 max-h-80 w-[min(26rem,calc(100vw-2rem))] overflow-auto rounded-xl border border-border bg-surface p-3 shadow-panel">
+        <p className="pb-2 text-xs font-semibold text-fg">Notificações</p>
         {items.length === 0 ? (
-          <p className="text-fg-muted">Nenhuma notificacao disponível.</p>
+          <p className="text-xs text-fg-muted">Nenhuma notificação disponível.</p>
         ) : (
           items.map((item) => (
             <button
               key={item.notification_id}
               type="button"
               onClick={() => void read(item)}
-              className="mb-2 block w-full rounded-lg border border-border p-3 text-left hover:bg-surface-muted"
+              className="mb-2 block w-full rounded-lg border border-border p-3 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <span className="font-medium">{item.title}</span>
+              <span className="flex items-center gap-1.5 font-medium">
+                {item.status !== 'read' && (
+                  <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-primary" />
+                )}
+                {item.title}
+              </span>
               <span className="mt-1 block text-xs leading-5 text-fg-muted">
                 {item.body}
               </span>
               <span className="mt-1 block text-2xs text-fg-subtle">
-                {item.status === 'read' ? 'Lida' : 'Nao lida'}
+                {item.status === 'read' ? 'Lida' : 'Não lida'}
               </span>
             </button>
           ))
         )}
-        <h3 className="mt-4 border-t border-border pt-3 font-medium">
+        <p className="mt-3 border-t border-border pt-3 text-xs font-semibold text-fg">
           Alertas configurados
-        </h3>
+        </p>
         {subscriptions.length === 0 ? (
-          <p className="mt-2 text-fg-muted">Nenhum alerta ativo.</p>
+          <p className="mt-2 text-xs text-fg-muted">Nenhum alerta ativo.</p>
         ) : (
           subscriptions.map((item) => (
             <div
@@ -148,7 +166,7 @@ export function NotificationCenter() {
             </div>
           ))
         )}
-      </div>
-    </details>
+      </PopoverContent>
+    </Popover>
   );
 }
