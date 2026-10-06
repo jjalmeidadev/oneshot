@@ -21,12 +21,12 @@ o LLM quando a origem falha.
 
 | Caso | Resultado | Ferramenta e evidência |
 |---|---|---|
-| CT-RNF09-P | Aprovado: mesma consulta e conteúdo na origem alternativa, ID exclusivo comprova configuração consumida | `pytest`, [observação](../../evidencias/sprint-05/rnf07-rnf09/rodada-03/CT-RNF09-P.json) |
-| CT-RNF09-N | Aprovado: diretório ausente, arquivo ausente, JSON malformado e estrutura inválida geram `RagSourceError` no carregamento e na consulta | `pytest`, [oito observações](../../evidencias/sprint-05/rnf07-rnf09/rodada-03/CT-RNF09-N.json) |
+| CT-RNF09-P | Aprovado: mesma consulta e conteúdo na origem alternativa, ID exclusivo comprova configuração consumida | `pytest`, [observação](../../../src/backend/evidencias/rnf07-rnf09/rodada-03/CT-RNF09-P.json) |
+| CT-RNF09-N | Aprovado: diretório ausente, arquivo ausente, JSON malformado e estrutura inválida geram `RagSourceError` no carregamento e na consulta | `pytest`, [oito observações](../../../src/backend/evidencias/rnf07-rnf09/rodada-03/CT-RNF09-N.json) |
 
-[Manifesto e hashes](../../evidencias/sprint-05/rnf07-rnf09/rodada-03/manifesto.json),
-[log integral](../../evidencias/sprint-05/rnf07-rnf09/rodada-03/pytest.txt) e
-[JUnit](../../evidencias/sprint-05/rnf07-rnf09/rodada-03/pytest.xml).
+[Manifesto e hashes](../../../src/backend/evidencias/rnf07-rnf09/rodada-03/manifesto.json),
+[log integral](../../../src/backend/evidencias/rnf07-rnf09/rodada-03/pytest.txt) e
+[JUnit](../../../src/backend/evidencias/rnf07-rnf09/rodada-03/pytest.xml).
 
 ## Regressão
 

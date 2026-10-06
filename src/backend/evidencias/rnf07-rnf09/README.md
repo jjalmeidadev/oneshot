@@ -1,11 +1,11 @@
 # Evidências S5-31 — RNF07, RNF08 e RNF09 (#285)
 
-Entrada principal: [consolidação dos seis casos](../../../testes/sprint5/consolidacao-s5-31.md).
+Entrada principal: [consolidação dos seis casos](../../../../docs/testes/sprint5/consolidacao-s5-31.md).
 
 | Artefato | Conteúdo |
 |---|---|
-| [Amostra congelada](../../../testes/sprint5/amostra-rnf07.csv) | Vinte frases e critérios definidos antes da aplicação |
-| [Protocolo](../../../testes/sprint5/protocolo-rnf07.md) | Aplicação, rubrica e cálculo da taxa |
+| [Amostra congelada](../../../../docs/testes/sprint5/amostra-rnf07.csv) | Vinte frases e critérios definidos antes da aplicação |
+| [Protocolo](../../../../docs/testes/sprint5/protocolo-rnf07.md) | Aplicação, rubrica e cálculo da taxa |
 | [Sessão P01](sessao-rnf07-p01.md) | Consentimento e sequência de preparação e coleta |
 | [Transcrições](transcricao-rnf07-p01.md) | Respostas e metadados visíveis nas dezessete imagens recebidas |
 | [Galeria das 17 imagens originais](imagens/README.md) | Capturas conferidas, mapeadas por frase e preservadas sem edição, com SHA-256 |
@@ -41,3 +41,11 @@ não invalidam registros anteriores: exigem nova rodada para uma nova
 verificação. O cálculo automatizado de RNF07 verifica IDs, perguntas e
 quantidade contra a amostra; não substitui a avaliação de utilidade do
 participante ou a revisão independente.
+
+## Localizacao das evidencias
+
+A pasta foi transferida de `docs/evidencias/sprint-05/rnf07-rnf09` para
+`src/backend/evidencias/rnf07-rnf09`. Logs e manifestos historicos preservam
+os caminhos e hashes observados na execucao original; para localizar seus
+artefatos, substituir o prefixo antigo pelo novo. Nao foram reescritos
+resultados de rodadas anteriores.

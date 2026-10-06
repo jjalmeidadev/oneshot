@@ -138,7 +138,7 @@ Este arquivo indexa todos os documentos Markdown versionados no repositório. Os
 - [Consolidação de RNF07 a RNF09](testes/sprint5/consolidacao-s5-31.md)
 - [Amostra e protocolo de usabilidade conversacional](testes/sprint5/protocolo-rnf07.md)
 - [Correção e reteste de portabilidade](testes/sprint5/reteste-s5-31-rnf09.md)
-- [Índice das evidências e cronologia](evidencias/sprint-05/rnf07-rnf09/README.md)
+- [Índice das evidências e cronologia](../src/backend/evidencias/rnf07-rnf09/README.md)
 
 ### Recursos não Markdown
 

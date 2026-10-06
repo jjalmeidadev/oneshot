@@ -25,19 +25,19 @@ def main():
         parser.error("Use um identificador simples de rodada, sem caminho.")
     backend = Path(__file__).resolve().parents[1]
     root = backend.parents[1]
-    output = root / "docs/evidencias/sprint-05/rnf07-rnf09" / args.round
+    output = root / "src/backend/evidencias/rnf07-rnf09" / args.round
     output.mkdir(parents=True, exist_ok=False)
     files = [root / "docs/testes/sprint5/amostra-rnf07.csv",
              root / "docs/testes/sprint5/protocolo-rnf07.md",
-             root / "docs/evidencias/sprint-05/rnf07-rnf09/coleta-rnf07-p01.csv",
-             root / "docs/evidencias/sprint-05/rnf07-rnf09/transcricao-rnf07-p01.md",
+             root / "src/backend/evidencias/rnf07-rnf09/coleta-rnf07-p01.csv",
+             root / "src/backend/evidencias/rnf07-rnf09/transcricao-rnf07-p01.md",
              root / "src/agent/README.md", root / "docs/Projeto.md",
              backend / "app/tests/test_rnf07_rnf09_s5_31.py",
              backend / "app/rag/sharepoint.py", backend / "app/rag/database.py",
              backend / "app/rag/errors.py", backend / "app/gemini/client.py",
              Path(__file__).resolve()]
     files += sorted((backend / "app/rag/data/sharepoint").glob("*.json"))
-    files += sorted((root / "docs/evidencias/sprint-05/rnf07-rnf09/imagens").glob("*"))
+    files += sorted((root / "src/backend/evidencias/rnf07-rnf09/imagens").glob("*"))
     git = ["git", "-c", f"safe.directory={root.as_posix()}", "-C", str(root)]
     manifest = {
         "started_at_utc": datetime.now(timezone.utc).isoformat(),

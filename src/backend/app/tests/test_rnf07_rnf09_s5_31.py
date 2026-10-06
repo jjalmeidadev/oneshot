@@ -65,7 +65,7 @@ def live_contract():
 def check_rnf07(case):
     """Apura transcrições recebidas; não simula nem reaplica a sessão humana."""
     sample_path = ROOT / "docs/testes/sprint5/amostra-rnf07.csv"
-    collection_path = ROOT / "docs/evidencias/sprint-05/rnf07-rnf09/coleta-rnf07-p01.csv"
+    collection_path = ROOT / "src/backend/evidencias/rnf07-rnf09/coleta-rnf07-p01.csv"
     with sample_path.open(encoding="utf-8", newline="") as stream:
         sample = {row["id"]: row for row in csv.DictReader(stream)}
     with collection_path.open(encoding="utf-8", newline="") as stream:

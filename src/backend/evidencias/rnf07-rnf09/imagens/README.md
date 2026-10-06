@@ -11,7 +11,7 @@ ficam resolvidas por esta inclusão. As pendências de confirmação do
 protocolo e revisão independente permanecem. RNF09 tem evidências
 automatizadas próprias; estas capturas pertencem somente ao RNF07.
 
-[Resultados consolidados](../../../../testes/sprint5/consolidacao-s5-31.md)
+[Resultados consolidados](../../../../../docs/testes/sprint5/consolidacao-s5-31.md)
 
 ## Imagem 1 — P01
 

@@ -5,7 +5,7 @@ Atualização: 06/10/2026 (America/Fortaleza). Critérios: Seção 9.2.3 de
 Os seis casos têm resultado e evidência textual; a aceitação formal e o
 fechamento da issue permanecem pendentes dos itens descritos ao final.
 
-**Imagens incorporadas:** [galeria das dezessete capturas originais](../../evidencias/sprint-05/rnf07-rnf09/imagens/README.md),
+**Imagens incorporadas:** [galeria das dezessete capturas originais](../../../src/backend/evidencias/rnf07-rnf09/imagens/README.md),
 com vínculo às frases e manifesto SHA-256. Todas correspondem aos anexos
 enviados pelo participante, conferidos visualmente e copiados sem edição.
 
@@ -13,17 +13,17 @@ enviados pelo participante, conferidos visualmente e copiados sem edição.
 
 | Caso | Resultado técnico | Ferramenta | Evidência |
 |---|---|---|---|
-| CT-RNF07-P | Reprovado pela meta conjunta de RNF07; positivas: 4/10 compreendidas, 6 falhas | Interface local, participante P01, transcrição visual, rubrica congelada e apuração CSV por pytest | [Transcrições](../../evidencias/sprint-05/rnf07-rnf09/transcricao-rnf07-p01.md), [apuração P](../../evidencias/sprint-05/rnf07-rnf09/rodada-04/CT-RNF07-P.json) |
-| CT-RNF07-N | Reprovado pela meta conjunta de RNF07; negativas: 2/10 compreendidas, 8 falhas | Mesmas ferramentas; frases ambíguas, sinônimos e erros leves | [Planilha](../../evidencias/sprint-05/rnf07-rnf09/coleta-rnf07-p01.csv), [apuração N](../../evidencias/sprint-05/rnf07-rnf09/rodada-04/CT-RNF07-N.json) |
-| CT-RNF08-P | Reprovado: contrato passa no checklist, mas o critério exige Copilot removido da arquitetura vigente | TestClient, modelo OpenAPI/Pydantic, checklist e revisão documental | [Observação](../../evidencias/sprint-05/rnf07-rnf09/rodada-04/CT-RNF08-P.json) |
-| CT-RNF08-N | Aprovado: cópias sem operação obrigatória ou com tipo incompatível rejeitadas | pytest, checklist de contrato e cópias isoladas | [Observação](../../evidencias/sprint-05/rnf07-rnf09/rodada-04/CT-RNF08-N.json) |
-| CT-RNF09-P | Aprovado: consulta e conteúdo preservados em diretório alternativo sem alterar núcleo | pytest, configuração de origem e núcleo RAG local | [Observação](../../evidencias/sprint-05/rnf07-rnf09/rodada-04/CT-RNF09-P.json) |
-| CT-RNF09-N | Aprovado após correção: origens ausentes/inválidas falham explicitamente | pytest, fontes inválidas e erro de domínio | [Observação](../../evidencias/sprint-05/rnf07-rnf09/rodada-04/CT-RNF09-N.json) |
+| CT-RNF07-P | Reprovado pela meta conjunta de RNF07; positivas: 4/10 compreendidas, 6 falhas | Interface local, participante P01, transcrição visual, rubrica congelada e apuração CSV por pytest | [Transcrições](../../../src/backend/evidencias/rnf07-rnf09/transcricao-rnf07-p01.md), [apuração P](../../../src/backend/evidencias/rnf07-rnf09/rodada-04/CT-RNF07-P.json) |
+| CT-RNF07-N | Reprovado pela meta conjunta de RNF07; negativas: 2/10 compreendidas, 8 falhas | Mesmas ferramentas; frases ambíguas, sinônimos e erros leves | [Planilha](../../../src/backend/evidencias/rnf07-rnf09/coleta-rnf07-p01.csv), [apuração N](../../../src/backend/evidencias/rnf07-rnf09/rodada-04/CT-RNF07-N.json) |
+| CT-RNF08-P | Reprovado: contrato passa no checklist, mas o critério exige Copilot removido da arquitetura vigente | TestClient, modelo OpenAPI/Pydantic, checklist e revisão documental | [Observação](../../../src/backend/evidencias/rnf07-rnf09/rodada-04/CT-RNF08-P.json) |
+| CT-RNF08-N | Aprovado: cópias sem operação obrigatória ou com tipo incompatível rejeitadas | pytest, checklist de contrato e cópias isoladas | [Observação](../../../src/backend/evidencias/rnf07-rnf09/rodada-04/CT-RNF08-N.json) |
+| CT-RNF09-P | Aprovado: consulta e conteúdo preservados em diretório alternativo sem alterar núcleo | pytest, configuração de origem e núcleo RAG local | [Observação](../../../src/backend/evidencias/rnf07-rnf09/rodada-04/CT-RNF09-P.json) |
+| CT-RNF09-N | Aprovado após correção: origens ausentes/inválidas falham explicitamente | pytest, fontes inválidas e erro de domínio | [Observação](../../../src/backend/evidencias/rnf07-rnf09/rodada-04/CT-RNF09-N.json) |
 
 Execução: `python -m scripts.run_s5_31 --round rodada-04` em `src/backend`.
-[Log](../../evidencias/sprint-05/rnf07-rnf09/rodada-04/pytest.txt),
-[JUnit](../../evidencias/sprint-05/rnf07-rnf09/rodada-04/pytest.xml) e
-[manifesto com hashes](../../evidencias/sprint-05/rnf07-rnf09/rodada-04/manifesto.json).
+[Log](../../../src/backend/evidencias/rnf07-rnf09/rodada-04/pytest.txt),
+[JUnit](../../../src/backend/evidencias/rnf07-rnf09/rodada-04/pytest.xml) e
+[manifesto com hashes](../../../src/backend/evidencias/rnf07-rnf09/rodada-04/manifesto.json).
 A saída 1 corresponde aos três critérios reprovados, sem mascarar falhas.
 O pytest de RNF07 apura registros já coletados; não simula participantes,
 reaplica perguntas nem substitui a revisão humana.
@@ -77,6 +77,6 @@ Histórico: [rodadas 01/02](relatorio-s5-31.md) e
 alterado passou em 58 testes. As limitações de escopo local de RNF08/RNF09
 continuam válidas; não houve homologação em tenant, contêiner ou serviço publicado.
 
-Verificação final após incorporar as imagens: [rodada 05](../../evidencias/sprint-05/rnf07-rnf09/rodada-05/pytest.txt).
+Verificação final após incorporar as imagens: [rodada 05](../../../src/backend/evidencias/rnf07-rnf09/rodada-05/pytest.txt).
 Ela preserva o resultado de 3 aprovados e 3 reprovados; a inclusão de imagens
 não modifica as respostas recebidas nem constitui reaplicação com participante.
