@@ -12,7 +12,7 @@ A validação cobre a interface S3/S5, os contratos HTTP, a conversão de áudio
 | Gravação           | Converter áudio para WAV PCM16 mono de 16 kHz, respeitar duração e tamanho, liberar microfone e URLs, inclusive quando a permissão chega após desmontagem. |
 | Backend            | Validar entradas e parâmetros, classificar intenções, preservar contratos e contexto, devolver erros controlados e integrar transcrição à resposta.        |
 | Navegador          | Executar envio e exibição de texto, fontes e métricas; recuperar de falhas; cancelar envio; gravar áudio sintético e receber resposta.                     |
-| Acessibilidade     | Verificar interface com axe nos temas claro e escuro, em desktop e celular, incluindo navegação responsiva.                                                |
+| Acessibilidade     | Verificar interface com axe nos temas claro e escuro, em desktop, tablet e celular, incluindo navegação responsiva e o fluxo principal só pelo teclado.    |
 
 ## Cobertura unitária do frontend
 
@@ -39,7 +39,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-O Playwright inicia os servidores locais automaticamente e executa os quatro cenários em desktop (1440 × 900) e celular (390 × 844). A configuração usa a instalação Python da raiz; `E2E_PYTHON` permite indicar outro executável. Os relatórios ficam em `coverage/` e `playwright-report/`.
+O Playwright inicia os servidores locais automaticamente e executa os cenários de `e2e/chat.spec.ts` e de `e2e/responsividade-acessibilidade.spec.ts` em desktop (1440 × 900), tablet (768 × 1024) e celular (390 × 844). O segundo arquivo confere, nas três larguras e nos dois temas, a ausência de rolagem horizontal e de violações do axe (WCAG 2.0, 2.1 e 2.2 A/AA) nos estados vazio, resposta, ajustes e fontes, e percorre o fluxo principal só pelo teclado. A configuração usa a instalação Python da raiz; `E2E_PYTHON` permite indicar outro executável. Os relatórios ficam em `coverage/` e `playwright-report/`.
 
 Para a suíte completa do backend, na raiz do repositório, execute:
 
