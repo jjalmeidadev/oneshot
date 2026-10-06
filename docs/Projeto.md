@@ -183,6 +183,8 @@
     - [8.5.9 Execução e verificação reproduzíveis](#859-execução-e-verificação-reproduzíveis)
     - [8.5.10 Geração rastreável de relatório executivo](#8510-geração-rastreável-de-relatório-executivo)
     - [8.5.11 Alerta autônomo de prazo](#8511-alerta-autônomo-de-prazo)
+    - [8.5.12 Webhooks e mensageria integrados (S5-09 a S5-11)](#8512-webhooks-e-mensageria-integrados-s5-09-a-s5-11)
+    - [8.5.13 Contrato de alteração de dados pelo chat (S5-05)](#8513-contrato-de-alteração-de-dados-pelo-chat-s5-05)
   - [8.6 Requisitos das APIs de voz (STT/TTS)](#86-requisitos-das-apis-de-voz-stttts)
     - [8.6.1 Objetivo e delimitação](#861-objetivo-e-delimitação)
     - [8.6.2 Entradas, saídas e formatos](#862-entradas-saídas-e-formatos)
@@ -4237,6 +4239,403 @@ Copilot Studio. O modo `power_automate_simulator` e doubles controlados validam
 os contratos. Nesta rodada, o publisher RabbitMQ também foi testado com double,
 sem conexão a broker externo; portanto a documentação não usa esses testes como
 evidência de homologação Microsoft ou de tráfego RabbitMQ em produção.
+
+### 8.5.13 Contrato de alteração de dados pelo chat (S5-05)
+
+O parceiro pediu, com ênfase, que os dados do projeto pudessem ser alterados
+diretamente pelo chat. É também a capacidade de maior risco da Sprint 5: o R17
+de [`GestaoProjeto.md`](GestaoProjeto.md) trata da alteração indevida ou não
+auditada de dados pelo chat. Esta seção é o contrato que a implementação
+(S5-06, [#260](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/260))
+e a interface (S5-07, [#261](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/261))
+seguem. Ele define quais campos podem mudar, quem pode mudá-los e quais
+garantias cercam cada escrita, e se apoia no controle de acesso da Seção 4.3.1.
+
+#### Princípios
+
+1. **O cartão é a única via de escrita.** Uma mensagem no chat só produz uma
+   prévia, e o valor é gravado apenas quando a pessoa confirma no cartão, que
+   chama a rota de confirmação. Nem o texto da pessoa nem a resposta do modelo
+   de linguagem gravam dados.
+2. **Nenhum modelo de linguagem no caminho da escrita.** O pedido é interpretado
+   por um extrator determinístico, que combina um léxico de verbos e campos, o
+   código do projeto e a leitura de datas, status e percentuais. Nada do pedido
+   nem do registro sai para o provedor, o que preserva o RNF01. Quando falta
+   informação, o chat pergunta em vez de adivinhar.
+3. **Uma alteração por vez.** Cada prévia muda um campo de um registro. Um
+   pedido com várias mudanças recebe a orientação de fazer uma de cada vez, o
+   que mantém a prévia legível e o desfazer exato.
+4. **A permissão vem da regra que cobre o alvo** e é verificada na prévia, na
+   confirmação e no desfazer. Ter escrita em um projeto não concede escrita em
+   outro.
+5. **Tudo ou nada.** O novo valor, o registro em `change_records` e o evento em
+   `audit_events` são gravados na mesma transação. Se qualquer parte falhar,
+   nada é gravado.
+
+#### Campos editáveis e regras de validação
+
+Somente os campos abaixo podem ser alterados pelo chat, e sempre em registros
+vinculados a um projeto (no caso dos riscos, `scope_type = 'projeto'`). Qualquer
+outro campo, como custo, escopo, título, descrição, gerente, patrocinador,
+criticidade ou probabilidade, é recusado com `FIELD_NOT_EDITABLE`, e a resposta
+lista os campos permitidos.
+
+| Registro | Campo (chave do contrato) | Coluna | Regra de validação | `change_type` |
+|---|---|---|---|---|
+| Projeto | `projeto.status` | `projects.status` | Um de `planejado`, `em_andamento`, `atencao`, `critico` ou `suspenso`. `concluido` e `descontinuado` são recusados, porque encerrar ou descontinuar um projeto segue o processo formal do PMO. | `outro` |
+| Projeto | `projeto.prazo_final` | `projects.planned_end_date` | Data válida, não anterior a `start_date`. É recusada se o projeto estiver `concluido` ou `descontinuado`. | `prazo` |
+| Atividade do cronograma | `cronograma.prazo` | `schedule_items.planned_end_date` | Data válida, não anterior a `planned_start_date`. | `prazo` |
+| Atividade do cronograma | `cronograma.status` | `schedule_items.status` | Um de `planejado`, `em_andamento`, `atrasado`, `concluido`, `cancelado` ou `bloqueado`. | `outro` |
+| Atividade do cronograma | `cronograma.progresso` | `schedule_items.progress_percent` | Número de 0 a 100, com até duas casas decimais. | `outro` |
+| Marco ou entrega | `marco.data_prevista` | `project_deliverables_milestones.planned_date` | Data válida. | `prazo` |
+| Marco ou entrega | `marco.status` | `project_deliverables_milestones.status` | Um de `planejado`, `em_andamento`, `atrasado`, `concluido` ou `cancelado`. A coluna não tem restrição no banco, então o contrato fixa esse conjunto. | `outro` |
+| Marco ou entrega | `marco.data_conclusao` | `project_deliverables_milestones.completed_date` | Data válida, não posterior a hoje. | `prazo` |
+| Risco ou problema | `risco.status` | `risk_issue_items.status` | Um de `aberto`, `em_tratamento`, `mitigado`, `resolvido`, `aceito` ou `cancelado`. | `outro` |
+| Risco ou problema | `risco.responsavel` | `risk_issue_items.owner_name` | Texto de 2 a 160 caracteres, depois de remover espaços extras, sem caracteres de controle e sem nenhum padrão da barreira de dado sensível da S5-27 (e-mail, CPF, telefone etc.). | `responsavel` |
+| Risco ou problema | `risco.prazo` | `risk_issue_items.due_date` | Data válida. | `prazo` |
+
+Regras comuns a todos os campos:
+
+- **Data válida** é uma data do calendário entre 01/01/2020 e 31/12/2036. O
+  extrator aceita `31/03/2027`, `31/03` (próxima ocorrência da data) e
+  `31 de março de 2027`. Um mês sem dia, como "até março", gera uma pergunta
+  pelo dia. Uma data prevista no passado é aceita, mas a prévia mostra um aviso.
+- **Hoje** é calculado no fuso `America/Sao_Paulo`.
+- O novo valor precisa ser diferente do atual. Se for igual, a resposta informa
+  que nada mudou (`NO_CHANGE`) e nenhuma prévia é criada.
+- Campos derivados não são recalculados. Resolver um risco não preenche
+  `closed_at`, e concluir um marco não preenche `completed_date`. Quando isso
+  deixar o registro incoerente, por exemplo um marco `concluido` sem data de
+  conclusão, a prévia mostra um aviso.
+
+#### Perfis autorizados
+
+A regra vale para **todos os campos da tabela acima**: a alteração exige a
+operação `write` sobre o projeto do registro. Essa permissão é lida na regra de
+`access_rules` que cobre aquele projeto, e não no agregado das regras do
+usuário. A regra precisa estar ativa e ter `can_write = true`. Com a carga da
+S5-03 (Seção 4.3.1), o resultado esperado é este:
+
+| Perfil | Regra da carga | O que pode alterar pelo chat | Exemplo de negação |
+|---|---|---|---|
+| Gerente de projeto | Projeto `PRJ-0442`, com escrita | Os campos da tabela, só no `PRJ-0442` | Alterar o `PRJ-0510` |
+| PMO | Portfólio, sem escrita | Nada | Qualquer alteração |
+| Líder de subportfólio | Subportfólio `MOD`, sem escrita | Nada | Qualquer alteração |
+| Consulta | Projeto `PRJ-0510`, sem escrita | Nada | Qualquer alteração |
+
+Nenhum campo tem regra própria de perfil. Mudar quem pode alterar é mudar a
+regra em `access_rules`, sem mudança de código.
+
+#### Entrada
+
+A mensagem segue o caminho atual de `POST /api/chat` até a barreira de dado
+sensível da S5-27. Logo depois, e antes do classificador, o extrator verifica se
+ela é um pedido de alteração: um verbo de alteração (alterar, mudar, atualizar,
+prorrogar, adiar, antecipar, marcar, definir, passar, trocar) junto de um termo
+de campo (prazo, data, término, status, situação, progresso, avanço, percentual,
+responsável). A detecção não depende do classificador, que hoje leva
+"prorroga o prazo do PRJ-0442 até março" para consulta (Seção 8.11.6), nem do
+switch de validação de intenção. Uma mensagem classificada como `TRANSACAO` de
+atualização, mas sem pedido reconhecível, recebe uma orientação com exemplos em
+vez de uma resposta do RAG.
+
+O extrator produz uma proposta estruturada:
+
+```json
+{
+  "project_code": "PRJ-0442",
+  "entity": "risco",
+  "item_reference": "interferência com a operação comercial",
+  "field": "risco.status",
+  "raw_value": "em tratamento"
+}
+```
+
+- O projeto é identificado pelo código (`PRJ-…`). Sem código, o chat pergunta
+  qual é o projeto.
+- Atividades, marcos e riscos são localizados pelo nome dentro do projeto, sem
+  diferenciar maiúsculas e acentos. Se nenhum registro corresponder, a resposta
+  é `TARGET_NOT_FOUND`. Se mais de um corresponder, o chat mostra até cinco
+  candidatos e a pessoa escolhe um antes da prévia.
+
+Exemplos com a massa sintética:
+
+| Mensagem | Campo | Antes | Depois |
+|---|---|---|---|
+| "Prorroga o prazo do PRJ-0442 para 31/03/2027" | `projeto.prazo_final` | 20/12/2026 | 31/03/2027 |
+| "Muda o status do risco Interferência com a operação comercial do PRJ-0442 para em tratamento" | `risco.status` | `aberto` | `em_tratamento` |
+| "Marca o marco Início da operação assistida na Linha Azul do PRJ-0442 como em andamento" | `marco.status` | `planejado` | `em_andamento` |
+
+#### Prévia
+
+Com a proposta completa, o backend executa, nesta ordem, as seguintes etapas:
+
+1. valida a permissão de escrita no projeto;
+2. localiza o registro;
+3. valida o valor;
+4. lê o valor atual.
+
+Só então ele cria a prévia em `pending_data_changes` e devolve o cartão. Nada é
+gravado no registro do projeto nesta etapa. A resposta de `POST /api/chat`
+ganha o campo opcional `data_change`:
+
+```json
+{
+  "text": "Confira a alteração antes de confirmar.",
+  "model": "alteracao-dados-chat",
+  "data_change": {
+    "status": "preview",
+    "preview": {
+      "pending_change_id": "6f1c2e4a-…",
+      "project": { "code": "PRJ-0442", "title": "Modernizacao do Sistema de Sinalizacao da Linha Azul" },
+      "target": { "entity": "projeto", "id": "…", "label": "PRJ-0442" },
+      "field": { "key": "projeto.prazo_final", "label": "Prazo final previsto" },
+      "before": { "value": "2026-12-20", "display": "20/12/2026" },
+      "after": { "value": "2027-03-31", "display": "31/03/2027" },
+      "warnings": [],
+      "expires_at": "2026-10-06T15:10:00-03:00",
+      "undo_window_minutes": 15
+    }
+  }
+}
+```
+
+`data_change.status` também pode ter dois outros valores:
+
+- `needs_input`, com `question` e, quando há ambiguidade, `candidates` (`id` e
+  `label`);
+- `rejected`, com `code` e `message`.
+
+Nos três casos a resposta HTTP é `200`, porque um pedido incompleto, inválido ou
+negado é parte da conversa, e não uma falha da requisição.
+
+A escolha de um candidato não depende de nova interpretação de texto: a
+interface chama `POST /api/data-change-previews` com a proposta completa
+(`project_code`, `entity`, `target_id`, `field` e `raw_value`), e o backend
+repete as etapas acima. A prévia vale por **10 minutos** e pertence ao usuário e
+à conversa que a criaram.
+
+#### Confirmação e saída
+
+`POST /api/data-change-previews/{pending_change_id}/confirm`
+
+O corpo é opcional: `{ "reason": "Replanejamento aprovado na reunião de 03/10" }`,
+com até 500 caracteres. A justificativa também passa pela barreira de dado
+sensível. Em uma única transação, o backend executa estas etapas:
+
+1. confere que a prévia existe, pertence ao usuário autenticado, não expirou e
+   não foi usada;
+2. verifica de novo a permissão de escrita, porque a regra pode ter mudado desde
+   a prévia;
+3. trava o registro (`SELECT … FOR UPDATE`) e confere que o valor atual ainda é
+   o `before` da prévia;
+4. valida o valor de novo;
+5. grava o novo valor, insere `change_records` e `audit_events` e marca a prévia
+   como confirmada.
+
+Saída (`200`):
+
+```json
+{
+  "change_id": "c2a9d7b0-…",
+  "status": "aplicada",
+  "field": { "key": "projeto.prazo_final", "label": "Prazo final previsto" },
+  "before": { "value": "2026-12-20", "display": "20/12/2026" },
+  "after": { "value": "2027-03-31", "display": "31/03/2027" },
+  "applied_at": "2026-10-06T15:02:11-03:00",
+  "undo_available_until": "2026-10-06T15:17:11-03:00",
+  "correlation_id": "…"
+}
+```
+
+Confirmar de novo a mesma prévia devolve a mesma resposta, sem nova escrita, de
+modo que um clique duplo não altera o valor duas vezes.
+`POST /api/data-change-previews/{pending_change_id}/cancel` descarta a prévia e
+devolve `{ "status": "cancelada" }`. Essa rota também é idempotente.
+
+#### Desfazer
+
+`POST /api/data-changes/{change_id}/undo`
+
+O valor anterior só é restaurado quando todas as condições abaixo valem:
+
+- quem pede é o autor da alteração;
+- passaram no máximo **15 minutos** desde `applied_at`;
+- o valor atual ainda é o que a alteração gravou, ou seja, ninguém o mudou
+  depois;
+- a pessoa ainda tem escrita no projeto;
+- a alteração ainda não foi desfeita.
+
+A verificação e a restauração ocorrem na mesma transação, com o registro
+travado. A saída (`200`) é
+`{ "change_id": "…", "status": "desfeita", "restored": { "value": "2026-12-20", "display": "20/12/2026" }, "undone_at": "…" }`.
+Um desfazer não pode ser desfeito; para voltar ao valor, faz-se uma nova
+alteração.
+
+#### Histórico
+
+`GET /api/data-changes?project_code=PRJ-0442&field=projeto.prazo_final&target_id=<uuid>`
+exige leitura no projeto. Ele devolve as alterações feitas pelo chat naquele
+campo, da mais recente para a mais antiga (até 20), com autor, antes, depois,
+data e a indicação de desfeita. É a fonte do histórico exibido pela S5-07.
+
+#### Erros
+
+Todas as rotas usam o envelope das demais APIs, `{"error": {"code": "…", "message": "…"}}`,
+com mensagem em português e sem detalhes internos. **Nenhum erro grava no
+registro do projeto.**
+
+No chat, os pedidos recusados voltam com `data_change.status = "rejected"` e
+HTTP `200`:
+
+| Código | Situação |
+|---|---|
+| `FIELD_NOT_EDITABLE` | O campo não está na tabela de campos editáveis. |
+| `INVALID_VALUE` | O valor viola a regra do campo; a mensagem diz qual é a regra. |
+| `TARGET_NOT_FOUND` | O projeto ou o registro não foi encontrado no escopo da pessoa. |
+| `OUT_OF_SCOPE_FOR_PROFILE` | A pessoa não tem escrita no projeto. |
+| `NO_CHANGE` | O valor pedido é igual ao atual. |
+| `MULTIPLE_CHANGES` | A mensagem pede mais de uma alteração. |
+| `DATA_CHANGE_UNAVAILABLE` | O backend está sem banco configurado. A escrita exige PostgreSQL, e o modo em memória não altera dados. |
+
+Nas rotas do cartão:
+
+| Código | HTTP | Rota | Situação |
+|---|---|---|---|
+| `UNAUTHENTICATED` | 401 | todas | Token ausente, inválido ou expirado. |
+| `OUT_OF_SCOPE_FOR_PROFILE` | 403 | criar prévia, confirmar, desfazer | Sem escrita no projeto. |
+| `UNDO_NOT_AUTHOR` | 403 | desfazer | A alteração foi feita por outra pessoa. |
+| `TARGET_NOT_FOUND` | 404 | criar prévia | Projeto ou registro inexistente no escopo. |
+| `PREVIEW_NOT_FOUND` | 404 | confirmar, cancelar | Prévia inexistente ou de outro usuário. |
+| `CHANGE_NOT_FOUND` | 404 | desfazer | Alteração inexistente. |
+| `PREVIEW_CANCELLED` | 409 | confirmar | A prévia foi cancelada. |
+| `STALE_PREVIEW` | 409 | confirmar | O valor mudou depois da prévia; é preciso gerar outra. |
+| `VALUE_CHANGED_SINCE` | 409 | desfazer | O valor foi alterado de novo depois desta alteração. |
+| `ALREADY_UNDONE` | 409 | desfazer | A alteração já foi desfeita. |
+| `PREVIEW_EXPIRED` | 410 | confirmar | Passaram mais de 10 minutos desde a prévia. |
+| `UNDO_WINDOW_EXPIRED` | 410 | desfazer | Passaram mais de 15 minutos desde a alteração. |
+| `FIELD_NOT_EDITABLE`, `INVALID_VALUE` | 422 | criar prévia, confirmar | Campo ou valor fora do contrato. |
+| `DATA_CHANGE_UNAVAILABLE` | 503 | todas | Sem banco ou falha na gravação; a transação é desfeita. |
+
+#### Registro em `change_records`
+
+Cada confirmação cria uma linha em `change_records`:
+
+| Coluna | Valor |
+|---|---|
+| `scope_type` | `projeto` |
+| `project_id` | Projeto do registro alterado |
+| `change_type` | O da tabela de campos |
+| `title` | `Alteração pelo chat: <rótulo do campo> de <alvo>`, com até 240 caracteres |
+| `source_label` | `chat` |
+| `reason` | Justificativa informada na confirmação, quando houver |
+| `impact_summary` | `<rótulo>: <antes> → <depois>` |
+| `requested_by` | `users.display_name` de quem confirmou |
+| `approved_by`, `approval_date` | Vazios, porque a confirmação no chat não é uma aprovação formal do PMO |
+| `status` | `implementada`; passa a `cancelada` quando a alteração é desfeita |
+| `registration_date` | Data da confirmação, no fuso de São Paulo |
+| `decided_at` | Instante da confirmação |
+| `metadata` | Objeto descrito abaixo |
+
+```json
+{
+  "origin": "chat",
+  "contract": "s5-05/v1",
+  "field": "projeto.prazo_final",
+  "table": "projects",
+  "column": "planned_end_date",
+  "target_id": "…",
+  "before": "2026-12-20",
+  "after": "2027-03-31",
+  "user_id": "…",
+  "interaction_id": "…",
+  "pending_change_id": "…",
+  "correlation_id": "…",
+  "applied_at": "2026-10-06T18:02:11Z",
+  "undo": null
+}
+```
+
+Ao desfazer, `undo` recebe `{ "undone_at": "…", "undone_by": "<user_id>" }`. A
+chave `metadata.origin = 'chat'` separa essas linhas das solicitações de mudança
+que vieram da carga do parceiro. Como o relatório executivo lê
+`change_records`, as alterações feitas pelo chat também aparecem nele.
+
+#### Eventos em `audit_events`
+
+Todos os eventos usam `component = 'api'`, o `user_id` de quem agiu, o
+`interaction_id` da mensagem que originou a prévia e o mesmo `correlation_id`
+em todo o fluxo. O payload leva a chave do campo, o projeto, o registro, o
+antes, o depois, os IDs da prévia e da alteração e, nas falhas, o código do
+erro. Ele nunca leva a mensagem original.
+
+| `event_type` | `event_status` | Quando |
+|---|---|---|
+| `project_data.change_previewed` | `pendente` | A prévia foi criada. |
+| `project_data.change_rejected` | `falha` | O pedido foi recusado por campo, valor ou registro. |
+| `authorization.access_denied` | `bloqueado` | A pessoa não tem escrita. É o evento da S5-04, com `operation = write`. |
+| `project_data.change_applied` | `sucesso` | A confirmação foi gravada. |
+| `project_data.change_cancelled` | `sucesso` | A prévia foi cancelada. |
+| `project_data.change_confirm_failed` | `falha` | A prévia estava expirada, cancelada ou desatualizada. |
+| `project_data.change_undone` | `sucesso` | A alteração foi desfeita. |
+| `project_data.undo_denied` | `bloqueado` | O desfazer foi pedido fora da janela, por outra pessoa ou com o valor já alterado. |
+
+`change_applied` e `change_undone` são gravados na mesma transação da escrita.
+Os demais seguem a regra da S5-04: uma falha ao gravar a auditoria é registrada
+como erro operacional e nunca transforma uma negação em permissão.
+
+#### Persistência da prévia
+
+A S5-06 cria `22_data_change_previews.sql` e o rollback correspondente com a
+tabela `pending_data_changes`, no mesmo padrão de
+`pending_proactive_suggestions`. As colunas são `id`, `user_id`,
+`external_conversation_id`, `interaction_id`, `project_id`, `entity`,
+`target_id`, `field_key`, `before_value` e `after_value` (JSONB), `status`
+(`pendente`, `confirmada` ou `cancelada`), `change_record_id`, `expires_at`,
+`decided_at`, `created_at` e `updated_at`. A expiração é avaliada na leitura,
+sem job. Como nas tabelas de workflow, a tabela tem RLS habilitada sem
+policies e os papéis `anon` e `authenticated` não têm acesso.
+
+#### Cenários de aceite
+
+Estes cenários orientam os testes da S5-06 e da S5-08. Em todos eles, nenhuma
+chamada é feita ao provedor de LLM.
+
+| # | Perfil | Ação | Resultado esperado |
+|---|---|---|---|
+| 1 | Gerente | Prorrogar o prazo do `PRJ-0442` e confirmar | Valor gravado, `change_records` com `implementada` e evento `change_applied`. |
+| 2 | Gerente | Gerar a mesma prévia e cancelar | Nada gravado no projeto; evento `change_cancelled`. |
+| 3 | Gerente | Confirmar e desfazer em até 15 minutos | Valor anterior restaurado, `change_records` com `cancelada` e evento `change_undone`. |
+| 4 | Gerente | Desfazer depois de 15 minutos | `410 UNDO_WINDOW_EXPIRED`; nada muda. |
+| 5 | Gerente | Alterar o `PRJ-0510` | `rejected` com `OUT_OF_SCOPE_FOR_PROFILE`, sem prévia; evento `access_denied`. |
+| 6 | PMO | Qualquer alteração | `rejected` com `OUT_OF_SCOPE_FOR_PROFILE`, sem prévia. |
+| 7 | Gerente | Progresso de 140% | `rejected` com `INVALID_VALUE`, sem prévia. |
+| 8 | Gerente | Status do projeto `concluido` | `rejected` com `INVALID_VALUE`, sem prévia. |
+| 9 | Gerente | Alterar o orçamento | `rejected` com `FIELD_NOT_EDITABLE`. |
+| 10 | Gerente | Confirmar depois que o mesmo campo mudou por outra via | `409 STALE_PREVIEW`; nada muda. |
+| 11 | Gerente | Confirmar depois de 10 minutos | `410 PREVIEW_EXPIRED`; nada muda. |
+| 12 | Gerente | Confirmar duas vezes a mesma prévia | Uma única escrita e a mesma resposta nas duas chamadas. |
+
+#### Limites assumidos
+
+- **O RAG continua lendo documentos.** As respostas do RAG vêm de
+  `source_extracts`, e não das tabelas alteradas. Depois de uma alteração, uma
+  pergunta pode citar o valor do documento até que ele seja atualizado na
+  origem. O relatório executivo e o alerta de prazo leem as tabelas e já
+  refletem a alteração. A confirmação mostra o novo valor, e o cartão leva ao
+  histórico.
+- **O cronograma não tem carga versionada.** Nenhum script do repositório
+  popula `schedule_items`. Para demonstrar e testar os campos `cronograma.*`, a
+  S5-06 precisa incluir atividades sintéticas para o `PRJ-0442`.
+- **O extrator reconhece formas comuns de pedido**, e não qualquer frase. Fora
+  delas, o chat pergunta ou orienta com exemplos.
+- **A alteração vale para a base da aplicação.** Ela não é sincronizada com o
+  SharePoint nem com outro sistema do Metrô. O catálogo ainda registra
+  `transacao_atualizar_cronograma` com destino `power_automate`, mas no MVP a
+  alteração é executada pelo backend.
+- **A carga continua com uma regra ativa por usuário** (Seção 4.3.1). Mesmo
+  assim, o contrato já exige a verificação pela regra que cobre o alvo, para que
+  várias regras não abram uma escrita indevida.
 
 ## 8.6 Requisitos das APIs de voz (STT/TTS)
 
