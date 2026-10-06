@@ -18,12 +18,19 @@ frontend-unit:
     - npm ci
     - npm run lint
     - npm run format:check
+    - npm run typecheck
     - npm run test:coverage
     - npm run build
   artifacts:
     when: always
     paths:
       - src/frontend/coverage/
+      - src/frontend/test-results/unit/junit.xml
+    reports:
+      junit: src/frontend/test-results/unit/junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: src/frontend/coverage/cobertura-coverage.xml
     expire_in: 7 days
 
 backend-api:

@@ -1,6 +1,35 @@
 # Evidências de testes — integração #131
 
-## Escopo e resultados
+## S5-22 — testes por componente (05/10/2026)
+
+A suíte atual passa com **112 testes em 18 arquivos**, incluindo 48 novos casos
+para UI, barra lateral, tema, proatividade, notificações, configuração de alertas
+e renderização de mensagens. O inventário cobre os **38 módulos de componentes**,
+além dos providers e de `App`.
+
+| Métrica      | Medição atual | Mínimo global |
+| ------------ | ------------- | ------------- |
+| Linhas       | 86,36%        | 80%           |
+| Instruções   | 83,96%        | 80%           |
+| Funções      | 85,81%        | 75%           |
+| Ramificações | 75,25%        | 70%           |
+
+`vitest.config.ts` aplica os mínimos locais e na pipeline. Um gate adicional
+por arquivo em `src/components/**/*.tsx` rejeita componentes com zero execução
+de linhas, instruções ou funções. Esse gate foi verificado com uma fixture sem
+teste: os 18 testes de UI passaram e a cobertura encerrou com código 1 por causa
+da fixture, removida ao concluir a verificação.
+
+O job `frontend-unit` publica JUnit em `test-results/unit/junit.xml` e relatório
+Cobertura em `coverage/cobertura-coverage.xml`, além de HTML e JSON summary.
+Execute `npm run typecheck` para verificar tipos separadamente do build.
+
+Inventário, critérios, limites e evidências reproduzíveis estão no
+[relatório S5-22](../../docs/testes/sprint5/relatorio-s5-22.md). A publicação do MR,
+execução remota e aprovação comentada por revisor de outra frente permanecem
+pendentes; a revisão local não substitui essas condições.
+
+## Resultados da integração #131 (registro anterior)
 
 A validação cobre a interface S3/S5, os contratos HTTP, a conversão de áudio, o contexto de conversa e falhas de comunicação. As execuções locais concluíram com **171 testes do backend, 46 testes unitários do frontend e 8 testes de ponta a ponta aprovados**. Lint, compilação de produção e verificação de formatação também passaram. A auditoria npm não encontrou vulnerabilidades.
 
