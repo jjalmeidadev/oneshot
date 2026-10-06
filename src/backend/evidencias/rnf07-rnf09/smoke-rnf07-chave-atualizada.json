@@ -1,0 +1,83 @@
+{
+  "purpose": "Aquecimento fora da amostra apos atualizacao da credencial pelo usuario",
+  "http_status": 200,
+  "request": {
+    "message": "Quais orientacoes existem para o embarque no trem?",
+    "use_intent_classifier": true,
+    "proactivity_enabled": false
+  },
+  "response": {
+    "contract_version": "1.1.0",
+    "text": "Não há evidência recuperada suficiente para responder com rastreabilidade.",
+    "model": "google/gemini-3.7-flash",
+    "interaction_id": "gen-1791255843-5RlTdTafte3pAJ19LufT",
+    "trace_id": null,
+    "latency_ms": 2440,
+    "retrieval_ms": 6,
+    "usage": {
+      "input_tokens": 375,
+      "output_tokens": 39,
+      "thought_tokens": 0,
+      "total_tokens": 414
+    },
+    "sources": [
+      {
+        "id": "comunicados-servico:203",
+        "title": "Campanha educativa de embarque",
+        "list_name": "Comunicados de Servico",
+        "web_url": "https://mock.sharepoint.local/sites/metro-mvp/Lists/Comunicados/203",
+        "last_modified": "2026-07-16T08:40:00Z",
+        "score": 4.4,
+        "excerpt": "A campanha ficticia reforca que passageiros devem aguardar o desembarque antes de entrar no trem e manter livre a faixa proxima das portas.",
+        "citation_id": "Fonte 1",
+        "artifact_id": null,
+        "extract_id": null,
+        "project_id": null,
+        "source_locator": null,
+        "registration_period": null,
+        "validity": {
+          "start": "2026-07-20",
+          "end": "2026-09-30"
+        },
+        "attributes": {
+          "Vigencia": "de 2026-07-20 a 2026-09-30",
+          "Tipo": "Campanha",
+          "Linha": "Todas",
+          "Status": "Ativo"
+        }
+      }
+    ],
+    "claims": [],
+    "evidence_status": "insufficient",
+    "recommendation": null,
+    "intent": {
+      "macro": "CONSULTA",
+      "specific": "consulta_documentos_fonte",
+      "confidence_macro": 0.8032,
+      "confidence_specific": 0.3952,
+      "flow": "RecuperadorInformacao -> Estruturador de Resposta",
+      "handler": "handler:consulta_documentos_fonte",
+      "alternatives": [
+        {
+          "intent": "consulta_documentos_fonte",
+          "confidence": 0.3952
+        },
+        {
+          "intent": "consulta_pendencias_projeto",
+          "confidence": 0.1742
+        },
+        {
+          "intent": "fora_escopo_externo",
+          "confidence": 0.1723
+        }
+      ]
+    },
+    "entities": [],
+    "pipeline_metrics": {
+      "nlp_ms": 26509,
+      "route_ms": 28958
+    },
+    "proactive_suggestion": null,
+    "workflow": null
+  }
+}

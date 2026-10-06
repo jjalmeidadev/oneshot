@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import AbstractSet, TYPE_CHECKING
 
 from app.nlp.schemas import AudioIntent
+from app.rag.errors import RagSourceError
 
 if TYPE_CHECKING:
     from app.rag.proactivity import SecondaryIntent
@@ -186,11 +187,28 @@ def load_sharepoint_documents(
     directory = data_dir or _configured_data_dir()
     documents: list[SharePointDocument] = []
 
-    if not directory.exists():
-        return documents
+    if not directory.is_dir():
+        raise RagSourceError("A origem de dados deve ser um diretório existente.")
 
-    for file_path in sorted(directory.glob("*.json")):
-        payload = json.loads(file_path.read_text(encoding="utf-8"))
+    files = sorted(directory.glob("*.json"))
+    if not files:
+        raise RagSourceError("A origem de dados não contém arquivos JSON.")
+
+    for file_path in files:
+        try:
+            payload = json.loads(file_path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as error:
+            raise RagSourceError("Não foi possível ler um JSON válido na origem de dados.") from error
+        if (
+            not isinstance(payload, dict)
+            or not isinstance(payload.get("list", {}), dict)
+            or not isinstance(payload.get("value"), list)
+            or any(
+                not isinstance(item, dict) or not isinstance(item.get("fields"), dict)
+                for item in payload.get("value", [])
+            )
+        ):
+            raise RagSourceError("Estrutura inválida: a origem deve conter uma lista value de itens com fields.")
         list_data = payload.get("list", {})
         list_id = str(list_data.get("id") or file_path.stem)
         list_name = str(list_data.get("displayName") or file_path.stem)

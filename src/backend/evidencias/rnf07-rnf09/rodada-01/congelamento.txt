@@ -1,0 +1,8 @@
+﻿
+
+Algorithm : SHA256
+Hash      : AB61A63A088CA3C47D235588E0A05CB225A59A6EB89E80973B2100921F6587FF
+Path      : C:\Users\wende\OneDrive\Área de Trabalho\G05-MD7\g05\docs\testes\sprint5\amostra-rnf07.csv
+
+
+
