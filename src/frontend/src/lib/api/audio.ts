@@ -37,6 +37,7 @@ export async function uploadAudio(
     form.append('previous_interaction_id', input.previousInteractionId);
   form.append('use_intent_classifier', String(input.useIntentClassifier ?? true));
   form.append('proactivity_enabled', String(input.proactivityEnabled ?? false));
+  form.append('include_audio', 'true');
   form.append('audio', input.audio, input.filename ?? 'gravacao.ogg');
   if (input.conversationId) {
     form.append('conversation_id', input.conversationId);

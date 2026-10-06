@@ -29,7 +29,8 @@ from app.audio.schemas import (
     VhsMetricsResponse,
 )
 from app.audio import transcription
-from app.audio.security import single_request_per_identity
+from app.audio.synthesis import synthesize_optional
+from app.audio.security import resolve_identity, single_request_per_identity
 from app.audio.service import process_audio_upload
 from app.audio.validation import DEFAULT_MAX_SIZE_BYTES
 from app.database.connection import close_database_pool
@@ -274,13 +275,20 @@ def create_chat_response(
     access: ReadAccess,
 ) -> GeminiChatResponse:
     try:
-        authorize_message_scope(access, request.message)
-        return process_message(
+        identity = (
+            resolve_identity(authorization)
+            if authorization or request.proactivity_enabled
+            else None
+        )
+        response = process_message(
             request,
             requester_id=str(access.auth_subject),
             user_id=str(access.user_id),
             access_context=access,
         )
+        if request.include_audio:
+            response.speech = synthesize_optional(response.text)
+        return response
     except GeminiConfigurationError as error:
         raise HTTPException(status_code=503, detail="O serviço de processamento está indisponível. Tente novamente em instantes.") from error
     except GeminiAPIError as error:
@@ -352,6 +360,9 @@ def create_audio_chat_response(
             user_id=str(access_context.user_id),
             access_context=access_context,
         )
+        if request.include_audio:
+            response.speech = synthesize_optional(response.text)
+        return response
     except GeminiConfigurationError as error:
         raise ProcessingUnavailableError() from error
     except GeminiAPIError as error:
@@ -375,6 +386,8 @@ async def create_audio_upload(
     previous_interaction_id: str | None = Form(default=None, max_length=1024),
     use_intent_classifier: bool = Form(default=True),
     proactivity_enabled: bool = Form(default=False),
+    include_audio: bool = Form(default=False),
+    authorization: str | None = Header(default=None),
 ) -> AudioUploadResponse:
     started_at = perf_counter()
     resolved_conversation_id = conversation_id or str(uuid4())
@@ -399,6 +412,7 @@ async def create_audio_upload(
                 previous_interaction_id=previous_interaction_id,
                 use_intent_classifier=use_intent_classifier,
                 proactivity_enabled=proactivity_enabled,
+                include_audio=include_audio,
             ),
             resolved_conversation_id,
             access,

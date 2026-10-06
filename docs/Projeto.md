@@ -215,7 +215,8 @@
     - [8.9.1 Introdução](#891-introdução)
     - [8.9.2 Benchmark das APIs](#892-benchmark-das-apis)
     - [8.9.3 API escolhida: Azure AI Speech](#893-api-escolhida-azure-ai-speech)
-    - [8.9.4 Referências](#894-referências)
+    - [8.9.4 Implementação da resposta em áudio](#894-implementação-da-resposta-em-áudio)
+    - [8.9.5 Referências](#895-referências)
   - [8.10 Escolha de algoritmo PLN](#810-escolha-de-algoritmo-pln)
     - [8.10.1 Objetivo e protocolo de avaliação](#8101-objetivo-e-protocolo-de-avaliação)
     - [8.10.2 Benchmark e decisão](#8102-benchmark-e-decisão)
@@ -4753,14 +4754,14 @@ Os dois serviços ocupam posições diferentes no fluxo de voz:
 1. o **STT** recebe o áudio enviado pelo usuário e produz a solicitação textual encaminhada ao pipeline de PLN;
 2. o **TTS** recebe a resposta textual final produzida pelo agente e sintetiza um áudio que poderá ser devolvido pelo canal de interação.
 
-Essa distinção preserva a delimitação da Sprint 1. A arquitetura inicial prevê solicitações por texto ou áudio e um componente de conversão de áudio em texto, enquanto os critérios de aceitação do RF01 exigem, no MVP, que o pipeline aceite solicitações textuais. A Seção 8.8 detalha o STT previsto na solução atual. A Seção 8.9 registra a avaliação e o contrato técnico de TTS, mas sua implementação continua classificada na Seção 3.4.5 como evolução; documentar a API não altera o escopo do MVP.
+Essa distinção preserva a delimitação da Sprint 1. A arquitetura inicial prevê solicitações por texto ou áudio e um componente de conversão de áudio em texto, enquanto os critérios de aceitação do RF01 exigem, no MVP, que o pipeline aceite solicitações textuais. A Seção 8.8 detalha o STT previsto na solução atual. A síntese, então registrada como evolução na Seção 3.4.5, foi acrescentada na Sprint 5 conforme a Seção 8.9.4.
 
 ### 8.6.2 Entradas, saídas e formatos
 
 | Serviço | Entrada esperada | Saída esperada | Formatos e metadados adotados ou exigidos | Destino no fluxo | Situação no escopo |
 |---|---|---|---|---|---|
 | **STT** | Fala em português do Brasil (`pt-BR`), capturada pelo canal como arquivo ou fluxo de áudio. O caso de uso atual é uma pergunta curta do usuário. | Transcrição textual estruturada. Quando disponível, a resposta deve expor o estado do reconhecimento, o texto normalizado e a confiança ou as alternativas retornadas pelo provedor. | A avaliação deve registrar contêiner, codec, taxa de amostragem, número de canais, duração e tamanho máximos, envio binário ou multipart e suporte a processamento síncrono ou streaming. No contrato adotado na Seção 8.8, usa-se preferencialmente WAV com PCM, 16 kHz e mono; OGG com OPUS, 16 kHz e mono também é aceito pelo endpoint documentado. | O texto final é encaminhado ao pipeline de PLN como uma solicitação textual; o STT não classifica a intenção nem gera a resposta do agente. | Componente previsto na arquitetura e detalhado na Seção 8.8. A disponibilidade no ambiente do parceiro ainda depende de confirmação com a GTI. |
-| **TTS** | Resposta textual final do agente em português do Brasil, codificada em um documento SSML válido após a aplicação das regras de acesso e fundamentação. | Bytes do áudio sintetizado, acompanhados do tipo de mídia correspondente ao formato solicitado. | O contrato da Seção 8.9 adota `application/ssml+xml` na entrada e `audio-24khz-48kbitrate-mono-mp3` na saída, adequado à reprodução direta. `riff-24khz-16bit-mono-pcm` (WAV) é a alternativa documentada para processamento sem perdas. Devem ser respeitados os limites de tamanho do SSML, duração e taxa de requisições do provedor. | O áudio é devolvido pela camada de interface sem alterar o conteúdo textual fundamentado, que permanece como resposta canônica do agente. | Contrato técnico documentado na Seção 8.9; a implementação permanece como evolução e não é requisito de entrega do MVP. |
+| **TTS** | Resposta textual final do agente em português do Brasil, codificada em um documento SSML válido após a aplicação das regras de acesso e fundamentação. | Bytes do áudio sintetizado, acompanhados do tipo de mídia correspondente ao formato solicitado. | O contrato da Seção 8.9 adota `application/ssml+xml` na entrada e `audio-24khz-48kbitrate-mono-mp3` na saída, adequado à reprodução direta. `riff-24khz-16bit-mono-pcm` (WAV) é a alternativa documentada para processamento sem perdas. Devem ser respeitados os limites de duração e taxa de requisições do provedor. | O áudio é devolvido pela camada de interface sem alterar o conteúdo textual fundamentado, que permanece como resposta canônica do agente. | Contrato e implementação da Sprint 5 na Seção 8.9.4. |
 
 Para ambas as APIs, o contrato técnico deve documentar autenticação, parâmetros obrigatórios, exemplo de requisição e resposta, códigos de erro, limites de uso e comportamento quando não for possível processar a entrada. No caso de STT, uma transcrição utilizável é o dado de entrada do restante do pipeline. No caso de TTS, a síntese acrescenta uma modalidade de apresentação e não modifica o conteúdo produzido pelo pipeline.
 
@@ -4789,7 +4790,7 @@ Os critérios abaixo orientam a pesquisa e a comparação de serviços de voz. E
 - O SSML, o MP3 adotado e o WAV alternativo descritos na Seção 8.9 pertencem ao contrato do endpoint Azure selecionado para TTS e não constituem exigências universais para outros provedores.
 - As APIs de voz não devem receber dados reais ou sensíveis em serviço não homologado. Durante a prova de conceito, aplicam-se as exigências de dados sintéticos ou anonimizados do RNF01.
 - A trilha prevista no RNF03 continua baseada na solicitação textual, na intenção, nas fontes e na resposta produzida. Este levantamento não cria uma nova obrigação de armazenar gravações ou áudios sintetizados.
-- A escolha técnica do Azure AI Speech para TTS na Seção 8.9 permite reutilizar o recurso e a autenticação do STT, mas não antecipa sua implementação: a síntese de fala permanece fora do escopo do MVP, conforme a Seção 3.4.5.
+- A escolha técnica do Azure AI Speech para TTS na Seção 8.9 reutiliza o recurso e a autenticação do STT. A Seção 3.4.5 registra o escopo inicial; a implementação posterior da Sprint 5 está descrita na Seção 8.9.4.
 
 ## 8.7 API de recebimento de áudio
 
@@ -5329,7 +5330,7 @@ Text-to-Speech (TTS), ou síntese de fala, é a tecnologia responsável por conv
 
 No projeto, o TTS é previsto como modalidade de saída do agente: depois que a resposta textual é gerada pelo pipeline de PLN, esse texto é convertido em áudio e devolvido ao usuário. A responsabilidade desta etapa é somente sintetizar a fala a partir de um texto já pronto, de forma simétrica ao papel do STT na entrada.
 
-**Delimitação de escopo.** Esta seção especifica a API a ser utilizada, com benchmark, decisão e contrato técnico, mas a implementação da síntese de fala permanece como evolução, conforme registrado na Seção 3.4.5. O texto continua sendo a resposta canônica do agente; o áudio acrescenta uma modalidade de apresentação, sem alterar o conteúdo fundamentado produzido pelo pipeline.
+**Delimitação de escopo.** Esta seção especifica a API utilizada, com benchmark, decisão e contrato técnico. A Seção 3.4.5 registra a síntese como evolução do escopo inicial; a Seção 8.9.4 descreve sua implementação na Sprint 5. O texto continua sendo a resposta canônica do agente; o áudio acrescenta uma modalidade de apresentação, sem alterar o conteúdo fundamentado produzido pelo pipeline.
 
 Os requisitos considerados para a escolha da API foram:
 
@@ -5475,14 +5476,24 @@ Status HTTP esperado: `200 OK`. O corpo da resposta não é JSON: são os **byte
 |---|---|---|
 | Requisições de síntese em tempo real | 20 a cada 60 segundos | 30 TPS por padrão (ajustável até 1.000 TPS) |
 | Duração máxima de áudio por requisição | 10 minutos | 10 minutos |
-| Tamanho máximo da mensagem SSML por conexão | 64 KB | 64 KB |
+| Tamanho máximo de SSML por turno no WebSocket | 64 KB | 64 KB |
 | Tags `<voice>`/`<audio>` distintas por SSML | 50 | 50 |
 
 #### Requisição opcional de token
 
 Idêntica à já documentada para o STT (Seção 8.8.3): trocar a chave por um token Bearer válido por 10 minutos, usando o mesmo endpoint `/sts/v1.0/issueToken` do mesmo recurso Azure.
 
-### 8.9.4 Referências
+### 8.9.4 Implementação da resposta em áudio
+
+A síntese integra a saída do agente na bancada web. `POST /api/chat` e `POST /api/audio` aceitam o parâmetro opcional `include_audio`, com padrão `false`. A interface envia `true` nos dois fluxos. Depois que o pipeline produz a resposta textual fundamentada, `app/audio/synthesis.py` envia o texto final ao Azure AI Speech; a transcrição STT permanece em `app/audio/transcription.py`. A resposta textual, suas fontes e seus identificadores continuam canônicos. A síntese não altera o registro da interação.
+
+Quando solicitada e concluída, a resposta completa do chat inclui `speech.status=available`, `speech.media_type=audio/mpeg` e `speech.data_base64` com o MP3. Em `POST /api/audio`, esses campos aparecem dentro de `chat`. O frontend converte o Base64 em `Blob` apenas na memória da sessão e apresenta um reprodutor associado à mensagem. A reprodução depende de acionamento do usuário. Clientes que não pedem áudio recebem `speech=null`.
+
+Timeout, indisponibilidade, limite de requisições, credencial ausente, conteúdo não reconhecido como MP3 ou texto além do limite operacional de síntese resultam em `speech.status=unavailable` e um aviso para a interface. Nesses casos, a rota principal ainda responde com o texto e as fontes. O backend limita o prazo total de TTS por `AZURE_TTS_TIMEOUT_SECONDS` (padrão de oito segundos) e tenta novamente apenas uma vez em falha transitória. Respostas acima de 4.000 caracteres ficam somente em texto, evitando áudio truncado pelo limite de duração do provedor. O MP3 não é persistido nem armazenado em cache.
+
+O serviço utiliza `AZURE_SPEECH_KEY` exclusivamente no backend. `AZURE_SPEECH_REGION`, quando presente, define o endpoint regional TTS; na ausência dela, o backend deriva o endpoint de `AZURE_SPEECH_ENDPOINT` ou `AZURE_SPEECH_RESOURCE`. O operador deve confirmar a região e a disponibilidade da voz `pt-BR-FranciscaNeural` no recurso real. A chamada ao Azure, o tempo de TTS e o tamanho do áudio ficam fora da medição do pipeline textual do RNF05 descrita na Seção 9.2.4. Uma chamada com `include_audio=true` aguarda a síntese ou seu prazo antes de devolver o JSON; sua latência total deve ser registrada separadamente na homologação.
+
+### 8.9.5 Referências
 
 - Microsoft. [Preços do Azure AI Speech](https://azure.microsoft.com/en-us/pricing/details/speech/). Acesso em: 27 ago. 2026.
 - Microsoft. [Quotas e limites do Azure AI Speech](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-services-quotas-and-limits). Acesso em: 27 ago. 2026.
