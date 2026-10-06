@@ -176,6 +176,7 @@ export type ChatMessage = {
   id: string;
   role: MessageRole;
   content: string;
+  speech?: ChatResponse['speech'];
   createdAt: string;
   origin: MessageOrigin;
   status: MessageStatus;
@@ -317,6 +318,7 @@ export function toAssistantMessage(
     id: crypto.randomUUID(),
     role: 'assistant',
     content: response.text,
+    speech: response.speech,
     createdAt: new Date().toISOString(),
     origin: 'text',
     status: 'complete',

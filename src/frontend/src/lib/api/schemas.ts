@@ -19,6 +19,7 @@
 /** `GeminiChatRequest`. `message` tem min_length=1 e max_length=20000. */
 export type ChatRequest = {
   message: string;
+  include_audio?: boolean;
   conversation_id?: string | null;
   use_intent_classifier?: boolean;
   proactivity_enabled?: boolean;
@@ -104,6 +105,7 @@ export type ChatResponse = {
   entities?: PipelineEntity[];
   pipeline_metrics?: ChatPipelineMetrics;
   text: string;
+  speech?: SpeechResponse | null;
   model: string;
   interaction_id: string | null;
   latency_ms: number;
@@ -116,6 +118,13 @@ export type ChatResponse = {
   recommendation?: string | null;
   proactive_suggestion?: ProactiveSuggestion | null;
   workflow?: WorkflowDirective | null;
+};
+
+export type SpeechResponse = {
+  status: 'available' | 'unavailable';
+  media_type: 'audio/mpeg' | null;
+  data_base64: string | null;
+  warning: string | null;
 };
 
 export type WorkflowDirective = {

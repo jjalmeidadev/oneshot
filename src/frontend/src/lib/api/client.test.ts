@@ -31,6 +31,7 @@ describe('Contrato HTTP', () => {
       previous_interaction_id: 'anterior',
       use_intent_classifier: true,
       proactivity_enabled: true,
+      include_audio: true,
     });
     expect(init.headers.Authorization).toBe('Bearer test');
   });
@@ -50,6 +51,7 @@ describe('Contrato HTTP', () => {
     expect(init.body.get('previous_interaction_id')).toBe('before');
     expect(init.body.get('use_intent_classifier')).toBe('false');
     expect(init.body.get('proactivity_enabled')).toBe('true');
+    expect(init.body.get('include_audio')).toBe('true');
   });
   it('inicia e responde o workflow com identidade, revisão e idempotência', async () => {
     const workflow = {

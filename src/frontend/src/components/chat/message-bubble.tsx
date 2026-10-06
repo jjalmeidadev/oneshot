@@ -1,4 +1,5 @@
 import { AlertTriangle, AudioLines, Sparkles, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { IntentBadge } from '@/components/chat/intent-badge';
 import { MarkdownMessage } from '@/components/chat/markdown-message';
@@ -130,6 +131,14 @@ function AssistantMessage({
         ) : (
           <>
             <MarkdownMessage content={message.content} />
+            {message.speech?.status === 'available' && message.speech.data_base64 && (
+              <SpeechPlayer data={message.speech.data_base64} />
+            )}
+            {message.speech?.status === 'unavailable' && message.speech.warning && (
+              <p role="status" className="mt-2 text-xs text-fg-muted">
+                {message.speech.warning}
+              </p>
+            )}
             {message.workflow?.workflow === 'transacao_gerar_relatorio' && (
               <ReportWorkflowCard workflow={message.workflow} />
             )}
@@ -173,5 +182,42 @@ function AssistantMessage({
         </div>
       </div>
     </div>
+  );
+}
+
+function SpeechPlayer({ data }: { data: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    try {
+      const decoded = atob(data);
+      const bytes = new Uint8Array(decoded.length);
+      for (let index = 0; index < decoded.length; index += 1) {
+        bytes[index] = decoded.charCodeAt(index);
+      }
+      objectUrl = URL.createObjectURL(new Blob([bytes], { type: 'audio/mpeg' }));
+      setUrl(objectUrl);
+      setFailed(false);
+    } catch {
+      setUrl(null);
+      setFailed(true);
+    }
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [data]);
+
+  if (failed) {
+    return (
+      <p role="status" className="mt-2 text-xs text-fg-muted">
+        Não foi possível reproduzir o áudio desta resposta.
+      </p>
+    );
+  }
+  if (!url) return null;
+  return (
+    <audio controls src={url} aria-label="Resposta em áudio" className="mt-3 w-full" />
   );
 }
