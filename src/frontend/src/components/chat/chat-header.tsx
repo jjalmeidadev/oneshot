@@ -61,21 +61,24 @@ export function ChatHeader({
               size="sm"
               onClick={onToggleDocumentPanel}
               aria-pressed={documentPanelOpen}
-              // O rotulo textual some em telas estreitas, entao o nome acessivel
-              // do botao precisa vir daqui.
-              aria-label={`Fontes da resposta (${sourceCount})`}
             >
               {documentPanelOpen ? (
-                <PanelRightClose size={15} />
+                <PanelRightClose size={15} aria-hidden />
               ) : (
-                <BookOpen size={15} />
+                <BookOpen size={15} aria-hidden />
               )}
-              <span className="hidden sm:inline">Fontes</span>
+              {/*
+               * O nome acessivel vem do proprio conteudo ("Fontes 2 da ultima
+               * resposta"), para que o texto visivel esteja contido nele
+               * (WCAG 2.5.3). Em telas estreitas a palavra so fica oculta.
+               */}
+              <span className="sr-only sm:not-sr-only">Fontes</span>
               {sourceCount > 0 && (
                 <Badge tone={documentPanelOpen ? 'primary' : 'neutral'}>
                   {sourceCount}
                 </Badge>
               )}
+              <span className="sr-only">da última resposta</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom" align="end">

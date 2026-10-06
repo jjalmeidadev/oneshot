@@ -54,7 +54,7 @@ describe('AppShell, barra lateral, sessão e tema', () => {
       expect(screen.getByRole('log')).toHaveTextContent(response.text),
     );
     // O painel de fontes começa fechado e abre pelo botão do cabeçalho.
-    await userEvent.click(screen.getByRole('button', { name: /Fontes da resposta/ }));
+    await userEvent.click(screen.getByRole('button', { name: /da última resposta/ }));
     await waitFor(() =>
       expect(screen.getByText('Entrega prevista para dezembro.')).toBeVisible(),
     );
@@ -133,7 +133,10 @@ describe('AppShell, barra lateral, sessão e tema', () => {
     await authenticate();
     expect(screen.queryByRole('switch')).not.toBeInTheDocument();
     expect(screen.queryByText(/Validação de intenção/)).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Fontes da resposta/ })).toHaveAttribute(
+    expect(
+      screen.queryByLabelText('Token de acesso da sessão'),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /da última resposta/ })).toHaveAttribute(
       'aria-pressed',
       'false',
     );
@@ -158,6 +161,60 @@ describe('AppShell, barra lateral, sessão e tema', () => {
     expect(within(log).getByText(response.model)).toBeVisible();
     expect(within(log).getByText(response.intent!.specific!)).toBeVisible();
     expect(screen.getByText(/Iniciada em/)).toBeVisible();
+  });
+  it('atalho de teclado leva o foco ao campo de mensagem', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockImplementation((url: string) => Promise.resolve(successfulResponse(url))),
+    );
+    render(<App />);
+    await authenticate();
+    (document.activeElement as HTMLElement | null)?.blur();
+    await userEvent.tab();
+    const skip = screen.getByRole('link', { name: 'Pular para o campo de mensagem' });
+    expect(skip).toHaveFocus();
+    await userEvent.keyboard('{Enter}');
+    expect(
+      screen.getByRole('textbox', { name: 'Mensagem para o agente' }),
+    ).toHaveFocus();
+    expect(screen.getByRole('navigation', { name: 'Conversas' })).toBeVisible();
+    expect(screen.getByRole('main')).toBeVisible();
+  });
+  it('entre 1024 e 1279 px as fontes deslizam e devolvem o foco ao fechar', async () => {
+    vi.spyOn(window, 'matchMedia').mockImplementation(
+      (query) =>
+        ({
+          matches: query.includes('1024'),
+          media: query,
+          addEventListener: vi.fn(),
+          removeEventListener: vi.fn(),
+        }) as unknown as MediaQueryList,
+    );
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockImplementation((url: string) => Promise.resolve(successfulResponse(url))),
+    );
+    render(<App />);
+    await authenticate();
+    // A barra de conversas continua fixa nessa faixa.
+    expect(screen.getByRole('navigation', { name: 'Conversas' })).toBeVisible();
+    const input = screen.getByRole('textbox', { name: 'Mensagem para o agente' });
+    fireEvent.change(input, { target: { value: 'prazo' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await waitFor(() =>
+      expect(screen.getByRole('log')).toHaveTextContent(response.text),
+    );
+    const sources = screen.getByRole('button', { name: /da última resposta/ });
+    sources.focus();
+    await userEvent.keyboard('{Enter}');
+    expect(screen.getByRole('dialog', { name: 'Fontes da resposta' })).toBeVisible();
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(sources).toHaveFocus();
   });
   it('layout móvel abre e fecha o diálogo de conversas pelo teclado', async () => {
     vi.spyOn(window, 'matchMedia').mockImplementation(

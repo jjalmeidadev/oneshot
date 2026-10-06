@@ -27,13 +27,14 @@ test('texto, fontes, modo técnico e navegação responsiva', async ({
   await page.getByRole('button', { name: 'Ajustes do agente' }).click();
   await page.getByRole('switch', { name: 'Mostrar detalhes técnicos' }).click();
   await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: /Fontes da resposta/ }).click();
+  await page.getByRole('button', { name: /da última resposta/ }).click();
   await expect(page.getByText('Trecho de teste: entrega em dezembro.')).toBeVisible();
   await page.getByRole('tab', { name: 'Resposta', exact: true }).click();
   await expect(
     page.getByText('provedor-de-teste', { exact: true }).last(),
   ).toBeVisible();
-  if (testInfo.project.name === 'mobile') await page.keyboard.press('Escape');
+  // Abaixo de 1280 px as fontes abrem como painel deslizante.
+  if (testInfo.project.name !== 'desktop') await page.keyboard.press('Escape');
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -80,12 +81,12 @@ test('gravação sintética, WAV, upload e resposta pelo backend', async ({ page
   ).toBeVisible();
 });
 
-test('acessibilidade automática e tema nos dois tamanhos', async ({
+test('acessibilidade automática e tema nas três larguras', async ({
   page,
 }, testInfo) => {
   await page.goto('/');
   await authenticate(page);
-  if (testInfo.project.name === 'mobile')
+  if (testInfo.project.name !== 'desktop')
     await page.getByRole('button', { name: 'Abrir conversas' }).click();
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])

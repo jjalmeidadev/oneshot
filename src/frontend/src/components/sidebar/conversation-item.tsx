@@ -37,7 +37,7 @@ export function ConversationItem({
           size={15}
           className={cn('mt-0.5 shrink-0', active ? 'text-primary' : 'text-fg-subtle')}
         />
-        <span className="min-w-0 flex-1">
+        <span className="min-w-0 flex-1 pr-7">
           <span
             className={cn(
               'block truncate text-xs font-medium',
@@ -57,7 +57,8 @@ export function ConversationItem({
         size="icon-sm"
         aria-label={`Excluir conversa ${conversation.title}`}
         onClick={onDelete}
-        className="absolute right-1 top-1.5 opacity-0 transition-opacity hover:text-danger focus-visible:opacity-100 group-hover:opacity-100"
+        // Em telas de toque nao ha hover: o botao fica sempre visivel ali.
+        className="absolute right-1 top-1.5 transition-opacity hover:text-danger focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:hover)]:opacity-0"
       >
         <Trash2 size={14} />
       </Button>
