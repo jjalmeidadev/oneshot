@@ -105,7 +105,7 @@ def test_references_survive_provider_api_and_audit(monkeypatch, evidence, provid
     assert interaction[11] == chat["text"]
     events = [params for query, params in cursor.calls if "INSERT INTO public.audit_events" in query]
     assert all(event[0] == body["trace_id"] for event in events)
-    snapshot = json.loads(next(event[-1] for event in events
+    snapshot = json.loads(next(event[-2] for event in events
                               if event[1] == "database_rag_sources_retrieved"))
     assert snapshot["claims"] == chat["claims"]
     assert "trace_sources" not in chat
@@ -180,14 +180,17 @@ def test_audit_snapshot_and_limitation_are_correlated(monkeypatch, evidence, sup
     request = GeminiChatRequest(message="Prazo?")
     response = generate_chat_response(request)
     cursor = FakeCursor()
-    _insert_audit_events(cursor, interaction_id="trace-17", request=request,
-        response=response, intent=None, entities=[], status="processado",
-        error_message=None, user_id=None, requester_id=None)
+    _insert_audit_events(
+        cursor, interaction_id="trace-17", correlation_id="correlation-17",
+        request=request, response=response, intent=None, entities=[],
+        status="processado", error_message=None, user_id=None, requester_id=None,
+    )
     event = next(params for _, params in cursor.calls
                  if params[1] == "database_rag_sources_retrieved")
     assert event[0] == "trace-17"
     assert event[3] == ("sucesso" if supported else "pendente")
-    snapshot = json.loads(event[-1])
+    assert event[-1] == "correlation-17"
+    snapshot = json.loads(event[-2])
     assert snapshot["sources"] == [source.model_dump() for source in response.sources]
     assert snapshot["claims"] == [claim.model_dump() for claim in response.claims]
     assert snapshot["provider_interaction_id"] == "provider-17"
