@@ -5,6 +5,7 @@ import os
 import re
 from collections.abc import Callable
 from typing import Any
+from uuid import uuid4
 
 from app.database.connection import open_database_connection
 from app.gemini.schemas import GeminiChatRequest, GeminiChatResponse
@@ -81,6 +82,7 @@ def trace_interaction(
                 _insert_audit_events(
                     cursor,
                     interaction_id=interaction_id,
+                    correlation_id=str(uuid4()),
                     request=request,
                     response=response,
                     intent=intent,
@@ -306,9 +308,15 @@ def _insert_out_of_scope_request(
     response: GeminiChatResponse | None,
     intent: AudioIntent | None,
 ) -> None:
-    """Enfileira para curadoria apenas perguntas sem contexto recuperável."""
+    """Enfileira classificacoes fora de escopo e perguntas sem contexto RAG."""
 
-    if not response or response.model != "rag-retriever" or response.sources:
+    classified_out_of_scope = bool(
+        intent and intent.macro in {"FORA_DE_ESCOPO", "INDEFINIDA"}
+    )
+    rag_without_context = bool(
+        response and response.model == "rag-retriever" and not response.sources
+    )
+    if not classified_out_of_scope and not rag_without_context:
         return
 
     cursor.execute(
@@ -348,9 +356,9 @@ def _out_of_scope_reason(intent: AudioIntent | None) -> str:
     if not intent:
         return "sem_classificacao_e_sem_contexto_rag"
     if intent.macro == "FORA_DE_ESCOPO":
-        return "macrointencao_fora_de_escopo_e_sem_contexto_rag"
+        return "macrointencao_fora_de_escopo"
     if intent.macro == "INDEFINIDA" or not intent.specific:
-        return "baixa_confianca_e_sem_contexto_rag"
+        return "baixa_confianca"
     return "sem_contexto_rag"
 
 
@@ -358,6 +366,7 @@ def _insert_audit_events(
     cursor: Any,
     *,
     interaction_id: str,
+    correlation_id: str,
     request: GeminiChatRequest,
     response: GeminiChatResponse | None,
     intent: AudioIntent | None,
@@ -376,6 +385,7 @@ def _insert_audit_events(
                 "message_length": len(request.message),
                 "has_response": response is not None,
                 "processing_status": status,
+                "intent_classifier_enabled": request.use_intent_classifier,
                 "requester_id": requester_id,
             },
         )
@@ -403,7 +413,7 @@ def _insert_audit_events(
             events.append(
                 (
                     "guided_workflow_dispatched",
-                    "guided_workflow",
+                    "api",
                     "pendente",
                     {
                         "action": response.workflow.action,
@@ -459,9 +469,10 @@ def _insert_audit_events(
                 component,
                 event_status,
                 user_id,
-                event_payload
+                event_payload,
+                correlation_id
             )
-            VALUES (%s, %s, %s, %s, %s, %s::jsonb);
+            VALUES (%s, %s, %s, %s, %s, %s::jsonb, %s);
             """,
             (
                 interaction_id,
@@ -470,6 +481,7 @@ def _insert_audit_events(
                 event_status,
                 user_id,
                 _json(payload),
+                correlation_id,
             ),
         )
 
