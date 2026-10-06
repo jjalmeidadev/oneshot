@@ -2,6 +2,9 @@ import json
 
 import pytest
 
+# Preserva a cobertura anterior do backend-api na selecao por marcador (#255).
+pytestmark = pytest.mark.integration
+
 from app.gemini.client import confirm_proactive_suggestion, generate_chat_response
 from app.gemini.schemas import GeminiChatRequest, ProactiveConfirmationRequest
 from app.nlp.schemas import AudioIntent

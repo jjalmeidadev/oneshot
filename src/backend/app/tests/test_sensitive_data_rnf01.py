@@ -33,6 +33,8 @@ from app.security.sensitive_data import (
 )
 from test_traceability import FakeConnection, FakeCursor, _connect
 
+pytestmark = pytest.mark.integration
+
 DATA_DIR = Path(__file__).resolve().parents[1] / "rag" / "data" / "sharepoint"
 
 # Valores sinteticos com digito verificador valido. Nao pertencem a ninguem.

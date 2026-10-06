@@ -36,6 +36,8 @@ from app.security import (
     resolve_access_context,
 )
 
+pytestmark = pytest.mark.integration
+
 
 AUTH_SUBJECT = UUID("762a2bde-87b8-413f-8656-958a2f380574")
 PUBLIC_USER_ID = UUID("6e7d0df0-c96a-4076-b241-64f78a05997a")
