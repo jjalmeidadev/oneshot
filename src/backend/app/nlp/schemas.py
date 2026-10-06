@@ -15,6 +15,7 @@ class AudioIntent(BaseModel):
     flow: str = ""
     handler: str = ""
     alternatives: list[IntentAlternative] = Field(default_factory=list)
+    routing_rule: str | None = None
 
 
 class PublicEntity(BaseModel):
