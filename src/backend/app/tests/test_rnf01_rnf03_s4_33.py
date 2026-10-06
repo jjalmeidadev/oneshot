@@ -25,6 +25,8 @@ from app.database.connection import (
     DatabaseConfigurationError,
     open_database_connection,
 )
+from app.gemini.client import generate_chat_response
+from app.gemini.schemas import GeminiChatRequest
 from app.rag.sharepoint import (
     build_rag_input,
     load_sharepoint_documents,
@@ -122,17 +124,18 @@ def test_ct_rnf01_p_prompt_declara_origem_ficticia() -> None:
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "D-06: nao existe validacao de dado sensivel no caminho textual. "
-        "build_rag_input copia document.content para o prompt sem inspecao, e "
-        "nenhum modulo do backend classifica ou bloqueia conteudo sensivel. O "
-        "RNF01 hoje e atendido por convencao (a massa e sintetica), nao por "
-        "controle. Ver secao 5 do relatorio S4-33."
-    ),
-)
-def test_ct_rnf01_n_marcador_sensivel_nao_chega_ao_provedor(tmp_path: Path) -> None:
+def test_ct_rnf01_n_marcador_sensivel_nao_chega_ao_provedor(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """CT-RNF01-N, corrigido pela S5-27 (D-06).
+
+    Segue a Secao 9.2.3: injeta o marcador numa copia temporaria da massa,
+    repete o envio pelo caminho real (`generate_chat_response`) e captura com
+    um duplo de rede tudo o que sairia para o provedor. O marcador nao pode
+    aparecer em nenhum payload, e a contagem de chamadas externas com dado
+    sensivel tem de ser zero.
+    """
+
     # Copia temporaria da massa, como manda a Secao 9.2.3: o original nao e tocado.
     massa_temporaria = tmp_path / "sharepoint"
     shutil.copytree(DATA_DIR, massa_temporaria)
@@ -152,17 +155,62 @@ def test_ct_rnf01_n_marcador_sensivel_nao_chega_ao_provedor(tmp_path: Path) -> N
 
     documentos = load_sharepoint_documents(massa_temporaria)
     assert documentos, "massa temporaria nao carregou"
-
     resultados = retrieve_sharepoint_context("objeto perdido", documents=documentos)
     if not resultados:
         pytest.skip("consulta de sondagem nao recuperou documento da copia")
+    assert any(MARCADOR_SENSIVEL in r.document.content for r in resultados)
 
-    prompt = build_rag_input("Pergunta de sondagem", resultados)
+    # Duplo de rede: guarda o payload de cada chamada ao provedor.
+    payloads: list[str] = []
 
-    assert MARCADOR_SENSIVEL not in prompt, (
-        "o marcador sensivel atravessou a montagem do prompt e seria enviado ao "
-        "provedor externo: o sistema nao bloqueia nada antes da fronteira"
+    class _Resposta:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
+        def read(self) -> bytes:
+            return json.dumps(
+                {
+                    "id": "ct-rnf01-n",
+                    "model": "duplo-de-rede",
+                    "status": "completed",
+                    "steps": [
+                        {
+                            "type": "model_output",
+                            "content": [{"type": "text", "text": "Evidencia insuficiente."}],
+                        }
+                    ],
+                    "usage": {"total_tokens": 1},
+                }
+            ).encode("utf-8")
+
+    def duplo_de_rede(request, timeout):
+        payloads.append(request.data.decode("utf-8"))
+        return _Resposta()
+
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    monkeypatch.delenv("LLM_PROVIDER", raising=False)
+    monkeypatch.setattr("app.gemini.client.urlopen", duplo_de_rede)
+    monkeypatch.setattr(
+        "app.gemini.client.retrieve_context", lambda *_a, **_k: resultados
     )
+
+    resposta = generate_chat_response(
+        GeminiChatRequest(message="Pergunta de sondagem", use_intent_classifier=False)
+    )
+
+    chamadas_com_dado_sensivel = [p for p in payloads if MARCADOR_SENSIVEL in p]
+    assert chamadas_com_dado_sensivel == [], (
+        "o marcador sensivel atravessou a montagem do prompt e seria enviado ao "
+        "provedor externo"
+    )
+    assert all("[DADO CLASSIFICADO]" in p for p in payloads)
+    assert all(MARCADOR_SENSIVEL not in (f.excerpt or "") for f in resposta.sources)
+    assert resposta.security_report is not None
+    assert resposta.security_report["categories"] == ["marcador_classificacao"]
+    assert MARCADOR_SENSIVEL not in json.dumps(resposta.security_report)
 
 
 # ==========================================================================

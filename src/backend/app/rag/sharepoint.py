@@ -103,6 +103,9 @@ class SharePointDocument:
     validity: dict[str, str | None] | None = None
     project_code: str | None = None
     project_title: str | None = None
+    #: `project_artifacts.confidentiality_level` no banco. Restrito e
+    #: confidencial nunca vao ao provedor (S5-27, RNF01).
+    confidentiality_level: str | None = None
 
 
 @dataclass(frozen=True)

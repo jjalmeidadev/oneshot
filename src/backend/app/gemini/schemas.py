@@ -90,6 +90,9 @@ class GeminiChatResponse(BaseModel):
     # Somente na resposta secundaria confirmada: analise rotulada, nao fato.
     recommendation: str | None = None
     trace_sources: list[dict] = Field(default_factory=list, exclude=True)
+    # Resumo da barreira de dado sensivel (RNF01), so para a auditoria. Traz
+    # etapa, categorias e contagens; nunca o valor encontrado.
+    security_report: dict | None = Field(default=None, exclude=True)
     intent: AudioIntent | None = None
     entities: list[PublicEntity] = Field(default_factory=list)
     pipeline_metrics: ChatPipelineMetrics = Field(default_factory=ChatPipelineMetrics)
