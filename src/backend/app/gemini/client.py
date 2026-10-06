@@ -27,6 +27,7 @@ from app.rag.proactive_confirmation import (
 )
 from app.rag.proactivity import SecondaryIntent, resolve_secondary_intent
 from app.rag.sharepoint import build_rag_input
+from app.security.sensitive_data import SensitiveDataReport, protect_documents, scan
 from app.gemini.evidence import ValidatedAnswer, validate_evidence
 from app.security.access import AccessContext
 
@@ -68,6 +69,21 @@ class GeminiAPIError(RuntimeError):
         self.status_code = status_code
 
 
+class SensitiveDataBlockedError(GeminiAPIError):
+    """A guarda final encontrou dado sensivel no prompt e recusou a chamada.
+
+    So deve ocorrer se um caminho novo montar o prompt sem passar pelas
+    barreiras da pergunta e dos documentos. ``report`` vai para a auditoria.
+    """
+
+    def __init__(self, report: SensitiveDataReport) -> None:
+        super().__init__(
+            "A solicitacao foi bloqueada para proteger dado sensivel.",
+            status_code=422,
+        )
+        self.report = report
+
+
 def generate_chat_response(
     request: GeminiChatRequest,
     intent: AudioIntent | None = None,
@@ -93,6 +109,15 @@ def generate_chat_response(
         ) from error
     retrieval_ms = round((perf_counter() - retrieval_started_at) * 1000)
 
+    # RNF01: o dado sensivel dos documentos e mascarado antes de montar o
+    # prompt, e os classificados como restritos ficam fora do contexto. A
+    # versao mascarada e a mesma usada nas fontes exibidas e na verificacao de
+    # evidencia, para que a resposta continue conferivel.
+    retrieved_documents, document_report = protect_documents(retrieved_documents)
+    security_report = (
+        document_report.audit_payload() if document_report.triggered else None
+    )
+
     # Mesmo com o classificador desligado, nao gerar fatos sem fonte.
     if not retrieved_documents:
         return GeminiChatResponse(
@@ -103,6 +128,7 @@ def generate_chat_response(
             usage=GeminiUsage(),
             sources=[],
             evidence_status="insufficient",
+            security_report=security_report,
         )
 
     llm = _call_llm(
@@ -158,6 +184,7 @@ def generate_chat_response(
             _trace_source_payload(result, citation_order=index)
             for index, result in enumerate(retrieved_documents, start=1)
         ],
+        security_report=security_report,
         proactive_suggestion=(
             _public_proactive_suggestion(
                 register_pending_suggestion(
@@ -328,6 +355,18 @@ def _call_llm(
     previous_interaction_id: str | None = None,
 ) -> _LLMResult:
     """Unico ponto de chamada ao LLM, compartilhado pelas duas rotas do cliente."""
+
+    # Guarda final do RNF01: nenhum prompt com dado sensivel sai daqui, mesmo
+    # que um caminho futuro esqueca as barreiras da pergunta e dos documentos.
+    guard = scan(prompt)
+    if guard.found:
+        logger.warning(
+            "Chamada ao provedor bloqueada: dado sensivel no prompt (%s).",
+            ", ".join(guard.categories),
+        )
+        raise SensitiveDataBlockedError(
+            SensitiveDataReport(stage="prompt", action="bloqueado", counts=guard.counts)
+        )
 
     if _provider() == LLM_PROVIDER_OPENROUTER:
         return _call_openrouter(prompt, api_key=api_key)

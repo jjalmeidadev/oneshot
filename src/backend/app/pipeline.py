@@ -8,6 +8,7 @@ from app.database.tracing import TraceabilityError, trace_interaction
 from app.gemini.client import (
     GeminiAPIError,
     GeminiConfigurationError,
+    SensitiveDataBlockedError,
     execute_proactive_confirmation,
     generate_chat_response,
 )
@@ -19,6 +20,7 @@ from app.gemini.schemas import (
     ProactiveConfirmationResponse,
 )
 from app.nlp.entities import Entidade, extract_entities
+from app.security.sensitive_data import SensitiveDataReport, describe_categories, scan
 from app.nlp.schemas import (
     AudioIntent,
     ChatPipelineMetrics,
@@ -29,6 +31,12 @@ from app.security.access import AccessContext
 
 _classifier_lock = Lock()
 logger = logging.getLogger(__name__)
+
+#: Modelo informado na resposta quando a pergunta e barrada pelo RNF01.
+SENSITIVE_BLOCK_MODEL = "bloqueio-dado-sensivel"
+#: Registrado como falha controlada: `processing_status` nao tem `bloqueado`,
+#: e o evento `sensitive_content_blocked` traz o detalhe (decisao da S5-27).
+SENSITIVE_BLOCK_ERROR = "Dado sensivel bloqueado antes do provedor."
 
 
 def warmup_classifier() -> None:
@@ -49,6 +57,21 @@ def process_message(
     access_context: AccessContext | None = None,
 ) -> GeminiChatResponse:
     route_started_at = perf_counter()
+
+    # RNF01, primeira barreira: pergunta com dado sensivel nao segue para
+    # classificacao nem para o provedor, e a auditoria so recebe a versao
+    # mascarada.
+    blocked = _block_sensitive_message(
+        request,
+        route_started_at=route_started_at,
+        channel=channel,
+        external_conversation_id=external_conversation_id,
+        requester_id=requester_id,
+        user_id=user_id,
+    )
+    if blocked is not None:
+        return blocked
+
     intent = None
     fallback_to_rag = False
     nlp_ms = 0
@@ -149,6 +172,11 @@ def process_message(
             external_conversation_id=external_conversation_id,
             error_message=str(error),
             requester_id=requester_id,
+            security_report=(
+                error.report.audit_payload()
+                if isinstance(error, SensitiveDataBlockedError)
+                else None
+            ),
             user_id=user_id,
         )
         raise
@@ -321,6 +349,53 @@ def _elapsed_ms(started_at: float) -> int:
     return round((perf_counter() - started_at) * 1000)
 
 
+def _block_sensitive_message(
+    request: GeminiChatRequest,
+    *,
+    route_started_at: float,
+    channel: str,
+    external_conversation_id: str | None,
+    requester_id: str | None,
+    user_id: str | None = None,
+) -> GeminiChatResponse | None:
+    """Barra a pergunta com dado sensivel antes de qualquer servico externo."""
+
+    found = scan(request.message)
+    if not found.found:
+        return None
+
+    report = SensitiveDataReport(stage="mensagem", action="bloqueado", counts=found.counts)
+    response = GeminiChatResponse(
+        text=(
+            f"Sua mensagem contém {describe_categories(found.categories)}. "
+            "Por segurança, ela não foi enviada ao modelo de linguagem. "
+            "Remova o dado e envie a pergunta novamente."
+        ),
+        model=SENSITIVE_BLOCK_MODEL,
+        latency_ms=0,
+        usage=GeminiUsage(),
+        evidence_status="not_applicable",
+        security_report=report.audit_payload(),
+        pipeline_metrics=ChatPipelineMetrics(
+            nlp_ms=0,
+            route_ms=_elapsed_ms(route_started_at),
+        ),
+    )
+    _trace_safely(
+        request=request.model_copy(update={"message": found.masked}),
+        response=response,
+        intent=None,
+        entities=[],
+        processing_ms=response.pipeline_metrics.route_ms,
+        channel=channel,
+        external_conversation_id=external_conversation_id,
+        error_message=SENSITIVE_BLOCK_ERROR,
+        requester_id=requester_id,
+        user_id=user_id,
+    )
+    return response
+
+
 def _trace_safely(
     *,
     request: GeminiChatRequest,
@@ -332,6 +407,7 @@ def _trace_safely(
     external_conversation_id: str | None = None,
     error_message: str | None = None,
     requester_id: str | None = None,
+    security_report: dict | None = None,
     user_id: str | None = None,
 ) -> None:
     try:
@@ -345,6 +421,7 @@ def _trace_safely(
             external_conversation_id=external_conversation_id,
             error_message=error_message,
             requester_id=requester_id,
+            security_report=security_report,
             user_id=user_id,
         )
         if response is not None:

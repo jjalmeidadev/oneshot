@@ -35,6 +35,7 @@ def trace_interaction(
     external_conversation_id: str | None = None,
     error_message: str | None = None,
     requester_id: str | None = None,
+    security_report: dict | None = None,
     user_id: str | None = None,
     connect: Callable[..., Any] | None = None,
 ) -> str | None:
@@ -90,6 +91,8 @@ def trace_interaction(
                     error_message=error_message,
                     user_id=resolved_user_id,
                     requester_id=requester_id,
+                    security_report=security_report
+                    or (response.security_report if response else None),
                 )
             _commit(connection)
             return interaction_id
@@ -367,6 +370,7 @@ def _insert_audit_events(
     error_message: str | None,
     user_id: str | None,
     requester_id: str | None,
+    security_report: dict | None = None,
 ) -> None:
     events = [
         (
@@ -439,6 +443,18 @@ def _insert_audit_events(
                 "api",
                 "falha",
                 {"message": _safe_error_message(error_message)},
+            )
+        )
+
+    if security_report:
+        # RNF01: etapa, categorias e contagens do bloqueio. O valor sensivel
+        # nunca entra no payload, e a pergunta ja chega aqui mascarada.
+        events.append(
+            (
+                "sensitive_content_blocked",
+                "api",
+                "bloqueado",
+                security_report,
             )
         )
 
