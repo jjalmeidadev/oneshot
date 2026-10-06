@@ -1,5 +1,6 @@
 """Referencias nas respostas: evidencia sintetica entre recuperacao, provedores, API e auditoria."""
 import json
+from dataclasses import replace
 
 import pytest
 from fastapi.testclient import TestClient
@@ -53,7 +54,13 @@ def provider_response(monkeypatch, provider, text):
 
 @pytest.mark.parametrize("provider", ["gemini", "openrouter"])
 @pytest.mark.parametrize("channel", ["chat", "audio"])
-def test_references_survive_provider_api_and_audit(monkeypatch, evidence, provider, channel):
+@pytest.mark.parametrize("fallback", [False, True], ids=["banco", "json-local"])
+def test_references_survive_provider_api_and_audit(monkeypatch, evidence, provider, channel, fallback):
+    if fallback:
+        evidence = replace(evidence, document=replace(
+            evidence.document, fallback=True, artifact_id=None, extract_id=None, project_id=None,
+        ))
+        monkeypatch.setattr("app.gemini.client.retrieve_context", lambda *a, **kw: [evidence])
     monkeypatch.setenv("DATABASE_URL", "postgresql://synthetic:synthetic@example.test/test")
     provider_response(monkeypatch, provider, "O prazo e 30/09/2026. [Fonte 1]")
     fetch_values = [("intent-17",), ("conversation-17",), ("trace-17",)]
@@ -83,7 +90,7 @@ def test_references_survive_provider_api_and_audit(monkeypatch, evidence, provid
     assert chat["claims"][0]["citation_ids"] == ["Fonte 1"]
     source = chat["sources"][0]
     assert (source["artifact_id"], source["extract_id"], source["project_id"]) == (
-        "artifact-17", "extract-17", "project-17")
+        evidence.document.artifact_id, evidence.document.extract_id, evidence.document.project_id)
     assert source["source_locator"] == "Planilha!B17"
     assert source["last_modified"] == evidence.document.last_modified
     assert source["registration_period"] == evidence.document.registration_period
@@ -108,6 +115,9 @@ def test_references_survive_provider_api_and_audit(monkeypatch, evidence, provid
     snapshot = json.loads(next(event[-2] for event in events
                               if event[1] == "database_rag_sources_retrieved"))
     assert snapshot["claims"] == chat["claims"]
+    assert snapshot["persistent_source_count"] == len(chat["sources"]) == 1
+    assert metadata["fallback"] is fallback
+    assert params[1:4] == (evidence.document.artifact_id, evidence.document.extract_id, evidence.document.project_id)
     assert "trace_sources" not in chat
     if channel == "audio":
         assert body["answer"]["claims"] == chat["claims"]
