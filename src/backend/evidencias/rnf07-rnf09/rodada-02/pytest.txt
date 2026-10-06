@@ -1,0 +1,44 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\wende\OneDrive\Área de Trabalho\G05-MD7\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\wende\OneDrive\Área de Trabalho\G05-MD7\g05\src\backend
+plugins: anyio-4.15.1
+collecting ... collected 6 items
+
+app/tests/test_rnf07_rnf09_s5_31.py::test_ct_rnf07_p SKIPPED (Amostr...)
+app/tests/test_rnf07_rnf09_s5_31.py::test_ct_rnf07_n SKIPPED (Amostr...)
+app/tests/test_rnf07_rnf09_s5_31.py::test_ct_rnf08_p {"artifact": "openapi-real.json", "observation": {"sha256": "abebeccf87ea45ebb337f531179eceaac246a8f4511d3f61999477ac4dbfbc15"}}
+{"artifact": "CT-RNF08-P.json", "observation": {"health_http": 200, "openapi_http": 200, "contract_errors": [], "architecture_reference": "src/agent/README.md", "copilot_removed_from_runtime": true, "criterion": "Se\u00e7\u00e3o 9.2.3 exige Teams/Copilot/SharePoint/Azure previstos", "scope": "ASGI local com lifespan; sem homologa\u00e7\u00e3o no tenant Microsoft"}}
+FAILED
+app/tests/test_rnf07_rnf09_s5_31.py::test_ct_rnf08_n {"artifact": "openapi-sem-chat.json", "observation": {"sha256": "8bb1ad343e5abad7c5ca43fca9ac45bc92ed662cd3ecc4f2bf8f5273cc32146c"}}
+{"artifact": "openapi-tipo-incompativel.json", "observation": {"sha256": "1a124593e56eb5795d1dd7d245b9a806bb6b68af9b3deb4b4ac613068ab2c724"}}
+{"artifact": "CT-RNF08-N.json", "observation": {"missing_operation": ["opera\u00e7\u00e3o obrigat\u00f3ria ausente/incompleta: post /api/chat"], "incompatible_type": ["GeminiChatRequest.message deve ser string"]}}
+PASSED
+app/tests/test_rnf07_rnf09_s5_31.py::test_ct_rnf09_p {"artifact": "CT-RNF09-P.json", "observation": {"query": "Como devo registrar um objeto perdido?", "configuration": "SHAREPOINT_MOCK_DATA_DIR", "baseline_ids": ["procedimentos-operacionais:101"], "alternate_ids": ["s5-31-alternativa:101"], "baseline_contents": ["Registrar a descricao do objeto, local e horario informados pelo passageiro. Consultar o registro local de achados e perdidos e fornecer o protocolo ficticio. Objetos nao localizados devem permanecer registrados para consulta posterior."], "alternate_contents": ["Registrar a descricao do objeto, local e horario informados pelo passageiro. Consultar o registro local de achados e perdidos e fornecer o protocolo ficticio. Objetos nao localizados devem permanecer registrados para consulta posterior."], "prompt": "Voce e um assistente do Metro em um ambiente de demonstracao. Os trechos abaixo vieram de listas simuladas do SharePoint e sao dados ficticios para o MVP. Use-os quando forem pertinentes, cite as fontes no formato [Fonte N] e informe quando o contexto nao for suficiente. Modo extrativo estrito: selecione somente os trechos que respondem a pergunta. Copie INTEGRALMENTE o Conteudo de uma fonte ou um atributo completo no formato Rotulo: valor, sem parafrasear, resumir, cortar frases ou mudar numeros. Preserve condicoes e negacoes. Escreva cada unidade copiada em uma unica linha, sempre terminando com suas citacoes [Fonte N]. Se nao houver unidade que responda, informe evidencia insuficiente. Nao inclua afirmacoes sem fonte nem cabecalhos sem citacao. Nao apresente esses dados como informacao operacional real.\n\nRoteamento: classificador desativado; interprete a pergunta diretamente.\n\nContexto recuperado:\n[Fonte 1] Atendimento a objeto perdido\nLista: Procedimentos Operacionais\nAtualizado em: 2026-07-18T14:30:00Z\nPeriodo de registro: null\nCodigo: POP-MVP-001\nCategoria: Atendimento ao passageiro\nLinha: Todas\nStatus: Vigente\nConteudo: Registrar a descricao do objeto, local e horario informados pelo passageiro. Consultar o registro local de achados e perdidos e fornecer o protocolo ficticio. Objetos nao localizados devem permanecer registrados para consulta posterior.\n\nPergunta do usuario: Como devo registrar um objeto perdido?", "scope": "n\u00facleo RAG local, sem classificador, LLM, cont\u00eainer ou publica\u00e7\u00e3o"}}
+PASSED
+app/tests/test_rnf07_rnf09_s5_31.py::test_ct_rnf09_n {"artifact": "CT-RNF09-N.json", "observation": {"diretorio_ausente": {"carregamento": {"returned_count": 0, "exception": null}, "consulta": {"returned_count": 0, "exception": null}}, "arquivo_ausente": {"carregamento": {"returned_count": 0, "exception": null}, "consulta": {"returned_count": 0, "exception": null}}, "json_malformado": {"carregamento": {"exception": "JSONDecodeError", "message": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"}, "consulta": {"exception": "JSONDecodeError", "message": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"}}, "estrutura_invalida": {"carregamento": {"exception": "AttributeError", "message": "'list' object has no attribute 'get'"}, "consulta": {"exception": "AttributeError", "message": "'list' object has no attribute 'get'"}}}}
+FAILED
+
+================================== FAILURES ===================================
+_______________________________ test_ct_rnf08_p _______________________________
+app\tests\test_rnf07_rnf09_s5_31.py:87: in test_ct_rnf08_p
+    assert not removed, "DEF-S5-31-01: arquitetura vigente remove Copilot exigido pelo critério ainda publicado"
+E   AssertionError: DEF-S5-31-01: arquitetura vigente remove Copilot exigido pelo critério ainda publicado
+E   assert not True
+_______________________________ test_ct_rnf09_n _______________________________
+app\tests\test_rnf07_rnf09_s5_31.py:159: in test_ct_rnf09_n
+    assert all(stage["exception"] in expected[name] for name, stages in observations.items() for stage in stages.values()), (
+E   AssertionError: ('DEF-S5-31-02: origem ausente é silenciosa e estrutura inválida expõe AttributeError', {'diretorio_ausente': {'carregamento': {'returned_count': 0, 'exception': None}, 'consulta': {'returned_count': 0, 'exception': None}}, 'arquivo_ausente': {'carregamento': {'returned_count': 0, 'exception': None}, 'consulta': {'returned_count': 0, 'exception': None}}, 'json_malformado': {'carregamento': {'exception': 'JSONDecodeError', 'message': 'Expecting property name enclosed in double quotes: line 1 column 2 (char 1)'}, 'consulta': {'exception': 'JSONDecodeError', 'message': 'Expecting property name enclosed in double quotes: line 1 column 2 (char 1)'}}, 'estrutura_invalida': {'carregamento': {'exception': 'AttributeError', 'message': "'list' object has no attribute 'get'"}, 'consulta': {'exception': 'AttributeError', 'message': "'list' object has no attribute 'get'"}}})
+E   assert False
+E    +  where False = all(<generator object test_ct_rnf09_n.<locals>.<genexpr> at 0x0000029B9428D8A0>)
+============================== warnings summary ===============================
+..\..\..\.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\wende\OneDrive\Área de Trabalho\G05-MD7\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\wende\OneDrive\Área de Trabalho\G05-MD7\g05\docs\evidencias\sprint-05\rnf07-rnf09\rodada-02\pytest.xml -
+=========================== short test summary info ===========================
+FAILED app/tests/test_rnf07_rnf09_s5_31.py::test_ct_rnf08_p - AssertionError:...
+FAILED app/tests/test_rnf07_rnf09_s5_31.py::test_ct_rnf09_n - AssertionError:...
+============== 2 failed, 2 passed, 2 skipped, 1 warning in 2.87s ==============

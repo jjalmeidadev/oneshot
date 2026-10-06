@@ -1,5 +1,8 @@
 # Evidências dos testes de RNF — Sprint 4
 
+Complementação da Sprint 5: [evidências de RNF07 a RNF09](rnf07-rnf09/README.md),
+incluindo a galeria das 17 capturas de RNF07 e as rodadas de portabilidade.
+
 Evidências da execução dos testes de RNF04 e RNF05. Planejamento na Seção 9.2 do
 [`Projeto.md`](../../../docs/Projeto.md).
 

@@ -1,0 +1,18 @@
+{
+  "query": "Como devo registrar um objeto perdido?",
+  "configuration": "SHAREPOINT_MOCK_DATA_DIR",
+  "baseline_ids": [
+    "procedimentos-operacionais:101"
+  ],
+  "alternate_ids": [
+    "s5-31-alternativa:101"
+  ],
+  "baseline_contents": [
+    "Registrar a descricao do objeto, local e horario informados pelo passageiro. Consultar o registro local de achados e perdidos e fornecer o protocolo ficticio. Objetos nao localizados devem permanecer registrados para consulta posterior."
+  ],
+  "alternate_contents": [
+    "Registrar a descricao do objeto, local e horario informados pelo passageiro. Consultar o registro local de achados e perdidos e fornecer o protocolo ficticio. Objetos nao localizados devem permanecer registrados para consulta posterior."
+  ],
+  "prompt": "Voce e um assistente do Metro em um ambiente de demonstracao. Os trechos abaixo vieram de listas simuladas do SharePoint e sao dados ficticios para o MVP. Use-os quando forem pertinentes, cite as fontes no formato [Fonte N] e informe quando o contexto nao for suficiente. Modo extrativo estrito: selecione somente os trechos que respondem a pergunta. Copie INTEGRALMENTE o Conteudo de uma fonte ou um atributo completo no formato Rotulo: valor, sem parafrasear, resumir, cortar frases ou mudar numeros. Preserve condicoes e negacoes. Escreva cada unidade copiada em uma unica linha, sempre terminando com suas citacoes [Fonte N]. Se nao houver unidade que responda, informe evidencia insuficiente. Nao inclua afirmacoes sem fonte nem cabecalhos sem citacao. Nao apresente esses dados como informacao operacional real.\n\nRoteamento: classificador desativado; interprete a pergunta diretamente.\n\nContexto recuperado:\n[Fonte 1] Atendimento a objeto perdido\nLista: Procedimentos Operacionais\nAtualizado em: 2026-07-18T14:30:00Z\nPeriodo de registro: null\nCodigo: POP-MVP-001\nCategoria: Atendimento ao passageiro\nLinha: Todas\nStatus: Vigente\nConteudo: Registrar a descricao do objeto, local e horario informados pelo passageiro. Consultar o registro local de achados e perdidos e fornecer o protocolo ficticio. Objetos nao localizados devem permanecer registrados para consulta posterior.\n\nPergunta do usuario: Como devo registrar um objeto perdido?",
+  "scope": "núcleo RAG local, sem classificador, LLM, contêiner ou publicação"
+}
