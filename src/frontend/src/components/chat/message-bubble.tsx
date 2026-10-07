@@ -7,6 +7,7 @@ import { ProactiveSuggestion } from '@/components/chat/proactive-suggestion';
 import { ReportWorkflowCard } from '@/components/chat/report-workflow-card';
 import { AlertWorkflowCard } from '@/components/chat/alert-workflow-card';
 import { DataChangeCard } from '@/components/chat/data-change-card';
+import { ResponseBlocks } from '@/components/chat/response-blocks';
 import { SourceCitations } from '@/components/chat/source-citations';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -132,6 +133,13 @@ function AssistantMessage({
         ) : (
           <>
             <MarkdownMessage content={message.content} />
+            {message.evidenceStatus !== 'insufficient' && (
+              <ResponseBlocks
+                blocks={message.blocks ?? []}
+                sources={message.sources ?? []}
+                onSelectSource={onSelectSource}
+              />
+            )}
             {message.speech?.status === 'available' && message.speech.data_base64 && (
               <SpeechPlayer data={message.speech.data_base64} />
             )}

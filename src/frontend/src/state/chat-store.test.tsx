@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { ChatStoreProvider, useChatStore } from './chat-store';
 import { response } from '@/tests/fixtures';
+import { responseBlocks } from '@/tests/response-blocks-fixture';
 
 function AuthenticatedWrapper({ children }: { children: ReactNode }) {
   return <ChatStoreProvider accessToken="test">{children}</ChatStoreProvider>;
@@ -268,4 +269,44 @@ describe('Estado e integração do chat', () => {
     act(() => result.current.setShowTechnicalDetails(true));
     expect(result.current.showTechnicalDetails).toBe(true);
   });
+});
+
+describe('Preservação de blocos estruturados nos canais', () => {
+  it.each(['text', 'audio'] as const)(
+    'preserva os três tipos no canal %s',
+    async (channel) => {
+      const chat = { ...response, contract_version: '1.2.0', blocks: responseBlocks };
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue(
+          new Response(
+            JSON.stringify(
+              channel === 'text'
+                ? chat
+                : {
+                    pipeline_status: 'completed',
+                    chat,
+                    transcription: {
+                      text: 'avanço',
+                      confidence: 1,
+                      duration_seconds: 1,
+                    },
+                  },
+            ),
+          ),
+        ),
+      );
+      const { result } = renderHook(useChatStore, { wrapper: AuthenticatedWrapper });
+      await act(async () => {
+        expect(
+          await (channel === 'text'
+            ? result.current.sendMessage('avanço')
+            : result.current.sendAudio(new Blob(['wav']))),
+        ).toBe(true);
+      });
+      expect(result.current.activeConversation?.messages[1].blocks).toEqual(
+        responseBlocks,
+      );
+    },
+  );
 });
