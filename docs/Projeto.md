@@ -4113,6 +4113,9 @@ A rastreabilidade entre ação, estado e contrato ajuda a localizar uma alteraç
 | Interromper | `stop` aborta o controlador pendente | `AbortSignal` recebido pelo cliente comum | O indicador termina e nenhuma resposta tardia é aplicada. |
 | Trocar ou excluir conversa | `selectConversation` ou `deleteConversation` despacha no reducer | Nenhuma chamada HTTP | Histórico, fontes e documento selecionado mudam apenas na sessão. |
 | Abrir uma fonte | seleção derivada de `activeSources` | Nenhuma nova chamada HTTP | `DocumentViewer` mostra metadados e o trecho já devolvido pela API. |
+| Confirmar, cancelar ou desfazer uma alteração de dados | `updateDataChange` guarda a fase do cartão na mensagem | `confirmDataChange`, `cancelDataChange` e `undoDataChange` em `lib/api/data-changes.ts` | `DataChangeCard` mostra o valor gravado, o cancelamento, o erro ou o valor restaurado. |
+
+A alteração de dados pelo chat (S5-07, sobre o contrato da Seção 8.5.13) usa o cartão `DataChangeCard`. Quando a resposta traz `data_change`, o cartão mostra o valor antes e depois e os avisos, e a gravação só acontece no botão **Confirmar alteração**. Depois disso o cartão oferece **Desfazer** enquanto a janela de 15 minutos estiver aberta. Cancelamento e erro encerram o cartão informando que nada foi gravado, e **Tentar de novo** aparece só quando repetir adianta. **Histórico do campo** consulta a API ao ser aberto. Como a fase fica na mensagem, reabrir a conversa não oferece confirmar de novo.
 
 Essa cadeia também define onde testar: componentes verificam a apresentação, a store verifica concorrência e associação à conversa, o cliente verifica serialização e erros, e o Playwright atravessa as quatro camadas pelo comportamento observável.
 

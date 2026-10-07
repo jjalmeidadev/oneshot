@@ -39,6 +39,7 @@ import {
   deriveConversationTitle,
   type ChatMessage,
   type Conversation,
+  type DataChangeState,
   type RetrievedDocument,
 } from '@/lib/domain';
 
@@ -89,7 +90,8 @@ type Action =
   | { type: 'set-document-panel'; open: boolean }
   | { type: 'set-document-sheet'; open: boolean }
   | { type: 'set-sidebar'; open: boolean }
-  | { type: 'update-workflow'; workflow: GuidedWorkflowSession };
+  | { type: 'update-workflow'; workflow: GuidedWorkflowSession }
+  | { type: 'update-data-change'; messageId: string; dataChange: DataChangeState };
 
 function createConversation(): Conversation {
   const now = new Date().toISOString();
@@ -234,6 +236,23 @@ function reducer(state: State, action: Action): State {
         })),
       };
 
+    case 'update-data-change':
+      return {
+        ...state,
+        conversations: state.conversations.map((conversation) =>
+          conversation.messages.some((message) => message.id === action.messageId)
+            ? {
+                ...conversation,
+                messages: conversation.messages.map((message) =>
+                  message.id === action.messageId
+                    ? { ...message, dataChange: action.dataChange }
+                    : message,
+                ),
+              }
+            : conversation,
+        ),
+      };
+
     default:
       return state;
   }
@@ -300,6 +319,8 @@ type ChatStoreValue = {
   confirmWorkflow: (workflow: GuidedWorkflowSession) => Promise<void>;
   cancelWorkflow: (workflow: GuidedWorkflowSession) => Promise<void>;
   downloadArtifact: (workflow: WorkflowSessionResponse) => Promise<void>;
+  /** Guarda na mensagem o que a pessoa fez no cartao de alteracao. */
+  updateDataChange: (messageId: string, dataChange: DataChangeState) => void;
 };
 
 const ChatStoreContext = createContext<ChatStoreValue | null>(null);
@@ -770,6 +791,8 @@ export function ChatStoreProvider({
       confirmWorkflow,
       cancelWorkflow,
       downloadArtifact,
+      updateDataChange: (messageId, dataChange) =>
+        dispatch({ type: 'update-data-change', messageId, dataChange }),
     }),
     [
       view.conversations,
