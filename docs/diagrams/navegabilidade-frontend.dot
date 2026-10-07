@@ -1,0 +1,45 @@
+digraph nav {
+  graph [rankdir=LR, fontname="DejaVu Sans", fontsize=13, nodesep=0.22, ranksep=0.9, bgcolor="white", pad=0.3, newrank=true, splines=spline];
+  node  [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=11, color="#2864a4", fillcolor="#eef3fa", penwidth=1.2, margin="0.14,0.07", width=3.2];
+  edge  [fontname="DejaVu Sans", fontsize=9.5, color="#4a5568", arrowsize=0.7];
+
+  entrada [label="Tela de entrada\n(AccessScreen)\npersona + senha", fillcolor="#2864a4", fontcolor="white", width=2];
+
+  subgraph cluster_shell {
+    label="Área de trabalho (AppShell)"; labeljust=l; style="rounded"; color="#9aa9bd"; fontcolor="#1a2b45";
+    conversas [label="Conversas\nnova · buscar · selecionar · excluir\nfixa a partir de 1024 px;\ndiálogo abaixo disso", width=2.6];
+    vazio  [label="Chat vazio\nsugestões de pergunta", width=2.2];
+    conversa [label="Conversa\nmensagens, citações [n],\ncampo de texto e microfone", width=2.4, penwidth=2];
+
+    subgraph cluster_cards {
+      label="Cartões na mensagem do agente"; labeljust=l; style="rounded,dashed"; color="#b8c4d4";
+      relatorio [label="Relatório guiado\nperguntas → revisão → gerando → DOCX"];
+      alerta [label="Alerta de prazo\nperguntas → confirmação → inscrição ativa"];
+      alteracao [label="Alteração de dados (S5-07)\nprévia → confirmada → desfazer (15 min)\nou cancelada / erro"];
+      sugestao [label="Sugestão proativa\naceitar · recusar · desativar"];
+    }
+    subgraph cluster_side {
+      label="Painéis, menus e voz"; labeljust=l; style="rounded,dashed"; color="#b8c4d4";
+      ajustes [label="Ajustes do agente (engrenagem)\nvalidação de intenção · proativas\ndetalhes técnicos · perfil · Sair"];
+      sino [label="Notificações (sino)\nler · pausar / retomar / cancelar alerta"];
+      fontes [label="Fontes da resposta\nabas Fontes | Resposta (modo técnico)\nfixo a partir de 1280 px; diálogo abaixo"];
+      voz [label="Entrada por voz\ngravar (até 60 s) → concluir →\nprévia → enviar ou descartar"];
+    }
+  }
+
+  entrada -> conversas [style=invis];
+  entrada -> vazio [label="Entrar →\n← Sair (engrenagem) ou 401", dir=both];
+  conversas -> vazio [label="Nova conversa"];
+  conversas -> conversa [label="selecionar"];
+  vazio -> conversa [label="enviar texto\nou sugestão"];
+
+  conversa -> relatorio [label="intenção relatório"];
+  conversa -> alerta [label="intenção alerta"];
+  conversa -> alteracao [label="data_change"];
+  conversa -> sugestao [label="proatividade ligada"];
+  conversa -> voz [label="microfone /\ntranscrição volta", dir=both];
+  conversa -> fontes [label="citação [n] ou Fontes"];
+  conversa -> ajustes [label="cabeçalho", style=dashed];
+  conversa -> sino [label="cabeçalho", style=dashed];
+
+}

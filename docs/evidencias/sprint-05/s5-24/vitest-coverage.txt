@@ -1,0 +1,125 @@
+2026-10-07T01:27:11+00:00
+
+ RUN  v5.0.0 src/frontend
+      Coverage enabled with v8
+
+ ✓ src/components/layout/app-shell.test.tsx (7 tests) 3162ms
+   ✓ AppShell, barra lateral, sessão e tema (7)
+     ✓ integra envio, fontes, busca, seleção, exclusão e tema 1226ms
+     ✓ perfil aparece na engrenagem, sem campo de token, e AppShell anuncia falhas 347ms
+     ✓ tela padrão sem detalhes técnicos, que voltam pelo modo técnico 466ms
+     ✓ entre 1024 e 1279 px as fontes deslizam e devolvem o foco ao fechar 453ms
+ ✓ src/state/access-session.test.tsx (7 tests) 2170ms
+   ✓ Sessão de acesso em memória (7)
+     ✓ abre a aplicação quando persona e perfil real correspondem sem expor a senha 419ms
+     ✓ logout desmonta o ChatStore e remove a conversa da persona anterior 674ms
+     ✓ 401 encerra a sessão, enquanto 403 preserva o perfil validado 491ms
+ ✓ src/components/components.test.tsx (25 tests) 898ms
+ ✓ src/components/chat/data-change-flow.test.tsx (2 tests) 836ms
+   ✓ alteração de dados pelo chat na aplicação (2)
+     ✓ a resposta do chat vira cartão; confirmado, ele não volta a pedir confirmação 833ms
+ ✓ src/components/settings/agent-settings.test.tsx (6 tests) 699ms
+   ✓ AgentSettings (6)
+     ✓ fica recolhida até o usuário abrir a engrenagem 329ms
+ ✓ src/components/chat/data-change-card.test.tsx (14 tests) 888ms
+ ✓ src/components/chat/report-workflow-card.test.tsx (3 tests) 471ms
+ ✓ src/components/documents/references.test.tsx (3 tests) 252ms
+ ✓ src/components/notifications/notification-center.test.tsx (2 tests) 303ms
+ ✓ src/components/chat/alert-workflow-card.test.tsx (1 test) 129ms
+ ✓ src/components/sidebar/user-card.test.tsx (2 tests) 205ms
+ ✓ src/hooks/use-audio-recorder.test.tsx (5 tests) 135ms
+ ✓ src/state/chat-store.test.tsx (9 tests) 49ms
+ ✓ src/lib/audio.test.ts (1 test) 44ms
+ ✓ src/lib/api/client.test.ts (17 tests) 30ms
+ ✓ src/lib/domain.test.ts (2 tests) 6ms
+
+ Test Files  16 passed (16)
+      Tests  106 passed (106)
+   Start at  01:27:12
+   Duration  26.67s (tests 43%, environment 35%, import 10%, setup 7%, transform 3%, worker 3%)
+
+    Isolate  16 workers spawned · ~608ms startup each (spawn + environment, per file)
+             at least ~9.12s faster with isolate: false — reuses workers across files instead of one per file
+
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   82.13 |    75.51 |   80.36 |   84.93 |                   
+ components/access |    93.1 |       80 |   71.42 |   96.29 |                   
+  ...ss-screen.tsx |    93.1 |       80 |   71.42 |   96.29 | 92                
+ components/chat   |    85.4 |    84.39 |   81.35 |   86.93 |                   
+  ...flow-card.tsx |   29.62 |    47.05 |   15.38 |   33.33 | 15-28,50-105      
+  ...pty-state.tsx |     100 |      100 |     100 |     100 |                   
+  chat-header.tsx  |     100 |      100 |     100 |     100 |                   
+  ...ange-card.tsx |   91.34 |    90.69 |   93.93 |    94.5 | ...06,154-155,564 
+  ...e-history.tsx |   90.32 |    75.86 |   88.88 |   91.66 | 56,103            
+  intent-badge.tsx |     100 |       50 |     100 |     100 | 44-97             
+  ...n-message.tsx |   57.14 |      100 |   57.14 |   57.14 | 22,29,35-55       
+  ...ge-bubble.tsx |     100 |     86.2 |     100 |     100 | 59,134-137        
+  message-list.tsx |     100 |    88.88 |     100 |     100 | 44                
+  ...uggestion.tsx |     100 |       80 |     100 |     100 | 49,75-89,117-121  
+  ...flow-card.tsx |   93.47 |     82.5 |    92.3 |   92.85 | 36,104,169        
+  ...citations.tsx |     100 |      100 |     100 |     100 |                   
+  ...indicator.tsx |     100 |      100 |     100 |     100 |                   
+ ...nents/composer |   81.57 |    74.19 |   72.72 |   85.71 |                   
+  audio-button.tsx |     100 |      100 |     100 |     100 |                   
+  composer.tsx     |   74.07 |    72.72 |   57.14 |   79.16 | 70-72,91-115      
+  ...rding-bar.tsx |     100 |    63.63 |     100 |     100 | 88-117,127        
+ ...ents/documents |   95.65 |    81.81 |   92.85 |   95.65 |                   
+  ...ment-card.tsx |     100 |       50 |     100 |     100 | 21-54             
+  ...ent-panel.tsx |   88.88 |      100 |      75 |   88.88 | 133               
+  ...nt-viewer.tsx |     100 |    95.45 |     100 |     100 | 34                
+  ...e-details.tsx |     100 |       75 |     100 |     100 | ...62-174,279-285 
+ components/layout |   84.61 |       86 |      75 |    87.5 |                   
+  app-shell.tsx    |   83.67 |    84.78 |   73.68 |   86.66 | 140,181-195       
+  theme-toggle.tsx |     100 |      100 |     100 |     100 |                   
+ .../notifications |   62.85 |       25 |   28.57 |   65.62 |                   
+  ...on-center.tsx |   62.85 |       25 |   28.57 |   65.62 | 54-70,102-160     
+ ...nents/settings |     100 |      100 |     100 |     100 |                   
+  ...-settings.tsx |     100 |      100 |     100 |     100 |                   
+ ...onents/sidebar |   95.45 |    86.36 |     100 |     100 |                   
+  ...tion-item.tsx |     100 |      100 |     100 |     100 |                   
+  ...n-sidebar.tsx |     100 |    93.75 |     100 |     100 | 34                
+  user-card.tsx    |   84.61 |    72.22 |     100 |     100 | 14-41,73          
+ components/ui     |   96.87 |     92.3 |   89.47 |   96.87 |                   
+  badge.tsx        |     100 |      100 |     100 |     100 |                   
+  button.tsx       |     100 |      100 |     100 |     100 |                   
+  dialog.tsx       |   93.33 |       90 |      75 |   93.33 | 83                
+  empty-state.tsx  |     100 |      100 |     100 |     100 |                   
+  meter.tsx        |     100 |      100 |     100 |     100 |                   
+  popover.tsx      |     100 |      100 |     100 |     100 |                   
+  scroll-area.tsx  |     100 |       80 |     100 |     100 | 39                
+  separator.tsx    |     100 |       75 |     100 |     100 | 16                
+  skeleton.tsx     |       0 |      100 |       0 |       0 | 4                 
+  switch.tsx       |     100 |      100 |     100 |     100 |                   
+  tabs.tsx         |     100 |      100 |     100 |     100 |                   
+  textarea.tsx     |     100 |      100 |     100 |     100 |                   
+  tooltip.tsx      |     100 |      100 |     100 |     100 |                   
+ hooks             |   85.26 |    63.51 |   85.71 |   90.05 |                   
+  ...o-recorder.ts |   83.33 |       60 |   82.35 |    87.9 | ...72-178,185-193 
+  ...e-textarea.ts |   92.85 |       75 |     100 |     100 | 12,23             
+  ...edia-query.ts |   92.85 |      100 |   85.71 |     100 |                   
+  use-theme.ts     |    87.5 |    64.28 |   88.88 |    90.9 | 10,25             
+ lib               |    72.8 |    56.04 |      96 |   78.78 |                   
+  audio.ts         |   59.52 |    28.57 |   66.66 |   60.52 | 34-49             
+  domain.ts        |      85 |    63.04 |     100 |     100 | ...05-324,382-383 
+  format.ts        |   78.43 |    52.63 |     100 |   86.04 | 65,79-82,91       
+  utils.ts         |     100 |      100 |     100 |     100 |                   
+ lib/api           |   80.32 |    76.25 |      75 |   80.86 |                   
+  access.ts        |      50 |       50 |      50 |      50 | 40-46             
+  ...t-workflow.ts |       0 |      100 |       0 |       0 | 5-64              
+  audio.ts         |     100 |    83.33 |     100 |     100 | 38-39             
+  chat.ts          |      50 |        0 |   66.66 |      50 | 82-86             
+  client.ts        |   87.87 |    84.78 |   85.71 |   87.09 | 111,116,119,125   
+  constants.ts     |     100 |      100 |     100 |     100 |                   
+  data-changes.ts  |   92.85 |       75 |     100 |    92.3 | 120               
+  notifications.ts |      50 |      100 |      50 |      50 | 18,38             
+  ...t-workflow.ts |   78.94 |       25 |     100 |   83.33 | 95-97             
+  ...ion-events.ts |     100 |      100 |     100 |     100 |                   
+ state             |      75 |    66.28 |   75.43 |   77.54 |                   
+  ...s-session.tsx |   96.77 |       75 |     100 |   96.77 | 111               
+  chat-store.tsx   |   71.62 |    66.06 |   70.83 |   74.24 | ...40,781,786,830 
+  ...-provider.tsx |   85.71 |       50 |     100 |   85.71 | 29                
+-------------------|---------|----------|---------|---------|-------------------
+EXIT 0

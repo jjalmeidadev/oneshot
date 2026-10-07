@@ -185,6 +185,7 @@
     - [8.5.11 Alerta autônomo de prazo](#8511-alerta-autônomo-de-prazo)
     - [8.5.12 Webhooks e mensageria integrados (S5-09 a S5-11)](#8512-webhooks-e-mensageria-integrados-s5-09-a-s5-11)
     - [8.5.13 Contrato de alteração de dados pelo chat (S5-05)](#8513-contrato-de-alteração-de-dados-pelo-chat-s5-05)
+    - [8.5.14 Front-end: navegabilidade, estratégia de construção e testes (S5-24)](#8514-front-end-navegabilidade-estratégia-de-construção-e-testes-s5-24)
   - [8.6 Requisitos das APIs de voz (STT/TTS)](#86-requisitos-das-apis-de-voz-stttts)
     - [8.6.1 Objetivo e delimitação](#861-objetivo-e-delimitação)
     - [8.6.2 Entradas, saídas e formatos](#862-entradas-saídas-e-formatos)
@@ -3714,7 +3715,7 @@ app/tests/test_sharepoint_rag.py::test_builds_prompt_with_source_labels_and_disc
 158 passed, 11 warnings in 15.69s
 ```
 
-**Verificação atual após a integração da interface.** A execução local em 10 de setembro de 2026 aprovou 171 testes do back-end, 46 testes unitários do front-end e 8 testes de navegador — quatro cenários em desktop e os mesmos quatro em celular. Também passaram lint sem avisos, verificação de formatação e build de produção. O merge da integração ponta a ponta acrescentou quatro testes de rota depois dessa execução, levando o back-end a 175 testes, conforme a Seção 8.11.7. A cobertura unitária do front-end foi de 87,10% das linhas, 84,33% das instruções, 73,12% das ramificações e 83,83% das funções. Os comandos, a matriz por comportamento e os limites da evidência estão em `src/frontend/TESTES.md`.
+**Verificação atual após a integração da interface.** A execução local em 10 de setembro de 2026 aprovou 171 testes do back-end, 46 testes unitários do front-end e 8 testes de navegador — quatro cenários em desktop e os mesmos quatro em celular. Também passaram lint sem avisos, verificação de formatação e build de produção. O merge da integração ponta a ponta acrescentou quatro testes de rota depois dessa execução, levando o back-end a 175 testes, conforme a Seção 8.11.7. A cobertura unitária do front-end foi de 87,10% das linhas, 84,33% das instruções, 73,12% das ramificações e 83,83% das funções. Os comandos, a matriz por comportamento e os limites da evidência estão em `src/frontend/TESTES.md`. A medição da Sprint 5, com data, commit e cobertura por área, está na Seção 8.5.14.
 
 **Cobertura ainda não atingida.** O teste de navegador atravessa front-end, FastAPI, validação WAV e pipeline, mas substitui Azure, Gemini e classificação nas fronteiras externas. Continuam sem evidência local as chamadas reais aos provedores, autenticação Entra ID, SharePoint corporativo, persistência PostgreSQL, latência de produção e validação manual completa com tecnologia assistiva. Os resultados determinísticos não devem ser usados como aprovação desses itens.
 
@@ -3900,6 +3901,8 @@ O envio por texto aceita uma sugestão ou mensagem digitada, usa `Enter` para en
 Cada conversa mantém seu último `interaction_id`, mensagens, fontes e preferências enquanto a página permanece aberta. Criar ou selecionar outra conversa cancela a espera corrente, e o identificador interno da requisição impede que um retorno atrasado seja inserido no destino errado. A busca e a exclusão alteram apenas o estado local. Recarregar a página remove histórico e token; o tema é a única preferência com persistência prevista.
 
 No desktop, as três áreas ficam lado a lado. Abaixo de 1024 px, conversas e documentos abrem em diálogos que podem ser fechados com `Escape`. Estados de carregamento e mudanças relevantes possuem anúncios para tecnologias assistivas, os controles têm nomes acessíveis e o foco retorna ao contexto apropriado ao fechar um diálogo. Essas propriedades fazem parte dos testes descritos em `src/frontend/TESTES.md`, não apenas do desenho visual.
+
+O mapa de navegação, os fluxos entre telas, a estratégia de construção e a medição atual dos testes do front-end estão na Seção 8.5.14.
 
 ### 8.5.8 Back-end: ciclo de processamento
 
@@ -4636,6 +4639,153 @@ chamada é feita ao provedor de LLM.
 - **A carga continua com uma regra ativa por usuário** (Seção 4.3.1). Mesmo
   assim, o contrato já exige a verificação pela regra que cobre o alvo, para que
   várias regras não abram uma escrita indevida.
+
+### 8.5.14 Front-end: navegabilidade, estratégia de construção e testes (S5-24)
+
+Esta seção reúne, para o front-end em `src/frontend`, três coisas que a Seção 8.5.7 só cita: como a pessoa usuária se move entre as telas, por que o código foi construído do jeito que está e quais testes verificam cada fluxo, com a cobertura medida. A versão descrita é a do commit `f7ba157`, que soma à `develop` de 06/10/2026 a interface de alteração de dados da S5-07 (Seção 8.5.13), ainda em revisão no momento da medição.
+
+#### Mapa de navegação
+
+A aplicação tem só duas telas de verdade: a de **entrada** e a **área de trabalho**. Não existem rotas de URL. Quem decide qual das duas aparece é o estado da sessão: o `SessionBoundary`, em `App.tsx`, mostra a entrada enquanto não há sessão válida e a área de trabalho depois do login. Todo o resto acontece dentro da área de trabalho, de dois jeitos: em painéis e menus que abrem ao lado ou por cima do chat, ou em cartões que aparecem dentro da própria mensagem do agente.
+
+<p align="center"><img src="img/navegabilidade-frontend.png" alt="Mapa de navegação do front-end: da tela de entrada para a área de trabalho, onde a conversa dá acesso a painéis, menus, entrada por voz e cartões de relatório, alerta, alteração de dados e sugestão proativa" width="100%"></p>
+
+<p align="center"><strong>Figura 28</strong> - Mapa de navegação do front-end.<br><sup>Fonte: Material produzido pelos autores, 2026. Fonte editável em <code>docs/diagrams/navegabilidade-frontend.dot</code>.</sup></p>
+
+A Figura 28 parte da tela de entrada. **Entrar** leva ao chat vazio. **Sair**, na engrenagem, ou uma sessão expirada (HTTP 401) trazem de volta à entrada, de qualquer ponto da área de trabalho. Um HTTP 403 não derruba a sessão: a ação negada mostra erro e o perfil continua válido. A conversa é o centro da área de trabalho: dela saem os painéis, os menus e os cartões.
+
+| Tela ou elemento | Como se chega | O que permite | Como se sai |
+| --- | --- | --- | --- |
+| Tela de entrada (`AccessScreen`) | Abrir a aplicação sem sessão, **Sair** ou sessão expirada (401). | Escolher a persona (PMO, Líder de subportfólio, Gerente de projeto ou Consulta) e informar a senha, validada no Supabase Auth. | **Entrar** abre a área de trabalho. Credencial inválida mantém a tela, limpa a senha e devolve o foco ao campo da persona. |
+| Chat vazio (`ChatEmptyState`) | Primeiro acesso ou **Nova conversa**. | Escolher uma sugestão de pergunta, digitar ou gravar. | O primeiro envio cria a conversa. |
+| Conversa (`MessageList` e `Composer`) | Enviar uma mensagem ou selecionar uma conversa. | Ler respostas em Markdown, abrir citações `[n]`, ver o erro controlado e usar **Interromper resposta** durante o envio. | Trocar de conversa cancela a espera em andamento. |
+| Conversas (`ConversationSidebar`) | Fixa à esquerda a partir de 1024 px. Abaixo disso, **Abrir conversas** abre um diálogo. | Criar, buscar por título ou conteúdo, selecionar e excluir conversas da sessão. | Selecionar ou **Escape** fecha o diálogo e devolve o foco ao botão que o abriu. |
+| Fontes da resposta (`DocumentPanel`) | Uma citação `[n]` ou o botão **Fontes** do cabeçalho. O painel começa fechado. Fica fixo a partir de 1280 px e vira diálogo abaixo disso. | Ver a lista de fontes, o trecho recuperado e a origem. A aba **Resposta**, com as métricas, só aparece no modo técnico. | O mesmo botão ou **Escape**. |
+| Ajustes do agente (`AgentSettings`) | Engrenagem do cabeçalho. | Ligar a validação de intenção, as sugestões proativas (que dependem da validação) e os detalhes técnicos, ver o perfil da sessão e sair. Os controles ficam bloqueados enquanto há uma resposta em andamento. | **Escape**. **Sair** volta para a entrada. |
+| Notificações (`NotificationCenter`) | Sino do cabeçalho, com a contagem de não lidas. A lista é atualizada a cada 30 segundos. | Marcar notificações como lidas e pausar, retomar ou cancelar inscrições de alerta. | **Escape**. |
+| Entrada por voz (`AudioButton`, `RecordingBar` e `RecordingPreview`) | Microfone no campo de mensagem. Exige sessão e permissão do navegador. | Gravar até 60 segundos, concluir e ouvir a prévia. | **Enviar áudio** transforma a transcrição em mensagem. **Descartar** apaga a captura. |
+| Cartão de relatório (`ReportWorkflowCard`) | Resposta classificada como `transacao_gerar_relatorio`. | Responder às perguntas, revisar, confirmar a geração e acompanhar o processamento. | **Baixar no chat** entrega o DOCX. Também é possível cancelar. |
+| Cartão de alerta (`AlertWorkflowCard`) | Resposta classificada como `alerta_prazo_atraso`. | Configurar o limiar e confirmar a inscrição. | A inscrição ativa passa a ser gerida pelo sino. |
+| Cartão de alteração de dados (`DataChangeCard`, S5-07) | Resposta do chat com `data_change`. | Ver a prévia (antes, depois e avisos), confirmar com justificativa opcional, desfazer em até 15 minutos e abrir o histórico do campo. | Confirmada, cancelada, desfeita ou com erro. A fase fica salva na mensagem, então reabrir a conversa não pede confirmação de novo. |
+| Sugestão proativa (`ProactiveSuggestion`) | Validação de intenção e sugestões proativas ligadas, e o backend propõe uma intenção secundária. | Aceitar, recusar ou desativar as sugestões, tudo no mesmo cartão. | A decisão substitui os botões e o foco vai para o resultado. |
+
+#### Fluxos entre telas
+
+Os fluxos abaixo são os caminhos completos que a interface precisa sustentar. A última coluna indica onde cada um é verificado. Os testes unitários aparecem pelo nome do arquivo e os de navegador pelo nome do cenário no Playwright.
+
+| Fluxo | Caminho | Resultado esperado | Verificado em |
+| --- | --- | --- | --- |
+| F1 — Entrar e sair | Entrada → chat vazio → engrenagem → **Sair** → entrada | O token só existe na memória. O logout desmonta o estado do chat e apaga as conversas da persona anterior. Um 401 encerra a sessão e um 403 a preserva. | `access-session.test.tsx`; `app-shell.test.tsx`; E2E "autentica a persona, envia Bearer e limpa o chat no logout" |
+| F2 — Consulta por texto | Chat vazio → conversa → citação `[n]` → fontes | A resposta aparece com as citações. A fonte abre com o trecho e a origem, sem inventar métricas ausentes. | `components.test.tsx`; `references.test.tsx`; `chat-store.test.tsx`; E2E "texto, fontes, modo técnico e navegação responsiva" |
+| F3 — Consulta por voz | Conversa → microfone → concluir → prévia → **Enviar áudio** → conversa | O áudio sai em WAV PCM mono, 16 bits e 16 kHz. A transcrição vira mensagem da pessoa usuária e a resposta segue o mesmo caminho do texto. | `use-audio-recorder.test.tsx`; `audio.test.ts`; `chat-store.test.tsx`; E2E "gravação sintética, WAV, upload e resposta pelo backend" |
+| F4 — Relatório guiado | Conversa → cartão (perguntas) → revisão → **Confirmar e gerar DOCX** → **Baixar no chat** | O cartão coleta escopo, período, público e ênfases, exige confirmação e entrega um DOCX válido sem sair do chat. | `report-workflow-card.test.tsx`; `client.test.ts`; E2E "PLN inicia fluxo guiado e entrega DOCX baixavel no chat" |
+| F5 — Alerta de prazo | Conversa → cartão → confirmação → inscrição ativa → sino | A inscrição confirmada mostra a próxima avaliação. Depois ela pode ser pausada, retomada ou cancelada pelo sino. | `alert-workflow-card.test.tsx`; `notification-center.test.tsx`. Ainda sem cenário de navegador. |
+| F6 — Alteração de dados | Conversa → prévia → **Confirmar alteração** → **Desfazer** ou **Histórico do campo**. Alternativas: **Cancelar** ou erro. | Nada é gravado antes da confirmação. O cancelamento informa que nada foi gravado. O erro final não oferece repetir. Desfazer só aparece dentro da janela. | `data-change-card.test.tsx`; `data-change-flow.test.tsx`; E2E "prévia, confirmação, histórico e desfazer" e "cancelamento não grava e erro final não oferece repetir" |
+| F7 — Sugestão proativa | Engrenagem → ligar validação e proativas → resposta com sugestão → aceitar, recusar ou desativar | Nada é executado sem escolha explícita. Recusar preserva a resposta principal. Uma confirmação interrompida devolve a sugestão para pendente. | `components.test.tsx`; `chat-store.test.tsx`; `agent-settings.test.tsx` |
+| F8 — Falha e interrupção | Conversa → erro do provedor ou da rede → mensagem controlada → novo envio. Durante o envio: **Interromper resposta**. | Nenhum detalhe interno aparece na tela. A pergunta é mantida e um novo envio é liberado. Resposta atrasada não é aplicada. | `client.test.ts`; `chat-store.test.tsx`; E2E "falha controlada, recuperação e interrupção" |
+| F9 — Troca de conversa, largura e teclado | Conversas ↔ conversa. Abaixo de 1024 px, conversas e fontes em diálogo. Fluxo completo só pelo teclado. | A resposta atrasada não cai em outra conversa. Não há rolagem horizontal. **Escape** fecha diálogos e devolve o foco. **Pular para o campo de mensagem** é o primeiro Tab. | `chat-store.test.tsx`; `app-shell.test.tsx`; E2E de `responsividade-acessibilidade.spec.ts` |
+
+#### Estratégia de construção
+
+As decisões abaixo explicam a forma do código. Cada uma traz o motivo, para que uma mudança futura saiba o que está trocando.
+
+1. **Duas telas e o resto dentro do chat.** Relatório, alerta, alteração de dados e sugestão proativa aparecem como cartões na mensagem que os originou, e não em telas próprias. Assim a pessoa não perde o contexto da conversa, a confirmação fica visível ao lado do pedido e não foi preciso criar roteamento. A tela padrão também ficou enxuta, como o parceiro pediu na S5-20: validação de intenção, proatividade, modo técnico e perfil foram para a engrenagem, e o painel de fontes só abre quando a pessoa pede.
+2. **A sessão delimita o estado.** O `ChatStoreProvider` recebe `key={session.sessionKey}`. Por isso, trocar de sessão ou sair desmonta todo o estado de conversa em vez de limpá-lo campo a campo. O token e as conversas ficam só em memória. O tema é a única preferência gravada no navegador.
+3. **Camadas com uma direção só.** O caminho é sempre componente → estado (`state/chat-store.tsx`, com reducer) → cliente (`lib/api/`) → backend. Nenhum componente chama `fetch`. Os contratos ficam declarados em `lib/api/schemas.ts` e são convertidos em `lib/domain.ts`, então a interface nunca lê o JSON cru. Isso permite testar cada camada substituindo apenas a de baixo.
+4. **Estados com nome.** Cada cartão tem fases explícitas: o `status` do workflow de relatório e de alerta, e a `phase` da alteração de dados (`idle`, `applied`, `cancelled`, `failed` e `undone`). Cada fase tem a sua renderização. A fase da alteração fica salva na mensagem, e é por isso que voltar à conversa não pede confirmação de novo.
+5. **Falha nunca aparece crua.** O cliente converte os códigos HTTP 400, 401, 403, 413, 422, 429, 500, 502, 503 e 504, a queda de rede e a resposta sem JSON em mensagens próprias. Na tela, essas mensagens usam `role=alert`. HTML de proxy, traceback e texto do provedor não chegam à pessoa usuária.
+6. **Os mesmos componentes em três larguras.** `hooks/use-media-query.ts` define as faixas de 1024 e 1280 px. Conversas e fontes usam o mesmo componente como painel fixo ou como diálogo. Ao fechar um diálogo, o foco volta ao botão que o abriu.
+7. **Acessibilidade como contrato de teste.** Os testes localizam os elementos por papel e nome acessível (`getByRole` e `getByLabelText`), e não por classe CSS. Se um botão perde o nome, o teste quebra. No navegador, o axe roda nos dois temas e nas três larguras.
+8. **Primitivos reutilizados e substitutos só nas bordas.** Diálogos, abas, popovers e switches vêm do Radix, em `components/ui/`. Os testes usam esses componentes reais e só substituem o que está fora do front-end: `fetch`, a store (quando o teste é de um componente isolado) e o microfone.
+9. **Qualidade no pipeline.** O job `frontend-unit` do `.gitlab-ci.yml` roda lint sem avisos, verificação de formatação, testes com cobertura e build. O job `frontend-e2e` roda o Playwright e publica `playwright-report/` e `test-results/` como artefatos, mesmo quando falha.
+
+#### Testes: camadas, casos e resultados esperados
+
+A suíte é dividida pelo que cada camada isola:
+
+| Camada | Ferramenta | O que é real e o que é substituído | Arquivos | Casos |
+| --- | --- | --- | --- | --- |
+| Componentes | Vitest, Testing Library e jsdom | O componente e os primitivos de UI são reais. A store e a API são substituídas quando o componente é testado sozinho. | `components.test.tsx`, `data-change-card`, `report-workflow-card`, `alert-workflow-card`, `references`, `notification-center`, `agent-settings` e `user-card` | 56 |
+| Tela e estado integrados | Vitest | A aplicação, a store e o cliente são reais. Só o `fetch` é substituído. | `app-shell`, `data-change-flow`, `chat-store` e `access-session` | 25 |
+| Cliente HTTP e conversões | Vitest | A serialização, os contratos e a conversão de áudio são reais. `fetch` e microfone são substituídos. | `client`, `domain`, `audio` e `use-audio-recorder` | 25 |
+| Navegador (E2E) | Playwright com Chromium em 1440 × 900, 768 × 1024 e 390 × 844 | O front-end Vite e as rotas FastAPI são reais (`app/tests/e2e_server.py`). Gemini, Azure e o classificador respondem de forma determinística. As rotas da S5-06 são simuladas com `page.route`. | 3 specs | 12 cenários × 3 larguras = 36 execuções |
+
+Casos unitários e o resultado esperado de cada arquivo:
+
+| Arquivo | Casos | Resultado esperado |
+| --- | --- | --- |
+| `components/components.test.tsx` | 25 | Cada componente do chat, do campo de mensagem, das fontes e da barra lateral tem nome acessível, renderiza Markdown sem executar HTML, mostra o erro controlado e a origem do áudio, esconde intenção e modelo fora do modo técnico, envia com Enter e quebra linha com Shift+Enter, bloqueia texto acima do limite e não inventa métricas. |
+| `chat/data-change-card.test.tsx` | 14 | A prévia não grava nada. A confirmação grava e oferece desfazer. O cancelamento informa que nada foi gravado. O erro final não oferece repetir e o erro transitório permite tentar de novo. A janela de 15 minutos e a prévia expirada são respeitadas. Histórico, avisos e perguntas com candidatos ou com valor inválido funcionam. |
+| `chat/data-change-flow.test.tsx` | 2 | Na aplicação real, a resposta com `data_change` vira cartão, e depois de confirmado o cartão não volta a pedir confirmação. Uma resposta sem `data_change` não desenha cartão. |
+| `chat/report-workflow-card.test.tsx` | 3 | O cartão envia a opção escolhida, coleta intervalo, seleção múltipla e texto opcional, confirma, cancela e baixa o artefato. |
+| `chat/alert-workflow-card.test.tsx` | 1 | Depois da confirmação, o cartão mostra a próxima avaliação automática. |
+| `documents/references.test.tsx` | 3 | A fonte mostra identificadores e períodos disponíveis. Fontes consultadas que não sustentam a resposta são sinalizadas. |
+| `notifications/notification-center.test.tsx` | 2 | O resumo de não lidas é acessível e as notificações abrem a partir do sino. |
+| `settings/agent-settings.test.tsx` | 6 | A engrenagem começa fechada, troca os modos, bloqueia a proatividade sem a validação de intenção, não troca de modo durante uma resposta e mostra o perfil só quando há sessão. |
+| `sidebar/user-card.test.tsx` | 2 | O perfil, o escopo e as permissões aparecem sem expor o token. O perfil de consulta é descrito como só leitura. |
+| `layout/app-shell.test.tsx` | 7 | A aplicação integra envio, fontes, busca, seleção, exclusão, tema, saída pela engrenagem, atalho de teclado e os diálogos de 1024 a 1279 px e do celular, que devolvem o foco ao fechar. |
+| `state/chat-store.test.tsx` | 9 | A conversa é criada no primeiro envio e preserva o contexto. Não há envio duplicado. Uma resposta atrasada é descartada. A falha libera um novo envio. O áudio exige token. A sugestão aceita, recusada ou interrompida volta ao estado correto. |
+| `state/access-session.test.tsx` | 7 | A aplicação não abre antes da validação. Persona divergente e credencial inválida são recusadas. O logout limpa a persona anterior. Um 401 encerra a sessão e um 403 a preserva. O formulário funciona pelo teclado. |
+| `lib/api/client.test.ts` | 17 | O cliente envia JSON e multipart corretos, executa o workflow com identidade, revisão e idempotência e baixa o DOCX. Os códigos 400 a 504 e a queda de rede viram mensagens controladas. O cancelamento chega até o `fetch`. |
+| `lib/domain.test.ts` | 2 | A conversão preserva evidências, períodos e correlação, e a abstenção não ganha afirmações nem metadados. |
+| `lib/audio.test.ts` | 1 | O áudio sai em PCM mono, 16 bits e 16 kHz, limitado a 60 segundos. |
+| `hooks/use-audio-recorder.test.tsx` | 5 | O gravador converte para WAV, libera o microfone e a prévia, descarta o cancelamento sem upload, libera a captura concedida depois da desmontagem, comunica permissão negada e permite tentar de novo depois de erro. |
+
+Cenários de navegador. Os cenários marcados com "claro e escuro" rodam uma vez em cada tema:
+
+| Cenário (`e2e/`) | Resultado esperado |
+| --- | --- |
+| `chat.spec.ts` — texto, fontes, modo técnico e navegação responsiva | A resposta e a fonte aparecem. A tela padrão não mostra detalhes técnicos. O modo técnico mostra a aba **Resposta**. |
+| `chat.spec.ts` — falha controlada, recuperação e interrupção | O 503 do provedor vira um alerta de indisponibilidade sem o detalhe privado. **Interromper resposta** libera o envio e a pergunta seguinte é respondida. |
+| `chat.spec.ts` — gravação sintética, WAV, upload e resposta pelo backend | O microfone sintético produz um WAV aceito pela validação real e a resposta chega marcada como **Transcrito**. |
+| `chat.spec.ts` — acessibilidade automática e tema nas três larguras | O axe não encontra violações e o tema escuro é aplicado. |
+| `chat.spec.ts` — PLN inicia fluxo guiado e entrega DOCX baixável no chat | O fluxo completo do cartão termina em um arquivo `.docx` válido, que começa por `PK`. |
+| `chat.spec.ts` — autentica a persona, envia Bearer e limpa o chat no logout | As chamadas levam `Authorization: Bearer`. Sair limpa a conversa. |
+| `responsividade-acessibilidade.spec.ts` — largura e verificação automática nos estados principais (claro e escuro) | Nos estados vazio, resposta, ajustes e fontes, não há rolagem horizontal nem violação WCAG 2.0, 2.1 e 2.2 A/AA. |
+| `responsividade-acessibilidade.spec.ts` — fluxo principal só pelo teclado | O primeiro Tab foca **Pular para o campo de mensagem** e o fluxo completo funciona sem mouse. |
+| `alteracao-dados.spec.ts` — prévia, confirmação, histórico e desfazer (claro e escuro) | A prévia mostra o antes e o depois, a confirmação grava, o histórico abre e o desfazer restaura o valor. O axe roda sobre o cartão. |
+| `alteracao-dados.spec.ts` — cancelamento não grava e erro final não oferece repetir | O cancelamento informa que nada foi gravado. O erro final não oferece **Tentar de novo**. |
+
+#### Cobertura medida
+
+A medição foi feita em **06/10/2026, às 22h27 (horário de Brasília)**, sobre o commit `f7ba157`, com Node.js 24.21.0 e Vitest 5.0.0, rodando `npm run test:coverage` em `src/frontend`. Resultado: **106 testes aprovados em 16 arquivos, sem falhas**. O relatório V8 considera os arquivos de `src/components`, `src/hooks`, `src/lib` e `src/state` (62 arquivos), inclusive os que nenhum teste importa. A cobertura dos testes de navegador não entra nesta conta.
+
+| Métrica | Coberto / total | 06/10/2026 | 10/09/2026 (Seção 8.4) | Mínimo proposto na S5-22 |
+| --- | --- | --- | --- | --- |
+| Linhas | 964 / 1.135 | **84,93%** | 87,10% | 80% |
+| Instruções | 1.025 / 1.248 | **82,13%** | 84,33% | 80% |
+| Funções | 307 / 382 | **80,36%** | 83,83% | 75% |
+| Ramificações | 814 / 1.078 | **75,51%** | 73,12% | 70% |
+
+De setembro para cá, a suíte passou de 46 para 106 testes, e o código medido passou de 636 para 1.135 linhas, com autenticação, engrenagem, notificações, alerta e alteração de dados. A cobertura de linhas caiu 2,2 pontos porque o código cresceu mais rápido do que os testes, mas as quatro métricas ficam acima dos mínimos que a S5-22 propõe para o pipeline.
+
+| Área | Linhas | Funções | Ramificações |
+| --- | --- | --- | --- |
+| `components/sidebar` | 100,0% | 100,0% | 86,4% |
+| `components/settings` | 100,0% | 100,0% | 100,0% |
+| `components/ui` | 96,9% | 89,5% | 92,3% |
+| `components/access` | 96,3% | 71,4% | 80,0% |
+| `components/documents` | 95,7% | 92,9% | 81,8% |
+| `hooks` | 90,1% | 85,7% | 63,5% |
+| `components/layout` | 87,5% | 75,0% | 86,0% |
+| `components/chat` | 86,9% | 81,4% | 84,4% |
+| `components/composer` | 85,7% | 72,7% | 74,2% |
+| `lib/api` | 80,9% | 75,0% | 76,2% |
+| `lib` (`domain`, `audio`, `format`, `utils`) | 78,8% | 96,0% | 56,0% |
+| `state` | 77,5% | 75,4% | 66,3% |
+| `components/notifications` | 65,6% | 28,6% | 25,0% |
+
+Os pontos fracos estão concentrados no alerta: `notification-center.tsx` (pausar, retomar e cancelar não são exercitados), `alert-workflow-card.tsx` (33% das linhas) e `lib/api/alert-workflow.ts` (0%). Os ramos de erro da gravação em `lib/audio.ts` também ficam descobertos. `ui/skeleton.tsx` aparece com 0% porque é decorativo e nenhuma tela o usa hoje.
+
+Para reproduzir a medição, use **Node.js 24**, a versão pedida no README e usada pela imagem `node:24-bookworm` do pipeline. Com o Node.js 22, o caso `client.test.ts › baixa o DOCX pelo backend e revoga a URL temporaria` falha por incompatibilidade entre o `Blob` do jsdom e o `Response` do Node. Não é um defeito da aplicação: o mesmo arquivo aprova os 17 casos no Node.js 24. A saída completa e o resumo por arquivo estão em `docs/evidencias/sprint-05/s5-24-documentacao-frontend.md`.
+
+```sh
+cd src/frontend
+npm ci
+npm run test:coverage      # 106 testes e cobertura em coverage/
+npx playwright install chromium
+npm run test:e2e           # 36 execuções; relatório em playwright-report/
+```
 
 ## 8.6 Requisitos das APIs de voz (STT/TTS)
 
@@ -6678,7 +6828,7 @@ Executados em 22 e 23/09/2026 por Henrique Diniz. O índice completo das rodadas
 | `rnf04/avaliar_rnf04.py` | Apura fundamentação e alucinação com numerador e denominador explícitos | Aplica o critério sobre o conjunto completo, nunca sobre um subconjunto escolhido depois |
 | `executar_rodada_rnf.sh` | Encadeia a coleta do RNF04 e as três rodadas do RNF05 numa campanha | Reproduz a execução completa com um comando |
 | SQL em `public.ai_interactions` | Compara o tempo do pipeline, gravado pela auditoria do RNF03, com o tempo do cliente | Separa o custo do sistema do custo do que vem depois do pipeline, sem instrumentação nova |
-| [`evidencias/graficos_rnf05.ipynb`](../src/backend/evidencias/graficos_rnf05.ipynb) | Gera as Figuras 28 e 29 a partir dos CSVs versionados | Nenhum número das figuras é digitado à mão |
+| [`evidencias/graficos_rnf05.ipynb`](../src/backend/evidencias/graficos_rnf05.ipynb) | Gera as Figuras 29 e 30 a partir dos CSVs versionados | Nenhum número das figuras é digitado à mão |
 | OpenRouter | Chama o `gemini-3.7-flash` em plano pago | Mesmo modelo da bancada, sem o limite de 20 requisições por dia do *Free Tier*; o adaptador envia exatamente o mesmo texto que o Gemini direto receberia |
 
 **Comandos do RNF04**, a partir de `src/backend`, com a API no ar como na Seção 9.2.4. Os do RNF05 estão no item 6 da revisão do protocolo, na mesma seção.
@@ -6713,21 +6863,21 @@ Executados em 22 e 23/09/2026 por Henrique Diniz. O índice completo das rodadas
 
 **Estados usados na tabela.** *Aprovado* e *reprovado* comparam o observado com o critério; *validado* indica o cenário negativo que reprovou, como exigido; *inconclusivo* é a janela com menos de 40 amostras em alguma rota, que não aprova nem reprova; *bloqueado* é a execução impedida por dependência externa; *não executado*, o caso que não chegou a rodar.
 
-A Figura 28 compara o P95 de cada rodada positiva com o teto do requisito. As barras vermelhas são as rodadas reprovadas: na 1ª, a comparação com um usuário teve 10 amostras e o P95 coincidiu com a pior requisição; na 2ª, houve um erro com um usuário e P95 simples de 11,0 s com cinco. Na 3ª, com cache quente e com cache frio, todas as rotas ficaram abaixo do teto, com pelo menos 64 amostras cada.
+A Figura 29 compara o P95 de cada rodada positiva com o teto do requisito. As barras vermelhas são as rodadas reprovadas: na 1ª, a comparação com um usuário teve 10 amostras e o P95 coincidiu com a pior requisição; na 2ª, houve um erro com um usuário e P95 simples de 11,0 s com cinco. Na 3ª, com cache quente e com cache frio, todas as rotas ficaram abaixo do teto, com pelo menos 64 amostras cada.
 
 <div align="center">
   <img src="img/rnf05-p95-rodadas.png" alt="P95 da consulta simples e da comparação em cada rodada positiva do RNF05, contra os tetos de 10 e 20 segundos" width="100%">
 </div>
 
-<p align="center"><strong>Figura 28</strong> - RNF05: P95 medido pelo cliente em cada rodada positiva.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
+<p align="center"><strong>Figura 29</strong> - RNF05: P95 medido pelo cliente em cada rodada positiva.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
 
-A Figura 29 abre os percentis da 3ª rodada. As quatro curvas positivas ficam abaixo dos tetos até o P95; a comparação com um usuário tem uma requisição de 13,5 s, que aparece no P99 e no máximo, ainda abaixo do teto de 20 s. A curva do cenário negativo fica acima de 30 s em todos os percentis: a medição enxerga a violação.
+A Figura 30 abre os percentis da 3ª rodada. As quatro curvas positivas ficam abaixo dos tetos até o P95; a comparação com um usuário tem uma requisição de 13,5 s, que aparece no P99 e no máximo, ainda abaixo do teto de 20 s. A curva do cenário negativo fica acima de 30 s em todos os percentis: a medição enxerga a violação.
 
 <div align="center">
   <img src="img/rnf05-rodada3-percentis.png" alt="Mediana, P90, P95, P99 e máximo de cada janela e rota da 3ª rodada do RNF05, com o cenário negativo acima dos tetos" width="100%">
 </div>
 
-<p align="center"><strong>Figura 29</strong> - RNF05: percentis da 3ª rodada por janela e rota, com o cenário negativo.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
+<p align="center"><strong>Figura 30</strong> - RNF05: percentis da 3ª rodada por janela e rota, com o cenário negativo.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
 
 **Registros das execuções aprovadas.** Saídas dos apuradores, reproduzíveis a partir dos arquivos de evidência.
 
@@ -6819,42 +6969,42 @@ O planejamento prevê a realização dos testes com pelo menos cinco usuários e
 
 A planilha de execução funciona como instrumento de campo para o moderador e os observadores. A aba "Registro dos testes" organiza os cenários em blocos sequenciais, mantendo o mesmo padrão visual do modelo do grupo: título da tarefa, descrição da atividade, resultado geral, cinco etapas observáveis e campo de observações por usuário. A aba "Ocorrências" concentra problemas identificados durante as sessões, incluindo tarefa relacionada, severidade, resumo do ocorrido, potenciais melhorias e participante afetado. Dessa forma, o artefato permite registrar tanto o desempenho objetivo em cada etapa quanto evidências qualitativas de dificuldade, dúvida, hesitação, necessidade de ajuda ou quebra de confiança.
 
-As Figuras 30 a 34 apresentam os principais recortes da planilha criada para conduzir e registrar os testes. Esses prints documentam como o roteiro foi operacionalizado em tarefas observáveis, permitindo que diferentes avaliadores registrem os resultados de forma padronizada.
+As Figuras 31 a 35 apresentam os principais recortes da planilha criada para conduzir e registrar os testes. Esses prints documentam como o roteiro foi operacionalizado em tarefas observáveis, permitindo que diferentes avaliadores registrem os resultados de forma padronizada.
 
 <div align="center">
   <img src="img/testes-usabilidade-p1e2.png" alt="Planilha de testes de usabilidade com os cenários 1 e 2" width="900">
-  <p><strong>Figura 30</strong> - Registro dos cenários 1 e 2 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 31</strong> - Registro dos cenários 1 e 2 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 30 apresenta os dois primeiros cenários do roteiro: entrada em linguagem natural e consulta de status ou prazo. Esses cenários validam se o usuário consegue iniciar a interação com o agente sem comandos técnicos e se consegue interpretar uma resposta objetiva, incluindo a verificação da fonte indicada.
+A Figura 31 apresenta os dois primeiros cenários do roteiro: entrada em linguagem natural e consulta de status ou prazo. Esses cenários validam se o usuário consegue iniciar a interação com o agente sem comandos técnicos e se consegue interpretar uma resposta objetiva, incluindo a verificação da fonte indicada.
 
 <div align="center">
   <img src="img/testes-usabilidade-p3e4.png" alt="Planilha de testes de usabilidade com os cenários 3 e 4" width="900">
-  <p><strong>Figura 31</strong> - Registro dos cenários 3 e 4 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 32</strong> - Registro dos cenários 3 e 4 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 31 mostra os cenários voltados à consulta de riscos e à análise comparativa entre projetos. Nessa parte do teste, o observador registra se o participante consegue escolher o tema da consulta, compreender as informações retornadas, pedir detalhes quando necessário e avaliar se a comparação apresentada apoia a tomada de decisão.
+A Figura 32 mostra os cenários voltados à consulta de riscos e à análise comparativa entre projetos. Nessa parte do teste, o observador registra se o participante consegue escolher o tema da consulta, compreender as informações retornadas, pedir detalhes quando necessário e avaliar se a comparação apresentada apoia a tomada de decisão.
 
 <div align="center">
   <img src="img/testes-usabilidade-p5e6.png" alt="Planilha de testes de usabilidade com os cenários 5 e 6" width="900">
-  <p><strong>Figura 32</strong> - Registro dos cenários 5 e 6 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 33</strong> - Registro dos cenários 5 e 6 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 32 registra os cenários de informação ausente ou fora de escopo e de sugestão proativa. Esses testes são importantes para avaliar confiança e controle: o agente deve declarar limites quando não houver informação suficiente e, quando sugerir um próximo passo, deve deixar claro que a ação depende da confirmação do usuário.
+A Figura 33 registra os cenários de informação ausente ou fora de escopo e de sugestão proativa. Esses testes são importantes para avaliar confiança e controle: o agente deve declarar limites quando não houver informação suficiente e, quando sugerir um próximo passo, deve deixar claro que a ação depende da confirmação do usuário.
 
 <div align="center">
   <img src="img/testes-usabilidade-p7.png" alt="Planilha de testes de usabilidade com o cenário 7" width="900">
-  <p><strong>Figura 33</strong> - Registro do cenário 7 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 34</strong> - Registro do cenário 7 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 33 apresenta o cenário de entrada por voz. O objetivo desse bloco é observar se o participante consegue acionar a entrada por áudio, formular uma pergunta curta, conferir a transcrição e obter uma resposta coerente, mantendo o mesmo fluxo previsto para solicitações textuais.
+A Figura 34 apresenta o cenário de entrada por voz. O objetivo desse bloco é observar se o participante consegue acionar a entrada por áudio, formular uma pergunta curta, conferir a transcrição e obter uma resposta coerente, mantendo o mesmo fluxo previsto para solicitações textuais.
 
 <div align="center">
   <img src="img/testes-usabilidade-ocorrencias.png" alt="Planilha de ocorrências dos testes de usabilidade" width="900">
-  <p><strong>Figura 34</strong> - Aba de ocorrências dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 35</strong> - Aba de ocorrências dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 34 apresenta a aba de ocorrências, usada para consolidar problemas identificados durante as sessões. O registro separado por tarefa, severidade, descrição do ocorrido, melhoria potencial e participante afetado permite priorizar correções após os testes, distinguindo falhas críticas de ajustes menores de clareza ou interface.
+A Figura 35 apresenta a aba de ocorrências, usada para consolidar problemas identificados durante as sessões. O registro separado por tarefa, severidade, descrição do ocorrido, melhoria potencial e participante afetado permite priorizar correções após os testes, distinguindo falhas críticas de ajustes menores de clareza ou interface.
 
 Os perfis desejados são:
 
@@ -6944,7 +7094,7 @@ Quatro dicas do moderador foram necessárias, todas nos cenários 5 e 6 e todas 
   <img src="img/usabilidade-resultado-por-cenario.png" alt="Resultado de cada cenário do teste de usabilidade, com a distribuição dos seis participantes entre concluído, concluído com dificuldade e falhou" width="100%">
 </div>
 
-<p align="center"><strong>Figura 35</strong> - Resultado por cenário do teste de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos dados anonimizados das seis sessões.</sup></p>
+<p align="center"><strong>Figura 36</strong> - Resultado por cenário do teste de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos dados anonimizados das seis sessões.</sup></p>
 
 **Ocorrências.**
 
