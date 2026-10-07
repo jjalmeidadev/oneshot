@@ -146,6 +146,28 @@ def _build_evaluation_report(classificador, conjunto_de_teste, predicoes) -> dic
 
 
 class TestClassificacaoDeSolicitacoes:
+    @pytest.mark.parametrize("text,macro,specific", [
+        ("fale sobre os Objetos perdidos", "CONSULTA", None),
+        ("fale sobre o Bilhete digital", "CONSULTA", None),
+        ("Bilhete digital", "CONSULTA", None),
+        ("Como funciona o bilhete digital?", "CONSULTA", None),
+        ("Mostre o status do projeto PRJ-0442", "CONSULTA", "consulta_status_projeto"),
+        ("Mostre o status do projeto XPTO", "CONSULTA", "consulta_status_projeto"),
+        ("Qual é o status do projeto PRJ-0442?", "CONSULTA", "consulta_status_projeto"),
+        ("Reserve uma sala de reunião para amanhã", "FORA_DE_ESCOPO", None),
+        ("Agende uma reunião amanhã", "FORA_DE_ESCOPO", None),
+    ])
+    def test_casos_congelados_issue_282(self, classificador, text, macro, specific):
+        result = classificador.classify(text)
+        assert result.macrointencao == macro
+        assert result.intencao == specific
+        assert result.regra_roteamento is not None
+        if macro == "FORA_DE_ESCOPO":
+            assert result.handler == "limitacao:agendamento"
+            assert result.resposta_sugerida
+        else:
+            assert result.resposta_sugerida is None
+
     def test_consulta_de_status_aciona_o_handler_especifico(
         self, classificador
     ) -> None:

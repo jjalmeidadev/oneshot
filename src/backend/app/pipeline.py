@@ -105,6 +105,28 @@ def process_message(
             raise GeminiConfigurationError("Classificador indisponivel.") from error
 
         intent = _public_intent(result)
+        from app.nlp.routing import SCHEDULING_LIMITATION_HANDLER
+
+        if result.handler == SCHEDULING_LIMITATION_HANDLER:
+            response = GeminiChatResponse(
+                text=result.resposta_sugerida,
+                model="domain-router",
+                latency_ms=0,
+                usage=GeminiUsage(input_tokens=0, output_tokens=0, total_tokens=0),
+                intent=intent,
+                entities=entities,
+                pipeline_metrics=ChatPipelineMetrics(
+                    nlp_ms=nlp_ms, route_ms=_elapsed_ms(route_started_at),
+                ),
+            )
+            _trace_safely(
+                request=request, response=response, intent=intent, entities=entities,
+                processing_ms=response.pipeline_metrics.route_ms, channel=channel,
+                external_conversation_id=external_conversation_id,
+                requester_id=requester_id, user_id=user_id,
+            )
+            return response
+
         fallback_to_rag = (
             not result.roteada
             or result.macrointencao == "FORA_DE_ESCOPO"
@@ -338,6 +360,7 @@ def _public_intent(result: object) -> AudioIntent:
         confidence_specific=result.confianca_intencao,
         flow=getattr(result, "fluxo", ""),
         handler=getattr(result, "handler", ""),
+        routing_rule=getattr(result, "regra_roteamento", None),
         alternatives=[
             IntentAlternative(intent=alternative, confidence=confidence)
             for alternative, confidence in alternatives
