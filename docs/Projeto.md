@@ -320,7 +320,7 @@ A Tabela 1 apresenta os principais termos e abreviações utilizados ao longo de
 | Termo | Descrição |
 |---------|-----------|
 | AI | Artificial Intelligence (Inteligência Artificial). |
-| Copilot | Assistente de Inteligência Artificial da Microsoft utilizado como interface conversacional da solução. |
+| Copilot | Assistente de Inteligência Artificial da Microsoft já usado pelo Metrô. Na solução, o acesso ao agente pelo Copilot está previsto por servidor MCP (S5-18); o Copilot Studio não foi disponibilizado pelo parceiro. |
 | IA | Inteligência Artificial. |
 | LLM | Large Language Model, modelo de linguagem utilizado para compreensão e geração de linguagem natural. |
 | PLN | Processamento de Linguagem Natural, conjunto de técnicas utilizadas para interpretação das solicitações dos usuários. |
@@ -335,7 +335,7 @@ A Tabela 1 apresenta os principais termos e abreviações utilizados ao longo de
 | Teams | Plataforma Microsoft Teams utilizada como principal interface de interação com o agente. |
 | MVP | Minimum Viable Product (Produto Mínimo Viável), correspondente à primeira versão funcional da solução. |
 | SharePoint | Plataforma Microsoft utilizada para armazenamento e organização de documentos corporativos. |
-| Power Platform | Conjunto de ferramentas Microsoft utilizado para desenvolvimento da solução, incluindo Power Automate, Copilot Studio e demais componentes do ecossistema. |
+| Power Platform | Conjunto de ferramentas Microsoft do ambiente do Metrô, que inclui Power Automate e Copilot Studio. Na solução, apenas o Power Automate é usado, como integração opcional dos workflows de relatório. |
 
 ---
 
@@ -1908,7 +1908,7 @@ Os requisitos não funcionais definem os atributos de qualidade que a solução 
 | RNF05 | Desempenho | O pipeline deve processar solicitações textuais em tempo compatível com uma interação conversacional. | Em ambiente de MVP, responder consultas simples em até 10 segundos e análises comparativas em até 20 segundos, considerando o tempo entre o recebimento da solicitação pela API e o retorno da resposta estruturada. | Alta | Atendido na Sprint 4 (3ª rodada) |
 | RNF06 | Qualidade do PLN | O núcleo de PLN deve apresentar desempenho mínimo aceitável na classificação de intenções e na recuperação de informações. | Em conjunto de teste sintético, atingir F1 macro igual ou superior a 0,80 na classificação de intenções e recall igual ou superior a 0,80 na recuperação de informações. | Muito Alta | Reprovado na Sprint 4: F1 0,832724; *recall*@3 0,555556; IC 95% [0,440874; 0,664609] |
 | RNF07 | Usabilidade conversacional | A interação deve permitir solicitações em linguagem natural, sem exigir que o usuário conheça comandos técnicos, estrutura dos dados ou nomes internos dos componentes. | Validar, por meio de casos de teste e testes com usuários, que pelo menos 80% das solicitações formuladas em português sejam compreendidas corretamente ou recebam orientação adequada para reformulação. | Alta | Não iniciado |
-| RNF08 | Aderência tecnológica | A solução deve priorizar tecnologias compatíveis com o ecossistema Microsoft já utilizado pelo Metrô, incluindo Teams, Copilot Studio, Power Platform, SharePoint e Azure. | Verificar que a arquitetura proposta utiliza o Teams como canal principal, API documentada em OpenAPI para integração e componentes compatíveis com o ambiente homologável pelo parceiro. | Muito Alta | Não iniciado |
+| RNF08 | Aderência tecnológica | A solução deve priorizar tecnologias compatíveis com o ecossistema Microsoft já utilizado pelo Metrô (Teams, SharePoint, Entra ID e Azure), sem depender de serviços que o parceiro não disponibilizou, como o Copilot Studio. | Verificar que a API está documentada em OpenAPI válido, que cada componente do runtime tem equivalente Microsoft mapeado na Seção 6.4 e que o canal web pode ser publicado no Teams e acessado pelo Copilot por MCP sem exigir Copilot Studio. Revisado na S5-43 após a decisão do Metrô. | Muito Alta | Não iniciado |
 | RNF09 | Portabilidade | O núcleo de PLN deve ser independente da plataforma final de gestão do portfólio, permitindo substituição futura da camada de dados sem reescrita do pipeline principal. | Verificar que o pipeline consome dados por interfaces ou formatos estruturados e pode ser executado localmente, em contêiner ou em serviço publicado. | Alta | Não iniciado |
 | RNF10 | Manutenibilidade | O código e os artefatos técnicos devem ser organizados de forma a facilitar testes, evolução e manutenção pela equipe. | Validar a existência de separação entre interface, lógica de negócio e acesso a dados, documentação da API, testes automatizados e instruções de execução do serviço. | Alta | Não iniciado |
 | RNF11 | Disponibilidade e tratamento de falhas | A solução deve tratar falhas de classificação, recuperação, indisponibilidade de fonte ou ausência de informação sem interromper a experiência do usuário. | Verificar que 100% dos cenários de erro previstos retornam mensagens controladas, indicando a limitação encontrada, sem expor detalhes técnicos desnecessários ao usuário final. | Alta | Não iniciado |
@@ -1949,9 +1949,11 @@ O parágrafo acima, escrito na Sprint 1, já declara que as metas numéricas des
 
 **O que a revisão não altera.** O resultado da 1ª rodada foi medido com os critérios congelados antes da execução e permanece **não atendido** (Seção 9.2.7). A Seção 9.2.1 proíbe usar resultados observados para flexibilizar a meta depois da medição; por isso as decisões acima valem somente a partir da rodada indicada em cada uma, registradas antes de executá-la, e nenhuma é aplicada retroativamente a uma rodada anterior.
 
-**Provedor da bancada e provedor de produção.** O RNF05 não foi restringido a um ambiente específico. A bancada de teste (Seção 3.4.2.1) usa o Gemini no *Free Tier* para não gerar custo, e esse provedor, sozinho, não comporta o teto: a chamada trivial mede de 14,7 s a 37,7 s. No ambiente do Metrô, o agente usará o Copilot Studio com modelos GPT, no ecossistema Microsoft, e a latência desse provedor é medida na homologação. O piso do *Free Tier* é, portanto, característica da bancada, e não do produto.
+**Provedor da bancada e provedor de produção.** O RNF05 não foi restringido a um ambiente específico. A bancada de teste (Seção 3.4.2.1) usa o Gemini no *Free Tier* para não gerar custo, e esse provedor, sozinho, não comporta o teto: a chamada trivial mede de 14,7 s a 37,7 s. No ambiente do Metrô, o modelo de produção será o aprovado pela GTI no Azure (Azure OpenAI/Microsoft Foundry, Seção 6.4.3), e a latência desse provedor é medida na homologação. O Copilot Studio não foi disponibilizado e não é o provedor da solução. O piso do *Free Tier* é, portanto, característica da bancada, e não do produto.
 
 ## 3.3 Visão Inicial sobre a Solução Técnica de Engenharia
+
+> **Leitura desta seção.** A Seção 3.3 registra o esboço da Sprint 1, quando o canal previsto era o Microsoft Teams com o Copilot Studio como orquestrador. O Metrô não disponibilizou o Copilot Studio (Seção 6.4.1), e a solução implementada usa chat web, workflows guiados do backend e acesso ao Copilot previsto por servidor MCP. A arquitetura vigente está na Seção 5.2, a implantação na Seção 6.1 e o mapeamento para o ecossistema Microsoft na Seção 6.4. O texto e a Figura 18 abaixo são mantidos como registro histórico.
 
 Esta seção apresenta o esboço preliminar da solução como um conjunto de blocos conectados, organizados nas três camadas previstas para o projeto: interface humano-computador, lógica de negócio e acesso a dados e serviços. O objetivo é registrar **como os componentes se relacionam**, ou seja, quais falam com quais, em que sentido e por meio de qual interface. O detalhamento interno de cada bloco fica para as seções de modelagem e de solução técnica das próximas sprints.
 
@@ -2008,7 +2010,7 @@ Esta seção apresenta a seleção inicial de tecnologias e ferramentas consider
 
 As tecnologias apresentadas nesta seção são classificadas entre aquelas previstas para utilização no **MVP**, desenvolvido e validado sobre dados sintéticos, e aquelas consideradas como alternativas ou possibilidades de evolução. Essa distinção é necessária porque o TAPI estabelece que a integração com o portfólio real do Metrô constitui uma evolução do MVP, não sendo requisito para a validação inicial da solução.
 
-> **Leitura desta seção.** A Seção 3.4 registra a visão de tecnologias formulada na Sprint 1. As decisões de canal permanecem válidas: o agente é entregue no Microsoft Teams, com o Copilot Studio como orquestrador. A Sprint 2 acrescentou o detalhamento que aqui aparece apenas como direção — os requisitos comuns das APIs de voz estão na Seção 8.6, os benchmarks de STT e TTS estão nas Seções 8.7 e 8.8, o benchmark do algoritmo de PLN está na Seção 8.10 e a arquitetura consolidada, com o papel de cada componente, na Seção 5.2.
+> **Leitura desta seção.** A Seção 3.4 registra a visão de tecnologias formulada na Sprint 1. As decisões de canal desta visão foram revistas: o Metrô não disponibilizou o Copilot Studio, o canal implementado é o chat web, a publicação como aba no Teams depende da S5-19 e o acesso pelo Copilot está previsto por servidor MCP (S5-18). A Sprint 2 acrescentou o detalhamento que aqui aparece apenas como direção — os requisitos comuns das APIs de voz estão na Seção 8.6, os benchmarks de STT e TTS estão nas Seções 8.7 e 8.8, o benchmark do algoritmo de PLN está na Seção 8.10 e a arquitetura consolidada, com o papel de cada componente, na Seção 5.2.
 
 ### 3.4.1 Critérios de seleção
 
@@ -2185,7 +2187,7 @@ Como possibilidades de evolução, poderão ser consideradas:
 
 ### 3.4.6 Plataforma de execução, confiabilidade e escalabilidade
 
-> Esta subseção consolida a pilha na Sprint 2, incorporando o que foi decidido nas Seções 5.2, 6.2, 8.7 a 8.10. As subseções anteriores permanecem como registro da visão inicial.
+> Esta subseção consolida a pilha na Sprint 2, incorporando o que foi decidido nas Seções 5.2, 6.2, 8.7 a 8.10. As subseções anteriores permanecem como registro da visão inicial. Na S5-43 (#297), a linha de canal foi revista: o canal implementado é o chat web, a identidade operacional é o Supabase Auth e a entrega pelo Teams e pelo Copilot está prevista (Seção 5.2).
 
 **Plataforma de execução**
 
@@ -2201,7 +2203,7 @@ A decisão de não construir cliente próprio é o que torna o suporte a mobile 
 
 | Camada | Tecnologias | Papel |
 |---|---|---|
-| Canal | Microsoft Teams, Copilot Studio | Interface conversacional e orquestração de tópicos |
+| Canal | Chat web (React); aba no Teams e Copilot via MCP previstos | Interface conversacional; os fluxos de múltiplos turnos ficam nos workflows guiados do backend |
 | API da aplicação | Python 3.11, FastAPI, Uvicorn | Endpoint HTTP/JSON, validação de entrada e roteamento |
 | Núcleo de PLN | scikit-learn, PyTorch, Transformers (BERTimbau), nltk, joblib | Classificação de intenção em dois níveis, conforme as Seções 8.10 e 8.11 |
 | Recuperação | Índice vetorial e catálogo local de fontes | Seleção dos trechos que compõem o contexto |
@@ -2690,7 +2692,7 @@ O objetivo da modelagem é representar, de forma simples e implementável, os da
 
 ## 4.1 Especificação da Base de Dados
 
-A base de dados do MVP foi desenhada para funcionar como uma camada intermediária entre o agente conversacional, o núcleo de PLN, o Copilot Studio, os fluxos do Power Automate e as fontes simuladas do SharePoint. Como o projeto utiliza dados sintéticos, a modelagem não replica dados reais do Metrô; ela replica a estrutura necessária para representar projetos, subportfólios, artefatos documentais, cronogramas, avanços físico-econômicos, entregas, marcos, termos de abertura, termos de encerramento, riscos, mudanças, intenções e registros de auditoria.
+A base de dados do MVP foi desenhada para funcionar como uma camada intermediária entre o agente conversacional, o núcleo de PLN, os workflows guiados do backend (com Power Automate opcional) e as fontes simuladas do SharePoint. Como o projeto utiliza dados sintéticos, a modelagem não replica dados reais do Metrô; ela replica a estrutura necessária para representar projetos, subportfólios, artefatos documentais, cronogramas, avanços físico-econômicos, entregas, marcos, termos de abertura, termos de encerramento, riscos, mudanças, intenções e registros de auditoria.
 
 A decisão de modelagem adotada foi reduzir a complexidade para um MVP, evitando uma tabela para cada página, lista ou biblioteca do SharePoint. Em vez disso, documentos, links, anexos, prompts, normativos e planilhas são representados pela tabela `project_artifacts`. Quando uma lista do parceiro possui ciclo de vida e campos estruturados relevantes para consulta, ela é representada por uma tabela própria, como `project_progress_updates`, `project_deliverables_milestones`, `project_charters` ou `project_closure_terms`. Quando a origem é apenas documental ou um anexo de suporte, ela permanece como artefato consultável.
 
@@ -2716,7 +2718,7 @@ As principais entidades conceituais do MVP são:
 | Situação de Subportfólio | Registro periódico da situação de um subportfólio, com data de referência, item, situação e ano. |
 | Projeto | Iniciativa acompanhada pelo PMO, associada a um subportfólio e composta por documentos, cronograma, status, riscos e mudanças. |
 | Artefato do Projeto | Fonte de informação vinculada ao projeto, podendo ser TAP, cronograma, relatório, planilha, lista SharePoint, prompt ou normativo. |
-| Extrato de Fonte | Parte extraída de um documento, lista ou planilha para consulta, referência e montagem de contexto controlado no Copilot. |
+| Extrato de Fonte | Parte extraída de um documento, lista ou planilha para consulta, referência e montagem de contexto controlado na geração de respostas. |
 | Item de Cronograma | Linha estruturada extraída de um cronograma, inclusive quando a origem for uma planilha Excel vinculada no SharePoint. |
 | Avanço do Projeto | Medição periódica de avanço físico e econômico previsto e realizado. |
 | Entrega ou Marco | Entrega, marco ou etapa relevante do projeto, com datas prevista e realizada e status de acompanhamento. |
@@ -2762,7 +2764,7 @@ Para manter o escopo adequado ao MVP e incorporar o inventário do parceiro, a m
 | subportfolio_status_updates | id | subportfolio_id → subportfolios.id | Armazena a situação periódica do subportfólio por data de referência, item, situação e ano. |
 | projects | id | subportfolio_id → subportfolios.id | Armazena os projetos do portfólio, incluindo status programa/projeto e identificador de origem. |
 | project_artifacts | id | project_id → projects.id | Representa documentos, listas, links, anexos, planilhas, prompts e normativos vindos do SharePoint ou da massa sintética. |
-| source_extracts | id | artifact_id → project_artifacts.id, project_id → projects.id | Armazena extratos consultáveis de documentos, listas e planilhas para composição de contexto no Copilot e rastreabilidade de fontes. |
+| source_extracts | id | artifact_id → project_artifacts.id, project_id → projects.id | Armazena extratos consultáveis de documentos, listas e planilhas para composição de contexto na geração de respostas e rastreabilidade de fontes. |
 | schedule_items | id | project_id → projects.id, artifact_id → project_artifacts.id, parent_item_id → schedule_items.id | Armazena linhas estruturadas de cronograma, inclusive extraídas de Excel. |
 | project_progress_updates | id | project_id → projects.id | Armazena avanço físico e econômico previsto e realizado por data de referência. |
 | project_status_updates | id | project_id → projects.id, artifact_id → project_artifacts.id | Armazena avanço, situação e resumo de status dos projetos. |
@@ -2776,7 +2778,7 @@ Para manter o escopo adequado ao MVP e incorporar o inventário do parceiro, a m
 | users | id | - | Armazena usuários simulados ou autenticados via Entra ID em evolução futura. |
 | access_rules | id | user_id → users.id, subportfolio_id → subportfolios.id, project_id → projects.id | Armazena regras de acesso por usuário, perfil e escopo. |
 | intent_catalog | id | - | Armazena macrointenção, intenção específica, fluxo, handler e limiares do classificador. |
-| prompt_templates | id | intent_id → intent_catalog.id | Armazena templates de prompts padronizados para Copilot, Power Automate, M365 Copilot e PLN local. |
+| prompt_templates | id | intent_id → intent_catalog.id | Armazena templates de prompts padronizados para o provedor de LLM, o Power Automate e o PLN local. |
 | ai_conversations | id | user_id → users.id | Armazena sessões conversacionais. |
 | ai_interactions | id | conversation_id → ai_conversations.id, user_id → users.id, intent_id → intent_catalog.id, prompt_template_id → prompt_templates.id | Armazena pergunta, macrointenção, intenção específica, confianças, handler, alternativas, rota, resposta e status da interação. |
 | consulted_sources | id | interaction_id → ai_interactions.id, artifact_id → project_artifacts.id, extract_id → source_extracts.id, project_id → projects.id | Armazena as fontes consultadas para compor uma resposta. |
@@ -2816,7 +2818,7 @@ As principais regras de integridade do modelo lógico são:
 - casos de teste de intenção devem preservar template_id e dataset_split para evitar vazamento entre treino, validação e teste;
 - o agente deve consultar access_rules antes de retornar informações restritas;
 - perguntas fora do catálogo devem gerar registros em out_of_scope_requests;
-- leituras, classificações, consultas a fontes, respostas do Copilot e acionamentos de fluxos devem gerar eventos em audit_events.
+- leituras, classificações, consultas a fontes, respostas geradas e acionamentos de fluxos devem gerar eventos em audit_events.
 
 ### 4.3.1 Autenticação e controle de acesso do MVP
 
@@ -3001,7 +3003,7 @@ O modelo físico adota as seguintes decisões:
 - uso de `CHECK CONSTRAINTS` para domínios controlados, como status de projeto, tipo de artefato, tipo de fonte e perfil de usuário;
 - uso de `FOREIGN KEYS` para preservar integridade entre projetos, artefatos, cronogramas, interações, fontes consultadas e auditoria;
 - uso de índices para os principais caminhos de consulta do MVP, como projeto, subportfólio, status, artefato, cronograma, intenção, interação e eventos de auditoria;
-- compatibilidade com o ecossistema Microsoft, registrando o componente alvo da intenção, os prompts usados por Copilot/Power Automate/M365 Copilot e as fontes consultadas a partir do SharePoint.
+- compatibilidade com o ecossistema Microsoft, registrando o componente alvo da intenção, os prompts usados pelo provedor de LLM e pelo Power Automate e as fontes consultadas a partir do SharePoint.
 
 O tratamento das planilhas Excel vinculadas em listas do SharePoint também foi contemplado fisicamente. A tabela `project_artifacts` armazena o link da planilha, a aba e o intervalo de leitura; a tabela `schedule_items` armazena as linhas normalizadas do cronograma, incluindo a referência à aba, linha e intervalo de células de origem; a tabela `source_extracts` preserva extratos textuais ou estruturados quando a planilha também precisar ser usada como fonte consultável; e a tabela `consulted_sources` registra qual documento, extrato, planilha, linha ou intervalo foi utilizado para compor a resposta.
 
@@ -3081,7 +3083,7 @@ As tabelas `project_status_updates` e `intent_test_cases` não aparecem como cla
 
 ## 5.2 Diagrama de Componentes da UML
 
-O Diagrama de Componentes representa a **estrutura lógica e técnica dos principais módulos da solução e suas interações**. A representação evidencia as fronteiras entre o chat web como canal de interação, o backend da aplicação, o núcleo autoral de Processamento de Linguagem Natural (PLN), a camada de recuperação aumentada por geração (RAG), os workflows guiados do backend e os serviços de Inteligência Artificial utilizados pela solução. Microsoft Teams, Microsoft Copilot Studio, Microsoft Entra ID e o SharePoint corporativo integram a arquitetura-alvo e são descritos como evolução na Seção 5.2.4 e no capítulo de evolução; eles não participam do runtime atualmente implementado.
+O Diagrama de Componentes representa a **estrutura lógica e técnica dos principais módulos da solução e suas interações**. A representação evidencia as fronteiras entre o chat web como canal de interação, o backend da aplicação, o núcleo autoral de Processamento de Linguagem Natural (PLN), a camada de recuperação aumentada por geração (RAG), os workflows guiados do backend e os serviços de Inteligência Artificial utilizados pela solução. Microsoft Teams, Microsoft Entra ID, o SharePoint corporativo e o acesso pelo Copilot via servidor MCP aparecem como **previstos**: estão no caminho de homologação da Seção 6.4.7, mas não participam do runtime atual. O Copilot Studio não faz parte da arquitetura, porque o Metrô não o disponibilizou.
 
 A arquitetura parte do **chat web** — a bancada React por onde o usuário interage com o agente — e de uma **API da aplicação** (FastAPI), que centraliza o recebimento das mensagens, o gerenciamento da conversa e a integração com os demais componentes. A entrada pode ocorrer por texto ou por voz, cuja transcrição é realizada pelo serviço de Speech-to-Text (Azure AI Speech) antes do processamento do núcleo da aplicação.
 
@@ -3091,11 +3093,11 @@ A partir dessa classificação, a conversa é encaminhada para a capacidade corr
 
 Solicitações associadas a **funcionalidades ou fluxos específicos** são encaminhadas a um **workflow guiado do backend**: o frontend conduz as perguntas estruturadas consumindo a API de sessões e, após a confirmação, o backend executa a operação localmente ou aciona o **Power Automate** por HTTP como fronteira assíncrona opcional, recebendo o resultado por webhook. O modo local/simulador mantém o fluxo executável sem depender do ambiente corporativo.
 
-A Figura 22 apresenta a arquitetura-alvo, na qual a orquestração dos fluxos funcionais é assumida por Microsoft Copilot Studio e Power Automate sobre os serviços corporativos. No runtime atualmente implementado, os componentes mantêm responsabilidades distintas: o **PLN interpreta e roteia**, o **RAG recupera conhecimento**, o **LLM gera respostas fundamentadas a partir do contexto recuperado** e os **workflows guiados do backend executam e orquestram os fluxos funcionais associados às intenções**, com Power Automate opcional e Supabase Storage para os artefatos gerados. Identidade, configuração e rastreabilidade atravessam os demais componentes.
+A Figura 22 apresenta a solução efetivamente implementada, revista na S5-43 ([#297](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/297)), com os componentes previstos em cinza e tracejado. Os componentes mantêm responsabilidades distintas: o **PLN interpreta e roteia**, o **RAG recupera conhecimento**, o **LLM gera respostas fundamentadas a partir do contexto recuperado** e os **workflows guiados do backend executam e orquestram os fluxos funcionais associados às intenções**, com Power Automate opcional e Supabase Storage para os artefatos gerados. Os webhooks de entrada e o RabbitMQ (S5-09 a S5-11, Seção 8.5.12) desacoplam o processamento assíncrono de alertas e de alterações do SharePoint simulado. Identidade, configuração e rastreabilidade atravessam os demais componentes.
 
 <div align="center">
-  <img src="img/componentes-metro-5.2.png" alt="Diagrama de componentes da arquitetura-alvo da solução" width="100%">
-  <p><strong>Figura 22</strong> - Diagrama de componentes da arquitetura-alvo da solução (visão de evolução corporativa; o runtime atual está descrito no texto desta seção e detalhado na Seção 8.5).</p>
+  <img src="img/componentes-metro-5.2.png" alt="Diagrama de componentes da solução implementada, com os componentes previstos destacados" width="100%">
+  <p><strong>Figura 22</strong> - Diagrama de componentes da solução implementada; componentes previstos em cinza e tracejado.</p>
   <sup>Fonte: Material produzido pelos autores, 2026.</sup>
 </div>
 
@@ -3107,43 +3109,41 @@ java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/componentes-
 
 ### 5.2.1 Componentes e responsabilidades
 
-| Componente | Responsabilidade |
-|---|---|
-| **Microsoft Teams** | Canal de interação com o usuário: recebe as solicitações e apresenta respostas, referências e resultados dos fluxos executados, dentro do ambiente de trabalho já utilizado pelas equipes. |
-| **API da Aplicação** | Expor o ponto de entrada HTTP/JSON, centralizar a comunicação entre interface, processamento e retorno das respostas. |
-| **Gerenciador de Conversação** | Manter o contexto necessário da interação e consolidar os resultados produzidos pelas diferentes rotas de processamento. |
-| **Pré-processamento** | Normalizar e preparar o texto para as etapas posteriores do pipeline de PLN. |
-| **Classificador de Intenções** | Identificar a intenção expressa pelo usuário e atribuir a categoria correspondente com sua confiança. |
-| **Catálogo de Intenções** | Associar as intenções reconhecidas às capacidades e funcionalidades disponíveis, determinando o próximo fluxo de processamento. |
-| **Validador de Escopo** | Verificar se a solicitação pertence ao conjunto de interações suportadas pela solução antes do acesso às fontes e aos fluxos. |
-| **Extração de Entidades** | Identificar entidades relevantes para a execução da intenção, como projeto, subportfólio, período e critérios de análise. |
-| **Recuperador RAG** | Buscar conteúdo relevante para consultas documentais a partir do índice vetorial e das fontes integradas. |
-| **Ingestão / Indexação Documental** | Preparar os documentos utilizados pela solução para posterior recuperação semântica. |
-| **Extração e Normalização** | Extrair e organizar o conteúdo proveniente dos documentos utilizados na base de conhecimento. |
-| **Geração de Embeddings** | Transformar os trechos normalizados em representações vetoriais utilizadas na busca semântica. |
-| **Índice Vetorial** | Armazenar embeddings e metadados para permitir a recuperação dos conteúdos mais relevantes. |
-| **Integração com SharePoint** | Intermediar o acesso aos documentos, listas e metadados disponibilizados pelo SharePoint. |
-| **Microsoft Copilot Studio** | Orquestrar os tópicos e fluxos associados às intenções funcionais identificadas pelo PLN. |
-| **Tópicos / Fluxos por Intenção** | Implementar os comportamentos específicos associados às funcionalidades previstas no catálogo de intenções. |
-| **Power Automate** | Executar automações e operações de integração necessárias aos fluxos funcionais. |
-| **API de LLM** | Gerar respostas em linguagem natural a partir do contexto recuperado pelo RAG. O provedor não está definido: a integração é feita por interface HTTP substituível, e a escolha será registrada quando o benchmark for realizado. |
-| **Azure AI Speech** | Consumir a API de Speech-to-Text documentada para converter entradas de voz em texto em português brasileiro antes do processamento pelo backend. |
-| **Microsoft Entra ID** | Fornecer a identidade do usuário e apoiar o controle de acesso às funcionalidades e informações. |
-| **Trilha de Auditoria** | Registrar eventos relevantes da interação, incluindo intenção, fontes consultadas e fluxos acionados. |
-| **Configuração / Secrets** | Armazenar configurações e credenciais necessárias aos serviços integrados sem expô-las à interface. |
+| Componente | Situação | Responsabilidade | Implementação |
+|---|---|---|---|
+| **Chat web** | Implementado | Canal de interação: recebe texto e voz, apresenta respostas com fontes, cartões de workflow e notificações. | `src/frontend` |
+| **Aba no Microsoft Teams** | Previsto (S5-19) | Publicar o mesmo frontend como aba, sem reconstruir a interface (Seção 6.4.7). | — |
+| **Copilot via servidor MCP** | Previsto (S5-18) | Expor operações da API como ferramentas MCP para o Copilot do Metrô, sem Copilot Studio. | — |
+| **Rotas de chat e áudio** | Implementado | Ponto de entrada HTTP/JSON (`/api/chat`, `/api/audio`), orquestração do pipeline e consolidação da resposta. | `app/main.py`, `app/pipeline.py` |
+| **Autenticação e escopo de acesso** | Implementado | Validar o JWT do Supabase Auth e resolver as permissões por perfil, subportfólio e projeto. | `app/security` |
+| **Barreira de dado sensível** | Implementado | Bloquear perguntas e mascarar fontes com dado sensível antes de qualquer chamada externa. | `app/security/sensitive_data.py` |
+| **Pré-processamento e entidades** | Implementado | Normalizar o texto e extrair projeto, subportfólio, período e prazos. | `app/nlp/preprocessing.py`, `app/nlp/entities.py` |
+| **Classificador de intenções** | Implementado | Identificar macrointenção e intenção específica com TF-IDF e embeddings do BERTimbau. | `app/nlp/inference.py` |
+| **Roteamento por catálogo e regras** | Implementado | Associar a intenção ao handler do catálogo e aplicar as regras de domínio (fora de escopo, consultas curtas). | `app/nlp/routing.py` |
+| **Recuperador RAG** | Implementado | Buscar trechos por pontuação lexical nos extratos do PostgreSQL ou nas listas simuladas do SharePoint. Não há índice vetorial documental. | `app/rag` |
+| **Contexto, citações e validação** | Implementado | Montar o contexto, exigir citação por afirmação e declarar ausência quando falta evidência. | `app/gemini/evidence.py` |
+| **Cliente de LLM** | Implementado | Chamar o provedor de linguagem (Gemini ou OpenRouter) por interface substituível, com credencial só no backend. | `app/gemini/client.py` |
+| **Workflows guiados** | Implementado | Conduzir relatório, alerta e alteração de dados com perguntas, confirmação, execução e histórico. | `app/reports`, `app/alerts`, `app/data_changes` |
+| **Webhooks de entrada** | Implementado | Receber alterações do SharePoint simulado, confirmações de entrega e resultados do Power Automate, com assinatura HMAC. | `app/sharepoint_webhooks`, `app/alerts/router.py`, `app/reports/router.py` |
+| **RabbitMQ e workers** | Implementado | Publicar a outbox em filas com DLQ e processar alertas e alterações do SharePoint de forma assíncrona e idempotente. | `app/alerts/worker.py`, `app/sharepoint_webhooks/worker.py` |
+| **Trilha de auditoria** | Implementado | Registrar interação, intenção, fontes, workflow e falhas. | `app/database/tracing.py` |
+| **PostgreSQL, Auth e Storage (Supabase)** | Implementado | Persistir portfólio, sessões, auditoria e outbox; autenticar personas; guardar os DOCX gerados. | `src/database/sql` |
+| **Azure AI Speech** | Implementado | Transcrever o áudio (STT) e sintetizar a resposta (TTS) em pt-BR. | `app/audio` |
+| **Power Automate** | Opcional | Executar o relatório por HTTP quando habilitado; o modo local e o simulador mantêm o fluxo sem o ambiente do Metrô. | `app/reports/service.py` |
+| **Entra ID e SharePoint corporativo** | Previsto | Identidade corporativa e fontes reais via Microsoft Graph, conforme a Seção 6.4.4. | — |
 
 ### 5.2.2 Fluxo de interação entre os componentes
 
 O fluxo de uma solicitação conversacional típica ocorre da seguinte forma:
 
-1. O **usuário** envia uma mensagem pelo **Microsoft Teams**. Quando a entrada é realizada por voz, o áudio pode ser encaminhado ao **Azure AI Speech**, que devolve a transcrição em texto.
+1. O **usuário**, autenticado pelo Supabase Auth, envia uma mensagem pelo **chat web**. Quando a entrada é realizada por voz, o áudio é encaminhado ao **Azure AI Speech**, que devolve a transcrição em texto. A aba no Teams e o acesso pelo Copilot via MCP são canais previstos que chegariam à mesma API.
 2. A **API da aplicação** recebe a solicitação por HTTP/JSON e a encaminha ao **gerenciador de conversação**.
 3. O **Pilar 1 — Núcleo de PLN e Roteamento** realiza o pré-processamento, identifica e classifica a intenção, valida se a solicitação está no escopo suportado, associa a intenção ao catálogo de capacidades e extrai as entidades relevantes para o fluxo selecionado.
 4. Após a validação de escopo, o **catálogo de intenções** associa a intenção reconhecida à capacidade responsável pelo processamento da solicitação.
-5. Quando a intenção corresponde a uma **consulta ou dúvida documental**, o **Recuperador RAG** busca os conteúdos relevantes no índice vetorial e, quando necessário, na integração com o **SharePoint**. Os resultados são organizados pelo componente de **Montagem de Contexto**.
+5. Quando a intenção corresponde a uma **consulta ou dúvida documental**, o **Recuperador RAG** busca os conteúdos relevantes por pontuação lexical nos extratos do PostgreSQL ou nas listas simuladas do **SharePoint**. Os resultados são organizados pelo componente de **Montagem de Contexto**.
 6. O contexto recuperado é enviado ao **LLM**, que produz a resposta em linguagem natural. O resultado retorna ao gerenciador de conversação.
 7. Quando a intenção corresponde a uma **funcionalidade estruturada**, o backend inicia um workflow guiado próprio e o frontend apresenta suas perguntas. O Power Automate é uma fronteira assíncrona opcional; o modo local/simulador mantém o fluxo executável sem acesso ao ambiente do Metrô.
-8. O resultado produzido pela rota escolhida é consolidado pelo **backend** e devolvido ao chat web; a integração futura com Microsoft Teams não é requisito do fluxo atual.
+8. O resultado produzido pela rota escolhida é consolidado pelo **backend** e devolvido ao chat web. Eventos assíncronos, como alertas e alterações do SharePoint simulado, seguem pela outbox e pelo RabbitMQ até os workers.
 9. Durante o processamento, os componentes de **identidade e auditoria** registram os elementos necessários para controle de acesso e rastreabilidade da interação.
 
 ### 5.2.3 Relação entre o catálogo de intenções e os fluxos da solução
@@ -3161,10 +3161,10 @@ O catálogo pode, portanto, evoluir juntamente com as funcionalidades priorizada
 
 ### 5.2.4 Decisões arquiteturais refletidas no diagrama
 
-- **O canal de interação é desacoplado da lógica de negócio.** O Teams entrega a mensagem à API da aplicação, que controla o roteamento e a consolidação da resposta. Trocar ou acrescentar um canal não exige reestruturar o núcleo de PLN nem as rotas de atendimento.
+- **O canal de interação é desacoplado da lógica de negócio.** O chat web entrega a mensagem à API da aplicação, e os canais previstos (aba no Teams e Copilot via MCP) usariam a mesma API, que controla o roteamento e a consolidação da resposta. Trocar ou acrescentar um canal não exige reestruturar o núcleo de PLN nem as rotas de atendimento.
 - **O núcleo de PLN permanece independente dos modelos generativos.** A identificação da intenção, o controle de escopo e o roteamento são responsabilidades do Pilar 1.
 - **O catálogo de intenções funciona como mecanismo de roteamento.** A mesma entrada conversacional pode ser direcionada a diferentes capacidades conforme a intenção identificada.
-- **O Copilot Studio foi retirado da arquitetura executável.** Os artefatos exportados permanecem apenas como referência histórica; a orquestração ativa está no backend e no frontend, com Power Automate opcional.
+- **O Copilot Studio não faz parte da arquitetura.** O Metrô não o disponibilizou; os artefatos exportados em `src/agent` permanecem apenas como referência histórica, e a orquestração está no backend e no frontend, com Power Automate opcional. O acesso pelo Copilot está previsto por servidor MCP (S5-18, [#272](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/272)), ainda sem código integrado.
 - **RAG e geração são componentes distintos.** O mecanismo de recuperação seleciona o contexto relevante e o LLM produz a resposta a partir desse contexto. No runtime atual a fonte documental são extratos sintéticos em JSON e no PostgreSQL; o SharePoint corporativo é a fonte prevista na arquitetura-alvo.
 - **A credencial do LLM é protegida no backend.** A interface não acessa diretamente a API generativa nem recebe suas credenciais.
 - **A camada de conhecimento é desacoplada dos canais e da geração.** A fonte documental e o índice podem evoluir sem exigir mudanças estruturais na interface ou no mecanismo de roteamento.
@@ -3186,7 +3186,7 @@ plantuml -charset UTF-8 -tpng -o ../img docs/diagrams/<arquivo>.puml
 ```
 
 
-Os diagramas de sequência desta seção detalham a ordem das interações entre os principais componentes da solução na arquitetura-alvo, na qual o canal é o Microsoft Teams, a identidade vem do Microsoft Entra ID e a orquestração de fluxos funcionais usa o Copilot Studio. No runtime atualmente implementado, o canal é o chat web, a identidade é validada por JWT do Supabase Auth e os fluxos funcionais são conduzidos pelos workflows guiados do backend, com Power Automate como fronteira assíncrona opcional; o núcleo autoral de PLN, o catálogo de intenções, a arquitetura RAG, a geração pelo LLM e o Speech-to-Text permanecem idênticos nos dois cenários.
+Os diagramas de sequência desta seção detalham a ordem das interações entre os principais componentes da solução na arquitetura-alvo, na qual o canal é o Microsoft Teams e a identidade vem do Microsoft Entra ID. No runtime atualmente implementado, o canal é o chat web, a identidade é validada por JWT do Supabase Auth e os fluxos funcionais são conduzidos pelos workflows guiados do backend, com Power Automate como fronteira assíncrona opcional; o núcleo autoral de PLN, o catálogo de intenções, a arquitetura RAG, a geração pelo LLM e o Speech-to-Text permanecem idênticos nos dois cenários.
 
 A seleção dos cenários considera os caminhos centrais da solução: consultas documentais fundamentadas, análises comparativas, direcionamento para fluxos funcionais e entrada por voz. Em todos os casos, o PLN permanece responsável pela interpretação e classificação da solicitação, enquanto o catálogo de intenções determina a capacidade que deverá processá-la. A partir desse roteamento, a solicitação segue para a recuperação e geração de resposta ou para o workflow guiado correspondente no backend.
 
@@ -3244,23 +3244,22 @@ catálogo a associa ao workflow correspondente. A partir desse ponto, o
 frontend conduz as perguntas estruturadas consumindo a API de sessões; após a
 confirmação, o backend executa a operação localmente ou aciona o Power Automate
 por HTTP como fronteira assíncrona opcional e recebe o resultado por webhook.
-A figura abaixo apresenta a orquestração equivalente na arquitetura-alvo, com
-Copilot Studio como plataforma de execução do tópico; no runtime atual esse
-papel é desempenhado pelo próprio backend.
+A figura abaixo apresenta essa orquestração como implementada: o workflow guiado
+do backend conduz as perguntas e executa a operação, sem Copilot Studio.
 
 <div align="center">
-  <img src="img/sequencia-copilot-fluxo.png" alt="Sequência: direcionamento para fluxo funcional via Copilot Studio" width="100%">
+  <img src="img/sequencia-workflow-guiado.png" alt="Sequência: direcionamento para workflow funcional guiado" width="100%">
 </div>
 
-<p align="center"><strong>Figura 25</strong> - Sequência: direcionamento para fluxo funcional via Copilot Studio.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 25</strong> - Sequência: direcionamento para workflow funcional guiado.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
-O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-copilot-fluxo.puml`](diagrams/sequencia-copilot-fluxo.puml) e pode ser regerado com PlantUML e Graphviz instalados:
+O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-workflow-guiado.puml`](diagrams/sequencia-workflow-guiado.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
 ```bash
-java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/sequencia-copilot-fluxo.puml
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/sequencia-workflow-guiado.puml
 ```
 
-Nesta orquestração, o **Copilot Studio não é responsável por descobrir a intenção do usuário**. A decisão já foi tomada pelo núcleo de PLN e pelo catálogo de intenções, e o Copilot Studio atuaria como plataforma de execução do tópico ou fluxo selecionado. No runtime atual esse papel é desempenhado pelo workflow guiado do backend, que conduz as perguntas pelo frontend e consolida o resultado.
+Nesta orquestração, o **workflow guiado não descobre a intenção do usuário**. A decisão já foi tomada pelo núcleo de PLN e pelo catálogo de intenções; o workflow conduz as perguntas pelo frontend, pede confirmação e consolida o resultado.
 
 O retorno do **Power Automate** ocorre somente quando o fluxo efetivamente o aciona; no ramo puramente conversacional, o resultado é consolidado sem automação, evitando associar um retorno de automação a uma operação que não foi executada.
 
@@ -3288,7 +3287,7 @@ O ramo de falha contempla situações documentadas para o serviço de STT, como 
 
 ### 5.3.5 Considerações sobre os cenários
 
-Os quatro cenários apresentados cobrem os principais caminhos de interação da solução. A **consulta documental** representa o fluxo central de recuperação e geração fundamentada; a **análise comparativa** acrescenta a consolidação e interpretação de informações de múltiplos projetos; o **direcionamento para fluxos funcionais** demonstra a integração entre o núcleo de PLN, o catálogo de intenções e os workflows guiados do backend — com Copilot Studio previsto apenas na arquitetura-alvo; e a **entrada por voz** demonstra a utilização da API de Speech-to-Text como modalidade alternativa de entrada.
+Os quatro cenários apresentados cobrem os principais caminhos de interação da solução. A **consulta documental** representa o fluxo central de recuperação e geração fundamentada; a **análise comparativa** acrescenta a consolidação e interpretação de informações de múltiplos projetos; o **direcionamento para fluxos funcionais** demonstra a integração entre o núcleo de PLN, o catálogo de intenções e os workflows guiados do backend — sem dependência do Copilot Studio; e a **entrada por voz** demonstra a utilização da API de Speech-to-Text como modalidade alternativa de entrada.
 
 Em todos os cenários, o núcleo de PLN permanece como ponto comum de interpretação e decisão. A diferença entre os caminhos ocorre somente após a identificação e validação da intenção: consultas e análises documentais seguem para recuperação de contexto e geração de resposta, enquanto intenções funcionais são encaminhadas para o workflow guiado associado no backend.
 
@@ -3412,39 +3411,45 @@ editáveis em [diagrams](diagrams/).
 
 # 6. Mapeamento técnico de infraestrutura e implantação
 
-Esta seção documenta a estratégia de implantação prevista para a solução, considerando que o projeto ainda está em estágio de PoC acadêmica e que a equipe não possui garantia de acesso a uma assinatura Azure corporativa. Portanto, a implantação descrita aqui não representa um deploy produtivo nem uma pipeline de CI/CD já implementada. O objetivo é registrar uma estratégia reprodutível e simples, capaz de orientar a publicação futura do MVP sem bloquear o desenvolvimento atual.
+Esta seção documenta a implantação da solução. A PoC foi publicada na Sprint 4 em uma EC2 da AWS, com Docker Compose, imagens no ECR, acesso HTTPS pelo Cloudflare Quick Tunnel e Supabase Cloud como banco gerenciado (Seção 10.2). Não é um deploy produtivo: o ambiente serve à demonstração e aos testes com dados sintéticos. A migração para o ambiente corporativo do Metrô está mapeada na Seção 6.4.
 
-A decisão principal é separar o que faz parte do MVP do que deve permanecer como evolução. Para o MVP, a nuvem comercial efetivamente assumida é o **Supabase Cloud**, utilizado como banco PostgreSQL gerenciado e ponto de persistência da trilha de auditoria. A aplicação, por sua vez, pode ser executada localmente durante o desenvolvimento e, quando houver código consolidado suficiente, publicada em uma hospedagem simples com domínio público temporário. O empacotamento em Docker, a criação de uma pipeline de deploy e a migração para Azure ficam documentados como evolução futura.
+O estado atual de cada componente da implantação é:
 
-O escopo atual de implantação contempla:
-
-| Componente | Situação no MVP | Papel na estratégia |
+| Componente | Situação na PoC | Papel na estratégia |
 |---|---|---|
-| Interface web | Em desenvolvimento pela equipe em `src/frontend` | Interface própria para interação com o agente durante a demonstração. |
-| API da aplicação | Planejada para expor os endpoints do MVP | Ponte entre frontend, classificação de intenção, recuperação de dados e integrações. |
-| Núcleo de PLN | Definido conceitualmente e avaliado no notebook do classificador | Responsável por classificar intenções e orientar o roteamento da solicitação. |
-| Banco de dados | Supabase Cloud | Persistência dos dados sintéticos, catálogo, interações e auditoria. |
-| Armazenamento | Supabase Storage | Área prevista para documentos sintéticos e, futuramente, artefatos do modelo. |
+| Interface web | Implementada em `src/frontend`, servida por nginx no Compose | Canal da demonstração; a aba no Teams depende da S5-19. |
+| API da aplicação | Implementada (FastAPI), contêiner `backend` | Ponte entre interface, PLN, recuperação, workflows e integrações. |
+| Núcleo de PLN | Implementado e carregado pela API | Classifica intenções e orienta o roteamento. |
+| Mensageria | RabbitMQ e workers no Compose | Processa alertas e alterações do SharePoint simulado de forma assíncrona. |
+| Banco de dados | Supabase Cloud (PostgreSQL) | Persistência dos dados sintéticos, catálogo, sessões, interações, auditoria e outbox. |
+| Armazenamento | Supabase Storage | Artefatos DOCX dos relatórios. |
 | Autenticação | Supabase Auth no MVP; Microsoft Entra ID como evolução | Validação server-side do JWT e resolução das permissões em `access_rules`; a troca futura do provedor preserva a autorização de domínio. |
-| Orquestração | Copilot Studio | Integração prevista para tópicos e fluxos conversacionais. |
-| Automação | Power Automate | Evolução para execução de fluxos funcionais sobre dados sintéticos ou homologados. |
-| Docker e pipeline de deploy | Fora do escopo atual | Evolução futura, quando houver serviço suficientemente estável para empacotamento e publicação automatizada. |
+| Orquestração | Workflows guiados do backend | Relatório, alerta e alteração de dados conduzidos pela API; Copilot Studio fora da arquitetura, por decisão do Metrô. |
+| Automação | Power Automate opcional | Execução do relatório por HTTP quando habilitada; modo local e simulador no MVP. |
+| Acesso pelo Copilot | Previsto por servidor MCP (S5-18) | Ferramentas MCP sobre a API REST, sem código integrado. |
+| Docker e pipeline | Docker Compose e imagens no ECR; GitLab CI com testes | O deploy na EC2 é manual e documentado na Seção 10.2. |
 
-Como o provedor de LLM externo ainda não está definido nem homologado, conforme registrado na Seção 5.2, a implantação do MVP não deve depender de API generativa externa. Quando a camada do Copilot Studio não estiver disponível, o MVP deve retornar uma resposta estruturada com base nos dados sintéticos recuperados.
+Como o provedor de LLM externo ainda não está definido nem homologado, conforme registrado na Seção 5.2, a implantação do MVP não deve depender de API generativa externa. Quando o provedor de LLM não estiver disponível, o MVP deve retornar uma resposta controlada, sem inventar informação.
 
 ## 6.1 Diagrama de implantação da UML
 
-A Figura 27 apresenta a visão de implantação da PoC. O diagrama separa o ambiente atualmente viável para o MVP dos componentes que dependem de desenvolvimento posterior ou provisionamento pela GTI.
+A Figura 27 apresenta a implantação da PoC como publicada na Sprint 4 (Seção 10.2) e revista na S5-43: EC2 com Docker Compose, acesso HTTPS por Cloudflare Quick Tunnel, Supabase Cloud e os serviços externos de voz e LLM. O ambiente-alvo do Metrô aparece como previsto, conforme a Seção 6.4.
 
 <div align="center">
-  <img src="img/implantacao-poc.png" alt="Diagrama de implantação planejada da PoC" width="100%">
+  <img src="img/implantacao-poc.png" alt="Diagrama de implantação da PoC em AWS EC2, com o ambiente-alvo do Metrô previsto" width="100%">
 </div>
 
-<p align="center"><strong>Figura 27</strong> - Diagrama de implantação planejada da PoC.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 27</strong> - Diagrama de implantação da PoC.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
-O código-fonte do diagrama está versionado em [`docs/diagrams/implantacao-poc.puml`](diagrams/implantacao-poc.puml).
+O código-fonte do diagrama está versionado em [`docs/diagrams/implantacao-poc.puml`](diagrams/implantacao-poc.puml) e pode ser regerado com PlantUML e Graphviz instalados:
+
+```bash
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/implantacao-poc.puml
+```
 
 ## 6.2 Justificativa das escolhas de implantação
+
+> **Leitura das Seções 6.2 e 6.3.** Estas seções registram o planejamento de implantação feito antes do deploy. A implantação executada, com Docker, ECR e EC2, está na Seção 10.2 e na Figura 27. O Copilot Studio, citado no planejamento original, foi retirado porque o Metrô não o disponibilizou; os trechos correspondentes foram revistos na S5-43.
 
 As escolhas de implantação priorizam simplicidade, baixo custo e aderência ao estágio real do projeto. Como ainda não há um serviço final estabilizado para produção, esta seção evita tratar Docker, pipeline de CI/CD ou Azure como entregas já concluídas.
 
@@ -3493,13 +3498,13 @@ A interface principal do MVP é a aplicação própria desenvolvida pela equipe 
 
 A autenticação prevista é o **Microsoft Entra ID**, pois essa decisão mantém alinhamento com o ambiente do Metrô e permite evoluir para controle de acesso por perfil. Como o MVP usa dados sintéticos, a autenticação tem papel principalmente demonstrativo e de rastreabilidade.
 
-O **Copilot Studio** deve ser integrado ao backend por API/OpenAPI quando o serviço estiver consolidado. O papel do Copilot Studio é executar tópicos e fluxos conversacionais associados às intenções identificadas, sem substituir o núcleo autoral de PLN.
+O acesso pelo **Copilot** está previsto por servidor MCP (S5-18), que o próprio Metrô pode registrar no seu ambiente sem depender do Copilot Studio. Os fluxos conversacionais associados às intenções são executados pelos workflows guiados do backend, sem substituir o núcleo autoral de PLN.
 
 O **Power Automate** permanece como caminho para fluxos funcionais. No MVP, esses fluxos podem ser simulados ou executados apenas sobre dados sintéticos, evitando dependência de SharePoint real ou permissões corporativas.
 
 ### 6.2.5 Estratégia de fallback
 
-Como não há provedor de LLM definido para o produto e a camada generativa do Copilot Studio pode depender do ambiente disponível, o MVP deve prever um fallback simples. Nesse cenário, a aplicação retorna uma resposta estruturada contendo:
+Como o provedor de LLM pode estar indisponível ou não configurado no ambiente, o MVP deve prever um fallback simples. Nesse cenário, a aplicação retorna uma resposta estruturada contendo:
 
 - intenção identificada;
 - nível de confiança;
@@ -3521,7 +3526,7 @@ O processo recomendado para a PoC é:
 5. **Executar a aplicação localmente.** Rodar frontend e backend em ambiente de desenvolvimento, enquanto o serviço final não estiver estabilizado.
 6. **Validar a persistência.** Confirmar que interações, fontes consultadas e eventos de auditoria são gravados no Supabase.
 7. **Configurar autenticação Microsoft.** Registrar a aplicação no Entra ID quando houver URL de callback definida.
-8. **Preparar integração com Copilot Studio.** Documentar ou expor a especificação OpenAPI quando a API estiver estável.
+8. **Preparar o acesso pelo Copilot.** Manter a especificação OpenAPI estável, como base das ferramentas do servidor MCP previsto na S5-18.
 9. **Publicar em domínio temporário.** Realizar publicação manual em serviço simples somente quando houver versão demonstrável.
 10. **Registrar pendências de evolução.** Docker, pipeline CI/CD, Azure, Azure Machine Learning e Application Insights devem permanecer como próximos passos.
 
@@ -3537,8 +3542,6 @@ As variáveis mínimas planejadas para reprodução do MVP são:
 | `MICROSOFT_CLIENT_ID` | Frontend/backend | Identificador da aplicação registrada no Entra ID. |
 | `MICROSOFT_TENANT_ID` | Frontend/backend | Tenant usado para autenticação. |
 | `MICROSOFT_REDIRECT_URI` | Frontend | URL de retorno após login. |
-| `COPILOT_STUDIO_ENABLED` | Backend | Indica se a integração com Copilot Studio está ativa. |
-| `COPILOT_STUDIO_ENDPOINT` | Backend | Endpoint usado quando a integração estiver disponível. |
 | `APP_ENV` | Backend/frontend | Ambiente de execução, como `local`, `dev`, `hmg` ou `main`. |
 
 Exemplo de arquivo `.env` planejado para o backend:
@@ -3550,8 +3553,6 @@ SUPABASE_ANON_KEY=ey...
 SUPABASE_SERVICE_ROLE_KEY=ey...
 MICROSOFT_CLIENT_ID=00000000-0000-0000-0000-000000000000
 MICROSOFT_TENANT_ID=00000000-0000-0000-0000-000000000000
-COPILOT_STUDIO_ENABLED=false
-COPILOT_STUDIO_ENDPOINT=
 ```
 
 ### 6.2.8 Comandos de execução local
@@ -3607,7 +3608,7 @@ As métricas obrigatórias para o MVP são:
 | Taxa de sucesso das requisições | Identificar falhas de API, falhas de conexão com Supabase e erros de integração. | Backend e registros de auditoria. |
 | Tempo de resposta da recuperação de dados | Avaliar o impacto das consultas à base sintética. | Backend e registros de auditoria. |
 | Confiança da macrointenção e da intenção específica | Monitorar a qualidade do roteamento do PLN. | Tabela `ai_interactions`. |
-| Quantidade de respostas por fallback | Verificar indisponibilidade da camada generativa/Copilot ou ausência de evidência suficiente. | Tabela `ai_interactions` e logs. |
+| Quantidade de respostas por fallback | Verificar indisponibilidade do provedor de LLM ou ausência de evidência suficiente. | Tabela `ai_interactions` e logs. |
 | Quantidade de fontes recuperadas por consulta | Avaliar se o RAG está encontrando evidências suficientes. | Tabela `consulted_sources`. |
 
 Para a PoC, as métricas devem ser simples e associadas aos fluxos já implementados. Métricas mais avançadas de carregamento de modelo, consumo de memória, imagem Docker e telemetria de contêiner devem ser adicionadas somente quando o serviço de PLN estiver empacotado para publicação.
@@ -3655,7 +3656,7 @@ A seção de implantação deve deixar explícito que alguns itens dependem de d
 | Application Insights/Azure Monitor | Não obrigatório na PoC sem Azure. | Substituir por logs e métricas persistidas no Supabase; ativar em Azure no futuro. |
 | SharePoint real | Fora do MVP. | Usar apenas base sintética/anonimizada. |
 | Fluxos reais de Power Automate | Podem ser simulados no MVP. | Ativar fluxos reais apenas com dados e permissões homologadas. |
-| Camada generativa do Copilot Studio | Integração prevista no MVP, sujeita ao ambiente disponível. | Usar fallback estruturado se indisponível. |
+| Acesso pelo Copilot | Previsto por servidor MCP (S5-18), sem código integrado; o Copilot Studio não foi disponibilizado. | Manter a API REST documentada em OpenAPI como base das ferramentas MCP. |
 
 ### 6.3.5 Checklist de conclusão da implantação
 
@@ -3669,7 +3670,7 @@ Para considerar a estratégia de deploy reprodutível, a equipe deve validar:
 - [ ] autenticação Microsoft Entra ID configurada ou documentada para o ambiente disponível;
 - [ ] interação gravada nas tabelas de auditoria;
 - [ ] fallback estruturado funcionando sem API generativa externa;
-- [ ] endpoint OpenAPI preparado para conexão com Copilot Studio;
+- [ ] endpoint OpenAPI preparado como base das ferramentas do servidor MCP (S5-18);
 - [ ] Docker e pipeline registrados como evolução futura, sem arquivos de build ativando CI/CD nesta etapa;
 
 ## 6.4 Tabela de-para para o ecossistema Microsoft do Metrô
@@ -3764,7 +3765,7 @@ A sequência recomendada para avaliação pelo parceiro é: **(1)** concluir S5-
 
 O mapeamento conserva a separação das responsabilidades descritas na Seção 5.2: **canal → API/PLN → recuperação/resposta ou workflow → persistência/auditoria**. Teams é canal; Copilot Studio seria uma opção de orquestração condicionada ao ambiente; SharePoint é fonte corporativa; Speech é serviço de voz. O núcleo autoral de PLN e as regras de autorização continuam reaproveitáveis fora dessas plataformas.
 
-As Seções 3.3, 5.2 e 6.1–6.3 contêm representações iniciais ou pendências que divergem do runtime posterior, e a Seção 9.2.7 ainda cita Copilot Studio com GPT como destino certo. **Esses trechos não constituem evidência de implementação.** A reconciliação integral dos diagramas, do RNF08 e dessas afirmações pertence à **S5-43 ([#297](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/297))**. Esta tabela explicita a diferença e deverá ser conferida novamente após essa revisão, especialmente se a S5-18 introduzir MCP ou a S5-19 aprovar outro canal.
+A **S5-43 ([#297](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/297))** conciliou os diagramas (Figuras 22, 25 e 27), o RNF08 e as afirmações das Seções 3.2.2, 5.2, 5.3, 6.1–6.3 e 9.2.7 com esta tabela: o Copilot Studio não faz parte da arquitetura, e o acesso pelo Copilot fica previsto por servidor MCP. As Seções 3.3 e 3.4 permanecem como registro histórico da Sprint 1, com nota de leitura. Esta tabela deve ser conferida novamente se a S5-18 introduzir o servidor MCP ou se a S5-19 aprovar outro canal.
 
 A produção local da S5-44 entrega o inventário, as correspondências, a classificação, o esforço e as observações rastreáveis. O [registro da task](stories/S5-44.md) acompanha a revisão documental e as pendências. **A conclusão no GitLab continua condicionada** à evidência da S5-19, à conciliação com a revisão de arquitetura e a MR aprovado com comentário do revisor de outra frente e `Closes #298`. A análise de branches, os testes locais e a revisão QA não equivalem a essa aprovação externa.
 
@@ -4059,7 +4060,7 @@ O cliente aplica limite de 120 segundos e permite cancelamento por `AbortControl
 | Identidade e acesso | `security/access.py` valida o JWT no Supabase Auth, resolve `public.users` e aplica `access_rules`; o áudio limita uma transcrição ativa por usuário. | `SUPABASE_URL` e `SUPABASE_PUBLISHABLE_KEY` ou `SUPABASE_ANON_KEY`. | O Entra ID permanece como evolução; o MVP usa identidades e escopos sintéticos. |
 | RabbitMQ | `alerts/messaging.py` publica e consome eventos persistentes de avaliação, criação de notificação, confirmação de entrega e alteração SharePoint simulada, com confirmação manual e DLQ. | `RABBITMQ_URL` e `compose.rabbitmq.yml`. | Necessário para o alerta e a reindexação assíncronos persistentes; AMQP, scheduler e outbox não são webhooks. A rodada documental usa doubles controlados, não broker externo. |
 
-O SharePoint corporativo, Entra ID, Teams e Copilot Studio aparecem nos desenhos e no modelo-alvo, mas não possuem adaptador ativo nesta versão. O Supabase Auth é o provedor de identidade operacional do MVP. Power Automate possui um adaptador opcional apenas para relatórios; o modo local não depende dele e o alerta não o utiliza. As demais intenções transacionais continuam sem escrita externa. Essa distinção evita interpretar a bancada como um canal de produção ou como evidência de autorização corporativa.
+O SharePoint corporativo, o Entra ID e o Teams aparecem nos diagramas como componentes previstos, sem adaptador ativo nesta versão; o Copilot Studio não faz parte da arquitetura. O Supabase Auth é o provedor de identidade operacional do MVP. Power Automate possui um adaptador opcional apenas para relatórios; o modo local não depende dele e o alerta não o utiliza. As demais intenções transacionais continuam sem escrita externa. Essa distinção evita interpretar a bancada como um canal de produção ou como evidência de autorização corporativa.
 
 ### 8.5.6 Banco de dados: modelo e integrações operacionais
 
@@ -7193,7 +7194,7 @@ Os dados, prompts, perfis e fontes devem ser sintéticos ou anonimizados. Cada e
 | RNF05 | Manter P95 de consulta simples em até 10 s e de comparação em até 20 s, sem erro HTTP ou de contrato na carga definida. | CT-RNF05-P, CT-RNF05-N | `Locust`, CSV/HTML, log da API e configuração do ambiente. |
 | RNF06 | Atingir F1 macro ≥ 0,80 na classificação de intenções e *recall* ≥ 0,80 na recuperação. | CT-RNF06-P, CT-RNF06-N | `scikit-learn`, notebook executado e `metricas.json`. |
 | RNF07 | Compreender ou orientar a reformulação em pelo menos 80% das formulações em português da amostra. | CT-RNF07-P, CT-RNF07-N | `pytest`, roteiro de usuários e planilha consolidada. |
-| RNF08 | Manter Teams como canal previsto, contrato OpenAPI válido e componentes compatíveis com o ecossistema Microsoft. | CT-RNF08-P, CT-RNF08-N | `/openapi.json`, checklist arquitetural e relatório de validação. |
+| RNF08 | Contrato OpenAPI válido, componentes do runtime com equivalente Microsoft mapeado (Seção 6.4) e canal publicável no Teams e acessível pelo Copilot via MCP, sem dependência do Copilot Studio. Critério revisado na S5-43. | CT-RNF08-P, CT-RNF08-N | `/openapi.json`, checklist arquitetural e relatório de validação. |
 | RNF09 | Executar o núcleo com dados estruturados sem depender da plataforma final ou de uma fonte concreta. | CT-RNF09-P, CT-RNF09-N | `pytest` do RAG, configuração da fonte e log de execução local. |
 | RNF10 | Preservar separação entre interface, negócio e dados, API documentada, testes e instruções reproduzíveis. | CT-RNF10-P, CT-RNF10-N | Testes de importação, checklist de estrutura e documentação. |
 | RNF11 | Tratar 100% das falhas previstas com resposta controlada, sem *stack trace*, segredo ou corpo bruto do provedor. | CT-RNF11-P, CT-RNF11-N | `pytest`/`TestClient`, respostas HTTP e logs sanitizados. |
@@ -7212,7 +7213,7 @@ Os dados, prompts, perfis e fontes devem ser sintéticos ou anonimizados. Cada e
 | CT-RNF05-N | Provar que a medição detecta uma violação. | 1. Subir `api_com_atraso.py`, uma segunda instância da API em que um duplo acrescenta 25 s a toda comparação da massa congelada, sem alterar o restante do pipeline. 2. Rodar o `locustfile.py` contra ela com `RNF05_SO_COMPARACAO=1`, 5 usuários por 6 minutos. | P95 comparativo acima de 20 s: a rodada precisa reprovar. Se aprovar, a medição não enxerga violação e as rodadas positivas não valem. |
 | CT-RNF06-P / CT-RNF06-N | Avaliar qualidade do PLN contra limiares reproduzíveis. | **P:** executar integralmente `src/notebooks/classificador_intencoes_metro.ipynb` com o conjunto de teste fechado e calcular F1 macro e *recall*. **N:** avaliar separadamente classes e termos ausentes ou fracos, sem treiná-los novamente, e aplicar os mesmos limiares. | `metricas.json` e notebook registram valores e versão da massa; qualquer métrica abaixo de 0,80 reprova o requisito e identifica as classes afetadas. |
 | CT-RNF07-P / CT-RNF07-N | Verificar interação em português natural e orientação de reformulação. | Congelar ao menos 20 formulações. **P:** participantes enviam frases naturais válidas sem conhecer nomes internos. **N:** enviar frases ambíguas, com sinônimos não cadastrados e erros leves; registrar se houve compreensão ou orientação útil. | Pelo menos 80% do conjunto total é compreendido ou recebe reformulação acionável; anexar roteiro, respostas anonimizadas e cálculo. |
-| CT-RNF08-P / CT-RNF08-N | Conferir aderência aos contratos e ao ecossistema definido. | **P:** iniciar a API, abrir `/openapi.json` e confrontar canal, conector e componentes com a arquitetura. **N:** validar uma cópia do contrato com operação obrigatória removida ou tipo incompatível. | Contrato real é válido e a arquitetura mantém Teams/Copilot/SharePoint/Azure previstos; a cópia alterada reprova no checklist, sem substituir o contrato versionado. |
+| CT-RNF08-P / CT-RNF08-N | Conferir aderência aos contratos e ao ecossistema definido. | **P:** iniciar a API, abrir `/openapi.json` e confrontar os componentes da Figura 22 com a tabela de-para da Seção 6.4. **N:** validar uma cópia do contrato com operação obrigatória removida ou tipo incompatível. | Contrato real é válido, cada componente do runtime tem equivalente Microsoft mapeado e nenhum depende do Copilot Studio; a cópia alterada reprova no checklist, sem substituir o contrato versionado. |
 | CT-RNF09-P / CT-RNF09-N | Provar portabilidade da origem de dados. | **P:** apontar a configuração para um diretório sintético alternativo e executar a mesma consulta localmente. **N:** apontar para arquivo ausente e depois para formato inválido, observando inicialização e resposta. | A troca válida não exige alteração no núcleo; origens inválidas geram falha explícita e localizada, sem acoplamento à interface ou à fonte concreta. |
 | CT-RNF10-P / CT-RNF10-N | Verificar manutenibilidade por evidências estruturais e reprodução. | **P:** seguir o README em ambiente limpo, executar testes e conferir limites entre interface, negócio e dados. **N:** aplicar o checklist a uma cópia com instrução obrigatória removida ou dependência direta de acesso externo introduzida na rota. | A estrutura real passa nos itens objetivos; a violação controlada é detectada pelo teste de importação ou checklist. Anexar comandos, árvore relevante e resultado. |
 | CT-RNF11-P / CT-RNF11-N | Garantir respostas controladas para falhas previstas e inesperadas. | **P:** parametrizar falha de classificação, ausência de resultado, indisponibilidade da fonte e *timeout*. **N:** fazer o duplo retornar exceção inesperada e payload inválido; inspecionar resposta e logs. | Todos os casos retornam código e mensagem definidos, preservam auditoria e não expõem *stack trace*, segredo ou corpo bruto do provedor. |
@@ -7402,7 +7403,7 @@ Log da API na 3ª rodada, resumido sem identificadores ([`api-log-resumo.txt`](.
 | --- | --- | --- |
 | DEF-RNF04-01 | Vigência, status e linha do extrato eram recuperados do banco e descartados antes do prompt; perguntas de cronograma recebiam "contexto insuficiente" | Corrigido em `build_rag_input`, com 10 testes de regressão; as perguntas afetadas passaram a responder as datas corretas |
 | DEF-RNF04-02 | Respostas truncadas pelo limite de tokens entregues como completas | Mecanismo confirmado nas rodadas do RNF05: 36 de 451 respostas (8,0%) na 2ª e 50 de 860 (5,8%) na 3ª terminaram por limite de tokens no caminho do OpenRouter, porque o raciocínio do modelo consome o mesmo orçamento de 512 tokens do texto. O adaptador passou a registrar cada ocorrência em log. Nenhuma das 35 respostas coletadas pelo Gemini direto terminou cortada. Depois do teste de usabilidade, em que duas respostas chegaram vazias (Seção 9.3.2), o limite passou a 1024 tokens e a resposta interrompida passou a vir com um aviso ao usuário; no reteste, 0 de 38 respostas foram cortadas, contra 4 de 38 com o limite antigo, com cerca de 0,2 s a mais na mediana do tempo do modelo ([relatório](../src/backend/evidencias/reteste-truncamento/RELATORIO.md)). As rodadas do RNF05 foram medidas com o limite de 512 |
-| DEF-RNF05-01 | O Gemini no *Free Tier*, provedor da bancada, tem piso de 14,7 s a 37,7 s por chamada trivial, acima do teto do RNF05 | Característica da bancada, não do produto: o *Free Tier* é usado para não gerar custo, e o ambiente do Metrô usará o Copilot Studio com modelos GPT. As rodadas do RNF05 foram medidas com provedor pago. Ver Seção 3.2.2 |
+| DEF-RNF05-01 | O Gemini no *Free Tier*, provedor da bancada, tem piso de 14,7 s a 37,7 s por chamada trivial, acima do teto do RNF05 | Característica da bancada, não do produto: o *Free Tier* é usado para não gerar custo, e o modelo de produção será o aprovado pela GTI no Azure (Seção 6.4.3). As rodadas do RNF05 foram medidas com provedor pago. Ver Seção 3.2.2 |
 | DEF-RNF05-02 | A gravação da auditoria do RNF03 é síncrona e fica no caminho da resposta. Na 2ª rodada, sob carga, a distância entre o P95 do cliente e o do pipeline foi de 4,1 s, e, sem limite de tempo nas consultas ao banco, uma gravação presa segurou uma resposta por mais de 60 s | Aplicados antes da 3ª rodada: limite de 5 s por consulta ao banco (`statement_timeout`) e *keepalive* de TCP nas conexões, com 9 testes. Na 3ª rodada a distância caiu para 1,8 s, sem erro. A gravação fora do caminho da resposta, por fila ou tarefa em segundo plano, fica para a mensageria prevista na Sprint 5: muda a semântica da auditoria verificada nos testes do RNF03 e é decisão do grupo |
 | — | Cada requisição abria duas conexões novas com o Supabase, cerca de 1 s cada | Pool de conexões: de 1.209 ms para 599 ms por acesso, ou cerca de 1,2 s a menos por requisição, com qualquer provedor de LLM |
 | — | 21 testes do *backend* falhavam quando havia `.env` configurado | Isolamento do ambiente de teste; 322 testes passam com e sem `.env` |
@@ -7416,7 +7417,7 @@ O que elas **não** cobrem, e por quê:
 
 | Fora da cobertura | Motivo | Efeito sobre a leitura do resultado |
 | --- | --- | --- |
-| Modelo de produção | O Metrô usará o Copilot Studio com modelos GPT; as rodadas usam o `gemini-3.7-flash`, o modelo da bancada | Fundamentação e latência valem para o modelo medido e são medidas de novo na homologação, com a mesma amostra e o mesmo protocolo |
+| Modelo de produção | O modelo de produção será o aprovado pela GTI no Azure (Seção 6.4.3); as rodadas usam o `gemini-3.7-flash`, o modelo da bancada | Fundamentação e latência valem para o modelo medido e são medidas de novo na homologação, com a mesma amostra e o mesmo protocolo |
 | Base real | A massa tem nove extratos recuperáveis e um projeto | O custo da recuperação e o risco de confundir entidades podem crescer com a base real |
 | Comparação efetivamente produzida | A massa tem um único projeto, o `PRJ-0442`, e a comparação entre projetos foi adiada para a Sprint 5 (Seção 6.4.1 do `GestaoProjeto.md`). Os prompts comparativos pedem a comparação com o `PRJ-0518`, que não existe | O P95 comparativo mede o sistema tratando o pedido de comparação e declarando a limitação, com chamada ao LLM; **não** demonstra o teto de 20 s para uma comparação real, que é medida quando a funcionalidade existir |
 | Rotulagem independente | A planilha é cega, mas foi rotulada por quem construiu a amostra | Cada rótulo pode ser auditado um a um; uma segunda rotulagem por outro integrante daria garantia processual mais forte, e a margem do RNF04 é de um caso em cada critério |
