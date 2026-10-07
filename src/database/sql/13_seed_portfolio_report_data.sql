@@ -52,6 +52,7 @@ DELETE FROM public.project_deliverables_milestones WHERE project_id IN (SELECT i
 DELETE FROM public.project_benefits        WHERE project_id IN (SELECT id FROM public.projects WHERE code IN ('PRJ-0442','PRJ-0510','PRJ-0587'));
 DELETE FROM public.change_records          WHERE project_id IN (SELECT id FROM public.projects WHERE code IN ('PRJ-0442','PRJ-0510','PRJ-0587'));
 DELETE FROM public.risk_issue_items        WHERE project_id IN (SELECT id FROM public.projects WHERE code IN ('PRJ-0442','PRJ-0510','PRJ-0587'));
+DELETE FROM public.schedule_items          WHERE project_id IN (SELECT id FROM public.projects WHERE code IN ('PRJ-0442','PRJ-0510','PRJ-0587'));
 
 -- ---------------------------------------------------------------------------
 -- Avanco fisico (historico mensal; o ultimo registro alimenta o relatorio)
@@ -151,6 +152,29 @@ UNION ALL SELECT id, 'Encerramento do plano de transicao operacional', DATE '202
 UNION ALL SELECT id, 'Conclusao da especificacao tecnica dos elevadores', DATE '2026-10-30', 'planejado' FROM public.projects WHERE code = 'PRJ-0587'
 UNION ALL SELECT id, 'Contratacao do fornecedor de elevadores', DATE '2026-12-15', 'planejado' FROM public.projects WHERE code = 'PRJ-0587'
 UNION ALL SELECT id, 'Entrega da primeira estacao adaptada', DATE '2027-05-30', 'planejado' FROM public.projects WHERE code = 'PRJ-0587';
+
+-- ---------------------------------------------------------------------------
+-- Atividades do cronograma do PRJ-0442 (S5-06: campos cronograma.* do chat)
+-- Nenhuma atividade esta vencida e aberta, para nao disparar o alerta de prazo.
+-- ---------------------------------------------------------------------------
+INSERT INTO public.schedule_items (project_id, wbs_code, activity_name, responsible_name,
+                                   planned_start_date, planned_end_date, actual_start_date,
+                                   actual_end_date, progress_percent, status, metadata)
+SELECT id, '1.1', 'Projeto executivo da sinalizacao', 'Engenharia de Sistemas',
+       DATE '2026-01-15', DATE '2026-04-30', DATE '2026-01-15', DATE '2026-05-08', 100, 'concluido',
+       '{"mock": true}'::jsonb FROM public.projects WHERE code = 'PRJ-0442'
+UNION ALL SELECT id, '1.2', 'Instalacao do lote 1 de equipamentos de sinalizacao', 'Coordenacao de Implantacao',
+       DATE '2026-05-04', DATE '2026-09-20', DATE '2026-05-11', DATE '2026-09-25', 100, 'concluido',
+       '{"mock": true}'::jsonb FROM public.projects WHERE code = 'PRJ-0442'
+UNION ALL SELECT id, '1.3', 'Instalacao do lote 2 de equipamentos de sinalizacao', 'Coordenacao de Implantacao',
+       DATE '2026-09-21', DATE '2026-11-15', DATE '2026-09-28', NULL, 35, 'em_andamento',
+       '{"mock": true}'::jsonb FROM public.projects WHERE code = 'PRJ-0442'
+UNION ALL SELECT id, '1.4', 'Testes integrados de sinalizacao', 'Engenharia de Sistemas',
+       DATE '2026-11-16', DATE '2026-12-10', NULL, NULL, 0, 'planejado',
+       '{"mock": true}'::jsonb FROM public.projects WHERE code = 'PRJ-0442'
+UNION ALL SELECT id, '1.5', 'Preparacao da operacao assistida', 'Gerencia de Operacao',
+       DATE '2026-11-23', DATE '2026-12-18', NULL, NULL, 0, 'planejado',
+       '{"mock": true}'::jsonb FROM public.projects WHERE code = 'PRJ-0442';
 
 -- ---------------------------------------------------------------------------
 -- Beneficios esperados (2-3 por projeto)

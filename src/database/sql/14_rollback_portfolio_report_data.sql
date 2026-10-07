@@ -23,6 +23,9 @@ WHERE project_id IN (SELECT id FROM public.projects WHERE code IN ('PRJ-0442','P
 DELETE FROM public.risk_issue_items
 WHERE project_id IN (SELECT id FROM public.projects WHERE code IN ('PRJ-0442','PRJ-0510','PRJ-0587'));
 
+DELETE FROM public.schedule_items
+WHERE project_id IN (SELECT id FROM public.projects WHERE code IN ('PRJ-0442','PRJ-0510','PRJ-0587'));
+
 -- Remove apenas os projetos adicionados pelo seed.
 DELETE FROM public.projects WHERE code IN ('PRJ-0510', 'PRJ-0587');
 

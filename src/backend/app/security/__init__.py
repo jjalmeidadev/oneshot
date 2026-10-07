@@ -22,6 +22,8 @@ from app.security.access import (
     authenticate_persona,
     authorize_message_scope,
     authorize_operation,
+    authorize_project_write,
+    grant_covers_project,
     resolve_access_context,
 )
 from app.security.http import (
@@ -55,6 +57,8 @@ __all__ = [
     "audit_request_denial",
     "authorize_message_scope",
     "authorize_operation",
+    "authorize_project_write",
+    "grant_covers_project",
     "get_access_context",
     "require_export_access",
     "require_read_access",

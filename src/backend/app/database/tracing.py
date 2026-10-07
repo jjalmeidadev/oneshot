@@ -413,7 +413,21 @@ def _insert_audit_events(
             )
         )
 
-    if response is not None:
+    if response is not None and response.data_change is not None:
+        # A alteracao pelo chat grava os proprios eventos (previa, recusa,
+        # negativa), ligados a esta interacao pelo correlation_id.
+        events.append(
+            (
+                "project_data.chat_request",
+                "api",
+                "sucesso",
+                {
+                    "data_change_status": response.data_change.status,
+                    "code": response.data_change.code,
+                },
+            )
+        )
+    elif response is not None:
         if response.workflow:
             events.append(
                 (
