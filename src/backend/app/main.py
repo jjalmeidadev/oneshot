@@ -59,6 +59,8 @@ from app.reports.errors import ReportError
 from app.reports.router import router as reports_router
 from app.alerts.errors import AlertError
 from app.alerts.router import router as alerts_router
+from app.data_changes.errors import DataChangeError
+from app.data_changes.router import router as data_changes_router
 from app.security import (
     AccessContext,
     AccessError,
@@ -110,6 +112,7 @@ app = FastAPI(
 )
 app.include_router(reports_router)
 app.include_router(alerts_router)
+app.include_router(data_changes_router)
 ReadAccess = Annotated[AccessContext, Depends(require_read_access)]
 WriteAccess = Annotated[AccessContext, Depends(require_write_access)]
 AuthenticatedAccess = Annotated[AccessContext, Depends(get_access_context)]
@@ -140,6 +143,13 @@ def handle_alert_error(_request: Request, error: AlertError) -> JSONResponse:
         status_code=error.status_code,
         content={"error": {"code": error.code, "message": error.message}},
     )
+
+
+@app.exception_handler(DataChangeError)
+def handle_data_change_error(_request: Request, error: DataChangeError) -> JSONResponse:
+    # As negativas de escrita ja foram auditadas pelo servico, na mesma
+    # transacao das demais recusas.
+    return JSONResponse(status_code=error.status_code, content=error.to_payload())
 
 
 @app.exception_handler(AccessError)
@@ -217,6 +227,16 @@ async def handle_request_validation_error(
                 "error": {
                     "code": "ALERT_INVALID_INPUT",
                     "message": "Revise os parametros informados para o alerta.",
+                }
+            },
+        )
+    if request.url.path.startswith(("/api/data-change-previews", "/api/data-changes")):
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": {
+                    "code": "DATA_CHANGE_INVALID_INPUT",
+                    "message": "Revise os dados enviados para a alteração.",
                 }
             },
         )

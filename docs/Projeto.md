@@ -4623,9 +4623,13 @@ ganha o campo opcional `data_change`:
 
 `data_change.status` também pode ter dois outros valores:
 
-- `needs_input`, com `question` e, quando há ambiguidade, `candidates` (`id` e
-  `label`);
+- `needs_input`, com `missing` (`project`, `target`, `field` ou `value`),
+  `question` e, quando há escolha a fazer, `candidates` (`id` e `label`);
 - `rejected`, com `code` e `message`.
+
+Os três trazem `draft`, com o que já foi entendido do pedido (`project_code`,
+`entity`, `field`, `target_id`, `item_reference` e `raw_value`), para que a
+interface complete o que falta sem reinterpretar o texto.
 
 Nos três casos a resposta HTTP é `200`, porque um pedido incompleto, inválido ou
 negado é parte da conversa, e não uma falha da requisição.
@@ -4698,7 +4702,9 @@ alteração.
 `GET /api/data-changes?project_code=PRJ-0442&field=projeto.prazo_final&target_id=<uuid>`
 exige leitura no projeto. Ele devolve as alterações feitas pelo chat naquele
 campo, da mais recente para a mais antiga (até 20), com autor, antes, depois,
-data e a indicação de desfeita. É a fonte do histórico exibido pela S5-07.
+data e a indicação de desfeita. Cada item traz também `can_undo` e
+`undo_available_until`, verdadeiros só para o autor dentro da janela. É a fonte
+do histórico exibido pela S5-07.
 
 #### Erros
 
@@ -4735,6 +4741,8 @@ Nas rotas do cartão:
 | `ALREADY_UNDONE` | 409 | desfazer | A alteração já foi desfeita. |
 | `PREVIEW_EXPIRED` | 410 | confirmar | Passaram mais de 10 minutos desde a prévia. |
 | `UNDO_WINDOW_EXPIRED` | 410 | desfazer | Passaram mais de 15 minutos desde a alteração. |
+| `PREVIEW_ALREADY_CONFIRMED` | 409 | cancelar | A prévia já foi confirmada; resta o desfazer. |
+| `DATA_CHANGE_INVALID_INPUT` | 422 | todas | Corpo ou parâmetro malformado, como justificativa acima de 500 caracteres. |
 | `FIELD_NOT_EDITABLE`, `INVALID_VALUE` | 422 | criar prévia, confirmar | Campo ou valor fora do contrato. |
 | `DATA_CHANGE_UNAVAILABLE` | 503 | todas | Sem banco ou falha na gravação; a transação é desfeita. |
 
@@ -4800,6 +4808,7 @@ erro. Ele nunca leva a mensagem original.
 | `project_data.change_confirm_failed` | `falha` | A prévia estava expirada, cancelada ou desatualizada. |
 | `project_data.change_undone` | `sucesso` | A alteração foi desfeita. |
 | `project_data.undo_denied` | `bloqueado` | O desfazer foi pedido fora da janela, por outra pessoa ou com o valor já alterado. |
+| `project_data.chat_request` | `sucesso` | Registrado pelo rastreamento RNF03 na interação do chat, com o status do `data_change`. |
 
 `change_applied` e `change_undone` são gravados na mesma transação da escrita.
 Os demais seguem a regra da S5-04: uma falha ao gravar a auditoria é registrada
@@ -4807,15 +4816,22 @@ como erro operacional e nunca transforma uma negação em permissão.
 
 #### Persistência da prévia
 
-A S5-06 cria `22_data_change_previews.sql` e o rollback correspondente com a
-tabela `pending_data_changes`, no mesmo padrão de
-`pending_proactive_suggestions`. As colunas são `id`, `user_id`,
-`external_conversation_id`, `interaction_id`, `project_id`, `entity`,
-`target_id`, `field_key`, `before_value` e `after_value` (JSONB), `status`
-(`pendente`, `confirmada` ou `cancelada`), `change_record_id`, `expires_at`,
-`decided_at`, `created_at` e `updated_at`. A expiração é avaliada na leitura,
-sem job. Como nas tabelas de workflow, a tabela tem RLS habilitada sem
-policies e os papéis `anon` e `authenticated` não têm acesso.
+`22_data_change_previews.sql` cria a tabela `pending_data_changes`, no mesmo
+padrão de `pending_proactive_suggestions`, e
+`23_rollback_data_change_previews.sql` a remove. As colunas são `id`,
+`user_id`, `correlation_id`, `external_conversation_id`, `interaction_id`,
+`project_id`, `entity`, `target_id`, `field_key`, `before_value` e
+`after_value` (JSONB), `status` (`pendente`, `confirmada` ou `cancelada`),
+`change_record_id`, `reason`, `expires_at`, `decided_at`, `created_at` e
+`updated_at`. Restrições `CHECK` limitam `entity`, `field_key` e `status` aos
+valores do contrato. A expiração é avaliada na leitura, sem job. Como nas
+tabelas de workflow, a tabela tem RLS habilitada sem policies e os papéis
+`anon` e `authenticated` não têm acesso. A migração também cria um índice
+parcial em `change_records` para o histórico por campo.
+
+O `interaction_id` só existe depois que o rastreamento RNF03 grava a interação.
+Por isso a prévia e seus eventos nascem com o `correlation_id`, e o pipeline
+liga os dois à interação logo em seguida.
 
 #### Cenários de aceite
 
@@ -4837,6 +4853,31 @@ chamada é feita ao provedor de LLM.
 | 11 | Gerente | Confirmar depois de 10 minutos | `410 PREVIEW_EXPIRED`; nada muda. |
 | 12 | Gerente | Confirmar duas vezes a mesma prévia | Uma única escrita e a mesma resposta nas duas chamadas. |
 
+#### Implementação (S5-06)
+
+A implementação está em `src/backend/app/data_changes/`:
+
+| Módulo | Responsabilidade |
+|---|---|
+| `fields.py` | Tabela de campos do contrato, leitura e validação de valores, forma canônica e exibição. |
+| `extractor.py` | Extrator determinístico do pedido, sem modelo de linguagem. |
+| `service.py` | Prévia, confirmação, cancelamento, desfazer e histórico, com a permissão verificada pela regra. |
+| `repository.py` | Unidade de trabalho transacional em PostgreSQL (`SELECT … FOR UPDATE`) e em memória para testes. |
+| `router.py` | As rotas do cartão. |
+
+A verificação por regra está em `authorize_project_write`, em
+`app/security/access.py`. O pipeline chama o extrator depois da barreira de
+dado sensível e antes do classificador. As intenções
+`transacao_atualizar_cronograma` e `transacao_atualizar_status`, quando não há
+pedido reconhecível, recebem a orientação com exemplos. Sem banco configurado,
+o chat responde `DATA_CHANGE_UNAVAILABLE`.
+
+Os testes cobrem os 12 cenários de aceite, o extrator, as regras de cada campo,
+a API e a integração com PostgreSQL real, incluindo duas confirmações
+simultâneas do mesmo campo e a falha da auditoria no meio da transação. A
+execução está registrada em
+[`docs/evidencias/sprint-05/s5-06-alteracao-dados-chat.md`](evidencias/sprint-05/s5-06-alteracao-dados-chat.md).
+
 #### Limites assumidos
 
 - **O RAG continua lendo documentos.** As respostas do RAG vêm de
@@ -4845,9 +4886,10 @@ chamada é feita ao provedor de LLM.
   origem. O relatório executivo e o alerta de prazo leem as tabelas e já
   refletem a alteração. A confirmação mostra o novo valor, e o cartão leva ao
   histórico.
-- **O cronograma não tem carga versionada.** Nenhum script do repositório
-  popula `schedule_items`. Para demonstrar e testar os campos `cronograma.*`, a
-  S5-06 precisa incluir atividades sintéticas para o `PRJ-0442`.
+- **Reaplicar a carga `13` limpa o histórico.** A `13` passou a trazer cinco
+  atividades sintéticas do `PRJ-0442` em `schedule_items`, usadas pelos campos
+  `cronograma.*`, mas continua apagando as mudanças registradas dos três
+  projetos antes de recriá-las, inclusive as feitas pelo chat.
 - **O extrator reconhece formas comuns de pedido**, e não qualquer frase. Fora
   delas, o chat pergunta ou orienta com exemplos.
 - **A alteração vale para a base da aplicação.** Ela não é sincronizada com o
