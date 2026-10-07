@@ -5375,11 +5375,14 @@ entidades extraídas e métricas do percurso de áudio e PLN, mantendo RNF05
 rastreável no contrato HTTP e RNF11 com mensagens controladas para entradas sem
 rota segura. No exemplo, `chat` omite `intent`, `entities` e `pipeline_metrics`,
 que repetem os objetos do nível superior; `answer.sources` também omite os
-campos nulos. O contrato completo das referências é descrito a seguir.
+campos nulos. O contrato completo das referências é descrito a seguir. A versão `1.2.0`
+acrescenta `chat.blocks` e `answer.blocks`, descritos no
+[contrato de respostas estruturadas](contracts/respostas-estruturadas-1.2.0.md).
+Os exemplos abaixo omitem os blocos para destacar os campos existentes.
 
 ```json
 {
-  "contract_version": "1.1.0",
+  "contract_version": "1.2.0",
   "conversation_id": "1f5c9a24-1c2e-4a8f-9a3e-2b6d8c0f1a77",
   "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
   "trace_id": "0d6f2c1e-4b7a-4f0e-9c3d-5a8b7e6f1d20",
@@ -5418,7 +5421,7 @@ campos nulos. O contrato completo das referências é descrito a seguir.
     "total_ms": 456
   },
   "chat": {
-    "contract_version": "1.1.0",
+    "contract_version": "1.2.0",
     "text": "O prazo do projeto XPTO e 30/09/2026. [Fonte 1]",
     "model": "gemini-3.7-flash",
     "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
@@ -5490,7 +5493,7 @@ campos nulos. O contrato completo das referências é descrito a seguir.
 
 | Campo | Tipo | Descrição |
 |---|---|---|
-| `contract_version` | `string` | Versão do contrato de resposta, comum a texto e áudio (`1.1.0`). |
+| `contract_version` | `string` | Versão do contrato de resposta, comum a texto e áudio (`1.2.0`). |
 | `conversation_id` | `string` | Valor recebido no formulário ou UUID gerado pela API se o campo não foi enviado. |
 | `interaction_id` | `string` | UUID gerado para a interação. |
 | `trace_id` | `string \| null` | Identificador do registro de auditoria (`ai_interactions`), comum a `consulted_sources` e `audit_events`; `null` sem persistência disponível. |
@@ -5503,6 +5506,7 @@ campos nulos. O contrato completo das referências é descrito a seguir.
 | `chat` | `object` | Resposta textual completa no mesmo contrato de `POST /api/chat`, incluindo `intent`, `entities`, fontes, afirmações verificadas e métricas do pipeline. |
 | `answer.text` | `string` | Espelho compatível do texto de resposta usado pelo frontend atual. |
 | `answer.evidence_status` | `string` | `referenced` quando cada afirmação reproduz integralmente a fonte citada; `insufficient` na abstenção. |
+| `answer.blocks` | `array` | Tabelas, indicadores numéricos e destaques com citações; espelho de `chat.blocks`. Ver [contrato 1.2.0](contracts/respostas-estruturadas-1.2.0.md). |
 | `answer.claims` | `array` | Afirmações com as citações e a evidência integral que as sustenta, iguais às de `chat.claims`. |
 | `answer.sources` | `array` | Mesmos campos de `chat.sources`, com os aliases legados `artifact` (título) e `section` (localizador ou lista). |
 | `pipeline_status` | `string` | `completed` quando validação, STT e pipeline de chat terminam com resposta controlada. |
@@ -6706,7 +6710,7 @@ as regras de validação e a sugestão proativa estão consolidados nesta seçã
 
 ```json
 {
-  "contract_version": "1.1.0",
+  "contract_version": "1.2.0",
   "text": "Status: Em acompanhamento [Fonte 1]",
   "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
   "trace_id": "0d6f2c1e-4b7a-4f0e-9c3d-5a8b7e6f1d20",

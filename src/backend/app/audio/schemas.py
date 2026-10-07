@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
+from app.gemini.blocks import ResponseBlock
 from app.nlp.schemas import AudioIntent, AudioPipelineMetrics, PublicEntity
 from app.gemini.schemas import GeminiChatResponse, GeminiSource, FactualClaim
 from typing import Literal
@@ -23,13 +24,14 @@ class AudioAnswerSource(GeminiSource):
 
 class AudioAnswer(BaseModel):
     text: str
+    blocks: list[ResponseBlock] = Field(default_factory=list)
     sources: list[AudioAnswerSource] = Field(default_factory=list)
     claims: list[FactualClaim] = Field(default_factory=list)
     evidence_status: Literal["referenced", "insufficient", "not_applicable"] = "not_applicable"
 
 
 class AudioUploadResponse(BaseModel):
-    contract_version: Literal["1.1.0"] = "1.1.0"
+    contract_version: Literal["1.2.0"] = "1.2.0"
     conversation_id: str = Field(max_length=MAX_CONVERSATION_ID_LENGTH)
     interaction_id: str | None
     trace_id: str | None = None
