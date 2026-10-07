@@ -3369,7 +3369,8 @@ constitui homologação com todos os dados reais do parceiro.
 O banco é necessário para o fluxo autenticado e persistente completo. Fallbacks
 em memória/JSON atendem desenvolvimento/testes específicos. `DATABASE_URL` ou
 `SUPABASE_DATABASE_URL` controla conexão; credenciais ficam fora do Git.
-O Compose observado precisa receber URL/chave pública de Auth no ambiente de runtime. Esse ajuste de configuração não foi incluído nesta entrega documental.
+O Compose da base analisada não repassa a URL e a chave pública de Auth ao
+runtime. A configuração dessas variáveis permanece pendente antes da publicação.
 O compose observado usa `REPORT_REPOSITORY_MODE=memory`,
 `REPORT_STORAGE_MODE=local`, `REPORT_PORTFOLIO_SOURCE=synthetic`, embora alertas
 usem banco. Não torna todo relatório persistido no Supabase automaticamente.
@@ -3391,7 +3392,7 @@ secrets válidos e tratamento idempotente de reentrega.
 | Teams/Entra/SharePoint/Copilot corporativos | Não homologados; Azure e JSON com formato SharePoint não provam conexão ao tenant do Metrô. |
 | AWS | Projeto 10.2, demo Learner Lab/URL efêmera; não prova operação sustentada. |
 | TTS, auditoria, gate e testes finais | !123/!117/!120/!124/!130 integrados. RNF07 reprovado; ver resultados abaixo. |
-| Escrita pelo chat e blocos estruturados | Contrato !132 integrado; implementação completa conforme premissa do usuário. MRs !133/!128/!129 não aparecem como merges no HEAD observado. |
+| Escrita pelo chat e blocos estruturados | Contrato !132 integrado. A integração das implementações !133/!128/!129 não está comprovada por merge na base analisada. |
 
 ### Serviços complementares e referências
 
@@ -8049,9 +8050,8 @@ A avaliação recebida indicava **81%** e situação Conforme. Esta auditoria
 reproduz seus 37 critérios, registra correções verificáveis e explicita as
 pendências. Todos os critérios estão rastreados, mas isso não comprova que
 todos estejam conformes. O percentual oficial depende da reavaliação do
-Escritório. Não há alteração de nota em sistema externo.
-Link público inacessível, ausência de segredo e limpeza remota exigem limites
-explícitos; não são resolvidos simplesmente mudando uma célula para Conforme.
+Escritório. A disponibilidade de links externos, a verificação de dados sensíveis
+e a limpeza de branches exigem evidências específicas de conclusão.
 
 ### Checklist e evidências
 
@@ -8071,7 +8071,7 @@ explícitos; não são resolvidos simplesmente mudando uma célula para Conforme
 | 12 | Grupo/integrantes na licença | Oneshot e seis integrantes. | Conforme |
 | 13 | Links na licença | Links de integrantes/instituição. | Estrutura conforme; acesso externo condicionado |
 | 14 | Referências além do modelo | Bibliografia formal README e fontes primárias em Arquitetura. | Conforme |
-| 15 | Instruções genéricas/template removidos | [Guia de padrões](GuiaPadroesDesenvolvimento.md) restaurado ao conteúdo anterior de develop por solicitação do grupo. Contém marcadores de template e exemplos de stack distintos do runtime atual. | Pendente de atualização específica do guia; padrões não duplicados em Projeto.md |
+| 15 | Instruções genéricas/template removidos | [Guia de padrões](GuiaPadroesDesenvolvimento.md) disponível em documento próprio. Contém marcadores de template e exemplos de stack distintos do runtime atual. | Pendente de atualização específica do guia; padrões não duplicados em Projeto.md |
 | 16 | README coerente com repositório | Estrutura atual e links; modos/limites no manual/Arquitetura. | Conforme |
 | 17 | Seção de requisitos | Prioridades MVP no README; requisitos completos Projeto. | Conforme |
 | 18 | Instruções de execução/instalação | Dois terminais e configuração; Seção 14.2 atualizada para Auth/banco. O smoke do HEAD atual encontra Header não definido; ver conciliação abaixo. | Instruções presentes; execução backend bloqueada no HEAD atual |
@@ -8089,9 +8089,9 @@ explícitos; não são resolvidos simplesmente mudando uma célula para Conforme
 | 30 | Links funcionam sem restrição | Caminhos locais validados; localhost escrito como instrução, exige servidores; GitLab/LinkedIn exigem direitos externos. | Conforme em links locais; acesso irrestrito externo não demonstrado |
 | 31 | Formatação mínima | Títulos, listas e tabelas; validação editorial. | Conforme |
 | 32 | Seções principais preenchidas | GestãoProjeto/Configuração, Guia e Projeto, mais fechamento S5. | Conforme |
-| 33 | Temporários/irrelevantes removidos | Arquivos intermediários da pesquisa ficaram fora da entrega; nenhum snapshot bruto ou .env é parte do pacote. Complementares úteis explicados. | Conforme no pacote local |
-| 34 | Versão PDF da documentação, se exigida | A entrega solicitada é em Markdown, consolidada em Projeto.md e GestaoProjeto.md. Não há exigência de PDF confirmada no escopo autorizado. | Não aplicável ao formato solicitado; confirmar aplicabilidade na reavaliação do EP |
-| 35 | Repositórios auxiliares/complementares linkados | Arquitetura identifica único repo próprio e fontes de integrações; não inventa outro repo. | Conforme documental |
+| 33 | Temporários/irrelevantes removidos | Arquivos temporários de trabalho e .env não integram os artefatos versionados de fechamento. Arquivos complementares têm finalidade documentada. | Conforme nos artefatos de fechamento |
+| 34 | Versão PDF da documentação, se exigida | Documentação mantida em Markdown, em Projeto.md e GestaoProjeto.md. O critério de PDF é condicional e sua exigência não está confirmada. | Aplicabilidade pendente de confirmação na reavaliação do EP |
+| 35 | Repositórios auxiliares/complementares linkados | Arquitetura identifica o repositório do projeto e as referências das integrações externas. | Conforme documental |
 | 36 | Arquitetura detalhada | Componentes, fluxo, controles, persistência, ambientes, dependências e limites em Seção 5.4 deste documento. | Conforme |
 | 37 | Estrutura formal de testes | backend/app/tests, frontend/tests/e2e, docs/testes e evidências RNF. | Conforme |
 
@@ -8109,8 +8109,8 @@ externo e aceite do modelo permanecem visíveis.
 | Pipeline não obrigatório | Snapshot GitLab mostra only_allow_merge_if_pipeline_succeeds=true. |
 | Título de MR sem gate | Job validar-titulo-mr e dois scripts presentes; !118 integrado. |
 | Gate integração/marcadores ausente | !120 integrado: job conflict-markers no estágio validate, título de MR no mesmo job, backend com seleção integration/strict-markers e frontend com typecheck/cobertura. Resultado remoto do HEAD atual não reconsultado; evidência versionada registra limitação de jobs do GitLab. |
-| Temporárias pós-merge e nomes fora da regra | Inventário realizado; não houve exclusão. A limpeza de branches está fora desta entrega documental. |
-| Coerência develop/hmg/main | Ancestralidade/conteúdo devem ser verificados na promoção final. Esta entrega não promove release nem inventa identidade das branches. |
+| Temporárias pós-merge e nomes fora da regra | Inventário realizado; limpeza pendente. Preservar branches permanentes, MRs abertos e conteúdo sem integração comprovada. |
+| Coerência develop/hmg/main | Ancestralidade e conteúdo devem ser verificados e registrados na promoção final; igualdade de conteúdo não comprova identidade do histórico. |
 | Cobertura do job backend | CI atual usa pytest app/tests -m integration --strict-markers. Coleta local de síntese/tracing falhou por Header não definido em main.py; integração do YAML não implica backend ou pipeline aprovados. |
 
 ### Aceite e resultado
@@ -8119,17 +8119,16 @@ As correções locais resolvem os itens documentais parciais/não conformes:
 referências, README de banco, descrição das integrações, arquitetura e instruções atuais.
 **Não se declara 100% oficial ou acesso externo irrestrito sem evidência.** Os
 critérios condicionados acima ficam prontos para inspeção do EP, com limites
-explícitos. Não há novas issues; os destinos pertencem a #302–#307 e tasks S5
-existentes. O registro de validação nesta seção e
+explícitos. As correções e pendências são rastreadas nas issues #302–#307
+e nas frentes técnicas da Sprint 5. O registro de validação nesta seção e
 [fechamento](GestaoProjeto.md) permitem revisão do pacote.
 
 
-### Conciliação com develop após pull — 06/10/2026
+### Estado integrado e verificação da base — 06/10/2026
 
-Base atual: `1ff5927a75b79219314068291b1aa43de3fe9674`, sem conflitos na reaplicação desta documentação.
-Foram preservadas as novas seções 6.4 (tabela Microsoft) e 8.9.4 (TTS),
-os relatórios, evidências, READMEs e alterações de aplicação vindos de develop.
-As alterações locais desta entrega continuam restritas à documentação e ao gráfico.
+Base analisada: `1ff5927a75b79219314068291b1aa43de3fe9674` de develop.
+A versão inclui a tabela Microsoft (Seção 6.4), a resposta em áudio (Seção 8.9.4),
+os testes finais, o gate de integração e a correção da auditoria do fluxo guiado.
 
 | Frente integrada | Evidência atual | Conclusão e limite |
 |---|---|---|
@@ -8148,8 +8147,8 @@ Assim, não se declara runtime backend aprovado ou entrega 100% conforme.
 Uma segunda seleção (persistência e fontes) confirmou o mesmo bloqueio no
 setup: 22 erros e 12 skips, estes por ausência de banco no modo isolado.
 Os sete testes locais do gate de marcadores passaram.
-O código não foi alterado nesta conciliação documental. Corrigir esse import
-e repetir coleta/smoke é necessário antes de declarar a aplicação executável.
+A correção do import e a repetição da coleta e do smoke são necessárias
+para validar a inicialização da aplicação nessa versão.
 
 **Frontend no HEAD atualizado.** Lint, `npm run typecheck` e build passaram.
 Vitest com `--pool=forks --maxWorkers=1 --testTimeout=20000` concluiu com
@@ -8159,22 +8158,17 @@ UserCard (um) e sugestão proativa (um). No AppShell, o teste novo de áudio ten
 encontrar o campo de mensagem antes de autenticar; no UserCard, falta o provider
 de sessão. Os demais resultados precisam ser conciliados com os componentes
 atuais; falha de teste não prova isoladamente falha da aplicação publicada.
-A tentativa com threads foi interrompida após ausência prolongada de progresso;
-teste/build inicialmente também encontraram restrição de leitura do sandbox,
-superada na execução autorizada. Não foram modificados testes para obter aprovação.
 O resultado antigo de 112 testes do relatório S5-22 descreve sua própria base,
 não a aprovação dos 142 testes alcançados pelo HEAD integrado atual.
 
-**Veredito desta conciliação:** validação editorial aprovada; qualidade do
-runtime com bloqueios, sem aceite de 100% de conformidade. O relatório RNF
-reprovado e as falhas atuais permanecem rastreados. Esta revisão foi executada
-pelo mesmo agente, sem se apresentar como aprovação independente de colega.
+**Resultado da verificação:** links, tabelas e formatação aprovados; runtime
+com bloqueios de inicialização e testes reprovados. Esses resultados impedem
+declarar conformidade integral da versão. O aceite final depende da correção
+dos bloqueios e de revisão por outro integrante.
 
-Os estados de aprovação, comentários de revisão e fechamento de issues da
-consulta GitLab anterior não foram atualizados pela API: a revisão automática
-bloqueou o uso de token do .env pelo script. O pull comprova integração por Git,
-sem inferir essas ações administrativas. Não houve push, nova issue ou exclusão
-de branch. A data 07/10 continua editorial; não inventa trabalho futuro.
+O Git comprova os merges listados, mas os registros disponíveis não confirmam
+as aprovações, os comentários de revisão e o fechamento das issues após essas
+integrações. Esses itens devem ser conferidos no GitLab no encerramento.
 
 ## 14.2 Instalação e identidade na versão S5
 
