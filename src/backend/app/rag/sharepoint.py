@@ -224,9 +224,13 @@ def load_sharepoint_documents(
                 or ""
             )
             searchable_values = [
-                str(value)
-                for value in fields.values()
-                if isinstance(value, (str, int, float))
+                str(item.get("project_code") or ""),
+                str(item.get("project_title") or ""),
+                *(
+                    str(value)
+                    for value in fields.values()
+                    if isinstance(value, (str, int, float))
+                ),
             ]
             documents.append(
                 SharePointDocument(
@@ -269,8 +273,8 @@ def retrieve_sharepoint_context(
             document
             for document in candidates
             # Documento sem projeto e institucional e vale para todos os perfis.
-            if not document.project_id
-            or document.project_id.casefold() in allowed
+            if (not document.project_id and not document.project_code)
+            or (document.project_id or "").casefold() in allowed
             or (document.project_code or "").casefold() in allowed
         ]
     scored: list[RetrievedDocument] = []

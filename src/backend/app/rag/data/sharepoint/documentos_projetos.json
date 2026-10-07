@@ -1,0 +1,46 @@
+{
+  "@odata.context": "https://mock.sharepoint.local/$metadata#lists/items",
+  "mock": true,
+  "site": {
+    "id": "metro-mvp-site",
+    "displayName": "Portal de Projetos - Dados Ficticios"
+  },
+  "list": {
+    "id": "documentos-projetos",
+    "displayName": "Documentos de Projetos"
+  },
+  "value": [
+    {
+      "id": "510",
+      "project_code": "PRJ-0510",
+      "project_title": "Renovacao do Centro de Controle Operacional",
+      "createdDateTime": "2026-02-10T09:00:00Z",
+      "lastModifiedDateTime": "2026-08-31T18:00:00Z",
+      "webUrl": "https://mock.sharepoint.local/sites/metro-mvp/Lists/DocumentosProjetos/510",
+      "fields": {
+        "Title": "Status executivo do PRJ-0510",
+        "CodigoProjeto": "PRJ-0510",
+        "Categoria": "Status de projeto",
+        "Status": "Em andamento",
+        "Conteudo": "O projeto PRJ-0510 Renovacao do Centro de Controle Operacional registrou avanco fisico de 43,2% em 31/08/2026, com farol verde. A proxima acao sintetica e executar o ensaio integrado dos subsistemas e consolidar o plano de transicao operacional.",
+        "PalavrasChave": "PRJ-0510 centro controle operacional status avanco fisico farol verde ensaio integrado transicao"
+      }
+    },
+    {
+      "id": "587",
+      "project_code": "PRJ-0587",
+      "project_title": "Adequacao de Acessibilidade das Estacoes",
+      "createdDateTime": "2026-05-05T09:00:00Z",
+      "lastModifiedDateTime": "2026-08-31T18:00:00Z",
+      "webUrl": "https://mock.sharepoint.local/sites/metro-mvp/Lists/DocumentosProjetos/587",
+      "fields": {
+        "Title": "Status executivo do PRJ-0587",
+        "CodigoProjeto": "PRJ-0587",
+        "Categoria": "Status de projeto",
+        "Status": "Em andamento",
+        "Conteudo": "O projeto PRJ-0587 Adequacao de Acessibilidade das Estacoes registrou avanco fisico de 22,0% em 31/08/2026, com farol amarelo. A proxima acao sintetica e concluir a especificacao tecnica dos elevadores e iniciar o processo de contratacao.",
+        "PalavrasChave": "PRJ-0587 acessibilidade estacoes status avanco fisico farol amarelo elevadores contratacao"
+      }
+    }
+  ]
+}

@@ -343,6 +343,30 @@ def test_local_fallback_without_project_identity_abstains():
     assert retrieve_context("Status e bicicleta no PRJ-0017") == []
 
 
+@pytest.mark.parametrize(
+    ("project_name", "project_code"),
+    [
+        ("Modernizacao do Sistema de Sinalizacao", "PRJ-0442"),
+        ("Renovacao do Centro de Controle Operacional", "PRJ-0510"),
+        ("Adequacao de Acessibilidade das Estacoes", "PRJ-0587"),
+    ],
+)
+def test_local_fallback_restricts_sources_by_registered_project_name(
+    monkeypatch, project_name: str, project_code: str
+):
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.delenv("SUPABASE_DATABASE_URL", raising=False)
+
+    results = retrieve_context(
+        f"Qual o status de {project_name}?",
+        entities=[_entity(project_name)],
+        limit=8,
+    )
+
+    assert results
+    assert {result.document.project_code for result in results} == {project_code}
+
+
 def test_project_name_outside_the_register_keeps_other_sources(monkeypatch):
     # "Linha 2-Verde" vem do lexico do NER, mas nao e um projeto cadastrado.
     monkeypatch.setenv("DATABASE_URL", "postgresql://synthetic:synthetic@example.test/test")

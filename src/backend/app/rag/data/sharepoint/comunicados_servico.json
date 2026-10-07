@@ -12,11 +12,14 @@
   "value": [
     {
       "id": "201",
+      "project_code": "PRJ-0442",
+      "project_title": "Modernizacao do Sistema de Sinalizacao",
       "createdDateTime": "2026-08-01T12:00:00Z",
       "lastModifiedDateTime": "2026-08-01T12:00:00Z",
       "webUrl": "https://mock.sharepoint.local/sites/metro-mvp/Lists/Comunicados/201",
       "fields": {
         "Title": "Operacao assistida na Linha Azul",
+        "CodigoProjeto": "PRJ-0442",
         "Tipo": "Operacao",
         "Linha": "Linha 1-Azul",
         "ValidadeInicio": "2026-08-24",

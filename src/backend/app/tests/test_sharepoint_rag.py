@@ -71,13 +71,64 @@ pytestmark = pytest.mark.integration
 def test_loads_mock_sharepoint_list_exports() -> None:
     documents = load_sharepoint_documents(DATA_DIR)
 
-    assert len(documents) == 9
+    assert len(documents) == 11
     assert {document.list_name for document in documents} == {
         "Base de Atendimento",
         "Comunicados de Servico",
+        "Documentos de Projetos",
         "Procedimentos Operacionais",
     }
     assert all(document.source_id and document.web_url for document in documents)
+
+
+def test_mock_sharepoint_covers_every_synthetic_project() -> None:
+    documents = load_sharepoint_documents(DATA_DIR)
+
+    project_documents = {
+        document.project_code: document
+        for document in documents
+        if document.project_code
+    }
+
+    assert set(project_documents) == {"PRJ-0442", "PRJ-0510", "PRJ-0587"}
+    assert all(document.project_title for document in project_documents.values())
+    assert all("CodigoProjeto" in dict(document.attributes)
+               for document in project_documents.values())
+
+
+@pytest.mark.parametrize("project_code", ["PRJ-0442", "PRJ-0510", "PRJ-0587"])
+def test_retrieves_only_the_requested_project_document(project_code: str) -> None:
+    documents = load_sharepoint_documents(DATA_DIR)
+
+    results = retrieve_sharepoint_context(
+        f"status do projeto {project_code}",
+        documents=documents,
+        allowed_project_ids={project_code},
+        limit=8,
+    )
+
+    project_results = [
+        result.document for result in results if result.document.project_code
+    ]
+    assert project_results
+    assert {document.project_code for document in project_results} == {project_code}
+
+
+def test_retrieves_documents_for_comparison_between_projects() -> None:
+    documents = load_sharepoint_documents(DATA_DIR)
+
+    results = retrieve_sharepoint_context(
+        "compare status PRJ-0510 e PRJ-0587",
+        documents=documents,
+        allowed_project_ids={"PRJ-0510", "PRJ-0587"},
+        limit=8,
+    )
+
+    assert {
+        result.document.project_code
+        for result in results
+        if result.document.project_code
+    } == {"PRJ-0510", "PRJ-0587"}
 
 
 def test_retrieves_relevant_sharepoint_items() -> None:
