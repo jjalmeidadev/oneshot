@@ -7314,6 +7314,12 @@ na imagem publicada acompanha a publicação da versão final. Resultados,
 latências e hashes estão nas
 [evidências da homologação com Azure real](evidencias/sprint-05/vhs-azure-real/README.md).
 
+#### Integração frontend-backend e falhas de comunicação — S5-23
+
+A S5-23 ([#277](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/277)) automatizou no Playwright os fluxos principais da interface contra o backend de testes (`app/tests/e2e_server.py`), que usa as rotas reais da API, repositórios em memória e provedores determinísticos. A suíte terminou com 60 testes aprovados: 20 cenários em desktop, tablet e celular. Texto, áudio, relatório e alerta percorrem o backend; o alerta vai até a assinatura ativa, conferida em `GET /api/alert-subscriptions`. A alteração de dados é exercitada com a API simulada, e o contrato do backend correspondente é coberto pelos testes de `data_changes`.
+
+As falhas de comunicação simuladas foram 503, 502 e 500 do backend, 504 de gateway, *timeout* do cliente, perda de conexão e 503 no meio do workflow de alerta. Em todas, a interface exibiu mensagem controlada, sem detalhe interno, e voltou a funcionar no envio seguinte. O job `frontend-e2e` publica o relatório HTML como artefato do MR e o JUnit na aba de testes. Resultados, mudanças e limites estão no [relatório S5-23](testes/sprint5/relatorio-s5-23.md).
+
 # 10. Procedimentos de Implantação
 
 O deploy da Sprint 4 foi realizado no AWS Academy Learner Lab e teve como objetivo disponibilizar a PoC para testes da equipe e do cliente sem depender de infraestrutura corporativa do Metrô. O processo combinou Supabase PostgreSQL, imagens Docker privadas no Amazon ECR, uma instância EC2 gerenciada por CloudFormation e um Cloudflare Quick Tunnel para fornecer acesso HTTPS temporário.

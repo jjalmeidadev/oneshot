@@ -1,0 +1,309 @@
+[WebServer] INFO:     Started server process [6480]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:8001 (Press CTRL+C to quit)
+
+Running 60 tests using 1 worker
+
+  ✓   1 [desktop] › e2e/alteracao-dados.spec.ts:110:3 › prévia, confirmação, histórico e desfazer (light) (3.8s)
+  ✓   2 [desktop] › e2e/alteracao-dados.spec.ts:110:3 › prévia, confirmação, histórico e desfazer (dark) (3.2s)
+  ✓   3 [desktop] › e2e/alteracao-dados.spec.ts:173:1 › cancelamento não grava e erro final não oferece repetir (3.1s)
+  ✓   4 [desktop] › e2e/chat.spec.ts:13:1 › texto, fontes, modo técnico e navegação responsiva (2.2s)
+  ✓   5 [desktop] › e2e/chat.spec.ts:45:1 › falha controlada, recuperação e interrupção (2.2s)
+  ✓   6 [desktop] › e2e/chat.spec.ts:67:1 › gravação sintética, WAV, upload e resposta pelo backend (3.4s)
+  ✓   7 [desktop] › e2e/chat.spec.ts:84:1 › acessibilidade automática e tema nas três larguras (2.2s)
+  ✓   8 [desktop] › e2e/chat.spec.ts:121:1 › PLN inicia fluxo guiado e entrega DOCX baixavel no chat (4.7s)
+  ✓   9 [desktop] › e2e/chat.spec.ts:159:1 › autentica a persona, envia Bearer e limpa o chat no logout (2.2s)
+  ✓  10 [desktop] › e2e/integracao-falhas.spec.ts:64:3 › fluxo integrado de alerta › configura e ativa o alerta pelo workflow do backend (2.3s)
+  ✓  11 [desktop] › e2e/integracao-falhas.spec.ts:99:3 › fluxo integrado de alerta › falha de comunicação no meio do workflow mostra erro e permite repetir (1.9s)
+  ✓  12 [desktop] › e2e/integracao-falhas.spec.ts:137:5 › falhas de comunicação no chat › backend responde 503: mensagem controlada e recuperação (2.3s)
+  ✓  13 [desktop] › e2e/integracao-falhas.spec.ts:137:5 › falhas de comunicação no chat › backend responde 502: mensagem controlada e recuperação (2.2s)
+[WebServer] ERROR:    Exception in ASGI application
+[WebServer] Traceback (most recent call last):
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/uvicorn/protocols/http/h11_impl.py", line 416, in run_asgi
+[WebServer]     result = await app(  # type: ignore[func-returns-value]
+[WebServer]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]         self.scope, self.receive, self.send
+[WebServer]         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]     )
+[WebServer]     ^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 63, in __call__
+[WebServer]     return await self.app(scope, receive, send)
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/applications.py", line 1163, in __call__
+[WebServer]     await super().__call__(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/applications.py", line 96, in __call__
+[WebServer]     await self.middleware_stack(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 186, in __call__
+[WebServer]     raise exc
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+[WebServer]     await self.app(scope, receive, _send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+[WebServer]     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+[WebServer]     raise exc
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+[WebServer]     await app(scope, receive, sender)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+[WebServer]     await self.app(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 676, in __call__
+[WebServer]     await self.middleware_stack(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 2734, in app
+[WebServer]     await route.handle(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 1281, in handle
+[WebServer]     await super().handle(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 282, in handle
+[WebServer]     await self.app(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 158, in app
+[WebServer]     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+[WebServer]     raise exc
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+[WebServer]     await app(scope, receive, sender)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 144, in app
+[WebServer]     response = await f(request)
+[WebServer]                ^^^^^^^^^^^^^^^^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 706, in app
+[WebServer]     raw_response = await run_endpoint_function(
+[WebServer]                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]     ...<3 lines>...
+[WebServer]     )
+[WebServer]     ^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 354, in run_endpoint_function
+[WebServer]     return await run_in_threadpool(dependant.call, **values)
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/concurrency.py", line 34, in run_in_threadpool
+[WebServer]     return await anyio.to_thread.run_sync(func)
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/anyio/to_thread.py", line 65, in run_sync
+[WebServer]     return await get_async_backend().run_sync_in_worker_thread(
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]         func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+[WebServer]         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]     )
+[WebServer]     ^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 2706, in run_sync_in_worker_thread
+[WebServer]     return await future
+[WebServer]            ^^^^^^^^^^^^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 1100, in run
+[WebServer]     result = context.run(func, *args)
+[WebServer]   File "<repo>/src/backend/app/main.py", line 299, in create_chat_response
+[WebServer]     response = process_message(
+[WebServer]         request,
+[WebServer]     ...<2 lines>...
+[WebServer]         access_context=access,
+[WebServer]     )
+[WebServer]   File "<repo>/src/backend/app/pipeline.py", line 245, in process_message
+[WebServer]     response = generate_chat_response(request, **provider_kwargs)
+[WebServer]   File "<repo>/src/backend/app/tests/e2e_server.py", line 106, in generate
+[WebServer]     raise RuntimeError('detalhe privado de excecao inesperada')
+[WebServer] RuntimeError: detalhe privado de excecao inesperada
+  ✓  14 [desktop] › e2e/integracao-falhas.spec.ts:137:5 › falhas de comunicação no chat › backend responde 500: mensagem controlada e recuperação (2.3s)
+  ✓  15 [desktop] › e2e/integracao-falhas.spec.ts:151:3 › falhas de comunicação no chat › gateway responde 504: mensagem de demora e recuperação (2.0s)
+  ✓  16 [desktop] › e2e/integracao-falhas.spec.ts:168:3 › falhas de comunicação no chat › timeout do cliente: interrompe a espera, avisa e libera o envio (12.0s)
+  ✓  17 [desktop] › e2e/integracao-falhas.spec.ts:189:3 › falhas de comunicação no chat › perda de conexão: avisa sem travar e volta quando a rede retorna (2.2s)
+  ✓  18 [desktop] › e2e/responsividade-acessibilidade.spec.ts:59:3 › largura e verificação automática nos estados principais (light) (5.3s)
+  ✓  19 [desktop] › e2e/responsividade-acessibilidade.spec.ts:59:3 › largura e verificação automática nos estados principais (dark) (5.6s)
+  ✓  20 [desktop] › e2e/responsividade-acessibilidade.spec.ts:91:1 › fluxo principal só pelo teclado (2.8s)
+  ✓  21 [tablet] › e2e/alteracao-dados.spec.ts:110:3 › prévia, confirmação, histórico e desfazer (light) (3.3s)
+  ✓  22 [tablet] › e2e/alteracao-dados.spec.ts:110:3 › prévia, confirmação, histórico e desfazer (dark) (3.1s)
+  ✓  23 [tablet] › e2e/alteracao-dados.spec.ts:173:1 › cancelamento não grava e erro final não oferece repetir (2.9s)
+  ✓  24 [tablet] › e2e/chat.spec.ts:13:1 › texto, fontes, modo técnico e navegação responsiva (2.8s)
+  ✓  25 [tablet] › e2e/chat.spec.ts:45:1 › falha controlada, recuperação e interrupção (2.1s)
+  ✓  26 [tablet] › e2e/chat.spec.ts:67:1 › gravação sintética, WAV, upload e resposta pelo backend (3.2s)
+  ✓  27 [tablet] › e2e/chat.spec.ts:84:1 › acessibilidade automática e tema nas três larguras (2.4s)
+  ✓  28 [tablet] › e2e/chat.spec.ts:121:1 › PLN inicia fluxo guiado e entrega DOCX baixavel no chat (4.4s)
+  ✓  29 [tablet] › e2e/chat.spec.ts:159:1 › autentica a persona, envia Bearer e limpa o chat no logout (2.1s)
+  ✓  30 [tablet] › e2e/integracao-falhas.spec.ts:64:3 › fluxo integrado de alerta › configura e ativa o alerta pelo workflow do backend (2.3s)
+  ✓  31 [tablet] › e2e/integracao-falhas.spec.ts:99:3 › fluxo integrado de alerta › falha de comunicação no meio do workflow mostra erro e permite repetir (2.0s)
+  ✓  32 [tablet] › e2e/integracao-falhas.spec.ts:137:5 › falhas de comunicação no chat › backend responde 503: mensagem controlada e recuperação (2.0s)
+  ✓  33 [tablet] › e2e/integracao-falhas.spec.ts:137:5 › falhas de comunicação no chat › backend responde 502: mensagem controlada e recuperação (2.0s)
+[WebServer] ERROR:    Exception in ASGI application
+[WebServer] Traceback (most recent call last):
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/uvicorn/protocols/http/h11_impl.py", line 416, in run_asgi
+[WebServer]     result = await app(  # type: ignore[func-returns-value]
+[WebServer]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]         self.scope, self.receive, self.send
+[WebServer]         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]     )
+[WebServer]     ^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 63, in __call__
+[WebServer]     return await self.app(scope, receive, send)
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/applications.py", line 1163, in __call__
+[WebServer]     await super().__call__(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/applications.py", line 96, in __call__
+[WebServer]     await self.middleware_stack(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 186, in __call__
+[WebServer]     raise exc
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+[WebServer]     await self.app(scope, receive, _send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+[WebServer]     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+[WebServer]     raise exc
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+[WebServer]     await app(scope, receive, sender)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+[WebServer]     await self.app(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 676, in __call__
+[WebServer]     await self.middleware_stack(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 2734, in app
+[WebServer]     await route.handle(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 1281, in handle
+[WebServer]     await super().handle(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 282, in handle
+[WebServer]     await self.app(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 158, in app
+[WebServer]     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+[WebServer]     raise exc
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+[WebServer]     await app(scope, receive, sender)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 144, in app
+[WebServer]     response = await f(request)
+[WebServer]                ^^^^^^^^^^^^^^^^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 706, in app
+[WebServer]     raw_response = await run_endpoint_function(
+[WebServer]                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]     ...<3 lines>...
+[WebServer]     )
+[WebServer]     ^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 354, in run_endpoint_function
+[WebServer]     return await run_in_threadpool(dependant.call, **values)
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/concurrency.py", line 34, in run_in_threadpool
+[WebServer]     return await anyio.to_thread.run_sync(func)
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/anyio/to_thread.py", line 65, in run_sync
+[WebServer]     return await get_async_backend().run_sync_in_worker_thread(
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]         func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+[WebServer]         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]     )
+[WebServer]     ^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 2706, in run_sync_in_worker_thread
+[WebServer]     return await future
+[WebServer]            ^^^^^^^^^^^^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 1100, in run
+[WebServer]     result = context.run(func, *args)
+[WebServer]   File "<repo>/src/backend/app/main.py", line 299, in create_chat_response
+[WebServer]     response = process_message(
+[WebServer]         request,
+[WebServer]     ...<2 lines>...
+[WebServer]         access_context=access,
+[WebServer]     )
+[WebServer]   File "<repo>/src/backend/app/pipeline.py", line 245, in process_message
+[WebServer]     response = generate_chat_response(request, **provider_kwargs)
+[WebServer]   File "<repo>/src/backend/app/tests/e2e_server.py", line 106, in generate
+[WebServer]     raise RuntimeError('detalhe privado de excecao inesperada')
+[WebServer] RuntimeError: detalhe privado de excecao inesperada
+  ✓  34 [tablet] › e2e/integracao-falhas.spec.ts:137:5 › falhas de comunicação no chat › backend responde 500: mensagem controlada e recuperação (2.0s)
+  ✓  35 [tablet] › e2e/integracao-falhas.spec.ts:151:3 › falhas de comunicação no chat › gateway responde 504: mensagem de demora e recuperação (2.0s)
+  ✓  36 [tablet] › e2e/integracao-falhas.spec.ts:168:3 › falhas de comunicação no chat › timeout do cliente: interrompe a espera, avisa e libera o envio (12.4s)
+  ✓  37 [tablet] › e2e/integracao-falhas.spec.ts:189:3 › falhas de comunicação no chat › perda de conexão: avisa sem travar e volta quando a rede retorna (2.2s)
+  ✓  38 [tablet] › e2e/responsividade-acessibilidade.spec.ts:59:3 › largura e verificação automática nos estados principais (light) (5.1s)
+  ✓  39 [tablet] › e2e/responsividade-acessibilidade.spec.ts:59:3 › largura e verificação automática nos estados principais (dark) (5.6s)
+  ✓  40 [tablet] › e2e/responsividade-acessibilidade.spec.ts:91:1 › fluxo principal só pelo teclado (3.3s)
+  ✓  41 [mobile] › e2e/alteracao-dados.spec.ts:110:3 › prévia, confirmação, histórico e desfazer (light) (3.1s)
+  ✓  42 [mobile] › e2e/alteracao-dados.spec.ts:110:3 › prévia, confirmação, histórico e desfazer (dark) (2.9s)
+  ✓  43 [mobile] › e2e/alteracao-dados.spec.ts:173:1 › cancelamento não grava e erro final não oferece repetir (3.5s)
+  ✓  44 [mobile] › e2e/chat.spec.ts:13:1 › texto, fontes, modo técnico e navegação responsiva (2.7s)
+  ✓  45 [mobile] › e2e/chat.spec.ts:45:1 › falha controlada, recuperação e interrupção (2.0s)
+  ✓  46 [mobile] › e2e/chat.spec.ts:67:1 › gravação sintética, WAV, upload e resposta pelo backend (3.4s)
+  ✓  47 [mobile] › e2e/chat.spec.ts:84:1 › acessibilidade automática e tema nas três larguras (2.2s)
+  ✓  48 [mobile] › e2e/chat.spec.ts:121:1 › PLN inicia fluxo guiado e entrega DOCX baixavel no chat (4.4s)
+  ✓  49 [mobile] › e2e/chat.spec.ts:159:1 › autentica a persona, envia Bearer e limpa o chat no logout (2.1s)
+  ✓  50 [mobile] › e2e/integracao-falhas.spec.ts:64:3 › fluxo integrado de alerta › configura e ativa o alerta pelo workflow do backend (2.3s)
+  ✓  51 [mobile] › e2e/integracao-falhas.spec.ts:99:3 › fluxo integrado de alerta › falha de comunicação no meio do workflow mostra erro e permite repetir (2.0s)
+  ✓  52 [mobile] › e2e/integracao-falhas.spec.ts:137:5 › falhas de comunicação no chat › backend responde 503: mensagem controlada e recuperação (1.9s)
+  ✓  53 [mobile] › e2e/integracao-falhas.spec.ts:137:5 › falhas de comunicação no chat › backend responde 502: mensagem controlada e recuperação (2.0s)
+[WebServer] ERROR:    Exception in ASGI application
+[WebServer] Traceback (most recent call last):
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/uvicorn/protocols/http/h11_impl.py", line 416, in run_asgi
+[WebServer]     result = await app(  # type: ignore[func-returns-value]
+[WebServer]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]         self.scope, self.receive, self.send
+[WebServer]         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]     )
+[WebServer]     ^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 63, in __call__
+[WebServer]     return await self.app(scope, receive, send)
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/applications.py", line 1163, in __call__
+[WebServer]     await super().__call__(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/applications.py", line 96, in __call__
+[WebServer]     await self.middleware_stack(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 186, in __call__
+[WebServer]     raise exc
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+[WebServer]     await self.app(scope, receive, _send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+[WebServer]     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+[WebServer]     raise exc
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+[WebServer]     await app(scope, receive, sender)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+[WebServer]     await self.app(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 676, in __call__
+[WebServer]     await self.middleware_stack(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 2734, in app
+[WebServer]     await route.handle(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 1281, in handle
+[WebServer]     await super().handle(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 282, in handle
+[WebServer]     await self.app(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 158, in app
+[WebServer]     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+[WebServer]     raise exc
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+[WebServer]     await app(scope, receive, sender)
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 144, in app
+[WebServer]     response = await f(request)
+[WebServer]                ^^^^^^^^^^^^^^^^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 706, in app
+[WebServer]     raw_response = await run_endpoint_function(
+[WebServer]                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]     ...<3 lines>...
+[WebServer]     )
+[WebServer]     ^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 354, in run_endpoint_function
+[WebServer]     return await run_in_threadpool(dependant.call, **values)
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/starlette/concurrency.py", line 34, in run_in_threadpool
+[WebServer]     return await anyio.to_thread.run_sync(func)
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/anyio/to_thread.py", line 65, in run_sync
+[WebServer]     return await get_async_backend().run_sync_in_worker_thread(
+[WebServer]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]         func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+[WebServer]         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]     )
+[WebServer]     ^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 2706, in run_sync_in_worker_thread
+[WebServer]     return await future
+[WebServer]            ^^^^^^^^^^^^
+[WebServer]   File "<repo>/src/backend/.venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 1100, in run
+[WebServer]     result = context.run(func, *args)
+[WebServer]   File "<repo>/src/backend/app/main.py", line 299, in create_chat_response
+[WebServer]     response = process_message(
+[WebServer]         request,
+[WebServer]     ...<2 lines>...
+[WebServer]         access_context=access,
+[WebServer]     )
+[WebServer]   File "<repo>/src/backend/app/pipeline.py", line 245, in process_message
+[WebServer]     response = generate_chat_response(request, **provider_kwargs)
+[WebServer]   File "<repo>/src/backend/app/tests/e2e_server.py", line 106, in generate
+[WebServer]     raise RuntimeError('detalhe privado de excecao inesperada')
+[WebServer] RuntimeError: detalhe privado de excecao inesperada
+  ✓  54 [mobile] › e2e/integracao-falhas.spec.ts:137:5 › falhas de comunicação no chat › backend responde 500: mensagem controlada e recuperação (1.9s)
+  ✓  55 [mobile] › e2e/integracao-falhas.spec.ts:151:3 › falhas de comunicação no chat › gateway responde 504: mensagem de demora e recuperação (2.0s)
+  ✓  56 [mobile] › e2e/integracao-falhas.spec.ts:168:3 › falhas de comunicação no chat › timeout do cliente: interrompe a espera, avisa e libera o envio (12.3s)
+  ✓  57 [mobile] › e2e/integracao-falhas.spec.ts:189:3 › falhas de comunicação no chat › perda de conexão: avisa sem travar e volta quando a rede retorna (2.0s)
+  ✓  58 [mobile] › e2e/responsividade-acessibilidade.spec.ts:59:3 › largura e verificação automática nos estados principais (light) (5.1s)
+  ✓  59 [mobile] › e2e/responsividade-acessibilidade.spec.ts:59:3 › largura e verificação automática nos estados principais (dark) (5.2s)
+  ✓  60 [mobile] › e2e/responsividade-acessibilidade.spec.ts:91:1 › fluxo principal só pelo teclado (3.0s)
+
+  60 passed (3.5m)

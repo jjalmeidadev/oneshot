@@ -33,8 +33,9 @@ python -m pytest app/tests/test_rnf10_rnf12_s5_32.py   # só os casos
 python -m scripts.validar_massa_sintetica              # só o validador (exit 1 se faltar categoria)
 ```
 
-Os casos são marcados como `integration` e entram no job `backend-api` da
-pipeline.
+Os casos são marcados como `integration`. Como o job `backend-api` enumera
+os arquivos de teste, `test_rnf10_rnf12_s5_32.py` foi incluído nessa lista
+junto com a S5-23.
 
 ## Seis casos
 
