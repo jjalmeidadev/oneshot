@@ -284,6 +284,7 @@
   - [11.7 Defesa das premissas e dos valores](#117-defesa-das-premissas-e-dos-valores)
   - [11.8 Fluxo de caixa sintético](#118-fluxo-de-caixa-sintético)
   - [11.9 Conclusão da viabilidade](#119-conclusão-da-viabilidade)
+  - [11.10 Custos de implementação da PoC e da solução final](#1110-custos-de-implementação-da-poc-e-da-solução-final)
 - [12. Benefícios Entregues e Aperfeiçoamentos Futuros](#12-benefícios-entregues-e-aperfeiçoamentos-futuros)
   - [12.1 Benefícios entregues](#121-benefícios-entregues)
   - [12.2 Aperfeiçoamentos futuros](#122-aperfeiçoamentos-futuros)
@@ -8006,6 +8007,157 @@ O fluxo confirma que todos os pagamentos mapeados podem ser liquidados e que o s
 ## 11.9 Conclusão da viabilidade
 
 Nas premissas adotadas, a entrega é financeiramente viável pelo preço de **R$ 192.195,11**. Esse valor paga os R$ 115.400,00 de custos diretos, os R$ 15.771,36 de despesas operacionais, os R$ 5.684,09 de juros, o imposto único estimado em R$ 30.270,73 e o lucro de R$ 25.068,93. O empréstimo de R$ 131.171,36 resolve o descasamento entre os pagamentos do desenvolvimento e o recebimento final, enquanto a inclusão dos juros na formação do preço preserva o lucro desejado de 15% após a quitação. Portanto, a viabilidade depende de cumprir o prazo, controlar o uso das ferramentas e receber do cliente na data contratada.
+
+## 11.10 Custos de implementação da PoC e da solução final
+
+Esta subseção atende à **S5-39 ([#293](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/293))**. Ela consolida os insumos das S4-52A a S4-52C ([#246](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/246) a [#248](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/248)), já refletidos nas Seções 11.2 e 11.3, e separa os custos em dois objetos:
+
+- **PoC:** o que foi construído no módulo, com dados sintéticos e ambiente de demonstração.
+- **Solução final:** a evolução da PoC para operar no ambiente corporativo do Metrô, seguindo o caminho de homologação da Seção 6.4.7.
+
+Em ambos, o custo tem duas partes, **pessoal e tecnologia**, cada linha com premissa, quantidade e valor. Tributos, margem e despesas administrativas pertencem à formação do preço das Seções 11.4 a 11.6 e não entram aqui.
+
+### 11.10.1 Premissas comuns
+
+| Premissa | Valor adotado | Fonte ou justificativa |
+|---|---|---|
+| Equipe | 6 pessoas desenvolvedoras júnior PJ | Composição do grupo, Seção 11.2.1 |
+| Dedicação | 8 horas por pessoa por dia útil | Dedicação integral, a mesma da Seção 11.2.1 |
+| Capacidade da equipe | 48 horas por dia útil; 480 horas por sprint de duas semanas (`6 × 8 × 10`) | Derivada das duas linhas anteriores |
+| Valor-hora | R$ 50,00 | Taxa PJ júnior da Seção 11.2.1, com referência no [Guia Salarial 2026 da Robert Half](https://www.roberthalf.com/br/pt/insights/salary-guide) |
+| Câmbio | R$ 5,1795 por US$ 1,00 | PTAX de venda de 24/09/2026, a mesma da Seção 11.3.1 |
+| Região de nuvem da solução final | Azure Brazil South | Dados do Metrô permanecem no país; preços da [API pública de preços do Azure](https://prices.azure.com/api/retail/prices), consultada em 07/10/2026 |
+
+### 11.10.2 PoC
+
+**Pessoal.** A PoC foi desenvolvida em cinco sprints, entre 3 de agosto e 7 de outubro de 2026, o que dá 47 dias úteis.
+
+| Item | Premissa | Quantidade | Valor unitário | Valor |
+|---|---|---:|---:|---:|
+| Desenvolvimento | 6 pessoas × 47 dias úteis × 8 h | 2.256 h | R$ 50,00/h | R$ 112.800,00 |
+| **Total de pessoal da PoC** | | **2.256 h** | | **R$ 112.800,00** |
+
+**Tecnologia.** Valores das Seções 11.2.2 e 11.3.1, mantidos como preço de mercado. Créditos acadêmicos e camadas gratuitas usados pela equipe não reduzem o orçamento, porque não estariam disponíveis para uma startup contratada.
+
+| Item | Premissa | Quantidade | Valor unitário | Valor |
+|---|---|---:|---:|---:|
+| Codex | Assistente de código para cada integrante | 6 pessoas × 3 meses | R$ 100,00/mês | R$ 1.800,00 |
+| Gemini / OpenRouter | Franquia para desenvolvimento, integração e testes do agente | 1 franquia | R$ 500,00 | R$ 500,00 |
+| Azure AI Speech | Franquia para integração e testes de transcrição | 1 franquia | R$ 300,00 | R$ 300,00 |
+| AWS EC2 `t3.large` | Execução sob demanda | ~6 semanas | — | R$ 393,01 |
+| AWS EBS `gp3` 50 GB, IPv4, ECR e CloudWatch | Armazenamento, endereço, imagens e logs | ~6 semanas | — | R$ 69,37 |
+| Supabase Pro | Banco gerenciado | ~2 meses | — | R$ 258,98 |
+| **Total de tecnologia da PoC** | | | | **R$ 3.321,36** |
+
+| Resumo da PoC | Valor |
+|---|---:|
+| Pessoal | R$ 112.800,00 |
+| Tecnologia | R$ 3.321,36 |
+| **Custo de implementação da PoC** | **R$ 116.121,36** |
+
+### 11.10.3 Solução final
+
+**Escopo.** A solução final mantém o núcleo Python da PoC e adapta hospedagem, identidade, dados, modelo de linguagem e canal ao ecossistema Microsoft, pelo caminho recomendado na Seção 6.4.7:
+
+- aplicação web publicada como aba do Teams;
+- API e workers em Azure Container Apps;
+- PostgreSQL gerenciado em Azure;
+- Microsoft Entra ID para identidade;
+- SharePoint corporativo acessado pelo Microsoft Graph;
+- Azure OpenAI no lugar do Gemini;
+- Azure AI Speech para voz;
+- servidor MCP para conexão com o Copilot, pedido na S5-18.
+
+Ficam fora do escopo: reconstruir os fluxos em Power Automate ou Copilot Studio, trocar o RabbitMQ por Service Bus e adotar Azure AI Search. A Seção 6.4 classifica esses três caminhos como opcionais e de esforço alto.
+
+**Método do esforço.** As horas vêm da avaliação de esforço que a Seção 6.4 atribui a cada componente:
+
+| Nível de esforço | Horas por componente |
+|---|---:|
+| Baixo | 32 h |
+| Médio | 96 h |
+| Alto | 192 h |
+
+Somam-se **20%** para homologação e regressão no ambiente do Metrô: repetir os testes funcionais, os RNFs (em especial RNF04 a RNF06, com dados reais) e a usabilidade. Para calibrar: na PoC, as 2.256 horas produziram os 32 componentes inventariados na Seção 6.4, uma média de 70,5 h por componente. As 96 h de um componente médio ficam acima dessa média porque cobrem o adaptador e sua validação no ambiente corporativo, que a PoC não teve. A proporção 1 : 3 : 6 entre os níveis acompanha a escala qualitativa da Seção 6.4.2.
+
+**Pessoal.**
+
+| Frente | Componentes da Seção 6.4 e esforço | Horas |
+|---|---|---:|
+| Interface e canal | Aba Teams (médio); domínio e ingress HTTPS (médio); blocos de resposta no canal (médio); notificações no Teams (médio) | 384 h |
+| API e inteligência | API em Container Apps (médio); classificador e catálogo (médio); workflows de relatório e alerta (médio); proatividade (médio); cliente Azure OpenAI (médio); normalização e entidades (baixo); validação de citações (baixo) | 544 h |
+| Dados e identidade | SharePoint via Graph (alto); PostgreSQL gerenciado (alto); Entra ID e mapeamento de perfis (alto); recuperação mantida e reavaliada (médio); Blob Storage (médio); auditoria (médio); barreira de dado sensível (médio) | 960 h |
+| Voz, relatórios e alertas | STT (baixo); TTS (médio); serviço de relatórios (médio); renderização DOCX (baixo); workers de alerta (médio); RabbitMQ em contêiner (médio) | 448 h |
+| Copilot | Servidor MCP com ferramentas, transporte e autenticação (alto) | 192 h |
+| Hospedagem e operação | Container Apps e registro de imagens (alto); Key Vault (médio); Azure Monitor e Application Insights (médio); CI/CD do GitLab para Azure (médio) | 480 h |
+| **Subtotal dos componentes** | | **3.008 h** |
+| Homologação e regressão | 20% do subtotal | 601,6 h |
+| **Esforço estimado** | | **3.609,6 h** |
+
+Com 480 horas por sprint, o esforço exige **8 sprints**, ou 16 semanas (cerca de 4 meses). A equipe é contratada pela capacidade das sprints, e as 230,4 horas que sobram (6% do total) funcionam como reserva.
+
+| Item | Premissa | Quantidade | Valor unitário | Valor |
+|---|---|---:|---:|---:|
+| Desenvolvimento e homologação | 6 pessoas × 8 h × 80 dias úteis | 3.840 h | R$ 50,00/h | R$ 192.000,00 |
+| **Total de pessoal da solução final** | | **3.840 h** | | **R$ 192.000,00** |
+
+**Tecnologia durante a implementação** (8 sprints, cerca de 4 meses):
+
+| Item | Premissa | Quantidade | Valor unitário | Valor |
+|---|---|---:|---:|---:|
+| Codex | Assistente de código para cada integrante | 6 pessoas × 4 meses | R$ 100,00/mês | R$ 2.400,00 |
+| Ambiente Azure de homologação | PostgreSQL B1ms (US$ 0,035/h × 730 h), registro de imagens Basic (US$ 0,1666/dia), testes no Azure OpenAI (1 M de tokens de entrada e 0,3 M de saída) e 15% de reserva para armazenamento, backup e tráfego. Container Apps, Log Analytics e Speech dentro das cotas gratuitas mensais | 4 meses × US$ 36,23 | R$ 187,65/mês | R$ 750,61 |
+| **Total de tecnologia da implementação** | | | | **R$ 3.150,61** |
+
+| Resumo da solução final | Valor |
+|---|---:|
+| Pessoal | R$ 192.000,00 |
+| Tecnologia durante a implementação | R$ 3.150,61 |
+| **Custo de implementação da solução final** | **R$ 195.150,61** |
+
+**Operação mensal após a implantação.** A operação não faz parte do custo de implementação, mas define o que o Metrô passa a pagar todo mês. O volume adotado é este:
+
+- 30 usuários (PMO e gestores dos 48 projetos ativos do cenário de protótipo da Seção 3.8.3), 10 consultas por usuário por dia útil e 21 dias úteis: **6.300 consultas por mês**;
+- 70% das consultas chegam ao modelo de linguagem; o restante é resolvido por roteamento local, como mostrou a hipótese de tokens da Sprint 4;
+- 2.000 tokens de entrada e 600 de saída por chamada, mais que os cerca de 200 e 140 da massa sintética, porque os documentos reais são maiores;
+- 20% das perguntas por voz, com 15 segundos cada;
+- 30% das respostas reproduzidas em áudio, com 600 caracteres cada.
+
+| Item | Premissa | Quantidade por mês | Preço unitário (US$) | Valor mensal |
+|---|---|---:|---:|---:|
+| Container Apps, vCPU | API com 1 vCPU e 2 GiB; frontend, worker de alertas e RabbitMQ com 0,25 vCPU e 0,5 GiB cada; 24 × 7; descontada a cota gratuita | 4.419.000 vCPU-s faturáveis | 0,000024 | R$ 549,34 |
+| Container Apps, memória | Mesmos contêineres | 8.838.000 GiB-s faturáveis | 0,000003 | R$ 137,31 |
+| PostgreSQL Flexible B2s | Banco do portfólio, sessões e auditoria, 24 × 7 | 730 h | 0,14 | R$ 529,34 |
+| Azure OpenAI `gpt-4.1-mini` | 4.410 chamadas | 8,82 M tokens de entrada / 2,65 M de saída | 0,40 / 1,60 por M | R$ 40,19 |
+| Speech, STT | 1.260 perguntas por voz | 5,25 h de áudio | 1,00/h | R$ 27,19 |
+| Speech, TTS neural | 1.890 respostas em áudio | 1,13 M caracteres | 15,00 por M | R$ 88,10 |
+| Registro de imagens Basic | Imagens da API e do frontend | 30,42 dias | 0,1666/dia | R$ 26,26 |
+| Key Vault | Leitura de segredos pela aplicação | 100 mil operações | 0,03 por 10 mil | R$ 1,55 |
+| Log Analytics | Logs e telemetria acima dos 5 GB gratuitos | 3 GB | 4,60/GB | R$ 71,48 |
+| Reserva de 15% | Armazenamento do banco e de arquivos, backup, tráfego de saída | — | — | R$ 220,61 |
+| **Total mensal de operação** | | | | **R$ 1.691,37** |
+
+Isso dá cerca de **R$ 20.296 por ano**. O valor se concentra em computação e banco, que respondem por 72% do total. O modelo de linguagem pesa pouco nesse volume: dobrar as consultas acrescentaria cerca de R$ 40 por mês nessa linha.
+
+**O que não está no custo.**
+
+- Teams, Entra ID e SharePoint fazem parte do Microsoft 365 que o Metrô já usa, então o custo incremental foi considerado zero.
+- Licenças de Copilot para os usuários, se o Metrô quiser usar o agente pelo Copilot, dependem do contrato Microsoft dele e não foram orçadas.
+- O preço do `gpt-4.1-mini` é o da implantação global. Se a GTI exigir processamento restrito a uma zona de dados, o valor por token muda e precisa ser revisto.
+- Sustentação, operação assistida e evolução depois da implantação exigem outra equipe e outro orçamento.
+
+### 11.10.4 Comparação
+
+| | PoC | Solução final |
+|---|---:|---:|
+| Duração | 5 sprints (47 dias úteis) | 8 sprints (80 dias úteis) |
+| Horas de desenvolvimento | 2.256 h | 3.840 h |
+| Pessoal | R$ 112.800,00 | R$ 192.000,00 |
+| Tecnologia durante a implementação | R$ 3.321,36 | R$ 3.150,61 |
+| **Custo de implementação** | **R$ 116.121,36** | **R$ 195.150,61** |
+| Operação depois da entrega | Não prevista (demonstração) | R$ 1.691,37 por mês |
+
+Nos dois casos, pessoal responde por mais de 97% do custo de implementação. Por isso, o prazo é a variável que mais pesa: cada sprint a mais da equipe custa R$ 24.000,00. A solução final custa cerca de 1,7 vez a PoC porque troca dados sintéticos e serviços de demonstração por identidade, fontes e hospedagem corporativas. Essa diferença acompanha o esforço que a Seção 6.4 atribui a cada componente.
 
 # 12. Benefícios Entregues e Aperfeiçoamentos Futuros
 
