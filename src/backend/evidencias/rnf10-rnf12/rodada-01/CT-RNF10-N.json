@@ -1,0 +1,15 @@
+{
+  "readme_sem_instrucao_de_teste": {
+    "instrucoes_ausentes": [
+      "executar os testes"
+    ]
+  },
+  "rota_com_acesso_externo_direto": {
+    "arquivo_alterado": "reports/router.py (cópia)",
+    "violacoes": [
+      "reports/router.py: interface acessa banco/serviço externo diretamente (httpx, psycopg)",
+      "reports/router.py: driver de banco fora da camada de dados"
+    ]
+  },
+  "arquivos_reais_intactos": true
+}

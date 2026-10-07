@@ -1,0 +1,11 @@
+{
+  "cenario": "payload_invalido",
+  "http": 502,
+  "content_type": "application/json",
+  "corpo": "{\"detail\":\"Não foi possível obter uma resposta. Tente novamente em instantes.\"}",
+  "mensagem_definida_pelo_projeto": "Não foi possível obter uma resposta. Tente novamente em instantes.",
+  "vazamentos_na_resposta": [],
+  "vazamentos_no_log": [],
+  "auditoria_registros": 1,
+  "auditoria_com_falha": true
+}

@@ -7083,6 +7083,21 @@ A linha de base de 22 de setembro recuperou 11 de 18 fontes e registrou *recall*
 
 Os demais CT-RNF permanecem sem resultado nesta subseção até que sejam executados com as evidências previstas. Casos bloqueados devem identificar a dependência e o plano de desbloqueio.
 
+#### RNF10 a RNF12 — Sprint 5
+
+A execução da S5-32 ([#286](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/286)) ocorreu em 7 de outubro de 2026, no commit `84df352` da `develop`, com a API em processo (`TestClient`), duplos na fronteira do provedor e da fonte, e sem banco, rede ou `.env`. O relatório completo, com comandos e limites, está em [`testes/sprint5/relatorio-s5-32.md`](testes/sprint5/relatorio-s5-32.md), e as evidências em [`src/backend/evidencias/rnf10-rnf12/rodada-01/`](../src/backend/evidencias/rnf10-rnf12/rodada-01/manifesto.json).
+
+| Caso | Resultado observado | Situação |
+| --- | --- | --- |
+| CT-RNF10-P | Checklist de camadas, README, contrato OpenAPI e testes versionados sem violações; README reproduzido em ambiente limpo | Aprovado |
+| CT-RNF10-N | README sem instrução de teste e rota com acesso externo direto, ambos em cópias, detectados pelo checklist | Aprovado |
+| CT-RNF11-P | Falha de classificação (503), ausência de resultado (200, sem chamar o provedor), fonte indisponível (503), *timeout* (502) e provedor 5xx (502): mensagem definida, auditoria registrada e nenhum vazamento | Aprovado |
+| CT-RNF11-N | Payload inválido do provedor controlado (502). Exceção inesperada: 500 genérico do Starlette, sem mensagem do projeto e sem auditoria (`DEF-S5-32-01`) | **Reprovado** |
+| CT-RNF12-P | `scripts/validar_massa_sintetica.py` encontrou as seis categorias: 3 projetos, 1 subportfólio, 10 marcos, 10 riscos, 17 indicadores e 9 documentos | Aprovado |
+| CT-RNF12-N | Seis cópias, cada uma sem uma categoria, reprovadas com a categoria ausente identificada | Aprovado |
+
+O `DEF-S5-32-01` decorre da falta de um tratador global de exceções em `/api/chat`: uma exceção sem tratador registrado escapa antes do registro de auditoria. O destino do defeito fica para a consolidação dos testes sistêmicos (S5-36).
+
 ## 9.3 Testes de Usabilidade
 
 Os testes de usabilidade têm como objetivo avaliar se o Agente de Gestão de Portfólio pode ser utilizado por pessoas externas à equipe de desenvolvimento para consultar, interpretar e validar informações de projetos por meio de uma interação conversacional. A avaliação concentra-se na experiência do usuário durante os fluxos centrais do MVP: entrada em linguagem natural, consulta de informações, análise comparativa entre projetos, tratamento de informação ausente ou fora de escopo, sugestão proativa e entrada por voz.
