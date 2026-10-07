@@ -1,0 +1,146 @@
+<testsuites id="" name="" tests="60" failures="0" skipped="0" errors="0" time="207.54194400000003">
+<testsuite name="alteracao-dados.spec.ts" timestamp="2026-10-07T05:16:45.171Z" hostname="desktop" tests="3" failures="0" skipped="0" time="9.998" errors="0">
+<testcase name="prévia, confirmação, histórico e desfazer (light)" classname="alteracao-dados.spec.ts" time="3.751">
+</testcase>
+<testcase name="prévia, confirmação, histórico e desfazer (dark)" classname="alteracao-dados.spec.ts" time="3.176">
+</testcase>
+<testcase name="cancelamento não grava e erro final não oferece repetir" classname="alteracao-dados.spec.ts" time="3.071">
+</testcase>
+</testsuite>
+<testsuite name="chat.spec.ts" timestamp="2026-10-07T05:16:45.171Z" hostname="desktop" tests="6" failures="0" skipped="0" time="16.772" errors="0">
+<testcase name="texto, fontes, modo técnico e navegação responsiva" classname="chat.spec.ts" time="2.194">
+</testcase>
+<testcase name="falha controlada, recuperação e interrupção" classname="chat.spec.ts" time="2.209">
+</testcase>
+<testcase name="gravação sintética, WAV, upload e resposta pelo backend" classname="chat.spec.ts" time="3.36">
+</testcase>
+<testcase name="acessibilidade automática e tema nas três larguras" classname="chat.spec.ts" time="2.191">
+</testcase>
+<testcase name="PLN inicia fluxo guiado e entrega DOCX baixavel no chat" classname="chat.spec.ts" time="4.652">
+</testcase>
+<testcase name="autentica a persona, envia Bearer e limpa o chat no logout" classname="chat.spec.ts" time="2.166">
+</testcase>
+</testsuite>
+<testsuite name="integracao-falhas.spec.ts" timestamp="2026-10-07T05:16:45.171Z" hostname="desktop" tests="8" failures="0" skipped="0" time="27.112" errors="0">
+<testcase name="fluxo integrado de alerta › configura e ativa o alerta pelo workflow do backend" classname="integracao-falhas.spec.ts" time="2.323">
+</testcase>
+<testcase name="fluxo integrado de alerta › falha de comunicação no meio do workflow mostra erro e permite repetir" classname="integracao-falhas.spec.ts" time="1.87">
+</testcase>
+<testcase name="falhas de comunicação no chat › backend responde 503: mensagem controlada e recuperação" classname="integracao-falhas.spec.ts" time="2.251">
+</testcase>
+<testcase name="falhas de comunicação no chat › backend responde 502: mensagem controlada e recuperação" classname="integracao-falhas.spec.ts" time="2.155">
+</testcase>
+<testcase name="falhas de comunicação no chat › backend responde 500: mensagem controlada e recuperação" classname="integracao-falhas.spec.ts" time="2.274">
+</testcase>
+<testcase name="falhas de comunicação no chat › gateway responde 504: mensagem de demora e recuperação" classname="integracao-falhas.spec.ts" time="2.022">
+</testcase>
+<testcase name="falhas de comunicação no chat › timeout do cliente: interrompe a espera, avisa e libera o envio" classname="integracao-falhas.spec.ts" time="12.044">
+</testcase>
+<testcase name="falhas de comunicação no chat › perda de conexão: avisa sem travar e volta quando a rede retorna" classname="integracao-falhas.spec.ts" time="2.173">
+</testcase>
+</testsuite>
+<testsuite name="responsividade-acessibilidade.spec.ts" timestamp="2026-10-07T05:16:45.171Z" hostname="desktop" tests="3" failures="0" skipped="0" time="13.725" errors="0">
+<testcase name="largura e verificação automática nos estados principais (light)" classname="responsividade-acessibilidade.spec.ts" time="5.314">
+</testcase>
+<testcase name="largura e verificação automática nos estados principais (dark)" classname="responsividade-acessibilidade.spec.ts" time="5.59">
+</testcase>
+<testcase name="fluxo principal só pelo teclado" classname="responsividade-acessibilidade.spec.ts" time="2.821">
+</testcase>
+</testsuite>
+<testsuite name="alteracao-dados.spec.ts" timestamp="2026-10-07T05:16:45.171Z" hostname="tablet" tests="3" failures="0" skipped="0" time="9.284" errors="0">
+<testcase name="prévia, confirmação, histórico e desfazer (light)" classname="alteracao-dados.spec.ts" time="3.31">
+</testcase>
+<testcase name="prévia, confirmação, histórico e desfazer (dark)" classname="alteracao-dados.spec.ts" time="3.056">
+</testcase>
+<testcase name="cancelamento não grava e erro final não oferece repetir" classname="alteracao-dados.spec.ts" time="2.918">
+</testcase>
+</testsuite>
+<testsuite name="chat.spec.ts" timestamp="2026-10-07T05:16:45.171Z" hostname="tablet" tests="6" failures="0" skipped="0" time="17.058" errors="0">
+<testcase name="texto, fontes, modo técnico e navegação responsiva" classname="chat.spec.ts" time="2.768">
+</testcase>
+<testcase name="falha controlada, recuperação e interrupção" classname="chat.spec.ts" time="2.137">
+</testcase>
+<testcase name="gravação sintética, WAV, upload e resposta pelo backend" classname="chat.spec.ts" time="3.204">
+</testcase>
+<testcase name="acessibilidade automática e tema nas três larguras" classname="chat.spec.ts" time="2.433">
+</testcase>
+<testcase name="PLN inicia fluxo guiado e entrega DOCX baixavel no chat" classname="chat.spec.ts" time="4.443">
+</testcase>
+<testcase name="autentica a persona, envia Bearer e limpa o chat no logout" classname="chat.spec.ts" time="2.073">
+</testcase>
+</testsuite>
+<testsuite name="integracao-falhas.spec.ts" timestamp="2026-10-07T05:16:45.171Z" hostname="tablet" tests="8" failures="0" skipped="0" time="26.904" errors="0">
+<testcase name="fluxo integrado de alerta › configura e ativa o alerta pelo workflow do backend" classname="integracao-falhas.spec.ts" time="2.306">
+</testcase>
+<testcase name="fluxo integrado de alerta › falha de comunicação no meio do workflow mostra erro e permite repetir" classname="integracao-falhas.spec.ts" time="2.012">
+</testcase>
+<testcase name="falhas de comunicação no chat › backend responde 503: mensagem controlada e recuperação" classname="integracao-falhas.spec.ts" time="2.005">
+</testcase>
+<testcase name="falhas de comunicação no chat › backend responde 502: mensagem controlada e recuperação" classname="integracao-falhas.spec.ts" time="1.986">
+</testcase>
+<testcase name="falhas de comunicação no chat › backend responde 500: mensagem controlada e recuperação" classname="integracao-falhas.spec.ts" time="2.019">
+</testcase>
+<testcase name="falhas de comunicação no chat › gateway responde 504: mensagem de demora e recuperação" classname="integracao-falhas.spec.ts" time="2.015">
+</testcase>
+<testcase name="falhas de comunicação no chat › timeout do cliente: interrompe a espera, avisa e libera o envio" classname="integracao-falhas.spec.ts" time="12.378">
+</testcase>
+<testcase name="falhas de comunicação no chat › perda de conexão: avisa sem travar e volta quando a rede retorna" classname="integracao-falhas.spec.ts" time="2.183">
+</testcase>
+</testsuite>
+<testsuite name="responsividade-acessibilidade.spec.ts" timestamp="2026-10-07T05:16:45.171Z" hostname="tablet" tests="3" failures="0" skipped="0" time="14.063" errors="0">
+<testcase name="largura e verificação automática nos estados principais (light)" classname="responsividade-acessibilidade.spec.ts" time="5.085">
+</testcase>
+<testcase name="largura e verificação automática nos estados principais (dark)" classname="responsividade-acessibilidade.spec.ts" time="5.638">
+</testcase>
+<testcase name="fluxo principal só pelo teclado" classname="responsividade-acessibilidade.spec.ts" time="3.34">
+</testcase>
+</testsuite>
+<testsuite name="alteracao-dados.spec.ts" timestamp="2026-10-07T05:16:45.171Z" hostname="mobile" tests="3" failures="0" skipped="0" time="9.551" errors="0">
+<testcase name="prévia, confirmação, histórico e desfazer (light)" classname="alteracao-dados.spec.ts" time="3.115">
+</testcase>
+<testcase name="prévia, confirmação, histórico e desfazer (dark)" classname="alteracao-dados.spec.ts" time="2.931">
+</testcase>
+<testcase name="cancelamento não grava e erro final não oferece repetir" classname="alteracao-dados.spec.ts" time="3.505">
+</testcase>
+</testsuite>
+<testsuite name="chat.spec.ts" timestamp="2026-10-07T05:16:45.171Z" hostname="mobile" tests="6" failures="0" skipped="0" time="16.806" errors="0">
+<testcase name="texto, fontes, modo técnico e navegação responsiva" classname="chat.spec.ts" time="2.685">
+</testcase>
+<testcase name="falha controlada, recuperação e interrupção" classname="chat.spec.ts" time="2.023">
+</testcase>
+<testcase name="gravação sintética, WAV, upload e resposta pelo backend" classname="chat.spec.ts" time="3.379">
+</testcase>
+<testcase name="acessibilidade automática e tema nas três larguras" classname="chat.spec.ts" time="2.218">
+</testcase>
+<testcase name="PLN inicia fluxo guiado e entrega DOCX baixavel no chat" classname="chat.spec.ts" time="4.398">
+</testcase>
+<testcase name="autentica a persona, envia Bearer e limpa o chat no logout" classname="chat.spec.ts" time="2.103">
+</testcase>
+</testsuite>
+<testsuite name="integracao-falhas.spec.ts" timestamp="2026-10-07T05:16:45.171Z" hostname="mobile" tests="8" failures="0" skipped="0" time="26.416" errors="0">
+<testcase name="fluxo integrado de alerta › configura e ativa o alerta pelo workflow do backend" classname="integracao-falhas.spec.ts" time="2.318">
+</testcase>
+<testcase name="fluxo integrado de alerta › falha de comunicação no meio do workflow mostra erro e permite repetir" classname="integracao-falhas.spec.ts" time="2.014">
+</testcase>
+<testcase name="falhas de comunicação no chat › backend responde 503: mensagem controlada e recuperação" classname="integracao-falhas.spec.ts" time="1.901">
+</testcase>
+<testcase name="falhas de comunicação no chat › backend responde 502: mensagem controlada e recuperação" classname="integracao-falhas.spec.ts" time="1.961">
+</testcase>
+<testcase name="falhas de comunicação no chat › backend responde 500: mensagem controlada e recuperação" classname="integracao-falhas.spec.ts" time="1.886">
+</testcase>
+<testcase name="falhas de comunicação no chat › gateway responde 504: mensagem de demora e recuperação" classname="integracao-falhas.spec.ts" time="1.974">
+</testcase>
+<testcase name="falhas de comunicação no chat › timeout do cliente: interrompe a espera, avisa e libera o envio" classname="integracao-falhas.spec.ts" time="12.34">
+</testcase>
+<testcase name="falhas de comunicação no chat › perda de conexão: avisa sem travar e volta quando a rede retorna" classname="integracao-falhas.spec.ts" time="2.022">
+</testcase>
+</testsuite>
+<testsuite name="responsividade-acessibilidade.spec.ts" timestamp="2026-10-07T05:16:45.171Z" hostname="mobile" tests="3" failures="0" skipped="0" time="13.287" errors="0">
+<testcase name="largura e verificação automática nos estados principais (light)" classname="responsividade-acessibilidade.spec.ts" time="5.112">
+</testcase>
+<testcase name="largura e verificação automática nos estados principais (dark)" classname="responsividade-acessibilidade.spec.ts" time="5.201">
+</testcase>
+<testcase name="fluxo principal só pelo teclado" classname="responsividade-acessibilidade.spec.ts" time="2.974">
+</testcase>
+</testsuite>
+</testsuites>

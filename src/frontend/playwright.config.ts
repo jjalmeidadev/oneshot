@@ -11,7 +11,12 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
   workers: 1,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  // HTML para leitura humana e JUnit para o relatorio de testes do MR (S5-23).
+  reporter: [
+    ['list'],
+    ['html', { open: 'never' }],
+    ['junit', { outputFile: 'test-results/e2e/junit.xml' }],
+  ],
   use: {
     baseURL: 'http://127.0.0.1:5174',
     trace: 'retain-on-failure',
@@ -47,7 +52,8 @@ export default defineConfig({
     },
     {
       command: 'npm run dev -- --host 127.0.0.1 --port 5174 --strictPort',
-      env: { API_PROXY_TARGET: 'http://127.0.0.1:8001' },
+      // Timeout curto so no E2E: o cenario de timeout nao precisa esperar 120 s.
+      env: { API_PROXY_TARGET: 'http://127.0.0.1:8001', VITE_API_TIMEOUT_MS: '10000' },
       url: 'http://127.0.0.1:5174',
       reuseExistingServer: false,
       timeout: 120_000,

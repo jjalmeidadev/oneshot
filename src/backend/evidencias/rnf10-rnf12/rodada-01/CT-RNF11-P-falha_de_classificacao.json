@@ -1,0 +1,10 @@
+{
+  "cenario": "falha_de_classificacao",
+  "http": 503,
+  "http_esperado": 503,
+  "mensagem": "O serviço de processamento está indisponível. Tente novamente em instantes.",
+  "mensagem_esperada": "O serviço de processamento está indisponível. Tente novamente em instantes.",
+  "vazamentos": [],
+  "auditoria_registros": 1,
+  "auditoria_estado": "falha"
+}

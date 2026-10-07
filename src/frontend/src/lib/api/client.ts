@@ -16,6 +16,16 @@ import { notifyUnauthorized } from './session-events';
 
 export const API_BASE_URL = '/api';
 
+/**
+ * Tempo maximo de espera de cada chamada a API. O padrao de 120 s cobre a
+ * resposta mais lenta prevista (comparacao com RAG e LLM). `VITE_API_TIMEOUT_MS`
+ * so existe para os testes E2E simularem o *timeout* sem esperar dois minutos.
+ */
+export const REQUEST_TIMEOUT_MS =
+  Number(import.meta.env.VITE_API_TIMEOUT_MS) > 0
+    ? Number(import.meta.env.VITE_API_TIMEOUT_MS)
+    : 120_000;
+
 export class ApiError extends Error {
   readonly status: number;
   /** Presente apenas nas respostas que usam o envelope da rota de audio. */
@@ -93,7 +103,7 @@ export async function requestJson<T>(
 ): Promise<T> {
   const signal = AbortSignal.any([
     ...(init.signal ? [init.signal] : []),
-    AbortSignal.timeout(120_000),
+    AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   ]);
   const response = await fetch(`${API_BASE_URL}${path}`, { ...init, signal });
 
