@@ -6812,6 +6812,19 @@ Os cenários negativos de ausência de informação apresentaram comportamento s
 
 Com isso, todos os casos possuem classificação, resultado observado, evidência associada e, quando aplicável, defeito ou observação de qualidade rastreável.
 
+#### 9.1.5.9 Reexecução após as correções da Sprint 5
+
+A S5-33 ([#287](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/287)) reexecutou em 7 de outubro de 2026, no commit `e544388`, os casos cujas correções já estavam integradas. As entradas foram as mesmas de 23/09, enviadas a `POST /api/chat` com o classificador v2, as regras de roteamento e a extração de entidades reais. Só a geração do texto pelo LLM foi substituída por um duplo, porque esses casos são julgados pela classificação e pelo encaminhamento.
+
+| Caso | Rodada de 23/09 | Reexecução de 07/10 | Observação |
+|:--|:--|:--|:--|
+| CT-RF02-01 | **FALHOU** | **APROVADO** | `CONSULTA` / `consulta_status_projeto`, encaminhada ao catálogo pela regra `consulta_status_explicita` da #282. As probabilidades do modelo não mudaram. |
+| CT-RF03-02 | **FALHOU** | **APROVADO** | `FORA_DE_ESCOPO` pela regra `limite_agendamento`, sem chamada ao provedor e com 0 tokens. |
+| CT-RF06-01 | **FALHOU** | **BLOQUEADO** | Depende da S5-12 (#266), ainda não iniciada; a base continua sem documento do `PRJ-0510`. |
+| CT-RF08-01 | **FALHOU** | **BLOQUEADO** | Mesma dependência e mesma causa (`DEF-RF06-01`). |
+
+Com a reexecução, o resultado funcional passa a 18 casos aprovados, nenhuma falha confirmada após correção e 2 casos bloqueados pela #266. Os defeitos `DEF-RF02-01` e `DEF-RF03-01` ficam corrigidos no comportamento do sistema, e o `DEF-RF06-01` continua aberto. Detalhes, ambiente e evidências estão no [relatório S5-33](testes/sprint5/relatorio-s5-33.md).
+
 ## 9.2 Testes de RNFs
 
 ### 9.2.1 Planejamento
@@ -7080,6 +7093,8 @@ A avaliação prospectiva ampliada do RNF06 foi executada uma única vez em 23 d
 | RNF06 consolidado | Aprovação exige F1-macro, *recall*@3 e limite inferior do IC simultaneamente ≥ 0,80 | F1-macro 0,832724; *recall*@3 0,555556 | **Reprovado** |
 
 A linha de base de 22 de setembro recuperou 11 de 18 fontes e registrou *recall*@3 de 0,611111. As equivalências lexicais adicionadas em seguida foram escolhidas a partir dos erros desses mesmos casos; por isso, a reexecução com 18 de 18 fontes e *recall*@3 de 1,000000 é apenas evidência de regressão conhecida, não de generalização. A avaliação prospectiva v2 corrige essa contaminação metodológica: suas 72 consultas não repetem a massa v1, foram congeladas contra a implementação anterior e não foram reutilizadas para ajuste. Ela revelou fragilidade especialmente em consultas curtas e sinônimos novos (0,333333), formulações implícitas e paráfrases (0,444444). A autoria interna não cega e o uso de fontes sintéticas ainda limitam a validade externa; a conclusão não substitui homologação com solicitações reais e SharePoint do parceiro.
+
+**Reexecução prevista na Sprint 5.** A S5-33 não reexecutou a recuperação do RNF06: o recuperador e o corpus continuam os mesmos da avaliação v2, e a ampliação da base depende da S5-12 (#266), ainda não iniciada. A nova massa prospectiva será congelada sobre o corpus ampliado, antes da única medição, conforme o [relatório S5-33](testes/sprint5/relatorio-s5-33.md). Até lá, o RNF06 permanece **reprovado** na recuperação.
 
 Os demais CT-RNF permanecem sem resultado nesta subseção até que sejam executados com as evidências previstas. Casos bloqueados devem identificar a dependência e o plano de desbloqueio.
 
