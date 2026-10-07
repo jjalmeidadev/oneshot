@@ -21,6 +21,13 @@ export class ApiError extends Error {
   /** Presente apenas nas respostas que usam o envelope da rota de audio. */
   readonly code: string | null;
   readonly detail: Record<string, unknown> | null;
+  /**
+   * Mensagem do envelope `{ error: { message } }`, quando o backend a envia.
+   * As rotas de alteracao de dados devolvem texto pronto para a pessoa (por
+   * exemplo, "O valor mudou depois da previa"); as demais rotas seguem usando
+   * a mensagem generica por status.
+   */
+  readonly serverMessage: string | null;
 
   constructor(
     message: string,
@@ -28,6 +35,7 @@ export class ApiError extends Error {
       status: number;
       code?: string | null;
       detail?: Record<string, unknown> | null;
+      serverMessage?: string | null;
     },
   ) {
     super(message);
@@ -35,6 +43,7 @@ export class ApiError extends Error {
     this.status = options.status;
     this.code = options.code ?? null;
     this.detail = options.detail ?? null;
+    this.serverMessage = options.serverMessage ?? null;
   }
 
   /** O usuario pode tentar de novo sem mudar nada na solicitacao. */
@@ -67,9 +76,14 @@ export async function parseError(response: Response): Promise<ApiError> {
     504: 'O processamento demorou mais que o esperado. Tente novamente.',
   };
   const code = body && 'error' in body && body.error ? body.error.code : null;
+  const serverMessage =
+    body && 'error' in body && body.error && typeof body.error.message === 'string'
+      ? body.error.message
+      : null;
   return new ApiError(messages[response.status] ?? FALLBACK_MESSAGE, {
     status: response.status,
     code,
+    serverMessage,
   });
 }
 

@@ -88,6 +88,10 @@ TypeScript também verifica os contratos discriminados de relatório e alerta.
 O fluxo de mensageria AMQP deve ser validado separadamente com Docker Engine e
 RabbitMQ ativos, porque os testes de componente não inicializam infraestrutura.
 
+## Evidência da alteração de dados pelo chat (S5-07)
+
+`data-change-card.test.tsx` cobre os quatro estados exigidos pela issue #261 (prévia, confirmação, cancelamento e erro) e também o erro transitório com nova tentativa, o desfazer dentro e fora da janela, a prévia expirada, os avisos, o histórico do campo, a recusa sem ações e as perguntas com candidatos e com valor inválido. `data-change-flow.test.tsx` atravessa a aplicação real (store, lista e cartão) e confirma que, depois de gravar, trocar de conversa e voltar não oferece confirmar de novo. `e2e/alteracao-dados.spec.ts` repete o fluxo no Chromium em desktop, tablet e celular, com auditoria axe do cartão nos temas claro e escuro e verificação de rolagem horizontal. O servidor E2E não tem as rotas da S5-06, então a resposta do chat e as rotas do cartão são simuladas com `page.route`; a permissão de escrita é coberta pelos testes do backend da S5-06. Evidência e capturas em `docs/evidencias/sprint-05/s5-07-interface-alteracao.md`.
+
 ## Limites da evidência
 
 Os testes de navegador usam o backend real e validam o arquivo WAV enviado, mas substituem as bordas de Azure, Gemini e classificação por respostas determinísticas. A classificação local também foi executada separadamente com o modelo real. Não havia credenciais para comprovar chamadas reais de Azure e Gemini; essa validação deve ser realizada no ambiente configurado antes da publicação.
