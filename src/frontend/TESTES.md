@@ -1,5 +1,19 @@
 # Evidências de testes — integração #131
 
+## S5-23 — E2E integrado e falhas de comunicação (07/10/2026)
+
+A suíte Playwright passa com **60 testes em 4 specs** (20 cenários × desktop,
+tablet e celular). `e2e/integracao-falhas.spec.ts` acrescenta o alerta contra o
+workflow real do backend e as falhas de comunicação: 503, 502 e 500 do backend,
+504 de gateway, _timeout_ do cliente e perda de conexão. Em cada falha, a spec
+confere a mensagem controlada, a ausência de detalhe interno e a recuperação no
+envio seguinte.
+
+O E2E encurta o _timeout_ do cliente para 10 s com `VITE_API_TIMEOUT_MS`; fora
+dele, o padrão continua 120 s. O job `frontend-e2e` publica o relatório HTML
+como artefato exposto no MR e o JUnit em `test-results/e2e/junit.xml`. Detalhes
+no [relatório S5-23](../../docs/testes/sprint5/relatorio-s5-23.md).
+
 ## S5-22 — testes por componente (05/10/2026)
 
 A suíte atual passa com **112 testes em 18 arquivos**, incluindo 48 novos casos
