@@ -283,6 +283,7 @@
   - [11.7 Defesa das premissas e dos valores](#117-defesa-das-premissas-e-dos-valores)
   - [11.8 Fluxo de caixa sintético](#118-fluxo-de-caixa-sintético)
   - [11.9 Conclusão da viabilidade](#119-conclusão-da-viabilidade)
+  - [11.10 Custos de implementação da PoC e da solução final](#1110-custos-de-implementação-da-poc-e-da-solução-final)
 - [12. Benefícios Entregues e Aperfeiçoamentos Futuros](#12-benefícios-entregues-e-aperfeiçoamentos-futuros)
   - [12.1 Benefícios entregues](#121-benefícios-entregues)
   - [12.2 Aperfeiçoamentos futuros](#122-aperfeiçoamentos-futuros)
@@ -7696,7 +7697,7 @@ Esta seção simula a equipe como uma startup contratada pelo Metrô de São Pau
 
 O objeto da proposta é a entrega, em **7 de outubro de 2026**, de um MVP demonstrável do agente de IA para apoio à gestão do portfólio de projetos do Metrô. O produto utiliza dados sintéticos e contempla as funcionalidades, a arquitetura, os testes, a documentação e o deploy descritos neste documento.
 
-O projeto ocorre entre **3 de agosto e 7 de outubro de 2026**, totalizando dez semanas de calendário e **47 dias úteis de trabalho**, após a exclusão do feriado nacional de 7 de setembro. Foram consideradas seis pessoas desenvolvedoras juniores, contratadas como prestadoras de serviço PJ, com dedicação de oito horas por dia útil. O contrato simulado termina com a entrega: manutenção evolutiva, operação assistida e suporte posterior a 7 de outubro não integram o preço.
+O projeto ocorre entre **3 de agosto e 7 de outubro de 2026**, totalizando dez semanas de calendário e **47 dias úteis de trabalho**, após a exclusão do feriado nacional de 7 de setembro. Foram consideradas seis pessoas desenvolvedoras juniores, contratadas como prestadoras de serviço PJ, com dedicação de **16 horas por sprint** ao longo das **cinco sprints** do módulo. O contrato simulado termina com a entrega: manutenção evolutiva, operação assistida e suporte posterior a 7 de outubro não integram o preço.
 
 ## 11.2 Custos diretos do projeto
 
@@ -7704,19 +7705,19 @@ Custos diretos são os recursos consumidos na produção do MVP e que podem ser 
 
 ### 11.2.1 Equipe de desenvolvimento
 
-Cada integrante trabalha 376 horas no período, calculadas por `47 dias úteis × 8 horas`. Como os seis integrantes têm a mesma senioridade, dedicação e responsabilidade de execução, foi aplicada a mesma taxa de **R$ 50,00 por hora**.
+Cada integrante dedica **80 horas** ao projeto, calculadas por `16 horas por sprint × 5 sprints`, e a equipe soma **480 horas**. É a carga efetiva de desenvolvimento: os 47 dias úteis definem o prazo do contrato, mas não a dedicação de cada integrante, que divide o período com outras atividades. Como os seis integrantes têm a mesma senioridade, dedicação e responsabilidade de execução, foi aplicada a mesma taxa de **R$ 50,00 por hora**.
 
 | Integrante | Função orçada | Horas | Valor por hora | Custo |
 |---|---|---:|---:|---:|
-| Felipe Neves | Pessoa desenvolvedora júnior PJ — interface e experiência de uso | 376 | R$ 50,00 | R$ 18.800,00 |
-| Henrique Diniz | Pessoa desenvolvedora júnior PJ — PLN e classificação de intenções | 376 | R$ 50,00 | R$ 18.800,00 |
-| Jaime Almeida | Pessoa desenvolvedora júnior PJ — dados, voz e testes | 376 | R$ 50,00 | R$ 18.800,00 |
-| Leonardo Ramos | Pessoa desenvolvedora júnior PJ — integração e deploy | 376 | R$ 50,00 | R$ 18.800,00 |
-| Pedro Uchoa | Pessoa desenvolvedora júnior PJ — integração e qualidade | 376 | R$ 50,00 | R$ 18.800,00 |
-| Wendel Feitosa | Pessoa desenvolvedora júnior PJ — backend e áudio | 376 | R$ 50,00 | R$ 18.800,00 |
-| **Total da equipe** | **6 pessoas** | **2.256** |  | **R$ 112.800,00** |
+| Felipe Neves | Pessoa desenvolvedora júnior PJ — interface e experiência de uso | 80 | R$ 50,00 | R$ 4.000,00 |
+| Henrique Diniz | Pessoa desenvolvedora júnior PJ — PLN e classificação de intenções | 80 | R$ 50,00 | R$ 4.000,00 |
+| Jaime Almeida | Pessoa desenvolvedora júnior PJ — dados, voz e testes | 80 | R$ 50,00 | R$ 4.000,00 |
+| Leonardo Ramos | Pessoa desenvolvedora júnior PJ — integração e deploy | 80 | R$ 50,00 | R$ 4.000,00 |
+| Pedro Uchoa | Pessoa desenvolvedora júnior PJ — integração e qualidade | 80 | R$ 50,00 | R$ 4.000,00 |
+| Wendel Feitosa | Pessoa desenvolvedora júnior PJ — backend e áudio | 80 | R$ 50,00 | R$ 4.000,00 |
+| **Total da equipe** | **6 pessoas** | **480** |  | **R$ 24.000,00** |
 
-A taxa de R$ 50,00 por hora equivale a R$ 8.000,00 para um mês de 160 horas. Ela foi adotada como taxa comercial PJ, que precisa remunerar o trabalho e também compensar a ausência de férias, décimo terceiro, FGTS e demais benefícios típicos de um vínculo CLT. Como referência externa para a ordem de grandeza da remuneração, foi consultado o [Guia Salarial 2026 da Robert Half](https://www.roberthalf.com/br/pt/insights/salary-guide) e sua página para [desenvolvimento full-stack júnior](https://www.roberthalf.com/br/pt/vagas-detalhes/desenvolvedora-full-stack-junior). O valor também mantém o custo da equipe próximo da referência de R$ 111.625,00 observada no feedback fornecido para outro projeto, com a diferença explicada pelas horas efetivas e pela taxa única adotada neste caso.
+A taxa de R$ 50,00 por hora equivale a R$ 8.000,00 para um mês de 160 horas. Ela foi adotada como taxa comercial PJ, que precisa remunerar o trabalho e também compensar a ausência de férias, décimo terceiro, FGTS e demais benefícios típicos de um vínculo CLT. Como referência externa para a ordem de grandeza da remuneração, foi consultado o [Guia Salarial 2026 da Robert Half](https://www.roberthalf.com/br/pt/insights/salary-guide) e sua página para [desenvolvimento full-stack júnior](https://www.roberthalf.com/br/pt/vagas-detalhes/desenvolvedora-full-stack-junior). A referência de R$ 111.625,00, observada no feedback de outro projeto, corresponde a cerca de 2.230 horas à mesma taxa, ou seja, a dedicação integral. A diferença para os R$ 24.000,00 deste orçamento vem das horas efetivas, não da taxa.
 
 ### 11.2.2 Ferramentas e serviços diretamente ligados à entrega
 
@@ -7733,9 +7734,9 @@ Assim, os custos diretos totalizam:
 
 | Categoria de custo | Valor |
 |---|---:|
-| Equipe de desenvolvimento | R$ 112.800,00 |
+| Equipe de desenvolvimento | R$ 24.000,00 |
 | Ferramentas e serviços diretos | R$ 2.600,00 |
-| **Total de custos diretos** | **R$ 115.400,00** |
+| **Total de custos diretos** | **R$ 26.600,00** |
 
 ## 11.3 Despesas operacionais
 
@@ -7783,27 +7784,27 @@ O percentual de **15,75%** incide sobre o preço cobrado do cliente. Por isso, o
 
 A margem desejada é de **15% sobre a soma de custos, despesas operacionais, despesa financeira e impostos**. Ela foi escolhida como estratégia de entrada para uma startup que entrega um primeiro MVP a um cliente institucional: remunera o risco técnico e comercial sem elevar a proposta ao patamar de uma solução produtiva com sustentação e alta disponibilidade.
 
-Como o recebimento integral ocorre somente na entrega, os juros do empréstimo fazem parte da despesa necessária para executar o contrato. O custo financeiro estimado é de **R$ 5.684,09**, calculado sobre o principal de R$ 131.171,36, à taxa de 2% ao mês, pelo prazo de 65 dias. Esse valor foi incorporado à formação do preço para que o lucro permaneça em 15% após a quitação do financiamento.
+Como o recebimento integral ocorre somente na entrega, os juros do empréstimo fazem parte da despesa necessária para executar o contrato. O custo financeiro estimado é de **R$ 1.836,09**, calculado sobre o principal de R$ 42.371,36, à taxa de 2% ao mês, pelo prazo de 65 dias. Esse valor foi incorporado à formação do preço para que o lucro permaneça em 15% após a quitação do financiamento.
 
 Como o imposto depende do preço e a margem também inclui o imposto em sua base, o preço foi obtido pela seguinte equação:
 
 `P = B × (1 + m) ÷ [1 − t × (1 + m)]`
 
-Onde `P` é o preço final, `B` é a base de custos, despesas operacionais e despesa financeira, `m` é a margem e `t` é a alíquota tributária. Substituindo `B = R$ 136.855,45`, `m = 15%` e `t = 15,75%`, obtém-se **P = R$ 192.195,11**. O imposto contido nesse preço é de **R$ 30.270,73**. O lucro de **R$ 25.068,93** corresponde a 15% de `R$ 136.855,45 + R$ 30.270,73`.
+Onde `P` é o preço final, `B` é a base de custos, despesas operacionais e despesa financeira, `m` é a margem e `t` é a alíquota tributária. Substituindo `B = R$ 44.207,45`, `m = 15%` e `t = 15,75%`, obtém-se **P = R$ 62.083,43**. O imposto contido nesse preço é de **R$ 9.778,14**. O lucro de **R$ 8.097,84** corresponde a 15% de `R$ 44.207,45 + R$ 9.778,14`.
 
 ## 11.6 Preço final do projeto
 
 | Componente do preço | Valor |
 |---|---:|
-| Custos diretos | R$ 115.400,00 |
+| Custos diretos | R$ 26.600,00 |
 | Despesas operacionais | R$ 15.771,36 |
-| Despesa financeira do empréstimo | R$ 5.684,09 |
-| **Base antes de tributos e lucro** | **R$ 136.855,45** |
-| Imposto, calculado por dentro a 15,75% do preço | R$ 30.270,73 |
-| Lucro desejado, 15% sobre custos + despesas + juros + impostos | R$ 25.068,93 |
-| **Preço final para o Metrô de São Paulo** | **R$ 192.195,11** |
+| Despesa financeira do empréstimo | R$ 1.836,09 |
+| **Base antes de tributos e lucro** | **R$ 44.207,45** |
+| Imposto, calculado por dentro a 15,75% do preço | R$ 9.778,14 |
+| Lucro desejado, 15% sobre custos + despesas + juros + impostos | R$ 8.097,84 |
+| **Preço final para o Metrô de São Paulo** | **R$ 62.083,43** |
 
-Os valores, as fórmulas e as premissas detalhadas podem ser consultados na [planilha de precificação do projeto](https://docs.google.com/spreadsheets/d/1okRWK8HoPHITbrlPIta1h3NH3-2euzaHEm_N-hrCl30/edit?usp=sharing).
+Os valores, as fórmulas e as premissas detalhadas podem ser consultados na [planilha de precificação do projeto](https://docs.google.com/spreadsheets/d/1okRWK8HoPHITbrlPIta1h3NH3-2euzaHEm_N-hrCl30/edit?usp=sharing). Na S5-39, a dedicação passou de 8 horas por dia útil para 16 horas por sprint; os valores desta seção já refletem essa premissa, e a planilha deve ser atualizada para acompanhá-los.
 
 O preço corresponde a uma entrega fechada do MVP e não deve ser interpretado como mensalidade. Qualquer extensão de prazo, uso de dados reais, adequação ao ambiente corporativo do Metrô, suporte continuado ou transformação do MVP em produto de produção exigiria novo orçamento.
 
@@ -7811,14 +7812,14 @@ O preço corresponde a uma entrega fechada do MVP e não deve ser interpretado c
 
 | Premissa | Defesa |
 |---|---|
-| 2.256 horas de desenvolvimento | A carga deriva do calendário real: 6 pessoas × 47 dias úteis × 8 horas. Ela evita tratar um projeto de dedicação integral como atividade parcial. |
+| 480 horas de desenvolvimento | A carga deriva da dedicação efetiva ao módulo: 6 pessoas × 16 horas por sprint × 5 sprints. Os 47 dias úteis definem a duração do contrato, não a dedicação integral de cada integrante. |
 | R$ 50,00 por hora PJ | Corresponde a R$ 8.000,00 por 160 horas e inclui o risco contratual da prestação PJ. A taxa é uniforme porque senioridade e dedicação são iguais entre os seis integrantes. |
-| R$ 112.800,00 de equipe | Representa 86,0% da base de custos e despesas, proporção coerente com um projeto de software intensivo em trabalho especializado. Também se aproxima da referência de R$ 111.625,00 citada no feedback da professora. |
+| R$ 24.000,00 de equipe | Representa 56,6% dos custos diretos e despesas operacionais. A participação é menor que a de um projeto em dedicação integral porque RH, financeiro e contabilidade acompanham a duração do contrato, e não as horas de desenvolvimento. |
 | Ferramentas limitadas a R$ 2.600,00 | São franquias específicas para desenvolvimento e testes do MVP. Não foram incluídas licenças corporativas ou volumes de produção que o escopo não exige. |
 | Infraestrutura de R$ 721,36 | A EC2 fica ligada apenas na janela de seis semanas e os serviços foram dimensionados para demonstração. A ausência de alta disponibilidade e domínio pago reduz o custo sem ocultar os componentes utilizados. |
 | Apoio terceirizado | RH, financeiro e contabilidade representam funções reais de uma startup com seis prestadores. As horas foram limitadas ao período do contrato. |
 | Marketing de R$ 2.300,00 | O projeto prevê divulgação leve e preparação da apresentação comercial, compatíveis com uma venda institucional dirigida, sem campanha de mídia ampla. |
-| Juros de R$ 5.684,09 | A despesa financeira decorre do pagamento integral apenas na entrega. Ela foi calculada a 2% ao mês por 65 dias e incorporada ao preço para não reduzir o lucro desejado. |
+| Juros de R$ 1.836,09 | A despesa financeira decorre do pagamento integral apenas na entrega. Ela foi calculada a 2% ao mês por 65 dias e incorporada ao preço para não reduzir o lucro desejado. |
 | Imposto de 15,75% | A alíquota efetiva deriva de uma RBT12 explicitamente simulada e é aplicada sobre a receita. O cálculo por dentro impede que o tributo reduza a margem planejada. |
 | Lucro de 15% | É uma margem de entrada para o MVP. Incide sobre custos, despesas operacionais, juros e imposto, preservando a rentabilidade mesmo após a quitação do empréstimo. |
 
@@ -7828,33 +7829,184 @@ O cronograma completo de entradas, saídas e saldos está disponível na [planil
 
 O orçamento mede o resultado econômico do contrato, enquanto o fluxo de caixa verifica se há dinheiro disponível nas datas de pagamento. Como a simulação prevê o pagamento integral pelo Metrô apenas na entrega, em 7 de outubro, a startup precisa financiar os desembolsos de agosto, setembro e do início de outubro.
 
-Foi simulado um empréstimo recebido em **3 de agosto de 2026**, no valor de **R$ 131.171,36**, exatamente igual ao total de custos diretos e despesas operacionais. A taxa assumida é de **2% ao mês**, com juros simples proporcionais por 65 dias:
+Foi simulado um empréstimo recebido em **3 de agosto de 2026**, no valor de **R$ 42.371,36**, exatamente igual ao total de custos diretos e despesas operacionais. A taxa assumida é de **2% ao mês**, com juros simples proporcionais por 65 dias:
 
-`Juros = R$ 131.171,36 × 2% × (65 ÷ 30) = R$ 5.684,09`
+`Juros = R$ 42.371,36 × 2% × (65 ÷ 30) = R$ 1.836,09`
 
-O empréstimo continua limitado a R$ 131.171,36 porque precisa financiar somente os custos diretos e as despesas operacionais anteriores ao recebimento. Os juros não aumentam o principal: eles são pagos após a entrada do cliente e foram incorporados ao preço de venda.
+O empréstimo continua limitado a R$ 42.371,36 porque precisa financiar somente os custos diretos e as despesas operacionais anteriores ao recebimento. Os juros não aumentam o principal: eles são pagos após a entrada do cliente e foram incorporados ao preço de venda.
 
-O Metrô paga R$ 192.195,11 em 7 de outubro. Na mesma data, após o recebimento, a startup quita o principal e os juros do empréstimo. O imposto de R$ 30.270,73 é pago em 20 de novembro, data sintética adotada para evidenciar a obrigação tributária após o faturamento.
+O Metrô paga R$ 62.083,43 em 7 de outubro. Na mesma data, após o recebimento, a startup quita o principal e os juros do empréstimo. O imposto de R$ 9.778,14 é pago em 20 de novembro, data sintética adotada para evidenciar a obrigação tributária após o faturamento. As horas da equipe foram distribuídas pelos dias úteis de cada mês: 21 em agosto, 21 em setembro e 5 em outubro.
 
 | Mês | Saldo inicial | Entradas | Saídas do projeto | Principal do empréstimo | Juros | Impostos | Saldo final |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Agosto/2026 | R$ 0,00 | R$ 131.171,36 | R$ 55.261,83 | R$ 0,00 | R$ 0,00 | R$ 0,00 | R$ 75.909,53 |
-| Setembro/2026 | R$ 75.909,53 | R$ 0,00 | R$ 57.534,30 | R$ 0,00 | R$ 0,00 | R$ 0,00 | R$ 18.375,23 |
-| Outubro/2026 | R$ 18.375,23 | R$ 192.195,11 | R$ 18.375,23 | R$ 131.171,36 | R$ 5.684,09 | R$ 0,00 | R$ 55.339,66 |
-| Novembro/2026 | R$ 55.339,66 | R$ 0,00 | R$ 0,00 | R$ 0,00 | R$ 0,00 | R$ 30.270,73 | **R$ 25.068,93** |
-| **Total** |  | **R$ 323.366,47** | **R$ 131.171,36** | **R$ 131.171,36** | **R$ 5.684,09** | **R$ 30.270,73** | **R$ 25.068,93** |
+| Agosto/2026 | R$ 0,00 | R$ 42.371,36 | R$ 15.585,23 | R$ 0,00 | R$ 0,00 | R$ 0,00 | R$ 26.786,13 |
+| Setembro/2026 | R$ 26.786,13 | R$ 0,00 | R$ 17.857,70 | R$ 0,00 | R$ 0,00 | R$ 0,00 | R$ 8.928,43 |
+| Outubro/2026 | R$ 8.928,43 | R$ 62.083,43 | R$ 8.928,43 | R$ 42.371,36 | R$ 1.836,09 | R$ 0,00 | R$ 17.875,98 |
+| Novembro/2026 | R$ 17.875,98 | R$ 0,00 | R$ 0,00 | R$ 0,00 | R$ 0,00 | R$ 9.778,14 | **R$ 8.097,84** |
+| **Total** |  | **R$ 104.454,79** | **R$ 42.371,36** | **R$ 42.371,36** | **R$ 1.836,09** | **R$ 9.778,14** | **R$ 8.097,84** |
 
-Antes do recebimento do cliente, o empréstimo é totalmente consumido pelos R$ 131.171,36 de custos e despesas, de modo que o menor saldo projetado é zero. A conciliação final é:
+Antes do recebimento do cliente, o empréstimo é totalmente consumido pelos R$ 42.371,36 de custos e despesas, de modo que o menor saldo projetado é zero. A conciliação final é:
 
 `Lucro após financiamento = resultado antes do financiamento − juros`
 
-`Lucro após financiamento = R$ 30.753,02 − R$ 5.684,09 = R$ 25.068,93`
+`Lucro após financiamento = R$ 9.933,93 − R$ 1.836,09 = R$ 8.097,84`
 
-O fluxo confirma que todos os pagamentos mapeados podem ser liquidados e que o saldo final coincide com o lucro desejado. Os R$ 25.068,93 representam exatamente 15% da soma de custos diretos, despesas operacionais, juros e imposto. Em relação ao preço de venda, esse resultado corresponde a aproximadamente 13,04%, pois o percentual de 15% foi aplicado sobre a base definida no barema e não diretamente sobre a receita. A simulação não inclui IOF, tarifa de abertura, custo bancário, atraso do cliente nem reserva de contingência; em uma proposta real, esses itens também deveriam compor o preço ou uma linha de crédito adicional. Um adiantamento do Metrô reduziria a necessidade de capital de giro.
+O fluxo confirma que todos os pagamentos mapeados podem ser liquidados e que o saldo final coincide com o lucro desejado. Os R$ 8.097,84 representam exatamente 15% da soma de custos diretos, despesas operacionais, juros e imposto. Em relação ao preço de venda, esse resultado corresponde a aproximadamente 13,04%, pois o percentual de 15% foi aplicado sobre a base definida no barema e não diretamente sobre a receita. A simulação não inclui IOF, tarifa de abertura, custo bancário, atraso do cliente nem reserva de contingência; em uma proposta real, esses itens também deveriam compor o preço ou uma linha de crédito adicional. Um adiantamento do Metrô reduziria a necessidade de capital de giro.
 
 ## 11.9 Conclusão da viabilidade
 
-Nas premissas adotadas, a entrega é financeiramente viável pelo preço de **R$ 192.195,11**. Esse valor paga os R$ 115.400,00 de custos diretos, os R$ 15.771,36 de despesas operacionais, os R$ 5.684,09 de juros, o imposto único estimado em R$ 30.270,73 e o lucro de R$ 25.068,93. O empréstimo de R$ 131.171,36 resolve o descasamento entre os pagamentos do desenvolvimento e o recebimento final, enquanto a inclusão dos juros na formação do preço preserva o lucro desejado de 15% após a quitação. Portanto, a viabilidade depende de cumprir o prazo, controlar o uso das ferramentas e receber do cliente na data contratada.
+Nas premissas adotadas, a entrega é financeiramente viável pelo preço de **R$ 62.083,43**. Esse valor paga os R$ 26.600,00 de custos diretos, os R$ 15.771,36 de despesas operacionais, os R$ 1.836,09 de juros, o imposto único estimado em R$ 9.778,14 e o lucro de R$ 8.097,84. O empréstimo de R$ 42.371,36 resolve o descasamento entre os pagamentos do desenvolvimento e o recebimento final, enquanto a inclusão dos juros na formação do preço preserva o lucro desejado de 15% após a quitação. Portanto, a viabilidade depende de cumprir o prazo, controlar o uso das ferramentas e receber do cliente na data contratada.
+
+## 11.10 Custos de implementação da PoC e da solução final
+
+Esta subseção atende à **S5-39 ([#293](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/293))**. Ela consolida os insumos das S4-52A a S4-52C ([#246](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/246) a [#248](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/248)), já refletidos nas Seções 11.2 e 11.3, e separa os custos em dois objetos:
+
+- **PoC:** o que foi construído no módulo, com dados sintéticos e ambiente de demonstração.
+- **Solução final:** a evolução da PoC para operar no ambiente corporativo do Metrô, seguindo o caminho de homologação da Seção 6.4.7.
+
+Em ambos, o custo tem duas partes, **pessoal e tecnologia**, cada linha com premissa, quantidade e valor. Tributos, margem e despesas administrativas pertencem à formação do preço das Seções 11.4 a 11.6 e não entram aqui.
+
+### 11.10.1 Premissas comuns
+
+| Premissa | Valor adotado | Fonte ou justificativa |
+|---|---|---|
+| Equipe | 6 pessoas desenvolvedoras júnior PJ | Composição do grupo, Seção 11.2.1 |
+| Dedicação | 16 horas por pessoa por sprint | Dedicação efetiva ao módulo, definida pelo grupo |
+| Capacidade da equipe | 96 horas por sprint (`6 × 16`) | Derivada das duas linhas anteriores |
+| Valor-hora | R$ 50,00 | Taxa PJ júnior da Seção 11.2.1, com referência no [Guia Salarial 2026 da Robert Half](https://www.roberthalf.com/br/pt/insights/salary-guide) |
+| Câmbio | R$ 5,1795 por US$ 1,00 | PTAX de venda de 24/09/2026, a mesma da Seção 11.3.1 |
+| Região de nuvem da solução final | Azure Brazil South | Dados do Metrô permanecem no país; preços da [API pública de preços do Azure](https://prices.azure.com/api/retail/prices), consultada em 07/10/2026 |
+
+### 11.10.2 PoC
+
+**Pessoal.** A PoC foi desenvolvida em cinco sprints.
+
+| Item | Premissa | Quantidade | Valor unitário | Valor |
+|---|---|---:|---:|---:|
+| Desenvolvimento | 6 pessoas × 16 h × 5 sprints | 480 h | R$ 50,00/h | R$ 24.000,00 |
+| **Total de pessoal da PoC** | | **480 h** | | **R$ 24.000,00** |
+
+**Tecnologia.** Valores das Seções 11.2.2 e 11.3.1, mantidos como preço de mercado. Créditos acadêmicos e camadas gratuitas usados pela equipe não reduzem o orçamento, porque não estariam disponíveis para uma startup contratada.
+
+| Item | Premissa | Quantidade | Valor unitário | Valor |
+|---|---|---:|---:|---:|
+| Codex | Assistente de código para cada integrante | 6 pessoas × 3 meses | R$ 100,00/mês | R$ 1.800,00 |
+| Gemini / OpenRouter | Franquia para desenvolvimento, integração e testes do agente | 1 franquia | R$ 500,00 | R$ 500,00 |
+| Azure AI Speech | Franquia para integração e testes de transcrição | 1 franquia | R$ 300,00 | R$ 300,00 |
+| AWS EC2 `t3.large` | Execução sob demanda | ~6 semanas | — | R$ 393,01 |
+| AWS EBS `gp3` 50 GB, IPv4, ECR e CloudWatch | Armazenamento, endereço, imagens e logs | ~6 semanas | — | R$ 69,37 |
+| Supabase Pro | Banco gerenciado | ~2 meses | — | R$ 258,98 |
+| **Total de tecnologia da PoC** | | | | **R$ 3.321,36** |
+
+| Resumo da PoC | Valor |
+|---|---:|
+| Pessoal | R$ 24.000,00 |
+| Tecnologia | R$ 3.321,36 |
+| **Custo de implementação da PoC** | **R$ 27.321,36** |
+
+### 11.10.3 Solução final
+
+**Escopo.** A solução final mantém o núcleo Python da PoC e adapta hospedagem, identidade, dados, modelo de linguagem e canal ao ecossistema Microsoft, pelo caminho recomendado na Seção 6.4.7:
+
+- aplicação web publicada como aba do Teams;
+- API e workers em Azure Container Apps;
+- PostgreSQL gerenciado em Azure;
+- Microsoft Entra ID para identidade;
+- SharePoint corporativo acessado pelo Microsoft Graph;
+- Azure OpenAI no lugar do Gemini;
+- Azure AI Speech para voz;
+- servidor MCP para conexão com o Copilot, pedido na S5-18.
+
+Ficam fora do escopo: reconstruir os fluxos em Power Automate ou Copilot Studio, trocar o RabbitMQ por Service Bus e adotar Azure AI Search. A Seção 6.4 classifica esses três caminhos como opcionais e de esforço alto.
+
+**Método do esforço.** As horas vêm da avaliação de esforço que a Seção 6.4 atribui a cada componente:
+
+| Nível de esforço | Horas por componente |
+|---|---:|
+| Baixo | 8 h |
+| Médio | 24 h |
+| Alto | 48 h |
+
+Somam-se **20%** para homologação e regressão no ambiente do Metrô: repetir os testes funcionais, os RNFs (em especial RNF04 a RNF06, com dados reais) e a usabilidade. Para calibrar: na PoC, as 480 horas produziram os 32 componentes inventariados na Seção 6.4, uma média de 15 h por componente. Os 24 h de um componente médio cobrem o adaptador e sua validação no ambiente corporativo, que a PoC não teve.
+
+**Pessoal.**
+
+| Frente | Componentes da Seção 6.4 e esforço | Horas |
+|---|---|---:|
+| Interface e canal | Aba Teams (médio); domínio e ingress HTTPS (médio); blocos de resposta no canal (médio); notificações no Teams (médio) | 96 h |
+| API e inteligência | API em Container Apps (médio); classificador e catálogo (médio); workflows de relatório e alerta (médio); proatividade (médio); cliente Azure OpenAI (médio); normalização e entidades (baixo); validação de citações (baixo) | 136 h |
+| Dados e identidade | SharePoint via Graph (alto); PostgreSQL gerenciado (alto); Entra ID e mapeamento de perfis (alto); recuperação mantida e reavaliada (médio); Blob Storage (médio); auditoria (médio); barreira de dado sensível (médio) | 240 h |
+| Voz, relatórios e alertas | STT (baixo); TTS (médio); serviço de relatórios (médio); renderização DOCX (baixo); workers de alerta (médio); RabbitMQ em contêiner (médio) | 112 h |
+| Copilot | Servidor MCP com ferramentas, transporte e autenticação (alto) | 48 h |
+| Hospedagem e operação | Container Apps e registro de imagens (alto); Key Vault (médio); Azure Monitor e Application Insights (médio); CI/CD do GitLab para Azure (médio) | 120 h |
+| **Subtotal dos componentes** | | **752 h** |
+| Homologação e regressão | 20% do subtotal | 150,4 h |
+| **Esforço estimado** | | **902,4 h** |
+
+Com 96 horas por sprint, o esforço exige **10 sprints**, cerca de 20 semanas. A equipe é contratada pela capacidade das sprints, e as 57,6 horas que sobram (6% do total) funcionam como reserva.
+
+| Item | Premissa | Quantidade | Valor unitário | Valor |
+|---|---|---:|---:|---:|
+| Desenvolvimento e homologação | 6 pessoas × 16 h × 10 sprints | 960 h | R$ 50,00/h | R$ 48.000,00 |
+| **Total de pessoal da solução final** | | **960 h** | | **R$ 48.000,00** |
+
+**Tecnologia durante a implementação** (10 sprints, cerca de 5 meses):
+
+| Item | Premissa | Quantidade | Valor unitário | Valor |
+|---|---|---:|---:|---:|
+| Codex | Assistente de código para cada integrante | 6 pessoas × 5 meses | R$ 100,00/mês | R$ 3.000,00 |
+| Ambiente Azure de homologação | PostgreSQL B1ms (US$ 0,035/h × 730 h), registro de imagens Basic (US$ 0,1666/dia), testes no Azure OpenAI (1 M de tokens de entrada e 0,3 M de saída) e 15% de reserva para armazenamento, backup e tráfego. Container Apps, Log Analytics e Speech dentro das cotas gratuitas mensais | 5 meses × US$ 36,23 | R$ 187,65/mês | R$ 938,27 |
+| **Total de tecnologia da implementação** | | | | **R$ 3.938,27** |
+
+| Resumo da solução final | Valor |
+|---|---:|
+| Pessoal | R$ 48.000,00 |
+| Tecnologia durante a implementação | R$ 3.938,27 |
+| **Custo de implementação da solução final** | **R$ 51.938,27** |
+
+**Operação mensal após a implantação.** A operação não faz parte do custo de implementação, mas define o que o Metrô passa a pagar todo mês. O volume adotado é este:
+
+- 30 usuários (PMO e gestores dos 48 projetos ativos do cenário de protótipo da Seção 3.8.3), 10 consultas por usuário por dia útil e 21 dias úteis: **6.300 consultas por mês**;
+- 70% das consultas chegam ao modelo de linguagem; o restante é resolvido por roteamento local, como mostrou a hipótese de tokens da Sprint 4;
+- 2.000 tokens de entrada e 600 de saída por chamada, mais que os cerca de 200 e 140 da massa sintética, porque os documentos reais são maiores;
+- 20% das perguntas por voz, com 15 segundos cada;
+- 30% das respostas reproduzidas em áudio, com 600 caracteres cada.
+
+| Item | Premissa | Quantidade por mês | Preço unitário (US$) | Valor mensal |
+|---|---|---:|---:|---:|
+| Container Apps, vCPU | API com 1 vCPU e 2 GiB; frontend, worker de alertas e RabbitMQ com 0,25 vCPU e 0,5 GiB cada; 24 × 7; descontada a cota gratuita | 4.419.000 vCPU-s faturáveis | 0,000024 | R$ 549,34 |
+| Container Apps, memória | Mesmos contêineres | 8.838.000 GiB-s faturáveis | 0,000003 | R$ 137,31 |
+| PostgreSQL Flexible B2s | Banco do portfólio, sessões e auditoria, 24 × 7 | 730 h | 0,14 | R$ 529,34 |
+| Azure OpenAI `gpt-4.1-mini` | 4.410 chamadas | 8,82 M tokens de entrada / 2,65 M de saída | 0,40 / 1,60 por M | R$ 40,19 |
+| Speech, STT | 1.260 perguntas por voz | 5,25 h de áudio | 1,00/h | R$ 27,19 |
+| Speech, TTS neural | 1.890 respostas em áudio | 1,13 M caracteres | 15,00 por M | R$ 88,10 |
+| Registro de imagens Basic | Imagens da API e do frontend | 30,42 dias | 0,1666/dia | R$ 26,26 |
+| Key Vault | Leitura de segredos pela aplicação | 100 mil operações | 0,03 por 10 mil | R$ 1,55 |
+| Log Analytics | Logs e telemetria acima dos 5 GB gratuitos | 3 GB | 4,60/GB | R$ 71,48 |
+| Reserva de 15% | Armazenamento do banco e de arquivos, backup, tráfego de saída | — | — | R$ 220,61 |
+| **Total mensal de operação** | | | | **R$ 1.691,37** |
+
+Isso dá cerca de **R$ 20.296 por ano**. O valor se concentra em computação e banco, que respondem por 72% do total. O modelo de linguagem pesa pouco nesse volume: dobrar as consultas acrescentaria cerca de R$ 40 por mês nessa linha.
+
+**O que não está no custo.**
+
+- Teams, Entra ID e SharePoint fazem parte do Microsoft 365 que o Metrô já usa, então o custo incremental foi considerado zero.
+- Licenças de Copilot para os usuários, se o Metrô quiser usar o agente pelo Copilot, dependem do contrato Microsoft dele e não foram orçadas.
+- O preço do `gpt-4.1-mini` é o da implantação global. Se a GTI exigir processamento restrito a uma zona de dados, o valor por token muda e precisa ser revisto.
+- Sustentação, operação assistida e evolução depois da implantação exigem outra equipe e outro orçamento.
+
+### 11.10.4 Comparação
+
+| | PoC | Solução final |
+|---|---:|---:|
+| Duração | 5 sprints | 10 sprints |
+| Horas de desenvolvimento | 480 h | 960 h |
+| Pessoal | R$ 24.000,00 | R$ 48.000,00 |
+| Tecnologia durante a implementação | R$ 3.321,36 | R$ 3.938,27 |
+| **Custo de implementação** | **R$ 27.321,36** | **R$ 51.938,27** |
+| Operação depois da entrega | Não prevista (demonstração) | R$ 1.691,37 por mês |
+
+Nos dois casos, pessoal responde por mais de 87% do custo de implementação. Por isso, o prazo é a variável que mais pesa: cada sprint a mais da equipe custa R$ 4.800,00. A solução final custa cerca de 1,9 vez a PoC porque troca dados sintéticos e serviços de demonstração por identidade, fontes e hospedagem corporativas. Essa diferença acompanha o esforço que a Seção 6.4 atribui a cada componente.
 
 # 12. Benefícios Entregues e Aperfeiçoamentos Futuros
 
