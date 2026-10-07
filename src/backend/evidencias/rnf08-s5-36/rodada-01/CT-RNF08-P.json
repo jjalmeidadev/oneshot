@@ -1,0 +1,52 @@
+{
+  "health_http": 200,
+  "openapi_http": 200,
+  "contract_errors": [],
+  "runtime_components": [
+    "alerts",
+    "api",
+    "data_changes",
+    "database",
+    "frontend",
+    "gemini",
+    "implantacao",
+    "nlp",
+    "pipeline",
+    "rag",
+    "reports",
+    "security",
+    "sharepoint_webhooks"
+  ],
+  "mapped": {
+    "frontend": "Aplicação web em Azure; possível aba no Microsoft Teams",
+    "api": "FastAPI em Azure Container Apps ou App Service; API consumível por aplicações Microsoft",
+    "pipeline": "FastAPI em Azure Container Apps ou App Service; API consumível por aplicações Microsoft",
+    "implantacao": "Azure VM para preservar Compose; Container Apps + Azure Container Registry para hospedagem gerenciada",
+    "alerts": "Backend próprio em Azure; tópicos de Copilot Studio apenas se houver ambiente disponível",
+    "data_changes": "Mesmo backend em Azure, gravando na fonte oficial dos dados: PostgreSQL Azure ou listas do SharePoint Online pelo Microsoft Graph",
+    "database": "Azure Database for PostgreSQL Flexible Server; Dataverse/Azure SQL como alternativas de remodelagem",
+    "gemini": "Endpoint de modelos homologados no Azure, incluindo Azure OpenAI/Microsoft Foundry",
+    "nlp": "O mesmo serviço Python hospedado em Azure",
+    "rag": "Regras na API Azure; apresentação no canal web/Teams",
+    "reports": "Backend próprio em Azure; tópicos de Copilot Studio apenas se houver ambiente disponível",
+    "security": "Microsoft Entra ID para identidade; autorização de domínio mantida na API",
+    "sharepoint_webhooks": "[Webhooks do SharePoint Online](https://learn.microsoft.com/en-us/sharepoint/dev/apis/webhooks/overview-sharepoint-webhooks) e notificações de alteração do Micr"
+  },
+  "unmapped": [],
+  "copilot_studio_in_runtime": {},
+  "copilot_studio_mentions": {
+    "src/backend/app/reports/workflow.py": [
+      "\"\"\"Workflow guiado de relatorio, independente de Copilot Studio.\"\"\""
+    ],
+    "src/frontend/src/lib/api/constants.ts": [
+      "* aceita 'teams', 'webchat', 'copilot_studio', 'api' e 'teste'."
+    ]
+  },
+  "copilot_studio_in_figure_22_outside_legend": [],
+  "planned_channels": {
+    "teams": true,
+    "copilot_mcp": true
+  },
+  "criterion": "Seção 9.2.2, revisada na S5-43 (#297)",
+  "scope": "ASGI local com lifespan; mapeamento documental; sem homologação no tenant Microsoft"
+}
