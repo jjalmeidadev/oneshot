@@ -195,6 +195,7 @@
     - [8.5.11 Alerta autônomo de prazo](#8511-alerta-autônomo-de-prazo)
     - [8.5.12 Webhooks e mensageria integrados (S5-09 a S5-11)](#8512-webhooks-e-mensageria-integrados-s5-09-a-s5-11)
     - [8.5.13 Contrato de alteração de dados pelo chat (S5-05)](#8513-contrato-de-alteração-de-dados-pelo-chat-s5-05)
+    - [8.5.14 SharePoint simulado ampliado (S5-12)](#8514-sharepoint-simulado-ampliado-s5-12)
   - [8.6 Requisitos das APIs de voz (STT/TTS)](#86-requisitos-das-apis-de-voz-stttts)
     - [8.6.1 Objetivo e delimitação](#861-objetivo-e-delimitação)
     - [8.6.2 Entradas, saídas e formatos](#862-entradas-saídas-e-formatos)
@@ -2914,8 +2915,9 @@ recuperação ou chamada ao modelo de linguagem.
 Essa verificação protege chat, confirmação proativa, áudio, métricas de voz,
 solicitações e artefatos de relatório, workflows e inscrições de alerta e a
 central de notificações. `GET /health` permanece público. Os callbacks técnicos
-de relatório e entrega de notificação continuam usando seu próprio
-`X-Callback-Token`, pois representam comunicação máquina a máquina.
+representam comunicação máquina a máquina: o relatório usa
+`X-Callback-Token`, enquanto a confirmação de entrega autentica e protege a
+integridade do corpo com HMAC-SHA256 em `X-Webhook-Signature`.
 
 O controle também foi levado à recuperação de contexto. No PostgreSQL, a
 consulta filtra `project_id` antes do ranqueamento. No fallback que lê os JSONs
@@ -4052,7 +4054,7 @@ O cliente aplica limite de 120 segundos e permite cancelamento por `AbortControl
 | RAG de SharePoint simulado | `rag/sharepoint.py` pesquisa exports JSON versionados e inclui rótulos de fonte no prompt. | `rag/data/sharepoint/` ou `SHAREPOINT_MOCK_DATA_DIR`. | Não acessa o tenant corporativo nem sincroniza alterações do SharePoint. |
 | Classificador local | `nlp/` carrega o `joblib` e o encoder BERTimbau via PyTorch/Transformers; `PLN_WARMUP=1` antecipa a carga. | Artefatos em `src/notebooks/artefatos/`; encoder obtido do repositório de modelo indicado na Seção 8.11 (`requirements-pln.txt`). | A primeira instalação/carga pode exigir internet e cache local; não executa transações. |
 | Identidade e acesso | `security/access.py` valida o JWT no Supabase Auth, resolve `public.users` e aplica `access_rules`; o áudio limita uma transcrição ativa por usuário. | `SUPABASE_URL` e `SUPABASE_PUBLISHABLE_KEY` ou `SUPABASE_ANON_KEY`. | O Entra ID permanece como evolução; o MVP usa identidades e escopos sintéticos. |
-| RabbitMQ | `alerts/messaging.py` publica e consome eventos persistentes de avaliação, criação de notificação e confirmação de entrega, com confirmação manual e DLQ. | `RABBITMQ_URL` e `compose.rabbitmq.yml`. | Necessário para o alerta assíncrono persistente; AMQP, scheduler e outbox não são webhooks. A rodada documental usa double controlado, não broker externo. |
+| RabbitMQ | `alerts/messaging.py` publica e consome eventos persistentes de avaliação, criação de notificação, confirmação de entrega e alteração SharePoint simulada, com confirmação manual e DLQ. | `RABBITMQ_URL` e `compose.rabbitmq.yml`. | Necessário para o alerta e a reindexação assíncronos persistentes; AMQP, scheduler e outbox não são webhooks. A rodada documental usa doubles controlados, não broker externo. |
 
 O SharePoint corporativo, Entra ID, Teams e Copilot Studio aparecem nos desenhos e no modelo-alvo, mas não possuem adaptador ativo nesta versão. O Supabase Auth é o provedor de identidade operacional do MVP. Power Automate possui um adaptador opcional apenas para relatórios; o modo local não depende dele e o alerta não o utiliza. As demais intenções transacionais continuam sem escrita externa. Essa distinção evita interpretar a bancada como um canal de produção ou como evidência de autorização corporativa.
 
@@ -4235,9 +4237,11 @@ junto da reexecução da regra com o código final e da saída dos testes.
 
 ### 8.5.12 Webhooks e mensageria integrados (S5-09 a S5-11)
 
-O estado atual possui **dois webhooks HTTP**. O primeiro recebe o resultado do
+O estado atual possui **três webhooks HTTP**. O primeiro recebe o resultado do
 processamento opcional de relatório. O segundo recebe a confirmação de entrega
-de uma notificação e inicia seu processamento assíncrono pela outbox. O
+de uma notificação e inicia seu processamento assíncrono pela outbox. O terceiro
+recebe alterações da fonte SharePoint simulada e as mantém em uma inbox para
+publicação posterior. O
 scheduler que solicita avaliações, os eventos AMQP e as consultas REST do
 frontend são mecanismos diferentes e não são chamados de webhook.
 
@@ -4335,11 +4339,11 @@ marca notificações como lidas pelas APIs da central.
 | Item | Contrato |
 | --- | --- |
 | Método e rota | `POST /api/integrations/notifications/delivery-results` |
-| Header obrigatório | `X-Callback-Token: <token>` |
-| Variável de ambiente | `NOTIFICATION_CALLBACK_TOKEN` |
+| Header obrigatório | `X-Webhook-Signature: sha256=<64 caracteres hexadecimais>` |
+| Variável de ambiente | `NOTIFICATION_CALLBACK_SECRET` |
 | Content-Type | `application/json` |
 | Persistência de entrada | `notification_delivery_callbacks` |
-| Autenticação atual | Token compartilhado comparado em tempo constante; ausente ou inválido retorna `401`. |
+| Autenticação atual | HMAC-SHA256 dos bytes exatos do corpo, comparada em tempo constante; assinatura ausente, malformada ou divergente retorna `401`. |
 | Processamento | Callback e evento são gravados atomicamente; a tentativa é criada pelo consumer. |
 
 | Campo | Tipo | Obrigatório | Descrição |
@@ -4356,7 +4360,7 @@ Exemplo completo:
 ```http
 POST /api/integrations/notifications/delivery-results HTTP/1.1
 Content-Type: application/json
-X-Callback-Token: <NOTIFICATION_CALLBACK_TOKEN>
+X-Webhook-Signature: sha256=<HMAC_SHA256_DO_CORPO>
 
 {
   "callback_id": "delivery-callback-001",
@@ -4367,6 +4371,26 @@ X-Callback-Token: <NOTIFICATION_CALLBACK_TOKEN>
   "error_code": null
 }
 ```
+
+A assinatura usa exatamente os bytes enviados no corpo, sem reserializar o
+JSON. Exemplo de geração em Python, considerando `body` como `bytes`:
+
+```python
+import hashlib
+import hmac
+import os
+
+secret = os.environ["NOTIFICATION_CALLBACK_SECRET"].encode("utf-8")
+signature = "sha256=" + hmac.new(
+    secret,
+    body,
+    hashlib.sha256,
+).hexdigest()
+```
+
+Alterar espaços, ordem, campos ou valores depois do cálculo invalida a
+assinatura. O segredo e a assinatura completa não devem ser registrados em
+logs.
 
 Exemplo de resposta `200`:
 
@@ -4385,14 +4409,16 @@ Exemplo de resposta `200`:
 | Código | Quando ocorre |
 | :---: | --- |
 | `200` | Callback novo persistido e enfileirado, ou repetição idêntica. |
-| `401` | `X-Callback-Token` ausente ou inválido. |
+| `401` | `X-Webhook-Signature` ausente, malformada, divergente ou calculada para outro corpo. |
 | `404` | `notification_id` não existe. |
 | `409` | Mesmo `callback_id` com payload diferente. |
 | `422` | UUID, status, data, tipo ou campo extra inválido. |
-| `503` | `NOTIFICATION_CALLBACK_TOKEN` ausente ou persistência indisponível. |
+| `503` | `NOTIFICATION_CALLBACK_SECRET` ausente ou persistência indisponível. |
 | `500` | Falha inesperada não classificada; não é usada como resposta normal do domínio. |
 
-**Idempotência e processamento.** A rota calcula SHA-256 do payload canônico.
+**Autenticação, idempotência e processamento.** Antes de aplicar o callback, a
+rota calcula HMAC-SHA256 sobre o corpo bruto e valida a assinatura. Depois da
+autenticação, calcula SHA-256 do payload canônico para idempotência.
 Na primeira chamada, `notification_delivery_callbacks` e o evento de outbox são
 gravados na mesma operação lógica — sob o mesmo lock em memória e na mesma
 transação PostgreSQL. Uma repetição idêntica devolve o `received_at` original e
@@ -4401,19 +4427,110 @@ consumer compara novamente o payload ao hash persistido e usa `callback_id`
 único em `notification_delivery_attempts`: `delivered` é armazenado no estado
 interno `available`; `failed` e `error_code` são preservados.
 
+#### Webhook 3 — alteração do SharePoint simulado
+
+**Finalidade.** Receber notificações de criação, atualização ou exclusão nos
+itens da fonte sintética, validar a origem pelo `clientState` e persistir cada
+evento uma única vez. A requisição HTTP não reindexa documentos e não publica
+diretamente no RabbitMQ; a S5-11 consome a inbox em uma etapa separada.
+
+| Item | Contrato |
+| --- | --- |
+| Método e rota | `POST /api/integrations/sharepoint/change-notifications` |
+| Handshake | Query string `validationToken`; resposta `200 text/plain` com o mesmo valor. |
+| Variáveis | `SHAREPOINT_WEBHOOK_CLIENT_STATE` e `SHAREPOINT_WEBHOOK_REPOSITORY_MODE=database` |
+| Content-Type normal | `application/json` |
+| Persistência | `sharepoint_webhook_events`, com `event_id` como chave primária e estado inicial `pending`. |
+| Autenticação atual | `clientState` compartilhado, comparado em tempo constante e nunca persistido. |
+
+O corpo normal contém `value`, um array de 1 a 100 notificações:
+
+| Campo | Tipo | Obrigatório | Descrição |
+| --- | --- | :---: | --- |
+| `eventId` | UUID | Sim | Chave idempotente global, estável e independente do conteúdo mutável. |
+| `subscriptionId` | string, 1–160 | Sim | Assinatura simulada que originou a notificação. |
+| `clientState` | string secreta | Sim | Deve coincidir com o segredo configurado; não é armazenado. |
+| `changeType` | enum | Sim | `created`, `updated` ou `deleted`. |
+| `resource` | string | Sim | Localizador `lists/<listId>/items/<itemId>`. |
+| `resourceData.siteId` | string | Sim | Site simulado, por exemplo `metro-sp-mock`. |
+| `resourceData.listId` | string | Sim | Nome estável da lista/biblioteca em minúsculas. |
+| `resourceData.itemId` | inteiro positivo | Sim | Identificador estável do item na fonte. |
+| `resourceData.partnerSourceId` | string | Sim | Deve ser `sharepoint-mock:<listId>:<itemId>`. |
+| `occurredAt` | data/hora ISO 8601 com fuso | Sim | Momento da alteração informado pelo simulador. |
+
+Handshake:
+
+```http
+POST /api/integrations/sharepoint/change-notifications?validationToken=validacao-123 HTTP/1.1
+```
+
+Resposta `200`, com `Content-Type: text/plain`:
+
+```text
+validacao-123
+```
+
+Exemplo de notificação válida:
+
+```json
+{
+  "value": [{
+    "eventId": "d6a29bb6-9d2d-40dd-aa3f-20dc8d7a1218",
+    "subscriptionId": "sharepoint-mock-documents",
+    "clientState": "<SHAREPOINT_WEBHOOK_CLIENT_STATE>",
+    "changeType": "updated",
+    "resource": "lists/documentos_projetos/items/5101",
+    "resourceData": {
+      "siteId": "metro-sp-mock",
+      "listId": "documentos_projetos",
+      "itemId": 5101,
+      "partnerSourceId": "sharepoint-mock:documentos_projetos:5101"
+    },
+    "occurredAt": "2026-10-07T12:30:00-03:00"
+  }]
+}
+```
+
+Primeira resposta `202`:
+
+```json
+{"status":"accepted","accepted":1,"created":1,"duplicates":0}
+```
+
+A repetição idêntica também recebe `202`, mas devolve `created: 0` e
+`duplicates: 1`.
+
+| Código | Quando ocorre |
+| :---: | --- |
+| `200` | Handshake válido por `validationToken`. |
+| `202` | Lote válido persistido ou repetição idêntica. |
+| `401` | `clientState` presente, mas divergente do segredo esperado. |
+| `409` | Mesmo `eventId` reutilizado com conteúdo diferente. |
+| `422` | Corpo ausente, campo extra, tipo inválido ou identificadores incoerentes. |
+| `503` | Segredo, modo de repositório ou banco indisponível. |
+
+**Idempotência e fronteira assíncrona.** A inbox armazena um SHA-256 do payload
+canônico sem `clientState`. `ON CONFLICT (event_id) DO NOTHING` torna a inserção
+segura sob concorrência; o hash existente distingue repetição de colisão. A
+interface interna `list_pending()` entrega somente payloads sanitizados, e
+`mark_published()` muda `pending` para `published`. Essas operações preparam o
+produtor da S5-11, mas não comprovam tráfego RabbitMQ nem conexão com Microsoft
+Graph ou SharePoint corporativo.
+
 #### Topologia RabbitMQ
 
 | Elemento | Valor e responsabilidade |
 | --- | --- |
 | Exchange principal | `metro.alerts`, tipo `topic`, durável. |
 | Dead-letter exchange | `metro.alerts.dlx`, tipo `direct`, durável. |
-| Routing keys/filas | `alert.evaluation.requested`, `alert.notification.requested` e `notification.delivery.received`; uma fila durável por chave. |
+| Routing keys/filas | `alert.evaluation.requested`, `alert.notification.requested`, `notification.delivery.received` e `sharepoint.change.received`; uma fila durável por chave. |
 | DLQs | `<routing-key>.dead`, ligadas à DLX com a mesma routing key. |
 | Produtor de avaliação | Scheduler → repository/outbox. |
 | Produtor de notificação | Evaluator → repository/outbox. |
 | Produtor de entrega | Webhook 2 → callback + outbox na mesma operação. |
+| Produtor SharePoint | Worker `app.sharepoint_webhooks.worker publisher`; lê a inbox S5-09 e publica somente payload sanitizado. |
 | Publisher | `python -m app.alerts.worker publisher`; reivindica a outbox com `FOR UPDATE SKIP LOCKED` e publica mensagens persistentes. |
-| Consumers | `evaluator`, `notifier` e `delivery`, executados por `app.alerts.worker`. |
+| Consumers | `evaluator`, `notifier` e `delivery`, executados por `app.alerts.worker`, e `sharepoint`, executado por `app.sharepoint_webhooks.worker consumer`. |
 | Confirmação | `incoming.process(...)` confirma somente quando o handler termina sem exceção. |
 | Retry do publisher | Falha volta a `pending` com atraso de `30 s × tentativas`; após cinco tentativas fica `failed`, com `last_error`. |
 | Retry do consumer | Primeira falha é reenfileirada; uma falha após redelivery é rejeitada e roteada à DLQ. |
@@ -4446,20 +4563,46 @@ O fluxo regular do alerta continua diferente: scheduler → outbox →
 `GET /api/notifications` e `POST /api/notifications/{id}/read`; AMQP e
 scheduler não são webhooks.
 
+Fluxo completo da alteração do SharePoint simulado:
+
+```text
+simulador SharePoint
+  -> POST /api/integrations/sharepoint/change-notifications
+  -> validação de clientState + schema + hash idempotente
+  -> sharepoint_webhook_events (pending)
+  -> sharepoint-publisher
+  -> exchange metro.alerts / sharepoint.change.received
+  -> fila sharepoint.change.received
+  -> sharepoint-consumer revalida envelope e hash da inbox
+  -> claim published → processing
+  -> reindex_sharepoint_mock
+  -> processed + ACK
+  -> em falha: uma redelivery; nova falha ou mensagem inválida segue para
+     sharepoint.change.received.dead
+```
+
+O Compose de produção executa `sharepoint-publisher` e
+`sharepoint-consumer` como processos separados, com repositório em modo
+`database`. O `compose.rabbitmq.yml` permanece propositalmente restrito ao
+broker local; os workers podem ser iniciados pela CLI contra esse broker.
+
 #### Testes e limites comprovados
 
 Em 25/09/2026, os comandos focados aprovaram **22 testes de alertas** e **24
-testes de relatórios** (46 no total). Eles cobrem sucesso, autenticação inválida,
+testes de relatórios** (46 no total). Em 07/10/2026, a regressão relacionada da
+S5-11 aprovou **66 testes**. Eles cobrem sucesso, autenticação inválida,
 payload inválido, repetição, conflito, ausência do recurso, persistência em
 memória, outbox, routing keys, publisher com double, consumers de sucesso/falha
-e evento inválido. O registro reproduzível está em
+e evento inválido. A validação do Compose foi executada sem iniciar os serviços.
+O registro reproduzível está em
 [`docs/evidencias/sprint-05/webhooks-rabbitmq.md`](evidencias/sprint-05/webhooks-rabbitmq.md).
 
 Não houve execução real de Power Automate, Teams, SharePoint corporativo ou
 Copilot Studio. O modo `power_automate_simulator` e doubles controlados validam
-os contratos. Nesta rodada, o publisher RabbitMQ também foi testado com double,
-sem conexão a broker externo; portanto a documentação não usa esses testes como
-evidência de homologação Microsoft ou de tráfego RabbitMQ em produção.
+os contratos. Nesta rodada, os publishers e consumers RabbitMQ também foram
+testados com doubles, sem conexão a broker externo; portanto a documentação não
+usa esses testes como evidência de homologação Microsoft ou de tráfego RabbitMQ
+em produção.
 
 ### 8.5.13 Contrato de alteração de dados pelo chat (S5-05)
 
@@ -4857,6 +5000,54 @@ chamada é feita ao provedor de LLM.
 - **A carga continua com uma regra ativa por usuário** (Seção 4.3.1). Mesmo
   assim, o contrato já exige a verificação pela regra que cobre o alvo, para que
   várias regras não abram uma escrita indevida.
+
+### 8.5.14 SharePoint simulado ampliado (S5-12)
+
+A S5-12 corrige a causa de `DEF-RF06-01`: a massa documental consultada pelo
+chat tinha fonte vinculada apenas ao `PRJ-0442`, embora o portfólio sintético
+também contenha `PRJ-0510` e `PRJ-0587`. A massa passa a ter 11 documentos. O
+item `201` de `comunicados_servico.json` permanece ligado ao `PRJ-0442`, e
+`documentos_projetos.json` acrescenta um status executivo sintético para cada
+um dos outros dois projetos.
+
+O material estrutural externo citado no planejamento não está versionado. Por
+decisão de produto registrada em `docs/stories/S5-12.md`, esta entrega usa como
+contrato substituto os JSONs locais e as tabelas `projects`,
+`project_artifacts` e `source_extracts`. Portanto, ela demonstra uma simulação
+reproduzível; não comprova integração ou homologação com o SharePoint
+corporativo do Metrô.
+
+| Origem JSON | Destino persistido | Regra |
+|---|---|---|
+| `site` | `project_artifacts.metadata.site` | site fictício preservado para rastreabilidade |
+| `list.id` e `list.displayName` | `sharepoint_library` e `metadata.list` | lista/biblioteca simulada |
+| `value[].id` | `sharepoint_item_id` | ID estável do item |
+| `project_code` / `fields.CodigoProjeto` | `projects.code` e chaves `project_id` | vínculo do artefato e do extrato ao projeto |
+| `fields.Title` / `fields.Conteudo` | artefato e extrato recuperável | conteúdo usado pelo RAG |
+| `webUrl` / `lastModifiedDateTime` | URL, extração e metadados | referência da versão simulada |
+
+`partner_source_id` segue o formato
+`sharepoint-mock:<list_id>:<item_id>`. A carga SQL faz upsert do artefato,
+atualiza o extrato de mesmo artefato/localizador e insere somente o ausente.
+Não há exclusão ampla de dados. A validação pós-carga exige ao menos um
+artefato e um extrato mock para cada um dos três projetos e rejeita grupos de
+extratos duplicados.
+
+Com `DATABASE_URL` ou `SUPABASE_DATABASE_URL` configurada, a reprodução parte
+de `src/backend`:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.reindex_sharepoint_mock apply
+.\.venv\Scripts\python.exe -m scripts.reindex_sharepoint_mock status
+```
+
+Os dois comandos devolvem JSON. `apply` reaplica a carga e depois valida;
+`status` executa apenas a validação. Sem URL de banco, os mesmos JSONs continuam
+disponíveis como fallback local. O carregador inclui código e nome do projeto
+no texto pesquisável, restringe o conjunto pelo escopo antes do ranqueamento e
+permite consultas individuais e comparativas sem incluir fontes de outro
+projeto. Testes e limitações estão registrados em
+[`docs/evidencias/sprint-05/sharepoint-simulado.md`](evidencias/sprint-05/sharepoint-simulado.md).
 
 ## 8.6 Requisitos das APIs de voz (STT/TTS)
 
@@ -7323,6 +7514,9 @@ O arquivo [`compose.prod.yml`](../compose.prod.yml) foi usado tanto nos testes l
 | `publisher` | `python -m app.alerts.worker publisher` | Apenas `app-private` |
 | `evaluator` | `python -m app.alerts.worker evaluator` | Apenas `app-private` |
 | `notifier` | `python -m app.alerts.worker notifier` | Apenas `app-private` |
+| `delivery` | `python -m app.alerts.worker delivery` | Apenas `app-private` |
+| `sharepoint-publisher` | `python -m app.sharepoint_webhooks.worker publisher` | Apenas `app-private` |
+| `sharepoint-consumer` | `python -m app.sharepoint_webhooks.worker consumer` | Apenas `app-private` |
 
 O notebook foi mantido no profile opcional `notebook` e não é iniciado nem baixado na configuração padrão da EC2. Os contêineres usam limites de CPU e memória, `read_only`, `tmpfs`, `no-new-privileges`, descarte de capabilities e rotação do driver de logs. Backend, frontend e RabbitMQ possuem *health checks*; os workers não usam health check HTTP porque não servem requisições.
 
@@ -7480,9 +7674,10 @@ sudo /usr/local/bin/m7-compose-up
 
 `m7-compose-up` valida a presença das variáveis, confirma que a URL AMQP corresponde às credenciais do RabbitMQ e inicia `rabbitmq`, `backend`, `frontend`, `scheduler`, `publisher`, `evaluator` e `notifier`. O arquivo instalado foi conferido como `root:root` modo `0600`.
 
-> **Nota temporal — Sprint 5:** esse registro descreve o deploy anterior ao
-> webhook de confirmação. O `compose.prod.yml` atual também declara o consumer
-> `delivery`, mas não houve nova execução na AWS que comprove esse contêiner no
+> **Nota temporal — Sprint 5:** esse registro descreve o deploy anterior aos
+> novos workers de webhook. O `compose.prod.yml` atual também declara o consumer
+> `delivery` e os workers `sharepoint-publisher` e `sharepoint-consumer`, mas não
+> houve nova execução na AWS que comprove esses contêineres no
 > ambiente publicado.
 
 O frontend permaneceu em `127.0.0.1:80`; o backend e o broker não publicam portas no host. O health check interno foi executado antes de criar qualquer acesso externo:
