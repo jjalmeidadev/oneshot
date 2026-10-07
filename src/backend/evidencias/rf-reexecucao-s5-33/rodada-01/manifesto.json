@@ -1,0 +1,50 @@
+{
+  "started_at_utc": "2026-10-07T05:35:30.008358+00:00",
+  "user_date": "2026-10-07",
+  "user_timezone": "America/Sao_Paulo",
+  "commit": "e544388713386c1ba49bd193111999677144cb02",
+  "worktree": " M .gitlab-ci.yml\n?? \"Claude outputs/\"\n?? src/backend/app/tests/test_reexecucao_s5_33.py\n?? src/backend/scripts/run_s5_33.py\n",
+  "python": "3.13.9",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "packages": {
+    "pytest": "9.1.1",
+    "fastapi": "0.141.1",
+    "pydantic": "2.13.5",
+    "torch": "2.13.0",
+    "transformers": "5.16.1",
+    "scikit-learn": "1.6.1"
+  },
+  "sha256": {
+    "src/backend/app/tests/test_reexecucao_s5_33.py": "3f8e1a70a81662525e455edff6fd277f1912811d7f11d7836327f5900b26d70a",
+    "src/backend/scripts/run_s5_33.py": "0357fee2205b39bf23f697484c9076ef0cabee8fc9a2a217183a4d98221a90c6",
+    "src/backend/app/main.py": "db6c49b93517e2b8c8c1aafd7b4365d44c2d1116959b83705158b8e7380b7ee3",
+    "src/backend/app/pipeline.py": "3b6fd747c0ec723e8850119360ab9d65a464c1bd01bea4182fa6435ed1e41a90",
+    "src/backend/app/nlp/inference.py": "23b916646f462942bb50de4d55730d37455d6def4bb48b6982c54fcc3793aebd",
+    "src/backend/app/nlp/routing.py": "f5b160f180535ba1eaebf83a9dc3bf465c428cc88f324e36f1c699ffff04d8b8",
+    "src/backend/app/nlp/entities.py": "9ba82174274717587aed658cd8b0d55b05acdf7577edcfc4ce5da2871f541fd5",
+    "src/notebooks/artefatos/avaliacao_classificador_intencoes.json": "41db42e1c434b35b73749684f8a2d49316b11cc5bdfecb2399dce7806a2798e1",
+    "src/notebooks/artefatos/benchmark_bertimbau.json": "fd2b6bcd41699bc2b02209dd6a570f27c5ae62e49bb5f50e69564113f6fe7552",
+    "src/notebooks/artefatos/benchmark_intencoes.json": "a17f3f96a985ae3b8ed75f3021744f8c89f6eda6c63bb8ca9dd00a0ca0d01d68",
+    "src/notebooks/artefatos/catalogo_intencoes.csv": "1ef3508d2507e31e91ead82219feb96933a25a01bf4fd153ba2ca6e618e3adbc",
+    "src/notebooks/artefatos/catalogo_intencoes.json": "39eee2c2c9126a9ed8814f3746913a3310d28d89b81970d661e94dd2b1be4750",
+    "src/notebooks/artefatos/classificador_intencoes.joblib": "ea5eb249bdc53d192ac9c0157303e0d8d62ab59fe32285628bac0547e5141b08",
+    "src/notebooks/artefatos/consultas_sinteticas_issue_251.csv": "701288c3be7a862121bd3da7a93dd5f34608c67983ee2d8ef9e8f6816ad51aaa",
+    "src/notebooks/artefatos/dataset_intencoes.csv": "262398d0ee093ef1c7b305765d50f2ecf7b62fcd23c7b9169f7c16fad7e4473d",
+    "src/notebooks/artefatos/metricas.json": "41db42e1c434b35b73749684f8a2d49316b11cc5bdfecb2399dce7806a2798e1",
+    "src/notebooks/artefatos/word2vec_portfolio.model": "7ab55299f842476d144eb1a6a2e07908b9d06b928473a95b9106747054f4b912"
+  },
+  "scope": "POST /api/chat via TestClient com classificador, roteamento e entidades reais; geração do LLM substituída por duplo; sem banco. Mesmas entradas da rodada de 23/09 (evidencias/rf01-rf10).",
+  "command": [
+    "C:\\Users\\Inteli\\g05-02\\g05\\src\\backend\\.venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "app/tests/test_reexecucao_s5_33.py",
+    "-v",
+    "-s",
+    "-rxX",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=C:\\Users\\Inteli\\g05-02\\g05\\src\\backend\\evidencias\\rf-reexecucao-s5-33\\rodada-01\\pytest.xml"
+  ]
+}

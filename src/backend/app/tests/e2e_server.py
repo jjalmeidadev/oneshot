@@ -99,6 +99,11 @@ def resolve_e2e_access(
 def generate(request, intent=None, entities=None, access_context=None):
     if request.message == 'falha':
         raise GeminiAPIError('detalhe privado do provedor', status_code=503)
+    # S5-23: falhas de comunicacao produzidas pelo proprio backend.
+    if request.message == 'falha-gateway':
+        raise GeminiAPIError('corpo bruto do provedor com detalhe privado', status_code=502)
+    if request.message == 'falha-inesperada':
+        raise RuntimeError('detalhe privado de excecao inesperada')
     if request.message == 'demorada':
         sleep(2)
     return GeminiChatResponse(
@@ -112,6 +117,14 @@ def generate(request, intent=None, entities=None, access_context=None):
 
 
 def classify(text):
+    if 'alerta' in text.casefold():
+        return SimpleNamespace(
+            macrointencao='TRANSACAO', intencao='alerta_prazo_atraso',
+            confianca_macro=.99, confianca_intencao=.97,
+            fluxo='Workflow guiado de alerta',
+            handler='handler:alerta_prazo_atraso', alternativas=[],
+            roteada=True, resposta_sugerida=None,
+        )
     if 'relat' in text.casefold():
         return SimpleNamespace(
             macrointencao='TRANSACAO', intencao='transacao_gerar_relatorio',

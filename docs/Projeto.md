@@ -6812,6 +6812,19 @@ Os cenários negativos de ausência de informação apresentaram comportamento s
 
 Com isso, todos os casos possuem classificação, resultado observado, evidência associada e, quando aplicável, defeito ou observação de qualidade rastreável.
 
+#### 9.1.5.9 Reexecução após as correções da Sprint 5
+
+A S5-33 ([#287](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/287)) reexecutou em 7 de outubro de 2026, no commit `e544388`, os casos cujas correções já estavam integradas. As entradas foram as mesmas de 23/09, enviadas a `POST /api/chat` com o classificador v2, as regras de roteamento e a extração de entidades reais. Só a geração do texto pelo LLM foi substituída por um duplo, porque esses casos são julgados pela classificação e pelo encaminhamento.
+
+| Caso | Rodada de 23/09 | Reexecução de 07/10 | Observação |
+|:--|:--|:--|:--|
+| CT-RF02-01 | **FALHOU** | **APROVADO** | `CONSULTA` / `consulta_status_projeto`, encaminhada ao catálogo pela regra `consulta_status_explicita` da #282. As probabilidades do modelo não mudaram. |
+| CT-RF03-02 | **FALHOU** | **APROVADO** | `FORA_DE_ESCOPO` pela regra `limite_agendamento`, sem chamada ao provedor e com 0 tokens. |
+| CT-RF06-01 | **FALHOU** | **BLOQUEADO** | Depende da S5-12 (#266), ainda não iniciada; a base continua sem documento do `PRJ-0510`. |
+| CT-RF08-01 | **FALHOU** | **BLOQUEADO** | Mesma dependência e mesma causa (`DEF-RF06-01`). |
+
+Com a reexecução, o resultado funcional passa a 18 casos aprovados, nenhuma falha confirmada após correção e 2 casos bloqueados pela #266. Os defeitos `DEF-RF02-01` e `DEF-RF03-01` ficam corrigidos no comportamento do sistema, e o `DEF-RF06-01` continua aberto. Detalhes, ambiente e evidências estão no [relatório S5-33](testes/sprint5/relatorio-s5-33.md).
+
 ## 9.2 Testes de RNFs
 
 ### 9.2.1 Planejamento
@@ -7081,7 +7094,24 @@ A avaliação prospectiva ampliada do RNF06 foi executada uma única vez em 23 d
 
 A linha de base de 22 de setembro recuperou 11 de 18 fontes e registrou *recall*@3 de 0,611111. As equivalências lexicais adicionadas em seguida foram escolhidas a partir dos erros desses mesmos casos; por isso, a reexecução com 18 de 18 fontes e *recall*@3 de 1,000000 é apenas evidência de regressão conhecida, não de generalização. A avaliação prospectiva v2 corrige essa contaminação metodológica: suas 72 consultas não repetem a massa v1, foram congeladas contra a implementação anterior e não foram reutilizadas para ajuste. Ela revelou fragilidade especialmente em consultas curtas e sinônimos novos (0,333333), formulações implícitas e paráfrases (0,444444). A autoria interna não cega e o uso de fontes sintéticas ainda limitam a validade externa; a conclusão não substitui homologação com solicitações reais e SharePoint do parceiro.
 
+**Reexecução prevista na Sprint 5.** A S5-33 não reexecutou a recuperação do RNF06: o recuperador e o corpus continuam os mesmos da avaliação v2, e a ampliação da base depende da S5-12 (#266), ainda não iniciada. A nova massa prospectiva será congelada sobre o corpus ampliado, antes da única medição, conforme o [relatório S5-33](testes/sprint5/relatorio-s5-33.md). Até lá, o RNF06 permanece **reprovado** na recuperação.
+
 Os demais CT-RNF permanecem sem resultado nesta subseção até que sejam executados com as evidências previstas. Casos bloqueados devem identificar a dependência e o plano de desbloqueio.
+
+#### RNF10 a RNF12 — Sprint 5
+
+A execução da S5-32 ([#286](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/286)) ocorreu em 7 de outubro de 2026, no commit `84df352` da `develop`, com a API em processo (`TestClient`), duplos na fronteira do provedor e da fonte, e sem banco, rede ou `.env`. O relatório completo, com comandos e limites, está em [`testes/sprint5/relatorio-s5-32.md`](testes/sprint5/relatorio-s5-32.md), e as evidências em [`src/backend/evidencias/rnf10-rnf12/rodada-01/`](../src/backend/evidencias/rnf10-rnf12/rodada-01/manifesto.json).
+
+| Caso | Resultado observado | Situação |
+| --- | --- | --- |
+| CT-RNF10-P | Checklist de camadas, README, contrato OpenAPI e testes versionados sem violações; README reproduzido em ambiente limpo | Aprovado |
+| CT-RNF10-N | README sem instrução de teste e rota com acesso externo direto, ambos em cópias, detectados pelo checklist | Aprovado |
+| CT-RNF11-P | Falha de classificação (503), ausência de resultado (200, sem chamar o provedor), fonte indisponível (503), *timeout* (502) e provedor 5xx (502): mensagem definida, auditoria registrada e nenhum vazamento | Aprovado |
+| CT-RNF11-N | Payload inválido do provedor controlado (502). Exceção inesperada: 500 genérico do Starlette, sem mensagem do projeto e sem auditoria (`DEF-S5-32-01`) | **Reprovado** |
+| CT-RNF12-P | `scripts/validar_massa_sintetica.py` encontrou as seis categorias: 3 projetos, 1 subportfólio, 10 marcos, 10 riscos, 17 indicadores e 9 documentos | Aprovado |
+| CT-RNF12-N | Seis cópias, cada uma sem uma categoria, reprovadas com a categoria ausente identificada | Aprovado |
+
+O `DEF-S5-32-01` decorre da falta de um tratador global de exceções em `/api/chat`: uma exceção sem tratador registrado escapa antes do registro de auditoria. O destino do defeito fica para a consolidação dos testes sistêmicos (S5-36).
 
 ## 9.3 Testes de Usabilidade
 
@@ -7298,6 +7328,12 @@ resíduo. A rodada partiu do ambiente local de desenvolvimento; a mesma coleta
 na imagem publicada acompanha a publicação da versão final. Resultados,
 latências e hashes estão nas
 [evidências da homologação com Azure real](evidencias/sprint-05/vhs-azure-real/README.md).
+
+#### Integração frontend-backend e falhas de comunicação — S5-23
+
+A S5-23 ([#277](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/277)) automatizou no Playwright os fluxos principais da interface contra o backend de testes (`app/tests/e2e_server.py`), que usa as rotas reais da API, repositórios em memória e provedores determinísticos. A suíte terminou com 60 testes aprovados: 20 cenários em desktop, tablet e celular. Texto, áudio, relatório e alerta percorrem o backend; o alerta vai até a assinatura ativa, conferida em `GET /api/alert-subscriptions`. A alteração de dados é exercitada com a API simulada, e o contrato do backend correspondente é coberto pelos testes de `data_changes`.
+
+As falhas de comunicação simuladas foram 503, 502 e 500 do backend, 504 de gateway, *timeout* do cliente, perda de conexão e 503 no meio do workflow de alerta. Em todas, a interface exibiu mensagem controlada, sem detalhe interno, e voltou a funcionar no envio seguinte. O job `frontend-e2e` publica o relatório HTML como artefato do MR e o JUnit na aba de testes. Resultados, mudanças e limites estão no [relatório S5-23](testes/sprint5/relatorio-s5-23.md).
 
 # 10. Procedimentos de Implantação
 
