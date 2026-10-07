@@ -6,7 +6,7 @@ from typing import Annotated
 from uuid import uuid4
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.requests import Request
@@ -30,7 +30,7 @@ from app.audio.schemas import (
 )
 from app.audio import transcription
 from app.audio.synthesis import synthesize_optional
-from app.audio.security import resolve_identity, single_request_per_identity
+from app.audio.security import single_request_per_identity
 from app.audio.service import process_audio_upload
 from app.audio.validation import DEFAULT_MAX_SIZE_BYTES
 from app.database.connection import close_database_pool
@@ -273,15 +273,9 @@ def get_vhs_metrics(
 def create_chat_response(
     request: GeminiChatRequest,
     access: ReadAccess,
-    authorization: str | None = Header(default=None),
 ) -> GeminiChatResponse:
     try:
         authorize_message_scope(access, request.message)
-        identity = (
-            resolve_identity(authorization)
-            if authorization or request.proactivity_enabled
-            else None
-        )
         response = process_message(
             request,
             requester_id=str(access.auth_subject),
@@ -354,7 +348,7 @@ def create_audio_chat_response(
 
     try:
         authorize_message_scope(access_context, request.message)
-        return process_message(
+        response = process_message(
             request,
             channel="api",
             external_conversation_id=conversation_id,
@@ -389,7 +383,6 @@ async def create_audio_upload(
     use_intent_classifier: bool = Form(default=True),
     proactivity_enabled: bool = Form(default=False),
     include_audio: bool = Form(default=False),
-    authorization: str | None = Header(default=None),
 ) -> AudioUploadResponse:
     started_at = perf_counter()
     resolved_conversation_id = conversation_id or str(uuid4())
