@@ -268,8 +268,8 @@ def _insert_consulted_sources(
             claim.model_dump() for claim in response.claims
             if metadata.get("citation_id") in claim.citation_ids
         ]
-        if metadata.get("fallback"):
-            continue
+        # Fontes locais tambem fundamentam respostas. As FKs opcionais podem
+        # ficar nulas; o identificador e a origem permanecem nos metadados.
 
         cursor.execute(
             """
@@ -572,11 +572,7 @@ def _alternatives(intent: AudioIntent | None) -> list[dict]:
 
 
 def _persistent_source_count(response: GeminiChatResponse) -> int:
-    return sum(
-        1
-        for source in response.trace_sources
-        if not (source.get("metadata") or {}).get("fallback")
-    )
+    return len(response.trace_sources)
 
 
 def _normalize_prompt(value: str) -> str:
