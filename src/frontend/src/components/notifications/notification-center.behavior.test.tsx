@@ -70,7 +70,9 @@ describe('Comportamento de NotificationCenter', () => {
 
   it('busca com token normalizado e atualiza resumo após marcar leitura', async () => {
     render(<NotificationCenter />);
-    await userEvent.click(await screen.findByLabelText('1 notificacoes nao lidas'));
+    await userEvent.click(
+      await screen.findByLabelText('Alertas: 1 notificação não lida'),
+    );
     expect(mocks.getNotifications).toHaveBeenCalledWith('token-test');
     expect(mocks.getAlertSubscriptions).toHaveBeenCalledWith('token-test');
     mocks.getNotifications.mockResolvedValue({
@@ -81,7 +83,9 @@ describe('Comportamento de NotificationCenter', () => {
     await waitFor(() =>
       expect(mocks.markNotificationRead).toHaveBeenCalledWith('n1', 'token-test'),
     );
-    expect(await screen.findByLabelText('0 notificacoes nao lidas')).toBeVisible();
+    expect(
+      await screen.findByLabelText('Alertas: nenhuma notificação não lida'),
+    ).toBeVisible();
     await userEvent.click(screen.getByRole('button', { name: /Prazo ultrapassado/ }));
     expect(mocks.markNotificationRead).toHaveBeenCalledOnce();
   });
@@ -97,7 +101,9 @@ describe('Comportamento de NotificationCenter', () => {
         { subscription: { ...subscription, status } },
       ]);
       render(<NotificationCenter />);
-      await userEvent.click(await screen.findByLabelText('1 notificacoes nao lidas'));
+      await userEvent.click(
+        await screen.findByLabelText('Alertas: 1 notificação não lida'),
+      );
       await userEvent.click(screen.getByRole('button', { name: label }));
       await waitFor(() =>
         expect(mocks.changeAlertSubscription).toHaveBeenCalledWith({
@@ -116,7 +122,9 @@ describe('Comportamento de NotificationCenter', () => {
       { subscription: { ...subscription, status: 'cancelled' } },
     ]);
     render(<NotificationCenter />);
-    await userEvent.click(await screen.findByLabelText('1 notificacoes nao lidas'));
+    await userEvent.click(
+      await screen.findByLabelText('Alertas: 1 notificação não lida'),
+    );
     expect(screen.getByText(/Mais de 7 dias · cancelled/)).toBeVisible();
     expect(screen.queryByRole('button', { name: 'Cancelar' })).not.toBeInTheDocument();
   });
@@ -125,8 +133,10 @@ describe('Comportamento de NotificationCenter', () => {
     mocks.getNotifications.mockRejectedValue(new Error('Offline'));
     const { rerender } = render(<NotificationCenter />);
     await waitFor(() => expect(mocks.getNotifications).toHaveBeenCalledOnce());
-    await userEvent.click(screen.getByLabelText('0 notificacoes nao lidas'));
-    expect(screen.getByText('Nenhuma notificacao disponível.')).toBeVisible();
+    await userEvent.click(
+      screen.getByLabelText('Alertas: nenhuma notificação não lida'),
+    );
+    expect(screen.getByText('Nenhuma notificação disponível.')).toBeVisible();
     mocks.token = ' ';
     rerender(<NotificationCenter />);
     expect(mocks.getNotifications).toHaveBeenCalledOnce();

@@ -6,6 +6,15 @@ workflow:
       when: never
     - when: always
 
+# Falhas de rede do runner durante o pull acontecem antes de qualquer script.
+# O retry cobre esse tipo de falha de infraestrutura sem repetir testes que
+# falharam por causa do codigo.
+default:
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+
 stages:
   - validate
   - test
@@ -58,21 +67,32 @@ frontend-unit:
 
 backend-api:
   stage: test
-  image: python:3.13-bookworm
+  # A variante completa somada ao PyTorch, SciPy e cache do BERTimbau excede
+  # o disco efemero do runner antes mesmo dos testes. Todas as dependencias
+  # deste job possuem wheels para CPython 3.12, portanto nao precisam das
+  # ferramentas de compilacao presentes na imagem bookworm completa.
+  image: python:3.12-slim-bookworm
   rules:
     - when: on_success
   variables:
     HF_HOME: "$CI_PROJECT_DIR/.cache/huggingface"
+    PIP_NO_CACHE_DIR: "1"
+    PIP_NO_COMPILE: "1"
+    PYTHONDONTWRITEBYTECODE: "1"
   cache:
-    key: REDACTED_FOR_PUBLIC_RELEASE
+    # A chave anterior continha snapshots e pesos TensorFlow/Flax que o
+    # AutoModel PyTorch nao usa. Alem de separar esse cache legado, a nova
+    # chave faz a primeira instalacao ocorrer antes do download do modelo;
+    # isso evita somar ~1,8 GB de cache ao pico de descompactacao do Torch.
+    key: REDACTED_FOR_PUBLIC_RELEASE-pytorch-only-v2
     paths:
       - .cache/huggingface/
   script:
     # O runner nao tem GPU. O torch do PyPI traz ~4 GB de bibliotecas CUDA,
     # que estouram o disco do runner ("No space left on device"). A roda CPU
     # tem a mesma versao (2.13.0+cpu satisfaz torch==2.13.0) e cabe no disco.
-    - pip install --no-cache-dir torch==2.13.0 --index-url https://download.pytorch.org/whl/cpu
-    - pip install --no-cache-dir -r src/backend/requirements.txt -r src/backend/requirements-pln.txt
+    - pip install torch==2.13.0 --index-url https://download.pytorch.org/whl/cpu
+    - pip install -r src/backend/requirements.txt -r src/backend/requirements-pln.txt
     - python -c "import torch, transformers; assert torch.version.cuda is None, torch.__version__"
     - cd src/backend
     - python -m pytest app/tests -m integration --strict-markers -q -o junit_family=legacy --junitxml=evidencias/backend-junit.xml

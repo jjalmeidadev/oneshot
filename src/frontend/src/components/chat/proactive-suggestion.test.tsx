@@ -20,7 +20,7 @@ describe('Sugestão proativa e espera', () => {
         onResolve={resolve}
       />,
     );
-    expect(screen.getByRole('region', { name: 'Sugestão opcional' })).toHaveTextContent(
+    expect(screen.getByRole('region', { name: 'Ação sugerida' })).toHaveTextContent(
       suggestion.description,
     );
     expect(resolve).not.toHaveBeenCalled();
