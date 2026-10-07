@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, Response, status
+from fastapi import APIRouter, Depends, Header, Request, Response, status
 
 from app.alerts.schemas import (
     AlertNotification,
@@ -17,7 +17,7 @@ from app.alerts.schemas import (
     StartAlertWorkflowRequest,
     SubscriptionStatus,
 )
-from app.alerts.security import validate_notification_callback_token
+from app.alerts.security import validate_notification_callback_signature
 from app.alerts.service import get_alert_service
 from app.alerts.workflow import get_alert_workflow_service
 from app.reports.security import report_identity_from_access_context
@@ -199,9 +199,12 @@ def read_notification(
     response_model=NotificationDeliveryCallbackResponse,
     summary="Receber confirmacao idempotente de entrega de notificacao",
 )
-def receive_notification_delivery_result(
+async def receive_notification_delivery_result(
+    request: Request,
     callback: NotificationDeliveryCallbackRequest,
-    callback_token: str | None = Header(default=None, alias="X-Callback-Token"),
+    webhook_signature: str | None = Header(
+        default=None, alias="X-Webhook-Signature"
+    ),
 ) -> NotificationDeliveryCallbackResponse:
-    validate_notification_callback_token(callback_token)
+    validate_notification_callback_signature(await request.body(), webhook_signature)
     return get_alert_service().apply_delivery_callback(callback)

@@ -82,7 +82,12 @@ def _contar(connection: Any, sql: str) -> int:
 # so aparece no identificador gravado no banco pela carga SQL; o carregador de
 # JSON monta o identificador como "<lista>:<item>".
 LISTAS_SIMULADAS = frozenset(
-    {"base-atendimento", "comunicados-servico", "procedimentos-operacionais"}
+    {
+        "base-atendimento",
+        "comunicados-servico",
+        "documentos-projetos",
+        "procedimentos-operacionais",
+    }
 )
 
 
