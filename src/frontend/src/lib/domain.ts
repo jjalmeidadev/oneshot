@@ -22,6 +22,7 @@ import {
   type GuidedWorkflowSession,
   type ProactiveSuggestion,
   type FactualClaim,
+  type ResponseBlock,
   type EvidenceStatus,
   type DataChangeConfirmResponse,
   type DataChangeOutcome,
@@ -180,6 +181,7 @@ export type ChatMessage = {
   id: string;
   role: MessageRole;
   content: string;
+  blocks?: ResponseBlock[];
   speech?: ChatResponse['speech'];
   createdAt: string;
   origin: MessageOrigin;
@@ -341,6 +343,7 @@ export function toAssistantMessage(
     id: crypto.randomUUID(),
     role: 'assistant',
     content: response.text,
+    blocks: response.blocks ?? [],
     speech: response.speech,
     createdAt: new Date().toISOString(),
     origin: 'text',
