@@ -43,9 +43,9 @@
       - [2.5.1.2 Mariana](#2512-mariana)
       - [2.5.1.3 Carlos](#2513-carlos)
     - [2.5.2 Jornadas do Usuário](#252-jornadas-do-usuário)
-      - [2.5.2.1 Mapa de jornada - Roberto](#2521-mapa-de-jornada---roberto)
-      - [2.5.2.2 Mapa de jornada - Mariana](#2522-mapa-de-jornada---mariana)
-      - [2.5.2.3 Mapa de jornada - Carlos](#2523-mapa-de-jornada---carlos)
+      - [2.5.2.1 Mapa de jornada de Roberto](#2521-mapa-de-jornada-de-roberto)
+      - [2.5.2.2 Mapa de jornada de Mariana](#2522-mapa-de-jornada-de-mariana)
+      - [2.5.2.3 Mapa de jornada de Carlos](#2523-mapa-de-jornada-de-carlos)
   - [2.6 Modelagem do Fluxo de Negócio](#26-modelagem-do-fluxo-de-negócio)
     - [2.6.1 Cadeia de Valor](#261-cadeia-de-valor)
     - [2.6.2 Fluxo de Negócio Proposto (AS-IS e TO-BE)](#262-fluxo-de-negócio-proposto-as-is-e-to-be)
@@ -142,6 +142,7 @@
     - [5.3.3 Direcionamento para workflow funcional web](#533-direcionamento-para-workflow-funcional-web)
     - [5.3.4 Entrada por voz com Speech-to-Text](#534-entrada-por-voz-com-speech-to-text)
     - [5.3.5 Considerações sobre os cenários](#535-considerações-sobre-os-cenários)
+  - [5.4 Arquitetura e integrações no fechamento S5](#54-arquitetura-e-integrações-no-fechamento-s5)
 - [6. Mapeamento técnico de infraestrutura e implantação](#6-mapeamento-técnico-de-infraestrutura-e-implantação)
   - [6.1 Diagrama de implantação da UML](#61-diagrama-de-implantação-da-uml)
   - [6.2 Justificativa das escolhas de implantação](#62-justificativa-das-escolhas-de-implantação)
@@ -295,6 +296,9 @@
     - [13.2.2 Governança e voz ativa](#1322-governança-e-voz-ativa)
     - [13.2.3 Comunidade e reconhecimento](#1323-comunidade-e-reconhecimento)
     - [13.2.4 Indicadores de uso e qualidade](#1324-indicadores-de-uso-e-qualidade)
+- [14. Consolidação documental e auditoria](#14-consolidação-documental-e-auditoria-do-repositório)
+  - [14.1 Auditoria do Escritório de Projetos](#141-auditoria-dos-critérios-do-escritório-de-projetos)
+  - [14.2 Instalação e identidade na versão S5](#142-instalação-e-identidade-na-versão-s5)
 - [Referências](#referências)
 
 # 1. Introdução
@@ -624,7 +628,7 @@ Além dos mapas visuais, as jornadas foram sintetizadas em etapas funcionais par
 | Carlos | Investigar desvios | Aprofundar atrasos, riscos e impactos antes de acionar líderes | Retrabalho para cruzar Power BI, documentos e relatos | Comparação estruturada entre projetos e recuperação de evidências |
 | Carlos | Coordenar ações do subportfólio | Direcionar responsáveis com base em informação confiável | Baixa confiança em respostas sem contexto | Respostas com fonte, limitação explícita e indicação de dados ausentes |
 
-#### 2.5.2.1 Mapa de jornada - Roberto
+#### 2.5.2.1 Mapa de jornada de Roberto
 
 <div align="center">
   <img src="img/User Journey Map - Roberto.png" alt="Mapa de Jornada do Usuário - Roberto" width="900">
@@ -635,7 +639,7 @@ A jornada de Roberto representa a experiência de um usuário com perfil executi
 
 Com a introdução da solução, Roberto passa a buscar uma síntese rápida e confiável por meio de consultas ao novo agente, fazendo perguntas por texto ou voz e aprofundando pontos críticos conforme necessário. Nessa etapa, a principal oportunidade está em evidenciar a confiabilidade das fontes, oferecer respostas objetivas e guiar aprofundamentos. Ao avançar para a definição de prioridades e direcionamentos, Roberto compara cenários, discute com gestores e define ações com maior segurança, utilizando a solução para compreender impactos e apoiar decisões de alta responsabilidade. Por fim, ao verificar os impactos das decisões tomadas, ele acompanha mudanças relevantes, indicadores e direcionamentos anteriores, com a expectativa de antecipar novos riscos e avaliar se as decisões produziram os efeitos esperados.
 
-#### 2.5.2.2 Mapa de jornada - Mariana
+#### 2.5.2.2 Mapa de jornada de Mariana
 
 <div align="center">
   <img src="img/User Journey Map - Mariana.png" alt="Mapa de Jornada do Usuário - Mariana" width="900">
@@ -651,7 +655,7 @@ A terceira fase é a que mais depende da confiança. Ao consultar o agente para 
 
 Nas duas fases finais, Mariana produz a análise para decisão e fecha o ciclo. Na quarta, monta o material executivo e revisa números e referências, sujeita a retrabalho sempre que um dado muda depois da consolidação — o que a prévia de relatório executivo mensal, gerada a partir dos dados já consolidados, reduz. Na quinta, levanta as pendências de preenchimento e aciona os responsáveis, tarefa hoje feita pessoa por pessoa a cada mês e que o lembrete proativo via Teams passa a executar. As cinco fases dessa jornada correspondem, nessa ordem, às cinco linhas de Mariana na tabela de etapas apresentada acima.
 
-#### 2.5.2.3 Mapa de jornada - Carlos
+#### 2.5.2.3 Mapa de jornada de Carlos
 
 <div align="center">
   <img src="img/User Journey Map - Carlos.png" alt="Mapa de Jornada do Usuário - Carlos" width="900">
@@ -3290,6 +3294,117 @@ Por fim, a utilização da **base sintética / índice vetorial** nos cenários 
 
 ---
 
+## 5.4 Arquitetura e integrações no fechamento S5
+
+Data editorial 07/10; estado observado após pull em 06/10:
+`1ff5927a75b79219314068291b1aa43de3fe9674`. Seis frentes adicionais foram integradas;
+publicação, homologação e resultado de teste continuam estados distintos.
+
+O RAG executável usa recuperação lexical em PostgreSQL/exports JSON. Os índices
+vetoriais das visões iniciais são desenho histórico, não componente ativo desta
+versão; a Seção 6.4 detalha essa diferença. O diagrama abaixo descreve as ligações
+implementadas, mas o bloqueio de importação encontrado na Seção 14.1 impede
+declarar que o HEAD atual inicializa sem correção.
+
+### 5.4.1 Componentes e responsabilidades
+
+| Componente | Código/configuração | Responsabilidade |
+|---|---|---|
+| React/TypeScript | [frontend](../src/frontend/README.md) | Chat, áudio, autenticação e notificações; Vite local, nginx no contêiner. |
+| FastAPI | [main.py](../src/backend/app/main.py) | Rotas, validação HTTP, CORS e correlação. |
+| Identidade/acesso | [security](../src/backend/app/security/) | Bearer Supabase e autorização de perfil/escopo. |
+| Orquestração | [pipeline.py](../src/backend/app/pipeline.py) | Guarda de dados, classificação, rota, recuperação e geração. |
+| PLN | [notebooks](../src/notebooks/) e backend | Intenções, entidades, BERTimbau e fallback conforme confiança. |
+| RAG/LLM | [rag](../src/backend/app/rag/) | Contexto e referências; provedor de geração substituível. |
+| Banco | [database](../src/database/README.md) | Catálogo, fontes, rastros, acesso e workflows. |
+| Voz/VHS | [backend](../src/backend/README.md) | Azure STT/VHS e TTS Azure opcional integrado em !123; MP3/base64 e aviso de falha preservam a resposta textual. |
+| Relatórios | [agent](../src/agent/README.md) | Solicitação, confirmação, artefato, repositório/storage e callback. |
+| Alertas | [webhooks](evidencias/sprint-05/webhooks-rabbitmq.md) | Scheduler, outbox, publisher e consumer RabbitMQ; callbacks/tentativas. |
+| Implantação | [compose](../compose.prod.yml), [AWS](../infra/aws/) | Imagens, workers, rede privada e infraestrutura acadêmica. |
+
+### Fluxo e fronteiras de confiança
+
+```mermaid
+flowchart TD
+  U[Usuário] --> F[React]
+  F --> A[FastAPI: bearer e acesso]
+  A --> V[Áudio: Azure STT e VHS]
+  V --> P[Guarda sensível e PLN]
+  A --> P
+  P --> R[Recuperação]
+  R --> L[LLM e referências]
+  P --> W[Workflows]
+  W --> Q[Outbox e RabbitMQ]
+  Q --> C[Consumer e callbacks]
+  P --> D[(PostgreSQL / Supabase)]
+  R --> D
+  W --> D
+  L --> F
+  L --> S[Azure TTS opcional]
+  W --> S
+  S --> F
+  W --> F
+  C --> F
+```
+
+O backend valida identidade/escopo antes da operação. Texto passa pela guarda
+antes de classificação e LLM. Áudio real chega ao Azure antes da guarda textual:
+a barreira não garante que áudio sensível permaneceu na máquina. Classificação
+seleciona rota; consulta recupera contexto e cita fontes; workflows específicos
+evitam geração livre quando há operação definida. Alteração pelo chat exige
+permissão, confirmação e auditoria. Proatividade oferece próximo passo sem
+executá-lo automaticamente. Com banco configurado, rastros correlacionam
+interação, classificação, rota, fontes e operações.
+
+A saída textual pode receber síntese Azure opcional antes de retornar ao
+frontend. Falha ou indisponibilidade de TTS conserva a resposta textual;
+o áudio de saída não substitui a trilha de fontes nem o controle de acesso.
+
+A filtragem usa padrões/metadados; não identifica todos os nomes, endereços ou
+dados confidenciais por significado. A aprovação de testes controlados não
+constitui homologação com todos os dados reais do parceiro.
+
+### Modos de execução e persistência
+
+O banco é necessário para o fluxo autenticado e persistente completo. Fallbacks
+em memória/JSON atendem desenvolvimento/testes específicos. `DATABASE_URL` ou
+`SUPABASE_DATABASE_URL` controla conexão; credenciais ficam fora do Git.
+O Compose observado precisa receber URL/chave pública de Auth no ambiente de runtime. Esse ajuste de configuração não foi incluído nesta entrega documental.
+O compose observado usa `REPORT_REPOSITORY_MODE=memory`,
+`REPORT_STORAGE_MODE=local`, `REPORT_PORTFOLIO_SOURCE=synthetic`, embora alertas
+usem banco. Não torna todo relatório persistido no Supabase automaticamente.
+Ativar os modos database/storage conforme [manual](Manual-instalacao.md).
+
+VHS usa TTL 300s e limite 256 por worker; o compose usa um worker. Caches não
+são compartilhados entre processos. Outbox/callbacks requerem banco, RabbitMQ,
+secrets válidos e tratamento idempotente de reentrega.
+
+### Integrações e estado
+
+| Integração | Evidência e limite |
+|---|---|
+| Azure Speech/VHS real | [Ensaio local](evidencias/sprint-05/vhs-azure-real/README.md): um miss, quatro hits, uma chamada. Não comprova imagem final publicada. |
+| Supabase Auth/perfis | !119 integrado, SQL20/21, security e testes; perfis sintéticos não equivalem a Entra corporativo. |
+| Persistência/auditoria | [Ensaio](testes/sprint4/relatorio-s4-11.md); depende da configuração de runtime. |
+| Gemini/OpenRouter | Abstração e ensaios RNF04/05; quota/modelo/ambiente delimitam resultados. |
+| RabbitMQ/webhooks | [Evidência](evidencias/sprint-05/webhooks-rabbitmq.md); dependência externa de runtime. |
+| Teams/Entra/SharePoint/Copilot corporativos | Não homologados; Azure e JSON com formato SharePoint não provam conexão ao tenant do Metrô. |
+| AWS | Projeto 10.2, demo Learner Lab/URL efêmera; não prova operação sustentada. |
+| TTS, auditoria, gate e testes finais | !123/!117/!120/!124/!130 integrados. RNF07 reprovado; ver resultados abaixo. |
+| Escrita pelo chat e blocos estruturados | Contrato !132 integrado; implementação completa conforme premissa do usuário. MRs !133/!128/!129 não aparecem como merges no HEAD observado. |
+
+### Serviços complementares e referências
+
+O código do grupo está neste GitLab; não foi identificado outro repositório
+próprio indispensável. Dependências externas: [FastAPI](https://fastapi.tiangolo.com/),
+[Supabase Auth](https://supabase.com/docs/guides/auth), [RabbitMQ](https://www.rabbitmq.com/docs),
+[Azure Speech](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/).
+Fontes primárias consultadas na auditoria; versões executadas vêm dos manifests
+e locks locais, não da versão mais recente das páginas.
+Requisitos, testes e implantação estão em [Projeto](Projeto.md), com fontes
+editáveis em [diagrams](diagrams/).
+
+
 # 6. Mapeamento técnico de infraestrutura e implantação
 
 Esta seção documenta a estratégia de implantação prevista para a solução, considerando que o projeto ainda está em estágio de PoC acadêmica e que a equipe não possui garantia de acesso a uma assinatura Azure corporativa. Portanto, a implantação descrita aqui não representa um deploy produtivo nem uma pipeline de CI/CD já implementada. O objetivo é registrar uma estratégia reprodutível e simples, capaz de orientar a publicação futura do MVP sem bloquear o desenvolvimento atual.
@@ -3597,7 +3712,7 @@ O **esforço** é uma avaliação qualitativa da migração indicada, não uma e
 | Esquema relacional do portfólio, sessões, execuções, notificações e outbox — [`src/database/sql`](../src/database/sql/01_create_database.sql), [`database/connection.py`](../src/backend/app/database/connection.py) | Azure Database for PostgreSQL Flexible Server; Dataverse/Azure SQL como alternativas de remodelagem | **Adaptado** para PostgreSQL; **Referência** para remodelagem | **Alto** | Preservar o modelo relacional e consultas PostgreSQL onde compatíveis. Migrar roles, RLS, funções e referências específicas de `auth`/`storage` do Supabase. [PostgreSQL gerenciado em Azure](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/overview) reduz a troca de dialeto; Dataverse e Listas SharePoint não recebem os scripts SQL nem substituem a outbox transacional automaticamente. |
 | Login de personas, validação de token Supabase e regras por perfil/projeto — [`security/access.py`](../src/backend/app/security/access.py), [`20_auth_access_foundation.sql`](../src/database/sql/20_auth_access_foundation.sql) | Microsoft Entra ID para identidade; autorização de domínio mantida na API | **Adaptado** | **Alto** | Substituir o login/validador Supabase, [validar tokens e claims](https://learn.microsoft.com/en-us/entra/identity-platform/claims-validation) do tenant e mapear identidades corporativas para os perfis e escopos internos. Manter checagens de leitura, escrita e exportação. Login Teams/Entra, sozinho, não concede acesso a todo o portfólio ou SharePoint. |
 | Arquivo DOCX local ou bucket privado Supabase — [`reports/storage.py`](../src/backend/app/reports/storage.py) | Azure Blob Storage para objetos privados; biblioteca SharePoint para publicação documental | **Adaptado** | **Médio** para Blob | Preservar hash, metadados, referência e download autorizado; criar adaptador de upload/download e política de retenção. [Blob Storage](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction) corresponde ao armazenamento de arquivos. Publicação em SharePoint é integração adicional, sujeita ao escopo do usuário. |
-| Trilhas de conversa, fontes consultadas e eventos de execução — [`database/tracing.py`](../src/backend/app/database/tracing.py), repositórios de relatório/alerta | Persistência da auditoria em PostgreSQL Azure; Dataverse como alternativa de remodelagem | **Adaptado** | **Médio** | Preservar IDs de interação, execução, usuário, fonte e correlação. Application Insights complementa diagnóstico operacional; não substitui sozinho o registro de negócio nem garante integridade/retenção. A correção adicional do MR !117 ainda precisa ser integrada. |
+| Trilhas de conversa, fontes consultadas e eventos de execução — [`database/tracing.py`](../src/backend/app/database/tracing.py), repositórios de relatório/alerta | Persistência da auditoria em PostgreSQL Azure; Dataverse como alternativa de remodelagem | **Adaptado** | **Médio** | Preservar IDs de interação, execução, usuário, fonte e correlação. Application Insights complementa diagnóstico operacional; não substitui sozinho o registro de negócio nem garante integridade/retenção. A correção do MR !117 está integrada no HEAD atual (3b95d985/9255e2f8); não comprova aplicação do backfill SQL19 em todo ambiente. |
 | Controle preventivo de dado sensível do MR !127 — `security/sensitive_data.py` na branch `fix/bloquear-dado-sensivel` | Barreira própria na API; políticas de dados da Power Platform quando ela for utilizada | **Planejado** no `develop`; **Direto** após integração | **Médio** | A branch bloqueia perguntas, mascara fontes e recusa prompts antes da chamada externa. As [políticas de dados da Power Platform](https://learn.microsoft.com/en-us/power-platform/admin/wp-data-loss-prevention) controlam conectores; não substituem esse filtro para chamadas Python a provedores. Testar o controle com o endpoint homologado e registrar seus limites. |
 
 ### 6.4.5 Voz, relatórios, alertas e integrações
@@ -3624,7 +3739,7 @@ O **esforço** é uma avaliação qualitativa da migração indicada, não uma e
 | Nginx/proxy e publicação por Cloudflare Quick Tunnel — [`frontend/nginx.conf`](../src/frontend/nginx.conf), Seção 10.2.9 | Ingress HTTPS no Azure e domínio corporativo | **Adaptado** | **Médio** | Preservar roteamento de `/api` e servir a UI com domínio estável. Validar origem, certificados, callbacks e redirecionamento de login. URL temporária da demonstração não satisfaz por si só a publicação corporativa/Teams. |
 | Variáveis de ambiente e arquivo `runtime.env` fora do repo | Azure Key Vault e identidade gerenciada do serviço, quando disponível | **Adaptado** | **Médio** | Reaproveitar nomes e validação de configuração; adaptar obtenção e rotação de credenciais. O [Key Vault](https://learn.microsoft.com/en-us/azure/key-vault/general/overview) armazena segredos e controla seu acesso. Nunca copiar valores de credenciais da bancada para a documentação ou o frontend. |
 | Logs de contêiner, CloudWatch e tempos de pipeline/VHS | Azure Monitor, Log Analytics e Application Insights | **Adaptado** | **Médio** | Reaproveitar métricas e IDs de correlação; trocar exportação/coleta e instrumentar dependências com [OpenTelemetry/Application Insights](https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview). Preservar separação entre telemetria operacional e auditoria de negócio. |
-| GitLab CI, pytest, Vitest, Playwright e evidências de RNFs — [`.gitlab-ci.yml`](../.gitlab-ci.yml), [`app/tests`](../src/backend/app/tests/conftest.py), [`frontend/TESTES.md`](../src/frontend/TESTES.md) | Manter GitLab com destino Azure; Azure Repos/Pipelines como alternativa | **Direto** para testes; **Adaptado** para pipeline | **Médio** | Reaproveitar cenários, massa sintética, critérios e formatos de evidência. [Azure Pipelines](https://learn.microsoft.com/en-us/azure/devops/pipelines/get-started/what-is-azure-pipelines?view=azure-devops) é uma opção, não requisito de migração. YAML, conexões e gates precisam de tradução; !120/!124/!130 permanecem mudanças propostas. Repetir RNFs após trocar provedor, fonte, canal ou infraestrutura. |
+| GitLab CI, pytest, Vitest, Playwright e evidências de RNFs — [`.gitlab-ci.yml`](../.gitlab-ci.yml), [`app/tests`](../src/backend/app/tests/conftest.py), [`frontend/TESTES.md`](../src/frontend/TESTES.md) | Manter GitLab com destino Azure; Azure Repos/Pipelines como alternativa | **Direto** para testes; **Adaptado** para pipeline | **Médio** | Reaproveitar cenários, massa sintética, critérios e formatos de evidência. [Azure Pipelines](https://learn.microsoft.com/en-us/azure/devops/pipelines/get-started/what-is-azure-pipelines?view=azure-devops) é uma opção, não requisito de migração. YAML, conexões e gates precisam de tradução; !120/!124/!130 foram integrados no pull; preservar resultados reprovados dos RNFs e conferir execução da pipeline no HEAD atual. Repetir RNFs após trocar provedor, fonte, canal ou infraestrutura. |
 | Notebooks, datasets sintéticos, catálogo, benchmarks e artefatos do PLN — [`src/notebooks`](../src/notebooks/treinar_classificador_intencoes_v2.py) | Mesmo processo Python; Azure Machine Learning para governança de experimentos/modelos | **Direto** | **Médio** | Preservar treino, divisão de avaliação, métricas, versões e revisão do encoder. Datasets sintéticos são material de teste, não o portfólio produtivo. O notebook opcional do Compose e a landing page `src/lp` não são serviços necessários ao fluxo de atendimento. |
 
 ### 6.4.7 Teams, dependência S5-19 e sequência de homologação
@@ -7490,7 +7605,7 @@ sudo /usr/local/bin/m7-compose stop
 
 Não se deve usar `docker compose down -v` enquanto os volumes de RabbitMQ ou artefatos ainda forem necessários. Mesmo com a EC2 parada, EBS, ECR e CloudWatch continuam armazenados e podem gerar custo. As principais limitações permanecem sendo as credenciais temporárias do Learner Lab, o SSH dependente do IP do operador, a URL temporária do Cloudflare e a ausência de autenticação adequada para divulgação pública.
 
-Os procedimentos detalhados de diagnóstico, atualização, rollback e encerramento, assim como o histórico das decisões de implantação, estão consolidados nesta seção e nas stories de [infraestrutura AWS](stories/phase-4-aws-mvp.md), [substituição da EC2](stories/phase-4-ec2-ssh-replacement-preparation.md) e [workers/atualização](stories/phase-4-alert-workers-local-update.md).
+Os procedimentos detalhados de diagnóstico, atualização, rollback e encerramento, assim como o histórico das decisões de implantação, estão consolidados nesta seção e nas stories de [infraestrutura AWS](Projeto.md), [substituição da EC2](Projeto.md) e [workers/atualização](Projeto.md).
 
 # 11. Análise de Viabilidade Financeira
 
@@ -7841,6 +7956,155 @@ Os indicadores de uso e de qualidade dos dados vêm de tabelas que o backend já
 
 Os quatro indicadores de qualidade com meta definida já têm linha de base medida na Seção 9.2. Quando um deles cair abaixo da meta por duas medições seguidas, a expansão para a fase seguinte do onboarding é suspensa até a causa ser tratada — regra que impede que a adoção avance sobre uma confiança que o próprio agente esteja corroendo.
 
+
+# 14. Consolidação documental e auditoria do repositório
+
+## 14.1 Auditoria dos critérios do Escritório de Projetos
+
+
+Grupo G05 / Oneshot, T17-M7. Data editorial 07/10/2026.
+
+A avaliação recebida indicava **81%** e situação Conforme. Esta auditoria
+reproduz seus 37 critérios, registra correções verificáveis e explicita as
+pendências. Todos os critérios estão rastreados, mas isso não comprova que
+todos estejam conformes. O percentual oficial depende da reavaliação do
+Escritório. Não há alteração de nota em sistema externo.
+Link público inacessível, ausência de segredo e limpeza remota exigem limites
+explícitos; não são resolvidos simplesmente mudando uma célula para Conforme.
+
+### Checklist e evidências
+
+| # | Critério da avaliação | Correção / evidência verificável | Situação local |
+|---|---|---|---|
+| 1 | Nome do projeto presente | README, título inicial. | Conforme |
+| 2 | Nome do grupo presente | README, Oneshot. | Conforme |
+| 3 | Integrantes descritos | README, seis nomes. | Conforme |
+| 4 | Links dos integrantes corretos | README, perfis LinkedIn identificados; rede externa pode exigir login. | Estrutura conforme; disponibilidade externa condicionada |
+| 5 | Descrição curta | README, descrição do problema e propósito. | Conforme |
+| 6 | Estrutura de pastas conforme modelo | README mapeia docs/src e frontend/backend/database; lp/notebooks são complementares explicados. | Conforme quanto à organização; interpretação do modelo sujeita ao EP |
+| 7 | Instalação clara com versões | README e Seção 14.2: Python3.12/3.13, Node24, locks/requirements e comandos. | Conforme |
+| 8 | Histórico de lançamentos | README, versões0.1.0–0.5.0 com datas. | Conforme documental; 0.5.0 é fechamento editorial |
+| 9 | Histórico adequado | README cronológico; não confunde data editorial com tag remota. | Conforme |
+| 10 | Licença | README, CC BY4.0. | Conforme |
+| 11 | Inteli na licença | Atribuição e link institucional. | Conforme |
+| 12 | Grupo/integrantes na licença | Oneshot e seis integrantes. | Conforme |
+| 13 | Links na licença | Links de integrantes/instituição. | Estrutura conforme; acesso externo condicionado |
+| 14 | Referências além do modelo | Bibliografia formal README e fontes primárias em Arquitetura. | Conforme |
+| 15 | Instruções genéricas/template removidos | [Guia de padrões](GuiaPadroesDesenvolvimento.md) restaurado ao conteúdo anterior de develop por solicitação do grupo. Contém marcadores de template e exemplos de stack distintos do runtime atual. | Pendente de atualização específica do guia; padrões não duplicados em Projeto.md |
+| 16 | README coerente com repositório | Estrutura atual e links; modos/limites no manual/Arquitetura. | Conforme |
+| 17 | Seção de requisitos | Prioridades MVP no README; requisitos completos Projeto. | Conforme |
+| 18 | Instruções de execução/instalação | Dois terminais e configuração; Seção 14.2 atualizada para Auth/banco. O smoke do HEAD atual encontra Header não definido; ver conciliação abaixo. | Instruções presentes; execução backend bloqueada no HEAD atual |
+| 19 | Repositório não expõe dados sensíveis | Exemplos sem secrets; varredura atual registra candidatos sem imprimir valores. | Conforme dentro do escopo da varredura; não é certificação universal |
+| 20 | Ausência verificada nos artefatos | Varredura de arquivos públicos versionados e alterados; binários/histórico têm limite declarado. | Verificação realizada; limitações documentadas |
+| 21 | Pasta código-fonte | src. | Conforme |
+| 22 | Código organizado | agent/backend/database/frontend e complementares. | Conforme |
+| 23 | Pasta frontend | src/frontend. | Conforme |
+| 24 | Pasta lógica/codificação | src/backend. | Conforme |
+| 25 | Database com README | [README raiz do banco](../src/database/README.md), modelo/migração/rollback. Corrige a observação que citava src/backend/database. | Conforme |
+| 26 | Configuração de ambiente produtivo | compose.prod.yml, infra/aws, Projeto10.2, Arquitetura e manual. | Conforme documental; homologação externa discriminada |
+| 27 | Docs na raiz | docs/. | Conforme |
+| 28 | Documentação acessível/localizável | README e Index com links relativos resolvíveis. | Conforme localmente |
+| 29 | Docs .md | Documentos principais e evidências Markdown. | Conforme |
+| 30 | Links funcionam sem restrição | Caminhos locais validados; localhost escrito como instrução, exige servidores; GitLab/LinkedIn exigem direitos externos. | Conforme em links locais; acesso irrestrito externo não demonstrado |
+| 31 | Formatação mínima | Títulos, listas e tabelas; validação editorial. | Conforme |
+| 32 | Seções principais preenchidas | GestãoProjeto/Configuração, Guia e Projeto, mais fechamento S5. | Conforme |
+| 33 | Temporários/irrelevantes removidos | Arquivos intermediários da pesquisa ficaram fora da entrega; nenhum snapshot bruto ou .env é parte do pacote. Complementares úteis explicados. | Conforme no pacote local |
+| 34 | Versão PDF da documentação, se exigida | A entrega solicitada é em Markdown, consolidada em Projeto.md e GestaoProjeto.md. Não há exigência de PDF confirmada no escopo autorizado. | Não aplicável ao formato solicitado; confirmar aplicabilidade na reavaliação do EP |
+| 35 | Repositórios auxiliares/complementares linkados | Arquitetura identifica único repo próprio e fontes de integrações; não inventa outro repo. | Conforme documental |
+| 36 | Arquitetura detalhada | Componentes, fluxo, controles, persistência, ambientes, dependências e limites em Seção 5.4 deste documento. | Conforme |
+| 37 | Estrutura formal de testes | backend/app/tests, frontend/tests/e2e, docs/testes e evidências RNF. | Conforme |
+
+Cobertura de auditoria: **37/37 critérios rastreados**, cada qual com evidência,
+correção, pendência ou justificativa. Não se atribui percentual de conformidade
+a esse número. O item de PDF é condicional; os condicionamentos de acesso
+externo e aceite do modelo permanecem visíveis.
+
+### Destino das divergências de Configuração 7.4 (S4)
+
+| Divergência histórica | Destino no fechamento |
+|---|---|
+| Variáveis alheias à aplicação no exemplo raiz | Pendência documentada; exemplos e configuração de runtime foram preservados nesta consolidação. |
+| Nove referências para arquivos removidos | Redirecionadas ao conteúdo técnico/evidências vigentes; links relativos validados. |
+| Pipeline não obrigatório | Snapshot GitLab mostra only_allow_merge_if_pipeline_succeeds=true. |
+| Título de MR sem gate | Job validar-titulo-mr e dois scripts presentes; !118 integrado. |
+| Gate integração/marcadores ausente | !120 integrado: job conflict-markers no estágio validate, título de MR no mesmo job, backend com seleção integration/strict-markers e frontend com typecheck/cobertura. Resultado remoto do HEAD atual não reconsultado; evidência versionada registra limitação de jobs do GitLab. |
+| Temporárias pós-merge e nomes fora da regra | Inventário realizado; não houve exclusão. A limpeza de branches está fora desta entrega documental. |
+| Coerência develop/hmg/main | Ancestralidade/conteúdo devem ser verificados na promoção final. Esta entrega não promove release nem inventa identidade das branches. |
+| Cobertura do job backend | CI atual usa pytest app/tests -m integration --strict-markers. Coleta local de síntese/tracing falhou por Header não definido em main.py; integração do YAML não implica backend ou pipeline aprovados. |
+
+### Aceite e resultado
+
+As correções locais resolvem os itens documentais parciais/não conformes:
+referências, README de banco, descrição das integrações, arquitetura e instruções atuais.
+**Não se declara 100% oficial ou acesso externo irrestrito sem evidência.** Os
+critérios condicionados acima ficam prontos para inspeção do EP, com limites
+explícitos. Não há novas issues; os destinos pertencem a #302–#307 e tasks S5
+existentes. O registro de validação nesta seção e
+[fechamento](GestaoProjeto.md) permitem revisão do pacote.
+
+
+### Conciliação com develop após pull — 06/10/2026
+
+Base atual: `1ff5927a75b79219314068291b1aa43de3fe9674`, sem conflitos na reaplicação desta documentação.
+Foram preservadas as novas seções 6.4 (tabela Microsoft) e 8.9.4 (TTS),
+os relatórios, evidências, READMEs e alterações de aplicação vindos de develop.
+As alterações locais desta entrega continuam restritas à documentação e ao gráfico.
+
+| Frente integrada | Evidência atual | Conclusão e limite |
+|---|---|---|
+| Tabela Microsoft #298 / !131 | Seção 6.4, d894b193/1e1465af | Mapeamento integrado; não é homologação de tenant. |
+| Auditoria #279 / !117 | tracing.py, SQL19, 3b95d985/9255e2f8 | Correção integrada; migração por ambiente não comprovada. |
+| Gate #255 / !120 | .gitlab-ci.yml, scripts/tests, 761c7769/5b3c57a0 | Implementado; execução remota atual não reconsultada. |
+| Testes unitários #276 / !124 | [Relatório S5-22](testes/sprint5/relatorio-s5-22.md), cb99aad7/b1859266 | Relatório da entrega registra 112 testes/18 arquivos; suíte atual também recebe o teste TTS. |
+| RNFs #285 / !130 | [Consolidação S5-31](testes/sprint5/consolidacao-s5-31.md), d38a8b20/e50742ea | Três casos aprovados/três reprovados. RNF07: 6/20 (30%); RNF08-P reprovado pelo critério Copilot; RNF08-N e RNF09-P/N aprovados no escopo local. |
+| Voz de saída #269 / !123 | Seção 8.9.4, synthesis.py, 919ef0f1/1ff5927a | TTS Azure opcional integrado; falhas preservam texto. Não comprova execução publicada com provedor real. |
+
+**Bloqueio encontrado no HEAD atual.** A execução local de testes de síntese,
+tracing, persistência e fontes (`PYTHON_DOTENV_DISABLED=1`) parou na coleta de
+síntese e tracing: `NameError: name 'Header' is not defined` em
+`src/backend/app/main.py:390`. A função usa `Header(default=None)` sem importá-lo.
+Assim, não se declara runtime backend aprovado ou entrega 100% conforme.
+Uma segunda seleção (persistência e fontes) confirmou o mesmo bloqueio no
+setup: 22 erros e 12 skips, estes por ausência de banco no modo isolado.
+Os sete testes locais do gate de marcadores passaram.
+O código não foi alterado nesta conciliação documental. Corrigir esse import
+e repetir coleta/smoke é necessário antes de declarar a aplicação executável.
+
+**Frontend no HEAD atualizado.** Lint, `npm run typecheck` e build passaram.
+Vitest com `--pool=forks --maxWorkers=1 --testTimeout=20000` concluiu com
+**133 testes aprovados e nove falhas em 22 arquivos** (18 arquivos aprovados,
+quatro reprovados). As falhas estão em AppShell (um teste), notificações (seis),
+UserCard (um) e sugestão proativa (um). No AppShell, o teste novo de áudio tenta
+encontrar o campo de mensagem antes de autenticar; no UserCard, falta o provider
+de sessão. Os demais resultados precisam ser conciliados com os componentes
+atuais; falha de teste não prova isoladamente falha da aplicação publicada.
+A tentativa com threads foi interrompida após ausência prolongada de progresso;
+teste/build inicialmente também encontraram restrição de leitura do sandbox,
+superada na execução autorizada. Não foram modificados testes para obter aprovação.
+O resultado antigo de 112 testes do relatório S5-22 descreve sua própria base,
+não a aprovação dos 142 testes alcançados pelo HEAD integrado atual.
+
+**Veredito desta conciliação:** validação editorial aprovada; qualidade do
+runtime com bloqueios, sem aceite de 100% de conformidade. O relatório RNF
+reprovado e as falhas atuais permanecem rastreados. Esta revisão foi executada
+pelo mesmo agente, sem se apresentar como aprovação independente de colega.
+
+Os estados de aprovação, comentários de revisão e fechamento de issues da
+consulta GitLab anterior não foram atualizados pela API: a revisão automática
+bloqueou o uso de token do .env pelo script. O pull comprova integração por Git,
+sem inferir essas ações administrativas. Não houve push, nova issue ou exclusão
+de branch. A data 07/10 continua editorial; não inventa trabalho futuro.
+
+## 14.2 Instalação e identidade na versão S5
+
+O fluxo autenticado exige banco, Supabase Auth e regras de perfil. Fallbacks
+JSON/memória são modos de teste/desenvolvimento; não provam acesso real.
+Aplicar SQL20 após suas dependências e conferir o seed administrativo com
+`src/backend/scripts/seed_mvp_access.py --dry-run` antes de aplicação autorizada.
+SQL21 é o rollback. URL, chave administrativa e senhas ficam no ambiente local,
+nunca no navegador ou no Git. O seed valida o projeto-alvo Oneshot.
+O compose atual não repassa as variáveis públicas de Auth: essa pendência de
+implantação deve ser conferida pelo responsável antes da publicação.
 
 # Referências
 

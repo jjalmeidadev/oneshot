@@ -41,6 +41,9 @@ Este arquivo indexa todos os documentos Markdown versionados no repositório. Os
 ### Evidências da Sprint 5
 
 - [Webhooks e integração RabbitMQ](evidencias/sprint-05/webhooks-rabbitmq.md)
+- [Contrato de alteração pelo chat](evidencias/sprint-05/s5-05-contrato-alteracao-chat.md)
+- [Proteção de dados sensíveis](evidencias/sprint-05/s5-27-dado-sensivel.md)
+- [VHS com Azure e Supabase reais](evidencias/sprint-05/vhs-azure-real/README.md)
 
 ### Planejamento e relatórios de testes
 
@@ -101,6 +104,7 @@ Este arquivo indexa todos os documentos Markdown versionados no repositório. Os
 ### Banco de dados
 
 - [Documentação do banco](../src/database/docs/README.md)
+- [README raiz do banco](../src/database/README.md)
 - [Evidências locais do banco](../src/database/docs/evidencias/README.md)
 - [Verificação do esquema físico](../src/database/docs/s4-08-schema-verification.md)
 - [Carga sintética idempotente](../src/database/docs/s4-09-idempotent-seed.md)
@@ -119,6 +123,11 @@ Este arquivo indexa todos os documentos Markdown versionados no repositório. Os
 - [Modelo RAG da landing page](../src/lp/src/rag/model/README.md)
 
 #### Documentos usados pela base RAG da landing page
+
+Estas cópias foram incorporadas à demonstração exploratória em `337358b8`
+(11/09). Preservam o conteúdo daquele artefato e não são a documentação
+canônica atual da aplicação. Instalação, padrões e estado presente são os
+documentos em `docs/` indexados acima; a base da demonstração contém histórico.
 
 - [Gestão de configuração](../src/lp/src/rag/documentsRAG/GestaoConfiguracao.md)
 - [Gestão do projeto](../src/lp/src/rag/documentsRAG/GestaoProjeto.md)

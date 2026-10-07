@@ -27,6 +27,11 @@ O agente busca reduzir o esforço necessário para localizar e interpretar infor
 
 O repositório do projeto segue a seguinte organização:
 
+As pastas padrão de entrega são `docs` (documentação) e `src` (código), com
+`src/frontend`, `src/backend` e `src/database`. `src/lp` e `src/notebooks`
+preservam artefatos complementares de prototipação e PLN. O banco tem
+[README próprio](src/database/README.md); não existe `src/backend/database`.
+
 ```text
 📦 g05
  ┣ 📂 .githooks                       hooks de validação de commits e pushes
@@ -95,6 +100,10 @@ npm run dev
 
 Abra `http://localhost:5173` e confirme a API em `http://127.0.0.1:8000/health`. Para configuração de banco, execução em contêineres e solução de problemas, consulte o [Manual de instalação](docs/Manual-instalacao.md).
 
+Esses endereços são locais: funcionam depois de iniciar os dois servidores e
+não representam links públicos de entrega. Para o fluxo autenticado completo,
+configure Supabase Auth, banco e regras de acesso conforme o manual.
+
 ---
 
 ## 📚 Documentação
@@ -102,6 +111,12 @@ Abra `http://localhost:5173` e confirme a API em `http://127.0.0.1:8000/health`.
 A documentação do projeto está organizada de acordo com as diferentes dimensões necessárias para registrar a gestão, o processo de desenvolvimento e a construção do produto.
 
 - [`Index.md`](docs/Index.md) — índice completo dos documentos Markdown versionados no repositório.
+
+- [Fechamento das cinco sprints](docs/GestaoProjeto.md) — retrospectiva,
+  métricas, riscos, papéis, contrato e post mortem.
+- [Auditoria do Escritório de Projetos](docs/Projeto.md) —
+  critério, correção e evidência para reavaliação.
+- [Arquitetura detalhada e integrações](docs/Projeto.md).
 
 ### Gestão do Projeto
 
@@ -162,5 +177,19 @@ Funcionalidades adicionais poderão ser incorporadas progressivamente conforme a
     * Gestão de Projetos Evolutiva e Apresentação Final
 
 ## 📋 Licença
+
+## Referências bibliográficas e técnicas
+
+- FASTAPI. *Documentação oficial*. Disponível em: [FastAPI](https://fastapi.tiangolo.com/).
+- SUPABASE. *Auth*. Disponível em: [documentação de autenticação](https://supabase.com/docs/guides/auth).
+- RABBITMQ. *RabbitMQ Documentation*. Disponível em: [documentação oficial](https://www.rabbitmq.com/docs).
+- MICROSOFT. *Azure Speech documentation*. Disponível em: [Microsoft Learn](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/).
+
+Fontes consultadas na auditoria de fechamento. O uso de cada serviço e seus
+limites estão na [arquitetura](docs/Projeto.md); manifests/locks fixam as
+versões da aplicação. Não foi identificado repositório próprio auxiliar além
+deste GitLab; as dependências externas são identificadas por essas referências.
+
+## Atribuição e licença
 
 <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="#">Oneshot</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://www.inteli.edu.br/">Inteli</a>, <a href="https://www.linkedin.com/in/ntsfelipe/">Felipe Neves</a>, <a href="https://www.linkedin.com/in/henrique-rodrigues-diniz-b7b011319/">Henrique Diniz</a>,  <a href="https://www.linkedin.com/in/jaimeandradedealmeida/">Jaime Almeida</a>, <a href="https://www.linkedin.com/in/leonardoramosvieira">Leonardo Ramos</a>, <a href="https://www.linkedin.com/in/pedro-uchoaa/">Pedro Uchoa</a>, <a href="https://www.linkedin.com/in/wendel-feitosa-975bb1346/">Wendel Feitosa</a> is licensed under <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">Attribution 4.0 International</a>.</p><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1">

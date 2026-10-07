@@ -43,21 +43,31 @@ describe('AppShell, barra lateral, sessão e tema', () => {
     vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL: vi.fn() });
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(
-        new Response(
-          JSON.stringify({
-            ...response,
-            speech: {
-              status: 'available',
-              media_type: 'audio/mpeg',
-              data_base64: btoa('ID3audio'),
-              warning: null,
-            },
-          }),
-        ),
-      ),
+      vi.fn().mockImplementation((url: string) => {
+        if (
+          url.includes('/access/login') ||
+          url.includes('/notifications') ||
+          url.includes('/alert-subscriptions')
+        ) {
+          return Promise.resolve(successfulResponse(url));
+        }
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              ...response,
+              speech: {
+                status: 'available',
+                media_type: 'audio/mpeg',
+                data_base64: btoa('ID3audio'),
+                warning: null,
+              },
+            }),
+          ),
+        );
+      }),
     );
     const view = render(<App />);
+    await authenticate();
     fireEvent.change(screen.getByRole('textbox', { name: 'Mensagem para o agente' }), {
       target: { value: 'prazo' },
     });

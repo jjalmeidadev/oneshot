@@ -6,7 +6,7 @@ from typing import Annotated
 from uuid import uuid4
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.requests import Request
@@ -273,8 +273,10 @@ def get_vhs_metrics(
 def create_chat_response(
     request: GeminiChatRequest,
     access: ReadAccess,
+    authorization: str | None = Header(default=None),
 ) -> GeminiChatResponse:
     try:
+        authorize_message_scope(access, request.message)
         identity = (
             resolve_identity(authorization)
             if authorization or request.proactivity_enabled

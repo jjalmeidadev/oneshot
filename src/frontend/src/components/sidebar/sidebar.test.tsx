@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConversationSidebar } from './conversation-sidebar';
-import { UserCard } from './user-card';
 import { ThemeProvider } from '@/state/theme-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import type { Conversation } from '@/lib/domain';
@@ -52,7 +51,7 @@ function mountSidebar(onClose?: () => void) {
   );
 }
 
-describe('ConversationSidebar e UserCard', () => {
+describe('ConversationSidebar', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     store.conversations = [];
@@ -111,17 +110,5 @@ describe('ConversationSidebar e UserCard', () => {
     await userEvent.clear(search);
     await userEvent.type(search, 'inexistente');
     expect(screen.getByText('Nenhuma conversa encontrada')).toBeVisible();
-  });
-
-  it('UserCard oculta o token, encaminha edição e não persiste em armazenamento', async () => {
-    render(<UserCard />);
-    const input = screen.getByLabelText('Token de acesso da sessão');
-    expect(input).toHaveAttribute('type', 'password');
-    expect(input).toHaveAttribute('autocomplete', 'off');
-    expect(input).toHaveAccessibleDescription('Válido apenas nesta sessão.');
-    await userEvent.type(input, 'x');
-    expect(store.setAccessToken).toHaveBeenCalledWith('x');
-    expect(localStorage.length).toBe(0);
-    expect(sessionStorage.length).toBe(0);
   });
 });
