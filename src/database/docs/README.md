@@ -125,6 +125,25 @@ A autenticação, a carga idempotente das identidades sintéticas e o controle p
 perfil e escopo estão consolidados na
 [Seção 4.3.1 do Projeto](../../../docs/Projeto.md#431-autenticação-e-controle-de-acesso-do-mvp).
 
+## Alteracao de dados pelo chat da S5-06
+
+A previa de cada alteracao fica em `pending_data_changes`, criada por
+`22_data_change_previews.sql` e removida por `23_rollback_data_change_previews.sql`.
+A migracao e idempotente e depende de `01` e `20`. O rollback preserva as linhas
+de `change_records` com `metadata->>'origin' = 'chat'`, que fazem parte da
+trilha de auditoria.
+
+```bash
+psql "$DATABASE_URL" -f src/database/sql/22_data_change_previews.sql
+psql "$DATABASE_URL" -f src/database/sql/13_seed_portfolio_report_data.sql
+```
+
+A carga `13` agora inclui cinco atividades sinteticas do `PRJ-0442` em
+`schedule_items`, usadas pelos campos `cronograma.*`. Reaplicar a `13` apaga as
+mudancas registradas dos tres projetos, inclusive as feitas pelo chat. O
+contrato completo esta na
+[Secao 8.5.13 do Projeto](../../../docs/Projeto.md#8513-contrato-de-alteração-de-dados-pelo-chat-s5-05).
+
 ## Verificacao S4-08 e S4-09 no Supabase
 
 No PowerShell, com `DATABASE_URL` ou `SUPABASE_DATABASE_URL` definido apenas

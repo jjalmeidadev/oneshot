@@ -1,6 +1,7 @@
 """Entrada comum de texto e transcricao para classificacao, resposta e tracing."""
 
 import logging
+from datetime import datetime
 from threading import Lock
 from time import perf_counter
 
@@ -28,6 +29,11 @@ from app.nlp.schemas import (
     PublicEntity,
 )
 from app.security.access import AccessContext
+from app.data_changes import errors as data_change_errors
+from app.data_changes.errors import DataChangeError
+from app.data_changes.extractor import extract_change
+from app.data_changes.schemas import DATA_CHANGE_MODEL, DataChangeOutcome
+from app.data_changes.service import LOCAL_TIMEZONE, get_data_change_service
 
 _classifier_lock = Lock()
 logger = logging.getLogger(__name__)
@@ -37,6 +43,15 @@ SENSITIVE_BLOCK_MODEL = "bloqueio-dado-sensivel"
 #: Registrado como falha controlada: `processing_status` nao tem `bloqueado`,
 #: e o evento `sensitive_content_blocked` traz o detalhe (decisao da S5-27).
 SENSITIVE_BLOCK_ERROR = "Dado sensivel bloqueado antes do provedor."
+#: Intencoes de atualizacao do catalogo. Sem pedido reconhecivel pelo
+#: extrator, a resposta orienta com exemplos em vez de ir ao RAG (S5-05).
+DATA_CHANGE_INTENTS = frozenset({"transacao_atualizar_cronograma", "transacao_atualizar_status"})
+DATA_CHANGE_GUIDANCE = (
+    "Posso alterar dados do projeto por aqui, com confirmação antes de gravar. "
+    "Diga o projeto, o campo e o novo valor, por exemplo: "
+    "“Prorroga o prazo do PRJ-0442 para 31/03/2027” ou "
+    "“Muda o status do risco Interferência com a operação comercial do PRJ-0442 para em tratamento”."
+)
 
 
 def warmup_classifier() -> None:
@@ -71,6 +86,20 @@ def process_message(
     )
     if blocked is not None:
         return blocked
+
+    # Alteracao de dados (S5-06): reconhecida por regras, antes do
+    # classificador, e sem nenhuma chamada ao provedor de linguagem.
+    data_change = _handle_data_change(
+        request,
+        access_context=access_context,
+        route_started_at=route_started_at,
+        channel=channel,
+        external_conversation_id=external_conversation_id,
+        requester_id=requester_id,
+        user_id=user_id,
+    )
+    if data_change is not None:
+        return data_change
 
     intent = None
     fallback_to_rag = False
@@ -142,6 +171,37 @@ def process_message(
                 entities=entities,
                 nlp_ms=nlp_ms,
                 route_started_at=route_started_at,
+            )
+            _trace_safely(
+                request=request,
+                response=response,
+                intent=intent,
+                entities=entities,
+                processing_ms=response.pipeline_metrics.route_ms,
+                channel=channel,
+                external_conversation_id=external_conversation_id,
+                requester_id=requester_id,
+                user_id=user_id,
+            )
+            return response
+
+        if not fallback_to_rag and result.intencao in DATA_CHANGE_INTENTS:
+            response = GeminiChatResponse(
+                text=DATA_CHANGE_GUIDANCE,
+                model=DATA_CHANGE_MODEL,
+                latency_ms=0,
+                usage=GeminiUsage(),
+                intent=intent,
+                entities=entities,
+                data_change=DataChangeOutcome(
+                    status="needs_input",
+                    missing="field",
+                    question=DATA_CHANGE_GUIDANCE,
+                ),
+                pipeline_metrics=ChatPipelineMetrics(
+                    nlp_ms=nlp_ms,
+                    route_ms=_elapsed_ms(route_started_at),
+                ),
             )
             _trace_safely(
                 request=request,
@@ -416,6 +476,68 @@ def _block_sensitive_message(
         requester_id=requester_id,
         user_id=user_id,
     )
+    return response
+
+
+def _handle_data_change(
+    request: GeminiChatRequest,
+    *,
+    access_context: AccessContext | None,
+    route_started_at: float,
+    channel: str,
+    external_conversation_id: str | None,
+    requester_id: str | None,
+    user_id: str | None,
+) -> GeminiChatResponse | None:
+    """Prepara a previa, a pergunta ou a recusa de um pedido de alteracao."""
+
+    service = get_data_change_service()
+    today = service.today() if service else datetime.now(LOCAL_TIMEZONE).date()
+    extracted = extract_change(request.message, today)
+    if extracted is None:
+        return None
+
+    correlation_id = None
+    if service is None or access_context is None:
+        unavailable = data_change_errors.unavailable()
+        outcome = DataChangeOutcome(status="rejected", code=unavailable.code, message=unavailable.message)
+        text = unavailable.message
+    else:
+        try:
+            handled = service.handle_message(
+                extracted,
+                access_context,
+                conversation_id=external_conversation_id or request.conversation_id,
+            )
+            outcome, correlation_id, text = handled.outcome, handled.correlation_id, handled.text
+        except DataChangeError as error:
+            outcome = DataChangeOutcome(status="rejected", code=error.code, message=error.message)
+            text = error.message
+
+    response = GeminiChatResponse(
+        text=text,
+        model=DATA_CHANGE_MODEL,
+        latency_ms=0,
+        usage=GeminiUsage(),
+        data_change=outcome,
+        pipeline_metrics=ChatPipelineMetrics(
+            nlp_ms=0,
+            route_ms=_elapsed_ms(route_started_at),
+        ),
+    )
+    _trace_safely(
+        request=request,
+        response=response,
+        intent=None,
+        entities=[],
+        processing_ms=response.pipeline_metrics.route_ms,
+        channel=channel,
+        external_conversation_id=external_conversation_id,
+        requester_id=requester_id,
+        user_id=user_id,
+    )
+    if service is not None and correlation_id and response.trace_id:
+        service.attach_interaction(correlation_id, response.trace_id)
     return response
 
 

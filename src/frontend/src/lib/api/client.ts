@@ -16,11 +16,28 @@ import { notifyUnauthorized } from './session-events';
 
 export const API_BASE_URL = '/api';
 
+/**
+ * Tempo maximo de espera de cada chamada a API. O padrao de 120 s cobre a
+ * resposta mais lenta prevista (comparacao com RAG e LLM). `VITE_API_TIMEOUT_MS`
+ * so existe para os testes E2E simularem o *timeout* sem esperar dois minutos.
+ */
+export const REQUEST_TIMEOUT_MS =
+  Number(import.meta.env.VITE_API_TIMEOUT_MS) > 0
+    ? Number(import.meta.env.VITE_API_TIMEOUT_MS)
+    : 120_000;
+
 export class ApiError extends Error {
   readonly status: number;
   /** Presente apenas nas respostas que usam o envelope da rota de audio. */
   readonly code: string | null;
   readonly detail: Record<string, unknown> | null;
+  /**
+   * Mensagem do envelope `{ error: { message } }`, quando o backend a envia.
+   * As rotas de alteracao de dados devolvem texto pronto para a pessoa (por
+   * exemplo, "O valor mudou depois da previa"); as demais rotas seguem usando
+   * a mensagem generica por status.
+   */
+  readonly serverMessage: string | null;
 
   constructor(
     message: string,
@@ -28,6 +45,7 @@ export class ApiError extends Error {
       status: number;
       code?: string | null;
       detail?: Record<string, unknown> | null;
+      serverMessage?: string | null;
     },
   ) {
     super(message);
@@ -35,6 +53,7 @@ export class ApiError extends Error {
     this.status = options.status;
     this.code = options.code ?? null;
     this.detail = options.detail ?? null;
+    this.serverMessage = options.serverMessage ?? null;
   }
 
   /** O usuario pode tentar de novo sem mudar nada na solicitacao. */
@@ -67,9 +86,14 @@ export async function parseError(response: Response): Promise<ApiError> {
     504: 'O processamento demorou mais que o esperado. Tente novamente.',
   };
   const code = body && 'error' in body && body.error ? body.error.code : null;
+  const serverMessage =
+    body && 'error' in body && body.error && typeof body.error.message === 'string'
+      ? body.error.message
+      : null;
   return new ApiError(messages[response.status] ?? FALLBACK_MESSAGE, {
     status: response.status,
     code,
+    serverMessage,
   });
 }
 
@@ -79,7 +103,7 @@ export async function requestJson<T>(
 ): Promise<T> {
   const signal = AbortSignal.any([
     ...(init.signal ? [init.signal] : []),
-    AbortSignal.timeout(120_000),
+    AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   ]);
   const response = await fetch(`${API_BASE_URL}${path}`, { ...init, signal });
 

@@ -1,5 +1,19 @@
 # Evidências de testes — integração #131
 
+## S5-23 — E2E integrado e falhas de comunicação (07/10/2026)
+
+A suíte Playwright passa com **60 testes em 4 specs** (20 cenários × desktop,
+tablet e celular). `e2e/integracao-falhas.spec.ts` acrescenta o alerta contra o
+workflow real do backend e as falhas de comunicação: 503, 502 e 500 do backend,
+504 de gateway, _timeout_ do cliente e perda de conexão. Em cada falha, a spec
+confere a mensagem controlada, a ausência de detalhe interno e a recuperação no
+envio seguinte.
+
+O E2E encurta o _timeout_ do cliente para 10 s com `VITE_API_TIMEOUT_MS`; fora
+dele, o padrão continua 120 s. O job `frontend-e2e` publica o relatório HTML
+como artefato exposto no MR e o JUnit em `test-results/e2e/junit.xml`. Detalhes
+no [relatório S5-23](../../docs/testes/sprint5/relatorio-s5-23.md).
+
 ## S5-22 — testes por componente (05/10/2026)
 
 A suíte atual passa com **112 testes em 18 arquivos**, incluindo 48 novos casos
@@ -87,6 +101,10 @@ validam a conclusão acessível do workflow e o resumo de notificações. A suí
 TypeScript também verifica os contratos discriminados de relatório e alerta.
 O fluxo de mensageria AMQP deve ser validado separadamente com Docker Engine e
 RabbitMQ ativos, porque os testes de componente não inicializam infraestrutura.
+
+## Evidência da alteração de dados pelo chat (S5-07)
+
+`data-change-card.test.tsx` cobre os quatro estados exigidos pela issue #261 (prévia, confirmação, cancelamento e erro) e também o erro transitório com nova tentativa, o desfazer dentro e fora da janela, a prévia expirada, os avisos, o histórico do campo, a recusa sem ações e as perguntas com candidatos e com valor inválido. `data-change-flow.test.tsx` atravessa a aplicação real (store, lista e cartão) e confirma que, depois de gravar, trocar de conversa e voltar não oferece confirmar de novo. `e2e/alteracao-dados.spec.ts` repete o fluxo no Chromium em desktop, tablet e celular, com auditoria axe do cartão nos temas claro e escuro e verificação de rolagem horizontal. O servidor E2E não tem as rotas da S5-06, então a resposta do chat e as rotas do cartão são simuladas com `page.route`; a permissão de escrita é coberta pelos testes do backend da S5-06. Evidência e capturas em `docs/evidencias/sprint-05/s5-07-interface-alteracao.md`.
 
 ## Limites da evidência
 

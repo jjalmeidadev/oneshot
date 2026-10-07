@@ -503,7 +503,7 @@ nem o processamento.
 por `validationToken` e recebe lotes JSON autenticados por `clientState`.
 Configure `SHAREPOINT_WEBHOOK_CLIENT_STATE` e mantenha
 `SHAREPOINT_WEBHOOK_REPOSITORY_MODE=database` fora dos testes. A migration
-`22_sharepoint_webhook_events.sql` deve estar aplicada antes de iniciar a API.
+`24_sharepoint_webhook_events.sql` deve estar aplicada antes de iniciar a API.
 
 Eventos válidos recebem `202` e entram na inbox com estado `pending`. A mesma
 requisição não duplica o registro; reutilizar o `eventId` com outro conteúdo

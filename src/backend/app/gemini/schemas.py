@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from app.nlp.schemas import AudioIntent, ChatPipelineMetrics, PublicEntity
 from app.reports.schemas import WorkflowDirective
 from app.alerts.schemas import AlertDirective
+from app.data_changes.schemas import DataChangeOutcome
 
 
 class GeminiChatRequest(BaseModel):
@@ -107,6 +108,8 @@ class GeminiChatResponse(BaseModel):
     pipeline_metrics: ChatPipelineMetrics = Field(default_factory=ChatPipelineMetrics)
     proactive_suggestion: ProactiveSuggestion | None = None
     workflow: WorkflowDirective | AlertDirective | None = None
+    # Alteracao de dados pelo chat (S5-06): previa, pergunta ou recusa.
+    data_change: DataChangeOutcome | None = None
 
     @model_validator(mode="after")
     def validate_claim_references(self):

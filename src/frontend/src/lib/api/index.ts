@@ -24,6 +24,15 @@ export {
   startAlertWorkflow,
 } from './alert-workflow';
 export {
+  cancelDataChange,
+  confirmDataChange,
+  createDataChangePreview,
+  listDataChanges,
+  toDataChangeFailure,
+  undoDataChange,
+  type DataChangeFailure,
+} from './data-changes';
+export {
   changeAlertSubscription,
   getAlertSubscriptions,
   getNotifications,

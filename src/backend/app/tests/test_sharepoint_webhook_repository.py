@@ -194,7 +194,7 @@ def test_postgres_repository_uses_on_conflict_and_detects_collision(monkeypatch)
 
 def test_migration_defines_unique_inbox_and_pending_index():
     sql = (
-        ROOT / "src/database/sql/22_sharepoint_webhook_events.sql"
+        ROOT / "src/database/sql/24_sharepoint_webhook_events.sql"
     ).read_text(encoding="utf-8")
 
     assert "event_id UUID PRIMARY KEY" in sql

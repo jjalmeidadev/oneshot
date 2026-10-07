@@ -3,9 +3,15 @@
 import hmac
 import os
 
-from fastapi import HTTPException, status
-
 from app.sharepoint_webhooks.schemas import SharePointNotificationBatch
+
+
+class SharePointWebhookNotConfiguredError(RuntimeError):
+    """O segredo do provedor simulado não foi configurado."""
+
+
+class SharePointWebhookUnauthorizedError(RuntimeError):
+    """O clientState recebido não corresponde ao segredo esperado."""
 
 
 def validate_client_state(payload: SharePointNotificationBatch) -> None:
@@ -13,10 +19,7 @@ def validate_client_state(payload: SharePointNotificationBatch) -> None:
 
     expected = os.getenv("SHAREPOINT_WEBHOOK_CLIENT_STATE", "").strip()
     if not expected:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Webhook do SharePoint simulado não configurado.",
-        )
+        raise SharePointWebhookNotConfiguredError()
 
     if any(
         not hmac.compare_digest(
@@ -25,7 +28,4 @@ def validate_client_state(payload: SharePointNotificationBatch) -> None:
         )
         for item in payload.value
     ):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="clientState inválido.",
-        )
+        raise SharePointWebhookUnauthorizedError()

@@ -124,7 +124,7 @@
   - [7.8 Revisão das políticas após a Sprint 4](#78-revisão-das-políticas-após-a-sprint-4)
   - [7.9 Registro final de configuração e validação](#79-registro-final-de-configuração-e-validação)
 - [8. Post mortem do projeto](#8-post-mortem-do-projeto)
-  - [8.1 Rastreabilidade](#81-rastreabilidade-das-tasks-existentes)
+  - [8.1 Rastreabilidade](#81-rastreabilidade-das-entregas-de-gestão)
 
 
 # 1. Introdução
@@ -594,20 +594,19 @@ Duas das sete ações funcionaram, duas em parte e duas falharam; uma não pôde
 
 ## 2.5 Sprint 5 — fechamento de 07/10/2026
 
-Este fechamento atende às issues existentes #302–#307, sem planejar outra sprint.
-`S_closed=5`, `S_plan=null`, `S_future=[]`. O usuário declarou implementadas as
-tasks da imagem: alteração pelo chat com confirmação, tabela Microsoft,
-RNF07/RNF09, blocos estruturados, testes de componentes, síntese de voz, gate de
-integração e correção da auditoria do fluxo guiado. A premissa original foi
-confrontada novamente após o pull: seis dessas frentes têm integração confirmada
-no Git. Escrita pelo chat e blocos estruturados permanecem premissas quando não
-há merge correspondente no HEAD; implementação não comprova publicação ou aprovação.
+Este documento consolida o encerramento da Sprint 5 e as entregas de gestão
+das issues #302–#307. A análise abrange alteração pelo chat, tabela Microsoft,
+testes RNF07/RNF09, blocos estruturados, testes de componentes, síntese de voz,
+gate de integração e auditoria do fluxo guiado. Seis dessas frentes têm
+integração confirmada no Git. Para escrita pelo chat e blocos estruturados,
+não há merge correspondente na base analisada; sua integração permanece
+pendente de comprovação.
 
-O snapshot observado de `develop` é
-`1ff5927a75b79219314068291b1aa43de3fe9674`, coletado em 06/10. O dia 07/10 é a
-data de fechamento solicitada; nenhuma atividade do dia seguinte foi inventada.
-As métricas S5 são observadas até esse snapshot, portanto provisórias em relação
-ao fechamento administrativo. O fuso é America/Sao_Paulo.
+O fechamento é datado de 07/10/2026. A base de análise é o commit
+`1ff5927a75b79219314068291b1aa43de3fe9674` de `develop`, obtido em 06/10.
+As métricas da Sprint 5 abrangem os registros disponíveis até essa base e
+permanecem provisórias até o fechamento administrativo. O fuso adotado é
+America/Sao_Paulo.
 
 Fontes: [gestão histórica](GestaoProjeto.md), [configuração](GestaoConfiguracao.md),
 [produto](Projeto.md), [feedbacks](RevisaoFeedbacks.md), [backlog S5](backlog/sprint-05-issues.csv),
@@ -615,10 +614,9 @@ histórico Git e consulta autenticada ao GitLab, com método descrito abaixo,
 [VHS real](evidencias/sprint-05/vhs-azure-real/README.md),
 [barreira de dados sensíveis](evidencias/sprint-05/s5-27-dado-sensivel.md) e
 [contrato de escrita](evidencias/sprint-05/s5-05-contrato-alteracao-chat.md).
-O inventário inicial identificou 792 paths versionados e examinou as fontes de gestão, produto, testes e Git. Isso não
-permite afirmar leitura humana de cada byte, de cada imagem ou de mensagens
-privadas que não foram fornecidas. Não foram encontrados exports S5 de Slack
-nas fontes consultadas; o cumprimento das dailies permanece não verificável.
+As fontes disponíveis abrangem documentos de gestão e produto, testes e
+histórico Git. Não há registros exportados das dailies da Sprint 5 nas fontes
+analisadas; seu cumprimento não pôde ser verificado.
 
 ### Evolução do projeto nas cinco sprints
 
@@ -628,7 +626,7 @@ nas fontes consultadas; o cumprimento das dailies permanece não verificável.
 | S2 | Protótipos exploraram consulta e iniciativa do agente; RF09/RF10 formalizaram sugestões e controle. Modelagem de dados e estratégia de voz; classificador com 5.353 exemplos sintéticos. | Intenção específica com F1 0,7401; documentação confundia bancada, provedor LLM e canal Teams. Quatro MRs chegaram ao fechamento. | Limiar/fallback protege roteamento; provedor desacoplado; integração real passa a ser prioridade. |
 | S3 | Frontend, classificação e Supabase; áudio Azure e plano VHS; planejamento de testes. | Não havia cadeia completa de áudio/PLN/RAG no corte histórico; resíduos de conflito e concentração da gestão. | Gates, ligação entre componentes e evidência ponta a ponta, em vez de inferir integração pela presença dos módulos. |
 | S4 | Texto/áudio, relatórios guiados, alertas autônomos, mensageria e deploy AWS; testes sistêmicos, integração, RNFs e usabilidade. Classificação específica chega a 0,8327. | Copilot Studio indisponível; workflows próprios absorvem restrição. Recall@3 0,5556 reprova recuperação; falta de autorização bloqueia testes. Onze issues apagadas e redistribuição pouco rastreável. | Identidade/perfis antes de escrita pelo chat; melhorar base e revisão; preservar trilha de decisões. |
-| S5 | Supabase Auth/perfis, proteção de dados antes do LLM, contrato de alteração com confirmação; VHS real Azure/Supabase e documentação final. Voz de saída, gate, auditoria, tabela Microsoft e testes finais integrados; escrita pelo chat e blocos estruturados conforme premissa. RNF07 reprovado em 30%. | Ecossistema corporativo continua dependendo do parceiro; controles de processo melhoram, mas registros de daily/inventário e distribuição de gestão não sustentam todos os acordos. | Handoff explícito de homologação, limites e evidências; não criar uma sprint adicional fictícia. |
+| S5 | Supabase Auth/perfis, proteção de dados antes do LLM, contrato de alteração com confirmação; VHS real Azure/Supabase e documentação final. Voz de saída, gate, auditoria, tabela Microsoft e testes finais integrados; integração de escrita pelo chat e blocos estruturados ainda não comprovada. RNF07 reprovado em 30%. | Ecossistema corporativo continua dependendo do parceiro; controles de processo melhoram, mas registros de daily/inventário e distribuição de gestão não sustentam todos os acordos. | Handoff com requisitos de homologação, limites e evidências para o parceiro. |
 
 O produto deixou de ser uma proposta de agente dentro do Teams e tornou-se uma
 aplicação web própria, com API, PLN autoral, recuperação fundamentada,
@@ -650,7 +648,7 @@ de repetição. O miss levou 1.540,27 ms e os hits 0,19/0,13/0,12/0,11 ms.
 múltiplos workers ou ambiente publicado.
 
 A documentação técnica final foi integrada em !122; o ensaio real do VHS em
-!121. A configuração exige pipeline aprovado para merge. Após o pull, o Git
+!121. A configuração exige pipeline aprovado para merge. O histórico Git
 confirma a integração de !117, !120, !131, !124, !130 e !123, respectivamente
 auditoria, gate, tabela Microsoft, testes unitários, RNFs e TTS. As evidências
 versionadas de RNF07–RNF09 registram três casos aprovados e três reprovados:
@@ -699,7 +697,7 @@ nas retrospectivas históricas. A série usa todos os commits alcançáveis do H
 congelado, data do committer no fuso local, não merges como denominador da
 convenção e merges de MRs com destino develop para a contagem administrativa.
 Atualizações de branch, squash e commits locais podem aumentar contagem sem
-produzir resultado novo. O script não usa essas contagens como produtividade individual.
+produzir resultado novo. Essas contagens não medem produtividade individual.
 
 | Sprint / janela | Commits | Não merge | MRs em develop | Convenção completa | Últimos dois dias ativos |
 |---|---:|---:|---:|---:|---:|
@@ -1067,7 +1065,8 @@ A tabela abaixo reúne todos os 27 itens. O impacto previsto é a nota ordinal
 inicial (1–5), não dinheiro ou dias. Impacto observado é consequência concreta;
 sem medida financeira/temporal não há conversão artificial para uma nota
 "real". As avaliações S1–S4 permanecem nas matrizes históricas e em Projeto 2.7.
-O status final é uma avaliação de 07/10 com a premissa de implementação.
+O status de fechamento considera as evidências da base analisada. Integrações
+sem comprovação permanecem identificadas como pendentes.
 
 | ID / item / responsável | Trajetória S1→S4 (severidade) | Impacto previsto inicial | Impacto observado / evidência | Status final 07/10 / resposta |
 |---|---|---|---|---|
@@ -1087,7 +1086,7 @@ O status final é uma avaliação de 07/10 com a premissa de implementação.
 | R14: Ausência de fluxo ponta a ponta demonstrável no fechamento da sprint; Leonardo Ramos | 25 → 10; ver histórico por sprint | 5 / 5 | E2E texto/áudio/relatório/alerta e demo AWS S4; VHS real S5 | Mitigado no MVP. Preservar ensaios e smoke por release. |
 | R15: Mudança de escopo ou exclusão de tasks sem registro de decisão; Felipe Neves | 12; ver histórico por sprint | 3 / 5 | Onze cards apagados S4; #294 ausente do snapshot S5 | Materializado; destino a registrar. Cancelar com causa e destino; não excluir trilha. |
 | R16: Ambiente de demonstração dependente de credenciais temporárias e de URL efêmera; Leonardo Ramos | 12; ver histórico por sprint | 4 / 5 | Learner Lab e tunnel efêmero; estabilidade sustentada não medida | Aberto; residual. Smoke, credencial válida, rollback e URL de contingência. |
-| R17: Alteração indevida ou não auditada de dados do projeto por meio do chat; Wendel Feitosa | 20; ver histórico por sprint | 5 / 5 | Contrato !132; escrita com confirmação !133 pela imagem | Mitigação implementada por premissa. Autorizar, confirmar, auditar e testar negação. |
+| R17: Alteração indevida ou não auditada de dados do projeto por meio do chat; Wendel Feitosa | 20; ver histórico por sprint | 5 / 5 | Contrato !132 integrado; fluxo de escrita !133 sem merge na base analisada | Contrato definido; integração do fluxo pendente de comprovação. Validar autorização, confirmação, auditoria e negação. |
 | R18: Cota ou custo do provedor externo de LLM interrompendo testes e demonstração; Henrique Diniz | 12; ver histórico por sprint | 3 / 5 | 13/24 HTTP429 na rodada gratuita S4; repetição paga | Materializado; residual. Quota e orçamento antes de ensaio/demo. |
 | O1: Aproveitamento do ecossistema Microsoft do parceiro; Wendel Feitosa | 16 → 12; ver histórico por sprint | 4 / 5 | Azure real utilizado; tenant/canal corporativo não homologados | Parcialmente materializada. Preservar adapter e validar canal com parceiro. |
 | O2: Fontes oficiais e conhecimento do PMO; Leonardo Ramos | 20 → 15 → 20; ver histórico por sprint | 5 / 5 | Estrutura oficial SharePoint disponível; conteúdo real PMO não validado | Parcialmente materializada. Homologar fontes e relevância. |
@@ -1107,7 +1106,7 @@ visíveis; O9 nasceu da tentativa de preservar acesso pelo ecossistema Microsoft
 Na conciliação final, apareceu ainda um bloqueio de inicialização do backend
 (`Header` não importado). Ele materializa o risco de integração R14: merges e
 relatórios históricos aprovados não dispensam smoke no HEAD final. O achado
-e sua verificação estão em Projeto.md, Seção 14.1, sem criar novo risco ou issue.
+e sua verificação estão em Projeto.md, Seção 14.1.
 Conclusão: detectar riscos cedo orientou modularidade e contingência, mas não
 garantiu disciplina de processo. Preservar a base sintética e os resultados
 reprovados é necessário para que o handoff não prometa prontidão inexistente.
@@ -2200,8 +2199,8 @@ O evento verificável é ff9675d869d68503e31d1d93670c0ef0b20005f9, de
 11/09/2026 20:53:04-03:00, autor/committer Felipe Neves, com parents
 c929f6c4c7a29e858b1d2429183109d8ca2787e5 e
 81bd8197c489802488deee2f2aaa07696f21b49c. A mensagem contém literalmente
-`chore: sincronizar o historico da main com a hmg (#NNN)`; não se inventa IID
-para substituir o marcador. O objeto é merge de dois parents, sem diferença
+`chore: sincronizar o historico da main com a hmg (#NNN)`; a referência de issue
+não está identificada nessa mensagem. O objeto é merge de dois parents, sem diferença
 de conteúdo resumida por git show --shortstat. O snapshot atual não fornece
 o estado completo anterior da referência main para provar apagamento ou
 atribuir intenção; a perda de autoria permanece relato do feedback, não fato
@@ -2212,19 +2211,19 @@ No snapshot, main=bc30be264464e884c6ae0436b683814bfb8638bd e
 hmg=9c11d9a5884a77210644a0e5f4bf44c51e04e533 têm conteúdo idêntico,
 mas o merge-base é c929f6c4: conteúdo igual não significa histórico igual.
 Develop=1ff5927a contém evolução posterior. `git tag --list` não retornou tags;
-as versões do README são marcos documentais. Publicação/tag/promoção final
-exigem a operação do responsável pela release e não foram executadas aqui.
+as versões do README são marcos documentais. Não há registro de tag ou
+promoção final nessa base; o responsável pela release deve registrar esses eventos.
 
-A lista de branches foi apenas inventariada a partir da task #302. Nenhuma
-branch foi excluída; a limpeza não faz parte desta correção documental.
-A implementação da aplicação não foi modificada para produzir este fechamento.
+O inventário de branches da #302 permanece disponível para a conferência de
+integração e nomenclatura. A limpeza de branches permanece pendente, preservando
+branches permanentes, MRs abertos e conteúdo cuja integração não foi comprovada.
 
 Os checks anteriores (14 arquivos/90 testes) pertenciam ao HEAD 9c7b6aa8.
 A verificação do HEAD atualizado está registrada em Projeto.md, Seção 14.1.
 O backend foi verificado com dotenv desabilitado e falhou na coleta de dois
 módulos: `Header` não definido em `app/main.py:390`. Esse bloqueio de runtime
-não foi corrigido nesta entrega documental nem ocultado pelos resultados antigos.
-Serviços reais, deploy e credenciais locais não foram alterados.
+permanece pendente na base analisada. Resultados de versões anteriores não
+comprovam a inicialização dessa versão.
 
 # 8. Post mortem do projeto
 
@@ -2256,12 +2255,11 @@ ter alternativa homologável e limite explicitado antes da implementação.
 da release. Homologar canal/fontes/perfis corporativos e repetir testes com
 dados representativos antes de operar com o parceiro. Registrar limites de
 cache por worker, dados sintéticos, recall reprovado e infraestrutura efêmera.
-Estas são recomendações de continuidade; não constituem novas issues,
-estimativas ou planejamento de uma Sprint 6.
+Essas recomendações orientam a continuidade e a homologação com o parceiro.
 
-## 8.1 Rastreabilidade das tasks existentes
+## 8.1 Rastreabilidade das entregas de gestão
 
-| Issue existente | Resultado | Evidência/validação | Estado deste pacote |
+| Issue | Resultado | Evidência/validação | Estado documental |
 |---|---|---|---|
 | #302 S5-48 | Conformidade EP e destino da auditoria S4 | [Auditoria](Projeto.md#141-auditoria-dos-critérios-do-escritório-de-projetos), links, configuração, banco e arquitetura em Markdown | Critérios rastreados; pendências e ações administrativas externas discriminadas. |
 | #303 S5-49 | Retrospectiva e nove ações | Seção 2.5 e consulta GitLab | Completo no recorte observado; métricas S5 não extrapoladas. |
@@ -2270,7 +2268,7 @@ estimativas ou planejamento de uma Sprint 6.
 | #306 S5-52 | Post mortem | Seção 8, apoiada nas análises anteriores | Produzido após as análises. |
 | #307 S5-53 | Papéis/competências e contrato | Seções 4.8 e 5.11; issues e MRs | Sem afirmar rotação/equilíbrio inexistentes. |
 
-### Checklist documental e arquivos desta entrega
+### Checklist documental e artefatos relacionados
 
 - [x] #302: 37 critérios EP rastreados e divergências S4 com destino, incluindo pendências justificadas.
 - [x] #303: retrospectiva, indicadores, nove ações anteriores e recomendações verificáveis.
@@ -2278,19 +2276,16 @@ estimativas ou planejamento de uma Sprint 6.
 - [x] #305: 27 riscos/oportunidades, impactos previstos/observados, status e imprevistos consolidados.
 - [x] #306: post mortem com conquistas, desafios e sugestões apoiadas nas análises.
 - [x] #307: papéis/competências nas cinco sprints e avaliação de cada acordo do contrato.
-- [x] Pull de develop conciliado sem conflito; validação editorial e git diff --check aprovados.
+- [x] Documentação compatível com a base de develop analisada; links, tabelas e formatação verificados.
 - [ ] Aceite de qualidade do HEAD: backend bloqueado por Header não definido; frontend com nove falhas; RNF07/RNF08-P reprovados.
 - [ ] Revisão independente, MR aprovado, Closes e encerramento administrativo das issues de gestão.
 
-Arquivos locais relativos a esta entrega: [README raiz](../README.md),
+Artefatos relacionados ao fechamento: [README raiz](../README.md),
 [Projeto.md](Projeto.md), [GestaoProjeto.md](GestaoProjeto.md),
 [Index.md](Index.md), [guia de padrões](GuiaPadroesDesenvolvimento.md),
 [README raiz do banco](../src/database/README.md) e
 [gráfico das cinco sprints](img/gestao-sprints-01-05.png).
-Código, JSONs e evidências trazidos pelo pull pertencem às integrações de develop;
-não são alterações locais desta entrega documental. Não há PDF no pacote.
 
-DoR de todas as MRs integradas, aprovação por outro integrante, comentário
-`Closes` e encerramento das issues não foram executados por esta entrega local.
-São evidências administrativas de aceite do grupo, não preenchidas pelo agente
-em nome de colegas. A autoauditoria documental não substitui esse aceite.
+O aceite das issues de gestão depende da aprovação dos MRs por outro integrante,
+do vínculo de encerramento (`Closes`) e da conferência dos critérios de prontidão
+e conclusão. Esses registros administrativos permanecem pendentes de comprovação.

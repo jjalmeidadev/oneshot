@@ -6,6 +6,7 @@ import { MarkdownMessage } from '@/components/chat/markdown-message';
 import { ProactiveSuggestion } from '@/components/chat/proactive-suggestion';
 import { ReportWorkflowCard } from '@/components/chat/report-workflow-card';
 import { AlertWorkflowCard } from '@/components/chat/alert-workflow-card';
+import { DataChangeCard } from '@/components/chat/data-change-card';
 import { SourceCitations } from '@/components/chat/source-citations';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -144,6 +145,9 @@ function AssistantMessage({
             )}
             {message.workflow?.workflow === 'alerta_prazo_atraso' && (
               <AlertWorkflowCard workflow={message.workflow} />
+            )}
+            {message.dataChange && (
+              <DataChangeCard messageId={message.id} state={message.dataChange} />
             )}
           </>
         )}

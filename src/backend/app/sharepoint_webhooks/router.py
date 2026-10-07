@@ -13,7 +13,11 @@ from app.sharepoint_webhooks.repository import (
     SharePointWebhookStorageError,
     get_sharepoint_webhook_repository,
 )
-from app.sharepoint_webhooks.security import validate_client_state
+from app.sharepoint_webhooks.security import (
+    SharePointWebhookNotConfiguredError,
+    SharePointWebhookUnauthorizedError,
+    validate_client_state,
+)
 
 
 router = APIRouter(prefix="/api/integrations/sharepoint", tags=["integrações"])
@@ -47,7 +51,18 @@ def receive_sharepoint_change_notification(
             detail="Payload de notificação ausente.",
         )
 
-    validate_client_state(payload)
+    try:
+        validate_client_state(payload)
+    except SharePointWebhookUnauthorizedError as error:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="clientState inválido.",
+        ) from error
+    except SharePointWebhookNotConfiguredError as error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Webhook do SharePoint simulado não configurado.",
+        ) from error
     try:
         result = get_sharepoint_webhook_repository().store_batch(payload.value)
     except SharePointWebhookConflictError as error:

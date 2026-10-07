@@ -6,7 +6,7 @@ from typing import Annotated
 from uuid import uuid4
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.requests import Request
@@ -30,7 +30,7 @@ from app.audio.schemas import (
 )
 from app.audio import transcription
 from app.audio.synthesis import synthesize_optional
-from app.audio.security import resolve_identity, single_request_per_identity
+from app.audio.security import single_request_per_identity
 from app.audio.service import process_audio_upload
 from app.audio.validation import DEFAULT_MAX_SIZE_BYTES
 from app.database.connection import close_database_pool
@@ -59,6 +59,8 @@ from app.reports.errors import ReportError
 from app.reports.router import router as reports_router
 from app.alerts.errors import AlertError
 from app.alerts.router import router as alerts_router
+from app.data_changes.errors import DataChangeError
+from app.data_changes.router import router as data_changes_router
 from app.sharepoint_webhooks.router import router as sharepoint_webhooks_router
 from app.security import (
     AccessContext,
@@ -111,6 +113,7 @@ app = FastAPI(
 )
 app.include_router(reports_router)
 app.include_router(alerts_router)
+app.include_router(data_changes_router)
 app.include_router(sharepoint_webhooks_router)
 ReadAccess = Annotated[AccessContext, Depends(require_read_access)]
 WriteAccess = Annotated[AccessContext, Depends(require_write_access)]
@@ -142,6 +145,13 @@ def handle_alert_error(_request: Request, error: AlertError) -> JSONResponse:
         status_code=error.status_code,
         content={"error": {"code": error.code, "message": error.message}},
     )
+
+
+@app.exception_handler(DataChangeError)
+def handle_data_change_error(_request: Request, error: DataChangeError) -> JSONResponse:
+    # As negativas de escrita ja foram auditadas pelo servico, na mesma
+    # transacao das demais recusas.
+    return JSONResponse(status_code=error.status_code, content=error.to_payload())
 
 
 @app.exception_handler(AccessError)
@@ -232,6 +242,16 @@ async def handle_request_validation_error(
                 }
             },
         )
+    if request.url.path.startswith(("/api/data-change-previews", "/api/data-changes")):
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": {
+                    "code": "DATA_CHANGE_INVALID_INPUT",
+                    "message": "Revise os dados enviados para a alteração.",
+                }
+            },
+        )
     if request.url.path != AUDIO_PATH:
         return await request_validation_exception_handler(request, error)
 
@@ -285,15 +305,9 @@ def get_vhs_metrics(
 def create_chat_response(
     request: GeminiChatRequest,
     access: ReadAccess,
-    authorization: str | None = Header(default=None),
 ) -> GeminiChatResponse:
     try:
         authorize_message_scope(access, request.message)
-        identity = (
-            resolve_identity(authorization)
-            if authorization or request.proactivity_enabled
-            else None
-        )
         response = process_message(
             request,
             requester_id=str(access.auth_subject),
@@ -366,7 +380,7 @@ def create_audio_chat_response(
 
     try:
         authorize_message_scope(access_context, request.message)
-        return process_message(
+        response = process_message(
             request,
             channel="api",
             external_conversation_id=conversation_id,
@@ -401,7 +415,6 @@ async def create_audio_upload(
     use_intent_classifier: bool = Form(default=True),
     proactivity_enabled: bool = Form(default=False),
     include_audio: bool = Form(default=False),
-    authorization: str | None = Header(default=None),
 ) -> AudioUploadResponse:
     started_at = perf_counter()
     resolved_conversation_id = conversation_id or str(uuid4())

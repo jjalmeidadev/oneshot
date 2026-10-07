@@ -195,7 +195,8 @@
     - [8.5.11 Alerta autônomo de prazo](#8511-alerta-autônomo-de-prazo)
     - [8.5.12 Webhooks e mensageria integrados (S5-09 a S5-11)](#8512-webhooks-e-mensageria-integrados-s5-09-a-s5-11)
     - [8.5.13 Contrato de alteração de dados pelo chat (S5-05)](#8513-contrato-de-alteração-de-dados-pelo-chat-s5-05)
-    - [8.5.14 SharePoint simulado ampliado (S5-12)](#8514-sharepoint-simulado-ampliado-s5-12)
+    - [8.5.13.1 SharePoint simulado ampliado (S5-12)](#85131-sharepoint-simulado-ampliado-s5-12)
+    - [8.5.14 Front-end: navegabilidade, estratégia de construção e testes (S5-24)](#8514-front-end-navegabilidade-estratégia-de-construção-e-testes-s5-24)
   - [8.6 Requisitos das APIs de voz (STT/TTS)](#86-requisitos-das-apis-de-voz-stttts)
     - [8.6.1 Objetivo e delimitação](#861-objetivo-e-delimitação)
     - [8.6.2 Entradas, saídas e formatos](#862-entradas-saídas-e-formatos)
@@ -284,6 +285,7 @@
   - [11.7 Defesa das premissas e dos valores](#117-defesa-das-premissas-e-dos-valores)
   - [11.8 Fluxo de caixa sintético](#118-fluxo-de-caixa-sintético)
   - [11.9 Conclusão da viabilidade](#119-conclusão-da-viabilidade)
+  - [11.10 Custos de implementação da PoC e da solução final](#1110-custos-de-implementação-da-poc-e-da-solução-final)
 - [12. Benefícios Entregues e Aperfeiçoamentos Futuros](#12-benefícios-entregues-e-aperfeiçoamentos-futuros)
   - [12.1 Benefícios entregues](#121-benefícios-entregues)
   - [12.2 Aperfeiçoamentos futuros](#122-aperfeiçoamentos-futuros)
@@ -3371,7 +3373,8 @@ constitui homologação com todos os dados reais do parceiro.
 O banco é necessário para o fluxo autenticado e persistente completo. Fallbacks
 em memória/JSON atendem desenvolvimento/testes específicos. `DATABASE_URL` ou
 `SUPABASE_DATABASE_URL` controla conexão; credenciais ficam fora do Git.
-O Compose observado precisa receber URL/chave pública de Auth no ambiente de runtime. Esse ajuste de configuração não foi incluído nesta entrega documental.
+O Compose da base analisada não repassa a URL e a chave pública de Auth ao
+runtime. A configuração dessas variáveis permanece pendente antes da publicação.
 O compose observado usa `REPORT_REPOSITORY_MODE=memory`,
 `REPORT_STORAGE_MODE=local`, `REPORT_PORTFOLIO_SOURCE=synthetic`, embora alertas
 usem banco. Não torna todo relatório persistido no Supabase automaticamente.
@@ -3393,7 +3396,7 @@ secrets válidos e tratamento idempotente de reentrega.
 | Teams/Entra/SharePoint/Copilot corporativos | Não homologados; Azure e JSON com formato SharePoint não provam conexão ao tenant do Metrô. |
 | AWS | Projeto 10.2, demo Learner Lab/URL efêmera; não prova operação sustentada. |
 | TTS, auditoria, gate e testes finais | !123/!117/!120/!124/!130 integrados. RNF07 reprovado; ver resultados abaixo. |
-| Escrita pelo chat e blocos estruturados | Contrato !132 integrado; implementação completa conforme premissa do usuário. MRs !133/!128/!129 não aparecem como merges no HEAD observado. |
+| Escrita pelo chat e blocos estruturados | Contrato !132 integrado. A integração das implementações !133/!128/!129 não está comprovada por merge na base analisada. |
 
 ### Serviços complementares e referências
 
@@ -3937,7 +3940,7 @@ app/tests/test_sharepoint_rag.py::test_builds_prompt_with_source_labels_and_disc
 158 passed, 11 warnings in 15.69s
 ```
 
-**Verificação atual após a integração da interface.** A execução local em 10 de setembro de 2026 aprovou 171 testes do back-end, 46 testes unitários do front-end e 8 testes de navegador — quatro cenários em desktop e os mesmos quatro em celular. Também passaram lint sem avisos, verificação de formatação e build de produção. O merge da integração ponta a ponta acrescentou quatro testes de rota depois dessa execução, levando o back-end a 175 testes, conforme a Seção 8.11.7. A cobertura unitária do front-end foi de 87,10% das linhas, 84,33% das instruções, 73,12% das ramificações e 83,83% das funções. Os comandos, a matriz por comportamento e os limites da evidência estão em `src/frontend/TESTES.md`.
+**Verificação atual após a integração da interface.** A execução local em 10 de setembro de 2026 aprovou 171 testes do back-end, 46 testes unitários do front-end e 8 testes de navegador — quatro cenários em desktop e os mesmos quatro em celular. Também passaram lint sem avisos, verificação de formatação e build de produção. O merge da integração ponta a ponta acrescentou quatro testes de rota depois dessa execução, levando o back-end a 175 testes, conforme a Seção 8.11.7. A cobertura unitária do front-end foi de 87,10% das linhas, 84,33% das instruções, 73,12% das ramificações e 83,83% das funções. Os comandos, a matriz por comportamento e os limites da evidência estão em `src/frontend/TESTES.md`. A medição da Sprint 5, com data, commit e cobertura por área, está na Seção 8.5.14.
 
 **Cobertura ainda não atingida.** O teste de navegador atravessa front-end, FastAPI, validação WAV e pipeline, mas substitui Azure, Gemini e classificação nas fronteiras externas. Continuam sem evidência local as chamadas reais aos provedores, autenticação Entra ID, SharePoint corporativo, persistência PostgreSQL, latência de produção e validação manual completa com tecnologia assistiva. Os resultados determinísticos não devem ser usados como aprovação desses itens.
 
@@ -4115,6 +4118,9 @@ A rastreabilidade entre ação, estado e contrato ajuda a localizar uma alteraç
 | Interromper | `stop` aborta o controlador pendente | `AbortSignal` recebido pelo cliente comum | O indicador termina e nenhuma resposta tardia é aplicada. |
 | Trocar ou excluir conversa | `selectConversation` ou `deleteConversation` despacha no reducer | Nenhuma chamada HTTP | Histórico, fontes e documento selecionado mudam apenas na sessão. |
 | Abrir uma fonte | seleção derivada de `activeSources` | Nenhuma nova chamada HTTP | `DocumentViewer` mostra metadados e o trecho já devolvido pela API. |
+| Confirmar, cancelar ou desfazer uma alteração de dados | `updateDataChange` guarda a fase do cartão na mensagem | `confirmDataChange`, `cancelDataChange` e `undoDataChange` em `lib/api/data-changes.ts` | `DataChangeCard` mostra o valor gravado, o cancelamento, o erro ou o valor restaurado. |
+
+A alteração de dados pelo chat (S5-07, sobre o contrato da Seção 8.5.13) usa o cartão `DataChangeCard`. Quando a resposta traz `data_change`, o cartão mostra o valor antes e depois e os avisos, e a gravação só acontece no botão **Confirmar alteração**. Depois disso o cartão oferece **Desfazer** enquanto a janela de 15 minutos estiver aberta. Cancelamento e erro encerram o cartão informando que nada foi gravado, e **Tentar de novo** aparece só quando repetir adianta. **Histórico do campo** consulta a API ao ser aberto. Como a fase fica na mensagem, reabrir a conversa não oferece confirmar de novo.
 
 Essa cadeia também define onde testar: componentes verificam a apresentação, a store verifica concorrência e associação à conversa, o cliente verifica serialização e erros, e o Playwright atravessa as quatro camadas pelo comportamento observável.
 
@@ -4123,6 +4129,8 @@ O envio por texto aceita uma sugestão ou mensagem digitada, usa `Enter` para en
 Cada conversa mantém seu último `interaction_id`, mensagens, fontes e preferências enquanto a página permanece aberta. Criar ou selecionar outra conversa cancela a espera corrente, e o identificador interno da requisição impede que um retorno atrasado seja inserido no destino errado. A busca e a exclusão alteram apenas o estado local. Recarregar a página remove histórico e token; o tema é a única preferência com persistência prevista.
 
 No desktop, as três áreas ficam lado a lado. Abaixo de 1024 px, conversas e documentos abrem em diálogos que podem ser fechados com `Escape`. Estados de carregamento e mudanças relevantes possuem anúncios para tecnologias assistivas, os controles têm nomes acessíveis e o foco retorna ao contexto apropriado ao fechar um diálogo. Essas propriedades fazem parte dos testes descritos em `src/frontend/TESTES.md`, não apenas do desenho visual.
+
+O mapa de navegação, os fluxos entre telas, a estratégia de construção e a medição atual dos testes do front-end estão na Seção 8.5.14.
 
 ### 8.5.8 Back-end: ciclo de processamento
 
@@ -4766,9 +4774,13 @@ ganha o campo opcional `data_change`:
 
 `data_change.status` também pode ter dois outros valores:
 
-- `needs_input`, com `question` e, quando há ambiguidade, `candidates` (`id` e
-  `label`);
+- `needs_input`, com `missing` (`project`, `target`, `field` ou `value`),
+  `question` e, quando há escolha a fazer, `candidates` (`id` e `label`);
 - `rejected`, com `code` e `message`.
+
+Os três trazem `draft`, com o que já foi entendido do pedido (`project_code`,
+`entity`, `field`, `target_id`, `item_reference` e `raw_value`), para que a
+interface complete o que falta sem reinterpretar o texto.
 
 Nos três casos a resposta HTTP é `200`, porque um pedido incompleto, inválido ou
 negado é parte da conversa, e não uma falha da requisição.
@@ -4841,7 +4853,9 @@ alteração.
 `GET /api/data-changes?project_code=PRJ-0442&field=projeto.prazo_final&target_id=<uuid>`
 exige leitura no projeto. Ele devolve as alterações feitas pelo chat naquele
 campo, da mais recente para a mais antiga (até 20), com autor, antes, depois,
-data e a indicação de desfeita. É a fonte do histórico exibido pela S5-07.
+data e a indicação de desfeita. Cada item traz também `can_undo` e
+`undo_available_until`, verdadeiros só para o autor dentro da janela. É a fonte
+do histórico exibido pela S5-07.
 
 #### Erros
 
@@ -4878,6 +4892,8 @@ Nas rotas do cartão:
 | `ALREADY_UNDONE` | 409 | desfazer | A alteração já foi desfeita. |
 | `PREVIEW_EXPIRED` | 410 | confirmar | Passaram mais de 10 minutos desde a prévia. |
 | `UNDO_WINDOW_EXPIRED` | 410 | desfazer | Passaram mais de 15 minutos desde a alteração. |
+| `PREVIEW_ALREADY_CONFIRMED` | 409 | cancelar | A prévia já foi confirmada; resta o desfazer. |
+| `DATA_CHANGE_INVALID_INPUT` | 422 | todas | Corpo ou parâmetro malformado, como justificativa acima de 500 caracteres. |
 | `FIELD_NOT_EDITABLE`, `INVALID_VALUE` | 422 | criar prévia, confirmar | Campo ou valor fora do contrato. |
 | `DATA_CHANGE_UNAVAILABLE` | 503 | todas | Sem banco ou falha na gravação; a transação é desfeita. |
 
@@ -4943,6 +4959,7 @@ erro. Ele nunca leva a mensagem original.
 | `project_data.change_confirm_failed` | `falha` | A prévia estava expirada, cancelada ou desatualizada. |
 | `project_data.change_undone` | `sucesso` | A alteração foi desfeita. |
 | `project_data.undo_denied` | `bloqueado` | O desfazer foi pedido fora da janela, por outra pessoa ou com o valor já alterado. |
+| `project_data.chat_request` | `sucesso` | Registrado pelo rastreamento RNF03 na interação do chat, com o status do `data_change`. |
 
 `change_applied` e `change_undone` são gravados na mesma transação da escrita.
 Os demais seguem a regra da S5-04: uma falha ao gravar a auditoria é registrada
@@ -4950,15 +4967,22 @@ como erro operacional e nunca transforma uma negação em permissão.
 
 #### Persistência da prévia
 
-A S5-06 cria `22_data_change_previews.sql` e o rollback correspondente com a
-tabela `pending_data_changes`, no mesmo padrão de
-`pending_proactive_suggestions`. As colunas são `id`, `user_id`,
-`external_conversation_id`, `interaction_id`, `project_id`, `entity`,
-`target_id`, `field_key`, `before_value` e `after_value` (JSONB), `status`
-(`pendente`, `confirmada` ou `cancelada`), `change_record_id`, `expires_at`,
-`decided_at`, `created_at` e `updated_at`. A expiração é avaliada na leitura,
-sem job. Como nas tabelas de workflow, a tabela tem RLS habilitada sem
-policies e os papéis `anon` e `authenticated` não têm acesso.
+`22_data_change_previews.sql` cria a tabela `pending_data_changes`, no mesmo
+padrão de `pending_proactive_suggestions`, e
+`23_rollback_data_change_previews.sql` a remove. As colunas são `id`,
+`user_id`, `correlation_id`, `external_conversation_id`, `interaction_id`,
+`project_id`, `entity`, `target_id`, `field_key`, `before_value` e
+`after_value` (JSONB), `status` (`pendente`, `confirmada` ou `cancelada`),
+`change_record_id`, `reason`, `expires_at`, `decided_at`, `created_at` e
+`updated_at`. Restrições `CHECK` limitam `entity`, `field_key` e `status` aos
+valores do contrato. A expiração é avaliada na leitura, sem job. Como nas
+tabelas de workflow, a tabela tem RLS habilitada sem policies e os papéis
+`anon` e `authenticated` não têm acesso. A migração também cria um índice
+parcial em `change_records` para o histórico por campo.
+
+O `interaction_id` só existe depois que o rastreamento RNF03 grava a interação.
+Por isso a prévia e seus eventos nascem com o `correlation_id`, e o pipeline
+liga os dois à interação logo em seguida.
 
 #### Cenários de aceite
 
@@ -4980,6 +5004,31 @@ chamada é feita ao provedor de LLM.
 | 11 | Gerente | Confirmar depois de 10 minutos | `410 PREVIEW_EXPIRED`; nada muda. |
 | 12 | Gerente | Confirmar duas vezes a mesma prévia | Uma única escrita e a mesma resposta nas duas chamadas. |
 
+#### Implementação (S5-06)
+
+A implementação está em `src/backend/app/data_changes/`:
+
+| Módulo | Responsabilidade |
+|---|---|
+| `fields.py` | Tabela de campos do contrato, leitura e validação de valores, forma canônica e exibição. |
+| `extractor.py` | Extrator determinístico do pedido, sem modelo de linguagem. |
+| `service.py` | Prévia, confirmação, cancelamento, desfazer e histórico, com a permissão verificada pela regra. |
+| `repository.py` | Unidade de trabalho transacional em PostgreSQL (`SELECT … FOR UPDATE`) e em memória para testes. |
+| `router.py` | As rotas do cartão. |
+
+A verificação por regra está em `authorize_project_write`, em
+`app/security/access.py`. O pipeline chama o extrator depois da barreira de
+dado sensível e antes do classificador. As intenções
+`transacao_atualizar_cronograma` e `transacao_atualizar_status`, quando não há
+pedido reconhecível, recebem a orientação com exemplos. Sem banco configurado,
+o chat responde `DATA_CHANGE_UNAVAILABLE`.
+
+Os testes cobrem os 12 cenários de aceite, o extrator, as regras de cada campo,
+a API e a integração com PostgreSQL real, incluindo duas confirmações
+simultâneas do mesmo campo e a falha da auditoria no meio da transação. A
+execução está registrada em
+[`docs/evidencias/sprint-05/s5-06-alteracao-dados-chat.md`](evidencias/sprint-05/s5-06-alteracao-dados-chat.md).
+
 #### Limites assumidos
 
 - **O RAG continua lendo documentos.** As respostas do RAG vêm de
@@ -4988,9 +5037,10 @@ chamada é feita ao provedor de LLM.
   origem. O relatório executivo e o alerta de prazo leem as tabelas e já
   refletem a alteração. A confirmação mostra o novo valor, e o cartão leva ao
   histórico.
-- **O cronograma não tem carga versionada.** Nenhum script do repositório
-  popula `schedule_items`. Para demonstrar e testar os campos `cronograma.*`, a
-  S5-06 precisa incluir atividades sintéticas para o `PRJ-0442`.
+- **Reaplicar a carga `13` limpa o histórico.** A `13` passou a trazer cinco
+  atividades sintéticas do `PRJ-0442` em `schedule_items`, usadas pelos campos
+  `cronograma.*`, mas continua apagando as mudanças registradas dos três
+  projetos antes de recriá-las, inclusive as feitas pelo chat.
 - **O extrator reconhece formas comuns de pedido**, e não qualquer frase. Fora
   delas, o chat pergunta ou orienta com exemplos.
 - **A alteração vale para a base da aplicação.** Ela não é sincronizada com o
@@ -5001,7 +5051,7 @@ chamada é feita ao provedor de LLM.
   assim, o contrato já exige a verificação pela regra que cobre o alvo, para que
   várias regras não abram uma escrita indevida.
 
-### 8.5.14 SharePoint simulado ampliado (S5-12)
+### 8.5.13.1 SharePoint simulado ampliado (S5-12)
 
 A S5-12 corrige a causa de `DEF-RF06-01`: a massa documental consultada pelo
 chat tinha fonte vinculada apenas ao `PRJ-0442`, embora o portfólio sintético
@@ -5048,6 +5098,153 @@ no texto pesquisável, restringe o conjunto pelo escopo antes do ranqueamento e
 permite consultas individuais e comparativas sem incluir fontes de outro
 projeto. Testes e limitações estão registrados em
 [`docs/evidencias/sprint-05/sharepoint-simulado.md`](evidencias/sprint-05/sharepoint-simulado.md).
+
+### 8.5.14 Front-end: navegabilidade, estratégia de construção e testes (S5-24)
+
+Esta seção reúne, para o front-end em `src/frontend`, três coisas que a Seção 8.5.7 só cita: como a pessoa usuária se move entre as telas, por que o código foi construído do jeito que está e quais testes verificam cada fluxo, com a cobertura medida. A versão descrita é a do commit `f7ba157`, que soma à `develop` de 06/10/2026 a interface de alteração de dados da S5-07 (Seção 8.5.13), ainda em revisão no momento da medição.
+
+#### Mapa de navegação
+
+A aplicação tem só duas telas de verdade: a de **entrada** e a **área de trabalho**. Não existem rotas de URL. Quem decide qual das duas aparece é o estado da sessão: o `SessionBoundary`, em `App.tsx`, mostra a entrada enquanto não há sessão válida e a área de trabalho depois do login. Todo o resto acontece dentro da área de trabalho, de dois jeitos: em painéis e menus que abrem ao lado ou por cima do chat, ou em cartões que aparecem dentro da própria mensagem do agente.
+
+<p align="center"><img src="img/navegabilidade-frontend.png" alt="Mapa de navegação do front-end: da tela de entrada para a área de trabalho, onde a conversa dá acesso a painéis, menus, entrada por voz e cartões de relatório, alerta, alteração de dados e sugestão proativa" width="100%"></p>
+
+<p align="center"><strong>Figura 28</strong> - Mapa de navegação do front-end.<br><sup>Fonte: Material produzido pelos autores, 2026. Fonte editável em <code>docs/diagrams/navegabilidade-frontend.dot</code>.</sup></p>
+
+A Figura 28 parte da tela de entrada. **Entrar** leva ao chat vazio. **Sair**, na engrenagem, ou uma sessão expirada (HTTP 401) trazem de volta à entrada, de qualquer ponto da área de trabalho. Um HTTP 403 não derruba a sessão: a ação negada mostra erro e o perfil continua válido. A conversa é o centro da área de trabalho: dela saem os painéis, os menus e os cartões.
+
+| Tela ou elemento | Como se chega | O que permite | Como se sai |
+| --- | --- | --- | --- |
+| Tela de entrada (`AccessScreen`) | Abrir a aplicação sem sessão, **Sair** ou sessão expirada (401). | Escolher a persona (PMO, Líder de subportfólio, Gerente de projeto ou Consulta) e informar a senha, validada no Supabase Auth. | **Entrar** abre a área de trabalho. Credencial inválida mantém a tela, limpa a senha e devolve o foco ao campo da persona. |
+| Chat vazio (`ChatEmptyState`) | Primeiro acesso ou **Nova conversa**. | Escolher uma sugestão de pergunta, digitar ou gravar. | O primeiro envio cria a conversa. |
+| Conversa (`MessageList` e `Composer`) | Enviar uma mensagem ou selecionar uma conversa. | Ler respostas em Markdown, abrir citações `[n]`, ver o erro controlado e usar **Interromper resposta** durante o envio. | Trocar de conversa cancela a espera em andamento. |
+| Conversas (`ConversationSidebar`) | Fixa à esquerda a partir de 1024 px. Abaixo disso, **Abrir conversas** abre um diálogo. | Criar, buscar por título ou conteúdo, selecionar e excluir conversas da sessão. | Selecionar ou **Escape** fecha o diálogo e devolve o foco ao botão que o abriu. |
+| Fontes da resposta (`DocumentPanel`) | Uma citação `[n]` ou o botão **Fontes** do cabeçalho. O painel começa fechado. Fica fixo a partir de 1280 px e vira diálogo abaixo disso. | Ver a lista de fontes, o trecho recuperado e a origem. A aba **Resposta**, com as métricas, só aparece no modo técnico. | O mesmo botão ou **Escape**. |
+| Ajustes do agente (`AgentSettings`) | Engrenagem do cabeçalho. | Ligar a validação de intenção, as sugestões proativas (que dependem da validação) e os detalhes técnicos, ver o perfil da sessão e sair. Os controles ficam bloqueados enquanto há uma resposta em andamento. | **Escape**. **Sair** volta para a entrada. |
+| Notificações (`NotificationCenter`) | Sino do cabeçalho, com a contagem de não lidas. A lista é atualizada a cada 30 segundos. | Marcar notificações como lidas e pausar, retomar ou cancelar inscrições de alerta. | **Escape**. |
+| Entrada por voz (`AudioButton`, `RecordingBar` e `RecordingPreview`) | Microfone no campo de mensagem. Exige sessão e permissão do navegador. | Gravar até 60 segundos, concluir e ouvir a prévia. | **Enviar áudio** transforma a transcrição em mensagem. **Descartar** apaga a captura. |
+| Cartão de relatório (`ReportWorkflowCard`) | Resposta classificada como `transacao_gerar_relatorio`. | Responder às perguntas, revisar, confirmar a geração e acompanhar o processamento. | **Baixar no chat** entrega o DOCX. Também é possível cancelar. |
+| Cartão de alerta (`AlertWorkflowCard`) | Resposta classificada como `alerta_prazo_atraso`. | Configurar o limiar e confirmar a inscrição. | A inscrição ativa passa a ser gerida pelo sino. |
+| Cartão de alteração de dados (`DataChangeCard`, S5-07) | Resposta do chat com `data_change`. | Ver a prévia (antes, depois e avisos), confirmar com justificativa opcional, desfazer em até 15 minutos e abrir o histórico do campo. | Confirmada, cancelada, desfeita ou com erro. A fase fica salva na mensagem, então reabrir a conversa não pede confirmação de novo. |
+| Sugestão proativa (`ProactiveSuggestion`) | Validação de intenção e sugestões proativas ligadas, e o backend propõe uma intenção secundária. | Aceitar, recusar ou desativar as sugestões, tudo no mesmo cartão. | A decisão substitui os botões e o foco vai para o resultado. |
+
+#### Fluxos entre telas
+
+Os fluxos abaixo são os caminhos completos que a interface precisa sustentar. A última coluna indica onde cada um é verificado. Os testes unitários aparecem pelo nome do arquivo e os de navegador pelo nome do cenário no Playwright.
+
+| Fluxo | Caminho | Resultado esperado | Verificado em |
+| --- | --- | --- | --- |
+| F1 — Entrar e sair | Entrada → chat vazio → engrenagem → **Sair** → entrada | O token só existe na memória. O logout desmonta o estado do chat e apaga as conversas da persona anterior. Um 401 encerra a sessão e um 403 a preserva. | `access-session.test.tsx`; `app-shell.test.tsx`; E2E "autentica a persona, envia Bearer e limpa o chat no logout" |
+| F2 — Consulta por texto | Chat vazio → conversa → citação `[n]` → fontes | A resposta aparece com as citações. A fonte abre com o trecho e a origem, sem inventar métricas ausentes. | `components.test.tsx`; `references.test.tsx`; `chat-store.test.tsx`; E2E "texto, fontes, modo técnico e navegação responsiva" |
+| F3 — Consulta por voz | Conversa → microfone → concluir → prévia → **Enviar áudio** → conversa | O áudio sai em WAV PCM mono, 16 bits e 16 kHz. A transcrição vira mensagem da pessoa usuária e a resposta segue o mesmo caminho do texto. | `use-audio-recorder.test.tsx`; `audio.test.ts`; `chat-store.test.tsx`; E2E "gravação sintética, WAV, upload e resposta pelo backend" |
+| F4 — Relatório guiado | Conversa → cartão (perguntas) → revisão → **Confirmar e gerar DOCX** → **Baixar no chat** | O cartão coleta escopo, período, público e ênfases, exige confirmação e entrega um DOCX válido sem sair do chat. | `report-workflow-card.test.tsx`; `client.test.ts`; E2E "PLN inicia fluxo guiado e entrega DOCX baixavel no chat" |
+| F5 — Alerta de prazo | Conversa → cartão → confirmação → inscrição ativa → sino | A inscrição confirmada mostra a próxima avaliação. Depois ela pode ser pausada, retomada ou cancelada pelo sino. | `alert-workflow-card.test.tsx`; `notification-center.test.tsx`. Ainda sem cenário de navegador. |
+| F6 — Alteração de dados | Conversa → prévia → **Confirmar alteração** → **Desfazer** ou **Histórico do campo**. Alternativas: **Cancelar** ou erro. | Nada é gravado antes da confirmação. O cancelamento informa que nada foi gravado. O erro final não oferece repetir. Desfazer só aparece dentro da janela. | `data-change-card.test.tsx`; `data-change-flow.test.tsx`; E2E "prévia, confirmação, histórico e desfazer" e "cancelamento não grava e erro final não oferece repetir" |
+| F7 — Sugestão proativa | Engrenagem → ligar validação e proativas → resposta com sugestão → aceitar, recusar ou desativar | Nada é executado sem escolha explícita. Recusar preserva a resposta principal. Uma confirmação interrompida devolve a sugestão para pendente. | `components.test.tsx`; `chat-store.test.tsx`; `agent-settings.test.tsx` |
+| F8 — Falha e interrupção | Conversa → erro do provedor ou da rede → mensagem controlada → novo envio. Durante o envio: **Interromper resposta**. | Nenhum detalhe interno aparece na tela. A pergunta é mantida e um novo envio é liberado. Resposta atrasada não é aplicada. | `client.test.ts`; `chat-store.test.tsx`; E2E "falha controlada, recuperação e interrupção" |
+| F9 — Troca de conversa, largura e teclado | Conversas ↔ conversa. Abaixo de 1024 px, conversas e fontes em diálogo. Fluxo completo só pelo teclado. | A resposta atrasada não cai em outra conversa. Não há rolagem horizontal. **Escape** fecha diálogos e devolve o foco. **Pular para o campo de mensagem** é o primeiro Tab. | `chat-store.test.tsx`; `app-shell.test.tsx`; E2E de `responsividade-acessibilidade.spec.ts` |
+
+#### Estratégia de construção
+
+As decisões abaixo explicam a forma do código. Cada uma traz o motivo, para que uma mudança futura saiba o que está trocando.
+
+1. **Duas telas e o resto dentro do chat.** Relatório, alerta, alteração de dados e sugestão proativa aparecem como cartões na mensagem que os originou, e não em telas próprias. Assim a pessoa não perde o contexto da conversa, a confirmação fica visível ao lado do pedido e não foi preciso criar roteamento. A tela padrão também ficou enxuta, como o parceiro pediu na S5-20: validação de intenção, proatividade, modo técnico e perfil foram para a engrenagem, e o painel de fontes só abre quando a pessoa pede.
+2. **A sessão delimita o estado.** O `ChatStoreProvider` recebe `key={session.sessionKey}`. Por isso, trocar de sessão ou sair desmonta todo o estado de conversa em vez de limpá-lo campo a campo. O token e as conversas ficam só em memória. O tema é a única preferência gravada no navegador.
+3. **Camadas com uma direção só.** O caminho é sempre componente → estado (`state/chat-store.tsx`, com reducer) → cliente (`lib/api/`) → backend. Nenhum componente chama `fetch`. Os contratos ficam declarados em `lib/api/schemas.ts` e são convertidos em `lib/domain.ts`, então a interface nunca lê o JSON cru. Isso permite testar cada camada substituindo apenas a de baixo.
+4. **Estados com nome.** Cada cartão tem fases explícitas: o `status` do workflow de relatório e de alerta, e a `phase` da alteração de dados (`idle`, `applied`, `cancelled`, `failed` e `undone`). Cada fase tem a sua renderização. A fase da alteração fica salva na mensagem, e é por isso que voltar à conversa não pede confirmação de novo.
+5. **Falha nunca aparece crua.** O cliente converte os códigos HTTP 400, 401, 403, 413, 422, 429, 500, 502, 503 e 504, a queda de rede e a resposta sem JSON em mensagens próprias. Na tela, essas mensagens usam `role=alert`. HTML de proxy, traceback e texto do provedor não chegam à pessoa usuária.
+6. **Os mesmos componentes em três larguras.** `hooks/use-media-query.ts` define as faixas de 1024 e 1280 px. Conversas e fontes usam o mesmo componente como painel fixo ou como diálogo. Ao fechar um diálogo, o foco volta ao botão que o abriu.
+7. **Acessibilidade como contrato de teste.** Os testes localizam os elementos por papel e nome acessível (`getByRole` e `getByLabelText`), e não por classe CSS. Se um botão perde o nome, o teste quebra. No navegador, o axe roda nos dois temas e nas três larguras.
+8. **Primitivos reutilizados e substitutos só nas bordas.** Diálogos, abas, popovers e switches vêm do Radix, em `components/ui/`. Os testes usam esses componentes reais e só substituem o que está fora do front-end: `fetch`, a store (quando o teste é de um componente isolado) e o microfone.
+9. **Qualidade no pipeline.** O job `frontend-unit` do `.gitlab-ci.yml` roda lint sem avisos, verificação de formatação, testes com cobertura e build. O job `frontend-e2e` roda o Playwright e publica `playwright-report/` e `test-results/` como artefatos, mesmo quando falha.
+
+#### Testes: camadas, casos e resultados esperados
+
+A suíte é dividida pelo que cada camada isola:
+
+| Camada | Ferramenta | O que é real e o que é substituído | Arquivos | Casos |
+| --- | --- | --- | --- | --- |
+| Componentes | Vitest, Testing Library e jsdom | O componente e os primitivos de UI são reais. A store e a API são substituídas quando o componente é testado sozinho. | `components.test.tsx`, `data-change-card`, `report-workflow-card`, `alert-workflow-card`, `references`, `notification-center`, `agent-settings` e `user-card` | 56 |
+| Tela e estado integrados | Vitest | A aplicação, a store e o cliente são reais. Só o `fetch` é substituído. | `app-shell`, `data-change-flow`, `chat-store` e `access-session` | 25 |
+| Cliente HTTP e conversões | Vitest | A serialização, os contratos e a conversão de áudio são reais. `fetch` e microfone são substituídos. | `client`, `domain`, `audio` e `use-audio-recorder` | 25 |
+| Navegador (E2E) | Playwright com Chromium em 1440 × 900, 768 × 1024 e 390 × 844 | O front-end Vite e as rotas FastAPI são reais (`app/tests/e2e_server.py`). Gemini, Azure e o classificador respondem de forma determinística. As rotas da S5-06 são simuladas com `page.route`. | 3 specs | 12 cenários × 3 larguras = 36 execuções |
+
+Casos unitários e o resultado esperado de cada arquivo:
+
+| Arquivo | Casos | Resultado esperado |
+| --- | --- | --- |
+| `components/components.test.tsx` | 25 | Cada componente do chat, do campo de mensagem, das fontes e da barra lateral tem nome acessível, renderiza Markdown sem executar HTML, mostra o erro controlado e a origem do áudio, esconde intenção e modelo fora do modo técnico, envia com Enter e quebra linha com Shift+Enter, bloqueia texto acima do limite e não inventa métricas. |
+| `chat/data-change-card.test.tsx` | 14 | A prévia não grava nada. A confirmação grava e oferece desfazer. O cancelamento informa que nada foi gravado. O erro final não oferece repetir e o erro transitório permite tentar de novo. A janela de 15 minutos e a prévia expirada são respeitadas. Histórico, avisos e perguntas com candidatos ou com valor inválido funcionam. |
+| `chat/data-change-flow.test.tsx` | 2 | Na aplicação real, a resposta com `data_change` vira cartão, e depois de confirmado o cartão não volta a pedir confirmação. Uma resposta sem `data_change` não desenha cartão. |
+| `chat/report-workflow-card.test.tsx` | 3 | O cartão envia a opção escolhida, coleta intervalo, seleção múltipla e texto opcional, confirma, cancela e baixa o artefato. |
+| `chat/alert-workflow-card.test.tsx` | 1 | Depois da confirmação, o cartão mostra a próxima avaliação automática. |
+| `documents/references.test.tsx` | 3 | A fonte mostra identificadores e períodos disponíveis. Fontes consultadas que não sustentam a resposta são sinalizadas. |
+| `notifications/notification-center.test.tsx` | 2 | O resumo de não lidas é acessível e as notificações abrem a partir do sino. |
+| `settings/agent-settings.test.tsx` | 6 | A engrenagem começa fechada, troca os modos, bloqueia a proatividade sem a validação de intenção, não troca de modo durante uma resposta e mostra o perfil só quando há sessão. |
+| `sidebar/user-card.test.tsx` | 2 | O perfil, o escopo e as permissões aparecem sem expor o token. O perfil de consulta é descrito como só leitura. |
+| `layout/app-shell.test.tsx` | 7 | A aplicação integra envio, fontes, busca, seleção, exclusão, tema, saída pela engrenagem, atalho de teclado e os diálogos de 1024 a 1279 px e do celular, que devolvem o foco ao fechar. |
+| `state/chat-store.test.tsx` | 9 | A conversa é criada no primeiro envio e preserva o contexto. Não há envio duplicado. Uma resposta atrasada é descartada. A falha libera um novo envio. O áudio exige token. A sugestão aceita, recusada ou interrompida volta ao estado correto. |
+| `state/access-session.test.tsx` | 7 | A aplicação não abre antes da validação. Persona divergente e credencial inválida são recusadas. O logout limpa a persona anterior. Um 401 encerra a sessão e um 403 a preserva. O formulário funciona pelo teclado. |
+| `lib/api/client.test.ts` | 17 | O cliente envia JSON e multipart corretos, executa o workflow com identidade, revisão e idempotência e baixa o DOCX. Os códigos 400 a 504 e a queda de rede viram mensagens controladas. O cancelamento chega até o `fetch`. |
+| `lib/domain.test.ts` | 2 | A conversão preserva evidências, períodos e correlação, e a abstenção não ganha afirmações nem metadados. |
+| `lib/audio.test.ts` | 1 | O áudio sai em PCM mono, 16 bits e 16 kHz, limitado a 60 segundos. |
+| `hooks/use-audio-recorder.test.tsx` | 5 | O gravador converte para WAV, libera o microfone e a prévia, descarta o cancelamento sem upload, libera a captura concedida depois da desmontagem, comunica permissão negada e permite tentar de novo depois de erro. |
+
+Cenários de navegador. Os cenários marcados com "claro e escuro" rodam uma vez em cada tema:
+
+| Cenário (`e2e/`) | Resultado esperado |
+| --- | --- |
+| `chat.spec.ts` — texto, fontes, modo técnico e navegação responsiva | A resposta e a fonte aparecem. A tela padrão não mostra detalhes técnicos. O modo técnico mostra a aba **Resposta**. |
+| `chat.spec.ts` — falha controlada, recuperação e interrupção | O 503 do provedor vira um alerta de indisponibilidade sem o detalhe privado. **Interromper resposta** libera o envio e a pergunta seguinte é respondida. |
+| `chat.spec.ts` — gravação sintética, WAV, upload e resposta pelo backend | O microfone sintético produz um WAV aceito pela validação real e a resposta chega marcada como **Transcrito**. |
+| `chat.spec.ts` — acessibilidade automática e tema nas três larguras | O axe não encontra violações e o tema escuro é aplicado. |
+| `chat.spec.ts` — PLN inicia fluxo guiado e entrega DOCX baixável no chat | O fluxo completo do cartão termina em um arquivo `.docx` válido, que começa por `PK`. |
+| `chat.spec.ts` — autentica a persona, envia Bearer e limpa o chat no logout | As chamadas levam `Authorization: Bearer`. Sair limpa a conversa. |
+| `responsividade-acessibilidade.spec.ts` — largura e verificação automática nos estados principais (claro e escuro) | Nos estados vazio, resposta, ajustes e fontes, não há rolagem horizontal nem violação WCAG 2.0, 2.1 e 2.2 A/AA. |
+| `responsividade-acessibilidade.spec.ts` — fluxo principal só pelo teclado | O primeiro Tab foca **Pular para o campo de mensagem** e o fluxo completo funciona sem mouse. |
+| `alteracao-dados.spec.ts` — prévia, confirmação, histórico e desfazer (claro e escuro) | A prévia mostra o antes e o depois, a confirmação grava, o histórico abre e o desfazer restaura o valor. O axe roda sobre o cartão. |
+| `alteracao-dados.spec.ts` — cancelamento não grava e erro final não oferece repetir | O cancelamento informa que nada foi gravado. O erro final não oferece **Tentar de novo**. |
+
+#### Cobertura medida
+
+A medição foi feita em **06/10/2026, às 22h27 (horário de Brasília)**, sobre o commit `f7ba157`, com Node.js 24.21.0 e Vitest 5.0.0, rodando `npm run test:coverage` em `src/frontend`. Resultado: **106 testes aprovados em 16 arquivos, sem falhas**. O relatório V8 considera os arquivos de `src/components`, `src/hooks`, `src/lib` e `src/state` (62 arquivos), inclusive os que nenhum teste importa. A cobertura dos testes de navegador não entra nesta conta.
+
+| Métrica | Coberto / total | 06/10/2026 | 10/09/2026 (Seção 8.4) | Mínimo proposto na S5-22 |
+| --- | --- | --- | --- | --- |
+| Linhas | 964 / 1.135 | **84,93%** | 87,10% | 80% |
+| Instruções | 1.025 / 1.248 | **82,13%** | 84,33% | 80% |
+| Funções | 307 / 382 | **80,36%** | 83,83% | 75% |
+| Ramificações | 814 / 1.078 | **75,51%** | 73,12% | 70% |
+
+De setembro para cá, a suíte passou de 46 para 106 testes, e o código medido passou de 636 para 1.135 linhas, com autenticação, engrenagem, notificações, alerta e alteração de dados. A cobertura de linhas caiu 2,2 pontos porque o código cresceu mais rápido do que os testes, mas as quatro métricas ficam acima dos mínimos que a S5-22 propõe para o pipeline.
+
+| Área | Linhas | Funções | Ramificações |
+| --- | --- | --- | --- |
+| `components/sidebar` | 100,0% | 100,0% | 86,4% |
+| `components/settings` | 100,0% | 100,0% | 100,0% |
+| `components/ui` | 96,9% | 89,5% | 92,3% |
+| `components/access` | 96,3% | 71,4% | 80,0% |
+| `components/documents` | 95,7% | 92,9% | 81,8% |
+| `hooks` | 90,1% | 85,7% | 63,5% |
+| `components/layout` | 87,5% | 75,0% | 86,0% |
+| `components/chat` | 86,9% | 81,4% | 84,4% |
+| `components/composer` | 85,7% | 72,7% | 74,2% |
+| `lib/api` | 80,9% | 75,0% | 76,2% |
+| `lib` (`domain`, `audio`, `format`, `utils`) | 78,8% | 96,0% | 56,0% |
+| `state` | 77,5% | 75,4% | 66,3% |
+| `components/notifications` | 65,6% | 28,6% | 25,0% |
+
+Os pontos fracos estão concentrados no alerta: `notification-center.tsx` (pausar, retomar e cancelar não são exercitados), `alert-workflow-card.tsx` (33% das linhas) e `lib/api/alert-workflow.ts` (0%). Os ramos de erro da gravação em `lib/audio.ts` também ficam descobertos. `ui/skeleton.tsx` aparece com 0% porque é decorativo e nenhuma tela o usa hoje.
+
+Para reproduzir a medição, use **Node.js 24**, a versão pedida no README e usada pela imagem `node:24-bookworm` do pipeline. Com o Node.js 22, o caso `client.test.ts › baixa o DOCX pelo backend e revoga a URL temporaria` falha por incompatibilidade entre o `Blob` do jsdom e o `Response` do Node. Não é um defeito da aplicação: o mesmo arquivo aprova os 17 casos no Node.js 24. A saída completa e o resumo por arquivo estão em `docs/evidencias/sprint-05/s5-24-documentacao-frontend.md`.
+
+```sh
+cd src/frontend
+npm ci
+npm run test:coverage      # 106 testes e cobertura em coverage/
+npx playwright install chromium
+npm run test:e2e           # 36 execuções; relatório em playwright-report/
+```
 
 ## 8.6 Requisitos das APIs de voz (STT/TTS)
 
@@ -6958,6 +7155,19 @@ Os cenários negativos de ausência de informação apresentaram comportamento s
 
 Com isso, todos os casos possuem classificação, resultado observado, evidência associada e, quando aplicável, defeito ou observação de qualidade rastreável.
 
+#### 9.1.5.9 Reexecução após as correções da Sprint 5
+
+A S5-33 ([#287](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/287)) reexecutou em 7 de outubro de 2026, no commit `e544388`, os casos cujas correções já estavam integradas. As entradas foram as mesmas de 23/09, enviadas a `POST /api/chat` com o classificador v2, as regras de roteamento e a extração de entidades reais. Só a geração do texto pelo LLM foi substituída por um duplo, porque esses casos são julgados pela classificação e pelo encaminhamento.
+
+| Caso | Rodada de 23/09 | Reexecução de 07/10 | Observação |
+|:--|:--|:--|:--|
+| CT-RF02-01 | **FALHOU** | **APROVADO** | `CONSULTA` / `consulta_status_projeto`, encaminhada ao catálogo pela regra `consulta_status_explicita` da #282. As probabilidades do modelo não mudaram. |
+| CT-RF03-02 | **FALHOU** | **APROVADO** | `FORA_DE_ESCOPO` pela regra `limite_agendamento`, sem chamada ao provedor e com 0 tokens. |
+| CT-RF06-01 | **FALHOU** | **BLOQUEADO** | Depende da S5-12 (#266), ainda não iniciada; a base continua sem documento do `PRJ-0510`. |
+| CT-RF08-01 | **FALHOU** | **BLOQUEADO** | Mesma dependência e mesma causa (`DEF-RF06-01`). |
+
+Com a reexecução, o resultado funcional passa a 18 casos aprovados, nenhuma falha confirmada após correção e 2 casos bloqueados pela #266. Os defeitos `DEF-RF02-01` e `DEF-RF03-01` ficam corrigidos no comportamento do sistema, e o `DEF-RF06-01` continua aberto. Detalhes, ambiente e evidências estão no [relatório S5-33](testes/sprint5/relatorio-s5-33.md).
+
 ## 9.2 Testes de RNFs
 
 ### 9.2.1 Planejamento
@@ -7100,7 +7310,7 @@ Executados em 22 e 23/09/2026 por Henrique Diniz. O índice completo das rodadas
 | `rnf04/avaliar_rnf04.py` | Apura fundamentação e alucinação com numerador e denominador explícitos | Aplica o critério sobre o conjunto completo, nunca sobre um subconjunto escolhido depois |
 | `executar_rodada_rnf.sh` | Encadeia a coleta do RNF04 e as três rodadas do RNF05 numa campanha | Reproduz a execução completa com um comando |
 | SQL em `public.ai_interactions` | Compara o tempo do pipeline, gravado pela auditoria do RNF03, com o tempo do cliente | Separa o custo do sistema do custo do que vem depois do pipeline, sem instrumentação nova |
-| [`evidencias/graficos_rnf05.ipynb`](../src/backend/evidencias/graficos_rnf05.ipynb) | Gera as Figuras 28 e 29 a partir dos CSVs versionados | Nenhum número das figuras é digitado à mão |
+| [`evidencias/graficos_rnf05.ipynb`](../src/backend/evidencias/graficos_rnf05.ipynb) | Gera as Figuras 29 e 30 a partir dos CSVs versionados | Nenhum número das figuras é digitado à mão |
 | OpenRouter | Chama o `gemini-3.7-flash` em plano pago | Mesmo modelo da bancada, sem o limite de 20 requisições por dia do *Free Tier*; o adaptador envia exatamente o mesmo texto que o Gemini direto receberia |
 
 **Comandos do RNF04**, a partir de `src/backend`, com a API no ar como na Seção 9.2.4. Os do RNF05 estão no item 6 da revisão do protocolo, na mesma seção.
@@ -7135,21 +7345,21 @@ Executados em 22 e 23/09/2026 por Henrique Diniz. O índice completo das rodadas
 
 **Estados usados na tabela.** *Aprovado* e *reprovado* comparam o observado com o critério; *validado* indica o cenário negativo que reprovou, como exigido; *inconclusivo* é a janela com menos de 40 amostras em alguma rota, que não aprova nem reprova; *bloqueado* é a execução impedida por dependência externa; *não executado*, o caso que não chegou a rodar.
 
-A Figura 28 compara o P95 de cada rodada positiva com o teto do requisito. As barras vermelhas são as rodadas reprovadas: na 1ª, a comparação com um usuário teve 10 amostras e o P95 coincidiu com a pior requisição; na 2ª, houve um erro com um usuário e P95 simples de 11,0 s com cinco. Na 3ª, com cache quente e com cache frio, todas as rotas ficaram abaixo do teto, com pelo menos 64 amostras cada.
+A Figura 29 compara o P95 de cada rodada positiva com o teto do requisito. As barras vermelhas são as rodadas reprovadas: na 1ª, a comparação com um usuário teve 10 amostras e o P95 coincidiu com a pior requisição; na 2ª, houve um erro com um usuário e P95 simples de 11,0 s com cinco. Na 3ª, com cache quente e com cache frio, todas as rotas ficaram abaixo do teto, com pelo menos 64 amostras cada.
 
 <div align="center">
   <img src="img/rnf05-p95-rodadas.png" alt="P95 da consulta simples e da comparação em cada rodada positiva do RNF05, contra os tetos de 10 e 20 segundos" width="100%">
 </div>
 
-<p align="center"><strong>Figura 28</strong> - RNF05: P95 medido pelo cliente em cada rodada positiva.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
+<p align="center"><strong>Figura 29</strong> - RNF05: P95 medido pelo cliente em cada rodada positiva.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
 
-A Figura 29 abre os percentis da 3ª rodada. As quatro curvas positivas ficam abaixo dos tetos até o P95; a comparação com um usuário tem uma requisição de 13,5 s, que aparece no P99 e no máximo, ainda abaixo do teto de 20 s. A curva do cenário negativo fica acima de 30 s em todos os percentis: a medição enxerga a violação.
+A Figura 30 abre os percentis da 3ª rodada. As quatro curvas positivas ficam abaixo dos tetos até o P95; a comparação com um usuário tem uma requisição de 13,5 s, que aparece no P99 e no máximo, ainda abaixo do teto de 20 s. A curva do cenário negativo fica acima de 30 s em todos os percentis: a medição enxerga a violação.
 
 <div align="center">
   <img src="img/rnf05-rodada3-percentis.png" alt="Mediana, P90, P95, P99 e máximo de cada janela e rota da 3ª rodada do RNF05, com o cenário negativo acima dos tetos" width="100%">
 </div>
 
-<p align="center"><strong>Figura 29</strong> - RNF05: percentis da 3ª rodada por janela e rota, com o cenário negativo.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
+<p align="center"><strong>Figura 30</strong> - RNF05: percentis da 3ª rodada por janela e rota, com o cenário negativo.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
 
 **Registros das execuções aprovadas.** Saídas dos apuradores, reproduzíveis a partir dos arquivos de evidência.
 
@@ -7227,7 +7437,24 @@ A avaliação prospectiva ampliada do RNF06 foi executada uma única vez em 23 d
 
 A linha de base de 22 de setembro recuperou 11 de 18 fontes e registrou *recall*@3 de 0,611111. As equivalências lexicais adicionadas em seguida foram escolhidas a partir dos erros desses mesmos casos; por isso, a reexecução com 18 de 18 fontes e *recall*@3 de 1,000000 é apenas evidência de regressão conhecida, não de generalização. A avaliação prospectiva v2 corrige essa contaminação metodológica: suas 72 consultas não repetem a massa v1, foram congeladas contra a implementação anterior e não foram reutilizadas para ajuste. Ela revelou fragilidade especialmente em consultas curtas e sinônimos novos (0,333333), formulações implícitas e paráfrases (0,444444). A autoria interna não cega e o uso de fontes sintéticas ainda limitam a validade externa; a conclusão não substitui homologação com solicitações reais e SharePoint do parceiro.
 
+**Reexecução prevista na Sprint 5.** A S5-33 não reexecutou a recuperação do RNF06: o recuperador e o corpus continuam os mesmos da avaliação v2, e a ampliação da base depende da S5-12 (#266), ainda não iniciada. A nova massa prospectiva será congelada sobre o corpus ampliado, antes da única medição, conforme o [relatório S5-33](testes/sprint5/relatorio-s5-33.md). Até lá, o RNF06 permanece **reprovado** na recuperação.
+
 Os demais CT-RNF permanecem sem resultado nesta subseção até que sejam executados com as evidências previstas. Casos bloqueados devem identificar a dependência e o plano de desbloqueio.
+
+#### RNF10 a RNF12 — Sprint 5
+
+A execução da S5-32 ([#286](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/286)) ocorreu em 7 de outubro de 2026, no commit `84df352` da `develop`, com a API em processo (`TestClient`), duplos na fronteira do provedor e da fonte, e sem banco, rede ou `.env`. O relatório completo, com comandos e limites, está em [`testes/sprint5/relatorio-s5-32.md`](testes/sprint5/relatorio-s5-32.md), e as evidências em [`src/backend/evidencias/rnf10-rnf12/rodada-01/`](../src/backend/evidencias/rnf10-rnf12/rodada-01/manifesto.json).
+
+| Caso | Resultado observado | Situação |
+| --- | --- | --- |
+| CT-RNF10-P | Checklist de camadas, README, contrato OpenAPI e testes versionados sem violações; README reproduzido em ambiente limpo | Aprovado |
+| CT-RNF10-N | README sem instrução de teste e rota com acesso externo direto, ambos em cópias, detectados pelo checklist | Aprovado |
+| CT-RNF11-P | Falha de classificação (503), ausência de resultado (200, sem chamar o provedor), fonte indisponível (503), *timeout* (502) e provedor 5xx (502): mensagem definida, auditoria registrada e nenhum vazamento | Aprovado |
+| CT-RNF11-N | Payload inválido do provedor controlado (502). Exceção inesperada: 500 genérico do Starlette, sem mensagem do projeto e sem auditoria (`DEF-S5-32-01`) | **Reprovado** |
+| CT-RNF12-P | `scripts/validar_massa_sintetica.py` encontrou as seis categorias: 3 projetos, 1 subportfólio, 10 marcos, 10 riscos, 17 indicadores e 9 documentos | Aprovado |
+| CT-RNF12-N | Seis cópias, cada uma sem uma categoria, reprovadas com a categoria ausente identificada | Aprovado |
+
+O `DEF-S5-32-01` decorre da falta de um tratador global de exceções em `/api/chat`: uma exceção sem tratador registrado escapa antes do registro de auditoria. O destino do defeito fica para a consolidação dos testes sistêmicos (S5-36).
 
 ## 9.3 Testes de Usabilidade
 
@@ -7241,42 +7468,42 @@ O planejamento prevê a realização dos testes com pelo menos cinco usuários e
 
 A planilha de execução funciona como instrumento de campo para o moderador e os observadores. A aba "Registro dos testes" organiza os cenários em blocos sequenciais, mantendo o mesmo padrão visual do modelo do grupo: título da tarefa, descrição da atividade, resultado geral, cinco etapas observáveis e campo de observações por usuário. A aba "Ocorrências" concentra problemas identificados durante as sessões, incluindo tarefa relacionada, severidade, resumo do ocorrido, potenciais melhorias e participante afetado. Dessa forma, o artefato permite registrar tanto o desempenho objetivo em cada etapa quanto evidências qualitativas de dificuldade, dúvida, hesitação, necessidade de ajuda ou quebra de confiança.
 
-As Figuras 30 a 34 apresentam os principais recortes da planilha criada para conduzir e registrar os testes. Esses prints documentam como o roteiro foi operacionalizado em tarefas observáveis, permitindo que diferentes avaliadores registrem os resultados de forma padronizada.
+As Figuras 31 a 35 apresentam os principais recortes da planilha criada para conduzir e registrar os testes. Esses prints documentam como o roteiro foi operacionalizado em tarefas observáveis, permitindo que diferentes avaliadores registrem os resultados de forma padronizada.
 
 <div align="center">
   <img src="img/testes-usabilidade-p1e2.png" alt="Planilha de testes de usabilidade com os cenários 1 e 2" width="900">
-  <p><strong>Figura 30</strong> - Registro dos cenários 1 e 2 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 31</strong> - Registro dos cenários 1 e 2 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 30 apresenta os dois primeiros cenários do roteiro: entrada em linguagem natural e consulta de status ou prazo. Esses cenários validam se o usuário consegue iniciar a interação com o agente sem comandos técnicos e se consegue interpretar uma resposta objetiva, incluindo a verificação da fonte indicada.
+A Figura 31 apresenta os dois primeiros cenários do roteiro: entrada em linguagem natural e consulta de status ou prazo. Esses cenários validam se o usuário consegue iniciar a interação com o agente sem comandos técnicos e se consegue interpretar uma resposta objetiva, incluindo a verificação da fonte indicada.
 
 <div align="center">
   <img src="img/testes-usabilidade-p3e4.png" alt="Planilha de testes de usabilidade com os cenários 3 e 4" width="900">
-  <p><strong>Figura 31</strong> - Registro dos cenários 3 e 4 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 32</strong> - Registro dos cenários 3 e 4 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 31 mostra os cenários voltados à consulta de riscos e à análise comparativa entre projetos. Nessa parte do teste, o observador registra se o participante consegue escolher o tema da consulta, compreender as informações retornadas, pedir detalhes quando necessário e avaliar se a comparação apresentada apoia a tomada de decisão.
+A Figura 32 mostra os cenários voltados à consulta de riscos e à análise comparativa entre projetos. Nessa parte do teste, o observador registra se o participante consegue escolher o tema da consulta, compreender as informações retornadas, pedir detalhes quando necessário e avaliar se a comparação apresentada apoia a tomada de decisão.
 
 <div align="center">
   <img src="img/testes-usabilidade-p5e6.png" alt="Planilha de testes de usabilidade com os cenários 5 e 6" width="900">
-  <p><strong>Figura 32</strong> - Registro dos cenários 5 e 6 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 33</strong> - Registro dos cenários 5 e 6 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 32 registra os cenários de informação ausente ou fora de escopo e de sugestão proativa. Esses testes são importantes para avaliar confiança e controle: o agente deve declarar limites quando não houver informação suficiente e, quando sugerir um próximo passo, deve deixar claro que a ação depende da confirmação do usuário.
+A Figura 33 registra os cenários de informação ausente ou fora de escopo e de sugestão proativa. Esses testes são importantes para avaliar confiança e controle: o agente deve declarar limites quando não houver informação suficiente e, quando sugerir um próximo passo, deve deixar claro que a ação depende da confirmação do usuário.
 
 <div align="center">
   <img src="img/testes-usabilidade-p7.png" alt="Planilha de testes de usabilidade com o cenário 7" width="900">
-  <p><strong>Figura 33</strong> - Registro do cenário 7 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 34</strong> - Registro do cenário 7 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 33 apresenta o cenário de entrada por voz. O objetivo desse bloco é observar se o participante consegue acionar a entrada por áudio, formular uma pergunta curta, conferir a transcrição e obter uma resposta coerente, mantendo o mesmo fluxo previsto para solicitações textuais.
+A Figura 34 apresenta o cenário de entrada por voz. O objetivo desse bloco é observar se o participante consegue acionar a entrada por áudio, formular uma pergunta curta, conferir a transcrição e obter uma resposta coerente, mantendo o mesmo fluxo previsto para solicitações textuais.
 
 <div align="center">
   <img src="img/testes-usabilidade-ocorrencias.png" alt="Planilha de ocorrências dos testes de usabilidade" width="900">
-  <p><strong>Figura 34</strong> - Aba de ocorrências dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 35</strong> - Aba de ocorrências dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 34 apresenta a aba de ocorrências, usada para consolidar problemas identificados durante as sessões. O registro separado por tarefa, severidade, descrição do ocorrido, melhoria potencial e participante afetado permite priorizar correções após os testes, distinguindo falhas críticas de ajustes menores de clareza ou interface.
+A Figura 35 apresenta a aba de ocorrências, usada para consolidar problemas identificados durante as sessões. O registro separado por tarefa, severidade, descrição do ocorrido, melhoria potencial e participante afetado permite priorizar correções após os testes, distinguindo falhas críticas de ajustes menores de clareza ou interface.
 
 Os perfis desejados são:
 
@@ -7366,7 +7593,7 @@ Quatro dicas do moderador foram necessárias, todas nos cenários 5 e 6 e todas 
   <img src="img/usabilidade-resultado-por-cenario.png" alt="Resultado de cada cenário do teste de usabilidade, com a distribuição dos seis participantes entre concluído, concluído com dificuldade e falhou" width="100%">
 </div>
 
-<p align="center"><strong>Figura 35</strong> - Resultado por cenário do teste de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos dados anonimizados das seis sessões.</sup></p>
+<p align="center"><strong>Figura 36</strong> - Resultado por cenário do teste de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos dados anonimizados das seis sessões.</sup></p>
 
 **Ocorrências.**
 
@@ -7444,6 +7671,12 @@ resíduo. A rodada partiu do ambiente local de desenvolvimento; a mesma coleta
 na imagem publicada acompanha a publicação da versão final. Resultados,
 latências e hashes estão nas
 [evidências da homologação com Azure real](evidencias/sprint-05/vhs-azure-real/README.md).
+
+#### Integração frontend-backend e falhas de comunicação — S5-23
+
+A S5-23 ([#277](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/277)) automatizou no Playwright os fluxos principais da interface contra o backend de testes (`app/tests/e2e_server.py`), que usa as rotas reais da API, repositórios em memória e provedores determinísticos. A suíte terminou com 60 testes aprovados: 20 cenários em desktop, tablet e celular. Texto, áudio, relatório e alerta percorrem o backend; o alerta vai até a assinatura ativa, conferida em `GET /api/alert-subscriptions`. A alteração de dados é exercitada com a API simulada, e o contrato do backend correspondente é coberto pelos testes de `data_changes`.
+
+As falhas de comunicação simuladas foram 503, 502 e 500 do backend, 504 de gateway, *timeout* do cliente, perda de conexão e 503 no meio do workflow de alerta. Em todas, a interface exibiu mensagem controlada, sem detalhe interno, e voltou a funcionar no envio seguinte. O job `frontend-e2e` publica o relatório HTML como artefato do MR e o JUnit na aba de testes. Resultados, mudanças e limites estão no [relatório S5-23](testes/sprint5/relatorio-s5-23.md).
 
 # 10. Procedimentos de Implantação
 
@@ -7970,6 +8203,157 @@ O fluxo confirma que todos os pagamentos mapeados podem ser liquidados e que o s
 
 Nas premissas adotadas, a entrega é financeiramente viável pelo preço de **R$ 192.195,11**. Esse valor paga os R$ 115.400,00 de custos diretos, os R$ 15.771,36 de despesas operacionais, os R$ 5.684,09 de juros, o imposto único estimado em R$ 30.270,73 e o lucro de R$ 25.068,93. O empréstimo de R$ 131.171,36 resolve o descasamento entre os pagamentos do desenvolvimento e o recebimento final, enquanto a inclusão dos juros na formação do preço preserva o lucro desejado de 15% após a quitação. Portanto, a viabilidade depende de cumprir o prazo, controlar o uso das ferramentas e receber do cliente na data contratada.
 
+## 11.10 Custos de implementação da PoC e da solução final
+
+Esta subseção atende à **S5-39 ([#293](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/293))**. Ela consolida os insumos das S4-52A a S4-52C ([#246](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/246) a [#248](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/248)), já refletidos nas Seções 11.2 e 11.3, e separa os custos em dois objetos:
+
+- **PoC:** o que foi construído no módulo, com dados sintéticos e ambiente de demonstração.
+- **Solução final:** a evolução da PoC para operar no ambiente corporativo do Metrô, seguindo o caminho de homologação da Seção 6.4.7.
+
+Em ambos, o custo tem duas partes, **pessoal e tecnologia**, cada linha com premissa, quantidade e valor. Tributos, margem e despesas administrativas pertencem à formação do preço das Seções 11.4 a 11.6 e não entram aqui.
+
+### 11.10.1 Premissas comuns
+
+| Premissa | Valor adotado | Fonte ou justificativa |
+|---|---|---|
+| Equipe | 6 pessoas desenvolvedoras júnior PJ | Composição do grupo, Seção 11.2.1 |
+| Dedicação | 8 horas por pessoa por dia útil | Dedicação integral, a mesma da Seção 11.2.1 |
+| Capacidade da equipe | 48 horas por dia útil; 480 horas por sprint de duas semanas (`6 × 8 × 10`) | Derivada das duas linhas anteriores |
+| Valor-hora | R$ 50,00 | Taxa PJ júnior da Seção 11.2.1, com referência no [Guia Salarial 2026 da Robert Half](https://www.roberthalf.com/br/pt/insights/salary-guide) |
+| Câmbio | R$ 5,1795 por US$ 1,00 | PTAX de venda de 24/09/2026, a mesma da Seção 11.3.1 |
+| Região de nuvem da solução final | Azure Brazil South | Dados do Metrô permanecem no país; preços da [API pública de preços do Azure](https://prices.azure.com/api/retail/prices), consultada em 07/10/2026 |
+
+### 11.10.2 PoC
+
+**Pessoal.** A PoC foi desenvolvida em cinco sprints, entre 3 de agosto e 7 de outubro de 2026, o que dá 47 dias úteis.
+
+| Item | Premissa | Quantidade | Valor unitário | Valor |
+|---|---|---:|---:|---:|
+| Desenvolvimento | 6 pessoas × 47 dias úteis × 8 h | 2.256 h | R$ 50,00/h | R$ 112.800,00 |
+| **Total de pessoal da PoC** | | **2.256 h** | | **R$ 112.800,00** |
+
+**Tecnologia.** Valores das Seções 11.2.2 e 11.3.1, mantidos como preço de mercado. Créditos acadêmicos e camadas gratuitas usados pela equipe não reduzem o orçamento, porque não estariam disponíveis para uma startup contratada.
+
+| Item | Premissa | Quantidade | Valor unitário | Valor |
+|---|---|---:|---:|---:|
+| Codex | Assistente de código para cada integrante | 6 pessoas × 3 meses | R$ 100,00/mês | R$ 1.800,00 |
+| Gemini / OpenRouter | Franquia para desenvolvimento, integração e testes do agente | 1 franquia | R$ 500,00 | R$ 500,00 |
+| Azure AI Speech | Franquia para integração e testes de transcrição | 1 franquia | R$ 300,00 | R$ 300,00 |
+| AWS EC2 `t3.large` | Execução sob demanda | ~6 semanas | — | R$ 393,01 |
+| AWS EBS `gp3` 50 GB, IPv4, ECR e CloudWatch | Armazenamento, endereço, imagens e logs | ~6 semanas | — | R$ 69,37 |
+| Supabase Pro | Banco gerenciado | ~2 meses | — | R$ 258,98 |
+| **Total de tecnologia da PoC** | | | | **R$ 3.321,36** |
+
+| Resumo da PoC | Valor |
+|---|---:|
+| Pessoal | R$ 112.800,00 |
+| Tecnologia | R$ 3.321,36 |
+| **Custo de implementação da PoC** | **R$ 116.121,36** |
+
+### 11.10.3 Solução final
+
+**Escopo.** A solução final mantém o núcleo Python da PoC e adapta hospedagem, identidade, dados, modelo de linguagem e canal ao ecossistema Microsoft, pelo caminho recomendado na Seção 6.4.7:
+
+- aplicação web publicada como aba do Teams;
+- API e workers em Azure Container Apps;
+- PostgreSQL gerenciado em Azure;
+- Microsoft Entra ID para identidade;
+- SharePoint corporativo acessado pelo Microsoft Graph;
+- Azure OpenAI no lugar do Gemini;
+- Azure AI Speech para voz;
+- servidor MCP para conexão com o Copilot, pedido na S5-18.
+
+Ficam fora do escopo: reconstruir os fluxos em Power Automate ou Copilot Studio, trocar o RabbitMQ por Service Bus e adotar Azure AI Search. A Seção 6.4 classifica esses três caminhos como opcionais e de esforço alto.
+
+**Método do esforço.** As horas vêm da avaliação de esforço que a Seção 6.4 atribui a cada componente:
+
+| Nível de esforço | Horas por componente |
+|---|---:|
+| Baixo | 32 h |
+| Médio | 96 h |
+| Alto | 192 h |
+
+Somam-se **20%** para homologação e regressão no ambiente do Metrô: repetir os testes funcionais, os RNFs (em especial RNF04 a RNF06, com dados reais) e a usabilidade. Para calibrar: na PoC, as 2.256 horas produziram os 32 componentes inventariados na Seção 6.4, uma média de 70,5 h por componente. As 96 h de um componente médio ficam acima dessa média porque cobrem o adaptador e sua validação no ambiente corporativo, que a PoC não teve. A proporção 1 : 3 : 6 entre os níveis acompanha a escala qualitativa da Seção 6.4.2.
+
+**Pessoal.**
+
+| Frente | Componentes da Seção 6.4 e esforço | Horas |
+|---|---|---:|
+| Interface e canal | Aba Teams (médio); domínio e ingress HTTPS (médio); blocos de resposta no canal (médio); notificações no Teams (médio) | 384 h |
+| API e inteligência | API em Container Apps (médio); classificador e catálogo (médio); workflows de relatório e alerta (médio); proatividade (médio); cliente Azure OpenAI (médio); normalização e entidades (baixo); validação de citações (baixo) | 544 h |
+| Dados e identidade | SharePoint via Graph (alto); PostgreSQL gerenciado (alto); Entra ID e mapeamento de perfis (alto); recuperação mantida e reavaliada (médio); Blob Storage (médio); auditoria (médio); barreira de dado sensível (médio) | 960 h |
+| Voz, relatórios e alertas | STT (baixo); TTS (médio); serviço de relatórios (médio); renderização DOCX (baixo); workers de alerta (médio); RabbitMQ em contêiner (médio) | 448 h |
+| Copilot | Servidor MCP com ferramentas, transporte e autenticação (alto) | 192 h |
+| Hospedagem e operação | Container Apps e registro de imagens (alto); Key Vault (médio); Azure Monitor e Application Insights (médio); CI/CD do GitLab para Azure (médio) | 480 h |
+| **Subtotal dos componentes** | | **3.008 h** |
+| Homologação e regressão | 20% do subtotal | 601,6 h |
+| **Esforço estimado** | | **3.609,6 h** |
+
+Com 480 horas por sprint, o esforço exige **8 sprints**, ou 16 semanas (cerca de 4 meses). A equipe é contratada pela capacidade das sprints, e as 230,4 horas que sobram (6% do total) funcionam como reserva.
+
+| Item | Premissa | Quantidade | Valor unitário | Valor |
+|---|---|---:|---:|---:|
+| Desenvolvimento e homologação | 6 pessoas × 8 h × 80 dias úteis | 3.840 h | R$ 50,00/h | R$ 192.000,00 |
+| **Total de pessoal da solução final** | | **3.840 h** | | **R$ 192.000,00** |
+
+**Tecnologia durante a implementação** (8 sprints, cerca de 4 meses):
+
+| Item | Premissa | Quantidade | Valor unitário | Valor |
+|---|---|---:|---:|---:|
+| Codex | Assistente de código para cada integrante | 6 pessoas × 4 meses | R$ 100,00/mês | R$ 2.400,00 |
+| Ambiente Azure de homologação | PostgreSQL B1ms (US$ 0,035/h × 730 h), registro de imagens Basic (US$ 0,1666/dia), testes no Azure OpenAI (1 M de tokens de entrada e 0,3 M de saída) e 15% de reserva para armazenamento, backup e tráfego. Container Apps, Log Analytics e Speech dentro das cotas gratuitas mensais | 4 meses × US$ 36,23 | R$ 187,65/mês | R$ 750,61 |
+| **Total de tecnologia da implementação** | | | | **R$ 3.150,61** |
+
+| Resumo da solução final | Valor |
+|---|---:|
+| Pessoal | R$ 192.000,00 |
+| Tecnologia durante a implementação | R$ 3.150,61 |
+| **Custo de implementação da solução final** | **R$ 195.150,61** |
+
+**Operação mensal após a implantação.** A operação não faz parte do custo de implementação, mas define o que o Metrô passa a pagar todo mês. O volume adotado é este:
+
+- 30 usuários (PMO e gestores dos 48 projetos ativos do cenário de protótipo da Seção 3.8.3), 10 consultas por usuário por dia útil e 21 dias úteis: **6.300 consultas por mês**;
+- 70% das consultas chegam ao modelo de linguagem; o restante é resolvido por roteamento local, como mostrou a hipótese de tokens da Sprint 4;
+- 2.000 tokens de entrada e 600 de saída por chamada, mais que os cerca de 200 e 140 da massa sintética, porque os documentos reais são maiores;
+- 20% das perguntas por voz, com 15 segundos cada;
+- 30% das respostas reproduzidas em áudio, com 600 caracteres cada.
+
+| Item | Premissa | Quantidade por mês | Preço unitário (US$) | Valor mensal |
+|---|---|---:|---:|---:|
+| Container Apps, vCPU | API com 1 vCPU e 2 GiB; frontend, worker de alertas e RabbitMQ com 0,25 vCPU e 0,5 GiB cada; 24 × 7; descontada a cota gratuita | 4.419.000 vCPU-s faturáveis | 0,000024 | R$ 549,34 |
+| Container Apps, memória | Mesmos contêineres | 8.838.000 GiB-s faturáveis | 0,000003 | R$ 137,31 |
+| PostgreSQL Flexible B2s | Banco do portfólio, sessões e auditoria, 24 × 7 | 730 h | 0,14 | R$ 529,34 |
+| Azure OpenAI `gpt-4.1-mini` | 4.410 chamadas | 8,82 M tokens de entrada / 2,65 M de saída | 0,40 / 1,60 por M | R$ 40,19 |
+| Speech, STT | 1.260 perguntas por voz | 5,25 h de áudio | 1,00/h | R$ 27,19 |
+| Speech, TTS neural | 1.890 respostas em áudio | 1,13 M caracteres | 15,00 por M | R$ 88,10 |
+| Registro de imagens Basic | Imagens da API e do frontend | 30,42 dias | 0,1666/dia | R$ 26,26 |
+| Key Vault | Leitura de segredos pela aplicação | 100 mil operações | 0,03 por 10 mil | R$ 1,55 |
+| Log Analytics | Logs e telemetria acima dos 5 GB gratuitos | 3 GB | 4,60/GB | R$ 71,48 |
+| Reserva de 15% | Armazenamento do banco e de arquivos, backup, tráfego de saída | — | — | R$ 220,61 |
+| **Total mensal de operação** | | | | **R$ 1.691,37** |
+
+Isso dá cerca de **R$ 20.296 por ano**. O valor se concentra em computação e banco, que respondem por 72% do total. O modelo de linguagem pesa pouco nesse volume: dobrar as consultas acrescentaria cerca de R$ 40 por mês nessa linha.
+
+**O que não está no custo.**
+
+- Teams, Entra ID e SharePoint fazem parte do Microsoft 365 que o Metrô já usa, então o custo incremental foi considerado zero.
+- Licenças de Copilot para os usuários, se o Metrô quiser usar o agente pelo Copilot, dependem do contrato Microsoft dele e não foram orçadas.
+- O preço do `gpt-4.1-mini` é o da implantação global. Se a GTI exigir processamento restrito a uma zona de dados, o valor por token muda e precisa ser revisto.
+- Sustentação, operação assistida e evolução depois da implantação exigem outra equipe e outro orçamento.
+
+### 11.10.4 Comparação
+
+| | PoC | Solução final |
+|---|---:|---:|
+| Duração | 5 sprints (47 dias úteis) | 8 sprints (80 dias úteis) |
+| Horas de desenvolvimento | 2.256 h | 3.840 h |
+| Pessoal | R$ 112.800,00 | R$ 192.000,00 |
+| Tecnologia durante a implementação | R$ 3.321,36 | R$ 3.150,61 |
+| **Custo de implementação** | **R$ 116.121,36** | **R$ 195.150,61** |
+| Operação depois da entrega | Não prevista (demonstração) | R$ 1.691,37 por mês |
+
+Nos dois casos, pessoal responde por mais de 97% do custo de implementação. Por isso, o prazo é a variável que mais pesa: cada sprint a mais da equipe custa R$ 24.000,00. A solução final custa cerca de 1,7 vez a PoC porque troca dados sintéticos e serviços de demonstração por identidade, fontes e hospedagem corporativas. Essa diferença acompanha o esforço que a Seção 6.4 atribui a cada componente.
+
 # 12. Benefícios Entregues e Aperfeiçoamentos Futuros
 
 Esta seção registra o valor que a prova de conceito entrega ao PMO do Metrô e prioriza as melhorias que ficam para depois do módulo. Cada benefício está ligado à funcionalidade que o produz e à evidência que o sustenta, de modo que nenhum deles depende de declaração: todos remetem a uma medição ou a um registro de execução do próprio documento.
@@ -8163,9 +8547,8 @@ A avaliação recebida indicava **81%** e situação Conforme. Esta auditoria
 reproduz seus 37 critérios, registra correções verificáveis e explicita as
 pendências. Todos os critérios estão rastreados, mas isso não comprova que
 todos estejam conformes. O percentual oficial depende da reavaliação do
-Escritório. Não há alteração de nota em sistema externo.
-Link público inacessível, ausência de segredo e limpeza remota exigem limites
-explícitos; não são resolvidos simplesmente mudando uma célula para Conforme.
+Escritório. A disponibilidade de links externos, a verificação de dados sensíveis
+e a limpeza de branches exigem evidências específicas de conclusão.
 
 ### Checklist e evidências
 
@@ -8185,7 +8568,7 @@ explícitos; não são resolvidos simplesmente mudando uma célula para Conforme
 | 12 | Grupo/integrantes na licença | Oneshot e seis integrantes. | Conforme |
 | 13 | Links na licença | Links de integrantes/instituição. | Estrutura conforme; acesso externo condicionado |
 | 14 | Referências além do modelo | Bibliografia formal README e fontes primárias em Arquitetura. | Conforme |
-| 15 | Instruções genéricas/template removidos | [Guia de padrões](GuiaPadroesDesenvolvimento.md) restaurado ao conteúdo anterior de develop por solicitação do grupo. Contém marcadores de template e exemplos de stack distintos do runtime atual. | Pendente de atualização específica do guia; padrões não duplicados em Projeto.md |
+| 15 | Instruções genéricas/template removidos | [Guia de padrões](GuiaPadroesDesenvolvimento.md) disponível em documento próprio. Contém marcadores de template e exemplos de stack distintos do runtime atual. | Pendente de atualização específica do guia; padrões não duplicados em Projeto.md |
 | 16 | README coerente com repositório | Estrutura atual e links; modos/limites no manual/Arquitetura. | Conforme |
 | 17 | Seção de requisitos | Prioridades MVP no README; requisitos completos Projeto. | Conforme |
 | 18 | Instruções de execução/instalação | Dois terminais e configuração; Seção 14.2 atualizada para Auth/banco. O smoke do HEAD atual encontra Header não definido; ver conciliação abaixo. | Instruções presentes; execução backend bloqueada no HEAD atual |
@@ -8203,9 +8586,9 @@ explícitos; não são resolvidos simplesmente mudando uma célula para Conforme
 | 30 | Links funcionam sem restrição | Caminhos locais validados; localhost escrito como instrução, exige servidores; GitLab/LinkedIn exigem direitos externos. | Conforme em links locais; acesso irrestrito externo não demonstrado |
 | 31 | Formatação mínima | Títulos, listas e tabelas; validação editorial. | Conforme |
 | 32 | Seções principais preenchidas | GestãoProjeto/Configuração, Guia e Projeto, mais fechamento S5. | Conforme |
-| 33 | Temporários/irrelevantes removidos | Arquivos intermediários da pesquisa ficaram fora da entrega; nenhum snapshot bruto ou .env é parte do pacote. Complementares úteis explicados. | Conforme no pacote local |
-| 34 | Versão PDF da documentação, se exigida | A entrega solicitada é em Markdown, consolidada em Projeto.md e GestaoProjeto.md. Não há exigência de PDF confirmada no escopo autorizado. | Não aplicável ao formato solicitado; confirmar aplicabilidade na reavaliação do EP |
-| 35 | Repositórios auxiliares/complementares linkados | Arquitetura identifica único repo próprio e fontes de integrações; não inventa outro repo. | Conforme documental |
+| 33 | Temporários/irrelevantes removidos | Arquivos temporários de trabalho e .env não integram os artefatos versionados de fechamento. Arquivos complementares têm finalidade documentada. | Conforme nos artefatos de fechamento |
+| 34 | Versão PDF da documentação, se exigida | Documentação mantida em Markdown, em Projeto.md e GestaoProjeto.md. O critério de PDF é condicional e sua exigência não está confirmada. | Aplicabilidade pendente de confirmação na reavaliação do EP |
+| 35 | Repositórios auxiliares/complementares linkados | Arquitetura identifica o repositório do projeto e as referências das integrações externas. | Conforme documental |
 | 36 | Arquitetura detalhada | Componentes, fluxo, controles, persistência, ambientes, dependências e limites em Seção 5.4 deste documento. | Conforme |
 | 37 | Estrutura formal de testes | backend/app/tests, frontend/tests/e2e, docs/testes e evidências RNF. | Conforme |
 
@@ -8223,8 +8606,8 @@ externo e aceite do modelo permanecem visíveis.
 | Pipeline não obrigatório | Snapshot GitLab mostra only_allow_merge_if_pipeline_succeeds=true. |
 | Título de MR sem gate | Job validar-titulo-mr e dois scripts presentes; !118 integrado. |
 | Gate integração/marcadores ausente | !120 integrado: job conflict-markers no estágio validate, título de MR no mesmo job, backend com seleção integration/strict-markers e frontend com typecheck/cobertura. Resultado remoto do HEAD atual não reconsultado; evidência versionada registra limitação de jobs do GitLab. |
-| Temporárias pós-merge e nomes fora da regra | Inventário realizado; não houve exclusão. A limpeza de branches está fora desta entrega documental. |
-| Coerência develop/hmg/main | Ancestralidade/conteúdo devem ser verificados na promoção final. Esta entrega não promove release nem inventa identidade das branches. |
+| Temporárias pós-merge e nomes fora da regra | Inventário realizado; limpeza pendente. Preservar branches permanentes, MRs abertos e conteúdo sem integração comprovada. |
+| Coerência develop/hmg/main | Ancestralidade e conteúdo devem ser verificados e registrados na promoção final; igualdade de conteúdo não comprova identidade do histórico. |
 | Cobertura do job backend | CI atual usa pytest app/tests -m integration --strict-markers. Coleta local de síntese/tracing falhou por Header não definido em main.py; integração do YAML não implica backend ou pipeline aprovados. |
 
 ### Aceite e resultado
@@ -8233,17 +8616,16 @@ As correções locais resolvem os itens documentais parciais/não conformes:
 referências, README de banco, descrição das integrações, arquitetura e instruções atuais.
 **Não se declara 100% oficial ou acesso externo irrestrito sem evidência.** Os
 critérios condicionados acima ficam prontos para inspeção do EP, com limites
-explícitos. Não há novas issues; os destinos pertencem a #302–#307 e tasks S5
-existentes. O registro de validação nesta seção e
+explícitos. As correções e pendências são rastreadas nas issues #302–#307
+e nas frentes técnicas da Sprint 5. O registro de validação nesta seção e
 [fechamento](GestaoProjeto.md) permitem revisão do pacote.
 
 
-### Conciliação com develop após pull — 06/10/2026
+### Estado integrado e verificação da base — 06/10/2026
 
-Base atual: `1ff5927a75b79219314068291b1aa43de3fe9674`, sem conflitos na reaplicação desta documentação.
-Foram preservadas as novas seções 6.4 (tabela Microsoft) e 8.9.4 (TTS),
-os relatórios, evidências, READMEs e alterações de aplicação vindos de develop.
-As alterações locais desta entrega continuam restritas à documentação e ao gráfico.
+Base analisada: `1ff5927a75b79219314068291b1aa43de3fe9674` de develop.
+A versão inclui a tabela Microsoft (Seção 6.4), a resposta em áudio (Seção 8.9.4),
+os testes finais, o gate de integração e a correção da auditoria do fluxo guiado.
 
 | Frente integrada | Evidência atual | Conclusão e limite |
 |---|---|---|
@@ -8262,8 +8644,8 @@ Assim, não se declara runtime backend aprovado ou entrega 100% conforme.
 Uma segunda seleção (persistência e fontes) confirmou o mesmo bloqueio no
 setup: 22 erros e 12 skips, estes por ausência de banco no modo isolado.
 Os sete testes locais do gate de marcadores passaram.
-O código não foi alterado nesta conciliação documental. Corrigir esse import
-e repetir coleta/smoke é necessário antes de declarar a aplicação executável.
+A correção do import e a repetição da coleta e do smoke são necessárias
+para validar a inicialização da aplicação nessa versão.
 
 **Frontend no HEAD atualizado.** Lint, `npm run typecheck` e build passaram.
 Vitest com `--pool=forks --maxWorkers=1 --testTimeout=20000` concluiu com
@@ -8273,22 +8655,17 @@ UserCard (um) e sugestão proativa (um). No AppShell, o teste novo de áudio ten
 encontrar o campo de mensagem antes de autenticar; no UserCard, falta o provider
 de sessão. Os demais resultados precisam ser conciliados com os componentes
 atuais; falha de teste não prova isoladamente falha da aplicação publicada.
-A tentativa com threads foi interrompida após ausência prolongada de progresso;
-teste/build inicialmente também encontraram restrição de leitura do sandbox,
-superada na execução autorizada. Não foram modificados testes para obter aprovação.
 O resultado antigo de 112 testes do relatório S5-22 descreve sua própria base,
 não a aprovação dos 142 testes alcançados pelo HEAD integrado atual.
 
-**Veredito desta conciliação:** validação editorial aprovada; qualidade do
-runtime com bloqueios, sem aceite de 100% de conformidade. O relatório RNF
-reprovado e as falhas atuais permanecem rastreados. Esta revisão foi executada
-pelo mesmo agente, sem se apresentar como aprovação independente de colega.
+**Resultado da verificação:** links, tabelas e formatação aprovados; runtime
+com bloqueios de inicialização e testes reprovados. Esses resultados impedem
+declarar conformidade integral da versão. O aceite final depende da correção
+dos bloqueios e de revisão por outro integrante.
 
-Os estados de aprovação, comentários de revisão e fechamento de issues da
-consulta GitLab anterior não foram atualizados pela API: a revisão automática
-bloqueou o uso de token do .env pelo script. O pull comprova integração por Git,
-sem inferir essas ações administrativas. Não houve push, nova issue ou exclusão
-de branch. A data 07/10 continua editorial; não inventa trabalho futuro.
+O Git comprova os merges listados, mas os registros disponíveis não confirmam
+as aprovações, os comentários de revisão e o fechamento das issues após essas
+integrações. Esses itens devem ser conferidos no GitLab no encerramento.
 
 ## 14.2 Instalação e identidade na versão S5
 
