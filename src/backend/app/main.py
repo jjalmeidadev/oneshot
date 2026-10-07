@@ -451,7 +451,7 @@ async def create_audio_upload(
             transcription=audio_result.transcription,
             intent=response.intent,
             entities=response.entities,
-            answer=AudioAnswer(text=response.text, claims=response.claims,
+            answer=AudioAnswer(text=response.text, blocks=response.blocks, claims=response.claims,
                 evidence_status=response.evidence_status, sources=[
                 AudioAnswerSource(**source.model_dump(), artifact=source.title,
                                   section=source.source_locator or source.list_name)

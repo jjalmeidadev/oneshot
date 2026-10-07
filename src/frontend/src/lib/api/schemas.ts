@@ -75,6 +75,21 @@ export type FactualClaim = {
   citation_ids: string[];
   evidence?: ClaimEvidence[];
 };
+export type ResponseBlock =
+  | {
+      type: 'table';
+      columns: string[];
+      rows: { cells: string[]; citation_ids: string[] }[];
+    }
+  | {
+      type: 'indicator';
+      label: string;
+      value: number;
+      unit: '%' | null;
+      citation_ids: string[];
+    }
+  | { type: 'highlight'; text: string; citation_ids: string[] };
+
 export type EvidenceStatus = 'referenced' | 'insufficient' | 'not_applicable';
 
 export type ProactiveSuggestion = {
@@ -100,7 +115,7 @@ export type ProactiveConfirmationResponse = {
 
 /** `GeminiChatResponse`. */
 export type ChatResponse = {
-  contract_version?: '1.1.0';
+  contract_version?: '1.1.0' | '1.2.0';
   trace_id?: string | null;
   intent?: AudioIntent | null;
   entities?: PipelineEntity[];
@@ -113,6 +128,7 @@ export type ChatResponse = {
   retrieval_ms: number;
   usage: ChatUsage;
   sources: ChatSource[];
+  blocks?: ResponseBlock[];
   claims?: FactualClaim[];
   evidence_status?: EvidenceStatus;
   /** Presente so na resposta secundaria confirmada: analise rotulada, nao fato. */
@@ -446,13 +462,14 @@ export type AudioAnswerSource = Partial<ChatSource> & {
 export type AudioAnswer = {
   text: string;
   sources: AudioAnswerSource[];
+  blocks?: ResponseBlock[];
   claims?: FactualClaim[];
   evidence_status?: EvidenceStatus;
 };
 
 /** `AudioUploadResponse`. */
 export type AudioUploadResponse = {
-  contract_version?: '1.1.0';
+  contract_version?: '1.1.0' | '1.2.0';
   trace_id?: string | null;
   chat?: ChatResponse | null;
   conversation_id: string;

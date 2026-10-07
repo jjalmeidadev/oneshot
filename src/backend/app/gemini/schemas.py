@@ -2,6 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.gemini.blocks import ResponseBlock, build_blocks
 from app.nlp.schemas import AudioIntent, ChatPipelineMetrics, PublicEntity
 from app.reports.schemas import WorkflowDirective
 from app.alerts.schemas import AlertDirective
@@ -85,8 +86,9 @@ class SpeechResponse(BaseModel):
 
 
 class GeminiChatResponse(BaseModel):
-    contract_version: Literal["1.1.0"] = "1.1.0"
+    contract_version: Literal["1.2.0"] = "1.2.0"
     text: str
+    blocks: list[ResponseBlock] = Field(default_factory=list)
     speech: SpeechResponse | None = None
     model: str
     interaction_id: str | None = None
@@ -146,6 +148,9 @@ class GeminiChatResponse(BaseModel):
                     raise ValueError(problem)
             if self.text != render_answer(self.claims, self.recommendation):
                 raise ValueError("Texto deve corresponder as afirmacoes verificadas")
+        allowed_blocks = build_blocks(self.claims)
+        if any(block not in allowed_blocks for block in self.blocks):
+            raise ValueError("Bloco deve corresponder as afirmacoes verificadas")
         return self
 
 

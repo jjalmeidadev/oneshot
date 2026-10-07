@@ -88,7 +88,7 @@ def test_references_survive_provider_api_and_audit(monkeypatch, evidence, provid
     chat = body if channel == "chat" else body["chat"]
     assert body["trace_id"] == chat["trace_id"] == "trace-17"
     assert chat["interaction_id"] == "provider-17"
-    assert body["contract_version"] == chat["contract_version"] == "1.1.0"
+    assert body["contract_version"] == chat["contract_version"] == "1.2.0"
     assert chat["evidence_status"] == "referenced"
     assert chat["claims"][0]["citation_ids"] == ["Fonte 1"]
     source = chat["sources"][0]
@@ -123,6 +123,7 @@ def test_references_survive_provider_api_and_audit(monkeypatch, evidence, provid
     assert params[1:4] == (evidence.document.artifact_id, evidence.document.extract_id, evidence.document.project_id)
     assert "trace_sources" not in chat
     if channel == "audio":
+        assert body["answer"]["blocks"] == chat["blocks"]
         assert body["answer"]["claims"] == chat["claims"]
         assert body["answer"]["evidence_status"] == chat["evidence_status"]
         assert body["answer"]["sources"][0] == {

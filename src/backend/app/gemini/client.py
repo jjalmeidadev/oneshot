@@ -28,6 +28,7 @@ from app.rag.proactive_confirmation import (
 )
 from app.rag.proactivity import SecondaryIntent, resolve_secondary_intent
 from app.rag.sharepoint import build_rag_input
+from app.gemini.blocks import build_blocks
 from app.security.sensitive_data import SensitiveDataReport, protect_documents, scan
 from app.gemini.evidence import ValidatedAnswer, validate_evidence
 from app.security.access import AccessContext
@@ -179,6 +180,7 @@ def generate_chat_response(
     return GeminiChatResponse(
         text=primary.text,
         claims=primary.claims,
+        blocks=build_blocks(primary.claims),
         evidence_status=primary.status,
         model=llm.model,
         interaction_id=llm.interaction_id,
@@ -277,6 +279,7 @@ def _prepared_proactive_response(
     return GeminiChatResponse(
         text=prepared.text,
         claims=prepared.claims,
+        blocks=build_blocks(prepared.claims),
         evidence_status=prepared.status,
         recommendation=prepared.recommendation,
         model=pending.prepared_model or "resposta-preparada",
