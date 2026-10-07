@@ -59,6 +59,7 @@ from app.reports.errors import ReportError
 from app.reports.router import router as reports_router
 from app.alerts.errors import AlertError
 from app.alerts.router import router as alerts_router
+from app.sharepoint_webhooks.router import router as sharepoint_webhooks_router
 from app.security import (
     AccessContext,
     AccessError,
@@ -110,6 +111,7 @@ app = FastAPI(
 )
 app.include_router(reports_router)
 app.include_router(alerts_router)
+app.include_router(sharepoint_webhooks_router)
 ReadAccess = Annotated[AccessContext, Depends(require_read_access)]
 WriteAccess = Annotated[AccessContext, Depends(require_write_access)]
 AuthenticatedAccess = Annotated[AccessContext, Depends(get_access_context)]
@@ -217,6 +219,16 @@ async def handle_request_validation_error(
                 "error": {
                     "code": "ALERT_INVALID_INPUT",
                     "message": "Revise os parametros informados para o alerta.",
+                }
+            },
+        )
+    if request.url.path.startswith("/api/integrations/sharepoint/"):
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": {
+                    "code": "SHAREPOINT_WEBHOOK_INVALID_INPUT",
+                    "message": "Revise os campos da notificação do SharePoint simulado.",
                 }
             },
         )
