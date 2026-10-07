@@ -53,6 +53,7 @@ A branch adicional `origin/docs/documentacao-tecnica-final`, head `b9c45e0e`, n�
 - `docs/GestaoProjeto.md` registra a indisponibilidade do Copilot Studio na Frente D e reafirma workflows próprios, RabbitMQ, Supabase e AWS no planejamento da Sprint 5.
 - As afirmações sobre Copilot/GPT na Seção 9.2.7 precisam de reconciliação pela S5-43. A S5-44 não certifica esses diagramas nem substitui a task de revisão arquitetural.
 - S5-19 (#273) e S5-18 (#272) são condicionantes de canal/integração, sem implementação ou homologação demonstrada na base e nos MRs examinados.
+- **Atualização S5-43 (#297):** os pontos acima foram conciliados. As Figuras 22, 25 e 27 foram redesenhadas a partir do código (chat web, workflows guiados, RabbitMQ, EC2), o Copilot Studio saiu da arquitetura, o MCP aparece como previsto e o RNF08 foi revisto. Registro em [`s5-43-revisao-arquitetura.md`](s5-43-revisao-arquitetura.md).
 
 ## Fontes Microsoft
 

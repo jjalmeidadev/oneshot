@@ -1,0 +1,62 @@
+@startuml sequencia-workflow-guiado
+' Sequência: direcionamento para workflow funcional guiado (runtime atual; S5-43, #297).
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam maxMessageSize 240
+skinparam participant {
+  BackgroundColor #EEF4FD
+  BorderColor #4A7EBB
+}
+skinparam actor {
+  BackgroundColor #E6F4E0
+  BorderColor #5A9E4A
+}
+skinparam sequence {
+  ArrowColor #4A5560
+  LifeLineBorderColor #8A949E
+  GroupBackgroundColor #FDF6D8
+  GroupBorderColor #B8A13A
+}
+
+autonumber
+actor "Usuário" as Usuario
+participant "Chat web" as Chat
+participant "API da Aplicação" as API
+participant "Núcleo de PLN\ne catálogo" as PLN
+participant "Workflow guiado\n(backend)" as Workflow
+participant "Power Automate\n(opcional)" as Automacao
+participant "Trilha de Auditoria" as Auditoria
+
+Usuario -> Chat : Entrar com perfil autenticado
+Usuario -> Chat : Solicitar uma operação funcional
+Chat -> API : POST /api/chat (Bearer)
+API -> PLN : Classificar e rotear
+alt Fora do escopo
+PLN --> API : Limitação de domínio
+API -> Auditoria : Registrar intenção e resultado
+API --> Chat : Orientação para reformular
+else Intenção funcional (relatório ou alerta)
+PLN --> API : Handler do catálogo
+API -> Auditoria : Registrar intenção
+API --> Chat : Diretiva de workflow guiado
+Chat -> Workflow : POST /api/workflow-sessions\nou /api/alert-workflow-sessions
+loop Cada pergunta estruturada
+Workflow --> Chat : Pergunta e opções
+Usuario -> Chat : Responder
+Chat -> Workflow : POST .../answers
+end
+Workflow --> Chat : Resumo para confirmação
+Usuario -> Chat : Confirmar
+Chat -> Workflow : POST .../confirm
+alt Execução local (padrão)
+Workflow -> Workflow : Executar operação\n(DOCX ou assinatura do alerta)
+else Power Automate habilitado
+Workflow -> Automacao : Despachar execução por HTTP
+Automacao --> API : Webhook de resultado
+API -> Workflow : Registrar resultado
+end
+Workflow -> Auditoria : Registrar execução e resultado
+Workflow --> Chat : Resultado da operação
+Chat --> Usuario : Apresentar retorno
+end
+@enduml
