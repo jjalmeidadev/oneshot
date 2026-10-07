@@ -1,0 +1,39 @@
+{
+  "started_at_utc": "2026-10-07T22:08:34.422996+00:00",
+  "user_date": "2026-10-07",
+  "user_timezone": "America/Sao_Paulo",
+  "commit": "f597478c5b02f6e9b81e0f04e930aaa2c9de00e4",
+  "worktree": " M docs/Projeto.md\n M src/backend/.env.example\n M src/backend/app/tests/test_rnf07_rnf09_s5_31.py\n?? \"Claude outputs/\"\n?? docs/testes/sprint5/relatorio-s5-36.md\n?? src/backend/app/tests/test_rnf08_s5_36.py\n?? src/backend/scripts/run_s5_36.py\n",
+  "python": "3.13.9",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "packages": {
+    "pytest": "9.1.1",
+    "fastapi": "0.141.1",
+    "pydantic": "2.13.5",
+    "httpx": "0.28.1"
+  },
+  "sha256": {
+    "docs/Projeto.md": "dc81933cc006dbd572de1bf8301ac34e45863a636e97fc62bd487d59c9a7bf73",
+    "docs/diagrams/componentes-metro-5.2.puml": "3637528d33ee37ad172aebc3d20dbb6cb57e2a7443770b9fcddb5e70d1361191",
+    ".env.example": "26ada2772aa62edaea58814974fc7d5681b417f1b466097ab328110354f7ede9",
+    "src/backend/.env.example": "6a5e0a4090e608ae61d10c75bef992fee5f552a588d376c7e9b07799341cf874",
+    "compose.prod.yml": "5982bbf456f64662d51f19085983bc32aacca0ac50d4a135938bd6953d570f2a",
+    "compose.rabbitmq.yml": "24d51da30a1c4b9bdb05cd37ec8987558dcb88cd7256be5d543385817983896e",
+    "src/backend/Dockerfile": "e397c3a24044e848b5a18bb86e603482280a8effdafa7dc2a611dbbb0712e856",
+    "src/frontend/Dockerfile": "042880190821ab7b4a2ff6340f1844d79323ffed43d0a87cbdedf4a9eac1fbab",
+    "src/backend/app/tests/test_rnf08_s5_36.py": "e5a5f6b4a76e55d956b05f65de53430431b37c65b1ae6d235a10255ae67247b0",
+    "src/backend/app/main.py": "fd6416240b5a4cee5951141305d738b1c1c4f212858e385c93ace552dc0cc876",
+    "src/backend/scripts/run_s5_36.py": "d82cfb3c6dcd7dff28399f8f029490da13258cfe4ac5f91b5fb0dd26594550ca"
+  },
+  "scope": "API ASGI local, código e configuração do runtime e Seções 5.2.1 e 6.4; sem tenant, rede ou credenciais",
+  "command": [
+    "C:\\Users\\Inteli\\g05-02\\g05\\src\\backend\\.venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "app/tests/test_rnf08_s5_36.py",
+    "-v",
+    "-s",
+    "--tb=short",
+    "--junitxml=C:\\Users\\Inteli\\g05-02\\g05\\src\\backend\\evidencias\\rnf08-s5-36\\rodada-01\\pytest.xml"
+  ]
+}

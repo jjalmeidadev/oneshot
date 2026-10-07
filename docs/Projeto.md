@@ -259,6 +259,7 @@
   - [9.4 Testes de Integração](#94-testes-de-integração)
     - [9.4.1 Planejamento](#941-planejamento)
     - [9.4.2 Resultados](#942-resultados)
+  - [9.5 Consolidação final dos testes](#95-consolidação-final-dos-testes)
 - [10. Procedimentos de Implantação](#10-procedimentos-de-implantação)
   - [10.1 Implantação e Configuração do Banco de Dados](#101-implantação-e-configuração-do-banco-de-dados)
     - [10.1.1 Preflight do esquema](#1011-preflight-do-esquema)
@@ -3719,22 +3720,24 @@ O **esforço** é uma avaliação qualitativa da migração indicada, não uma e
 | Login de personas, validação de token Supabase e regras por perfil/projeto — [`security/access.py`](../src/backend/app/security/access.py), [`20_auth_access_foundation.sql`](../src/database/sql/20_auth_access_foundation.sql) | Microsoft Entra ID para identidade; autorização de domínio mantida na API | **Adaptado** | **Alto** | Substituir o login/validador Supabase, [validar tokens e claims](https://learn.microsoft.com/en-us/entra/identity-platform/claims-validation) do tenant e mapear identidades corporativas para os perfis e escopos internos. Manter checagens de leitura, escrita e exportação. Login Teams/Entra, sozinho, não concede acesso a todo o portfólio ou SharePoint. |
 | Arquivo DOCX local ou bucket privado Supabase — [`reports/storage.py`](../src/backend/app/reports/storage.py) | Azure Blob Storage para objetos privados; biblioteca SharePoint para publicação documental | **Adaptado** | **Médio** para Blob | Preservar hash, metadados, referência e download autorizado; criar adaptador de upload/download e política de retenção. [Blob Storage](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction) corresponde ao armazenamento de arquivos. Publicação em SharePoint é integração adicional, sujeita ao escopo do usuário. |
 | Trilhas de conversa, fontes consultadas e eventos de execução — [`database/tracing.py`](../src/backend/app/database/tracing.py), repositórios de relatório/alerta | Persistência da auditoria em PostgreSQL Azure; Dataverse como alternativa de remodelagem | **Adaptado** | **Médio** | Preservar IDs de interação, execução, usuário, fonte e correlação. Application Insights complementa diagnóstico operacional; não substitui sozinho o registro de negócio nem garante integridade/retenção. A correção do MR !117 está integrada no HEAD atual (3b95d985/9255e2f8); não comprova aplicação do backfill SQL19 em todo ambiente. |
-| Controle preventivo de dado sensível do MR !127 — `security/sensitive_data.py` na branch `fix/bloquear-dado-sensivel` | Barreira própria na API; políticas de dados da Power Platform quando ela for utilizada | **Planejado** no `develop`; **Direto** após integração | **Médio** | A branch bloqueia perguntas, mascara fontes e recusa prompts antes da chamada externa. As [políticas de dados da Power Platform](https://learn.microsoft.com/en-us/power-platform/admin/wp-data-loss-prevention) controlam conectores; não substituem esse filtro para chamadas Python a provedores. Testar o controle com o endpoint homologado e registrar seus limites. |
+| Alteração de dados do projeto pelo chat, com prévia, confirmação, desfazer e histórico — [`data_changes`](../src/backend/app/data_changes/service.py), Seção 8.5.13 | Mesmo backend em Azure, gravando na fonte oficial dos dados: PostgreSQL Azure ou listas do SharePoint Online pelo Microsoft Graph | **Direto** no backend; **Adaptado** para gravar no SharePoint | **Médio** | Preservar extração, validação por campo, verificação de escopo na prévia, na confirmação e no desfazer, e a gravação de `change_records` e auditoria na mesma transação. A escrita em listas do SharePoint exige permissão do Graph concedida pela GTI. |
+| Controle preventivo de dado sensível — [`security/sensitive_data.py`](../src/backend/app/security/sensitive_data.py), integrado pelo MR !127 | Barreira própria na API; políticas de dados da Power Platform quando ela for utilizada | **Direto** | **Médio** | O controle bloqueia perguntas, mascara fontes e recusa prompts antes da chamada externa. As [políticas de dados da Power Platform](https://learn.microsoft.com/en-us/power-platform/admin/wp-data-loss-prevention) controlam conectores; não substituem esse filtro para chamadas Python a provedores. Testar o controle com o endpoint homologado e registrar seus limites. |
 
 ### 6.4.5 Voz, relatórios, alertas e integrações
 
 | Componente da PoC e evidência | Equivalente no ecossistema Microsoft | Reaproveitamento | Esforço | Observação |
 |---|---|---|---|---|
 | Captura de áudio, validação, STT Azure e cache VHS — [`app/audio`](../src/backend/app/audio/transcription.py), [`vhs.py`](../src/backend/app/audio/vhs.py) | Azure AI Speech, já utilizado pelo adaptador STT | **Direto** | **Baixo** | Preservar contrato, validação de arquivo, tratamento de erro, idioma `pt-BR` e cache. Reconfigurar recurso/credencial e repetir a homologação no destino. O [Speech](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/overview) oferece STT/TTS. Captura no Teams requer teste específico de dispositivo/permissão; cache local não é compartilhado entre réplicas. |
-| Síntese e reprodução de resposta em áudio do MR !123 — `audio/synthesis.py` na branch `feat/s5-15-resposta-audio-tts` | Text-to-Speech do Azure AI Speech | **Planejado** no `develop`; **Adaptado** após integração | **Médio** | A branch acrescenta síntese, contrato de áudio e reprodução no frontend. Validar texto elegível, tamanho, formato, credenciais e experiência no canal escolhido. Não declarar TTS entregue no `develop` nem extrapolar a evidência STT para síntese. |
+| Síntese e reprodução de resposta em áudio — [`audio/synthesis.py`](../src/backend/app/audio/synthesis.py), integrada pelo MR !123 | Text-to-Speech do Azure AI Speech | **Adaptado** | **Médio** | O módulo acrescenta síntese, contrato de áudio e reprodução no frontend. Validar texto elegível, tamanho, formato, credenciais e experiência no canal escolhido; a evidência do STT não vale para a síntese. |
 | Preparação de relatório, snapshot autorizado, máquina de estados e confirmação — [`app/reports`](../src/backend/app/reports/service.py) | Backend Azure; Power Automate como executor HTTP opcional | **Direto** no backend; **Adaptado** para executor | **Médio** | Preservar snapshot, hash, estado, confirmação e idempotência. `local` e `power_automate_simulator` não comprovam execução real no tenant. A API recebe callback autenticado, valida JSON e mantém a autoridade sobre o artefato final. |
 | Produção de DOCX com `python-docx` — [`reports/rendering.py`](../src/backend/app/reports/rendering.py), referência em [`support/word`](../src/agent/support/word/relatorio-executivo.template-manifest.json) | Mesmo renderer em Azure; Word Online (Business) como alternativa | **Direto** ao manter; **Referência** para Word Online | **Baixo** ao manter; **Alto** ao trocar | Preservar estrutura e fontes do relatório. O manifesto JSON não é um template Word pronto para importação. A alternativa com [Word Online](https://learn.microsoft.com/en-us/connectors/wordonlinebusiness/) exige template com controles compatíveis, conexões/licença e testes; o runtime atual não depende dela. |
 | Blueprint Power Automate, prompts AI Builder, contrato de callback e fixtures — [`src/agent/support`](../src/agent/support/IMPLEMENTATION.md) | Cloud flow Power Automate e prompts Microsoft/AI Builder no ambiente do parceiro | **Referência** | **Alto** | Reutilizar regras, schemas e exemplos; configurar conexões, tokens e endpoint HTTPS e testar sucesso, falha, repetição e autorização. Blueprint e [prompts](https://learn.microsoft.com/en-us/microsoft-copilot-studio/create-custom-prompt) não comprovam um fluxo importado/publicado. `ONESHOT` é legado e não deve ser sincronizado como runtime. |
 | Scheduler, avaliação de prazo e workers de alerta — [`alerts/worker.py`](../src/backend/app/alerts/worker.py), [`alerts/source.py`](../src/backend/app/alerts/source.py) | Workers em Azure Container Apps; jobs agendados para disparos delimitados | **Adaptado** | **Médio** | Preservar inscrição, revalidação de acesso, atualização dos dados, comparação estrita do prazo e idempotência. Escolher serviço contínuo ou job conforme o ciclo atual; um agendamento de infraestrutura não substitui as regras de negócio. Dias úteis dependem de calendário corporativo. |
 | RabbitMQ, publisher da outbox, eventos e dead-letter queues — [`alerts/messaging.py`](../src/backend/app/alerts/messaging.py), [`compose.rabbitmq.yml`](../compose.rabbitmq.yml) | RabbitMQ hospedado em Azure; Azure Service Bus como alternativa gerenciada | **Direto** ao manter; **Adaptado** para Service Bus | **Médio** ao manter; **Alto** ao trocar | Preservar eventos, `event_id`, `correlation_id`, outbox e consumidores idempotentes. O cliente atual `aio-pika` e a topologia RabbitMQ não são intercambiáveis com [Service Bus/AMQP 1.0](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-amqp-overview). A troca exige novo cliente, mapeamento de filas/tópicos, ack, retry e DLQ. |
+| Webhook de alterações do SharePoint simulado, inbox, publicação na fila e reindexação pelo consumidor — [`sharepoint_webhooks`](../src/backend/app/sharepoint_webhooks/router.py), [`consumer.py`](../src/backend/app/sharepoint_webhooks/consumer.py) | [Webhooks do SharePoint Online](https://learn.microsoft.com/en-us/sharepoint/dev/apis/webhooks/overview-sharepoint-webhooks) e notificações de alteração do Microsoft Graph | **Adaptado** | **Médio** | O payload segue o formato das notificações do SharePoint (`clientState` e lote `value`). No tenant, exige assinatura renovável, endpoint público validado e permissão do Graph. A reindexação ainda reaplica a massa inteira. |
 | Central web de notificações, estado de leitura e callback de entrega — [`alerts/router.py`](../src/backend/app/alerts/router.py), componentes do frontend | Central web em Teams; entrega de notificações via integração Microsoft homologada | **Adaptado** | **Médio** | Preservar destinatário, ocorrência, tentativa e confirmação de leitura/entrega. Notificação interna e confirmação por webhook não são prova de mensagem entregue no Teams. O adaptador externo precisa tratar identidade, permissão e deduplicação. |
 | Contratos REST/OpenAPI e callbacks de relatório/alerta — [`main.py`](../src/backend/app/main.py), [`report-generation.openapi.yaml`](../src/agent/support/openapi/report-generation.openapi.yaml) | Conector personalizado Power Platform/Logic Apps | **Adaptado** | **Médio** | Conservar semântica das operações, autenticação e erros. O contrato de suporte é OpenAPI 3.0.3; a [importação documentada de conector personalizado](https://learn.microsoft.com/en-us/connectors/custom-connectors/define-openapi-definition) exige OpenAPI 2.0. Preparar uma projeção compatível e testar; a existência de `/openapi.json` não comprova importação automática. |
-| Blocos de resposta do MR !128 e renderização acessível do MR !129 | UI web na aba Teams; representação em cartões somente com adaptador específico | **Planejado** no `develop`; **Adaptado** após integração | **Médio** | O contrato integrado ainda é `1.1.0`. A branch #270 introduz `1.2.0`, tabelas/indicadores/destaques com citações; #271 os apresenta no frontend. JSON de blocos da aplicação não é um Adaptive Card pronto. Preservar vínculo com afirmações/fontes ao adaptar o canal. |
+| Blocos de resposta do contrato `1.2.0`, integrados pelo MR !128 (#270), e renderização acessível do MR !129 (#271) | UI web na aba Teams; representação em cartões somente com adaptador específico | **Adaptado** para os blocos; renderização **Planejada** até a integração da #271 | **Médio** | O contrato `1.2.0` traz tabelas, indicadores e destaques com citações; a #271 os apresenta no frontend. JSON de blocos da aplicação não é um Adaptive Card pronto. Preservar vínculo com afirmações/fontes ao adaptar o canal. |
 | Servidor MCP solicitado na S5-18 ([#272](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/272)) | Ferramentas para conexão com o Copilot em cliente/ambiente que aceite MCP | **Planejado** | **Alto** | Há pedido e contratos REST reaproveitáveis, mas não foi localizado servidor MCP integrado nem nos oito MRs examinados. Implementar ferramentas, transporte e autenticação e validar no cliente escolhido pelo parceiro; REST/OpenAPI não constitui servidor MCP. |
 
 ### 6.4.6 Hospedagem, operação e engenharia
@@ -7459,7 +7462,18 @@ A execução da S5-32 ([#286](https://git.inteli.edu.br/graduacao/2026-2a/t17/g0
 | CT-RNF12-P | `scripts/validar_massa_sintetica.py` encontrou as seis categorias: 3 projetos, 1 subportfólio, 10 marcos, 10 riscos, 17 indicadores e 9 documentos | Aprovado |
 | CT-RNF12-N | Seis cópias, cada uma sem uma categoria, reprovadas com a categoria ausente identificada | Aprovado |
 
-O `DEF-S5-32-01` decorre da falta de um tratador global de exceções em `/api/chat`: uma exceção sem tratador registrado escapa antes do registro de auditoria. O destino do defeito fica para a consolidação dos testes sistêmicos (S5-36).
+O `DEF-S5-32-01` decorre da falta de um tratador global de exceções em `/api/chat`: uma exceção sem tratador registrado escapa antes do registro de auditoria. Na consolidação dos testes sistêmicos (Seção 9.5.3), o defeito foi encaminhado à Seção 12.2, item 5.
+
+#### RNF08 — reavaliação na Sprint 5
+
+A S5-31 reprovou o CT-RNF08-P porque o critério da época exigia o Copilot Studio na arquitetura (`DEF-S5-31-01`). Com o critério revisado na S5-43 ([#297](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/297)), a S5-36 ([#290](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/290)) reavaliou o requisito em 7 de outubro de 2026 com [`test_rnf08_s5_36.py`](../src/backend/app/tests/test_rnf08_s5_36.py). O teste descobre os pacotes de `src/backend/app` no disco e exige, para cada um, uma linha nas Seções 6.4.3 a 6.4.6 com o equivalente Microsoft preenchido. Também procura variável `COPILOT_STUDIO_*` ou endpoint do serviço no código e na configuração do runtime.
+
+| Caso | Resultado observado | Situação |
+| --- | --- | --- |
+| CT-RNF08-P | `/health` e `/openapi.json` com HTTP 200 e contrato sem erro; os 13 componentes do runtime com equivalente mapeado; nenhuma dependência do Copilot Studio no runtime nem na Figura 22; Teams e Copilot via MCP previstos na Seção 5.2.1 | Aprovado |
+| CT-RNF08-N | Em cópias: contrato sem `POST /api/chat`, tipo incompatível, de-para sem os alertas, equivalente vazio no PLN, `COPILOT_STUDIO_ENDPOINT` no `.env.example` e Copilot Studio como componente da Figura 22, todos detectados | Aprovado |
+
+A primeira execução local reprovou o caso positivo: `data_changes` e `sharepoint_webhooks` estavam no runtime sem linha na Seção 6.4, e o `.env.example` do backend ainda dizia que o agente usaria o Copilot Studio no Metrô. As duas linhas e o comentário foram corrigidos na mesma entrega. A verificação é local e documental e não substitui a homologação no tenant. Detalhes e evidências estão no [relatório S5-36](testes/sprint5/relatorio-s5-36.md#reavaliação-do-rnf08).
 
 ## 9.3 Testes de Usabilidade
 
@@ -7682,6 +7696,58 @@ latências e hashes estão nas
 A S5-23 ([#277](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/277)) automatizou no Playwright os fluxos principais da interface contra o backend de testes (`app/tests/e2e_server.py`), que usa as rotas reais da API, repositórios em memória e provedores determinísticos. A suíte terminou com 60 testes aprovados: 20 cenários em desktop, tablet e celular. Texto, áudio, relatório e alerta percorrem o backend; o alerta vai até a assinatura ativa, conferida em `GET /api/alert-subscriptions`. A alteração de dados é exercitada com a API simulada, e o contrato do backend correspondente é coberto pelos testes de `data_changes`.
 
 As falhas de comunicação simuladas foram 503, 502 e 500 do backend, 504 de gateway, *timeout* do cliente, perda de conexão e 503 no meio do workflow de alerta. Em todas, a interface exibiu mensagem controlada, sem detalhe interno, e voltou a funcionar no envio seguinte. O job `frontend-e2e` publica o relatório HTML como artefato do MR e o JUnit na aba de testes. Resultados, mudanças e limites estão no [relatório S5-23](testes/sprint5/relatorio-s5-23.md).
+
+## 9.5 Consolidação final dos testes
+
+A S5-36 ([#290](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/290)) reúne, em 7 de outubro de 2026, o resultado vigente de cada requisito, a evidência que o sustenta e o destino de cada defeito aberto. O resultado vigente é o da última execução do caso; uma correção integrada sem nova execução não muda o resultado e aparece na coluna de situação. O detalhamento está no [relatório S5-36](testes/sprint5/relatorio-s5-36.md).
+
+### 9.5.1 Resultado por requisito
+
+| Requisito | Resultado vigente | Situação e evidência |
+| --- | :---: | --- |
+| RF01, RF04, RF05, RF07, RF10 | **Aprovado** | Rodada de 23/09, 2/2 casos cada (Seção 9.1.5.7) |
+| RF02, RF03 | **Aprovado** | Falhas de 23/09 corrigidas pela S5-28 e aprovadas na reexecução de 07/10 (Seção 9.1.5.9) |
+| RF09 | **Aprovado** | Aprovado no reteste depois da correção do `DEF-RNF04-02` (Seção 9.1.5.2) |
+| RF06, RF08 | **Bloqueado** | Caso positivo bloqueado pelo `DEF-RF06-01`, que depende da S5-12 ([#266](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/266)); caso negativo aprovado |
+| RNF01 | **Aprovado** | CT-RNF01-P aprovado na S4-33; CT-RNF01-N aprovado depois da correção da S5-27 ([verificação](evidencias/sprint-05/s5-27-dado-sensivel.md#execução)) |
+| RNF02 | **Bloqueado** | Resultado da S4-33 (24/09). Perfis e regras chegaram com a S5-03 e a S5-04; a reexecução é da S5-30 ([#284](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/284)), ainda aberta |
+| RNF03 | **Reprovado** | Resultado da S4-33 (24/09): faltavam perfil e fontes. As correções da S5-04, S5-25 e S5-26 estão integradas; a reexecução é da S5-30 |
+| RNF04 | **Aprovado** | 91,67% fundamentadas e 4,17% de alucinação (Seção 9.2.7) |
+| RNF05 | **Aprovado** | 3ª rodada da Sprint 4, sem erro e dentro dos tetos (Seção 9.2.7) |
+| RNF06 | **Reprovado** | F1-macro 0,8327 aprovado; *recall*@3 0,5556 reprovado; nova medição depende da S5-12 (Seção 9.2.7) |
+| RNF07 | **Reprovado** | 6 de 20 formulações, contra a meta de 16, em coleta anterior à S5-28 ([consolidação S5-31](testes/sprint5/consolidacao-s5-31.md)) |
+| RNF08 | **Aprovado** | Reavaliado pelo critério revisado na S5-43 (Seção 9.2.7) |
+| RNF09 | **Aprovado** | Aprovado depois da correção do `DEF-S5-31-02` ([reteste](testes/sprint5/reteste-s5-31-rnf09.md)) |
+| RNF10, RNF12 | **Aprovado** | S5-32 (Seção 9.2.7) |
+| RNF11 | **Reprovado** | CT-RNF11-N reprovado pelo `DEF-S5-32-01` (Seção 9.2.7) |
+
+**Totais.** Funcionais: 18 casos aprovados e 2 bloqueados, sem falha em aberto; 8 requisitos aprovados e 2 bloqueados. Não funcionais: 7 requisitos aprovados, 4 reprovados e 1 bloqueado.
+
+### 9.5.2 Demais frentes de teste
+
+| Frente | Resultado vigente | Evidência |
+| --- | --- | --- |
+| Unitários do frontend (S5-22) | **Aprovado**: 112 testes; 86,36% das linhas e 75,25% das ramificações, acima dos mínimos do job `frontend-unit` | [Relatório S5-22](testes/sprint5/relatorio-s5-22.md) |
+| Integração do backend (S4-32B e #255) | **Aprovado**: suíte `integration` no job `backend-api`, depois do gate de conflitos | [S4-32B](testes/sprint4/relatorio-s4-32b.md), [#255](testes/sprint5/issue-255-gate-integracao.md) |
+| E2E textual com RAG (S4-20) | CT-E2E-01 a 05 **aprovados**; CT-E2E-06 **cancelado**, porque o Copilot Studio saiu da arquitetura; CT-E2E-07 **não aplicável**, porque não há fallback automático entre modelos e a falha do provedor é coberta por CT-E2E-03 e CT-RNF11-P | [S4-20](testes/sprint4/relatorio-s4-20.md) |
+| E2E da interface e falhas de comunicação (S5-23) | **Aprovado**: 60 testes, 20 cenários em três tamanhos de tela | [S5-23](testes/sprint5/relatorio-s5-23.md) |
+| Cache VHS com Azure Speech real | **Aprovado**: 1 chamada ao provedor e 4 acertos em 5 envios | Seção 9.4.2 |
+| Usabilidade | Seis sessões e SUS médio de 86,25; sem nova sessão depois das correções | Seção 9.3.2 |
+
+### 9.5.3 Defeitos remanescentes e destino
+
+Os defeitos já encerrados (`DEF-RF02-01`, `DEF-RF03-01`, `DEF-RNF04-01`, `DEF-RNF04-02`, `DEF-S5-31-01` e `DEF-S5-31-02`) estão listados no relatório. Ficam abertos:
+
+| Defeito | Afeta | Destino |
+| --- | --- | --- |
+| `DEF-RF06-01` e recuperação do RNF06 | RF06, RF08 e RNF06 | S5-12 ([#266](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/266)); sem ela nesta sprint, Seção 12.2, item 1 |
+| D-01 a D-06, corrigidos e não reexecutados | RNF02 e RNF03 | S5-30 ([#284](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/284)). O backfill `19_backfill_s5_25_audit.sql` ainda precisa ser aplicado no banco de destino |
+| RNF07 abaixo da meta | RNF07 | Seção 12.2, item 6 |
+| `DEF-S5-32-01` | RNF11 | Seção 12.2, item 5 |
+| `DEF-RNF05-01`, provedor da bancada | Leitura do RNF05 | Medição com o modelo de produção na homologação (Seção 12.2, item 4) |
+| `DEF-RNF05-02`, auditoria no caminho da resposta | Latência do RNF05 | Seção 12.2, item 16 |
+| O2, O3 e O4 | Usabilidade | S5-29 ([#283](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/283)) |
+| O1 e O8, corrigidos sem nova sessão; perfis não cobertos | Usabilidade | S5-34 ([#288](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/288)); sem ela, Seção 12.2, item 3 |
 
 # 10. Procedimentos de Implantação
 
@@ -8393,27 +8459,30 @@ A ordem segue dois critérios, nesta precedência. Primeiro vem o que hoje repro
 | 2 | Medição com solicitações reais do PMO | Classificação e recuperação foram medidas em frases sintéticas derivadas de templates; o desempenho com perguntas reais não é conhecido | Protocolo de avaliação reutilizável das Seções 8.10.1 e 9.2 |
 | 3 | Usabilidade com os perfis ainda não cobertos | As vagas de gestão de projetos, análise de indicadores e ferramentas Microsoft ficaram sem participante; as respostas não foram avaliadas por quem acompanha o portfólio na rotina | Roteiro, planilha e SUS da Seção 9.3.1 |
 | 4 | Homologação no ambiente corporativo | Entra ID, Azure e Teams dependem do provisionamento da GTI; a coleta do VHS na imagem publicada acompanha a publicação final | Roteiros das Seções 9.4.2 e 10.2 |
+| 5 | Tratamento das exceções inesperadas em `/api/chat` | Reprova o RNF11: uma exceção sem tratador volta como 500 genérico, sem a mensagem do projeto e sem registro na auditoria (`DEF-S5-32-01`, Seção 9.2.7) | O CT-RNF11-N da S5-32 já reproduz o caso e serve de teste de regressão |
+| 6 | Nova aplicação do RNF07 | Reprova o RNF07: 6 de 20 formulações compreendidas, contra a meta de 16, em coleta anterior à correção das perguntas curtas (S5-28) | Amostra, protocolo e apuração da S5-31, prontos para nova sessão com participantes |
 
 **Prioridade 2 — pedidos do parceiro que reaproveitam infraestrutura existente**
 
 | # | Aperfeiçoamento | O que já existe | O que falta |
 | :---: | --- | --- | --- |
-| 5 | Lembretes do projeto | Agendador, filas e central de notificações do alerta de prazo (Seção 8.5.11) | Intenção de lembrete, fluxo guiado e disparo por horário, e não por condição de atraso |
-| 6 | Tarefas e calendário do projeto no chat | Dados em `schedule_items` e `project_deliverables_milestones` (Seção 4.4) | Rota de leitura por projeto e as visões de lista e de calendário |
-| 7 | Agente exposto como servidor MCP | Rotas de consulta, relatório e alerta com contrato estável | Ferramentas MCP com autenticação, para o próprio Metrô conectar o agente ao Copilot sem depender do Copilot Studio, hoje indisponível para a equipe |
-| 8 | Integração com o Microsoft Teams | Contrato OpenAPI e arquitetura com o Teams como canal previsto (Seção 5.2) | Canal publicado no tenant do Metrô, após homologação |
-| 9 | Preenchimento assistido de documentos | Fluxo guiado do alerta e do relatório; tabelas `project_charters` e `project_benefits` no modelo físico (Seção 4.4) | Entrevista guiada para o Termo de Abertura e o Mapa de Benefícios, com validação das regras do cronograma — soma dos pesos em 100% e coerência de datas —, promessa do Canvas da Sprint 1 ainda não construída (Seção 2.9.1) |
+| 7 | Lembretes do projeto | Agendador, filas e central de notificações do alerta de prazo (Seção 8.5.11) | Intenção de lembrete, fluxo guiado e disparo por horário, e não por condição de atraso |
+| 8 | Tarefas e calendário do projeto no chat | Dados em `schedule_items` e `project_deliverables_milestones` (Seção 4.4) | Rota de leitura por projeto e as visões de lista e de calendário |
+| 9 | Agente exposto como servidor MCP | Rotas de consulta, relatório e alerta com contrato estável | Ferramentas MCP com autenticação, para o próprio Metrô conectar o agente ao Copilot sem depender do Copilot Studio, hoje indisponível para a equipe |
+| 10 | Integração com o Microsoft Teams | Contrato OpenAPI e arquitetura com o Teams como canal previsto (Seção 5.2) | Canal publicado no tenant do Metrô, após homologação |
+| 11 | Preenchimento assistido de documentos | Fluxo guiado do alerta e do relatório; tabelas `project_charters` e `project_benefits` no modelo físico (Seção 4.4) | Entrevista guiada para o Termo de Abertura e o Mapa de Benefícios, com validação das regras do cronograma — soma dos pesos em 100% e coerência de datas —, promessa do Canvas da Sprint 1 ainda não construída (Seção 2.9.1) |
 
-Os itens 5 e 6 estavam na linha de corte do planejamento da Sprint 5, que previa registrá-los aqui caso não coubessem na capacidade (Seção 6.5.1 do `GestaoProjeto.md`).
+Os itens 7 e 8 estavam na linha de corte do planejamento da Sprint 5, que previa registrá-los aqui caso não coubessem na capacidade (Seção 6.5.1 do `GestaoProjeto.md`).
 
 **Prioridade 3 — evolução técnica**
 
 | # | Aperfeiçoamento | Motivo |
 | :---: | --- | --- |
-| 10 | Cache VHS compartilhado entre réplicas | O cache é hoje em memória e por processo, com validade de 300 s; não sobrevive a reinício e impede escalar a API horizontalmente sem perder os acertos |
-| 11 | Lock do classificador restrito ao carregamento | O lock global serializa todas as classificações, embora só o carregamento dos artefatos precise dele; a medição da Seção 8.11.8 mostrou vazão até 2,3 vezes maior sem ele |
-| 12 | Ajuste supervisionado do encoder | O encoder é usado congelado, como extrator de atributos; o ajuste para as intenções do projeto depende de GPU |
-| 13 | Integração com o Power BI | Evolução prevista desde o Canvas da Seção 2.9, para levar os indicadores do agente aos painéis que o PMO já usa |
+| 12 | Cache VHS compartilhado entre réplicas | O cache é hoje em memória e por processo, com validade de 300 s; não sobrevive a reinício e impede escalar a API horizontalmente sem perder os acertos |
+| 13 | Lock do classificador restrito ao carregamento | O lock global serializa todas as classificações, embora só o carregamento dos artefatos precise dele; a medição da Seção 8.11.8 mostrou vazão até 2,3 vezes maior sem ele |
+| 14 | Ajuste supervisionado do encoder | O encoder é usado congelado, como extrator de atributos; o ajuste para as intenções do projeto depende de GPU |
+| 15 | Integração com o Power BI | Evolução prevista desde o Canvas da Seção 2.9, para levar os indicadores do agente aos painéis que o PMO já usa |
+| 16 | Auditoria fora do caminho da resposta | A gravação da auditoria do RNF03 ainda é síncrona; na 3ª rodada do RNF05, a distância entre o P95 do cliente e o do pipeline ainda era de 1,8 s (`DEF-RNF05-02`, Seção 9.2.7). Mover para fila ou tarefa em segundo plano muda a semântica verificada pelo RNF03 |
 
 
 # 13. Plano de Adoção e Mobilização do Ecossistema

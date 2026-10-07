@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 import shutil
 
+import pytest
 from fastapi.openapi.models import OpenAPI
 from fastapi.testclient import TestClient
 
@@ -110,6 +111,10 @@ def test_ct_rnf07_n():
     check_rnf07("CT-RNF07-N")
 
 
+@pytest.mark.skip(
+    reason="Critério do RNF08 revisado na S5-43 (#297); caso reavaliado em test_rnf08_s5_36.py. "
+    "A rodada-04 preserva o resultado pelo critério anterior."
+)
 def test_ct_rnf08_p():
     contract = live_contract()
     errors = contract_errors(contract)
