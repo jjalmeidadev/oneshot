@@ -542,6 +542,68 @@ def authorize_operation(
         )
 
 
+def grant_covers_project(
+    grant: AccessGrant,
+    *,
+    project_id: str | UUID,
+    subportfolio_id: str | UUID | None,
+    project_code: str | None = None,
+) -> bool:
+    """Diz se uma regra alcanca o projeto, olhando so aquela regra."""
+
+    if grant.permission_scope == "portfolio":
+        return True
+    if grant.permission_scope == "subportfolio":
+        return (
+            grant.subportfolio_id is not None
+            and subportfolio_id is not None
+            and str(grant.subportfolio_id).casefold() == str(subportfolio_id).casefold()
+        )
+    if grant.permission_scope == "projeto":
+        if grant.project_id is not None and str(grant.project_id).casefold() == str(project_id).casefold():
+            return True
+        return bool(
+            grant.project_code
+            and project_code
+            and grant.project_code.casefold() == project_code.casefold()
+        )
+    return False
+
+
+def authorize_project_write(
+    context: AccessContext,
+    *,
+    project_id: str | UUID,
+    subportfolio_id: str | UUID | None,
+    project_code: str | None = None,
+    correlation_id: str | None = None,
+) -> None:
+    """Exige escrita na regra que cobre o projeto (S5-05, Secao 8.5.13).
+
+    `context.can_write` e o agregado de todas as regras: com uma regra de
+    escrita no projeto A e outra so de leitura no B, ele seria verdadeiro para
+    os dois. Aqui cada regra e avaliada sozinha, e so uma regra que alcance o
+    projeto e tenha `can_write` libera a alteracao.
+    """
+
+    if not any(
+        grant.can_write
+        and grant_covers_project(
+            grant,
+            project_id=project_id,
+            subportfolio_id=subportfolio_id,
+            project_code=project_code,
+        )
+        for grant in context.grants
+    ):
+        raise OutOfScopeForProfileError(
+            "write",
+            project_id=str(project_id),
+            subportfolio_id=str(subportfolio_id) if subportfolio_id else None,
+            correlation_id=correlation_id,
+        )
+
+
 def authorize_message_scope(
     context: AccessContext,
     message: str,

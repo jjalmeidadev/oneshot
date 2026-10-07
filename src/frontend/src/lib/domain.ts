@@ -23,7 +23,11 @@ import {
   type ProactiveSuggestion,
   type FactualClaim,
   type EvidenceStatus,
+  type DataChangeConfirmResponse,
+  type DataChangeOutcome,
+  type DataChangeUndoResponse,
 } from './api/schemas';
+import type { DataChangeFailure } from './api/data-changes';
 
 /* -------------------------------------------------------------------------
  * Documento recuperado pelo RAG
@@ -176,6 +180,7 @@ export type ChatMessage = {
   id: string;
   role: MessageRole;
   content: string;
+  speech?: ChatResponse['speech'];
   createdAt: string;
   origin: MessageOrigin;
   status: MessageStatus;
@@ -199,6 +204,25 @@ export type ChatMessage = {
   proactiveSuggestion?: ProactiveSuggestionState;
   /** Estado do fluxo guiado iniciado por esta resposta. */
   workflow?: GuidedWorkflowSession;
+  /** Previa, pergunta ou recusa de alteracao de dados pelo chat. */
+  dataChange?: DataChangeState;
+};
+
+/**
+ * Estado do cartao de alteracao de dados (S5-07).
+ *
+ * `outcome` e o que o chat (ou a rota de previa) devolveu. `phase` registra o
+ * que a pessoa fez no cartao; fica na mensagem para que o cartao nao volte a
+ * oferecer "Confirmar" ao reabrir a conversa.
+ */
+export type DataChangePhase = 'idle' | 'applied' | 'cancelled' | 'undone' | 'failed';
+
+export type DataChangeState = {
+  outcome: DataChangeOutcome;
+  phase: DataChangePhase;
+  change?: DataChangeConfirmResponse;
+  undo?: DataChangeUndoResponse;
+  failure?: DataChangeFailure;
 };
 
 export type ConversationStatus = 'ativa' | 'finalizada' | 'abandonada' | 'erro';
@@ -317,6 +341,7 @@ export function toAssistantMessage(
     id: crypto.randomUUID(),
     role: 'assistant',
     content: response.text,
+    speech: response.speech,
     createdAt: new Date().toISOString(),
     origin: 'text',
     status: 'complete',
@@ -346,6 +371,9 @@ export function toAssistantMessage(
     intentLayerEnabled: options.intentLayerEnabled,
     proactiveSuggestion: response.proactive_suggestion
       ? toProactiveSuggestion(response.proactive_suggestion)
+      : undefined,
+    dataChange: response.data_change
+      ? { outcome: response.data_change, phase: 'idle' }
       : undefined,
   };
 }

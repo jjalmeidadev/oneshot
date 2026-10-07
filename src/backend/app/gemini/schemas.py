@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from app.nlp.schemas import AudioIntent, ChatPipelineMetrics, PublicEntity
 from app.reports.schemas import WorkflowDirective
 from app.alerts.schemas import AlertDirective
+from app.data_changes.schemas import DataChangeOutcome
 
 
 class GeminiChatRequest(BaseModel):
@@ -13,6 +14,7 @@ class GeminiChatRequest(BaseModel):
     previous_interaction_id: str | None = Field(default=None, max_length=1024)
     use_intent_classifier: bool = True
     proactivity_enabled: bool = False
+    include_audio: bool = False
 
     @field_validator("message")
     @classmethod
@@ -75,9 +77,17 @@ class ProactiveSuggestion(BaseModel):
     requires_confirmation: bool = True
 
 
+class SpeechResponse(BaseModel):
+    status: Literal["available", "unavailable"]
+    media_type: Literal["audio/mpeg"] | None = None
+    data_base64: str | None = None
+    warning: str | None = None
+
+
 class GeminiChatResponse(BaseModel):
     contract_version: Literal["1.1.0"] = "1.1.0"
     text: str
+    speech: SpeechResponse | None = None
     model: str
     interaction_id: str | None = None
     trace_id: str | None = None
@@ -98,6 +108,8 @@ class GeminiChatResponse(BaseModel):
     pipeline_metrics: ChatPipelineMetrics = Field(default_factory=ChatPipelineMetrics)
     proactive_suggestion: ProactiveSuggestion | None = None
     workflow: WorkflowDirective | AlertDirective | None = None
+    # Alteracao de dados pelo chat (S5-06): previa, pergunta ou recusa.
+    data_change: DataChangeOutcome | None = None
 
     @model_validator(mode="after")
     def validate_claim_references(self):

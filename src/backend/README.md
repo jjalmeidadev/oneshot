@@ -32,6 +32,13 @@ texto da pergunta, macro/intencao especifica e entidades extraidas pelo PLN,
 especialmente projeto ou linha. Sem URL de banco, o backend preserva o fallback
 local nos JSONs simulados de `app/rag/data/sharepoint`.
 
+`SHAREPOINT_MOCK_DATA_DIR` permite selecionar outro diretório de exportações
+JSON sem alterar o núcleo. O diretório deve existir e conter ao menos um JSON
+com `value` como lista de itens e `fields` como objeto em cada item. Uma lista
+`value` vazia é válida. Caminho ausente, diretório sem JSON ou arquivo inválido
+geram `RagSourceError`; na API de chat, essa falha resulta em HTTP 503 sem
+chamada ao LLM nem exposição do caminho local.
+
 Quando uma consulta classificada como `CONSULTA` nao recupera fontes suficientes,
 a API responde explicitamente que nao encontrou contexto seguro, sem inventar
 informacao.

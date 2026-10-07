@@ -38,6 +38,49 @@ function successfulResponse(url: string): Response {
 }
 
 describe('AppShell, barra lateral, sessão e tema', () => {
+  it('exibe o reprodutor da resposta obtida pela rota de chat', async () => {
+    const createObjectURL = vi.fn().mockReturnValue('blob:tts-answer');
+    vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL: vi.fn() });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((url: string) => {
+        if (
+          url.includes('/access/login') ||
+          url.includes('/notifications') ||
+          url.includes('/alert-subscriptions')
+        ) {
+          return Promise.resolve(successfulResponse(url));
+        }
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              ...response,
+              speech: {
+                status: 'available',
+                media_type: 'audio/mpeg',
+                data_base64: btoa('ID3audio'),
+                warning: null,
+              },
+            }),
+          ),
+        );
+      }),
+    );
+    const view = render(<App />);
+    await authenticate();
+    fireEvent.change(screen.getByRole('textbox', { name: 'Mensagem para o agente' }), {
+      target: { value: 'prazo' },
+    });
+    await userEvent.click(screen.getByRole('button', { name: 'Enviar mensagem' }));
+    expect(await screen.findByLabelText('Resposta em áudio')).toHaveAttribute(
+      'src',
+      'blob:tts-answer',
+    );
+    expect(screen.getByRole('log')).toHaveTextContent(response.text);
+    view.unmount();
+    vi.unstubAllGlobals();
+  });
+
   it('integra envio, fontes, busca, seleção, exclusão e tema', async () => {
     vi.stubGlobal(
       'fetch',

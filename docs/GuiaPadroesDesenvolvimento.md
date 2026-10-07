@@ -38,17 +38,17 @@ _conteúdo_
 
 - Variáveis e Funções: Utilize camelCase
   - Exemplos:
-    - ```let userName = "John";``` 
+    - ```let userName = "John";```
     - ```function calculateTotal() { ... }```
 
 - Classes e Interfaces: Utilize PascalCase
   - Exemplos:
-    - ```class UserProfile { ... }``` 
-    - ```interface PaymentGateway { ... }```  
+    - ```class UserProfile { ... }```
+    - ```interface PaymentGateway { ... }```
 
 - Constantes: Utilize UPPER_CASE com underscores
   - Exemplo:
-    - const MAX_USERS = 100; 
+    - const MAX_USERS = 100;
 
 ## 2.2 Formatação de Código
 
@@ -68,7 +68,7 @@ _conteúdo_
   - Exemplo: // Calcula o total com desconto
 
 - Comentários de Bloco: Use para documentar funções e classes com JSDoc.
-  - Exemplo: 
+  - Exemplo:
     ```
     /**
     * Calcula o total de um pedido.
@@ -114,7 +114,7 @@ _conteúdo_
 - Testes de Integração: Como sugestão, utilizar o Cypress para testes de integração.
   - Exemplo: Testar a interação entre componentes de frontend e backend.
 
-- Testes end-to-end: Como sugestão, utilizar o Cypress para testes end-to-end. 
+- Testes end-to-end: Como sugestão, utilizar o Cypress para testes end-to-end.
   - Exemplo: Testar um RF de ponta a ponta.
 
 ## 4.2 Controle de Qualidade
@@ -136,4 +136,3 @@ _conteúdo_
 - Backend: Utilize Node.js com TypeScript.
 
 - Frontend: Utilize Angular com TypeScript.
-

@@ -27,7 +27,7 @@ from __future__ import annotations
 import json
 import os
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Sequence
@@ -56,7 +56,9 @@ _BATCH_SIZE = 64
 
 LIMITATION_ANSWER = (
     "Não consegui identificar com segurança o que você precisa dentro do "
-    "portfólio. Pode reformular indicando o projeto e a informação desejada?"
+    "portfólio ou nos temas da base. Pode reformular indicando o tema e a "
+    "informação desejada? Por exemplo: 'Como funciona o Bilhete digital?' "
+    "ou 'Qual é o status do projeto PRJ-0442?'"
 )
 LIMITATION_FLOW = "Resposta padrão de limitação (RF08)"
 
@@ -86,10 +88,11 @@ class Classificacao:
     handler: str
     alternativas: list[tuple[str, float]] = field(default_factory=list)
     resposta_sugerida: str | None = None
+    regra_roteamento: str | None = None
 
     @property
     def roteada(self) -> bool:
-        """A macrointenção passou do limiar e a solicitação segue no pipeline."""
+        """A solicitação foi aceita pelo modelo ou por regra explícita de domínio."""
 
         return self.macrointencao != UNDEFINED_MACRO
 
@@ -149,7 +152,7 @@ class ClassificadorDeIntencoes:
             and self.artefato.intencao2macro.get(intencao) == macro
         )
 
-        return Classificacao(
+        resultado = Classificacao(
             texto=texto,
             macrointencao=macro if roteia else UNDEFINED_MACRO,
             confianca_macro=round(confianca_macro, 4),
@@ -166,6 +169,23 @@ class ClassificadorDeIntencoes:
             ],
             resposta_sugerida=None if roteia else LIMITATION_ANSWER,
         )
+        from app.nlp.routing import apply_domain_routes
+
+        resultado = apply_domain_routes(resultado)
+        if resultado.regra_roteamento:
+            # Regra determinística não vira probabilidade 1.0. Informar a
+            # probabilidade real da classe selecionada, mesmo abaixo do limiar.
+            indice_macro = list(macros).index(resultado.macrointencao)
+            confianca_especifica = (
+                float(probabilidades[list(classes).index(resultado.intencao)])
+                if resultado.intencao else 0.0
+            )
+            resultado = replace(
+                resultado,
+                confianca_macro=round(float(probabilidades_macro[indice_macro]), 4),
+                confianca_intencao=round(confianca_especifica, 4),
+            )
+        return resultado
 
     def vectorize(self, textos: Sequence[str]) -> Any:
         """Aplica as mesmas transformações ajustadas no treino, na mesma ordem."""

@@ -1,6 +1,35 @@
 # Evidências de testes — integração #131
 
-## Escopo e resultados
+## S5-22 — testes por componente (05/10/2026)
+
+A suíte atual passa com **112 testes em 18 arquivos**, incluindo 48 novos casos
+para UI, barra lateral, tema, proatividade, notificações, configuração de alertas
+e renderização de mensagens. O inventário cobre os **38 módulos de componentes**,
+além dos providers e de `App`.
+
+| Métrica      | Medição atual | Mínimo global |
+| ------------ | ------------- | ------------- |
+| Linhas       | 86,36%        | 80%           |
+| Instruções   | 83,96%        | 80%           |
+| Funções      | 85,81%        | 75%           |
+| Ramificações | 75,25%        | 70%           |
+
+`vitest.config.ts` aplica os mínimos locais e na pipeline. Um gate adicional
+por arquivo em `src/components/**/*.tsx` rejeita componentes com zero execução
+de linhas, instruções ou funções. Esse gate foi verificado com uma fixture sem
+teste: os 18 testes de UI passaram e a cobertura encerrou com código 1 por causa
+da fixture, removida ao concluir a verificação.
+
+O job `frontend-unit` publica JUnit em `test-results/unit/junit.xml` e relatório
+Cobertura em `coverage/cobertura-coverage.xml`, além de HTML e JSON summary.
+Execute `npm run typecheck` para verificar tipos separadamente do build.
+
+Inventário, critérios, limites e evidências reproduzíveis estão no
+[relatório S5-22](../../docs/testes/sprint5/relatorio-s5-22.md). A publicação do MR,
+execução remota e aprovação comentada por revisor de outra frente permanecem
+pendentes; a revisão local não substitui essas condições.
+
+## Resultados da integração #131 (registro anterior)
 
 A validação cobre a interface S3/S5, os contratos HTTP, a conversão de áudio, o contexto de conversa e falhas de comunicação. As execuções locais concluíram com **171 testes do backend, 46 testes unitários do frontend e 8 testes de ponta a ponta aprovados**. Lint, compilação de produção e verificação de formatação também passaram. A auditoria npm não encontrou vulnerabilidades.
 
@@ -58,6 +87,10 @@ validam a conclusão acessível do workflow e o resumo de notificações. A suí
 TypeScript também verifica os contratos discriminados de relatório e alerta.
 O fluxo de mensageria AMQP deve ser validado separadamente com Docker Engine e
 RabbitMQ ativos, porque os testes de componente não inicializam infraestrutura.
+
+## Evidência da alteração de dados pelo chat (S5-07)
+
+`data-change-card.test.tsx` cobre os quatro estados exigidos pela issue #261 (prévia, confirmação, cancelamento e erro) e também o erro transitório com nova tentativa, o desfazer dentro e fora da janela, a prévia expirada, os avisos, o histórico do campo, a recusa sem ações e as perguntas com candidatos e com valor inválido. `data-change-flow.test.tsx` atravessa a aplicação real (store, lista e cartão) e confirma que, depois de gravar, trocar de conversa e voltar não oferece confirmar de novo. `e2e/alteracao-dados.spec.ts` repete o fluxo no Chromium em desktop, tablet e celular, com auditoria axe do cartão nos temas claro e escuro e verificação de rolagem horizontal. O servidor E2E não tem as rotas da S5-06, então a resposta do chat e as rotas do cartão são simuladas com `page.route`; a permissão de escrita é coberta pelos testes do backend da S5-06. Evidência e capturas em `docs/evidencias/sprint-05/s5-07-interface-alteracao.md`.
 
 ## Limites da evidência
 

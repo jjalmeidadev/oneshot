@@ -1,10 +1,12 @@
 import { AlertTriangle, AudioLines, Sparkles, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { IntentBadge } from '@/components/chat/intent-badge';
 import { MarkdownMessage } from '@/components/chat/markdown-message';
 import { ProactiveSuggestion } from '@/components/chat/proactive-suggestion';
 import { ReportWorkflowCard } from '@/components/chat/report-workflow-card';
 import { AlertWorkflowCard } from '@/components/chat/alert-workflow-card';
+import { DataChangeCard } from '@/components/chat/data-change-card';
 import { SourceCitations } from '@/components/chat/source-citations';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -130,11 +132,22 @@ function AssistantMessage({
         ) : (
           <>
             <MarkdownMessage content={message.content} />
+            {message.speech?.status === 'available' && message.speech.data_base64 && (
+              <SpeechPlayer data={message.speech.data_base64} />
+            )}
+            {message.speech?.status === 'unavailable' && message.speech.warning && (
+              <p role="status" className="mt-2 text-xs text-fg-muted">
+                {message.speech.warning}
+              </p>
+            )}
             {message.workflow?.workflow === 'transacao_gerar_relatorio' && (
               <ReportWorkflowCard workflow={message.workflow} />
             )}
             {message.workflow?.workflow === 'alerta_prazo_atraso' && (
               <AlertWorkflowCard workflow={message.workflow} />
+            )}
+            {message.dataChange && (
+              <DataChangeCard messageId={message.id} state={message.dataChange} />
             )}
           </>
         )}
@@ -173,5 +186,42 @@ function AssistantMessage({
         </div>
       </div>
     </div>
+  );
+}
+
+function SpeechPlayer({ data }: { data: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    try {
+      const decoded = atob(data);
+      const bytes = new Uint8Array(decoded.length);
+      for (let index = 0; index < decoded.length; index += 1) {
+        bytes[index] = decoded.charCodeAt(index);
+      }
+      objectUrl = URL.createObjectURL(new Blob([bytes], { type: 'audio/mpeg' }));
+      setUrl(objectUrl);
+      setFailed(false);
+    } catch {
+      setUrl(null);
+      setFailed(true);
+    }
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [data]);
+
+  if (failed) {
+    return (
+      <p role="status" className="mt-2 text-xs text-fg-muted">
+        Não foi possível reproduzir o áudio desta resposta.
+      </p>
+    );
+  }
+  if (!url) return null;
+  return (
+    <audio controls src={url} aria-label="Resposta em áudio" className="mt-3 w-full" />
   );
 }

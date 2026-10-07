@@ -1,0 +1,41 @@
+{
+  "started_at_utc": "2026-10-06T02:53:41.941441+00:00",
+  "user_date": "2026-10-05",
+  "user_timezone": "America/Fortaleza",
+  "commit": "28337f402537ba3c52fee6d703d75e70af64dc65",
+  "worktree": " M src/backend/app/gemini/client.py\n M src/backend/app/rag/sharepoint.py\n M src/backend/app/tests/test_sharepoint_rag.py\n?? docs/evidencias/sprint-05/rnf07-rnf09/\n?? docs/testes/sprint5/\n?? src/backend/app/rag/errors.py\n?? src/backend/app/tests/test_rnf07_rnf09_s5_31.py\n?? src/backend/scripts/run_s5_31.py\n",
+  "python": "3.12.7",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "packages": {
+    "pytest": "9.1.1",
+    "fastapi": "0.141.1",
+    "pydantic": "2.13.5",
+    "httpx": "0.28.1"
+  },
+  "sha256": {
+    "docs/testes/sprint5/amostra-rnf07.csv": "ab61a63a088ca3c47d235588e0a05cb225a59a6eb89e80973b2100921f6587ff",
+    "docs/testes/sprint5/protocolo-rnf07.md": "806c704ced46805ec184f9d196df2bd83ff0a6962ef50adee4617350d2991edf",
+    "src/agent/README.md": "1afbdc0b9c53a3de1de36d5f85442b1aa560f3c1f618f1ea9d4fbefa9175ee80",
+    "docs/Projeto.md": "a690cc1533e429ae1273993bcfa6c58020a50f633cb2e709e7fb07238c16d5df",
+    "src/backend/app/tests/test_rnf07_rnf09_s5_31.py": "910331cd871c9d8271a384d83fc4324ec1fb5542f06d9d17073bbf7f28886400",
+    "src/backend/app/rag/sharepoint.py": "7fe11b3041ad3cbd14f4246a104b68087742a4748094210f41557499e8d4708c",
+    "src/backend/app/rag/database.py": "6a62b3269c971e54548039af847c5a49533885951f2455a1807d20b44cf71783",
+    "src/backend/app/rag/errors.py": "a82133bdcccf1b551aca086af009540abccae2390f5ec005594140a7ee4f5905",
+    "src/backend/app/gemini/client.py": "bd590e3ca794ab08afa9c357f187b8b9c1c29a8a417069a3ce3273c48f183ce8",
+    "src/backend/scripts/run_s5_31.py": "c3191f8c747266788635f0be662791d63da9345db9cae6126124b2ef0e96f5f0",
+    "src/backend/app/rag/data/sharepoint/base_atendimento.json": "6e18536a7fb60457941594ebee9ba1f284755ac2e3c5ff7d4b2e579edb7c1ab8",
+    "src/backend/app/rag/data/sharepoint/comunicados_servico.json": "d8fc529cbe9eeb14c1e671ac2863da38b5af1a6be97de8e4cae7eab4c26e24b7",
+    "src/backend/app/rag/data/sharepoint/procedimentos_operacionais.json": "1b7aa37690ac200c73e1cfe79c1f8aa123ee579b284b109a02c74d4613cf93ce"
+  },
+  "scope": "API ASGI local e núcleo RAG real; sem rede, banco, LLM ou participantes",
+  "command": [
+    "C:\\Users\\wende\\OneDrive\\Área de Trabalho\\G05-MD7\\.venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "app/tests/test_rnf07_rnf09_s5_31.py",
+    "-v",
+    "-s",
+    "--tb=short",
+    "--junitxml=C:\\Users\\wende\\OneDrive\\Área de Trabalho\\G05-MD7\\g05\\docs\\evidencias\\sprint-05\\rnf07-rnf09\\rodada-03\\pytest.xml"
+  ]
+}

@@ -4,6 +4,9 @@ from datetime import date, datetime, timedelta, timezone
 from types import SimpleNamespace
 
 import pytest
+
+# Preserva a cobertura anterior do backend-api na selecao por marcador (#255).
+pytestmark = pytest.mark.integration
 from fastapi.testclient import TestClient
 
 from app.alerts.errors import AlertConflictError, AlertMessageError

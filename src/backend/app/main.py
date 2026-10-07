@@ -29,6 +29,7 @@ from app.audio.schemas import (
     VhsMetricsResponse,
 )
 from app.audio import transcription
+from app.audio.synthesis import synthesize_optional
 from app.audio.security import single_request_per_identity
 from app.audio.service import process_audio_upload
 from app.audio.validation import DEFAULT_MAX_SIZE_BYTES
@@ -58,6 +59,8 @@ from app.reports.errors import ReportError
 from app.reports.router import router as reports_router
 from app.alerts.errors import AlertError
 from app.alerts.router import router as alerts_router
+from app.data_changes.errors import DataChangeError
+from app.data_changes.router import router as data_changes_router
 from app.security import (
     AccessContext,
     AccessError,
@@ -109,6 +112,7 @@ app = FastAPI(
 )
 app.include_router(reports_router)
 app.include_router(alerts_router)
+app.include_router(data_changes_router)
 ReadAccess = Annotated[AccessContext, Depends(require_read_access)]
 WriteAccess = Annotated[AccessContext, Depends(require_write_access)]
 AuthenticatedAccess = Annotated[AccessContext, Depends(get_access_context)]
@@ -139,6 +143,13 @@ def handle_alert_error(_request: Request, error: AlertError) -> JSONResponse:
         status_code=error.status_code,
         content={"error": {"code": error.code, "message": error.message}},
     )
+
+
+@app.exception_handler(DataChangeError)
+def handle_data_change_error(_request: Request, error: DataChangeError) -> JSONResponse:
+    # As negativas de escrita ja foram auditadas pelo servico, na mesma
+    # transacao das demais recusas.
+    return JSONResponse(status_code=error.status_code, content=error.to_payload())
 
 
 @app.exception_handler(AccessError)
@@ -219,6 +230,16 @@ async def handle_request_validation_error(
                 }
             },
         )
+    if request.url.path.startswith(("/api/data-change-previews", "/api/data-changes")):
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": {
+                    "code": "DATA_CHANGE_INVALID_INPUT",
+                    "message": "Revise os dados enviados para a alteração.",
+                }
+            },
+        )
     if request.url.path != AUDIO_PATH:
         return await request_validation_exception_handler(request, error)
 
@@ -275,12 +296,15 @@ def create_chat_response(
 ) -> GeminiChatResponse:
     try:
         authorize_message_scope(access, request.message)
-        return process_message(
+        response = process_message(
             request,
             requester_id=str(access.auth_subject),
             user_id=str(access.user_id),
             access_context=access,
         )
+        if request.include_audio:
+            response.speech = synthesize_optional(response.text)
+        return response
     except GeminiConfigurationError as error:
         raise HTTPException(status_code=503, detail="O serviço de processamento está indisponível. Tente novamente em instantes.") from error
     except GeminiAPIError as error:
@@ -344,7 +368,7 @@ def create_audio_chat_response(
 
     try:
         authorize_message_scope(access_context, request.message)
-        return process_message(
+        response = process_message(
             request,
             channel="api",
             external_conversation_id=conversation_id,
@@ -352,6 +376,9 @@ def create_audio_chat_response(
             user_id=str(access_context.user_id),
             access_context=access_context,
         )
+        if request.include_audio:
+            response.speech = synthesize_optional(response.text)
+        return response
     except GeminiConfigurationError as error:
         raise ProcessingUnavailableError() from error
     except GeminiAPIError as error:
@@ -375,6 +402,7 @@ async def create_audio_upload(
     previous_interaction_id: str | None = Form(default=None, max_length=1024),
     use_intent_classifier: bool = Form(default=True),
     proactivity_enabled: bool = Form(default=False),
+    include_audio: bool = Form(default=False),
 ) -> AudioUploadResponse:
     started_at = perf_counter()
     resolved_conversation_id = conversation_id or str(uuid4())
@@ -399,6 +427,7 @@ async def create_audio_upload(
                 previous_interaction_id=previous_interaction_id,
                 use_intent_classifier=use_intent_classifier,
                 proactivity_enabled=proactivity_enabled,
+                include_audio=include_audio,
             ),
             resolved_conversation_id,
             access,

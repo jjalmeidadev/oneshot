@@ -9,6 +9,9 @@ from uuid import uuid4
 import httpx
 import pytest
 
+pytestmark = pytest.mark.integration
+
+
 try:
     from scripts.seed_mvp_access import IDENTITIES, resolve_auth_users, run_seed
 except ImportError:  # Execucao do pytest a partir da raiz do repositorio.

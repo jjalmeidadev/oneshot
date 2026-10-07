@@ -33,6 +33,8 @@ from app.security.sensitive_data import (
 )
 from test_traceability import FakeConnection, FakeCursor, _connect
 
+pytestmark = pytest.mark.integration
+
 DATA_DIR = Path(__file__).resolve().parents[1] / "rag" / "data" / "sharepoint"
 
 # Valores sinteticos com digito verificador valido. Nao pertencem a ninguem.
@@ -298,7 +300,7 @@ def test_auditoria_registra_bloqueio_sem_expor_o_dado(
     ]
     bloqueio = [params for params in eventos if params[1] == "sensitive_content_blocked"]
     assert len(bloqueio) == 1
-    _interacao, _tipo, componente, status, _usuario, payload = bloqueio[0]
+    _interacao, _tipo, componente, status, _usuario, payload, _correlacao = bloqueio[0]
     assert (componente, status) == ("api", "bloqueado")
     assert json.loads(payload)["categories"] == ["cpf"]
 
