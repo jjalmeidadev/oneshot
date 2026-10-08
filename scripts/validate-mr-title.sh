@@ -15,6 +15,7 @@ if printf '%s\n' "$title" | grep -Eq "$pattern"; then
   exit 0
 fi
 
+printf 'Título de merge request recebido: <%s>\n' "$title" >&2
 cat >&2 <<'EOF'
 Título de merge request inválido.
 

@@ -104,6 +104,22 @@ Esses endereços são locais: funcionam depois de iniciar os dois servidores e
 não representam links públicos de entrega. Para o fluxo autenticado completo,
 configure Supabase Auth, banco e regras de acesso conforme o manual.
 
+### Aplicação na nuvem
+
+A versão de demonstração da Sprint 5 está disponível em
+**[aptitude-exemplary-saddling.ngrok-free.dev](https://aptitude-exemplary-saddling.ngrok-free.dev)**.
+O endereço usa um domínio gratuito fixo do ngrok e aponta para a aplicação na
+EC2; não é necessário manter o computador de um integrante ligado. No primeiro
+acesso pelo navegador, o ngrok mostra um aviso de segurança: confira o endereço
+acima e clique em **Visit Site** para abrir a aplicação. Cada visitante poderá
+ver esse aviso uma vez.
+
+O link só responde enquanto a instância, os contêineres e o serviço ngrok
+estiverem ativos. O plano gratuito tem limites de tráfego e requisições, por
+isso o ambiente é destinado a testes controlados. O [Manual de instalação](docs/Manual-instalacao.md)
+orienta a execução local; o processo de publicação e as verificações na nuvem
+estão na [Seção 10 do Projeto.md](docs/Projeto.md#10-procedimentos-de-implantação).
+
 ---
 
 ## 📚 Documentação

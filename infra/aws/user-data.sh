@@ -80,12 +80,16 @@ if grep -Eq '^[[:space:]]*(export[[:space:]]+)?AWS_[A-Za-z0-9_]*[[:space:]]*=' "
   echo 'Runtime configuration must not contain AWS_* assignments.' >&2
   exit 64
 fi
-for name in GEMINI_API_KEY AZURE_SPEECH_KEY AZURE_SPEECH_TIMEOUT_SECONDS AZURE_SPEECH_MAX_ATTEMPTS AUDIO_SIMULATED_IDENTITIES REPORT_SIMULATED_IDENTITIES ALERT_CONFIRMATION_SECRET RABBITMQ_USER RABBITMQ_PASSWORD RABBITMQ_URL DATABASE_POOL_MAX_SIZE DATABASE_STATEMENT_TIMEOUT_MS; do
+for name in GEMINI_API_KEY AZURE_SPEECH_KEY AZURE_SPEECH_TIMEOUT_SECONDS AZURE_SPEECH_MAX_ATTEMPTS AUDIO_SIMULATED_IDENTITIES REPORT_SIMULATED_IDENTITIES ALERT_CONFIRMATION_SECRET RABBITMQ_USER RABBITMQ_PASSWORD RABBITMQ_URL DATABASE_POOL_MAX_SIZE DATABASE_STATEMENT_TIMEOUT_MS SUPABASE_URL NOTIFICATION_CALLBACK_SECRET SHAREPOINT_WEBHOOK_CLIENT_STATE; do
   if ! grep -Eq "^$name=.+" "$RUNTIME_FILE"; then
     echo "Runtime configuration is missing a required variable: $name" >&2
     exit 64
   fi
 done
+if ! grep -Eq '^(SUPABASE_PUBLISHABLE_KEY|SUPABASE_ANON_KEY)=.+' "$RUNTIME_FILE"; then
+  echo 'Runtime configuration needs a public Supabase API key.' >&2
+  exit 64
+fi
 if ! grep -Eq '^AZURE_SPEECH_RESOURCE=.+|^AZURE_SPEECH_ENDPOINT=.+' "$RUNTIME_FILE"; then
   echo 'Runtime configuration needs AZURE_SPEECH_RESOURCE or AZURE_SPEECH_ENDPOINT.' >&2
   exit 64
@@ -100,9 +104,16 @@ import json, sys
 from urllib.parse import unquote, urlsplit
 try:
     services = json.load(sys.stdin)["services"]
+    expected = {"rabbitmq", "backend", "frontend", "scheduler", "publisher", "evaluator", "notifier", "delivery", "sharepoint-publisher", "sharepoint-consumer"}
+    api = services["backend"]["environment"]
     broker = services["rabbitmq"]["environment"]
-    url = urlsplit(services["backend"]["environment"]["RABBITMQ_URL"])
-    valid = (url.scheme == "amqp" and url.hostname == "rabbitmq"
+    url = urlsplit(api["RABBITMQ_URL"])
+    valid = (expected.issubset(services)
+             and bool(api["SUPABASE_URL"])
+             and bool(api["SUPABASE_PUBLISHABLE_KEY"] or api["SUPABASE_ANON_KEY"])
+             and bool(api["NOTIFICATION_CALLBACK_SECRET"])
+             and bool(api["SHAREPOINT_WEBHOOK_CLIENT_STATE"])
+             and url.scheme == "amqp" and url.hostname == "rabbitmq"
              and url.port == 5672
              and broker["RABBITMQ_DEFAULT_USER"] != "guest"
              and unquote(url.username or "") == broker["RABBITMQ_DEFAULT_USER"]
@@ -114,8 +125,8 @@ sys.exit(0 if valid else 1)
   echo 'RabbitMQ URL and broker credentials do not match.' >&2
   exit 64
 fi
-/usr/local/bin/m7-compose up -d --no-build rabbitmq backend frontend scheduler publisher evaluator notifier
-for service in backend frontend rabbitmq scheduler publisher evaluator notifier; do
+/usr/local/bin/m7-compose up -d --no-build --wait --wait-timeout 240 rabbitmq backend frontend scheduler publisher evaluator notifier delivery sharepoint-publisher sharepoint-consumer
+for service in rabbitmq backend frontend scheduler publisher evaluator notifier delivery sharepoint-publisher sharepoint-consumer; do
   systemctl enable "m7-container-logs@$service.service"
   systemctl restart "m7-container-logs@$service.service"
 done

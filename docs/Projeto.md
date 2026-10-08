@@ -264,7 +264,7 @@
   - [10.1 Implantação e Configuração do Banco de Dados](#101-implantação-e-configuração-do-banco-de-dados)
     - [10.1.1 Preflight do esquema](#1011-preflight-do-esquema)
     - [10.1.2 Aplicação da migração](#1012-aplicação-da-migração)
-  - [10.2 Implantação do Protótipo para uso por equipe de desenvolvimento](#102-implantação-do-protótipo-para-uso-por-equipe-de-desenvolvimento)
+  - [10.2 Implantação do protótipo para equipe e cliente](#102-implantação-do-protótipo-para-equipe-e-cliente)
     - [10.2.1 Restrições do Learner Lab e arquitetura adotada](#1021-restrições-do-learner-lab-e-arquitetura-adotada)
     - [10.2.2 Preparação dos contêineres](#1022-preparação-dos-contêineres)
     - [10.2.3 Build e publicação no ECR](#1023-build-e-publicação-no-ecr)
@@ -276,6 +276,8 @@
     - [10.2.9 Publicação com Cloudflare Quick Tunnel](#1029-publicação-com-cloudflare-quick-tunnel)
     - [10.2.10 Validação e resultado da Sprint 4](#10210-validação-e-resultado-da-sprint-4)
     - [10.2.11 Operação após o deploy](#10211-operação-após-o-deploy)
+    - [10.2.12 Alinhamento da aplicação na Sprint 5](#10212-alinhamento-da-aplicação-na-sprint-5)
+    - [10.2.13 URL fixa gratuita pelo ngrok](#10213-url-fixa-gratuita-pelo-ngrok)
 - [11. Análise de Viabilidade Financeira](#11-análise-de-viabilidade-financeira)
   - [11.1 Escopo considerado no orçamento](#111-escopo-considerado-no-orçamento)
   - [11.2 Custos diretos do projeto](#112-custos-diretos-do-projeto)
@@ -7751,7 +7753,7 @@ Os defeitos já encerrados (`DEF-RF02-01`, `DEF-RF03-01`, `DEF-RNF04-01`, `DEF-R
 
 # 10. Procedimentos de Implantação
 
-O deploy da Sprint 4 foi realizado no AWS Academy Learner Lab e teve como objetivo disponibilizar a PoC para testes da equipe e do cliente sem depender de infraestrutura corporativa do Metrô. O processo combinou Supabase PostgreSQL, imagens Docker privadas no Amazon ECR, uma instância EC2 gerenciada por CloudFormation e um Cloudflare Quick Tunnel para fornecer acesso HTTPS temporário.
+O deploy começou na Sprint 4 no AWS Academy Learner Lab e foi atualizado na Sprint 5 para disponibilizar a PoC à equipe e ao cliente sem depender de infraestrutura corporativa do Metrô. O processo combinou Supabase PostgreSQL, imagens Docker privadas no Amazon ECR, uma instância EC2 gerenciada por CloudFormation e túneis de saída para acesso HTTPS. O Cloudflare Quick Tunnel foi a primeira publicação; o endereço fixo gratuito do ngrok passou a ser o link de demonstração na Sprint 5 (Seção 10.2.13).
 
 As etapas abaixo descrevem o que foi configurado, os comandos e artefatos usados e as verificações executadas. Os valores sensíveis foram mantidos fora do Git e são representados apenas pelos nomes das variáveis.
 
@@ -7786,7 +7788,7 @@ A limpeza removeu os sete registros expirados e não reivindicados. Depois da ap
 
 O rollback [`16_rollback_alert_deadline_flow.sql`](../src/database/sql/16_rollback_alert_deadline_flow.sql) não foi usado porque remove as seis tabelas e seus dados. A conexão PostgreSQL foi posteriormente testada de dentro do contêiner backend na EC2 pela saída TCP/5432 do Security Group.
 
-## 10.2 Implantação do Protótipo para uso por equipe de desenvolvimento
+## 10.2 Implantação do protótipo para equipe e cliente
 
 ### 10.2.1 Restrições do Learner Lab e arquitetura adotada
 
@@ -7797,11 +7799,12 @@ O primeiro deploy usava AWS Systems Manager para toda a operação remota. A EC2
 - frontend publicado apenas em `127.0.0.1:80` na EC2;
 - backend, RabbitMQ e workers somente na rede privada do Compose;
 - Cloudflare Quick Tunnel iniciado na própria EC2 para acesso HTTPS externo;
+- ngrok instalado posteriormente na mesma EC2 para manter um endereço de demonstração fixo;
 - Supabase como PostgreSQL gerenciado;
 - ECR privado para as imagens de backend e frontend;
 - CloudWatch Agent e logs locais com rotação.
 
-Não foi aberta entrada HTTP pública no Security Group. O Cloudflare estabelece conexões de saída e encaminha as requisições para o frontend ligado ao *loopback*. A transição entre as duas arquiteturas está consolidada nesta seção.
+Não foi aberta entrada HTTP pública no Security Group. Os agentes de túnel estabelecem conexões de saída e encaminham as requisições para o frontend ligado ao *loopback*. A transição entre as versões da aplicação e os dois modos de publicação está consolidada nesta seção.
 
 ### 10.2.2 Preparação dos contêineres
 
@@ -7853,7 +7856,7 @@ docker push "$registry/m7-g05-backend:$tag"
 docker push "$registry/m7-g05-frontend:$tag"
 ```
 
-A publicação foi feita para `linux/amd64`. Depois do push, `ecr:DescribeImages` foi usado para recuperar e registrar os digests, que são exigidos pelo preflight de atualização. A versão implantada corresponde ao commit `f776feb352c3556d02e83dc14eea49b0d795f6b9`:
+A publicação foi feita para `linux/amd64`. Depois do push, `ecr:DescribeImages` foi usado para recuperar e registrar os digests, que são exigidos pelo preflight de atualização. A versão implantada ao fim da Sprint 4 correspondia ao commit `f776feb352c3556d02e83dc14eea49b0d795f6b9`; a atualização da Sprint 5 está na Seção 10.2.12:
 
 | Imagem | Tag imutável | Digest confirmado no ECR |
 |---|---|---|
@@ -7976,13 +7979,7 @@ rm -f ~/.runtime-stage/runtime.env.incoming
 sudo /usr/local/bin/m7-compose-up
 ```
 
-`m7-compose-up` valida a presença das variáveis, confirma que a URL AMQP corresponde às credenciais do RabbitMQ e inicia `rabbitmq`, `backend`, `frontend`, `scheduler`, `publisher`, `evaluator` e `notifier`. O arquivo instalado foi conferido como `root:root` modo `0600`.
-
-> **Nota temporal — Sprint 5:** esse registro descreve o deploy anterior aos
-> novos workers de webhook. O `compose.prod.yml` atual também declara o consumer
-> `delivery` e os workers `sharepoint-publisher` e `sharepoint-consumer`, mas não
-> houve nova execução na AWS que comprove esses contêineres no
-> ambiente publicado.
+Na Sprint 4, `m7-compose-up` validou as variáveis, conferiu a URL AMQP e iniciou `rabbitmq`, `backend`, `frontend`, `scheduler`, `publisher`, `evaluator` e `notifier`. O arquivo instalado foi conferido como `root:root` modo `0600`. Na Sprint 5, o wrapper e o Compose foram atualizados para iniciar também `delivery`, `sharepoint-publisher` e `sharepoint-consumer`; os dez serviços foram verificados na EC2 (Seção 10.2.12).
 
 O frontend permaneceu em `127.0.0.1:80`; o backend e o broker não publicam portas no host. O health check interno foi executado antes de criar qualquer acesso externo:
 
@@ -8018,13 +8015,13 @@ O preflight valida STS, stack, EC2, key pair, host SSH, arquivos locais, Compose
 .\scripts\aws\update-app.ps1 @update -Action Execute -ConfirmUpdate
 ```
 
-O script cria um staging remoto com modo `0700`, transfere Compose, runtime, configuração do CloudWatch e executor, cria um backup root-only, atualiza as tags em `/etc/m7/deploy.env`, executa `pull`, recria os sete serviços e verifica `/health`. Se uma etapa falhar, o executor restaura os arquivos anteriores e tenta recuperar os contêineres.
+O script cria um staging remoto com modo `0700`, transfere Compose, runtime, configuração do CloudWatch e executor, cria um backup root-only, atualiza as tags em `/etc/m7/deploy.env`, executa `pull`, recria os serviços e verifica `/health`. A execução da Sprint 4 abrangia sete serviços; a atualização da Sprint 5 abrange dez. Se uma etapa falhar, o executor restaura os arquivos anteriores e tenta recuperar os contêineres.
 
 Na primeira execução real foram corrigidos três problemas: o caminho do staging não era enviado ao executor, a configuração consumida do CloudWatch podia estar em um caminho diferente do canônico e as opções `tmpfs` dos workers precisavam estar entre aspas no YAML. Depois das correções, o fluxo terminou com health check aprovado.
 
-O rollback de versão usa [`rollback.ps1`](../scripts/aws/rollback.ps1). Ele confirma previamente que as tags antigas ainda existem no ECR e que seus digests correspondem aos valores registrados. A execução remota exige `-ExecuteRollback -ConfirmRollback` e termina com nova verificação dos contêineres e de `/health`.
+O rollback de versão da Sprint 4 usa [`rollback.ps1`](../scripts/aws/rollback.ps1). Ele confirma previamente que as tags antigas ainda existem no ECR e que seus digests correspondem aos valores registrados. Na Sprint 5, esse rollback por troca isolada de tags passou a recusar o Compose com novos workers; a restauração usa o backup completo de Compose, runtime, wrapper e configuração do CloudWatch (Seção 10.2.12).
 
-Na rotação posterior da chave Gemini, apenas o runtime protegido foi substituído. Backend e workers foram recriados primeiro e o frontend depois, pois o Nginx precisa resolver novamente o endereço interno do backend quando o contêiner é recriado. A chave foi comparada internamente sem imprimir seu valor e a chamada de chat confirmou o novo runtime.
+Em uma rotação feita antes do alinhamento da Sprint 5, apenas o runtime protegido foi substituído. Backend e workers foram recriados primeiro e o frontend depois, para que o Nginx resolvesse novamente o endereço interno do backend. A chave foi comparada internamente sem imprimir seu valor e a chamada de chat confirmou o runtime daquele momento. A rotação mais recente está descrita na Seção 10.2.12.
 
 ### 10.2.9 Publicação com Cloudflare Quick Tunnel
 
@@ -8084,27 +8081,75 @@ Para verificar o ambiente em uma nova sessão:
 sudo /usr/local/bin/m7-compose ps
 curl --fail --silent --output /dev/null http://127.0.0.1:80/health
 sudo systemctl is-active m7-cloudflared-quick
+sudo systemctl is-active m7-ngrok
 ```
 
-A EC2 pode ser interrompida entre as demonstrações para reduzir consumo. Ao iniciá-la novamente, seu IPv4 público provavelmente mudará. O operador deve consultar o novo endereço, atualizar a regra SSH para o IPv4 atual em `/32`, validar a chave de host e obter o novo endereço do Quick Tunnel. Durante a operação, o provedor do operador alternou entre dois IPv4; os dois foram autorizados temporariamente como `/32`, sem abrir SSH para `0.0.0.0/0`.
+A EC2 pode ser interrompida entre as demonstrações para reduzir consumo. Ao iniciá-la novamente, seu IPv4 público provavelmente mudará. O operador deve consultar o novo endereço, atualizar a regra SSH para o IPv4 atual em `/32` e validar a chave de host. O endereço gratuito do ngrok permanece atribuído à conta, mas o acesso deve ser testado novamente; o endereço do Quick Tunnel pode mudar. Durante a operação, o provedor do operador alternou entre dois IPv4; os dois foram autorizados temporariamente como `/32`, sem abrir SSH para `0.0.0.0/0`.
 
-Os contêineres do Docker Desktop local não sustentam a aplicação na AWS e podem ser desligados. Na EC2, os serviços usam `restart: unless-stopped` e voltam com o Docker, mas o health check deve ser repetido antes de compartilhar o link.
+Os contêineres do Docker Desktop local não sustentam a aplicação na AWS e podem ser desligados. Na EC2, os serviços usam `restart: unless-stopped` e voltam com o Docker quando a instância é iniciada, desde que não tenham sido parados manualmente com `m7-compose stop`. O health check deve ser repetido antes de compartilhar o link.
 
-Para encerrar apenas o acesso externo:
+Para encerrar os dois acessos externos sem parar a aplicação:
 
 ```bash
-sudo systemctl disable --now m7-cloudflared-quick
+sudo systemctl disable --now m7-ngrok m7-cloudflared-quick
 ```
 
-Para parar a aplicação antes de interromper a instância:
+Para parar a aplicação manualmente:
 
 ```bash
 sudo /usr/local/bin/m7-compose stop
 ```
 
-Não se deve usar `docker compose down -v` enquanto os volumes de RabbitMQ ou artefatos ainda forem necessários. Mesmo com a EC2 parada, EBS, ECR e CloudWatch continuam armazenados e podem gerar custo. As principais limitações permanecem sendo as credenciais temporárias do Learner Lab, o SSH dependente do IP do operador, a URL temporária do Cloudflare e a ausência de autenticação adequada para divulgação pública.
+Depois de uma parada manual, execute `sudo /usr/local/bin/m7-compose-up` para voltar a iniciar os dez serviços; não conte apenas com o reinício da EC2.
 
-Os procedimentos detalhados de diagnóstico, atualização, rollback e encerramento, assim como o histórico das decisões de implantação, estão consolidados nesta seção e nas stories de [infraestrutura AWS](Projeto.md), [substituição da EC2](Projeto.md) e [workers/atualização](Projeto.md).
+Não se deve usar `docker compose down -v` enquanto os volumes de RabbitMQ ou artefatos ainda forem necessários. Mesmo com a EC2 parada, EBS, ECR e CloudWatch continuam armazenados e podem gerar custo. As principais limitações permanecem sendo as credenciais temporárias do Learner Lab, o SSH dependente do IP do operador, a disponibilidade da própria instância e os limites dos túneis gratuitos. A URL fixa não representa garantia de disponibilidade nem substitui os controles necessários a uma implantação corporativa.
+
+Os procedimentos de diagnóstico, atualização, restauração e encerramento e o histórico das decisões de implantação estão consolidados nesta seção. O [Manual de instalação](Manual-instalacao.md) cobre a execução local.
+
+### 10.2.12 Alinhamento da aplicação na Sprint 5
+
+A versão da Sprint 4 permaneceu como ponto de partida na EC2 `i-0f31228a6d73a765b`. A atualização para a `develop` da Sprint 5 incorporou Supabase Auth, prévias de alteração de dados, callbacks de entrega e três serviços adicionais: `delivery`, `sharepoint-publisher` e `sharepoint-consumer`. O Compose, o wrapper `m7-compose-up`, o executor de atualização e a coleta de logs foram ajustados para dez serviços, sem recriar a instância nem abrir entrada HTTP pública.
+
+O banco Oneshot foi inspecionado antes das alterações. As migrações `17_notification_delivery_callbacks.sql`, `18_notification_delivery_attempt_callback.sql`, `22_data_change_previews.sql` e `24_sharepoint_webhook_events.sql` foram aplicadas em transações separadas; o índice e a constraint da migração 20 já existiam e não foram reaplicados. Depois da atualização do backend, `19_backfill_s5_25_audit.sql` completou os dados de auditoria: os registros com `interaction_id` e sem `correlation_id` caíram de 48 para zero. O preflight de acesso encontrou quatro contas Auth, quatro usuários e quatro regras de acesso. A inspeção posterior confirmou as tabelas novas com RLS, a coluna e o índice de callback e os índices de dados e webhook.
+
+O build da Sprint 5 gerou imagens `linux/amd64` com a tag imutável do commit `eda32648a89a29643d630ec4f88dc3639094722d`. Os digests verificados no ECR foram:
+
+| Imagem | Digest da versão Sprint 5 |
+|---|---|
+| `m7-g05-backend` | `sha256:ab8ef068e43d5e4291fbb4cd084a990914974acd0c09090d4e5c2c890750d29c` |
+| `m7-g05-frontend` | `sha256:6f194915a42ef76cbe51bf96685cde844f158e5b31c629d192f64aed8a97a5c6` |
+
+O backend passou em 102 testes focados na imagem de produção; a suíte completa local foi interrompida após deixar de avançar sob pressão de memória. O frontend passou em lint, build e 169 testes. A atualização remota transferiu o Compose, o wrapper e as configurações por SSH para um staging privado. Como o `runtime.env` da EC2 contém segredos, não foi exportado integralmente: somente um complemento protegido com as variáveis novas foi mesclado na própria instância. O executor preservou uma cópia completa em `/etc/m7/backups/update-NOnUsunf` e subiu os dez contêineres. O backend e o frontend terminaram saudáveis.
+
+O rollback antigo por troca isolada de tags foi bloqueado para o Compose da Sprint 5, pois as imagens da Sprint 4 não contêm os novos workers. Se for necessário restaurar a configuração anterior, o operador deve inspecionar o backup completo e executar na EC2:
+
+```bash
+sudo /usr/local/bin/m7-restore-backup /etc/m7/backups/update-NOnUsunf
+sudo /usr/local/bin/m7-compose ps
+curl --fail --silent http://127.0.0.1:80/health
+```
+
+Na validação, os dez contêineres estavam em execução. Login PMO, `/api/access/me`, frontend e `/health` passaram pelo acesso controlado via SSH; `/` e `/health` também responderam pelo Quick Tunnel. O processamento ponta a ponta de um evento SharePoint real ainda depende de um evento de teste. O teste de login pela URL pública não foi executado, para não transmitir a senha de teste por esse canal.
+
+Após o deploy, `GEMINI_API_KEY` foi rotacionada sem reconstruir as imagens. A chave atual foi lida do `.env` local, transferida sem exibir seu valor e instalada em `/etc/m7/runtime.env`, mantido como `root:root` modo `0600`. Uma cópia anterior ficou restrita a root em `/etc/m7/backups`. Apenas o backend, serviço que recebe essa variável no Compose, foi recriado; a comparação interna confirmou que o contêiner usa a chave do runtime. Em 7 de outubro de 2026, a EC2 obteve HTTP 200 na listagem de modelos da API Gemini com a nova chave, e o backend permaneceu saudável. Um teste sintético do cliente Gemini já havia gerado texto após a correção anterior da chave; a rotação mais recente foi validada pela listagem de modelos, sem nova geração de texto.
+
+Na mesma janela, o chat passou a exceder o tempo limite: o backend registrou `TimeoutError` em chamadas ao `gemini-3.7-flash`, com quatro tentativas de até 30 segundos e esperas progressivas; o Nginx registrou uma resposta `504` após 125 segundos. Uma geração sintética com esse modelo também excedeu 40 segundos dentro da EC2 e na estação do operador, enquanto `gemini-3.5-flash` respondeu pela mesma Interactions API em 1,3 segundo. O `GEMINI_MODEL` do runtime protegido foi alterado para `gemini-3.5-flash`, com backup root-only, sem rebuild das imagens. Após recriar apenas o backend, o cliente Gemini do próprio projeto gerou texto sintético, o backend ficou saudável e `/` e `/health` responderam HTTP 200 pela URL pública. Essa escolha é uma configuração operacional da PoC; a qualidade das respostas com o novo modelo ainda deve ser avaliada com a massa de testes do projeto antes de tratá-lo como equivalente ao modelo anterior.
+
+### 10.2.13 URL fixa gratuita pelo ngrok
+
+O Quick Tunnel da Seção 10.2.9 fornece uma URL temporária. Para compartilhar um endereço que não muda a cada reinício do agente, foi usado o domínio de desenvolvimento gratuito atribuído à conta ngrok: **[https://aptitude-exemplary-saddling.ngrok-free.dev](https://aptitude-exemplary-saddling.ngrok-free.dev)**. Não foi comprado domínio nem contratado plano pago. O ngrok instalado no computador do operador serviu apenas para identificar o domínio da conta; o agente que atende o público executa na EC2, de modo que o computador local pode ser desligado.
+
+Na EC2 foi instalado o agente ngrok `3.39.11` para `linux/amd64`. O token já configurado na estação do operador foi transmitido sem exibição para `/etc/ngrok/m7.yml`, acessível apenas a `root` e ao usuário de serviço `m7-ngrok`. O serviço `m7-ngrok.service` foi habilitado no `systemd` com reinício automático e proteções `NoNewPrivileges`, `PrivateTmp`, `ProtectSystem` e `ProtectHome`. Sua rota encaminha HTTPS público ao frontend em `http://127.0.0.1:80`:
+
+```bash
+/usr/local/bin/ngrok http http://127.0.0.1:80 \
+  --url https://aptitude-exemplary-saddling.ngrok-free.dev \
+  --config /etc/ngrok/m7.yml --log=stdout
+```
+
+O Security Group continua sem entrada HTTP pública. A saída TCP/443 já usada pelos serviços externos permitiu a conexão do agente ngrok. O Cloudflare Quick Tunnel continuou ativo como alternativa. Depois de reiniciar apenas `m7-ngrok.service`, o mesmo endereço respondeu externamente com HTTP 200 em `/` e `/health`; o frontend e os dez contêineres permaneceram em execução.
+
+No primeiro acesso pelo navegador, o plano gratuito do ngrok mostra a página “You are about to visit”. O visitante deve conferir o domínio acima e clicar em **Visit Site**. Essa tela é esperada e pode aparecer uma vez para cada visitante. O plano gratuito informa 1 GB de transferência e 20 mil requisições HTTP/S por mês; a URL continua atribuída à conta, mas só funciona enquanto a EC2, os contêineres e o agente estiverem disponíveis. Assim, o endereço é estável para testes controlados, sem garantia de disponibilidade contínua. Os limites vigentes devem ser conferidos na [página de preços do ngrok](https://ngrok.com/pricing).
 
 # 11. Análise de Viabilidade Financeira
 
