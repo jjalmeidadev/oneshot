@@ -63,6 +63,12 @@ for (const theme of ['light', 'dark']) {
     await expect(
       log.getByRole('complementary', { name: 'Destaque da resposta' }),
     ).toContainText('Status: Em andamento');
+    // Visibilidade não garante o fim da animação de entrada da mensagem.
+    // Medir contraste apenas quando o ancestral animado estiver opaco.
+    const responseMessage = log
+      .locator(':scope > div')
+      .filter({ has: page.getByRole('table', { name: 'Tabela da resposta' }) });
+    await expect(responseMessage).toHaveCSS('opacity', '1');
     const tableRegion = log.getByRole('region', { name: /Tabela da resposta/ });
     await tableRegion.focus();
     await expect(tableRegion).toBeFocused();
