@@ -9,9 +9,7 @@ export function ChatEmptyState({ onPick }: { onPick: (prompt: string) => void })
       <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-soft text-primary">
         <Sparkles size={22} />
       </span>
-      <h2 className="pt-4 text-lg font-semibold text-fg">
-        Agente de Portfólio do Metrô
-      </h2>
+      <h2 className="pt-4 text-lg font-semibold text-fg">ONESHOT</h2>
       <p className="max-w-md pt-2 text-sm leading-6 text-fg-muted">
         Pergunte em linguagem natural sobre projetos, cronogramas, TAPs e documentos
         normativos. Cada resposta indica os documentos de onde a informação veio.

@@ -11,10 +11,13 @@ export default defineConfig({
     maxWorkers: 1,
     setupFiles: ['./src/tests/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
+    reporters: ['default', 'junit'],
+    outputFile: { junit: 'test-results/unit/junit.xml' },
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'html', 'json-summary'],
+      reporter: ['text', 'html', 'json-summary', 'cobertura'],
       include: [
+        'src/App.tsx',
         'src/components/**/*.{ts,tsx}',
         'src/hooks/*.ts',
         'src/lib/**/*.ts',
@@ -25,6 +28,20 @@ export default defineConfig({
         'src/lib/api/index.ts',
         'src/lib/api/schemas.ts',
       ],
+      thresholds: {
+        lines: 80,
+        statements: 80,
+        functions: 75,
+        branches: 70,
+        // A média global não pode esconder um componente sem execução.
+        'src/components/**/*.tsx': {
+          perFile: true,
+          lines: 1,
+          statements: 1,
+          functions: 1,
+          branches: 0,
+        },
+      },
     },
   },
 });

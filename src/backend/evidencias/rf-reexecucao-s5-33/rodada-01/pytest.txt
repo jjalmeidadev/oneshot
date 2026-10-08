@@ -1,0 +1,35 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Inteli\g05-02\g05\src\backend\.venv\Scripts\python.exe
+rootdir: C:\Users\Inteli\g05-02\g05\src\backend
+plugins: anyio-4.15.1
+collecting ... collected 2 items
+
+app/tests/test_reexecucao_s5_33.py::test_ct_rf02_01_reexecucao Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 24593.14it/s]
+[transformers] [1mBertModel LOAD REPORT[0m from: neuralmind/bert-base-portuguese-cased
+Key                                        | Status     |  | 
+-------------------------------------------+------------+--+-
+cls.predictions.transform.dense.weight     | UNEXPECTED |  | 
+cls.predictions.bias                       | UNEXPECTED |  | 
+cls.predictions.transform.LayerNorm.weight | UNEXPECTED |  | 
+cls.seq_relationship.weight                | UNEXPECTED |  | 
+cls.seq_relationship.bias                  | UNEXPECTED |  | 
+cls.predictions.transform.dense.bias       | UNEXPECTED |  | 
+cls.predictions.decoder.weight             | UNEXPECTED |  | 
+cls.predictions.transform.LayerNorm.bias   | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+{"artifact": "CT-RF02-01.json", "observation": {"caso": "CT-RF02-01", "entrada": "Mostre o status do projeto PRJ-0442", "http": 200, "intent": {"macro": "CONSULTA", "specific": "consulta_status_projeto", "confidence_macro": 0.5372, "confidence_specific": 0.403, "flow": "RecuperadorInformacao -> Estruturador de Resposta", "handler": "handler:consulta_status_projeto", "routing_rule": "consulta_status_explicita"}, "alternativas": [{"intent": "transacao_atualizar_status", "confidence": 0.4108}, {"intent": "consulta_status_projeto", "confidence": 0.403}, {"intent": "comparacao_entre_projetos", "confidence": 0.0438}], "modelo_da_resposta": "duplo-s5-33", "tokens_do_provedor": 0, "provedor_chamado": true, "chamadas_ao_provedor": [{"mensagem": "Mostre o status do projeto PRJ-0442", "intencao_enviada_ao_provedor": "consulta_status_projeto", "macro_enviada_ao_provedor": "CONSULTA"}], "texto": "Resposta do duplo do provedor (S5-33): o texto n\u00e3o \u00e9 crit\u00e9rio deste caso.", "resultado_esperado": "CONSULTA / consulta_status_projeto como inten\u00e7\u00e3o prim\u00e1ria, encaminhada ao cat\u00e1logo", "rodada_anterior": "evidencias/rf01-rf10 (23/09/2026, commit be814f6): FALHOU", "protocolo": "POST /api/chat via TestClient; classificador, roteamento e entidades reais; LLM substitu\u00eddo por duplo"}}
+PASSED
+app/tests/test_reexecucao_s5_33.py::test_ct_rf03_02_reexecucao {"artifact": "CT-RF03-02.json", "observation": {"caso": "CT-RF03-02", "entrada": "Reserve uma sala de reuni\u00e3o para amanh\u00e3", "http": 200, "intent": {"macro": "FORA_DE_ESCOPO", "specific": "", "confidence_macro": 0.2132, "confidence_specific": 0.0, "flow": "Resposta padr\u00e3o de limita\u00e7\u00e3o (RF08)", "handler": "limitacao:agendamento", "routing_rule": "limite_agendamento"}, "alternativas": [{"intent": "transacao_agendar_compromisso", "confidence": 0.7335}, {"intent": "fora_escopo_externo", "confidence": 0.2048}, {"intent": "transacao_gerar_apresentacao", "confidence": 0.0247}], "modelo_da_resposta": "domain-router", "tokens_do_provedor": 0, "provedor_chamado": false, "chamadas_ao_provedor": [], "texto": "N\u00e3o realizo reservas de salas nem agendamentos sem v\u00ednculo com o portf\u00f3lio. Voc\u00ea pode consultar um tema, como 'Bilhete digital', ou pedir uma reuni\u00e3o de acompanhamento de um projeto ou portf\u00f3lio.", "resultado_esperado": "Sem associa\u00e7\u00e3o a transacao_agendar_compromisso; fora de escopo ou pedido de reformula\u00e7\u00e3o, sem chamar o provedor", "rodada_anterior": "evidencias/rf01-rf10 (23/09/2026, commit be814f6): FALHOU", "protocolo": "POST /api/chat via TestClient; classificador, roteamento e entidades reais; LLM substitu\u00eddo por duplo"}}
+PASSED
+
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\Inteli\g05-02\g05\src\backend\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\Inteli\g05-02\g05\src\backend\evidencias\rf-reexecucao-s5-33\rodada-01\pytest.xml -
+======================== 2 passed, 1 warning in 14.53s ========================

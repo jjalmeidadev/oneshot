@@ -1,0 +1,25 @@
+{
+  "scope": "apuração técnica das transcrições visuais da sessão P01; revisão independente pendente",
+  "collection": "docs\\evidencias\\sprint-05\\rnf07-rnf09\\coleta-rnf07-p01.csv",
+  "ids": [
+    "N06",
+    "N07",
+    "N08",
+    "N09",
+    "N10",
+    "N01",
+    "N02",
+    "N03",
+    "N04",
+    "N05"
+  ],
+  "subset_success": 2,
+  "subset_total": 10,
+  "total_success": 6,
+  "total": 20,
+  "percentage": 30.0,
+  "required_success": 16,
+  "protocol_confirmation": "pendente",
+  "participant_ratings": "pendentes",
+  "original_image_files": "17 arquivos incorporados; hashes verificados"
+}

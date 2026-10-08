@@ -32,6 +32,29 @@ texto da pergunta, macro/intencao especifica e entidades extraidas pelo PLN,
 especialmente projeto ou linha. Sem URL de banco, o backend preserva o fallback
 local nos JSONs simulados de `app/rag/data/sharepoint`.
 
+### Reindexacao do SharePoint simulado
+
+A massa local cobre `PRJ-0442`, `PRJ-0510` e `PRJ-0587`. Para reaplicar a
+carga documental de forma idempotente e validar sua cobertura, execute nesta
+pasta:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.reindex_sharepoint_mock apply
+.\.venv\Scripts\python.exe -m scripts.reindex_sharepoint_mock status
+```
+
+Os comandos usam `DATABASE_URL` ou `SUPABASE_DATABASE_URL` e devolvem JSON. O
+primeiro atualiza ou insere a massa antes de validar; o segundo e somente
+leitura. O contrato e a correspondencia JSON/banco estao em
+[`app/rag/data/sharepoint/README.md`](app/rag/data/sharepoint/README.md).
+
+`SHAREPOINT_MOCK_DATA_DIR` permite selecionar outro diretório de exportações
+JSON sem alterar o núcleo. O diretório deve existir e conter ao menos um JSON
+com `value` como lista de itens e `fields` como objeto em cada item. Uma lista
+`value` vazia é válida. Caminho ausente, diretório sem JSON ou arquivo inválido
+geram `RagSourceError`; na API de chat, essa falha resulta em HTTP 503 sem
+chamada ao LLM nem exposição do caminho local.
+
 Quando uma consulta classificada como `CONSULTA` nao recupera fontes suficientes,
 a API responde explicitamente que nao encontrou contexto seguro, sem inventar
 informacao.
@@ -432,7 +455,9 @@ inválido retorna `422`. Esse fluxo é síncrono e não publica evento no Rabbit
 ### Callback de entrega de notificacoes (S5-10)
 
 O webhook usa `POST /api/integrations/notifications/delivery-results` e exige o
-header `X-Callback-Token`, comparado ao segredo `NOTIFICATION_CALLBACK_TOKEN`.
+header `X-Webhook-Signature: sha256=<hex>`. O valor é o HMAC-SHA256 dos bytes
+exatos do corpo, calculado com `NOTIFICATION_CALLBACK_SECRET` e comparado em
+tempo constante. O segredo não deve ser versionado nem registrado em logs.
 O corpo aceita `callback_id` (string), `notification_id` (UUID), `provider`
 (string), `status` (`delivered` ou `failed`), `attempted_at` (data/hora ISO
 8601) e `error_code` (string opcional):
@@ -448,15 +473,61 @@ O corpo aceita `callback_id` (string), `notification_id` (UUID), `provider`
 }
 ```
 
+Exemplo de cálculo, em que `body` contém os mesmos bytes enviados na requisição:
+
+```python
+import hashlib
+import hmac
+import os
+
+secret = os.environ["NOTIFICATION_CALLBACK_SECRET"].encode("utf-8")
+signature = "sha256=" + hmac.new(
+    secret,
+    body,
+    hashlib.sha256,
+).hexdigest()
+```
+
 A primeira confirmacao valida e sua repeticao identica retornam `200`; o mesmo
-`callback_id` com outro conteudo retorna `409`. Token invalido retorna `401`,
-corpo invalido retorna `422` e notificacao inexistente retorna `404`. Cada
+`callback_id` com outro conteudo retorna `409`. Assinatura ausente, malformada,
+incorreta ou calculada para outro corpo retorna `401`; corpo invalido retorna
+`422` e notificacao inexistente retorna `404`. Cada
 callback novo e persistido junto a um evento `notification.delivery.received`
 na outbox. O publisher encaminha o evento ao RabbitMQ e o consumer `delivery`
 acrescenta a tentativa de entrega; repeticoes identicas nao duplicam o evento
 nem o processamento.
 
-O contrato completo dos dois webhooks, os códigos HTTP e a topologia AMQP estão
+### Webhook de alteracao do SharePoint simulado (S5-09)
+
+`POST /api/integrations/sharepoint/change-notifications` responde ao handshake
+por `validationToken` e recebe lotes JSON autenticados por `clientState`.
+Configure `SHAREPOINT_WEBHOOK_CLIENT_STATE` e mantenha
+`SHAREPOINT_WEBHOOK_REPOSITORY_MODE=database` fora dos testes. A migration
+`24_sharepoint_webhook_events.sql` deve estar aplicada antes de iniciar a API.
+
+Eventos válidos recebem `202` e entram na inbox com estado `pending`. A mesma
+requisição não duplica o registro; reutilizar o `eventId` com outro conteúdo
+retorna `409`. O segredo `clientState` é validado, mas nunca persistido. A
+requisição HTTP não executa reindexação nem publica no RabbitMQ.
+
+O produtor e o consumer dedicados da S5-11 usam a interface
+`list_pending/mark_published`, a routing key `sharepoint.change.received` e a
+DLQ `sharepoint.change.received.dead`. Para executá-los separadamente:
+
+```powershell
+.\.venv\Scripts\python.exe -m app.sharepoint_webhooks.worker publisher
+.\.venv\Scripts\python.exe -m app.sharepoint_webhooks.worker consumer
+.\.venv\Scripts\python.exe -m app.sharepoint_webhooks.worker publisher-once
+```
+
+O consumer valida o envelope e o hash da inbox, reivindica o evento de forma
+atômica e chama a reindexação da massa simulada. A primeira falha volta o evento
+para `published`; a segunda o marca como `failed`. Mensagens AMQP inválidas são
+rejeitadas sem requeue e seguem para a DLQ configurada. No Compose de produção,
+os serviços correspondentes são `sharepoint-publisher` e
+`sharepoint-consumer`.
+
+O contrato completo dos três webhooks, os códigos HTTP e a topologia AMQP estão
 na [Seção 8.5.12 de Projeto.md](../../docs/Projeto.md#8512-webhooks-e-mensageria-integrados-s5-09-a-s5-11).
 Os comandos e resultados reproduzíveis estão na
 [evidência da Sprint 5](../../docs/evidencias/sprint-05/webhooks-rabbitmq.md).

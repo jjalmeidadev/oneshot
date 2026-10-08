@@ -18,6 +18,7 @@ from app.rag.sharepoint import (
     _configured_result_limit,
     _meaningful_tokens,
 )
+from app.security.access import AccessContext
 
 PUBLIC_RAG_DATABASE_ERROR_MESSAGE = (
     "Nao foi possivel recuperar contexto no banco de dados."
@@ -37,6 +38,9 @@ requested_projects AS (
         ON lower(p.code) = lower(requested.term)
         OR lower(p.title) = lower(requested.term)
         OR lower(p.id::text) = lower(requested.term)
+),
+access_scope AS (
+    SELECT %s::uuid[] AS project_ids
 )
 SELECT
     se.id::text AS extract_id,
@@ -105,12 +109,21 @@ SELECT
             )
         THEN 1.0
         ELSE 0.0
-    END AS score
+    END AS score,
+    a.confidentiality_level
 FROM public.source_extracts se
 JOIN public.project_artifacts a ON a.id = se.artifact_id
 LEFT JOIN public.projects p ON p.id = COALESCE(se.project_id, a.project_id)
+CROSS JOIN access_scope access
 WHERE
     COALESCE(a.metadata ->> 'mock', se.metadata ->> 'mock') = 'true'
+    AND (
+        access.project_ids IS NULL
+        -- Documento sem projeto e institucional (procedimentos, comunicados,
+        -- politicas de atendimento) e vale para todos os perfis.
+        OR COALESCE(se.project_id, a.project_id) IS NULL
+        OR COALESCE(se.project_id, a.project_id) = ANY(access.project_ids)
+    )
     AND (
         NOT EXISTS (SELECT 1 FROM requested_projects)
         OR COALESCE(se.project_id, a.project_id) IN (SELECT id FROM requested_projects)
@@ -151,6 +164,7 @@ def retrieve_database_context(
     entities: Iterable[PublicEntity] | None = None,
     limit: int | None = None,
     connect: Callable[..., object] | None = None,
+    access_context: AccessContext | None = None,
 ) -> list[RetrievedDocument]:
     """Recupera extratos do banco usando pergunta, intencao e entidades."""
 
@@ -174,6 +188,11 @@ def retrieve_database_context(
                         query_terms,
                         entity_terms,
                         project_scope.terms,
+                        (
+                            None
+                            if access_context is None
+                            else list(access_context.allowed_project_ids)
+                        ),
                         specific_intent,
                         specific_intent,
                         specific_intent,
@@ -196,6 +215,7 @@ def retrieve_context(
     intent: AudioIntent | None = None,
     entities: Iterable[PublicEntity] | None = None,
     limit: int | None = None,
+    access_context: AccessContext | None = None,
 ) -> list[RetrievedDocument]:
     """Escolhe banco quando configurado e JSON local como fallback explicito."""
 
@@ -204,9 +224,28 @@ def retrieve_context(
         from app.rag.sharepoint import retrieve_sharepoint_context
 
         scope = _requested_projects(query, entities)
-        return scope.apply(retrieve_sharepoint_context(query, limit=limit))
+        return scope.apply(
+            retrieve_sharepoint_context(
+                query,
+                limit=limit,
+                allowed_project_ids=(
+                    None
+                    if access_context is None
+                    else {
+                        *(str(value) for value in access_context.allowed_project_ids),
+                        *access_context.allowed_project_codes,
+                    }
+                ),
+            )
+        )
 
-    return retrieve_database_context(query, intent=intent, entities=entities, limit=limit)
+    return retrieve_database_context(
+        query,
+        intent=intent,
+        entities=entities,
+        limit=limit,
+        access_context=access_context,
+    )
 
 
 @dataclass(frozen=True)
@@ -290,7 +329,7 @@ def _row_to_result(row: object) -> RetrievedDocument:
     else:
         value = (
             lambda key, default=None: row[_ROW_INDEX[key]]
-            if key in _ROW_INDEX
+            if key in _ROW_INDEX and _ROW_INDEX[key] < len(row)
             else default
         )
 
@@ -318,6 +357,7 @@ def _row_to_result(row: object) -> RetrievedDocument:
         attributes=attributes_from_metadata(value("extract_metadata")),
         registration_period=(value("extract_metadata") or {}).get("registration_period"),
         validity=(value("extract_metadata") or {}).get("validity"),
+        confidentiality_level=_optional_str(value("confidentiality_level")),
     )
     return RetrievedDocument(
         document=document,
@@ -340,6 +380,7 @@ _ROW_INDEX = {
     "project_title": 11,
     "extract_metadata": 12,
     "score": 13,
+    "confidentiality_level": 14,
 }
 
 

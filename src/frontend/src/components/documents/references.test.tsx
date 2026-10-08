@@ -55,7 +55,7 @@ it('sinaliza fontes consultadas que nao sustentam uma resposta insuficiente', ()
   const { rerender } = render(
     <SourceCitations sources={sources} selectedId={null} onSelect={() => {}} />,
   );
-  expect(screen.getByText('Fontes consultadas')).toBeVisible();
+  expect(screen.getByText('Fontes (1)')).toBeVisible();
   rerender(
     <SourceCitations sources={sources} selectedId={null} onSelect={() => {}} unused />,
   );

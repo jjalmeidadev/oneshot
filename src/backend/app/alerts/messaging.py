@@ -12,10 +12,12 @@ from app.alerts.errors import AlertConfigurationError
 EXCHANGE="metro.alerts"
 DEAD_LETTER_EXCHANGE="metro.alerts.dlx"
 DELIVERY_ROUTING_KEY = "notification.delivery.received"
+SHAREPOINT_ROUTING_KEY = "sharepoint.change.received"
 ROUTING_KEYS = (
     "alert.evaluation.requested",
     "alert.notification.requested",
     DELIVERY_ROUTING_KEY,
+    SHAREPOINT_ROUTING_KEY,
 )
 
 

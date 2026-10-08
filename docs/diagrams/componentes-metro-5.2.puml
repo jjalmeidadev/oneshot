@@ -1,20 +1,14 @@
-@startuml componentes-metro-5.2-espacado-v3
-' Diagrama de Componentes UML — arquitetura atual consolidada
-' Layout deliberadamente espaçado para leitura arquitetural e impressão em página.
+@startuml componentes-metro-5.2
+' Diagrama de Componentes UML — solução efetivamente implementada (S5-43, #297).
+' Componentes com <<previsto>> e conexões tracejadas ainda não estão no runtime.
 
-!pragma layout smetana
-left to right direction
-
+top to bottom direction
 skinparam componentStyle rectangle
 skinparam shadowing false
-skinparam linetype ortho
-skinparam packageStyle rectangle
-skinparam nodesep 110
-skinparam ranksep 120
-skinparam Padding 18
+skinparam linetype polyline
+skinparam nodesep 30
+skinparam ranksep 55
 skinparam defaultTextAlignment center
-skinparam maxMessageSize 65
-
 skinparam package {
   BorderColor #546E7A
   BackgroundColor #FAFAFA
@@ -24,250 +18,123 @@ skinparam component {
   BorderColor #37474F
   BackgroundColor #FFFFFF
   FontSize 12
-  Padding 10
+}
+skinparam component<<previsto>> {
+  BorderColor #9E9E9E
+  BackgroundColor #F5F5F5
+  FontColor #616161
+  BorderStyle dashed
 }
 skinparam database {
   BorderColor #37474F
   BackgroundColor #FFFFFF
-  FontSize 12
 }
-skinparam actor {
+skinparam queue {
   BorderColor #37474F
+  BackgroundColor #FFFFFF
 }
 skinparam note {
   BorderColor #F9A825
   BackgroundColor #FFFDE7
   FontSize 10
-  Padding 10
 }
 
 actor "Usuário do PMO" as Usuario
 
-' ============================================================
-' 1. INTERFACE
-' ============================================================
-package "1. Camada de Interface Humano-Computador" as Interface {
-  component "Microsoft Teams" as Chat <<canal corporativo>>
-  component "Entrada de Voz" as Voz <<captura no canal>>
+package "1. Canal" {
+  component "Chat web\nReact + Vite" as Chat
+  component "Aba no Microsoft Teams\n(S5-19)" as Teams <<previsto>>
+  component "Copilot via servidor MCP\n(S5-18)" as MCP <<previsto>>
 }
 
-' ============================================================
-' 2. APLICAÇÃO / PLN / ROTEAMENTO
-' ============================================================
-package "2. Camada de Aplicação" as Aplicacao {
-  component "API da Aplicação" as API <<REST / FastAPI>>
-  component "Gerenciador de Conversação" as Conversa <<backend>>
-
-  package "Pilar 1 — Núcleo de PLN e Roteamento" as Pilar1 {
-    component "Pré-processamento" as Prep <<Python / spaCy>>
-    component "Classificador de Intenções" as Classificador <<scikit-learn / Transformers>>
-    component "Catálogo de Intenções" as Catalogo <<features / tópicos>>
-    component "Validador de Escopo" as Escopo <<regras de negócio>>
-    component "Extração de Entidades" as NER <<PLN>>
-  }
+package "2. API da aplicação (FastAPI)" {
+  component "Rotas de chat e áudio\n/api/chat, /api/audio" as Rotas
+  component "Autenticação e\nescopo de acesso" as Acesso
+  component "Barreira de\ndado sensível" as Sensivel
+  component "Workflows guiados\nrelatório, alerta,\nalteração de dados" as Workflows
+  component "Webhooks de entrada\nSharePoint, entrega,\nresultado de relatório" as Webhooks
+  component "Trilha de auditoria" as Auditoria
 }
 
-' ============================================================
-' 3. ROTAS FUNCIONAIS — mantidas paralelas e independentes
-' ============================================================
-package "3. Rotas de Atendimento" as Rotas {
-
-  package "Rota A — Consulta / RAG" as RAG {
-    component "Recuperador RAG" as Retriever <<retrieval>>
-    component "Montagem de Contexto" as Contexto <<prompt / context>>
-    component "API de LLM" as LLM <<LLM generativo>>
-  }
-
-  package "Rota B — Fluxos Funcionais" as Fluxos {
-    component "Microsoft Copilot Studio" as Copilot <<orquestrador>>
-    component "Tópicos / Fluxos por Intenção" as Topicos <<features priorizadas>>
-    component "Power Automate" as Automate <<cloud flows>>
-  }
+package "3. Pilar 1 — PLN e roteamento" {
+  component "Pré-processamento\ne entidades" as Pre
+  component "Classificador de intenções\nTF-IDF + BERTimbau" as Classificador
+  component "Roteamento por catálogo\ne regras de domínio" as Roteamento
 }
 
-' ============================================================
-' 4. CONHECIMENTO — isolado visualmente da aplicação
-' ============================================================
-package "4. Camada de Conhecimento" as Conhecimento {
-  component "Ingestão / Indexação Documental" as Ingestao <<pipeline RAG>>
-  component "Extração e Normalização" as Extratores <<DOCX / XLSX / PDF>>
-  component "Geração de Embeddings" as Embeddings <<Sentence-Transformers>>
-  database "Índice Vetorial" as Vetor <<FAISS / ChromaDB>>
-  component "Integração com SharePoint" as SPAdapter <<API / Connector>>
+package "4. Recuperação e geração" {
+  component "Recuperador lexical\n(RAG)" as RAG
+  component "Contexto, citações\ne validação extrativa" as Contexto
+  component "Cliente de LLM\nGemini / OpenRouter" as ClienteLLM
 }
 
-' ============================================================
-' 5. SERVIÇOS / TRANSVERSAL
-' ============================================================
-package "5. Serviços Corporativos e IA" as Servicos {
-  database "SharePoint Online + Listas" as SharePoint <<fonte documental / dados>>
-  component "Microsoft Entra ID" as Entra <<identidade>>
-  component "Azure AI Speech" as Speech <<REST API / Speech-to-Text / pt-BR>>
+package "5. Processamento assíncrono" {
+  queue "RabbitMQ\noutbox, filas e DLQ" as Fila
+  component "Workers de alerta\nscheduler, publisher, evaluator,\nnotifier, delivery" as WorkersAlerta
+  component "Workers do SharePoint\npublisher, consumer" as WorkersSP
 }
 
-package "6. Camada Transversal" as Transversal {
-  component "Trilha de Auditoria" as Auditoria <<logs estruturados>>
-  database "Auditoria da Aplicação" as AuditStore <<SharePoint ou Dataverse>>
-  component "Configuração / Secrets" as Secrets <<variáveis de ambiente>>
+package "6. Dados" {
+  database "PostgreSQL (Supabase)\nportfólio, sessões,\nauditoria, outbox" as DB
+  component "Supabase Auth" as Auth
+  component "Supabase Storage\nartefatos DOCX" as Storage
+  component "Listas SharePoint\nsimuladas (JSON)" as SPMock
 }
 
-' ============================================================
-' FLUXOS PRINCIPAIS — somente relações necessárias
-' ============================================================
-Usuario --> Chat : texto
-Usuario --> Voz : áudio
-Voz --> Speech : áudio
-Speech --> API : transcrição pt-BR
-Chat --> API : HTTPS / JSON
-API --> Conversa : mensagem / contexto
+package "7. Serviços externos" {
+  component "Azure AI Speech\nSTT e TTS" as Speech
+  component "Provedor de LLM\nGemini / OpenRouter" as LLM
+  component "Power Automate\n(opcional; simulador local)" as PA
+  component "Entra ID e SharePoint\ncorporativo" as M365 <<previsto>>
+}
 
-' Autenticação
-Chat ..> Entra : autenticação
-Entra ..> API : identidade / token
+Usuario --> Chat
+Usuario ..> Teams
+Usuario ..> MCP
+Chat --> Rotas : HTTPS / JSON
+Teams ..> Rotas
+MCP ..> Rotas
+Chat --> Workflows : sessões guiadas
 
-' PLN
-Conversa --> Prep : normalização
-Prep --> Classificador : representação processada
-Classificador --> Catalogo : intenção + confiança
-Escopo --> Catalogo : intenção validada
-Catalogo --> NER : capacidade selecionada
+Rotas --> Acesso
+Acesso --> Auth : valida JWT
+Rotas --> Sensivel
+Rotas --> Speech : transcrição / síntese
+Rotas --> Pre
+Pre --> Classificador
+Classificador --> Roteamento
+Roteamento --> RAG : consulta documental
+Roteamento --> Workflows : intenção funcional
+RAG --> SPMock
+RAG --> DB
+RAG --> Contexto
+Contexto --> ClienteLLM
+ClienteLLM --> LLM
 
-' Roteamento para as duas rotas
-NER --> Retriever : consulta documental
-NER --> Copilot : intenção + entidades
+Workflows --> DB
+Workflows --> Storage
+Workflows --> PA : HTTP (opcional)
+PA --> Webhooks : callback
+Webhooks --> Fila
+Workflows --> Fila : outbox
+Fila --> WorkersAlerta
+Fila --> WorkersSP
+WorkersAlerta --> DB
+WorkersSP --> DB
 
-' ============================================================
-' ROTA A — RAG
-' ============================================================
-Retriever --> Vetor : busca semântica
-Vetor --> Retriever : trechos candidatos
-Retriever --> SPAdapter : recuperação documental
-SPAdapter --> SharePoint : leitura / metadados
-SPAdapter --> Retriever : conteúdo relevante
-Retriever --> Contexto : trechos + referências
-Contexto --> LLM : prompt + contexto recuperado
-LLM --> Conversa : resposta gerada
+Rotas --> Auditoria
+Workflows --> Auditoria
+Auditoria --> DB
 
-' ============================================================
-' ROTA B — FLUXOS FUNCIONAIS
-' ============================================================
-Copilot --> Topicos : seleção do tópico
-Topicos --> Automate : execução do fluxo
-Automate --> SharePoint : leitura / escrita
-Topicos --> Conversa : resposta / estado do fluxo
+M365 ..> Acesso : identidade
+M365 ..> RAG : fontes reais
 
-' ============================================================
-' ALIMENTAÇÃO DO RAG
-' ============================================================
-SharePoint --> Ingestao : documentos / atualizações
-Ingestao --> Extratores : extração
-Extratores --> Embeddings : chunks normalizados
-Embeddings --> Vetor : vetores + metadados
-
-' ============================================================
-' SAÍDA
-' ============================================================
-Conversa --> API : resposta consolidada
-API --> Chat : resposta / referências / estado
-
-' ============================================================
-' AUDITORIA — agrupada em um único ponto
-' ============================================================
-API ..> Auditoria : interação / usuário / tempo
-Auditoria --> AuditStore : persistência
-
-' ============================================================
-' SECRETS / CONFIGURAÇÃO
-' ============================================================
-Secrets ..> LLM : credencial da API
-Secrets ..> Speech : credenciais
-Secrets ..> API : configuração
-
-' ============================================================
-' CONTROLE DE POSICIONAMENTO
-' ============================================================
-' Ordem principal dos grandes blocos.
-Interface -[hidden]-> Aplicacao
-Aplicacao -[hidden]-> Rotas
-Rotas -[hidden]-> Conhecimento
-Conhecimento -[hidden]-> Servicos
-Servicos -[hidden]-> Transversal
-
-' Rotas lado a lado.
-RAG -[hidden]right- Fluxos
-Retriever -[hidden]right- Copilot
-Contexto -[hidden]right- Topicos
-LLM -[hidden]right- Automate
-
-' Sequência interna explícita.
-Retriever -[hidden]-> Contexto
-Contexto -[hidden]-> LLM
-Copilot -[hidden]-> Topicos
-Topicos -[hidden]-> Automate
-
-' Pilar 1 em coluna vertical.
-Prep -[hidden]-> Classificador
-Classificador -[hidden]-> Escopo
-Escopo -[hidden]-> Catalogo
-Catalogo -[hidden]-> NER
-
-' Conhecimento em linha horizontal.
-Ingestao -[hidden]right- Extratores
-Extratores -[hidden]right- Embeddings
-Embeddings -[hidden]right- Vetor
-
-' Serviços separados.
-SharePoint -[hidden]right- Entra
-Entra -[hidden]right- Speech
-
-note top of LLM
-O LLM atua somente na geração da resposta
-com base no contexto recuperado pelo RAG.
-A credencial permanece no backend/configuração
-e nunca fica exposta à interface.
-end note
-
-note top of Catalogo
-O catálogo reúne as intenções reconhecidas pelo PLN
-e associa cada intenção a uma capacidade do produto.
-A decisão de roteamento não é delegada ao LLM.
-end note
-
-note top of Retriever
-A camada de conhecimento separa a fonte documental
-do mecanismo de recuperação: o SharePoint fornece o
-conteúdo e o índice vetorial permite localizar trechos.
-end note
-
-note left of Topicos
-Os tópicos/fluxos refletem o catálogo de capacidades
-priorizadas na Seção 2.8, incluindo consulta,
-transações, atualizações, lembretes e demais fluxos
-previstos para evolução do produto.
-end note
-
-note bottom of Copilot
-O Copilot Studio permanece como componente de
-orquestração de fluxos específicos. Ele não é o
-canal principal de interação: o roteamento ocorre
-após a identificação da intenção pelo PLN.
-end note
-
-note bottom of Speech
-O componente representa a API de Speech-to-Text documentada no projeto,
-responsável por converter áudio em texto em português brasileiro antes
-do encaminhamento da transcrição para a API da aplicação.
-end note
-
-legend bottom
-  |= Elemento | Papel |
-  | <b>Interface</b> | Entrada e saída da interação |
-  | <b>Pilar 1</b> | Interpretação, classificação, escopo e roteamento |
-  | <b>RAG</b> | Recuperação de conhecimento documental |
-  | <b>Copilot Studio</b> | Orquestração de fluxos funcionais |
-  | <b>LLM</b> | Geração de linguagem natural a partir do contexto |
-  | <b>SharePoint</b> | Fonte documental e dados corporativos |
+legend right
+  |= Notação |= Significado |
+  | Caixa contínua, seta contínua | Implementado no runtime atual |
+  | Caixa cinza tracejada, seta tracejada | Previsto, sem código integrado |
+  Copilot Studio não faz parte da arquitetura:
+  o Metrô não o disponibilizou. A conexão com o
+  Copilot fica prevista por servidor MCP (S5-18).
 endlegend
-
-scale max 1700x1700
 @enduml

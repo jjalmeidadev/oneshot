@@ -4,6 +4,9 @@ from urllib.error import HTTPError, URLError
 
 import pytest
 
+# Preserva a cobertura anterior do backend-api na selecao por marcador (#255).
+pytestmark = pytest.mark.integration
+
 from app.gemini.client import (
     GeminiAPIError,
     GeminiConfigurationError,

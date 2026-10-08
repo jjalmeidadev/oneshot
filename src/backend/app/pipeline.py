@@ -1,6 +1,7 @@
 """Entrada comum de texto e transcricao para classificacao, resposta e tracing."""
 
 import logging
+from datetime import datetime
 from threading import Lock
 from time import perf_counter
 
@@ -8,6 +9,7 @@ from app.database.tracing import TraceabilityError, trace_interaction
 from app.gemini.client import (
     GeminiAPIError,
     GeminiConfigurationError,
+    SensitiveDataBlockedError,
     execute_proactive_confirmation,
     generate_chat_response,
 )
@@ -19,15 +21,37 @@ from app.gemini.schemas import (
     ProactiveConfirmationResponse,
 )
 from app.nlp.entities import Entidade, extract_entities
+from app.security.sensitive_data import SensitiveDataReport, describe_categories, scan
 from app.nlp.schemas import (
     AudioIntent,
     ChatPipelineMetrics,
     IntentAlternative,
     PublicEntity,
 )
+from app.security.access import AccessContext
+from app.data_changes import errors as data_change_errors
+from app.data_changes.errors import DataChangeError
+from app.data_changes.extractor import extract_change
+from app.data_changes.schemas import DATA_CHANGE_MODEL, DataChangeOutcome
+from app.data_changes.service import LOCAL_TIMEZONE, get_data_change_service
 
 _classifier_lock = Lock()
 logger = logging.getLogger(__name__)
+
+#: Modelo informado na resposta quando a pergunta e barrada pelo RNF01.
+SENSITIVE_BLOCK_MODEL = "bloqueio-dado-sensivel"
+#: Registrado como falha controlada: `processing_status` nao tem `bloqueado`,
+#: e o evento `sensitive_content_blocked` traz o detalhe (decisao da S5-27).
+SENSITIVE_BLOCK_ERROR = "Dado sensivel bloqueado antes do provedor."
+#: Intencoes de atualizacao do catalogo. Sem pedido reconhecivel pelo
+#: extrator, a resposta orienta com exemplos em vez de ir ao RAG (S5-05).
+DATA_CHANGE_INTENTS = frozenset({"transacao_atualizar_cronograma", "transacao_atualizar_status"})
+DATA_CHANGE_GUIDANCE = (
+    "Posso alterar dados do projeto por aqui, com confirmação antes de gravar. "
+    "Diga o projeto, o campo e o novo valor, por exemplo: "
+    "“Prorroga o prazo do PRJ-0442 para 31/03/2027” ou "
+    "“Muda o status do risco Interferência com a operação comercial do PRJ-0442 para em tratamento”."
+)
 
 
 def warmup_classifier() -> None:
@@ -44,8 +68,39 @@ def process_message(
     channel: str = "api",
     external_conversation_id: str | None = None,
     requester_id: str | None = None,
+    user_id: str | None = None,
+    access_context: AccessContext | None = None,
 ) -> GeminiChatResponse:
     route_started_at = perf_counter()
+
+    # RNF01, primeira barreira: pergunta com dado sensivel nao segue para
+    # classificacao nem para o provedor, e a auditoria so recebe a versao
+    # mascarada.
+    blocked = _block_sensitive_message(
+        request,
+        route_started_at=route_started_at,
+        channel=channel,
+        external_conversation_id=external_conversation_id,
+        requester_id=requester_id,
+        user_id=user_id,
+    )
+    if blocked is not None:
+        return blocked
+
+    # Alteracao de dados (S5-06): reconhecida por regras, antes do
+    # classificador, e sem nenhuma chamada ao provedor de linguagem.
+    data_change = _handle_data_change(
+        request,
+        access_context=access_context,
+        route_started_at=route_started_at,
+        channel=channel,
+        external_conversation_id=external_conversation_id,
+        requester_id=requester_id,
+        user_id=user_id,
+    )
+    if data_change is not None:
+        return data_change
+
     intent = None
     fallback_to_rag = False
     nlp_ms = 0
@@ -74,10 +129,33 @@ def process_message(
                 external_conversation_id=external_conversation_id,
                 error_message=str(error),
                 requester_id=requester_id,
+                user_id=user_id,
             )
             raise GeminiConfigurationError("Classificador indisponivel.") from error
 
         intent = _public_intent(result)
+        from app.nlp.routing import SCHEDULING_LIMITATION_HANDLER
+
+        if result.handler == SCHEDULING_LIMITATION_HANDLER:
+            response = GeminiChatResponse(
+                text=result.resposta_sugerida,
+                model="domain-router",
+                latency_ms=0,
+                usage=GeminiUsage(input_tokens=0, output_tokens=0, total_tokens=0),
+                intent=intent,
+                entities=entities,
+                pipeline_metrics=ChatPipelineMetrics(
+                    nlp_ms=nlp_ms, route_ms=_elapsed_ms(route_started_at),
+                ),
+            )
+            _trace_safely(
+                request=request, response=response, intent=intent, entities=entities,
+                processing_ms=response.pipeline_metrics.route_ms, channel=channel,
+                external_conversation_id=external_conversation_id,
+                requester_id=requester_id, user_id=user_id,
+            )
+            return response
+
         fallback_to_rag = (
             not result.roteada
             or result.macrointencao == "FORA_DE_ESCOPO"
@@ -103,6 +181,38 @@ def process_message(
                 channel=channel,
                 external_conversation_id=external_conversation_id,
                 requester_id=requester_id,
+                user_id=user_id,
+            )
+            return response
+
+        if not fallback_to_rag and result.intencao in DATA_CHANGE_INTENTS:
+            response = GeminiChatResponse(
+                text=DATA_CHANGE_GUIDANCE,
+                model=DATA_CHANGE_MODEL,
+                latency_ms=0,
+                usage=GeminiUsage(),
+                intent=intent,
+                entities=entities,
+                data_change=DataChangeOutcome(
+                    status="needs_input",
+                    missing="field",
+                    question=DATA_CHANGE_GUIDANCE,
+                ),
+                pipeline_metrics=ChatPipelineMetrics(
+                    nlp_ms=nlp_ms,
+                    route_ms=_elapsed_ms(route_started_at),
+                ),
+            )
+            _trace_safely(
+                request=request,
+                response=response,
+                intent=intent,
+                entities=entities,
+                processing_ms=response.pipeline_metrics.route_ms,
+                channel=channel,
+                external_conversation_id=external_conversation_id,
+                requester_id=requester_id,
+                user_id=user_id,
             )
             return response
 
@@ -119,6 +229,8 @@ def process_message(
                 intent=intent,
                 entities=entities,
                 processing_ms=response.pipeline_metrics.route_ms,
+                requester_id=requester_id,
+                user_id=user_id,
             )
             return response
 
@@ -126,6 +238,7 @@ def process_message(
         provider_kwargs = {
             "intent": None if fallback_to_rag else intent,
             "entities": entities,
+            "access_context": access_context,
         }
         if requester_id is not None and request.proactivity_enabled:
             provider_kwargs["requester_id"] = requester_id
@@ -141,6 +254,12 @@ def process_message(
             external_conversation_id=external_conversation_id,
             error_message=str(error),
             requester_id=requester_id,
+            security_report=(
+                error.report.audit_payload()
+                if isinstance(error, SensitiveDataBlockedError)
+                else None
+            ),
+            user_id=user_id,
         )
         raise
 
@@ -159,6 +278,7 @@ def process_message(
         channel=channel,
         external_conversation_id=external_conversation_id,
         requester_id=requester_id,
+        user_id=user_id,
     )
     return response
 
@@ -167,6 +287,7 @@ def process_proactive_confirmation(
     request: ProactiveConfirmationRequest,
     *,
     requester_id: str,
+    user_id: str | None = None,
 ) -> ProactiveConfirmationResponse:
     """Confirma a sugestao e registra a resposta secundaria no RNF03."""
 
@@ -196,6 +317,7 @@ def process_proactive_confirmation(
         entities=[],
         processing_ms=_elapsed_ms(started_at),
         requester_id=requester_id,
+        user_id=user_id,
     )
     return execution.response
 
@@ -298,6 +420,7 @@ def _public_intent(result: object) -> AudioIntent:
         confidence_specific=result.confianca_intencao,
         flow=getattr(result, "fluxo", ""),
         handler=getattr(result, "handler", ""),
+        routing_rule=getattr(result, "regra_roteamento", None),
         alternatives=[
             IntentAlternative(intent=alternative, confidence=confidence)
             for alternative, confidence in alternatives
@@ -307,6 +430,115 @@ def _public_intent(result: object) -> AudioIntent:
 
 def _elapsed_ms(started_at: float) -> int:
     return round((perf_counter() - started_at) * 1000)
+
+
+def _block_sensitive_message(
+    request: GeminiChatRequest,
+    *,
+    route_started_at: float,
+    channel: str,
+    external_conversation_id: str | None,
+    requester_id: str | None,
+    user_id: str | None = None,
+) -> GeminiChatResponse | None:
+    """Barra a pergunta com dado sensivel antes de qualquer servico externo."""
+
+    found = scan(request.message)
+    if not found.found:
+        return None
+
+    report = SensitiveDataReport(stage="mensagem", action="bloqueado", counts=found.counts)
+    response = GeminiChatResponse(
+        text=(
+            f"Sua mensagem contém {describe_categories(found.categories)}. "
+            "Por segurança, ela não foi enviada ao modelo de linguagem. "
+            "Remova o dado e envie a pergunta novamente."
+        ),
+        model=SENSITIVE_BLOCK_MODEL,
+        latency_ms=0,
+        usage=GeminiUsage(),
+        evidence_status="not_applicable",
+        security_report=report.audit_payload(),
+        pipeline_metrics=ChatPipelineMetrics(
+            nlp_ms=0,
+            route_ms=_elapsed_ms(route_started_at),
+        ),
+    )
+    _trace_safely(
+        request=request.model_copy(update={"message": found.masked}),
+        response=response,
+        intent=None,
+        entities=[],
+        processing_ms=response.pipeline_metrics.route_ms,
+        channel=channel,
+        external_conversation_id=external_conversation_id,
+        error_message=SENSITIVE_BLOCK_ERROR,
+        requester_id=requester_id,
+        user_id=user_id,
+    )
+    return response
+
+
+def _handle_data_change(
+    request: GeminiChatRequest,
+    *,
+    access_context: AccessContext | None,
+    route_started_at: float,
+    channel: str,
+    external_conversation_id: str | None,
+    requester_id: str | None,
+    user_id: str | None,
+) -> GeminiChatResponse | None:
+    """Prepara a previa, a pergunta ou a recusa de um pedido de alteracao."""
+
+    service = get_data_change_service()
+    today = service.today() if service else datetime.now(LOCAL_TIMEZONE).date()
+    extracted = extract_change(request.message, today)
+    if extracted is None:
+        return None
+
+    correlation_id = None
+    if service is None or access_context is None:
+        unavailable = data_change_errors.unavailable()
+        outcome = DataChangeOutcome(status="rejected", code=unavailable.code, message=unavailable.message)
+        text = unavailable.message
+    else:
+        try:
+            handled = service.handle_message(
+                extracted,
+                access_context,
+                conversation_id=external_conversation_id or request.conversation_id,
+            )
+            outcome, correlation_id, text = handled.outcome, handled.correlation_id, handled.text
+        except DataChangeError as error:
+            outcome = DataChangeOutcome(status="rejected", code=error.code, message=error.message)
+            text = error.message
+
+    response = GeminiChatResponse(
+        text=text,
+        model=DATA_CHANGE_MODEL,
+        latency_ms=0,
+        usage=GeminiUsage(),
+        data_change=outcome,
+        pipeline_metrics=ChatPipelineMetrics(
+            nlp_ms=0,
+            route_ms=_elapsed_ms(route_started_at),
+        ),
+    )
+    _trace_safely(
+        request=request,
+        response=response,
+        intent=None,
+        entities=[],
+        processing_ms=response.pipeline_metrics.route_ms,
+        channel=channel,
+        external_conversation_id=external_conversation_id,
+        requester_id=requester_id,
+        user_id=user_id,
+    )
+    if service is not None and correlation_id and response.trace_id:
+        service.attach_interaction(correlation_id, response.trace_id)
+    return response
 
 
 def _trace_safely(
@@ -320,6 +552,8 @@ def _trace_safely(
     external_conversation_id: str | None = None,
     error_message: str | None = None,
     requester_id: str | None = None,
+    security_report: dict | None = None,
+    user_id: str | None = None,
 ) -> None:
     try:
         trace_id = trace_interaction(
@@ -332,6 +566,8 @@ def _trace_safely(
             external_conversation_id=external_conversation_id,
             error_message=error_message,
             requester_id=requester_id,
+            security_report=security_report,
+            user_id=user_id,
         )
         if response is not None:
             response.trace_id = trace_id

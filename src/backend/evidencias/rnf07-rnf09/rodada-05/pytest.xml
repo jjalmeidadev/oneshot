@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="6" time="3.339" timestamp="2026-10-06T00:53:25.144325-03:00" hostname="nitrozin"><testcase classname="app.tests.test_rnf07_rnf09_s5_31" name="test_ct_rnf07_p" time="0.015"><failure message="AssertionError: RNF07: 6/20 abaixo de 16/20; avaliação técnica preliminar&#10;assert 6 &gt;= 16">app\tests\test_rnf07_rnf09_s5_31.py:106: in test_ct_rnf07_p
+    check_rnf07("CT-RNF07-P")
+app\tests\test_rnf07_rnf09_s5_31.py:102: in check_rnf07
+    assert total_success &gt;= 16, f"RNF07: {total_success}/20 abaixo de 16/20; avaliação técnica preliminar"
+E   AssertionError: RNF07: 6/20 abaixo de 16/20; avaliação técnica preliminar
+E   assert 6 &gt;= 16</failure></testcase><testcase classname="app.tests.test_rnf07_rnf09_s5_31" name="test_ct_rnf07_n" time="0.009"><failure message="AssertionError: RNF07: 6/20 abaixo de 16/20; avaliação técnica preliminar&#10;assert 6 &gt;= 16">app\tests\test_rnf07_rnf09_s5_31.py:110: in test_ct_rnf07_n
+    check_rnf07("CT-RNF07-N")
+app\tests\test_rnf07_rnf09_s5_31.py:102: in check_rnf07
+    assert total_success &gt;= 16, f"RNF07: {total_success}/20 abaixo de 16/20; avaliação técnica preliminar"
+E   AssertionError: RNF07: 6/20 abaixo de 16/20; avaliação técnica preliminar
+E   assert 6 &gt;= 16</failure></testcase><testcase classname="app.tests.test_rnf07_rnf09_s5_31" name="test_ct_rnf08_p" time="0.614"><failure message="AssertionError: DEF-S5-31-01: arquitetura vigente remove Copilot exigido pelo critério ainda publicado&#10;assert not True">app\tests\test_rnf07_rnf09_s5_31.py:127: in test_ct_rnf08_p
+    assert not removed, "DEF-S5-31-01: arquitetura vigente remove Copilot exigido pelo critério ainda publicado"
+E   AssertionError: DEF-S5-31-01: arquitetura vigente remove Copilot exigido pelo critério ainda publicado
+E   assert not True</failure></testcase><testcase classname="app.tests.test_rnf07_rnf09_s5_31" name="test_ct_rnf08_n" time="0.148" /><testcase classname="app.tests.test_rnf07_rnf09_s5_31" name="test_ct_rnf09_p" time="0.044" /><testcase classname="app.tests.test_rnf07_rnf09_s5_31" name="test_ct_rnf09_n" time="0.012" /></testsuite></testsuites>

@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 860" font-family="Helvetica, Arial, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">Canvas de Proposta de Valor revisado após a implementação</title>
+  <desc id="d">Mapa de valor com o que a prova de conceito entregou, à esquerda, e perfil do cliente, à direita. Cada item está marcado como mantido da Sprint 1, revisado ou novo.</desc>
+  <style>
+    .bg{fill:#ffffff}
+    .frame{fill:none;stroke:#1f2937;stroke-width:3}
+    .div{stroke:#1f2937;stroke-width:2}
+    .ttl{font-size:30px;font-weight:700;fill:#111827}
+    .sub{font-size:17px;fill:#4b5563}
+    .blk{font-size:19px;font-weight:700;fill:#111827}
+    .note{stroke:#9ca3af;stroke-width:1}
+    .m{fill:#fff3b0}.r{fill:#cde7ff}.n{fill:#c8f2d0}
+    .tx{font-size:14.5px;fill:#1f2937}
+    .lg{font-size:15px;fill:#1f2937}
+  </style>
+  <rect class="bg" width="1600" height="860"/>
+  <text class="ttl" x="40" y="52">Canvas de Proposta de Valor — revisão após a implementação</text>
+  <text class="sub" x="40" y="80">Mapa de valor com o que a prova de conceito entregou · Perfil do cliente do PMO, líderes e diretoria do Metrô</text>
+
+  <!-- Mapa de valor (quadrado) -->
+  <rect class="frame" x="40" y="120" width="660" height="660"/>
+  <line class="div" x1="290" y1="120" x2="290" y2="780"/>
+  <line class="div" x1="290" y1="450" x2="700" y2="450"/>
+  <text class="blk" x="58" y="152">Produtos e serviços</text>
+  <text class="blk" x="308" y="152">Criadores de ganho</text>
+  <text class="blk" x="308" y="482">Analgésicos</text>
+
+  <!-- Produtos e serviços -->
+  <rect class="note m" x="58" y="175" width="214" height="62" rx="6"/><text class="tx" x="70" y="201">Agente conversacional</text><text class="tx" x="70" y="222">com PLN</text>
+  <rect class="note r" x="58" y="252" width="214" height="62" rx="6"/><text class="tx" x="70" y="278">Consulta por texto</text><text class="tx" x="70" y="299">ou por voz</text>
+  <rect class="note r" x="58" y="329" width="214" height="62" rx="6"/><text class="tx" x="70" y="355">Relatório executivo e</text><text class="tx" x="70" y="376">alerta de prazo</text>
+
+  <!-- Criadores de ganho -->
+  <rect class="note m" x="308" y="172" width="180" height="62" rx="6"/><text class="tx" x="320" y="198">Automatiza relatórios</text><text class="tx" x="320" y="219">do portfólio</text>
+  <rect class="note m" x="502" y="172" width="182" height="62" rx="6"/><text class="tx" x="514" y="198">Destaca riscos e</text><text class="tx" x="514" y="219">marcos críticos</text>
+  <rect class="note r" x="308" y="250" width="180" height="62" rx="6"/><text class="tx" x="320" y="276">Resposta em tempo</text><text class="tx" x="320" y="297">de conversa</text>
+  <rect class="note n" x="502" y="250" width="182" height="62" rx="6"/><text class="tx" x="514" y="276">Próximo passo sugerido,</text><text class="tx" x="514" y="297">com confirmação</text>
+
+  <!-- Analgésicos -->
+  <rect class="note n" x="308" y="502" width="376" height="62" rx="6"/><text class="tx" x="320" y="528">Resposta com fonte citada e limite</text><text class="tx" x="320" y="549">declarado quando falta informação</text>
+  <rect class="note r" x="308" y="580" width="376" height="62" rx="6"/><text class="tx" x="320" y="606">Fluxo guiado no chat para configurar</text><text class="tx" x="320" y="627">relatório e alerta</text>
+  <rect class="note r" x="308" y="658" width="376" height="62" rx="6"/><text class="tx" x="320" y="684">Alerta que cobra prazos no lugar do</text><text class="tx" x="320" y="705">PMO, na central de notificações</text>
+
+  <!-- Encaixe -->
+  <path d="M 722 450 L 832 450" stroke="#1f2937" stroke-width="3" fill="none"/>
+  <path d="M 832 450 L 816 440 L 816 460 Z" fill="#1f2937"/>
+  <path d="M 832 450 L 722 450" stroke="none"/>
+  <path d="M 722 450 L 738 440 L 738 460 Z" fill="#1f2937"/>
+
+  <!-- Perfil do cliente (círculo) -->
+  <circle class="frame" cx="1180" cy="450" r="330"/>
+  <line class="div" x1="1290" y1="139" x2="1290" y2="761"/>
+  <line class="div" x1="850" y1="450" x2="1290" y2="450"/>
+  <text class="blk" x="935" y="272">Ganhos</text>
+  <text class="blk" x="935" y="484">Dores</text>
+  <text class="blk" x="1306" y="300">Tarefas do</text>
+  <text class="blk" x="1306" y="324">cliente</text>
+
+  <!-- Ganhos -->
+  <rect class="note m" x="915" y="286" width="178" height="52" rx="6"/><text class="tx" x="925" y="308">Visão executiva</text><text class="tx" x="925" y="327">do portfólio</text>
+  <rect class="note m" x="1100" y="286" width="178" height="52" rx="6"/><text class="tx" x="1110" y="308">Relatórios gerados</text><text class="tx" x="1110" y="327">mais rápido</text>
+  <rect class="note m" x="915" y="348" width="178" height="52" rx="6"/><text class="tx" x="925" y="370">Projetos atualizados</text><text class="tx" x="925" y="389">com mais frequência</text>
+  <rect class="note n" x="1100" y="348" width="178" height="52" rx="6"/><text class="tx" x="1110" y="370">Confiança no número</text><text class="tx" x="1110" y="389">apresentado</text>
+
+  <!-- Dores -->
+  <rect class="note m" x="915" y="498" width="178" height="52" rx="6"/><text class="tx" x="925" y="520">Preenchimento</text><text class="tx" x="925" y="539">manual demorado</text>
+  <rect class="note m" x="1100" y="498" width="178" height="52" rx="6"/><text class="tx" x="1110" y="520">Relatórios executivos</text><text class="tx" x="1110" y="539">trabalhosos</text>
+  <rect class="note m" x="915" y="560" width="178" height="52" rx="6"/><text class="tx" x="925" y="582">Cronogramas com</text><text class="tx" x="925" y="601">inconsistências</text>
+  <rect class="note n" x="1100" y="560" width="178" height="52" rx="6"/><text class="tx" x="1110" y="582">Desconfiança em IA</text><text class="tx" x="1110" y="601">sem fonte citada</text>
+
+  <!-- Tarefas do cliente -->
+  <rect class="note m" x="1304" y="345" width="168" height="52" rx="6"/><text class="tx" x="1314" y="367">Cadastrar novos</text><text class="tx" x="1314" y="386">projetos</text>
+  <rect class="note r" x="1304" y="407" width="168" height="52" rx="6"/><text class="tx" x="1314" y="429">Consolidar o balanço</text><text class="tx" x="1314" y="448">mensal do portfólio</text>
+  <rect class="note m" x="1304" y="469" width="168" height="52" rx="6"/><text class="tx" x="1314" y="491">Monitorar riscos,</text><text class="tx" x="1314" y="510">prazos e pendências</text>
+
+  <!-- Legenda -->
+  <rect class="note m" x="40" y="818" width="26" height="20" rx="3"/><text class="lg" x="76" y="834">Mantido da Sprint 1</text>
+  <rect class="note r" x="260" y="818" width="26" height="20" rx="3"/><text class="lg" x="296" y="834">Revisado com o que foi entregue</text>
+  <rect class="note n" x="560" y="818" width="26" height="20" rx="3"/><text class="lg" x="596" y="834">Novo</text>
+</svg>

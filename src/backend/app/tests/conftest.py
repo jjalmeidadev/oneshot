@@ -18,6 +18,12 @@ resultado na maquina de qualquer integrante e na CI, e impede que um teste passe
 por causa de uma credencial que so existe em uma maquina.
 """
 
+import json
+import os
+from typing import Annotated
+from uuid import NAMESPACE_URL, uuid5
+
+from fastapi import Header, Request
 import pytest
 
 #: Variaveis que a suite neutraliza antes de cada teste. Todas sao lidas em
@@ -42,7 +48,14 @@ VARIAVEIS_DE_AMBIENTE_NEUTRALIZADAS = (
     "DATABASE_URL",
     "SUPABASE_DATABASE_URL",
     "SUPABASE_URL",
+    "SUPABASE_PUBLISHABLE_KEY",
+    "SUPABASE_ANON_KEY",
     "SUPABASE_SERVICE_ROLE_KEY",
+    "MVP_AUTH_PASSWORD",
+    "MVP_AUTH_PMO_PASSWORD",
+    "MVP_AUTH_SUBPORTFOLIO_LEADER_PASSWORD",
+    "MVP_AUTH_PROJECT_MANAGER_PASSWORD",
+    "MVP_AUTH_CONSULTA_PASSWORD",
     "RAG_MAX_SOURCES",
     "SHAREPOINT_MOCK_DATA_DIR",
     # Transcricao
@@ -64,7 +77,10 @@ VARIAVEIS_DE_AMBIENTE_NEUTRALIZADAS = (
     "REPORT_STORAGE_MODE",
     "REPORT_REPOSITORY_MODE",
     "REPORT_SIMULATED_IDENTITIES",
-    "NOTIFICATION_CALLBACK_TOKEN",
+    "NOTIFICATION_CALLBACK_SECRET",
+    "SHAREPOINT_WEBHOOK_CLIENT_STATE",
+    "SHAREPOINT_WEBHOOK_REPOSITORY_MODE",
+    "SHAREPOINT_WEBHOOK_PUBLISHER_POLL_SECONDS",
     # Aquecimento do classificador: manter desligado deixa a suite rapida e
     # independente do download do BERTimbau.
     "PLN_WARMUP",
@@ -90,6 +106,88 @@ def ambiente_isolado(monkeypatch):
     # ate o timeout, em vez de falhar na hora como antes. O comportamento do
     # pool tem testes proprios em test_database_pool.py, com pool falso.
     monkeypatch.setenv("DATABASE_POOL_ENABLED", "0")
+
+
+@pytest.fixture(autouse=True)
+def acesso_central_isolado():
+    """Evita rede nos testes legados; casos de Auth removem este override."""
+
+    from app.main import app
+    from app.security import (
+        AccessContext,
+        AuthenticationRequiredError,
+        InvalidAccessTokenError,
+        get_access_context,
+    )
+    from app.security.access import AccessGrant
+
+    def context_from_payload(payload: dict, token: str) -> AccessContext:
+        allow_all = bool(payload.get("allow_all", False))
+        projects = frozenset(map(str, payload.get("projects", [])))
+        subportfolios = frozenset(map(str, payload.get("subportfolios", [])))
+        can_export = bool(payload.get("can_export", True))
+        can_write = bool(payload.get("can_write", can_export))
+        grants = (
+            AccessGrant("portfolio", None, None, True, can_write, can_export),
+        ) if allow_all else ()
+        subject = uuid5(NAMESPACE_URL, str(payload.get("subject") or token))
+        return AccessContext(
+            user_id=uuid5(NAMESPACE_URL, f"public:{subject}"),
+            auth_subject=payload.get("subject") or subject,
+            role_name=str(payload.get("role") or "pmo"),
+            allowed_subportfolio_ids=frozenset(),
+            allowed_project_ids=frozenset(),
+            can_read=bool(payload.get("can_read", True)),
+            can_write=can_write,
+            can_export=can_export,
+            grants=grants,
+            allowed_subportfolio_codes=subportfolios,
+            allowed_project_codes=projects,
+        )
+
+    def legacy_test_access(
+        request: Request,
+        authorization: Annotated[str | None, Header()] = None,
+    ) -> AccessContext:
+        scheme, _, token = (authorization or "").partition(" ")
+        token = token.strip()
+        if (
+            request.url.path.startswith("/api/audio")
+            or request.url.path == "/api/chat/proactive-confirmation"
+        ) and not token:
+            raise AuthenticationRequiredError()
+
+        configured_reports = os.getenv("REPORT_SIMULATED_IDENTITIES", "").strip()
+        if configured_reports and token:
+            payload = json.loads(configured_reports).get(token)
+            if payload is not None:
+                return context_from_payload(payload, token)
+
+        configured_audio = os.getenv("AUDIO_SIMULATED_IDENTITIES", "").strip()
+        if configured_audio and token:
+            tokens = {
+                item.partition("=")[0].strip()
+                for item in configured_audio.split(",")
+                if item.strip()
+            }
+            if scheme.casefold() != "bearer" or token not in tokens:
+                raise InvalidAccessTokenError()
+
+        return context_from_payload(
+            {
+                "subject": "legacy-test-user",
+                "role": "pmo",
+                "can_read": True,
+                "can_write": True,
+                "can_export": True,
+                "allow_all": True,
+            },
+            token or "legacy-test-token",
+        )
+
+    app.dependency_overrides[get_access_context] = legacy_test_access
+    yield
+    app.dependency_overrides.pop(get_access_context, None)
 
 
 def pytest_configure(config):

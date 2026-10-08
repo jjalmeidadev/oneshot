@@ -1,0 +1,1259 @@
+{
+  "$defs": {
+    "AlertDirective": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "guided_workflow",
+          "default": "guided_workflow",
+          "title": "Kind",
+          "type": "string"
+        },
+        "action": {
+          "const": "start",
+          "default": "start",
+          "title": "Action",
+          "type": "string"
+        },
+        "workflow": {
+          "const": "alerta_prazo_atraso",
+          "default": "alerta_prazo_atraso",
+          "title": "Workflow",
+          "type": "string"
+        },
+        "contract_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        }
+      },
+      "title": "AlertDirective",
+      "type": "object"
+    },
+    "AudioIntent": {
+      "properties": {
+        "macro": {
+          "title": "Macro",
+          "type": "string"
+        },
+        "specific": {
+          "title": "Specific",
+          "type": "string"
+        },
+        "confidence_macro": {
+          "title": "Confidence Macro",
+          "type": "number"
+        },
+        "confidence_specific": {
+          "title": "Confidence Specific",
+          "type": "number"
+        },
+        "flow": {
+          "default": "",
+          "title": "Flow",
+          "type": "string"
+        },
+        "handler": {
+          "default": "",
+          "title": "Handler",
+          "type": "string"
+        },
+        "alternatives": {
+          "items": {
+            "$ref": "#/$defs/IntentAlternative"
+          },
+          "title": "Alternatives",
+          "type": "array"
+        },
+        "routing_rule": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Routing Rule"
+        }
+      },
+      "required": [
+        "macro",
+        "specific",
+        "confidence_macro",
+        "confidence_specific"
+      ],
+      "title": "AudioIntent",
+      "type": "object"
+    },
+    "Candidate": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "Candidate",
+      "type": "object"
+    },
+    "ChatPipelineMetrics": {
+      "properties": {
+        "nlp_ms": {
+          "default": 0,
+          "title": "Nlp Ms",
+          "type": "integer"
+        },
+        "route_ms": {
+          "default": 0,
+          "title": "Route Ms",
+          "type": "integer"
+        }
+      },
+      "title": "ChatPipelineMetrics",
+      "type": "object"
+    },
+    "ClaimEvidence": {
+      "properties": {
+        "citation_id": {
+          "title": "Citation Id",
+          "type": "string"
+        },
+        "field": {
+          "enum": [
+            "excerpt",
+            "attribute"
+          ],
+          "title": "Field",
+          "type": "string"
+        },
+        "attribute": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attribute"
+        },
+        "quote": {
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        }
+      },
+      "required": [
+        "citation_id",
+        "field",
+        "quote"
+      ],
+      "title": "ClaimEvidence",
+      "type": "object"
+    },
+    "DataChangeDraft": {
+      "description": "O que ja foi entendido do pedido, para a interface completar.",
+      "properties": {
+        "project_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Project Code"
+        },
+        "entity": {
+          "anyOf": [
+            {
+              "enum": [
+                "projeto",
+                "cronograma",
+                "marco",
+                "risco"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entity"
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "target_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Id"
+        },
+        "item_reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Item Reference"
+        },
+        "raw_value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Value"
+        }
+      },
+      "title": "DataChangeDraft",
+      "type": "object"
+    },
+    "DataChangeOutcome": {
+      "description": "Campo `data_change` da resposta do chat.",
+      "properties": {
+        "status": {
+          "enum": [
+            "preview",
+            "needs_input",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "preview": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DataChangePreview"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "missing": {
+          "anyOf": [
+            {
+              "enum": [
+                "project",
+                "target",
+                "field",
+                "value"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Missing"
+        },
+        "question": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Question"
+        },
+        "candidates": {
+          "items": {
+            "$ref": "#/$defs/Candidate"
+          },
+          "title": "Candidates",
+          "type": "array"
+        },
+        "draft": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DataChangeDraft"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Code"
+        },
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "DataChangeOutcome",
+      "type": "object"
+    },
+    "DataChangePreview": {
+      "properties": {
+        "pending_change_id": {
+          "title": "Pending Change Id",
+          "type": "string"
+        },
+        "project": {
+          "$ref": "#/$defs/ProjectRef"
+        },
+        "target": {
+          "$ref": "#/$defs/TargetView"
+        },
+        "field": {
+          "$ref": "#/$defs/FieldRef"
+        },
+        "before": {
+          "$ref": "#/$defs/ValueView"
+        },
+        "after": {
+          "$ref": "#/$defs/ValueView"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "undo_window_minutes": {
+          "title": "Undo Window Minutes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "pending_change_id",
+        "project",
+        "target",
+        "field",
+        "before",
+        "after",
+        "expires_at",
+        "undo_window_minutes"
+      ],
+      "title": "DataChangePreview",
+      "type": "object"
+    },
+    "FactualClaim": {
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "citation_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Citation Ids",
+          "type": "array"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/ClaimEvidence"
+          },
+          "title": "Evidence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "citation_ids"
+      ],
+      "title": "FactualClaim",
+      "type": "object"
+    },
+    "FieldRef": {
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "label"
+      ],
+      "title": "FieldRef",
+      "type": "object"
+    },
+    "GeminiSource": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "list_name": {
+          "title": "List Name",
+          "type": "string"
+        },
+        "web_url": {
+          "title": "Web Url",
+          "type": "string"
+        },
+        "last_modified": {
+          "title": "Last Modified",
+          "type": "string"
+        },
+        "score": {
+          "title": "Score",
+          "type": "number"
+        },
+        "excerpt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Excerpt"
+        },
+        "citation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Citation Id"
+        },
+        "artifact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Id"
+        },
+        "extract_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Extract Id"
+        },
+        "project_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Project Id"
+        },
+        "source_locator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Locator"
+        },
+        "registration_period": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourcePeriod"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "validity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourcePeriod"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "list_name",
+        "web_url",
+        "last_modified",
+        "score"
+      ],
+      "title": "GeminiSource",
+      "type": "object"
+    },
+    "GeminiUsage": {
+      "properties": {
+        "input_tokens": {
+          "default": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "default": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "thought_tokens": {
+          "default": 0,
+          "title": "Thought Tokens",
+          "type": "integer"
+        },
+        "total_tokens": {
+          "default": 0,
+          "title": "Total Tokens",
+          "type": "integer"
+        }
+      },
+      "title": "GeminiUsage",
+      "type": "object"
+    },
+    "HighlightBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "citation_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Citation Ids",
+          "type": "array"
+        },
+        "type": {
+          "const": "highlight",
+          "default": "highlight",
+          "title": "Type",
+          "type": "string"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "citation_ids",
+        "text"
+      ],
+      "title": "HighlightBlock",
+      "type": "object"
+    },
+    "IndicatorBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "citation_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Citation Ids",
+          "type": "array"
+        },
+        "type": {
+          "const": "indicator",
+          "default": "indicator",
+          "title": "Type",
+          "type": "string"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "const": "%",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        }
+      },
+      "required": [
+        "citation_ids",
+        "label",
+        "value"
+      ],
+      "title": "IndicatorBlock",
+      "type": "object"
+    },
+    "IntentAlternative": {
+      "properties": {
+        "intent": {
+          "title": "Intent",
+          "type": "string"
+        },
+        "confidence": {
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "intent",
+        "confidence"
+      ],
+      "title": "IntentAlternative",
+      "type": "object"
+    },
+    "ProactiveSuggestion": {
+      "properties": {
+        "suggestion_id": {
+          "title": "Suggestion Id",
+          "type": "string"
+        },
+        "intent": {
+          "title": "Intent",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "display_message": {
+          "title": "Display Message",
+          "type": "string"
+        },
+        "requires_confirmation": {
+          "default": true,
+          "title": "Requires Confirmation",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "suggestion_id",
+        "intent",
+        "description",
+        "display_message"
+      ],
+      "title": "ProactiveSuggestion",
+      "type": "object"
+    },
+    "ProjectRef": {
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "title"
+      ],
+      "title": "ProjectRef",
+      "type": "object"
+    },
+    "PublicEntity": {
+      "properties": {
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "start": {
+          "title": "Start",
+          "type": "integer"
+        },
+        "end": {
+          "title": "End",
+          "type": "integer"
+        },
+        "types": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Types",
+          "type": "array"
+        },
+        "ambiguous": {
+          "default": false,
+          "title": "Ambiguous",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "value",
+        "text",
+        "start",
+        "end"
+      ],
+      "title": "PublicEntity",
+      "type": "object"
+    },
+    "SourcePeriod": {
+      "properties": {
+        "start": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Start"
+        },
+        "end": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
+        }
+      },
+      "title": "SourcePeriod",
+      "type": "object"
+    },
+    "SpeechResponse": {
+      "properties": {
+        "status": {
+          "enum": [
+            "available",
+            "unavailable"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "media_type": {
+          "anyOf": [
+            {
+              "const": "audio/mpeg",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Media Type"
+        },
+        "data_base64": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Data Base64"
+        },
+        "warning": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Warning"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "SpeechResponse",
+      "type": "object"
+    },
+    "TableBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "table",
+          "default": "table",
+          "title": "Type",
+          "type": "string"
+        },
+        "columns": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Columns",
+          "type": "array"
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/$defs/TableRow"
+          },
+          "minItems": 1,
+          "title": "Rows",
+          "type": "array"
+        }
+      },
+      "required": [
+        "columns",
+        "rows"
+      ],
+      "title": "TableBlock",
+      "type": "object"
+    },
+    "TableRow": {
+      "additionalProperties": false,
+      "properties": {
+        "citation_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Citation Ids",
+          "type": "array"
+        },
+        "cells": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Cells",
+          "type": "array"
+        }
+      },
+      "required": [
+        "citation_ids",
+        "cells"
+      ],
+      "title": "TableRow",
+      "type": "object"
+    },
+    "TargetView": {
+      "properties": {
+        "entity": {
+          "enum": [
+            "projeto",
+            "cronograma",
+            "marco",
+            "risco"
+          ],
+          "title": "Entity",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entity",
+        "id",
+        "label"
+      ],
+      "title": "TargetView",
+      "type": "object"
+    },
+    "ValueView": {
+      "description": "Valor canonico (para comparar) e exibido (para a pessoa).",
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "display": {
+          "title": "Display",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "display"
+      ],
+      "title": "ValueView",
+      "type": "object"
+    },
+    "WorkflowDirective": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "guided_workflow",
+          "default": "guided_workflow",
+          "title": "Kind",
+          "type": "string"
+        },
+        "action": {
+          "const": "start",
+          "default": "start",
+          "title": "Action",
+          "type": "string"
+        },
+        "workflow": {
+          "const": "transacao_gerar_relatorio",
+          "default": "transacao_gerar_relatorio",
+          "title": "Workflow",
+          "type": "string"
+        },
+        "contract_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        }
+      },
+      "title": "WorkflowDirective",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "contract_version": {
+      "const": "1.2.0",
+      "default": "1.2.0",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "text": {
+      "title": "Text",
+      "type": "string"
+    },
+    "blocks": {
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "highlight": "#/$defs/HighlightBlock",
+            "indicator": "#/$defs/IndicatorBlock",
+            "table": "#/$defs/TableBlock"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/TableBlock"
+          },
+          {
+            "$ref": "#/$defs/IndicatorBlock"
+          },
+          {
+            "$ref": "#/$defs/HighlightBlock"
+          }
+        ]
+      },
+      "title": "Blocks",
+      "type": "array"
+    },
+    "speech": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SpeechResponse"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "model": {
+      "title": "Model",
+      "type": "string"
+    },
+    "interaction_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Interaction Id"
+    },
+    "trace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Trace Id"
+    },
+    "latency_ms": {
+      "title": "Latency Ms",
+      "type": "integer"
+    },
+    "retrieval_ms": {
+      "default": 0,
+      "title": "Retrieval Ms",
+      "type": "integer"
+    },
+    "usage": {
+      "$ref": "#/$defs/GeminiUsage"
+    },
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/GeminiSource"
+      },
+      "title": "Sources",
+      "type": "array"
+    },
+    "claims": {
+      "items": {
+        "$ref": "#/$defs/FactualClaim"
+      },
+      "title": "Claims",
+      "type": "array"
+    },
+    "evidence_status": {
+      "default": "not_applicable",
+      "enum": [
+        "referenced",
+        "insufficient",
+        "not_applicable"
+      ],
+      "title": "Evidence Status",
+      "type": "string"
+    },
+    "recommendation": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Recommendation"
+    },
+    "trace_sources": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Trace Sources",
+      "type": "array"
+    },
+    "security_report": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Security Report"
+    },
+    "intent": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AudioIntent"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "entities": {
+      "items": {
+        "$ref": "#/$defs/PublicEntity"
+      },
+      "title": "Entities",
+      "type": "array"
+    },
+    "pipeline_metrics": {
+      "$ref": "#/$defs/ChatPipelineMetrics"
+    },
+    "proactive_suggestion": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ProactiveSuggestion"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "workflow": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/WorkflowDirective"
+        },
+        {
+          "$ref": "#/$defs/AlertDirective"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Workflow"
+    },
+    "data_change": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DataChangeOutcome"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "text",
+    "model",
+    "latency_ms",
+    "usage"
+  ],
+  "title": "GeminiChatResponse",
+  "type": "object"
+}

@@ -130,22 +130,35 @@ def test_conversa_nao_fica_sem_interacao(connection: Any) -> None:
 
 
 def test_interacao_processada_tem_intencao_e_resposta(connection: Any) -> None:
-    # As CHECK constraints ja barram valor fora do dominio. O que elas nao
-    # cobrem e uma interacao marcada como processada sem classificacao ou sem
-    # texto de resposta -- estado que so o backend pode produzir.
+    # O classificador pode ser desativado explicitamente na requisicao. Eventos
+    # antigos nao registravam a flag; neles, a presenca de evento PLN indica
+    # que a classificacao era esperada.
     incompletas = _contar(
         connection,
         """
         SELECT COUNT(*)
           FROM public.ai_interactions
          WHERE processing_status = 'processado'
-           AND (macro_intent_predicted IS NULL OR response_text IS NULL)
+           AND (
+               response_text IS NULL
+               OR (macro_intent_predicted IS NULL AND COALESCE(
+                   (SELECT (e.event_payload->>'intent_classifier_enabled')::boolean
+                      FROM public.audit_events e
+                     WHERE e.interaction_id = ai_interactions.id
+                       AND e.event_type = 'api_interaction_processed'
+                     ORDER BY e.occurred_at DESC
+                     LIMIT 1),
+                   EXISTS (SELECT 1 FROM public.audit_events e
+                            WHERE e.interaction_id = ai_interactions.id
+                              AND e.event_type = 'pln_intent_classified')
+               ))
+           )
         """,
     )
 
     assert incompletas == 0, (
-        f"{incompletas} interacoes marcadas como processadas sem intencao macro "
-        "ou sem response_text"
+        f"{incompletas} interacoes processadas sem resposta ou sem intencao "
+        "macro quando a classificacao era esperada"
     )
 
 
@@ -196,14 +209,6 @@ def test_toda_interacao_gera_evento_de_auditoria(connection: Any) -> None:
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "D-03: _insert_audit_events em app/database/tracing.py monta o INSERT "
-        "sem a coluna correlation_id. Rodada 1: 10631 eventos, nenhum "
-        "identificador. Ver secao 7 do relatorio S4-11."
-    ),
-)
 def test_evento_de_auditoria_carrega_identificador_de_correlacao(
     connection: Any,
 ) -> None:
@@ -297,14 +302,6 @@ def test_pergunta_fora_de_escopo_nao_cita_fonte(connection: Any) -> None:
 # --------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "D-02: app/database/tracing.py escreve em ai_conversations, "
-        "ai_interactions, consulted_sources e audit_events, e nunca em "
-        "out_of_scope_requests. Ver secao 6 do relatorio S4-11."
-    ),
-)
 def test_pergunta_fora_de_escopo_e_registrada_para_curadoria(
     connection: Any,
 ) -> None:
@@ -425,15 +422,6 @@ def _componente_do_evento_de_fluxo_guiado() -> str:
     return trecho.group(1)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "D-05: o evento do fluxo guiado usa component='guided_workflow', que "
-        "audit_events_component_ck nao aceita. Como trace_interaction roda tudo "
-        "em uma transacao, a violacao descarta a interacao inteira. Ver secao "
-        "8.2 do relatorio S4-11."
-    ),
-)
 def test_componente_do_fluxo_guiado_esta_no_dominio_do_schema() -> None:
     aceitos = _componentes_aceitos_pelo_schema()
     usado = _componente_do_evento_de_fluxo_guiado()

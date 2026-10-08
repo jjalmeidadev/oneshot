@@ -1,0 +1,42 @@
+{
+  "diretorio_ausente": {
+    "carregamento": {
+      "exception": "RagSourceError",
+      "message": "A origem de dados deve ser um diretório existente."
+    },
+    "consulta": {
+      "exception": "RagSourceError",
+      "message": "A origem de dados deve ser um diretório existente."
+    }
+  },
+  "arquivo_ausente": {
+    "carregamento": {
+      "exception": "RagSourceError",
+      "message": "A origem de dados deve ser um diretório existente."
+    },
+    "consulta": {
+      "exception": "RagSourceError",
+      "message": "A origem de dados deve ser um diretório existente."
+    }
+  },
+  "json_malformado": {
+    "carregamento": {
+      "exception": "RagSourceError",
+      "message": "Não foi possível ler um JSON válido na origem de dados."
+    },
+    "consulta": {
+      "exception": "RagSourceError",
+      "message": "Não foi possível ler um JSON válido na origem de dados."
+    }
+  },
+  "estrutura_invalida": {
+    "carregamento": {
+      "exception": "RagSourceError",
+      "message": "Estrutura inválida: a origem deve conter uma lista value de itens com fields."
+    },
+    "consulta": {
+      "exception": "RagSourceError",
+      "message": "Estrutura inválida: a origem deve conter uma lista value de itens com fields."
+    }
+  }
+}

@@ -52,6 +52,7 @@ def provider(monkeypatch):
         intent=None,
         entities=None,
         requester_id=None,
+        access_context=None,
     ):
         calls.append(
             ProviderCall(
@@ -151,7 +152,7 @@ def test_text_proactivity_mode_reaches_rag_provider(provider, classifier):
 def test_proactive_confirmation_route_accepts_only_bound_decision(monkeypatch):
     captured = []
 
-    def confirm(request, *, requester_id):
+    def confirm(request, *, requester_id, user_id=None):
         captured.append((request, requester_id))
         return ProactiveConfirmationResponse(status="declined")
 
@@ -440,7 +441,7 @@ def test_audio_response_provider_failure_uses_audio_error_contract(monkeypatch):
 
 @pytest.mark.parametrize('error,status', [(GeminiConfigurationError('secret-internal'),503), (GeminiAPIError('secret-internal'),502)])
 def test_provider_failure_is_controlled(monkeypatch, error, status):
-    def fail(request, intent=None, entities=None): raise error
+    def fail(request, intent=None, entities=None, **_kwargs): raise error
     monkeypatch.setattr('app.pipeline.generate_chat_response', fail)
     with TestClient(app) as client:
         result = client.post('/api/chat', json={'message': 'prazo', 'use_intent_classifier': False})

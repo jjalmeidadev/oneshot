@@ -61,6 +61,11 @@ if [ -n "$sensitive_files" ]; then
   exit 1
 fi
 
+if ! sh "$(git rev-parse --show-toplevel)/scripts/check-conflict-markers.sh"; then
+  echo "pre-commit: resolva os conflitos e adicione a resolucao ao stage." >&2
+  exit 1
+fi
+
 if ! git diff --cached --check; then
   echo "pre-commit: corrija os problemas apontados antes de commitar." >&2
   exit 1

@@ -1,0 +1,11 @@
+{
+  "cenario": "excecao_inesperada",
+  "http": 500,
+  "content_type": "text/plain; charset=utf-8",
+  "corpo": "Internal Server Error",
+  "mensagem_definida_pelo_projeto": null,
+  "vazamentos_na_resposta": [],
+  "vazamentos_no_log": [],
+  "auditoria_registros": 0,
+  "auditoria_com_falha": false
+}

@@ -1,0 +1,243 @@
+{
+  "issue": 282,
+  "base_commit": "9255e2f",
+  "protocolo": {
+    "split": "teste",
+    "entradas": 1135,
+    "sem_retreino": true,
+    "metrica": "F1-macro da intencao especifica prevista pelo modelo, antes dos limiares e regras de roteamento",
+    "dataset_sha256": "262398d0ee093ef1c7b305765d50f2ecf7b62fcd23c7b9169f7c16fad7e4473d",
+    "artefato_sha256": "ea5eb249bdc53d192ac9c0157303e0d8d62ab59fe32285628bac0547e5141b08"
+  },
+  "f1_macro": 0.8327243276603838,
+  "acuracia": 0.839647577092511,
+  "meta": 0.8,
+  "aderente": true,
+  "casos_congelados": [
+    {
+      "texto": "fale sobre os Objetos perdidos",
+      "macrointencao": "CONSULTA",
+      "confianca_macro": 0.4699,
+      "intencao": null,
+      "confianca_intencao": 0.0,
+      "fluxo": "RecuperadorInformacao -> Estruturador de Resposta",
+      "handler": "fluxo genérico de CONSULTA",
+      "alternativas": [
+        [
+          "consulta_escopo_tap",
+          0.1743
+        ],
+        [
+          "consulta_status_projeto",
+          0.1718
+        ],
+        [
+          "alerta_gerenciar_inscricao",
+          0.1019
+        ]
+      ],
+      "resposta_sugerida": null,
+      "regra_roteamento": "consulta_tema_operacional"
+    },
+    {
+      "texto": "fale sobre o Bilhete digital",
+      "macrointencao": "CONSULTA",
+      "confianca_macro": 0.1709,
+      "intencao": null,
+      "confianca_intencao": 0.0,
+      "fluxo": "RecuperadorInformacao -> Estruturador de Resposta",
+      "handler": "fluxo genérico de CONSULTA",
+      "alternativas": [
+        [
+          "transacao_solicitar_atualizacao",
+          0.3219
+        ],
+        [
+          "alerta_configurar_monitoramento",
+          0.1568
+        ],
+        [
+          "consulta_status_projeto",
+          0.1174
+        ]
+      ],
+      "resposta_sugerida": null,
+      "regra_roteamento": "consulta_tema_operacional"
+    },
+    {
+      "texto": "Bilhete digital",
+      "macrointencao": "CONSULTA",
+      "confianca_macro": 0.0557,
+      "intencao": null,
+      "confianca_intencao": 0.0,
+      "fluxo": "RecuperadorInformacao -> Estruturador de Resposta",
+      "handler": "fluxo genérico de CONSULTA",
+      "alternativas": [
+        [
+          "fora_escopo_externo",
+          0.3616
+        ],
+        [
+          "transacao_solicitar_atualizacao",
+          0.1886
+        ],
+        [
+          "transacao_exportar_dados",
+          0.076
+        ]
+      ],
+      "resposta_sugerida": null,
+      "regra_roteamento": "consulta_tema_operacional"
+    },
+    {
+      "texto": "Como funciona o bilhete digital?",
+      "macrointencao": "CONSULTA",
+      "confianca_macro": 0.5044,
+      "intencao": null,
+      "confianca_intencao": 0.0,
+      "fluxo": "RecuperadorInformacao -> Estruturador de Resposta",
+      "handler": "fluxo genérico de CONSULTA",
+      "alternativas": [
+        [
+          "fora_escopo_externo",
+          0.4161
+        ],
+        [
+          "consulta_status_projeto",
+          0.2731
+        ],
+        [
+          "analise_tendencia_desempenho",
+          0.0862
+        ]
+      ],
+      "resposta_sugerida": null,
+      "regra_roteamento": "consulta_tema_operacional"
+    },
+    {
+      "texto": "Mostre o status do projeto PRJ-0442",
+      "macrointencao": "CONSULTA",
+      "confianca_macro": 0.5372,
+      "intencao": "consulta_status_projeto",
+      "confianca_intencao": 0.403,
+      "fluxo": "RecuperadorInformacao -> Estruturador de Resposta",
+      "handler": "handler:consulta_status_projeto",
+      "alternativas": [
+        [
+          "transacao_atualizar_status",
+          0.4108
+        ],
+        [
+          "consulta_status_projeto",
+          0.403
+        ],
+        [
+          "comparacao_entre_projetos",
+          0.0438
+        ]
+      ],
+      "resposta_sugerida": null,
+      "regra_roteamento": "consulta_status_explicita"
+    },
+    {
+      "texto": "Mostre o status do projeto XPTO",
+      "macrointencao": "CONSULTA",
+      "confianca_macro": 0.2205,
+      "intencao": "consulta_status_projeto",
+      "confianca_intencao": 0.1304,
+      "fluxo": "RecuperadorInformacao -> Estruturador de Resposta",
+      "handler": "handler:consulta_status_projeto",
+      "alternativas": [
+        [
+          "transacao_atualizar_status",
+          0.6447
+        ],
+        [
+          "consulta_status_projeto",
+          0.1304
+        ],
+        [
+          "transacao_cadastrar_projeto",
+          0.0579
+        ]
+      ],
+      "resposta_sugerida": null,
+      "regra_roteamento": "consulta_status_explicita"
+    },
+    {
+      "texto": "Qual é o status do projeto PRJ-0442?",
+      "macrointencao": "CONSULTA",
+      "confianca_macro": 0.9786,
+      "intencao": "consulta_status_projeto",
+      "confianca_intencao": 0.8492,
+      "fluxo": "RecuperadorInformacao -> Estruturador de Resposta",
+      "handler": "handler:consulta_status_projeto",
+      "alternativas": [
+        [
+          "consulta_status_projeto",
+          0.8492
+        ],
+        [
+          "consulta_escopo_tap",
+          0.0609
+        ],
+        [
+          "transacao_atualizar_status",
+          0.0199
+        ]
+      ],
+      "resposta_sugerida": null,
+      "regra_roteamento": "consulta_status_explicita"
+    },
+    {
+      "texto": "Reserve uma sala de reunião para amanhã",
+      "macrointencao": "FORA_DE_ESCOPO",
+      "confianca_macro": 0.2132,
+      "intencao": null,
+      "confianca_intencao": 0.0,
+      "fluxo": "Resposta padrão de limitação (RF08)",
+      "handler": "limitacao:agendamento",
+      "alternativas": [
+        [
+          "transacao_agendar_compromisso",
+          0.7335
+        ],
+        [
+          "fora_escopo_externo",
+          0.2048
+        ],
+        [
+          "transacao_gerar_apresentacao",
+          0.0247
+        ]
+      ],
+      "resposta_sugerida": "Não realizo reservas de salas nem agendamentos sem vínculo com o portfólio. Você pode consultar um tema, como 'Bilhete digital', ou pedir uma reunião de acompanhamento de um projeto ou portfólio.",
+      "regra_roteamento": "limite_agendamento"
+    },
+    {
+      "texto": "Agende uma reunião amanhã",
+      "macrointencao": "FORA_DE_ESCOPO",
+      "confianca_macro": 0.2608,
+      "intencao": null,
+      "confianca_intencao": 0.0,
+      "fluxo": "Resposta padrão de limitação (RF08)",
+      "handler": "limitacao:agendamento",
+      "alternativas": [
+        [
+          "transacao_agendar_compromisso",
+          0.7061
+        ],
+        [
+          "fora_escopo_externo",
+          0.2324
+        ],
+        [
+          "fora_escopo_social",
+          0.0284
+        ]
+      ],
+      "resposta_sugerida": "Não realizo reservas de salas nem agendamentos sem vínculo com o portfólio. Você pode consultar um tema, como 'Bilhete digital', ou pedir uma reunião de acompanhamento de um projeto ou portfólio.",
+      "regra_roteamento": "limite_agendamento"
+    }
+  ]
+}

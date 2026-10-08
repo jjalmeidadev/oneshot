@@ -73,7 +73,7 @@ WITH source_items (
         TIMESTAMPTZ '2026-08-01T12:00:00Z',
         TIMESTAMPTZ '2026-08-01T12:00:00Z',
         'https://mock.sharepoint.local/sites/metro-mvp/Lists/Comunicados/201',
-        '{"Title":"Operacao assistida na Linha Azul","Tipo":"Operacao","Linha":"Linha 1-Azul","ValidadeInicio":"2026-08-24","ValidadeFim":"2026-08-28","Status":"Programado","Conteudo":"Durante o periodo ficticio, o intervalo entre trens podera ser ampliado entre 22h e o encerramento da operacao para testes de sinalizacao. Recomenda-se comunicar o tempo adicional de viagem nos canais de atendimento.","PalavrasChave":"linha azul intervalo trens sinalizacao horario noite"}'::jsonb
+        '{"Title":"Operacao assistida na Linha Azul","CodigoProjeto":"PRJ-0442","Tipo":"Operacao","Linha":"Linha 1-Azul","ValidadeInicio":"2026-08-24","ValidadeFim":"2026-08-28","Status":"Programado","Conteudo":"Durante o periodo ficticio, o intervalo entre trens podera ser ampliado entre 22h e o encerramento da operacao para testes de sinalizacao. Recomenda-se comunicar o tempo adicional de viagem nos canais de atendimento.","PalavrasChave":"linha azul intervalo trens sinalizacao horario noite"}'::jsonb
     ),
     (
         'comunicados_servico.json',
@@ -144,6 +144,34 @@ WITH source_items (
         TIMESTAMPTZ '2026-08-12T11:05:00Z',
         'https://mock.sharepoint.local/sites/metro-mvp/Lists/Atendimento/303',
         '{"Title":"Transporte de bicicleta","Categoria":"Regras de uso","Status":"Publicado","Conteudo":"Na politica ficticia do MVP, bicicletas sao aceitas aos sabados, domingos e feriados durante toda a operacao, e nos dias uteis apos as 20h30. O passageiro deve usar o ultimo carro e respeitar a capacidade indicada pela equipe.","PalavrasChave":"bicicleta bike horario fim semana ultimo carro"}'::jsonb
+    ),
+    (
+        'documentos_projetos.json',
+        'https://mock.sharepoint.local/$metadata#lists/items',
+        TRUE,
+        'metro-mvp-site',
+        'Portal de Projetos - Dados Ficticios',
+        'documentos-projetos',
+        'Documentos de Projetos',
+        '510',
+        TIMESTAMPTZ '2026-02-10T09:00:00Z',
+        TIMESTAMPTZ '2026-08-31T18:00:00Z',
+        'https://mock.sharepoint.local/sites/metro-mvp/Lists/DocumentosProjetos/510',
+        '{"Title":"Status executivo do PRJ-0510","CodigoProjeto":"PRJ-0510","Categoria":"Status de projeto","Status":"Em andamento","Conteudo":"O projeto PRJ-0510 Renovacao do Centro de Controle Operacional registrou avanco fisico de 43,2% em 31/08/2026, com farol verde. A proxima acao sintetica e executar o ensaio integrado dos subsistemas e consolidar o plano de transicao operacional.","PalavrasChave":"PRJ-0510 centro controle operacional status avanco fisico farol verde ensaio integrado transicao"}'::jsonb
+    ),
+    (
+        'documentos_projetos.json',
+        'https://mock.sharepoint.local/$metadata#lists/items',
+        TRUE,
+        'metro-mvp-site',
+        'Portal de Projetos - Dados Ficticios',
+        'documentos-projetos',
+        'Documentos de Projetos',
+        '587',
+        TIMESTAMPTZ '2026-05-05T09:00:00Z',
+        TIMESTAMPTZ '2026-08-31T18:00:00Z',
+        'https://mock.sharepoint.local/sites/metro-mvp/Lists/DocumentosProjetos/587',
+        '{"Title":"Status executivo do PRJ-0587","CodigoProjeto":"PRJ-0587","Categoria":"Status de projeto","Status":"Em andamento","Conteudo":"O projeto PRJ-0587 Adequacao de Acessibilidade das Estacoes registrou avanco fisico de 22,0% em 31/08/2026, com farol amarelo. A proxima acao sintetica e concluir a especificacao tecnica dos elevadores e iniciar o processo de contratacao.","PalavrasChave":"PRJ-0587 acessibilidade estacoes status avanco fisico farol amarelo elevadores contratacao"}'::jsonb
     )
 ),
 upsert_artifacts AS (
@@ -163,12 +191,7 @@ upsert_artifacts AS (
         metadata
     )
     SELECT
-        CASE
-            WHEN source_file = 'comunicados_servico.json'
-                AND item_id = '201'
-            THEN (SELECT id FROM public.projects WHERE code = 'PRJ-0442')
-            ELSE NULL
-        END,
+        (SELECT id FROM public.projects WHERE code = fields ->> 'CodigoProjeto'),
         'sharepoint-mock:' || list_id || ':' || item_id,
         'lista_sharepoint',
         fields ->> 'Title',
@@ -228,6 +251,50 @@ upsert_artifacts AS (
         id,
         project_id,
         partner_source_id
+),
+updated_extracts AS (
+    UPDATE public.source_extracts existing
+    SET
+        project_id = artifact.project_id,
+        section_title = item.fields ->> 'Title',
+        content_text = item.fields ->> 'Conteudo',
+        sharepoint_reference = item.web_url,
+        token_count = array_length(
+            regexp_split_to_array(trim(item.fields ->> 'Conteudo'), '\s+'),
+            1
+        ),
+        metadata = jsonb_build_object(
+            'mock', item.mock,
+            'ficticio', TRUE,
+            'official_operational_guidance', FALSE,
+            'source_file', item.source_file,
+            'list_id', item.list_id,
+            'list_display_name', item.list_display_name,
+            'item_id', item.item_id,
+            'field_name', 'Conteudo',
+            'status', item.fields ->> 'Status',
+            'line', item.fields ->> 'Linha',
+            'category', COALESCE(item.fields ->> 'Categoria', item.fields ->> 'Tipo'),
+            'validity', jsonb_strip_nulls(jsonb_build_object(
+                'start', item.fields ->> 'ValidadeInicio',
+                'end', item.fields ->> 'ValidadeFim'
+            )),
+            'keywords', item.fields ->> 'PalavrasChave',
+            'query_affordances', jsonb_build_array(
+                'status',
+                'prazo_cronograma',
+                'riscos_problemas',
+                'informacao_operacional_simulada'
+            )
+        ),
+        updated_at = NOW()
+    FROM source_items item
+    JOIN upsert_artifacts artifact
+        ON artifact.partner_source_id =
+            'sharepoint-mock:' || item.list_id || ':' || item.item_id
+    WHERE existing.artifact_id = artifact.id
+      AND existing.source_locator = item.list_id || '/' || item.item_id || '#Conteudo'
+    RETURNING existing.artifact_id, existing.source_locator
 )
 INSERT INTO public.source_extracts (
     artifact_id,
@@ -278,9 +345,9 @@ JOIN upsert_artifacts artifact
     ON artifact.partner_source_id = 'sharepoint-mock:' || item.list_id || ':' || item.item_id
 WHERE NOT EXISTS (
     SELECT 1
-    FROM public.source_extracts existing
-    WHERE existing.artifact_id = artifact.id
-      AND existing.source_locator = item.list_id || '/' || item.item_id || '#Conteudo'
+    FROM updated_extracts updated
+    WHERE updated.artifact_id = artifact.id
+      AND updated.source_locator = item.list_id || '/' || item.item_id || '#Conteudo'
 );
 
 COMMIT;
