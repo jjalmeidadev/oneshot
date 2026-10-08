@@ -114,6 +114,19 @@ acesso pelo navegador, o ngrok mostra um aviso de segurança: confira o endereç
 acima e clique em **Visit Site** para abrir a aplicação. Cada visitante poderá
 ver esse aviso uma vez.
 
+Para entrar na demonstração, selecione uma das personas na tela inicial e use
+a senha correspondente:
+
+| Persona | Senha de teste |
+| --- | --- |
+| PMO | `pmo1232026` |
+| Líder de subportfólio | `leader1232026` |
+| Gerente de projeto | `manager1232026` |
+| Consulta | `consulta1232026` |
+
+Essas credenciais são compartilhadas somente para a avaliação do MVP. Não use
+essas contas para inserir dados pessoais ou informações confidenciais.
+
 O link só responde enquanto a instância, os contêineres e o serviço ngrok
 estiverem ativos. O plano gratuito tem limites de tráfego e requisições, por
 isso o ambiente é destinado a testes controlados. O [Manual de instalação](docs/Manual-instalacao.md)
