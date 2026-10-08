@@ -1,0 +1,8 @@
+{
+  "missing_operation": [
+    "operação obrigatória ausente/incompleta: post /api/chat"
+  ],
+  "incompatible_type": [
+    "GeminiChatRequest.message deve ser string"
+  ]
+}

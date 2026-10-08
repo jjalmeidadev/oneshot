@@ -22,6 +22,8 @@ export function MessageList({
   selectedSourceId,
   onSelectSource,
   onResolveProactiveSuggestion,
+  onDisableProactivity,
+  showTechnicalDetails = false,
 }: {
   messages: ChatMessage[];
   isSending: boolean;
@@ -32,6 +34,8 @@ export function MessageList({
     messageId: string,
     decision: ProactiveDecision,
   ) => void;
+  onDisableProactivity?: () => void;
+  showTechnicalDetails?: boolean;
 }) {
   const viewportRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +53,10 @@ export function MessageList({
         aria-label="Mensagens da conversa"
         aria-live="polite"
         aria-busy={isSending}
-        className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6"
+        // Focavel para que quem usa teclado role uma resposta longa com as setas,
+        // mesmo quando ela nao tem links nem botoes.
+        tabIndex={0}
+        className="mx-auto flex max-w-3xl flex-col gap-6 rounded-lg px-4 py-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-6"
       >
         {messages.map((message) => (
           <motion.div key={message.id} {...ENTRY}>
@@ -58,6 +65,8 @@ export function MessageList({
               selectedSourceId={selectedSourceId}
               onSelectSource={onSelectSource}
               onResolveProactiveSuggestion={onResolveProactiveSuggestion}
+              onDisableProactivity={onDisableProactivity}
+              showTechnicalDetails={showTechnicalDetails}
             />
           </motion.div>
         ))}
@@ -67,7 +76,7 @@ export function MessageList({
             <motion.div {...ENTRY}>
               <TypingIndicator
                 label={
-                  intentLayerEnabled
+                  showTechnicalDetails && intentLayerEnabled
                     ? 'Classificando a intenção e consultando as fontes…'
                     : 'Consultando as fontes…'
                 }

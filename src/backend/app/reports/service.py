@@ -528,7 +528,7 @@ class ReportService:
     ) -> None:
         if execution.requested_by == identity.subject:
             return
-        authorize_scope(identity, execution.prepared_request.scope)
+        authorize_scope(identity, execution.prepared_request.scope, operation="read")
 
 
 @lru_cache(maxsize=1)

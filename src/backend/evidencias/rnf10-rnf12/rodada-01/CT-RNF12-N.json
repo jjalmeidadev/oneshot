@@ -1,0 +1,89 @@
+{
+  "copias_sem_categoria": {
+    "projetos": {
+      "aprovado": false,
+      "ausentes": [
+        "projetos"
+      ],
+      "contagens": {
+        "projetos": 0,
+        "subportfolios": 1,
+        "marcos": 10,
+        "riscos": 10,
+        "indicadores": 17,
+        "documentos": 9
+      }
+    },
+    "subportfolios": {
+      "aprovado": false,
+      "ausentes": [
+        "subportfolios"
+      ],
+      "contagens": {
+        "projetos": 3,
+        "subportfolios": 0,
+        "marcos": 10,
+        "riscos": 10,
+        "indicadores": 17,
+        "documentos": 9
+      }
+    },
+    "marcos": {
+      "aprovado": false,
+      "ausentes": [
+        "marcos"
+      ],
+      "contagens": {
+        "projetos": 3,
+        "subportfolios": 1,
+        "marcos": 0,
+        "riscos": 10,
+        "indicadores": 17,
+        "documentos": 9
+      }
+    },
+    "riscos": {
+      "aprovado": false,
+      "ausentes": [
+        "riscos"
+      ],
+      "contagens": {
+        "projetos": 3,
+        "subportfolios": 1,
+        "marcos": 10,
+        "riscos": 0,
+        "indicadores": 17,
+        "documentos": 9
+      }
+    },
+    "indicadores": {
+      "aprovado": false,
+      "ausentes": [
+        "indicadores"
+      ],
+      "contagens": {
+        "projetos": 3,
+        "subportfolios": 1,
+        "marcos": 10,
+        "riscos": 10,
+        "indicadores": 0,
+        "documentos": 9
+      }
+    },
+    "documentos": {
+      "aprovado": false,
+      "ausentes": [
+        "documentos"
+      ],
+      "contagens": {
+        "projetos": 3,
+        "subportfolios": 1,
+        "marcos": 10,
+        "riscos": 10,
+        "indicadores": 17,
+        "documentos": 0
+      }
+    }
+  },
+  "massa_oficial_intacta": true
+}

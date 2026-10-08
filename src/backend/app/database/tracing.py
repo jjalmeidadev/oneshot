@@ -5,6 +5,7 @@ import os
 import re
 from collections.abc import Callable
 from typing import Any
+from uuid import uuid4
 
 from app.database.connection import open_database_connection
 from app.gemini.schemas import GeminiChatRequest, GeminiChatResponse
@@ -35,6 +36,8 @@ def trace_interaction(
     external_conversation_id: str | None = None,
     error_message: str | None = None,
     requester_id: str | None = None,
+    security_report: dict | None = None,
+    user_id: str | None = None,
     connect: Callable[..., Any] | None = None,
 ) -> str | None:
     """Grava conversa, interacao, fontes persistidas e eventos de auditoria."""
@@ -46,14 +49,14 @@ def trace_interaction(
         connection = open_database_connection(connect=connect)
         try:
             with connection.cursor() as cursor:
-                user_id = _find_user_id(cursor, requester_id)
+                resolved_user_id = user_id or _find_user_id(cursor, requester_id)
                 intent_id = _find_intent_id(cursor, intent)
                 conversation_id = _get_or_create_conversation(
                     cursor,
                     request,
                     channel,
                     external_conversation_id=external_conversation_id,
-                    user_id=user_id,
+                    user_id=resolved_user_id,
                     requester_id=requester_id,
                 )
                 status = _processing_status(intent, response, error_message)
@@ -65,7 +68,7 @@ def trace_interaction(
                     response=response,
                     intent=intent,
                     intent_id=intent_id,
-                    user_id=user_id,
+                    user_id=resolved_user_id,
                     status=status,
                     limitation_response=limitation_response,
                     processing_ms=processing_ms,
@@ -81,14 +84,17 @@ def trace_interaction(
                 _insert_audit_events(
                     cursor,
                     interaction_id=interaction_id,
+                    correlation_id=str(uuid4()),
                     request=request,
                     response=response,
                     intent=intent,
                     entities=entities,
                     status=status,
                     error_message=error_message,
-                    user_id=user_id,
+                    user_id=resolved_user_id,
                     requester_id=requester_id,
+                    security_report=security_report
+                    or (response.security_report if response else None),
                 )
             _commit(connection)
             return interaction_id
@@ -262,8 +268,8 @@ def _insert_consulted_sources(
             claim.model_dump() for claim in response.claims
             if metadata.get("citation_id") in claim.citation_ids
         ]
-        if metadata.get("fallback"):
-            continue
+        # Fontes locais tambem fundamentam respostas. As FKs opcionais podem
+        # ficar nulas; o identificador e a origem permanecem nos metadados.
 
         cursor.execute(
             """
@@ -306,9 +312,15 @@ def _insert_out_of_scope_request(
     response: GeminiChatResponse | None,
     intent: AudioIntent | None,
 ) -> None:
-    """Enfileira para curadoria apenas perguntas sem contexto recuperável."""
+    """Enfileira classificacoes fora de escopo e perguntas sem contexto RAG."""
 
-    if not response or response.model != "rag-retriever" or response.sources:
+    classified_out_of_scope = bool(
+        intent and intent.macro in {"FORA_DE_ESCOPO", "INDEFINIDA"}
+    )
+    rag_without_context = bool(
+        response and response.model == "rag-retriever" and not response.sources
+    )
+    if not classified_out_of_scope and not rag_without_context:
         return
 
     cursor.execute(
@@ -348,9 +360,9 @@ def _out_of_scope_reason(intent: AudioIntent | None) -> str:
     if not intent:
         return "sem_classificacao_e_sem_contexto_rag"
     if intent.macro == "FORA_DE_ESCOPO":
-        return "macrointencao_fora_de_escopo_e_sem_contexto_rag"
+        return "macrointencao_fora_de_escopo"
     if intent.macro == "INDEFINIDA" or not intent.specific:
-        return "baixa_confianca_e_sem_contexto_rag"
+        return "baixa_confianca"
     return "sem_contexto_rag"
 
 
@@ -358,6 +370,7 @@ def _insert_audit_events(
     cursor: Any,
     *,
     interaction_id: str,
+    correlation_id: str,
     request: GeminiChatRequest,
     response: GeminiChatResponse | None,
     intent: AudioIntent | None,
@@ -366,6 +379,7 @@ def _insert_audit_events(
     error_message: str | None,
     user_id: str | None,
     requester_id: str | None,
+    security_report: dict | None = None,
 ) -> None:
     events = [
         (
@@ -376,6 +390,7 @@ def _insert_audit_events(
                 "message_length": len(request.message),
                 "has_response": response is not None,
                 "processing_status": status,
+                "intent_classifier_enabled": request.use_intent_classifier,
                 "requester_id": requester_id,
             },
         )
@@ -398,12 +413,26 @@ def _insert_audit_events(
             )
         )
 
-    if response is not None:
+    if response is not None and response.data_change is not None:
+        # A alteracao pelo chat grava os proprios eventos (previa, recusa,
+        # negativa), ligados a esta interacao pelo correlation_id.
+        events.append(
+            (
+                "project_data.chat_request",
+                "api",
+                "sucesso",
+                {
+                    "data_change_status": response.data_change.status,
+                    "code": response.data_change.code,
+                },
+            )
+        )
+    elif response is not None:
         if response.workflow:
             events.append(
                 (
                     "guided_workflow_dispatched",
-                    "guided_workflow",
+                    "api",
                     "pendente",
                     {
                         "action": response.workflow.action,
@@ -441,6 +470,18 @@ def _insert_audit_events(
             )
         )
 
+    if security_report:
+        # RNF01: etapa, categorias e contagens do bloqueio. O valor sensivel
+        # nunca entra no payload, e a pergunta ja chega aqui mascarada.
+        events.append(
+            (
+                "sensitive_content_blocked",
+                "api",
+                "bloqueado",
+                security_report,
+            )
+        )
+
     events.append(
         (
             "database_traceability_recorded",
@@ -459,9 +500,10 @@ def _insert_audit_events(
                 component,
                 event_status,
                 user_id,
-                event_payload
+                event_payload,
+                correlation_id
             )
-            VALUES (%s, %s, %s, %s, %s, %s::jsonb);
+            VALUES (%s, %s, %s, %s, %s, %s::jsonb, %s);
             """,
             (
                 interaction_id,
@@ -470,6 +512,7 @@ def _insert_audit_events(
                 event_status,
                 user_id,
                 _json(payload),
+                correlation_id,
             ),
         )
 
@@ -529,11 +572,7 @@ def _alternatives(intent: AudioIntent | None) -> list[dict]:
 
 
 def _persistent_source_count(response: GeminiChatResponse) -> int:
-    return sum(
-        1
-        for source in response.trace_sources
-        if not (source.get("metadata") or {}).get("fallback")
-    )
+    return len(response.trace_sources)
 
 
 def _normalize_prompt(value: str) -> str:

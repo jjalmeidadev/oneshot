@@ -1,3 +1,4 @@
+import json
 from types import SimpleNamespace
 
 import pytest
@@ -133,6 +134,47 @@ def _response_with_db_source() -> GeminiChatResponse:
 pytestmark = pytest.mark.integration
 
 
+def test_trace_uses_resolved_public_user_id_without_second_lookup(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://test.invalid/postgres")
+    public_user_id = "6e7d0df0-c96a-4076-b241-64f78a05997a"
+    cursor = FakeCursor(fetch_values=[("conversation-1",), ("interaction-1",)])
+    connection = FakeConnection(cursor)
+
+    trace_interaction(
+        request=GeminiChatRequest(
+            message="status", use_intent_classifier=False
+        ),
+        response=_response_with_db_source(),
+        intent=None,
+        entities=[],
+        processing_ms=5,
+        requester_id="762a2bde-87b8-413f-8656-958a2f380574",
+        user_id=public_user_id,
+        connect=_connect(connection),
+    )
+
+    assert not any("FROM public.users" in query for query, _ in cursor.calls)
+    conversation_params = next(
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.ai_conversations" in query
+    )
+    interaction_params = next(
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.ai_interactions" in query
+    )
+    audit_params = [
+        params
+        for query, params in cursor.calls
+        if "INSERT INTO public.audit_events" in query
+    ]
+    assert conversation_params[0] == public_user_id
+    assert interaction_params[-1] == public_user_id
+    assert audit_params
+    assert all(public_user_id in params for params in audit_params)
+
+
 def test_chat_real_classifier_contract_and_minimal_persistence(monkeypatch):
     monkeypatch.setenv("PLN_WARMUP", "0")
     monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
@@ -146,7 +188,7 @@ def test_chat_real_classifier_contract_and_minimal_persistence(monkeypatch):
     connection = FakeConnection(cursor)
     provider_calls = []
 
-    def fake_provider(request, intent=None, entities=None):
+    def fake_provider(request, intent=None, entities=None, **_kwargs):
         provider_calls.append((request, intent, entities))
         return _response_with_db_source()
 
@@ -205,10 +247,8 @@ def test_audio_real_classifier_contract_and_minimal_persistence(monkeypatch):
     external_conversation_id = "s4-13-audio-success"
     monkeypatch.setenv("PLN_WARMUP", "0")
     monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
-    monkeypatch.setenv("AUDIO_SIMULATED_IDENTITIES", "token-de-teste=usuario-teste")
     cursor = FakeCursor(
         fetch_values=[
-            None,
             ("intent-1",),
             None,
             ("conversation-1",),
@@ -218,7 +258,7 @@ def test_audio_real_classifier_contract_and_minimal_persistence(monkeypatch):
     connection = FakeConnection(cursor)
     provider_calls = []
 
-    def fake_provider(request, intent=None, entities=None):
+    def fake_provider(request, intent=None, entities=None, **_kwargs):
         provider_calls.append((request, intent, entities))
         return _response_with_db_source()
 
@@ -279,10 +319,8 @@ def test_audio_real_classifier_contract_and_minimal_persistence(monkeypatch):
 def test_audio_classifier_failure_is_persisted_and_correlated(monkeypatch):
     external_conversation_id = "s4-13-audio-classifier-failure"
     monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
-    monkeypatch.setenv("AUDIO_SIMULATED_IDENTITIES", "token-de-teste=usuario-teste")
     cursor = FakeCursor(
         fetch_values=[
-            None,
             None,
             ("conversation-1",),
             ("interaction-1",),
@@ -411,6 +449,81 @@ def test_trace_interaction_records_rf08_absence_as_limitation(monkeypatch):
     assert out_of_scope_call[1] == "prazo do projeto inexistente"
     assert out_of_scope_call[2:4] == ("CONSULTA", "consulta_cronograma_prazo")
     assert out_of_scope_call[5] == "sem_contexto_rag"
+
+
+def test_classified_out_of_scope_is_queued_without_rag_response(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
+    cursor = FakeCursor(fetch_values=[("conversation-1",), ("interaction-1",)])
+    connection = FakeConnection(cursor)
+
+    trace_interaction(
+        request=GeminiChatRequest(message="pedido fora do catalogo"),
+        response=GeminiChatResponse(
+            text="Nao posso atender.",
+            model="classificador-local",
+            latency_ms=0,
+            usage=GeminiUsage(),
+        ),
+        intent=_intent("FORA_DE_ESCOPO", ""),
+        entities=[],
+        processing_ms=1,
+        connect=_connect(connection),
+    )
+
+    queued = [params for query, params in cursor.calls
+              if "INSERT INTO public.out_of_scope_requests" in query]
+    assert len(queued) == 1
+    assert queued[0][0:3] == ("interaction-1", "pedido fora do catalogo", "FORA_DE_ESCOPO")
+    assert queued[0][5] == "macrointencao_fora_de_escopo"
+    assert connection.committed
+
+
+def test_audit_events_share_correlation_id(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
+    cursor = FakeCursor(fetch_values=[("intent-1",), ("conversation-1",), ("interaction-1",)])
+    connection = FakeConnection(cursor)
+
+    trace_interaction(
+        request=GeminiChatRequest(message="status"),
+        response=_response_with_db_source(),
+        intent=_intent(),
+        entities=[],
+        processing_ms=1,
+        connect=_connect(connection),
+    )
+
+    events = [(query, params) for query, params in cursor.calls
+              if "INSERT INTO public.audit_events" in query]
+    assert len(events) >= 2
+    assert all("correlation_id" in query for query, _ in events)
+    assert {params[-1] for _, params in events} == {events[0][1][-1]}
+    assert events[0][1][-1]
+
+
+def test_classifier_opt_out_is_explicit_in_audit(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
+    cursor = FakeCursor(fetch_values=[("conversation-1",), ("interaction-1",)])
+    connection = FakeConnection(cursor)
+
+    trace_interaction(
+        request=GeminiChatRequest(message="consulta sem PLN", use_intent_classifier=False),
+        response=GeminiChatResponse(
+            text="Resposta local", model="teste", latency_ms=0, usage=GeminiUsage(),
+        ),
+        intent=None,
+        entities=[],
+        processing_ms=1,
+        connect=_connect(connection),
+    )
+
+    interaction = next(params for query, params in cursor.calls
+                       if "INSERT INTO public.ai_interactions" in query)
+    event = next(params for query, params in cursor.calls
+                 if "INSERT INTO public.audit_events" in query
+                 and params[1] == "api_interaction_processed")
+    assert interaction[4] is None
+    assert interaction[13] == "processado"
+    assert json.loads(event[-2])["intent_classifier_enabled"] is False
 
 
 @pytest.mark.parametrize(
@@ -618,7 +731,7 @@ def test_workflow_directive_is_traced_as_guided_workflow(monkeypatch):
     assert interaction_call[9] == "guided_workflow"
     assert any(
         params[1:4]
-        == ("guided_workflow_dispatched", "guided_workflow", "pendente")
+        == ("guided_workflow_dispatched", "api", "pendente")
         for query, params in cursor.calls
         if "INSERT INTO public.audit_events" in query
     )

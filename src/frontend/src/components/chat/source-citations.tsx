@@ -1,4 +1,4 @@
-import { FileText } from 'lucide-react';
+import { BookOpen, FileText } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import type { RetrievedDocument } from '@/lib/domain';
@@ -29,10 +29,16 @@ export function SourceCitations({
 
   return (
     <div className="mt-3">
-      <p className="pb-1.5 text-2xs font-semibold uppercase tracking-wide text-fg-subtle">
+      <p
+        className={cn(
+          'flex items-center gap-1.5 pb-1.5 text-xs font-medium',
+          unused ? 'text-fg-muted' : 'text-fg',
+        )}
+      >
+        <BookOpen size={13} className={unused ? 'text-fg-subtle' : 'text-primary'} />
         {unused
           ? 'Fontes consultadas, sem evidência para esta resposta'
-          : 'Fontes consultadas'}
+          : `Fontes (${sources.length})`}
       </p>
       <div className="flex flex-wrap gap-1.5">
         {sources.map((source) => {
@@ -44,10 +50,10 @@ export function SourceCitations({
               onClick={() => onSelect(source.id)}
               title={`${source.title} — ${source.listName}`}
               className={cn(
-                'inline-flex max-w-[19rem] items-center gap-1.5 rounded-lg border px-2 py-1 text-left text-2xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                'inline-flex min-w-0 max-w-full items-center sm:max-w-[19rem] gap-1.5 rounded-lg border px-2 py-1 text-left text-2xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 selected
                   ? 'border-primary bg-primary-soft text-primary'
-                  : 'border-border bg-surface text-fg-muted hover:border-border-strong hover:text-fg',
+                  : 'border-border bg-surface text-fg hover:border-primary/50 hover:bg-primary-soft/40',
               )}
             >
               <span

@@ -1,12 +1,17 @@
 from datetime import datetime, timezone
+from uuid import UUID
 
 import pytest
+
+# Preserva a cobertura anterior do backend-api na selecao por marcador (#255).
+pytestmark = pytest.mark.integration
 
 from app.database.connection import DatabaseConnectionError
 from app.gemini.client import GeminiAPIError, generate_chat_response
 from app.gemini.schemas import GeminiChatRequest
 from app.nlp.schemas import AudioIntent, PublicEntity
 from app.rag.database import retrieve_context, retrieve_database_context
+from app.security import AccessContext, AccessGrant
 from test_gemini_client import FakeResponse
 
 
@@ -73,6 +78,38 @@ def _entity(value: str, entity_type: str = "projeto") -> PublicEntity:
         end=len(value),
         types=[entity_type],
     )
+
+
+def _project_access(project_id: str) -> AccessContext:
+    value = UUID(project_id)
+    return AccessContext(
+        user_id=UUID("6e7d0df0-c96a-4076-b241-64f78a05997a"),
+        auth_subject=UUID("762a2bde-87b8-413f-8656-958a2f380574"),
+        role_name="equipe_projeto",
+        allowed_subportfolio_ids=frozenset(),
+        allowed_project_ids=frozenset({value}),
+        can_read=True,
+        can_write=True,
+        can_export=True,
+        grants=(AccessGrant("projeto", None, value, True, True, True),),
+    )
+
+
+def test_database_filters_allowed_projects_in_sql_before_ranking(monkeypatch):
+    project_id = "fe091a56-310d-4465-8a13-5940d5765e1e"
+    monkeypatch.setenv("DATABASE_URL", "postgresql://test.invalid/postgres")
+    connect, connection = _connect_with_rows([])
+
+    retrieve_database_context(
+        "status do projeto",
+        connect=connect,
+        access_context=_project_access(project_id),
+    )
+
+    assert "COALESCE(se.project_id, a.project_id) = ANY(access.project_ids)" in (
+        connection.cursor_instance.executed_query
+    )
+    assert connection.cursor_instance.params[3] == [UUID(project_id)]
 
 
 def test_retrieves_source_extracts_from_database(monkeypatch):
@@ -304,6 +341,30 @@ def test_absent_project_never_uses_another_projects_source(monkeypatch):
 
 def test_local_fallback_without_project_identity_abstains():
     assert retrieve_context("Status e bicicleta no PRJ-0017") == []
+
+
+@pytest.mark.parametrize(
+    ("project_name", "project_code"),
+    [
+        ("Modernizacao do Sistema de Sinalizacao", "PRJ-0442"),
+        ("Renovacao do Centro de Controle Operacional", "PRJ-0510"),
+        ("Adequacao de Acessibilidade das Estacoes", "PRJ-0587"),
+    ],
+)
+def test_local_fallback_restricts_sources_by_registered_project_name(
+    monkeypatch, project_name: str, project_code: str
+):
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.delenv("SUPABASE_DATABASE_URL", raising=False)
+
+    results = retrieve_context(
+        f"Qual o status de {project_name}?",
+        entities=[_entity(project_name)],
+        limit=8,
+    )
+
+    assert results
+    assert {result.document.project_code for result in results} == {project_code}
 
 
 def test_project_name_outside_the_register_keeps_other_sources(monkeypatch):

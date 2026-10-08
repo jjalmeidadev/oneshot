@@ -4,6 +4,9 @@ import json
 
 import pytest
 
+# Preserva a cobertura anterior do backend-api na selecao por marcador (#255).
+pytestmark = pytest.mark.integration
+
 from app.nlp.entities import LEXICON_PATH, Entidade, extract_entities
 
 

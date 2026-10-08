@@ -1,0 +1,22 @@
+{
+  "missing_operation": [
+    "operação obrigatória ausente/incompleta: post /api/chat"
+  ],
+  "incompatible_type": [
+    "GeminiChatRequest.message deve ser string"
+  ],
+  "without_alerts_rows": [
+    "alerts"
+  ],
+  "blank_nlp_equivalent": [
+    "nlp"
+  ],
+  "copilot_studio_env": {
+    ".env.example": [
+      123
+    ]
+  },
+  "copilot_studio_component": [
+    140
+  ]
+}

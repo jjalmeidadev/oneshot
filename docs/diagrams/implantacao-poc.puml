@@ -1,68 +1,93 @@
 @startuml implantacao-poc
+' Diagrama de Implantação UML — PoC publicada na Sprint 4 e evolução prevista (S5-43, #297).
+
+left to right direction
 skinparam shadowing false
-skinparam linetype ortho
 skinparam nodesep 40
-skinparam ranksep 55
-skinparam rectangle {
+skinparam ranksep 60
+skinparam defaultTextAlignment center
+skinparam node {
+  BorderColor #37474F
   BackgroundColor #EEF4FD
-  BorderColor #4A7EBB
-  FontSize 12
 }
-skinparam package {
-  BackgroundColor #FAFBFC
-  BorderColor #8A949E
-  FontStyle bold
+skinparam cloud {
+  BorderColor #546E7A
+  BackgroundColor #FAFAFA
+}
+skinparam artifact {
+  BorderColor #37474F
+  BackgroundColor #FFFFFF
 }
 skinparam database {
-  BackgroundColor #F2F2F2
-  BorderColor #7A828A
+  BorderColor #37474F
+  BackgroundColor #FFFFFF
+}
+skinparam rectangle<<previsto>> {
+  BorderColor #9E9E9E
+  BackgroundColor #F5F5F5
+  FontColor #616161
+  BorderStyle dashed
 }
 skinparam ArrowColor #4A5560
-left to right direction
 
-rectangle "Usuário do MVP" as usuario
-rectangle "Liderança\naprova base sintética" as lideranca
-package "Navegador" as navegador {
-rectangle "Frontend próprio\nReact + Vite" as frontend
+actor "Usuário do PMO" as Usuario
+
+node "Navegador" as Navegador {
+  artifact "Chat web\n(React + Vite)" as SPA
 }
-package "Ambiente acessível da PoC\nexecução local ou publicação simples futura" as ambiente {
-rectangle "API do MVP\na ser consolidada" as api
-rectangle "Núcleo de PLN\nestratégia documentada" as pln
-rectangle "Recuperação de dados\nbase sintética" as rag
-rectangle "Fallback\nresposta estruturada" as fallback
+
+cloud "Cloudflare\nQuick Tunnel (HTTPS)" as Tunnel
+
+node "AWS EC2 t3.large\nUbuntu 24.04" as EC2 {
+  node "Docker Compose\n(rede privada)" as Compose {
+    artifact "frontend\nnginx em 127.0.0.1:80" as Front
+    artifact "backend\nFastAPI / Uvicorn" as Back
+    artifact "rabbitmq" as Rabbit
+    artifact "workers de alerta\nscheduler, publisher,\nevaluator, notifier, delivery" as WAlerta
+    artifact "workers do SharePoint\npublisher, consumer" as WSP
+  }
+  artifact "cloudflared" as Cloudflared
+  artifact "CloudWatch Agent" as CWAgent
 }
-package "Supabase Cloud" as supabase {
-database "PostgreSQL\ndados, catálogo e auditoria" as db
-database "Storage\ndocumentos sintéticos\ne artefatos futuros" as storage
+
+node "AWS ECR" as ECR {
+  artifact "imagens backend\ne frontend" as Imagens
 }
-package "Microsoft / Power Platform" as microsoft {
-rectangle "Entra ID\nOAuth/OIDC" as entra
-rectangle "Copilot Studio\ntópicos e orquestração" as copilot
-rectangle "Power Automate\nfluxos funcionais" as power
+cloud "AWS CloudWatch" as CloudWatch
+
+cloud "Supabase Cloud" as Supabase {
+  database "PostgreSQL" as PG
+  artifact "Auth" as SAuth
+  artifact "Storage" as SStorage
 }
-package "Evolução futura" as futuro {
-rectangle "Docker\nempacotamento do serviço" as docker
-rectangle "Pipeline CI/CD\nbuild, teste e deploy" as cicd
-rectangle "Azure Container Apps\nou App Service" as azure
-rectangle "Azure Machine Learning" as aml
-rectangle "Application Insights" as insights
+
+cloud "Microsoft Azure" as Azure {
+  artifact "Azure AI Speech\nSTT e TTS" as Speech
 }
-usuario --> frontend
-frontend --> entra
-entra --> frontend
-frontend --> api : requisição da aplicação
-api --> pln
-pln --> rag
-rag --> db
-rag --> storage
-api --> db : grava interação
-api --> copilot : quando disponível
-copilot --> power
-api --> fallback : sem camada generativa
-lideranca --> db : aprova antes da carga
-api ..> docker : evolução
-docker ..> cicd : automatização futura
-cicd ..> azure : publicação futura
-storage ..> aml : artefatos futuros
-api ..> insights : telemetria futura
+
+cloud "Provedor de LLM" as Provedor {
+  artifact "Gemini / OpenRouter" as LLM
+}
+
+
+rectangle "Ambiente-alvo do Metrô\n(previsto, Seção 6.4)\nAzure Container Apps, PostgreSQL gerenciado,\nAzure OpenAI, Entra ID, SharePoint via Graph,\naba no Teams e servidor MCP para o Copilot" as Alvo <<previsto>>
+
+Usuario --> SPA
+SPA --> Tunnel : HTTPS
+Tunnel --> Cloudflared
+Cloudflared --> Front : 127.0.0.1:80
+Front --> Back : /api (proxy)
+Back --> Rabbit : AMQP
+Rabbit --> WAlerta
+Rabbit --> WSP
+Back --> PG : SQL (TLS)
+WAlerta --> PG
+WSP --> PG
+Back --> SAuth : valida JWT
+Back --> SStorage : DOCX
+Back --> Speech : HTTPS
+Back --> LLM : HTTPS
+ECR --> Compose : docker pull
+CWAgent --> CloudWatch : logs
+Compose ..> Alvo : migração prevista
 @enduml

@@ -1,6 +1,7 @@
 export * from './client';
 export * from './constants';
 export * from './schemas';
+export * from './access';
 export {
   sendChatMessage,
   confirmProactiveSuggestion,
@@ -22,6 +23,15 @@ export {
   confirmAlertWorkflow,
   startAlertWorkflow,
 } from './alert-workflow';
+export {
+  cancelDataChange,
+  confirmDataChange,
+  createDataChangePreview,
+  listDataChanges,
+  toDataChangeFailure,
+  undoDataChange,
+  type DataChangeFailure,
+} from './data-changes';
 export {
   changeAlertSubscription,
   getAlertSubscriptions,

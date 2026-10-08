@@ -4,9 +4,10 @@ import re
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import AbstractSet, TYPE_CHECKING
 
 from app.nlp.schemas import AudioIntent
+from app.rag.errors import RagSourceError
 
 if TYPE_CHECKING:
     from app.rag.proactivity import SecondaryIntent
@@ -103,6 +104,9 @@ class SharePointDocument:
     validity: dict[str, str | None] | None = None
     project_code: str | None = None
     project_title: str | None = None
+    #: `project_artifacts.confidentiality_level` no banco. Restrito e
+    #: confidencial nunca vao ao provedor (S5-27, RNF01).
+    confidentiality_level: str | None = None
 
 
 @dataclass(frozen=True)
@@ -183,11 +187,28 @@ def load_sharepoint_documents(
     directory = data_dir or _configured_data_dir()
     documents: list[SharePointDocument] = []
 
-    if not directory.exists():
-        return documents
+    if not directory.is_dir():
+        raise RagSourceError("A origem de dados deve ser um diretório existente.")
 
-    for file_path in sorted(directory.glob("*.json")):
-        payload = json.loads(file_path.read_text(encoding="utf-8"))
+    files = sorted(directory.glob("*.json"))
+    if not files:
+        raise RagSourceError("A origem de dados não contém arquivos JSON.")
+
+    for file_path in files:
+        try:
+            payload = json.loads(file_path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as error:
+            raise RagSourceError("Não foi possível ler um JSON válido na origem de dados.") from error
+        if (
+            not isinstance(payload, dict)
+            or not isinstance(payload.get("list", {}), dict)
+            or not isinstance(payload.get("value"), list)
+            or any(
+                not isinstance(item, dict) or not isinstance(item.get("fields"), dict)
+                for item in payload.get("value", [])
+            )
+        ):
+            raise RagSourceError("Estrutura inválida: a origem deve conter uma lista value de itens com fields.")
         list_data = payload.get("list", {})
         list_id = str(list_data.get("id") or file_path.stem)
         list_name = str(list_data.get("displayName") or file_path.stem)
@@ -203,9 +224,13 @@ def load_sharepoint_documents(
                 or ""
             )
             searchable_values = [
-                str(value)
-                for value in fields.values()
-                if isinstance(value, (str, int, float))
+                str(item.get("project_code") or ""),
+                str(item.get("project_title") or ""),
+                *(
+                    str(value)
+                    for value in fields.values()
+                    if isinstance(value, (str, int, float))
+                ),
             ]
             documents.append(
                 SharePointDocument(
@@ -235,12 +260,23 @@ def retrieve_sharepoint_context(
     query: str,
     documents: list[SharePointDocument] | None = None,
     limit: int | None = None,
+    allowed_project_ids: AbstractSet[str] | None = None,
 ) -> list[RetrievedDocument]:
     query_tokens = _semantic_tokens(query)
     if not query_tokens:
         return []
 
     candidates = documents if documents is not None else load_sharepoint_documents()
+    if allowed_project_ids is not None:
+        allowed = {str(value).casefold() for value in allowed_project_ids}
+        candidates = [
+            document
+            for document in candidates
+            # Documento sem projeto e institucional e vale para todos os perfis.
+            if (not document.project_id and not document.project_code)
+            or (document.project_id or "").casefold() in allowed
+            or (document.project_code or "").casefold() in allowed
+        ]
     scored: list[RetrievedDocument] = []
 
     for document in candidates:

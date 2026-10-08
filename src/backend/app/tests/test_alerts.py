@@ -1,15 +1,22 @@
 import asyncio
+import hashlib
+import hmac
+import json
 import sys
 from datetime import date, datetime, timedelta, timezone
 from types import SimpleNamespace
 
 import pytest
+
+# Preserva a cobertura anterior do backend-api na selecao por marcador (#255).
+pytestmark = pytest.mark.integration
 from fastapi.testclient import TestClient
 
 from app.alerts.errors import AlertConflictError, AlertMessageError
 from app.alerts.messaging import (
     DELIVERY_ROUTING_KEY,
     ROUTING_KEYS,
+    SHAREPOINT_ROUTING_KEY,
     Message,
     RabbitMQBroker,
 )
@@ -32,6 +39,41 @@ from app.alerts.workflow import AlertWorkflowService, get_alert_workflow_service
 from app.alerts.worker import process_delivery_message
 from app.main import app
 from app.reports.security import ReportIdentity
+
+
+DELIVERY_CALLBACK_SECRET = "REDACTED_FOR_PUBLIC_RELEASE"
+DELIVERY_CALLBACK_PATH = "/api/integrations/notifications/delivery-results"
+
+
+def _delivery_body(payload: dict) -> bytes:
+    return json.dumps(
+        payload, ensure_ascii=False, separators=(",", ":")
+    ).encode("utf-8")
+
+
+def _delivery_signature(body: bytes, secret: str = DELIVERY_CALLBACK_SECRET) -> str:
+    digest = hmac.new(secret.encode("utf-8"), body, hashlib.sha256).hexdigest()
+    return f"sha256={digest}"
+
+
+def _post_delivery_callback(
+    client: TestClient,
+    payload: dict,
+    *,
+    signature: str | None = None,
+    signed_body: bytes | None = None,
+):
+    body = _delivery_body(payload)
+    return client.post(
+        DELIVERY_CALLBACK_PATH,
+        content=body,
+        headers={
+            "Content-Type": "application/json",
+            "X-Webhook-Signature": signature
+            if signature is not None
+            else _delivery_signature(signed_body or body),
+        },
+    )
 
 
 class FixedSource(ScheduleSource):
@@ -260,7 +302,7 @@ def test_http_contract_configures_and_lists_alert(monkeypatch):
 def delivery_callback_context(monkeypatch):
     monkeypatch.setenv("ALERT_REPOSITORY_MODE", "memory")
     monkeypatch.setenv("ALERT_SCHEDULE_SOURCE", "synthetic")
-    monkeypatch.setenv("NOTIFICATION_CALLBACK_TOKEN", "notification-test-token")
+    monkeypatch.setenv("NOTIFICATION_CALLBACK_SECRET", DELIVERY_CALLBACK_SECRET)
     reset_alert_repository()
     get_schedule_source.cache_clear()
     get_alert_service.cache_clear()
@@ -296,11 +338,7 @@ def delivery_callback_context(monkeypatch):
 
 def test_delivery_callback_succeeds(delivery_callback_context):
     client, repository, payload = delivery_callback_context
-    response = client.post(
-        "/api/integrations/notifications/delivery-results",
-        headers={"X-Callback-Token": "notification-test-token"},
-        json=payload,
-    )
+    response = _post_delivery_callback(client, payload)
     assert response.status_code == 200
     assert response.json()["callback_id"] == payload["callback_id"]
     assert response.json()["status"] == "delivered"
@@ -313,23 +351,56 @@ def test_delivery_callback_succeeds(delivery_callback_context):
     assert repository.delivery_attempts == []
 
 
-def test_delivery_callback_rejects_invalid_token(delivery_callback_context):
+@pytest.mark.parametrize(
+    "signature",
+    [None, "", "invalid", "sha256=short", f"sha256={'z' * 64}"],
+)
+def test_delivery_callback_rejects_invalid_signature(
+    delivery_callback_context, signature
+):
     client, _, payload = delivery_callback_context
+    body = _delivery_body(payload)
+    headers = {"Content-Type": "application/json"}
+    if signature is not None:
+        headers["X-Webhook-Signature"] = signature
     response = client.post(
-        "/api/integrations/notifications/delivery-results",
-        headers={"X-Callback-Token": "wrong-token"},
-        json=payload,
+        DELIVERY_CALLBACK_PATH,
+        content=body,
+        headers=headers,
     )
     assert response.status_code == 401
     assert response.json()["error"]["code"] == "NOTIFICATION_CALLBACK_UNAUTHORIZED"
 
 
+def test_delivery_callback_rejects_signature_for_another_body(
+    delivery_callback_context,
+):
+    client, _, payload = delivery_callback_context
+    original_body = _delivery_body(payload)
+    response = _post_delivery_callback(
+        client,
+        {**payload, "provider": "tampered"},
+        signed_body=original_body,
+    )
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "NOTIFICATION_CALLBACK_UNAUTHORIZED"
+
+
+def test_delivery_callback_requires_configured_secret(
+    delivery_callback_context, monkeypatch
+):
+    client, _, payload = delivery_callback_context
+    monkeypatch.delenv("NOTIFICATION_CALLBACK_SECRET")
+    response = _post_delivery_callback(client, payload)
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "ALERT_CONFIGURATION_ERROR"
+
+
 def test_delivery_callback_rejects_invalid_payload(delivery_callback_context):
     client, _, payload = delivery_callback_context
-    response = client.post(
-        "/api/integrations/notifications/delivery-results",
-        headers={"X-Callback-Token": "notification-test-token"},
-        json={**payload, "notification_id": "not-a-uuid", "unexpected": True},
+    response = _post_delivery_callback(
+        client,
+        {**payload, "notification_id": "not-a-uuid", "unexpected": True},
     )
     assert response.status_code == 422
     assert response.json()["error"]["code"] == "ALERT_INVALID_INPUT"
@@ -337,16 +408,8 @@ def test_delivery_callback_rejects_invalid_payload(delivery_callback_context):
 
 def test_delivery_callback_is_idempotent(delivery_callback_context):
     client, repository, payload = delivery_callback_context
-    first = client.post(
-        "/api/integrations/notifications/delivery-results",
-        headers={"X-Callback-Token": "notification-test-token"},
-        json=payload,
-    )
-    repeated = client.post(
-        "/api/integrations/notifications/delivery-results",
-        headers={"X-Callback-Token": "notification-test-token"},
-        json=payload,
-    )
+    first = _post_delivery_callback(client, payload)
+    repeated = _post_delivery_callback(client, payload)
     assert first.status_code == repeated.status_code == 200
     assert first.json() == repeated.json()
     assert len(repository.delivery_callbacks) == 1
@@ -361,16 +424,10 @@ def test_delivery_callback_rejects_conflicting_callback_id(
     delivery_callback_context,
 ):
     client, _, payload = delivery_callback_context
-    headers = {"X-Callback-Token": "notification-test-token"}
-    assert client.post(
-        "/api/integrations/notifications/delivery-results",
-        headers=headers,
-        json=payload,
-    ).status_code == 200
-    response = client.post(
-        "/api/integrations/notifications/delivery-results",
-        headers=headers,
-        json={**payload, "status": "failed", "error_code": "PROVIDER_ERROR"},
+    assert _post_delivery_callback(client, payload).status_code == 200
+    response = _post_delivery_callback(
+        client,
+        {**payload, "status": "failed", "error_code": "PROVIDER_ERROR"},
     )
     assert response.status_code == 409
     assert response.json()["error"]["code"] == "ALERT_CONFLICT"
@@ -380,10 +437,9 @@ def test_delivery_callback_rejects_unknown_notification(
     delivery_callback_context,
 ):
     client, _, payload = delivery_callback_context
-    response = client.post(
-        "/api/integrations/notifications/delivery-results",
-        headers={"X-Callback-Token": "notification-test-token"},
-        json={
+    response = _post_delivery_callback(
+        client,
+        {
             **payload,
             "callback_id": "delivery-callback-unknown",
             "notification_id": "b74a1986-b955-49d7-a922-6bd1c6125df0",
@@ -395,11 +451,7 @@ def test_delivery_callback_rejects_unknown_notification(
 
 def test_delivery_callback_persists_payload_in_memory(delivery_callback_context):
     client, repository, payload = delivery_callback_context
-    response = client.post(
-        "/api/integrations/notifications/delivery-results",
-        headers={"X-Callback-Token": "notification-test-token"},
-        json=payload,
-    )
+    response = _post_delivery_callback(client, payload)
     stored = repository.delivery_callbacks[payload["callback_id"]]
     assert response.status_code == 200
     assert len(stored["payload_hash"]) == 64
@@ -415,6 +467,7 @@ def test_rabbitmq_topology_keeps_existing_routes_and_adds_delivery():
         "alert.evaluation.requested",
         "alert.notification.requested",
         "notification.delivery.received",
+        "sharepoint.change.received",
     )
 
 
@@ -452,11 +505,7 @@ def test_publisher_uses_delivery_routing_key_without_real_rabbitmq(monkeypatch):
 
 def test_delivery_consumer_records_success(delivery_callback_context):
     client, repository, payload = delivery_callback_context
-    response = client.post(
-        "/api/integrations/notifications/delivery-results",
-        headers={"X-Callback-Token": "notification-test-token"},
-        json=payload,
-    )
+    response = _post_delivery_callback(client, payload)
     assert response.status_code == 200
     assert process_delivery_message(Message(**repository.outbox[0]), repository)
     assert repository.delivery_attempts == [
@@ -480,11 +529,7 @@ def test_delivery_consumer_records_failure(delivery_callback_context):
         "status": "failed",
         "error_code": "PROVIDER_UNAVAILABLE",
     }
-    response = client.post(
-        "/api/integrations/notifications/delivery-results",
-        headers={"X-Callback-Token": "notification-test-token"},
-        json=failed,
-    )
+    response = _post_delivery_callback(client, failed)
     assert response.status_code == 200
     assert process_delivery_message(Message(**repository.outbox[0]), repository)
     attempt = repository.delivery_attempts[0]

@@ -6,6 +6,9 @@ from pathlib import Path
 
 import httpx
 import pytest
+
+# Preserva a cobertura anterior do backend-api na selecao por marcador (#255).
+pytestmark = pytest.mark.integration
 from fastapi.testclient import TestClient
 
 from app.audio import transcription
@@ -82,7 +85,7 @@ def test_metrics_reject_unauthenticated_access(provider):
         response = client.get("/api/audio/vhs/metrics")
 
     assert response.status_code == 401
-    assert response.json()["error"]["code"] == "UNAUTHENTICATED"
+    assert response.json()["error"]["code"] == "AUTHENTICATION_REQUIRED"
 
 
 def test_container_runtime_uses_one_api_worker():

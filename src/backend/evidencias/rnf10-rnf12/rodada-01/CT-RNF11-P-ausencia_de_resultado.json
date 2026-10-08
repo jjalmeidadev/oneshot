@@ -1,0 +1,10 @@
+{
+  "cenario": "ausencia_de_resultado",
+  "http": 200,
+  "http_esperado": 200,
+  "mensagem": "Essa solicitação não está no escopo da base de conhecimento disponível.",
+  "mensagem_esperada": "Essa solicitação não está no escopo da base de conhecimento disponível.",
+  "vazamentos": [],
+  "auditoria_registros": 1,
+  "auditoria_estado": "resposta"
+}
