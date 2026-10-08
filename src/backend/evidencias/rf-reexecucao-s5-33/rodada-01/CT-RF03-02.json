@@ -1,0 +1,36 @@
+{
+  "caso": "CT-RF03-02",
+  "entrada": "Reserve uma sala de reunião para amanhã",
+  "http": 200,
+  "intent": {
+    "macro": "FORA_DE_ESCOPO",
+    "specific": "",
+    "confidence_macro": 0.2132,
+    "confidence_specific": 0.0,
+    "flow": "Resposta padrão de limitação (RF08)",
+    "handler": "limitacao:agendamento",
+    "routing_rule": "limite_agendamento"
+  },
+  "alternativas": [
+    {
+      "intent": "transacao_agendar_compromisso",
+      "confidence": 0.7335
+    },
+    {
+      "intent": "fora_escopo_externo",
+      "confidence": 0.2048
+    },
+    {
+      "intent": "transacao_gerar_apresentacao",
+      "confidence": 0.0247
+    }
+  ],
+  "modelo_da_resposta": "domain-router",
+  "tokens_do_provedor": 0,
+  "provedor_chamado": false,
+  "chamadas_ao_provedor": [],
+  "texto": "Não realizo reservas de salas nem agendamentos sem vínculo com o portfólio. Você pode consultar um tema, como 'Bilhete digital', ou pedir uma reunião de acompanhamento de um projeto ou portfólio.",
+  "resultado_esperado": "Sem associação a transacao_agendar_compromisso; fora de escopo ou pedido de reformulação, sem chamar o provedor",
+  "rodada_anterior": "evidencias/rf01-rf10 (23/09/2026, commit be814f6): FALHOU",
+  "protocolo": "POST /api/chat via TestClient; classificador, roteamento e entidades reais; LLM substituído por duplo"
+}

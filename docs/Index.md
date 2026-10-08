@@ -21,6 +21,7 @@ Este arquivo indexa todos os documentos Markdown versionados no repositório. Os
 | [Projeto.md](Projeto.md) | Documentação consolidada do produto, requisitos, solução técnica, testes, implantação e viabilidade. |
 | [Manual-instalacao.md](Manual-instalacao.md) | Instalação, configuração, execução e solução de problemas. |
 | [prototipo-1-roteiro.md](prototipo-1-roteiro.md) | Roteiro do protótipo reativo sob demanda. |
+| [RevisaoFeedbacks.md](RevisaoFeedbacks.md) | Feedbacks recebidos nas sprints, com a sprint de origem e a correção realizada ou a justificativa. |
 
 ### Gestão e processo de desenvolvimento
 
@@ -40,6 +41,9 @@ Este arquivo indexa todos os documentos Markdown versionados no repositório. Os
 ### Evidências da Sprint 5
 
 - [Webhooks e integração RabbitMQ](evidencias/sprint-05/webhooks-rabbitmq.md)
+- [Contrato de alteração pelo chat](evidencias/sprint-05/s5-05-contrato-alteracao-chat.md)
+- [Proteção de dados sensíveis](evidencias/sprint-05/s5-27-dado-sensivel.md)
+- [VHS com Azure e Supabase reais](evidencias/sprint-05/vhs-azure-real/README.md)
 
 ### Planejamento e relatórios de testes
 
@@ -100,6 +104,7 @@ Este arquivo indexa todos os documentos Markdown versionados no repositório. Os
 ### Banco de dados
 
 - [Documentação do banco](../src/database/docs/README.md)
+- [README raiz do banco](../src/database/README.md)
 - [Evidências locais do banco](../src/database/docs/evidencias/README.md)
 - [Verificação do esquema físico](../src/database/docs/s4-08-schema-verification.md)
 - [Carga sintética idempotente](../src/database/docs/s4-09-idempotent-seed.md)
@@ -119,6 +124,11 @@ Este arquivo indexa todos os documentos Markdown versionados no repositório. Os
 
 #### Documentos usados pela base RAG da landing page
 
+Estas cópias foram incorporadas à demonstração exploratória em `337358b8`
+(11/09). Preservam o conteúdo daquele artefato e não são a documentação
+canônica atual da aplicação. Instalação, padrões e estado presente são os
+documentos em `docs/` indexados acima; a base da demonstração contém histórico.
+
 - [Gestão de configuração](../src/lp/src/rag/documentsRAG/GestaoConfiguracao.md)
 - [Gestão do projeto](../src/lp/src/rag/documentsRAG/GestaoProjeto.md)
 - [Guia de padrões de desenvolvimento](../src/lp/src/rag/documentsRAG/GuiaPadroesDesenvolvimento.md)
@@ -131,6 +141,13 @@ Este arquivo indexa todos os documentos Markdown versionados no repositório. Os
 
 - [Template de tarefa](../.gitlab/issue_templates/Tarefa.md)
 - [Template de merge request](../.gitlab/merge_request_templates/Default.md)
+
+### Complementação dos testes sistêmicos — S5-31
+
+- [Consolidação de RNF07 a RNF09](testes/sprint5/consolidacao-s5-31.md)
+- [Amostra e protocolo de usabilidade conversacional](testes/sprint5/protocolo-rnf07.md)
+- [Correção e reteste de portabilidade](testes/sprint5/reteste-s5-31-rnf09.md)
+- [Índice das evidências e cronologia](../src/backend/evidencias/rnf07-rnf09/README.md)
 
 ### Recursos não Markdown
 

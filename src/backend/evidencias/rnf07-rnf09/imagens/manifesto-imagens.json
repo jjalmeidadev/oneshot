@@ -1,0 +1,192 @@
+[
+  {
+    "ordem": 1,
+    "frases": [
+      "P01"
+    ],
+    "arquivo": "01-p01.png",
+    "nome_original": "Captura de tela 2026-10-06 001416.png",
+    "bytes": 43419,
+    "sha256": "b931b7063c237cdf7687120ca4735d8e7b925e9b5ed6d8bc93cf9ea128a5e9e1",
+    "conferencia_visual": "corresponde ao anexo da conversa"
+  },
+  {
+    "ordem": 2,
+    "frases": [
+      "P04",
+      "P05"
+    ],
+    "arquivo": "02-p04-p05.png",
+    "nome_original": "Captura de tela 2026-10-06 001434.png",
+    "bytes": 42720,
+    "sha256": "f6cb51b6c3b84b07767ad4d5e23f3cd8b365c56895668f4bf87f1c9db6105110",
+    "conferencia_visual": "corresponde ao anexo da conversa"
+  },
+  {
+    "ordem": 3,
+    "frases": [
+      "P02"
+    ],
+    "arquivo": "03-p02.png",
+    "nome_original": "Captura de tela 2026-10-06 001744.png",
+    "bytes": 19104,
+    "sha256": "78fdf3817ac3e962970564b4c1c03ccd92c9291ade073819aad0ecf893f69698",
+    "conferencia_visual": "corresponde ao anexo da conversa"
+  },
+  {
+    "ordem": 4,
+    "frases": [
+      "P03"
+    ],
+    "arquivo": "04-p03.png",
+    "nome_original": "Captura de tela 2026-10-06 001829.png",
+    "bytes": 21754,
+    "sha256": "518ddbead6c4b77dd3080be01a287b1cbe6f456ba220b7ca18b56e4dd9b35dfc",
+    "conferencia_visual": "corresponde ao anexo da conversa"
+  },
+  {
+    "ordem": 5,
+    "frases": [
+      "P06",
+      "P07"
+    ],
+    "arquivo": "05-p06-p07.png",
+    "nome_original": "Captura de tela 2026-10-06 002126.png",
+    "bytes": 42245,
+    "sha256": "252da85facbd1f5705c7dcc44a21fdcfdc2f3f262faeb11c77fe9c062e7ded6a",
+    "conferencia_visual": "corresponde ao anexo da conversa"
+  },
+  {
+    "ordem": 6,
+    "frases": [
+      "P08"
+    ],
+    "arquivo": "06-p08.png",
+    "nome_original": "Captura de tela 2026-10-06 002150.png",
+    "bytes": 19480,
+    "sha256": "ccd0891d2449d9c1d6ebc38bdb931f1f00bac8da96a7f6af6484c267842e83a3",
+    "conferencia_visual": "corresponde ao anexo da conversa"
+  },
+  {
+    "ordem": 7,
+    "frases": [
+      "P09",
+      "P10"
+    ],
+    "arquivo": "07-p09-p10.png",
+    "nome_original": "Captura de tela 2026-10-06 002200.png",
+    "bytes": 40057,
+    "sha256": "e96b190bb1b3d45e1041de2c874677d2b771f4e93c70335c4678be09e0987941",
+    "conferencia_visual": "corresponde ao anexo da conversa"
+  },
+  {
+    "ordem": 8,
+    "frases": [
+      "N01"
+    ],
+    "arquivo": "08-n01.png",
+    "nome_original": "Captura de tela 2026-10-06 002555.png",
+    "bytes": 11365,
+    "sha256": "a5f83ae5bd67ee143f6998a7bf182ce94c7b0dc8b6d1a3c56ef5b2092b78c3c9",
+    "conferencia_visual": "corresponde ao anexo da conversa"
+  },
+  {
+    "ordem": 9,
+    "frases": [
+      "N02"
+    ],
+    "arquivo": "09-n02.png",
+    "nome_original": "Captura de tela 2026-10-06 003034.png",
+    "bytes": 10193,
+    "sha256": "567f11fb6d2e6f6b80011ec9c29b67db9dc61632005af8cb294d24fddfc51c34",
+    "conferencia_visual": "corresponde ao anexo da conversa"
+  },
+  {
+    "ordem": 10,
+    "frases": [
+      "N03"
+    ],
+    "arquivo": "10-n03.png",
+    "nome_original": "Captura de tela 2026-10-06 003054.png",
+    "bytes": 11155,
+    "sha256": "411d41061afcd13d5cf21d3685dc35d7d4d44815bf74d722aca975cf7ab88b78",
+    "conferencia_visual": "corresponde ao anexo da conversa"
+  },
+  {
+    "ordem": 11,
+    "frases": [
+      "N04"
+    ],
+    "arquivo": "11-n04.png",
+    "nome_original": "Captura de tela 2026-10-06 003117.png",
+    "bytes": 11732,
+    "sha256": "160e426bff1688147945b7fdfaf393ce3cee3619404f6d200431dad00e4a7f98",
+    "conferencia_visual": "corresponde ao anexo da conversa"
+  },
+  {
+    "ordem": 12,
+    "frases": [
+      "N05"
+    ],
+    "arquivo": "12-n05.png",
+    "nome_original": "Captura de tela 2026-10-06 003131.png",
+    "bytes": 11874,
+    "sha256": "32cfe0e84f9c486f171588ec26af79fe77a10d92c07a3465d9e353a50bc41575",
+    "conferencia_visual": "corresponde ao anexo da conversa"
+  },
+  {
+    "ordem": 13,
+    "frases": [
+      "N06"
+    ],
+    "arquivo": "13-n06.png",
+    "nome_original": "Captura de tela 2026-10-06 003325.png",
+    "bytes": 22334,
+    "sha256": "6510a81d065896acb084e24f0ee220e51ac64804daa4eca09531cf04d997ae26",
+    "conferencia_visual": "corresponde ao anexo da conversa"
+  },
+  {
+    "ordem": 14,
+    "frases": [
+      "N07"
+    ],
+    "arquivo": "14-n07.png",
+    "nome_original": "Captura de tela 2026-10-06 003346.png",
+    "bytes": 19738,
+    "sha256": "c2f18753b64da4ce336e91bd5484654ef057283da27123564380a644ff9d8bf9",
+    "conferencia_visual": "corresponde ao anexo da conversa"
+  },
+  {
+    "ordem": 15,
+    "frases": [
+      "N08"
+    ],
+    "arquivo": "15-n08.png",
+    "nome_original": "Captura de tela 2026-10-06 003408.png",
+    "bytes": 20932,
+    "sha256": "4d3074bc41d7c306b00bcc66561d8c1fb499dd84f1785abaad253903546a2e50",
+    "conferencia_visual": "corresponde ao anexo da conversa"
+  },
+  {
+    "ordem": 16,
+    "frases": [
+      "N09"
+    ],
+    "arquivo": "16-n09.png",
+    "nome_original": "Captura de tela 2026-10-06 003431.png",
+    "bytes": 10799,
+    "sha256": "09842b4982483aeb5737094a343c08d0e65a39f716a2b73439b3164cd108818f",
+    "conferencia_visual": "corresponde ao anexo da conversa"
+  },
+  {
+    "ordem": 17,
+    "frases": [
+      "N10"
+    ],
+    "arquivo": "17-n10.png",
+    "nome_original": "Captura de tela 2026-10-06 003451.png",
+    "bytes": 19724,
+    "sha256": "8416ae0fd3bcf2f4e3fa28b6213e7dd1d463088dadcc17f2847bf0521eacfcb9",
+    "conferencia_visual": "corresponde ao anexo da conversa"
+  }
+]

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import type { ReactNode } from 'react';
@@ -9,11 +9,10 @@ import { MarkdownMessage } from './chat/markdown-message';
 import { MessageBubble } from './chat/message-bubble';
 import { MessageList } from './chat/message-list';
 import { SourceCitations } from './chat/source-citations';
+import { ProactiveSuggestion } from './chat/proactive-suggestion';
 import { IntentBadge } from './chat/intent-badge';
 import { Composer } from './composer/composer';
 import { AudioButton } from './composer/audio-button';
-import { IntentToggle } from './composer/intent-toggle';
-import { ProactivityToggle } from './composer/proactivity-toggle';
 import { RecordingBar, RecordingPreview } from './composer/recording-bar';
 import { DocumentCard } from './documents/document-card';
 import { DocumentViewer } from './documents/document-viewer';
@@ -49,7 +48,7 @@ describe('Componentes de chat', () => {
     await userEvent.click(screen.getAllByRole('button')[0]);
     expect(pick).toHaveBeenCalledWith(expect.any(String));
   });
-  it('ChatHeader abre menu e documentos com nomes acessíveis', async () => {
+  it('ChatHeader abre menu e fontes com nomes acessíveis', async () => {
     const open = vi.fn(),
       toggle = vi.fn();
     mount(
@@ -63,10 +62,27 @@ describe('Componentes de chat', () => {
     );
     await userEvent.click(screen.getByRole('button', { name: 'Abrir conversas' }));
     await userEvent.click(
-      screen.getByRole('button', { name: 'Documentos recuperados (1)' }),
+      screen.getByRole('button', { name: /Fontes\s*1\s*da última resposta/ }),
     );
     expect(open).toHaveBeenCalledOnce();
     expect(toggle).toHaveBeenCalledOnce();
+  });
+  it('ChatHeader só mostra data e canal no modo técnico', () => {
+    const props = {
+      conversation,
+      sourceCount: 1,
+      documentPanelOpen: false,
+      onToggleDocumentPanel: vi.fn(),
+      onOpenSidebar: vi.fn(),
+    };
+    const { rerender } = mount(<ChatHeader {...props} />);
+    expect(screen.queryByText(/Iniciada em/)).not.toBeInTheDocument();
+    rerender(
+      <TooltipProvider>
+        <ChatHeader {...props} showTechnicalDetails />
+      </TooltipProvider>,
+    );
+    expect(screen.getByText(/Iniciada em/)).toBeVisible();
   });
   it('MarkdownMessage renderiza listas/tabelas e não executa HTML', () => {
     const { container } = mount(
@@ -108,6 +124,7 @@ describe('Componentes de chat', () => {
         messages={[message]}
         isSending={true}
         intentLayerEnabled={true}
+        showTechnicalDetails
         selectedSourceId={null}
         onSelectSource={vi.fn()}
         onResolveProactiveSuggestion={vi.fn()}
@@ -128,11 +145,77 @@ describe('Componentes de chat', () => {
         onResolveProactiveSuggestion={resolve}
       />,
     );
-    expect(screen.getByRole('region', { name: 'Sugestão opcional' })).toBeVisible();
+    expect(screen.getByRole('region', { name: 'Ação sugerida' })).toBeVisible();
+    expect(screen.getByText(/precisa da sua confirmação/)).toBeVisible();
     await userEvent.click(screen.getByRole('button', { name: 'Aceitar sugestão' }));
     await userEvent.click(screen.getByRole('button', { name: 'Recusar sugestão' }));
     expect(resolve).toHaveBeenNthCalledWith(1, message.id, 'accept');
     expect(resolve).toHaveBeenNthCalledWith(2, message.id, 'decline');
+  });
+  it('Sugestão reúne aceitar, recusar e desativar no mesmo lugar', async () => {
+    const resolve = vi.fn(),
+      disable = vi.fn();
+    mount(
+      <MessageBubble
+        message={message}
+        selectedSourceId={null}
+        onSelectSource={vi.fn()}
+        onResolveProactiveSuggestion={resolve}
+        onDisableProactivity={disable}
+      />,
+    );
+    const card = screen.getByRole('region', { name: 'Ação sugerida' });
+    expect(
+      within(card).getByRole('button', { name: 'Aceitar sugestão' }),
+    ).toBeVisible();
+    expect(
+      within(card).getByRole('button', { name: 'Recusar sugestão' }),
+    ).toBeVisible();
+    await userEvent.click(
+      within(card).getByRole('button', { name: 'Não sugerir mais' }),
+    );
+    expect(disable).toHaveBeenCalledOnce();
+    // Desativar recusa a sugestão atual sem executar nada.
+    expect(resolve).toHaveBeenCalledWith(message.id, 'decline');
+    expect(within(card).getByText(/Sugestões desligadas/)).toBeVisible();
+    expect(within(card).getByText('Ajustes do agente')).toBeVisible();
+  });
+  it('Sugestão leva o foco ao resultado quando os botões somem', async () => {
+    const suggestion = message.proactiveSuggestion!;
+    const { rerender } = mount(
+      <ProactiveSuggestion suggestion={suggestion} onResolve={vi.fn()} />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Aceitar sugestão' }));
+    rerender(
+      <TooltipProvider>
+        <ProactiveSuggestion
+          suggestion={{ ...suggestion, status: 'accepted' }}
+          onResolve={vi.fn()}
+        />
+      </TooltipProvider>,
+    );
+    expect(
+      screen.getByText('Sugestão aceita e executada.').parentElement,
+    ).toHaveFocus();
+  });
+  it('MessageBubble esconde intenção e modelo fora do modo técnico', () => {
+    const props = {
+      message,
+      selectedSourceId: null,
+      onSelectSource: vi.fn(),
+      onResolveProactiveSuggestion: vi.fn(),
+    };
+    const { rerender } = mount(<MessageBubble {...props} />);
+    expect(screen.queryByText(message.intent!.specific!)).not.toBeInTheDocument();
+    expect(screen.queryByText(message.metrics!.model)).not.toBeInTheDocument();
+    expect(screen.getByText('Fontes (1)')).toBeVisible();
+    rerender(
+      <TooltipProvider>
+        <MessageBubble {...props} showTechnicalDetails />
+      </TooltipProvider>,
+    );
+    expect(screen.getByText(message.intent!.specific!)).toBeVisible();
+    expect(screen.getByText(message.metrics!.model)).toBeVisible();
   });
 });
 
@@ -144,10 +227,6 @@ describe('Componentes de entrada', () => {
     onStop: vi.fn(),
     onSendAudio: vi.fn(),
     isSending: false,
-    intentLayerEnabled: true,
-    onIntentLayerChange: vi.fn(),
-    proactivityEnabled: false,
-    onProactivityChange: vi.fn(),
   };
   it('Composer envia por Enter, preserva Shift+Enter e bloqueia excesso de texto', () => {
     const submit = vi.fn();
@@ -176,21 +255,18 @@ describe('Componentes de entrada', () => {
       screen.getByRole('button', { name: 'Gravar pergunta em áudio' }),
     ).toBeDisabled();
   });
-  it('IntentToggle encaminha alteração e respeita disabled', async () => {
-    const change = vi.fn();
-    mount(<IntentToggle enabled onChange={change} disabled={false} />);
-    await userEvent.click(screen.getByRole('switch'));
-    expect(change).toHaveBeenCalledWith(false);
+  it('Composer marca o campo como inválido acima do limite', () => {
+    mount(<Composer {...props} value={'x'.repeat(20001)} />);
+    const input = screen.getByRole('textbox', { name: 'Mensagem para o agente' });
+    expect(input).toHaveAttribute('id', 'mensagem-para-o-agente');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input).toHaveAccessibleDescription(/20\.001/);
   });
-  it('ProactivityToggle encaminha a ativação opcional', async () => {
-    const change = vi.fn();
-    mount(<ProactivityToggle enabled={false} onChange={change} disabled={false} />);
-    await userEvent.click(
-      screen.getByRole('switch', {
-        name: 'Ativar sugestões proativas depois da resposta principal',
-      }),
-    );
-    expect(change).toHaveBeenCalledWith(true);
+  it('Composer não exibe controles técnicos nem atalhos por padrão', () => {
+    mount(<Composer {...props} />);
+    expect(screen.queryByRole('switch')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Validação de intenção/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/quebra linha/)).not.toBeInTheDocument();
   });
   it('RecordingBar permite concluir ou descartar', async () => {
     const stop = vi.fn(),
@@ -246,13 +322,27 @@ describe('Documentos e conversas', () => {
     );
     expect(screen.getByText('Trecho não disponível nesta resposta')).toBeVisible();
   });
-  it('DocumentPanel navega entre fontes e métricas', async () => {
+  it('DocumentPanel mostra só as fontes fora do modo técnico', () => {
     mount(
       <DocumentPanel
         documents={[doc]}
         selectedDocument={doc}
         onSelect={vi.fn()}
         lastAssistantMessage={message}
+      />,
+    );
+    expect(screen.getByRole('heading', { name: /Fontes da resposta/ })).toBeVisible();
+    expect(screen.queryByRole('tab', { name: 'Resposta' })).not.toBeInTheDocument();
+    expect(screen.queryByText('teste')).not.toBeInTheDocument();
+  });
+  it('DocumentPanel navega entre fontes e métricas no modo técnico', async () => {
+    mount(
+      <DocumentPanel
+        documents={[doc]}
+        selectedDocument={doc}
+        onSelect={vi.fn()}
+        lastAssistantMessage={message}
+        showResponseDetails
       />,
     );
     await userEvent.click(screen.getByRole('tab', { name: 'Resposta' }));

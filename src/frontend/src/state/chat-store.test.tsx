@@ -1,7 +1,17 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { ChatStoreProvider, useChatStore } from './chat-store';
 import { response } from '@/tests/fixtures';
+import { responseBlocks } from '@/tests/response-blocks-fixture';
+
+function AuthenticatedWrapper({ children }: { children: ReactNode }) {
+  return <ChatStoreProvider accessToken="test">{children}</ChatStoreProvider>;
+}
+
+function UnauthenticatedWrapper({ children }: { children: ReactNode }) {
+  return <ChatStoreProvider accessToken="">{children}</ChatStoreProvider>;
+}
 
 describe('Estado e integração do chat', () => {
   it('começa sem dados fictícios, cria conversa no primeiro envio e preserva contexto', async () => {
@@ -11,8 +21,7 @@ describe('Estado e integração do chat', () => {
         Promise.resolve(new Response(JSON.stringify(response))),
       );
     vi.stubGlobal('fetch', fetch);
-    const { result } = renderHook(useChatStore, { wrapper: ChatStoreProvider });
-    act(() => result.current.setAccessToken('test'));
+    const { result } = renderHook(useChatStore, { wrapper: AuthenticatedWrapper });
     expect(result.current.conversations).toHaveLength(0);
     act(() => result.current.setProactivityEnabled(true));
     await act(async () => {
@@ -44,8 +53,7 @@ describe('Estado e integração do chat', () => {
         }),
     );
     vi.stubGlobal('fetch', fetch);
-    const { result } = renderHook(useChatStore, { wrapper: ChatStoreProvider });
-    act(() => result.current.setAccessToken('test'));
+    const { result } = renderHook(useChatStore, { wrapper: AuthenticatedWrapper });
     await act(async () => {
       expect(await result.current.sendMessage('  ')).toBe(false);
     });
@@ -74,7 +82,7 @@ describe('Estado e integração do chat', () => {
           }),
       ),
     );
-    const { result } = renderHook(useChatStore, { wrapper: ChatStoreProvider });
+    const { result } = renderHook(useChatStore, { wrapper: AuthenticatedWrapper });
     let pending!: Promise<boolean>;
     act(() => {
       pending = result.current.sendMessage('prazo');
@@ -89,7 +97,7 @@ describe('Estado e integração do chat', () => {
   });
   it('mostra falha, libera novo envio e mantém a pergunta', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('internal')));
-    const { result } = renderHook(useChatStore, { wrapper: ChatStoreProvider });
+    const { result } = renderHook(useChatStore, { wrapper: AuthenticatedWrapper });
     await act(async () => {
       await result.current.sendMessage('prazo');
     });
@@ -119,27 +127,36 @@ describe('Estado e integração do chat', () => {
       ),
     );
     vi.stubGlobal('fetch', fetch);
-    const { result } = renderHook(useChatStore, { wrapper: ChatStoreProvider });
+    const { result } = renderHook(useChatStore, { wrapper: UnauthenticatedWrapper });
     await act(async () => {
       expect(await result.current.sendAudio(new Blob(['wav']))).toBe(false);
     });
     expect(fetch).not.toHaveBeenCalled();
-    act(() => result.current.setAccessToken('test'));
-    await act(async () => {
-      await result.current.sendAudio(new Blob(['wav']));
+    const authenticated = renderHook(useChatStore, {
+      wrapper: AuthenticatedWrapper,
     });
-    expect(result.current.activeConversation?.messages[0].origin).toBe('audio');
-    expect(result.current.activeConversation?.messages[0].content).toBe(
+    await act(async () => {
+      await authenticated.result.current.sendAudio(new Blob(['wav']));
+    });
+    expect(authenticated.result.current.activeConversation?.messages[0].origin).toBe(
+      'audio',
+    );
+    expect(authenticated.result.current.activeConversation?.messages[0].content).toBe(
       'pergunta falada',
     );
-    expect(result.current.activeConversation?.messages[1].content).toBe(response.text);
-    expect(result.current.activeConversation?.messages[1].entities?.[0].value).toBe(
-      'Projeto Linha Verde',
+    expect(authenticated.result.current.activeConversation?.messages[1].content).toBe(
+      response.text,
     );
-    expect(result.current.activeConversation?.messages[1].metrics?.sttMs).toBe(3);
-    expect(result.current.activeConversation?.messages[1].metrics?.backendTotalMs).toBe(
-      12,
-    );
+    expect(
+      authenticated.result.current.activeConversation?.messages[1].entities?.[0].value,
+    ).toBe('Projeto Linha Verde');
+    expect(
+      authenticated.result.current.activeConversation?.messages[1].metrics?.sttMs,
+    ).toBe(3);
+    expect(
+      authenticated.result.current.activeConversation?.messages[1].metrics
+        ?.backendTotalMs,
+    ).toBe(12);
   });
   it('aceita somente a sugestão vinculada e acrescenta a resposta confirmada', async () => {
     const confirmed = {
@@ -155,8 +172,7 @@ describe('Estado e integração do chat', () => {
         new Response(JSON.stringify({ status: 'accepted', result: confirmed })),
       );
     vi.stubGlobal('fetch', fetch);
-    const { result } = renderHook(useChatStore, { wrapper: ChatStoreProvider });
-    act(() => result.current.setAccessToken('test'));
+    const { result } = renderHook(useChatStore, { wrapper: AuthenticatedWrapper });
     await act(async () => {
       await result.current.sendMessage('status');
     });
@@ -190,8 +206,7 @@ describe('Estado e integração do chat', () => {
         new Response(JSON.stringify({ status: 'declined', result: null })),
       );
     vi.stubGlobal('fetch', fetch);
-    const { result } = renderHook(useChatStore, { wrapper: ChatStoreProvider });
-    act(() => result.current.setAccessToken('test'));
+    const { result } = renderHook(useChatStore, { wrapper: AuthenticatedWrapper });
     await act(async () => {
       await result.current.sendMessage('status');
     });
@@ -219,8 +234,7 @@ describe('Estado e integração do chat', () => {
           }),
       );
     vi.stubGlobal('fetch', fetch);
-    const { result } = renderHook(useChatStore, { wrapper: ChatStoreProvider });
-    act(() => result.current.setAccessToken('test'));
+    const { result } = renderHook(useChatStore, { wrapper: AuthenticatedWrapper });
     await act(async () => {
       await result.current.sendMessage('status');
     });
@@ -247,4 +261,52 @@ describe('Estado e integração do chat', () => {
     ).toBe('pending');
     expect(result.current.status).toBe('idle');
   });
+
+  it('começa com a tela enxuta: sem modo técnico e com o painel de fontes fechado', () => {
+    const { result } = renderHook(useChatStore, { wrapper: AuthenticatedWrapper });
+    expect(result.current.showTechnicalDetails).toBe(false);
+    expect(result.current.documentPanelOpen).toBe(false);
+    act(() => result.current.setShowTechnicalDetails(true));
+    expect(result.current.showTechnicalDetails).toBe(true);
+  });
+});
+
+describe('Preservação de blocos estruturados nos canais', () => {
+  it.each(['text', 'audio'] as const)(
+    'preserva os três tipos no canal %s',
+    async (channel) => {
+      const chat = { ...response, contract_version: '1.2.0', blocks: responseBlocks };
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue(
+          new Response(
+            JSON.stringify(
+              channel === 'text'
+                ? chat
+                : {
+                    pipeline_status: 'completed',
+                    chat,
+                    transcription: {
+                      text: 'avanço',
+                      confidence: 1,
+                      duration_seconds: 1,
+                    },
+                  },
+            ),
+          ),
+        ),
+      );
+      const { result } = renderHook(useChatStore, { wrapper: AuthenticatedWrapper });
+      await act(async () => {
+        expect(
+          await (channel === 'text'
+            ? result.current.sendMessage('avanço')
+            : result.current.sendAudio(new Blob(['wav']))),
+        ).toBe(true);
+      });
+      expect(result.current.activeConversation?.messages[1].blocks).toEqual(
+        responseBlocks,
+      );
+    },
+  );
 });

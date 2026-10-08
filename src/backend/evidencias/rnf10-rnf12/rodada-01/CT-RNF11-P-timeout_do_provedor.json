@@ -1,0 +1,10 @@
+{
+  "cenario": "timeout_do_provedor",
+  "http": 502,
+  "http_esperado": 502,
+  "mensagem": "Não foi possível obter uma resposta. Tente novamente em instantes.",
+  "mensagem_esperada": "Não foi possível obter uma resposta. Tente novamente em instantes.",
+  "vazamentos": [],
+  "auditoria_registros": 1,
+  "auditoria_estado": "falha"
+}

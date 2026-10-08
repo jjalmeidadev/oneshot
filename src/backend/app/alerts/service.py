@@ -48,7 +48,11 @@ class AlertService:
         self.secret = secret
 
     def prepare(self, request: PrepareAlertRequest, identity: ReportIdentity) -> PrepareAlertResponse:
-        authorize_scope(identity, ReportScope(type=ScopeType.PROJECT, id=request.rule.project_id))
+        authorize_scope(
+            identity,
+            ReportScope(type=ScopeType.PROJECT, id=request.rule.project_id),
+            operation="read",
+        )
         now = _now()
         prepared = PreparedAlert(
             request=request,
@@ -76,7 +80,11 @@ class AlertService:
             raise AlertConflictError("A confirmacao expirou; revise a configuracao.")
         if not hmac.compare_digest(request.confirmation_hash, self._signature(prepared)):
             raise AlertConflictError("A configuracao foi alterada apos a revisao.")
-        authorize_scope(identity, ReportScope(type=ScopeType.PROJECT, id=prepared.request.rule.project_id))
+        authorize_scope(
+            identity,
+            ReportScope(type=ScopeType.PROJECT, id=prepared.request.rule.project_id),
+            operation="read",
+        )
         now = _now()
         subscription = AlertSubscription(
             subscription_id=str(uuid4()),
@@ -151,6 +159,7 @@ class AlertService:
             authorize_scope(
                 worker_identity,
                 ReportScope(type=ScopeType.PROJECT, id=value.rule.project_id),
+                operation="read",
             )
         except Exception as error:
             previous = value.revision

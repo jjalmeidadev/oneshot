@@ -14,6 +14,8 @@ Os scripts atuais sao:
 - `../sql/06_verify_secondary_intents.sql`: verifica leitura, unicidade, integridade referencial e reexecucao da carga sem persistir dados de teste.
 - `../sql/07_add_pending_proactive_suggestions.sql`: cria o armazenamento compartilhado das sugestões pendentes;
 - `../sql/08_add_prepared_proactive_response.sql`: adiciona a resposta secundária preparada na chamada principal e remove pendências legadas incompatíveis.
+- `../sql/20_auth_access_foundation.sql`: adiciona o perfil `consulta`, garante unicidade de regras de acesso com `NULLS NOT DISTINCT`, documenta o vinculo com Supabase Auth e protege `secondary_intents` com RLS sem policies permissivas;
+- `../sql/21_rollback_auth_access_foundation.sql`: reverte especificamente a fundacao da migration 20 sem remover tabelas ou dados e bloqueia a reversao se ja existirem usuarios `consulta`.
 
 ## Banco-alvo
 
@@ -117,6 +119,31 @@ psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM public.project_artifacts WHERE met
 psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM public.source_extracts WHERE metadata ->> 'source_file' IN ('base_atendimento.json', 'comunicados_servico.json', 'procedimentos_operacionais.json');"
 ```
 
+## Carga de identidades e acessos da S5-03
+
+A autenticação, a carga idempotente das identidades sintéticas e o controle por
+perfil e escopo estão consolidados na
+[Seção 4.3.1 do Projeto](../../../docs/Projeto.md#431-autenticação-e-controle-de-acesso-do-mvp).
+
+## Alteracao de dados pelo chat da S5-06
+
+A previa de cada alteracao fica em `pending_data_changes`, criada por
+`22_data_change_previews.sql` e removida por `23_rollback_data_change_previews.sql`.
+A migracao e idempotente e depende de `01` e `20`. O rollback preserva as linhas
+de `change_records` com `metadata->>'origin' = 'chat'`, que fazem parte da
+trilha de auditoria.
+
+```bash
+psql "$DATABASE_URL" -f src/database/sql/22_data_change_previews.sql
+psql "$DATABASE_URL" -f src/database/sql/13_seed_portfolio_report_data.sql
+```
+
+A carga `13` agora inclui cinco atividades sinteticas do `PRJ-0442` em
+`schedule_items`, usadas pelos campos `cronograma.*`. Reaplicar a `13` apaga as
+mudancas registradas dos tres projetos, inclusive as feitas pelo chat. O
+contrato completo esta na
+[Secao 8.5.13 do Projeto](../../../docs/Projeto.md#8513-contrato-de-alteração-de-dados-pelo-chat-s5-05).
+
 ## Verificacao S4-08 e S4-09 no Supabase
 
 No PowerShell, com `DATABASE_URL` ou `SUPABASE_DATABASE_URL` definido apenas
@@ -131,10 +158,11 @@ O comando aplica o baseline em um banco vazio, executa `02_initial_data.sql` e
 registra um evento em `audit_events`. A evidencia sem segredos e gravada em
 `docs/evidencias/` com o mesmo `correlation_id`.
 
-O baseline atual deve retornar **27 tabelas, 46 indices explicitos e 27
+O baseline atual deve retornar **27 tabelas, 47 indices explicitos e 27
 triggers**. A expectativa anterior de 25/43/25 era do modelo antes das duas
 evolucoes posteriores: `secondary_intents` (+1/+1/+1) e
-`pending_proactive_suggestions` (+1/+2/+1). A reexecucao de
+`pending_proactive_suggestions` (+1/+2/+1); a fundacao de acesso acrescenta
+um indice unico em `access_rules`. A reexecucao de
 `01_create_database.sql` e um erro esperado, pois ele e um baseline para banco
 vazio; a idempotencia requerida e comprovada pela carga repetida.
 

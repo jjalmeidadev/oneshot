@@ -53,7 +53,7 @@ export function IntentBadge({ intent }: { intent: IntentResult }) {
           <Badge tone={outcome.tone}>
             <Icon size={11} />
             <span className="font-mono">{label}</span>
-            <span className="opacity-70">
+            <span>
               {formatConfidence(
                 intent.specific ? intent.specificConfidence : intent.macroConfidence,
               )}

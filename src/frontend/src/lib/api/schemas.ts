@@ -8,6 +8,7 @@
  * O que **existe hoje** no backend:
  *   POST /api/chat   -> app/gemini/schemas.py
  *   POST /api/audio  -> app/audio/schemas.py
+ *   /api/data-change-previews, /api/data-changes -> app/data_changes/schemas.py
  *   GET  /health     -> app/main.py
  *
  */
@@ -19,6 +20,7 @@
 /** `GeminiChatRequest`. `message` tem min_length=1 e max_length=20000. */
 export type ChatRequest = {
   message: string;
+  include_audio?: boolean;
   conversation_id?: string | null;
   use_intent_classifier?: boolean;
   proactivity_enabled?: boolean;
@@ -73,6 +75,21 @@ export type FactualClaim = {
   citation_ids: string[];
   evidence?: ClaimEvidence[];
 };
+export type ResponseBlock =
+  | {
+      type: 'table';
+      columns: string[];
+      rows: { cells: string[]; citation_ids: string[] }[];
+    }
+  | {
+      type: 'indicator';
+      label: string;
+      value: number;
+      unit: '%' | null;
+      citation_ids: string[];
+    }
+  | { type: 'highlight'; text: string; citation_ids: string[] };
+
 export type EvidenceStatus = 'referenced' | 'insufficient' | 'not_applicable';
 
 export type ProactiveSuggestion = {
@@ -98,25 +115,135 @@ export type ProactiveConfirmationResponse = {
 
 /** `GeminiChatResponse`. */
 export type ChatResponse = {
-  contract_version?: '1.1.0';
+  contract_version?: '1.1.0' | '1.2.0';
   trace_id?: string | null;
   intent?: AudioIntent | null;
   entities?: PipelineEntity[];
   pipeline_metrics?: ChatPipelineMetrics;
   text: string;
+  speech?: SpeechResponse | null;
   model: string;
   interaction_id: string | null;
   latency_ms: number;
   retrieval_ms: number;
   usage: ChatUsage;
   sources: ChatSource[];
+  blocks?: ResponseBlock[];
   claims?: FactualClaim[];
   evidence_status?: EvidenceStatus;
   /** Presente so na resposta secundaria confirmada: analise rotulada, nao fato. */
   recommendation?: string | null;
   proactive_suggestion?: ProactiveSuggestion | null;
   workflow?: WorkflowDirective | null;
+  /** Alteracao de dados pelo chat (S5-06): previa, pergunta ou recusa. */
+  data_change?: DataChangeOutcome | null;
 };
+
+export type SpeechResponse = {
+  status: 'available' | 'unavailable';
+  media_type: 'audio/mpeg' | null;
+  data_base64: string | null;
+  warning: string | null;
+};
+
+/* -------------------------------------------------------------------------
+ * Alteracao de dados pelo chat  —  app/data_changes/schemas.py
+ * Contrato: docs/Projeto.md, Secao 8.5.13 (S5-05).
+ * ---------------------------------------------------------------------- */
+
+export type DataChangeEntity = 'projeto' | 'cronograma' | 'marco' | 'risco';
+
+/** `FieldRef`: chave do contrato (`projeto.prazo_final`) e rotulo exibivel. */
+export type DataChangeField = { key: string; label: string };
+
+/** `ValueView`: valor canonico (para comparar) e exibido (para a pessoa). */
+export type DataChangeValue = { value: string | null; display: string };
+
+export type DataChangeTarget = { entity: DataChangeEntity; id: string; label: string };
+
+/** `DataChangePreview`. Nada foi gravado quando a previa existe. */
+export type DataChangePreview = {
+  pending_change_id: string;
+  project: { code: string; title: string };
+  target: DataChangeTarget;
+  field: DataChangeField;
+  before: DataChangeValue;
+  after: DataChangeValue;
+  warnings: string[];
+  expires_at: string;
+  undo_window_minutes: number;
+};
+
+/** `DataChangeDraft`: o que ja foi entendido do pedido. */
+export type DataChangeDraft = {
+  project_code?: string | null;
+  entity?: DataChangeEntity | null;
+  field?: string | null;
+  target_id?: string | null;
+  item_reference?: string | null;
+  raw_value?: string | null;
+};
+
+/** `DataChangeOutcome`: campo `data_change` da resposta do chat. */
+export type DataChangeOutcome = {
+  status: 'preview' | 'needs_input' | 'rejected';
+  preview?: DataChangePreview | null;
+  missing?: 'project' | 'target' | 'field' | 'value' | null;
+  question?: string | null;
+  candidates?: { id: string; label: string }[];
+  draft?: DataChangeDraft | null;
+  code?: string | null;
+  message?: string | null;
+};
+
+/** `PreviewRequest`: completa a proposta escolhida no cartao. */
+export type DataChangePreviewRequest = {
+  project_code: string;
+  entity?: DataChangeEntity | null;
+  field: string;
+  target_id?: string | null;
+  item_reference?: string | null;
+  raw_value?: string | null;
+  conversation_id?: string | null;
+};
+
+/** `ConfirmResponse`. */
+export type DataChangeConfirmResponse = {
+  change_id: string;
+  status: 'aplicada';
+  field: DataChangeField;
+  target: DataChangeTarget;
+  before: DataChangeValue;
+  after: DataChangeValue;
+  applied_at: string;
+  undo_available_until: string;
+  correlation_id: string;
+};
+
+/** `UndoResponse`. */
+export type DataChangeUndoResponse = {
+  change_id: string;
+  status: 'desfeita';
+  restored: DataChangeValue;
+  undone_at: string;
+};
+
+/** `HistoryItem`. */
+export type DataChangeHistoryItem = {
+  change_id: string;
+  field: DataChangeField;
+  target: DataChangeTarget;
+  before: DataChangeValue;
+  after: DataChangeValue;
+  requested_by: string;
+  applied_at: string;
+  status: 'aplicada' | 'desfeita';
+  undone_at?: string | null;
+  can_undo: boolean;
+  undo_available_until?: string | null;
+};
+
+export type DataChangeHistoryResponse = { items: DataChangeHistoryItem[] };
 
 export type WorkflowDirective = {
   kind: 'guided_workflow';
@@ -335,13 +462,14 @@ export type AudioAnswerSource = Partial<ChatSource> & {
 export type AudioAnswer = {
   text: string;
   sources: AudioAnswerSource[];
+  blocks?: ResponseBlock[];
   claims?: FactualClaim[];
   evidence_status?: EvidenceStatus;
 };
 
 /** `AudioUploadResponse`. */
 export type AudioUploadResponse = {
-  contract_version?: '1.1.0';
+  contract_version?: '1.1.0' | '1.2.0';
   trace_id?: string | null;
   chat?: ChatResponse | null;
   conversation_id: string;

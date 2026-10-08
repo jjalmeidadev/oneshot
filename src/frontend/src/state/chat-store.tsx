@@ -39,6 +39,7 @@ import {
   deriveConversationTitle,
   type ChatMessage,
   type Conversation,
+  type DataChangeState,
   type RetrievedDocument,
 } from '@/lib/domain';
 
@@ -55,14 +56,19 @@ type State = {
   intentLayerEnabled: boolean;
   /** Sugestao secundaria fundamentada, controlada pelo usuario. */
   proactivityEnabled: boolean;
+  /**
+   * Modo tecnico: exibe selo de intencao, modelo, subtitulo da conversa e a aba
+   * de metricas. Desligado por padrao, porque o parceiro pediu menos informacao
+   * na tela (S5-20).
+   */
+  showTechnicalDetails: boolean;
   /** Documento aberto no painel da direita. */
   selectedDocumentId: string | null;
-  /** Painel lateral fixo, em telas largas. Aberto por padrao. */
+  /** Painel lateral fixo, em telas largas. Fechado por padrao; abre ao clicar numa fonte. */
   documentPanelOpen: boolean;
   /** Painel deslizante, em telas estreitas. Fechado por padrao. */
   documentSheetOpen: boolean;
   sidebarOpen: boolean;
-  accessToken: string;
 };
 
 type Action =
@@ -79,12 +85,13 @@ type Action =
   | { type: 'set-status'; status: ChatStatus; error?: string | null }
   | { type: 'toggle-intent-layer'; enabled: boolean }
   | { type: 'toggle-proactivity'; enabled: boolean }
+  | { type: 'toggle-technical-details'; enabled: boolean }
   | { type: 'select-document'; id: string | null }
   | { type: 'set-document-panel'; open: boolean }
   | { type: 'set-document-sheet'; open: boolean }
   | { type: 'set-sidebar'; open: boolean }
-  | { type: 'set-token'; token: string }
-  | { type: 'update-workflow'; workflow: GuidedWorkflowSession };
+  | { type: 'update-workflow'; workflow: GuidedWorkflowSession }
+  | { type: 'update-data-change'; messageId: string; dataChange: DataChangeState };
 
 function createConversation(): Conversation {
   const now = new Date().toISOString();
@@ -197,6 +204,9 @@ function reducer(state: State, action: Action): State {
     case 'toggle-proactivity':
       return { ...state, proactivityEnabled: action.enabled };
 
+    case 'toggle-technical-details':
+      return { ...state, showTechnicalDetails: action.enabled };
+
     case 'select-document':
       return {
         ...state,
@@ -213,9 +223,6 @@ function reducer(state: State, action: Action): State {
     case 'set-sidebar':
       return { ...state, sidebarOpen: action.open };
 
-    case 'set-token':
-      return { ...state, accessToken: action.token };
-
     case 'update-workflow':
       return {
         ...state,
@@ -227,6 +234,23 @@ function reducer(state: State, action: Action): State {
               : message,
           ),
         })),
+      };
+
+    case 'update-data-change':
+      return {
+        ...state,
+        conversations: state.conversations.map((conversation) =>
+          conversation.messages.some((message) => message.id === action.messageId)
+            ? {
+                ...conversation,
+                messages: conversation.messages.map((message) =>
+                  message.id === action.messageId
+                    ? { ...message, dataChange: action.dataChange }
+                    : message,
+                ),
+              }
+            : conversation,
+        ),
       };
 
     default:
@@ -243,11 +267,11 @@ function initialState(): State {
     error: null,
     intentLayerEnabled: true,
     proactivityEnabled: false,
+    showTechnicalDetails: false,
     selectedDocumentId: null,
-    documentPanelOpen: true,
+    documentPanelOpen: false,
     documentSheetOpen: false,
     sidebarOpen: false,
-    accessToken: '',
   };
 }
 
@@ -262,6 +286,7 @@ type ChatStoreValue = {
   error: string | null;
   intentLayerEnabled: boolean;
   proactivityEnabled: boolean;
+  showTechnicalDetails: boolean;
   documentPanelOpen: boolean;
   documentSheetOpen: boolean;
   sidebarOpen: boolean;
@@ -281,11 +306,11 @@ type ChatStoreValue = {
   deleteConversation: (id: string) => void;
   setIntentLayerEnabled: (enabled: boolean) => void;
   setProactivityEnabled: (enabled: boolean) => void;
+  setShowTechnicalDetails: (enabled: boolean) => void;
   selectDocument: (id: string | null) => void;
   setDocumentPanelOpen: (open: boolean) => void;
   setDocumentSheetOpen: (open: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
-  setAccessToken: (token: string) => void;
   answerWorkflow: (
     workflow: GuidedWorkflowSession,
     step: WorkflowStep | AlertWorkflowStep,
@@ -294,11 +319,19 @@ type ChatStoreValue = {
   confirmWorkflow: (workflow: GuidedWorkflowSession) => Promise<void>;
   cancelWorkflow: (workflow: GuidedWorkflowSession) => Promise<void>;
   downloadArtifact: (workflow: WorkflowSessionResponse) => Promise<void>;
+  /** Guarda na mensagem o que a pessoa fez no cartao de alteracao. */
+  updateDataChange: (messageId: string, dataChange: DataChangeState) => void;
 };
 
 const ChatStoreContext = createContext<ChatStoreValue | null>(null);
 
-export function ChatStoreProvider({ children }: { children: ReactNode }) {
+export function ChatStoreProvider({
+  children,
+  accessToken,
+}: {
+  children: ReactNode;
+  accessToken: string;
+}) {
   const [state, dispatch] = useReducer(reducer, undefined, initialState);
 
   const view = state;
@@ -382,7 +415,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
         });
         return false;
       }
-      if (input instanceof Blob && !state.accessToken.trim()) {
+      if (input instanceof Blob && !accessToken.trim()) {
         dispatch({
           type: 'set-status',
           status: 'error',
@@ -393,7 +426,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
       if (
         typeof input === 'string' &&
         state.proactivityEnabled &&
-        !state.accessToken.trim()
+        !accessToken.trim()
       ) {
         dispatch({
           type: 'set-status',
@@ -429,7 +462,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
           response = await sendChatMessage({
             message: text,
             conversationId: conversation.id,
-            accessToken: state.accessToken,
+            accessToken,
             previousInteractionId: conversation.lastInteractionId,
             useIntentClassifier: state.intentLayerEnabled,
             proactivityEnabled: state.proactivityEnabled,
@@ -440,7 +473,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
             audio: input,
             filename: 'gravacao.wav',
             conversationId: conversation.id,
-            accessToken: state.accessToken,
+            accessToken,
             previousInteractionId: conversation.lastInteractionId,
             useIntentClassifier: state.intentLayerEnabled,
             proactivityEnabled: state.proactivityEnabled,
@@ -476,7 +509,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
           pipelineMetrics,
         });
         if (response.workflow) {
-          if (!state.accessToken.trim()) {
+          if (!accessToken.trim()) {
             throw new Error('REPORT_ACCESS_TOKEN_REQUIRED');
           }
           assistantMessage.workflow = await (
@@ -487,7 +520,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
             conversationId: conversation.id,
             interactionId: response.interaction_id,
             parameters: response.workflow.parameters,
-            accessToken: state.accessToken,
+            accessToken,
           });
         }
         dispatch({
@@ -511,7 +544,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
     },
     [
       activeConversation,
-      state.accessToken,
+      accessToken,
       state.intentLayerEnabled,
       state.proactivityEnabled,
     ],
@@ -544,7 +577,7 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
         const confirmation = await confirmProactiveSuggestion({
           suggestionId: suggestion.id,
           conversationId: activeConversation.id,
-          accessToken: state.accessToken,
+          accessToken,
           decision,
           signal: controller.signal,
         });
@@ -598,14 +631,14 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
         }
       }
     },
-    [activeConversation, state.accessToken, state.intentLayerEnabled],
+    [activeConversation, accessToken, state.intentLayerEnabled],
   );
 
   const requireAccessToken = useCallback(() => {
-    const token = state.accessToken.trim();
+    const token = accessToken.trim();
     if (!token) throw new Error('REPORT_ACCESS_TOKEN_REQUIRED');
     return token;
-  }, [state.accessToken]);
+  }, [accessToken]);
 
   const pollWorkflow = useCallback(async (sessionId: string, accessToken: string) => {
     workflowPolls.current.get(sessionId)?.abort();
@@ -721,10 +754,11 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
       error: view.error,
       intentLayerEnabled: state.intentLayerEnabled,
       proactivityEnabled: state.proactivityEnabled,
+      showTechnicalDetails: state.showTechnicalDetails,
       documentPanelOpen: state.documentPanelOpen,
       documentSheetOpen: state.documentSheetOpen,
       sidebarOpen: state.sidebarOpen,
-      accessToken: state.accessToken,
+      accessToken,
       activeSources,
       selectedDocument,
       sendMessage,
@@ -747,15 +781,18 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
         dispatch({ type: 'toggle-intent-layer', enabled }),
       setProactivityEnabled: (enabled) =>
         dispatch({ type: 'toggle-proactivity', enabled }),
+      setShowTechnicalDetails: (enabled) =>
+        dispatch({ type: 'toggle-technical-details', enabled }),
       selectDocument: (id) => dispatch({ type: 'select-document', id }),
       setDocumentPanelOpen: (open) => dispatch({ type: 'set-document-panel', open }),
       setDocumentSheetOpen: (open) => dispatch({ type: 'set-document-sheet', open }),
       setSidebarOpen: (open) => dispatch({ type: 'set-sidebar', open }),
-      setAccessToken: (token) => dispatch({ type: 'set-token', token }),
       answerWorkflow,
       confirmWorkflow,
       cancelWorkflow,
       downloadArtifact,
+      updateDataChange: (messageId, dataChange) =>
+        dispatch({ type: 'update-data-change', messageId, dataChange }),
     }),
     [
       view.conversations,
@@ -766,10 +803,11 @@ export function ChatStoreProvider({ children }: { children: ReactNode }) {
       selectedDocument,
       state.intentLayerEnabled,
       state.proactivityEnabled,
+      state.showTechnicalDetails,
       state.documentPanelOpen,
       state.documentSheetOpen,
       state.sidebarOpen,
-      state.accessToken,
+      accessToken,
       sendMessage,
       sendAudio,
       resolveProactiveSuggestion,

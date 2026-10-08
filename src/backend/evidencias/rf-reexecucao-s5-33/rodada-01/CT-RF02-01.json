@@ -1,0 +1,42 @@
+{
+  "caso": "CT-RF02-01",
+  "entrada": "Mostre o status do projeto PRJ-0442",
+  "http": 200,
+  "intent": {
+    "macro": "CONSULTA",
+    "specific": "consulta_status_projeto",
+    "confidence_macro": 0.5372,
+    "confidence_specific": 0.403,
+    "flow": "RecuperadorInformacao -> Estruturador de Resposta",
+    "handler": "handler:consulta_status_projeto",
+    "routing_rule": "consulta_status_explicita"
+  },
+  "alternativas": [
+    {
+      "intent": "transacao_atualizar_status",
+      "confidence": 0.4108
+    },
+    {
+      "intent": "consulta_status_projeto",
+      "confidence": 0.403
+    },
+    {
+      "intent": "comparacao_entre_projetos",
+      "confidence": 0.0438
+    }
+  ],
+  "modelo_da_resposta": "duplo-s5-33",
+  "tokens_do_provedor": 0,
+  "provedor_chamado": true,
+  "chamadas_ao_provedor": [
+    {
+      "mensagem": "Mostre o status do projeto PRJ-0442",
+      "intencao_enviada_ao_provedor": "consulta_status_projeto",
+      "macro_enviada_ao_provedor": "CONSULTA"
+    }
+  ],
+  "texto": "Resposta do duplo do provedor (S5-33): o texto não é critério deste caso.",
+  "resultado_esperado": "CONSULTA / consulta_status_projeto como intenção primária, encaminhada ao catálogo",
+  "rodada_anterior": "evidencias/rf01-rf10 (23/09/2026, commit be814f6): FALHOU",
+  "protocolo": "POST /api/chat via TestClient; classificador, roteamento e entidades reais; LLM substituído por duplo"
+}

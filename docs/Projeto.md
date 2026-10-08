@@ -43,9 +43,9 @@
       - [2.5.1.2 Mariana](#2512-mariana)
       - [2.5.1.3 Carlos](#2513-carlos)
     - [2.5.2 Jornadas do Usuário](#252-jornadas-do-usuário)
-      - [2.5.2.1 Mapa de jornada - Roberto](#2521-mapa-de-jornada---roberto)
-      - [2.5.2.2 Mapa de jornada - Mariana](#2522-mapa-de-jornada---mariana)
-      - [2.5.2.3 Mapa de jornada - Carlos](#2523-mapa-de-jornada---carlos)
+      - [2.5.2.1 Mapa de jornada de Roberto](#2521-mapa-de-jornada-de-roberto)
+      - [2.5.2.2 Mapa de jornada de Mariana](#2522-mapa-de-jornada-de-mariana)
+      - [2.5.2.3 Mapa de jornada de Carlos](#2523-mapa-de-jornada-de-carlos)
   - [2.6 Modelagem do Fluxo de Negócio](#26-modelagem-do-fluxo-de-negócio)
     - [2.6.1 Cadeia de Valor](#261-cadeia-de-valor)
     - [2.6.2 Fluxo de Negócio Proposto (AS-IS e TO-BE)](#262-fluxo-de-negócio-proposto-as-is-e-to-be)
@@ -60,6 +60,8 @@
   - [2.8 Ideação](#28-ideação)
     - [2.8.1 Descrição das Features Priorizadas](#281-descrição-das-features-priorizadas)
   - [2.9 Canvas de Proposta de Valor](#29-canvas-de-proposta-de-valor)
+    - [2.9.1 Revisão do Canvas após a implementação](#291-revisão-do-canvas-após-a-implementação)
+    - [2.9.2 Objetivos de Desenvolvimento Sustentável](#292-objetivos-de-desenvolvimento-sustentável)
   - [2.10 Business Drivers](#210-business-drivers)
     - [2.10.1 Business Drivers do Projeto](#2101-business-drivers-do-projeto)
     - [2.10.2 Indicadores Computacionais](#2102-indicadores-computacionais)
@@ -120,6 +122,7 @@
   - [4.1 Especificação da Base de Dados](#41-especificação-da-base-de-dados)
   - [4.2 Modelo Conceitual de Dados](#42-modelo-conceitual-de-dados)
   - [4.3 Modelo Lógico de Dados](#43-modelo-lógico-de-dados)
+    - [4.3.1 Autenticação e controle de acesso do MVP](#431-autenticação-e-controle-de-acesso-do-mvp)
   - [4.4 Modelo Físico de Dados](#44-modelo-físico-de-dados)
 - [5. Solução Técnica (Design)](#5-solução-técnica-design)
   - [5.1 Diagrama de Classes](#51-diagrama-de-classes)
@@ -139,6 +142,7 @@
     - [5.3.3 Direcionamento para workflow funcional web](#533-direcionamento-para-workflow-funcional-web)
     - [5.3.4 Entrada por voz com Speech-to-Text](#534-entrada-por-voz-com-speech-to-text)
     - [5.3.5 Considerações sobre os cenários](#535-considerações-sobre-os-cenários)
+  - [5.4 Arquitetura e integrações no fechamento S5](#54-arquitetura-e-integrações-no-fechamento-s5)
 - [6. Mapeamento técnico de infraestrutura e implantação](#6-mapeamento-técnico-de-infraestrutura-e-implantação)
   - [6.1 Diagrama de implantação da UML](#61-diagrama-de-implantação-da-uml)
   - [6.2 Justificativa das escolhas de implantação](#62-justificativa-das-escolhas-de-implantação)
@@ -156,6 +160,15 @@
     - [6.3.3 Auditoria](#633-auditoria)
     - [6.3.4 Limitações e pendências de provisionamento](#634-limitações-e-pendências-de-provisionamento)
     - [6.3.5 Checklist de conclusão da implantação](#635-checklist-de-conclusão-da-implantação)
+  - [6.4 Tabela de-para para o ecossistema Microsoft do Metrô](#64-tabela-de-para-para-o-ecossistema-microsoft-do-metrô)
+    - [6.4.1 Objetivo, evidências e limites do mapeamento](#641-objetivo-evidências-e-limites-do-mapeamento)
+    - [6.4.2 Critérios de reaproveitamento e esforço](#642-critérios-de-reaproveitamento-e-esforço)
+    - [6.4.3 Interface, API e inteligência da aplicação](#643-interface-api-e-inteligência-da-aplicação)
+    - [6.4.4 Conhecimento, dados e identidade](#644-conhecimento-dados-e-identidade)
+    - [6.4.5 Voz, relatórios, alertas e integrações](#645-voz-relatórios-alertas-e-integrações)
+    - [6.4.6 Hospedagem, operação e engenharia](#646-hospedagem-operação-e-engenharia)
+    - [6.4.7 Teams, dependência S5-19 e sequência de homologação](#647-teams-dependência-s5-19-e-sequência-de-homologação)
+    - [6.4.8 Coerência arquitetural e critério de conclusão](#648-coerência-arquitetural-e-critério-de-conclusão)
 - [7. Projeto Visual da Solução](#7-projeto-visual-da-solução)
   - [7.1 Desenvolvimento de Wireframes](#71-desenvolvimento-de-wireframes)
   - [7.2 Desenvolvimento de Mockups](#72-desenvolvimento-de-mockups)
@@ -180,6 +193,10 @@
     - [8.5.9 Execução e verificação reproduzíveis](#859-execução-e-verificação-reproduzíveis)
     - [8.5.10 Geração rastreável de relatório executivo](#8510-geração-rastreável-de-relatório-executivo)
     - [8.5.11 Alerta autônomo de prazo](#8511-alerta-autônomo-de-prazo)
+    - [8.5.12 Webhooks e mensageria integrados (S5-09 a S5-11)](#8512-webhooks-e-mensageria-integrados-s5-09-a-s5-11)
+    - [8.5.13 Contrato de alteração de dados pelo chat (S5-05)](#8513-contrato-de-alteração-de-dados-pelo-chat-s5-05)
+    - [8.5.13.1 SharePoint simulado ampliado (S5-12)](#85131-sharepoint-simulado-ampliado-s5-12)
+    - [8.5.14 Front-end: navegabilidade, estratégia de construção e testes (S5-24)](#8514-front-end-navegabilidade-estratégia-de-construção-e-testes-s5-24)
   - [8.6 Requisitos das APIs de voz (STT/TTS)](#86-requisitos-das-apis-de-voz-stttts)
     - [8.6.1 Objetivo e delimitação](#861-objetivo-e-delimitação)
     - [8.6.2 Entradas, saídas e formatos](#862-entradas-saídas-e-formatos)
@@ -201,7 +218,8 @@
     - [8.9.1 Introdução](#891-introdução)
     - [8.9.2 Benchmark das APIs](#892-benchmark-das-apis)
     - [8.9.3 API escolhida: Azure AI Speech](#893-api-escolhida-azure-ai-speech)
-    - [8.9.4 Referências](#894-referências)
+    - [8.9.4 Implementação da resposta em áudio](#894-implementação-da-resposta-em-áudio)
+    - [8.9.5 Referências](#895-referências)
   - [8.10 Escolha de algoritmo PLN](#810-escolha-de-algoritmo-pln)
     - [8.10.1 Objetivo e protocolo de avaliação](#8101-objetivo-e-protocolo-de-avaliação)
     - [8.10.2 Benchmark e decisão](#8102-benchmark-e-decisão)
@@ -241,6 +259,7 @@
   - [9.4 Testes de Integração](#94-testes-de-integração)
     - [9.4.1 Planejamento](#941-planejamento)
     - [9.4.2 Resultados](#942-resultados)
+  - [9.5 Consolidação final dos testes](#95-consolidação-final-dos-testes)
 - [10. Procedimentos de Implantação](#10-procedimentos-de-implantação)
   - [10.1 Implantação e Configuração do Banco de Dados](#101-implantação-e-configuração-do-banco-de-dados)
     - [10.1.1 Preflight do esquema](#1011-preflight-do-esquema)
@@ -267,6 +286,23 @@
   - [11.7 Defesa das premissas e dos valores](#117-defesa-das-premissas-e-dos-valores)
   - [11.8 Fluxo de caixa sintético](#118-fluxo-de-caixa-sintético)
   - [11.9 Conclusão da viabilidade](#119-conclusão-da-viabilidade)
+  - [11.10 Custos de implementação da PoC e da solução final](#1110-custos-de-implementação-da-poc-e-da-solução-final)
+- [12. Benefícios Entregues e Aperfeiçoamentos Futuros](#12-benefícios-entregues-e-aperfeiçoamentos-futuros)
+  - [12.1 Benefícios entregues](#121-benefícios-entregues)
+  - [12.2 Aperfeiçoamentos futuros](#122-aperfeiçoamentos-futuros)
+- [13. Plano de Adoção e Mobilização do Ecossistema](#13-plano-de-adoção-e-mobilização-do-ecossistema)
+  - [13.1 Mapa de adoção e aculturamento organizacional](#131-mapa-de-adoção-e-aculturamento-organizacional)
+    - [13.1.1 Público-alvo principal](#1311-público-alvo-principal)
+    - [13.1.2 Barreiras culturais e técnicas esperadas](#1312-barreiras-culturais-e-técnicas-esperadas)
+    - [13.1.3 Ações de onboarding e educação](#1313-ações-de-onboarding-e-educação)
+  - [13.2 Mecanismos de incentivo e engajamento](#132-mecanismos-de-incentivo-e-engajamento)
+    - [13.2.1 Utilidade e ganho de produtividade](#1321-utilidade-e-ganho-de-produtividade)
+    - [13.2.2 Governança e voz ativa](#1322-governança-e-voz-ativa)
+    - [13.2.3 Comunidade e reconhecimento](#1323-comunidade-e-reconhecimento)
+    - [13.2.4 Indicadores de uso e qualidade](#1324-indicadores-de-uso-e-qualidade)
+- [14. Consolidação documental e auditoria](#14-consolidação-documental-e-auditoria-do-repositório)
+  - [14.1 Auditoria do Escritório de Projetos](#141-auditoria-dos-critérios-do-escritório-de-projetos)
+  - [14.2 Instalação e identidade na versão S5](#142-instalação-e-identidade-na-versão-s5)
 - [Referências](#referências)
 
 # 1. Introdução
@@ -285,7 +321,7 @@ A Tabela 1 apresenta os principais termos e abreviações utilizados ao longo de
 | Termo | Descrição |
 |---------|-----------|
 | AI | Artificial Intelligence (Inteligência Artificial). |
-| Copilot | Assistente de Inteligência Artificial da Microsoft utilizado como interface conversacional da solução. |
+| Copilot | Assistente de Inteligência Artificial da Microsoft já usado pelo Metrô. Na solução, o acesso ao agente pelo Copilot está previsto por servidor MCP (S5-18); o Copilot Studio não foi disponibilizado pelo parceiro. |
 | IA | Inteligência Artificial. |
 | LLM | Large Language Model, modelo de linguagem utilizado para compreensão e geração de linguagem natural. |
 | PLN | Processamento de Linguagem Natural, conjunto de técnicas utilizadas para interpretação das solicitações dos usuários. |
@@ -300,7 +336,7 @@ A Tabela 1 apresenta os principais termos e abreviações utilizados ao longo de
 | Teams | Plataforma Microsoft Teams utilizada como principal interface de interação com o agente. |
 | MVP | Minimum Viable Product (Produto Mínimo Viável), correspondente à primeira versão funcional da solução. |
 | SharePoint | Plataforma Microsoft utilizada para armazenamento e organização de documentos corporativos. |
-| Power Platform | Conjunto de ferramentas Microsoft utilizado para desenvolvimento da solução, incluindo Power Automate, Copilot Studio e demais componentes do ecossistema. |
+| Power Platform | Conjunto de ferramentas Microsoft do ambiente do Metrô, que inclui Power Automate e Copilot Studio. Na solução, apenas o Power Automate é usado, como integração opcional dos workflows de relatório. |
 
 ---
 
@@ -596,7 +632,7 @@ Além dos mapas visuais, as jornadas foram sintetizadas em etapas funcionais par
 | Carlos | Investigar desvios | Aprofundar atrasos, riscos e impactos antes de acionar líderes | Retrabalho para cruzar Power BI, documentos e relatos | Comparação estruturada entre projetos e recuperação de evidências |
 | Carlos | Coordenar ações do subportfólio | Direcionar responsáveis com base em informação confiável | Baixa confiança em respostas sem contexto | Respostas com fonte, limitação explícita e indicação de dados ausentes |
 
-#### 2.5.2.1 Mapa de jornada - Roberto
+#### 2.5.2.1 Mapa de jornada de Roberto
 
 <div align="center">
   <img src="img/User Journey Map - Roberto.png" alt="Mapa de Jornada do Usuário - Roberto" width="900">
@@ -607,7 +643,7 @@ A jornada de Roberto representa a experiência de um usuário com perfil executi
 
 Com a introdução da solução, Roberto passa a buscar uma síntese rápida e confiável por meio de consultas ao novo agente, fazendo perguntas por texto ou voz e aprofundando pontos críticos conforme necessário. Nessa etapa, a principal oportunidade está em evidenciar a confiabilidade das fontes, oferecer respostas objetivas e guiar aprofundamentos. Ao avançar para a definição de prioridades e direcionamentos, Roberto compara cenários, discute com gestores e define ações com maior segurança, utilizando a solução para compreender impactos e apoiar decisões de alta responsabilidade. Por fim, ao verificar os impactos das decisões tomadas, ele acompanha mudanças relevantes, indicadores e direcionamentos anteriores, com a expectativa de antecipar novos riscos e avaliar se as decisões produziram os efeitos esperados.
 
-#### 2.5.2.2 Mapa de jornada - Mariana
+#### 2.5.2.2 Mapa de jornada de Mariana
 
 <div align="center">
   <img src="img/User Journey Map - Mariana.png" alt="Mapa de Jornada do Usuário - Mariana" width="900">
@@ -623,7 +659,7 @@ A terceira fase é a que mais depende da confiança. Ao consultar o agente para 
 
 Nas duas fases finais, Mariana produz a análise para decisão e fecha o ciclo. Na quarta, monta o material executivo e revisa números e referências, sujeita a retrabalho sempre que um dado muda depois da consolidação — o que a prévia de relatório executivo mensal, gerada a partir dos dados já consolidados, reduz. Na quinta, levanta as pendências de preenchimento e aciona os responsáveis, tarefa hoje feita pessoa por pessoa a cada mês e que o lembrete proativo via Teams passa a executar. As cinco fases dessa jornada correspondem, nessa ordem, às cinco linhas de Mariana na tabela de etapas apresentada acima.
 
-#### 2.5.2.3 Mapa de jornada - Carlos
+#### 2.5.2.3 Mapa de jornada de Carlos
 
 <div align="center">
   <img src="img/User Journey Map - Carlos.png" alt="Mapa de Jornada do Usuário - Carlos" width="900">
@@ -1352,6 +1388,57 @@ Ficam como evolução prevista a integração com o portfólio real do Metrô, a
 
 Dessa forma, nosso principal objetivo é auxiliar o Metrô a otimizar a gestão de seu portfólio de projetos por meio de um agente inteligente, conversacional e integrado ao ambiente corporativo já utilizado pela organização. A solução fortalece a governança, reduz retrabalho, melhora a qualidade dos dados e apoia decisões mais rápidas e assertivas, contribuindo para uma gestão de projetos mais eficiente, padronizada e orientada por informações confiáveis.
 
+### 2.9.1 Revisão do Canvas após a implementação
+
+O Canvas da Figura 12 representa a proposta de valor completa definida na Sprint 1. Esta revisão confronta cada bloco com o que a prova de conceito efetivamente entregou e com o que a implementação ensinou sobre o cliente. O perfil do cliente muda pouco, porque as necessidades do PMO não mudaram. O mapa de valor muda mais, porque passa a mostrar o que existe, e não o que se pretendia construir.
+
+<div align="center">
+  <img src="img/canvas-proposta-valor-revisado.svg" alt="Canvas de Proposta de Valor revisado, com o mapa de valor entregue pela prova de conceito à esquerda e o perfil do cliente à direita, cada item marcado como mantido, revisado ou novo" width="100%">
+  <p><strong>Figura 13</strong> - Canvas de Proposta de Valor revisado após a implementação.</p>
+  <sup>Fonte: Material produzido pelos autores, 2026, a partir do Canvas da Sprint 1 e das evidências das Seções 8, 9 e 10.</sup>
+</div>
+
+Os itens não listados abaixo foram mantidos sem alteração, porque continuam descrevendo o cliente ou foram entregues como previstos: o agente conversacional com PLN, a automação dos relatórios do portfólio e o destaque de riscos e marcos críticos, que o relatório executivo entrega em seção própria de riscos e pontos de atenção.
+
+| Bloco | Sprint 1 | Revisão | Motivo |
+| --- | --- | --- | --- |
+| Dores | — | Desconfiança em IA sem fonte citada *(novo)* | A experiência anterior do Metrô com IA generativa sem lastro documental (Seção 2.2) é a dor mais decisiva para a adoção e não aparecia no canvas |
+| Ganhos | — | Confiança no número apresentado *(novo)* | Ganho correspondente à nova dor: o PMO precisa sustentar cada número com sua origem ao responder à diretoria (Seção 2.5.2) |
+| Tarefas do cliente | Consolidar status para a diretoria | Consolidar o balanço mensal do portfólio | A jornada de Mariana mostrou que a tarefa concreta é o balanço mensal, que concentra o esforço manual descrito na Seção 2.2 |
+| Produtos e serviços | Entrada de status por texto ou voz | Consulta por texto ou por voz | Foi entregue a consulta por voz, com transcrição pelo Azure AI Speech (Seção 8.8); a atualização de status por voz não foi construída |
+| Produtos e serviços | Geração de relatórios executivos | Relatório executivo e alerta de prazo | O alerta autônomo de prazo foi entregue junto do relatório (Seções 8.5.10 e 8.5.11) |
+| Analgésicos | Entrevista guiada para documentos | Fluxo guiado no chat para configurar relatório e alerta | O fluxo guiado existe, mas para relatório e alerta; o preenchimento assistido do Termo de Abertura e do Mapa de Benefícios não foi construído e passa para a Seção 12.2 |
+| Analgésicos | Cobrança de atualizações via Teams | Alerta que cobra prazos na central de notificações | A cobrança é automática, mas chega pela central de notificações da interface web; o canal Teams depende de homologação (Seção 12.2) |
+| Analgésicos | Redução do retrabalho do PMO | Resposta com fonte citada e limite declarado *(novo)* | O item original descrevia um resultado, e não um mecanismo. A citação de fonte é o analgésico da nova dor, com 91,67% de respostas fundamentadas (Seção 9.2) |
+| Criadores de ganho | Acelera a tomada de decisão | Resposta em tempo de conversa | A promessa genérica passou a ter medida: P95 de 7,0 a 7,6 s na consulta simples (Seção 9.2) |
+| Criadores de ganho | — | Próximo passo sugerido, com confirmação *(novo)* | A sugestão proativa, explorada na prototipação da Seção 3.8, foi implementada sob controle do usuário (RF09 e RF10) |
+
+**A lacuna mais visível entre a proposta e a entrega.** A dor "cronogramas com inconsistências" permanece no perfil do cliente, mas o mapa de valor não tem mais um analgésico direto para ela. A validação que a atenderia, descrita no texto do Canvas da Sprint 1 — soma dos pesos do cronograma em 100%, coerência de datas e presença de campos obrigatórios —, faz parte do preenchimento assistido de documentos, que não foi construído. O encaixe entre o mapa de valor e o perfil do cliente é, por isso, mais forte nas dores ligadas à consulta e ao reporte do que nas ligadas ao registro dos dados.
+
+### 2.9.2 Objetivos de Desenvolvimento Sustentável
+
+A análise abaixo parte dos elementos do próprio projeto, e não da lista dos dezessete objetivos da Agenda 2030 (Nações Unidas Brasil, 2026). Para cada objetivo, indica-se a meta a que o projeto se relaciona e o elemento que sustenta a relação. A distinção entre contribuição direta e indireta é deliberada: o agente apoia a gestão de um portfólio de projetos, e não executa os projetos.
+
+**Objetivos atendidos**
+
+| ODS | Meta | Elemento do projeto | Natureza da contribuição |
+| --- | :---: | --- | --- |
+| 16 — Paz, justiça e instituições eficazes | 16.6 — instituições eficazes, responsáveis e transparentes | O Metrô é uma empresa pública. O agente cita a fonte de cada resposta, declara quando não sabe, respeita os perfis de acesso e registra cada interação em trilha de auditoria (`ai_interactions`, `consulted_sources` e `audit_events`) | **Direta.** Uma decisão sobre o portfólio público passa a ter registro de qual informação a sustentou e de quem a consultou |
+| 9 — Indústria, inovação e infraestrutura | 9.1 — infraestrutura de qualidade, confiável e resiliente | O agente apoia a governança do portfólio de projetos de infraestrutura de transporte do Metrô, com alerta autônomo de prazo, relatório executivo com riscos e consulta fundamentada | **Indireta.** O agente não constrói infraestrutura, mas encurta o tempo entre um desvio de prazo ou um risco e a decisão sobre ele, que é onde atrasos de obra se acumulam |
+| 11 — Cidades e comunidades sustentáveis | 11.2 — sistemas de transporte seguros, acessíveis e sustentáveis | O portfólio apoiado reúne projetos de expansão e modernização do transporte metropolitano de São Paulo | **Indireta e mais distante.** Depende de o ganho de gestão se converter em entregas mais próximas do prazo. O projeto não mede esse efeito e o registra como hipótese |
+
+**Objetivos potencialmente ameaçados**
+
+| ODS | Meta | Como o projeto pode ameaçá-lo | O que o projeto faz a respeito |
+| --- | :---: | --- | --- |
+| 8 — Trabalho decente e crescimento econômico | 8.5 — emprego pleno, produtivo e decente | Automatizar a consolidação, que é a atividade central do analista do PMO, pode ser lido como substituição da função ou reduzi-la a revisar o que o agente produz | O desenho mantém a pessoa como quem decide: o fluxo TO-BE da Seção 2.6 deixa ao líder iniciar, revisar e aprovar, e relatório e alerta exigem confirmação. O plano de adoção trata a consolidação como tempo liberado para análise (Seção 13). O destino desse tempo é decisão do Metrô, e não da solução |
+| 10 — Redução das desigualdades | 10.2 — inclusão de todos | No teste de usabilidade, as quatro dicas do moderador foram todas para participantes de familiaridade média ou baixa com agentes conversacionais (Seção 9.3.2). Numa equipe, o ganho tende a se concentrar em quem já é fluente nesse tipo de ferramenta | Fluxos guiados com opções a escolher, cartão de perguntas por perfil e multiplicadores por subportfólio (Seção 13.1.3) |
+| 16 — Paz, justiça e instituições eficazes | 16.6 — instituições responsáveis e transparentes | O mesmo objetivo que o projeto atende pode ser ameaçado por ele. A taxa de alucinação medida é de 4,17% (Seção 9.2), e uma resposta errada apresentada com fonte citada pode dar aparência de lastro a uma decisão mal fundamentada numa empresa pública | Limite de 5% de alucinação no RNF04, fonte verificável em cada resposta e indicador mensal que suspende a expansão do uso quando sai da meta (Seção 13.2.4) |
+| 7 — Energia limpa e acessível | 7.3 — eficiência energética | Cada consulta consome energia na inferência local do encoder de linguagem e na chamada ao provedor generativo, e o consumo cresce com a adoção | A classificação local decide antes de chamar o modelo generativo, solicitações fora de escopo não chegam ao provedor e o cache VHS evitou quatro de cinco transcrições repetidas (Seções 8.11.5 e 9.4.2). O consumo energético não foi medido |
+
+**Leitura de conjunto.** A contribuição mais sólida do projeto é para o ODS 16, porque decorre de mecanismos que existem e foram medidos — fonte citada, trilha de auditoria e controle de acesso —, e não de uma cadeia de efeitos. A mesma solidez vale para a principal ameaça, que incide sobre o mesmo objetivo: é a confiabilidade das respostas que sustenta a contribuição, e é ela que precisa ser acompanhada depois da implantação. As contribuições aos ODS 9 e 11 são reais, mas indiretas, e não devem ser apresentadas como resultado do projeto sem medição posterior.
+
+
 ---
 
 ## 2.10 Business Drivers
@@ -1682,7 +1769,7 @@ A modelagem considera a `Solicitacao` como elemento de entrada do sistema. Cada 
   <img src="img/modelagem-estatica.png" alt="Modelagem estática inicial dos requisitos funcionais" width="100%">
 </div>
 
-<p align="center"><strong>Figura 13</strong> - Modelagem estática inicial dos requisitos funcionais.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 14</strong> - Modelagem estática inicial dos requisitos funcionais.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/modelagem-estatica.puml`](diagrams/modelagem-estatica.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -1723,7 +1810,7 @@ Este cenário representa uma solicitação como **"Qual o prazo do projeto XPTO?
   <img src="img/sequencia-cenario-1.png" alt="Cenário 1 — Consulta de informação de um projeto" width="100%">
 </div>
 
-<p align="center"><strong>Figura 14</strong> - Cenário 1 — Consulta de informação de um projeto.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 15</strong> - Cenário 1 — Consulta de informação de um projeto.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-cenario-1.puml`](diagrams/sequencia-cenario-1.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -1741,7 +1828,7 @@ Este cenário representa uma solicitação como **"Compare os riscos e os prazos
   <img src="img/sequencia-cenario-2.png" alt="Cenário 2 — Análise e comparação entre projetos" width="100%">
 </div>
 
-<p align="center"><strong>Figura 15</strong> - Cenário 2 — Análise e comparação entre projetos.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 16</strong> - Cenário 2 — Análise e comparação entre projetos.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-cenario-2.puml`](diagrams/sequencia-cenario-2.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -1759,7 +1846,7 @@ Este cenário representa o comportamento do pipeline após identificar a intenç
   <img src="img/sequencia-cenario-3.png" alt="Cenário 3 — Roteamento híbrido e sugestão proativa" width="100%">
 </div>
 
-<p align="center"><strong>Figura 16</strong> - Cenário 3 — Roteamento híbrido e sugestão proativa.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 17</strong> - Cenário 3 — Roteamento híbrido e sugestão proativa.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-cenario-3.puml`](diagrams/sequencia-cenario-3.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -1816,13 +1903,13 @@ Os requisitos não funcionais definem os atributos de qualidade que a solução 
 | ID | Categoria | Requisito Não Funcional | Critério de verificação | Prioridade | Status |
 | :---: | --- | --- | --- | :---: | :---: |
 | RNF01 | Confidencialidade | A solução não deve processar dados reais ou sensíveis do portfólio em serviços externos não homologados pelo Metrô. No MVP, o desenvolvimento e os testes devem utilizar dados sintéticos ou anonimizados. | Verificar que 100% da base utilizada na prova de conceito é sintética ou anonimizada e que o pipeline não depende do envio de dados sensíveis para serviços externos não homologados. | Muito Alta | Não iniciado |
-| RNF02 | Controle de acesso | A solução deve respeitar os limites de permissão e acesso à informação de cada perfil de usuário. | Validar, em cenários simulados, que 100% das respostas retornadas a usuários com perfis distintos estejam compatíveis com suas permissões e responsabilidades. | Muito Alta | Não iniciado |
+| RNF02 | Controle de acesso | A solução deve respeitar os limites de permissão e acesso à informação de cada perfil de usuário. | Validar, em cenários simulados, que 100% das respostas retornadas a usuários com perfis distintos estejam compatíveis com suas permissões e responsabilidades. | Muito Alta | Atendido no MVP com Supabase Auth, regras por perfil e escopo, testes automatizados e validação real |
 | RNF03 | Rastreabilidade | A solução deve registrar as consultas realizadas, a intenção classificada, as fontes consultadas e a resposta retornada, permitindo auditoria técnica das interações. | Verificar que 100% das interações testadas geram registros estruturados contendo identificação do usuário ou perfil simulado, carimbo de tempo, intenção identificada, documentos recuperados e resposta produzida. | Muito Alta | Não iniciado |
 | RNF04 | Confiabilidade das respostas | As respostas geradas pelo agente devem ser fundamentadas nas informações recuperadas dos dados disponíveis, evitando apresentar como fato informações não sustentadas pela base. | Em testes com dados sintéticos, atingir taxa de respostas fundamentadas igual ou superior a 90% e taxa de alucinação igual ou inferior a 5% nas solicitações pertencentes ao escopo do MVP. | Muito Alta | Atendido na Sprint 4 |
 | RNF05 | Desempenho | O pipeline deve processar solicitações textuais em tempo compatível com uma interação conversacional. | Em ambiente de MVP, responder consultas simples em até 10 segundos e análises comparativas em até 20 segundos, considerando o tempo entre o recebimento da solicitação pela API e o retorno da resposta estruturada. | Alta | Atendido na Sprint 4 (3ª rodada) |
 | RNF06 | Qualidade do PLN | O núcleo de PLN deve apresentar desempenho mínimo aceitável na classificação de intenções e na recuperação de informações. | Em conjunto de teste sintético, atingir F1 macro igual ou superior a 0,80 na classificação de intenções e recall igual ou superior a 0,80 na recuperação de informações. | Muito Alta | Reprovado na Sprint 4: F1 0,832724; *recall*@3 0,555556; IC 95% [0,440874; 0,664609] |
 | RNF07 | Usabilidade conversacional | A interação deve permitir solicitações em linguagem natural, sem exigir que o usuário conheça comandos técnicos, estrutura dos dados ou nomes internos dos componentes. | Validar, por meio de casos de teste e testes com usuários, que pelo menos 80% das solicitações formuladas em português sejam compreendidas corretamente ou recebam orientação adequada para reformulação. | Alta | Não iniciado |
-| RNF08 | Aderência tecnológica | A solução deve priorizar tecnologias compatíveis com o ecossistema Microsoft já utilizado pelo Metrô, incluindo Teams, Copilot Studio, Power Platform, SharePoint e Azure. | Verificar que a arquitetura proposta utiliza o Teams como canal principal, API documentada em OpenAPI para integração e componentes compatíveis com o ambiente homologável pelo parceiro. | Muito Alta | Não iniciado |
+| RNF08 | Aderência tecnológica | A solução deve priorizar tecnologias compatíveis com o ecossistema Microsoft já utilizado pelo Metrô (Teams, SharePoint, Entra ID e Azure), sem depender de serviços que o parceiro não disponibilizou, como o Copilot Studio. | Verificar que a API está documentada em OpenAPI válido, que cada componente do runtime tem equivalente Microsoft mapeado na Seção 6.4 e que o canal web pode ser publicado no Teams e acessado pelo Copilot por MCP sem exigir Copilot Studio. Revisado na S5-43 após a decisão do Metrô. | Muito Alta | Não iniciado |
 | RNF09 | Portabilidade | O núcleo de PLN deve ser independente da plataforma final de gestão do portfólio, permitindo substituição futura da camada de dados sem reescrita do pipeline principal. | Verificar que o pipeline consome dados por interfaces ou formatos estruturados e pode ser executado localmente, em contêiner ou em serviço publicado. | Alta | Não iniciado |
 | RNF10 | Manutenibilidade | O código e os artefatos técnicos devem ser organizados de forma a facilitar testes, evolução e manutenção pela equipe. | Validar a existência de separação entre interface, lógica de negócio e acesso a dados, documentação da API, testes automatizados e instruções de execução do serviço. | Alta | Não iniciado |
 | RNF11 | Disponibilidade e tratamento de falhas | A solução deve tratar falhas de classificação, recuperação, indisponibilidade de fonte ou ausência de informação sem interromper a experiência do usuário. | Verificar que 100% dos cenários de erro previstos retornam mensagens controladas, indicando a limitação encontrada, sem expor detalhes técnicos desnecessários ao usuário final. | Alta | Não iniciado |
@@ -1863,9 +1950,11 @@ O parágrafo acima, escrito na Sprint 1, já declara que as metas numéricas des
 
 **O que a revisão não altera.** O resultado da 1ª rodada foi medido com os critérios congelados antes da execução e permanece **não atendido** (Seção 9.2.7). A Seção 9.2.1 proíbe usar resultados observados para flexibilizar a meta depois da medição; por isso as decisões acima valem somente a partir da rodada indicada em cada uma, registradas antes de executá-la, e nenhuma é aplicada retroativamente a uma rodada anterior.
 
-**Provedor da bancada e provedor de produção.** O RNF05 não foi restringido a um ambiente específico. A bancada de teste (Seção 3.4.2.1) usa o Gemini no *Free Tier* para não gerar custo, e esse provedor, sozinho, não comporta o teto: a chamada trivial mede de 14,7 s a 37,7 s. No ambiente do Metrô, o agente usará o Copilot Studio com modelos GPT, no ecossistema Microsoft, e a latência desse provedor é medida na homologação. O piso do *Free Tier* é, portanto, característica da bancada, e não do produto.
+**Provedor da bancada e provedor de produção.** O RNF05 não foi restringido a um ambiente específico. A bancada de teste (Seção 3.4.2.1) usa o Gemini no *Free Tier* para não gerar custo, e esse provedor, sozinho, não comporta o teto: a chamada trivial mede de 14,7 s a 37,7 s. No ambiente do Metrô, o modelo de produção será o aprovado pela GTI no Azure (Azure OpenAI/Microsoft Foundry, Seção 6.4.3), e a latência desse provedor é medida na homologação. O Copilot Studio não foi disponibilizado e não é o provedor da solução. O piso do *Free Tier* é, portanto, característica da bancada, e não do produto.
 
 ## 3.3 Visão Inicial sobre a Solução Técnica de Engenharia
+
+> **Leitura desta seção.** A Seção 3.3 registra o esboço da Sprint 1, quando o canal previsto era o Microsoft Teams com o Copilot Studio como orquestrador. O Metrô não disponibilizou o Copilot Studio (Seção 6.4.1), e a solução implementada usa chat web, workflows guiados do backend e acesso ao Copilot previsto por servidor MCP. A arquitetura vigente está na Seção 5.2, a implantação na Seção 6.1 e o mapeamento para o ecossistema Microsoft na Seção 6.4. O texto e a Figura 18 abaixo são mantidos como registro histórico.
 
 Esta seção apresenta o esboço preliminar da solução como um conjunto de blocos conectados, organizados nas três camadas previstas para o projeto: interface humano-computador, lógica de negócio e acesso a dados e serviços. O objetivo é registrar **como os componentes se relacionam**, ou seja, quais falam com quais, em que sentido e por meio de qual interface. O detalhamento interno de cada bloco fica para as seções de modelagem e de solução técnica das próximas sprints.
 
@@ -1883,11 +1972,11 @@ O esboço traduz a divisão em dois pilares definida pelo parceiro no Termo de A
 
 ### 3.3.2 Diagrama de Componentes (UML)
 
-A Figura 17 representa os componentes da solução e suas conexões. O diagrama mostra a **estrutura**, isto é, quais componentes se conectam a quais e em que sentido. A sequência de uma solicitação típica está descrita em 3.3.3.
+A Figura 18 representa os componentes da solução e suas conexões. O diagrama mostra a **estrutura**, isto é, quais componentes se conectam a quais e em que sentido. A sequência de uma solicitação típica está descrita em 3.3.3.
 
 ![Diagrama de componentes da solução, organizado nas camadas de interface humano-computador, lógica de negócio (Pilar 1 e Pilar 2), acesso a dados e serviços, e camada transversal](img/componentes-mvp.png)
 
-<p align="center"><strong>Figura 17</strong> - Visão inicial da solução técnica: diagrama de componentes do MVP sobre dados sintéticos.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 18</strong> - Visão inicial da solução técnica: diagrama de componentes do MVP sobre dados sintéticos.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/componentes-mvp.puml`](diagrams/componentes-mvp.puml). Para regerar a imagem é necessário ter o PlantUML e o Graphviz instalados:
 
@@ -1922,7 +2011,7 @@ Esta seção apresenta a seleção inicial de tecnologias e ferramentas consider
 
 As tecnologias apresentadas nesta seção são classificadas entre aquelas previstas para utilização no **MVP**, desenvolvido e validado sobre dados sintéticos, e aquelas consideradas como alternativas ou possibilidades de evolução. Essa distinção é necessária porque o TAPI estabelece que a integração com o portfólio real do Metrô constitui uma evolução do MVP, não sendo requisito para a validação inicial da solução.
 
-> **Leitura desta seção.** A Seção 3.4 registra a visão de tecnologias formulada na Sprint 1. As decisões de canal permanecem válidas: o agente é entregue no Microsoft Teams, com o Copilot Studio como orquestrador. A Sprint 2 acrescentou o detalhamento que aqui aparece apenas como direção — os requisitos comuns das APIs de voz estão na Seção 8.6, os benchmarks de STT e TTS estão nas Seções 8.7 e 8.8, o benchmark do algoritmo de PLN está na Seção 8.10 e a arquitetura consolidada, com o papel de cada componente, na Seção 5.2.
+> **Leitura desta seção.** A Seção 3.4 registra a visão de tecnologias formulada na Sprint 1. As decisões de canal desta visão foram revistas: o Metrô não disponibilizou o Copilot Studio, o canal implementado é o chat web, a publicação como aba no Teams depende da S5-19 e o acesso pelo Copilot está previsto por servidor MCP (S5-18). A Sprint 2 acrescentou o detalhamento que aqui aparece apenas como direção — os requisitos comuns das APIs de voz estão na Seção 8.6, os benchmarks de STT e TTS estão nas Seções 8.7 e 8.8, o benchmark do algoritmo de PLN está na Seção 8.10 e a arquitetura consolidada, com o papel de cada componente, na Seção 5.2.
 
 ### 3.4.1 Critérios de seleção
 
@@ -2099,7 +2188,7 @@ Como possibilidades de evolução, poderão ser consideradas:
 
 ### 3.4.6 Plataforma de execução, confiabilidade e escalabilidade
 
-> Esta subseção consolida a pilha na Sprint 2, incorporando o que foi decidido nas Seções 5.2, 6.2, 8.7 a 8.10. As subseções anteriores permanecem como registro da visão inicial.
+> Esta subseção consolida a pilha na Sprint 2, incorporando o que foi decidido nas Seções 5.2, 6.2, 8.7 a 8.10. As subseções anteriores permanecem como registro da visão inicial. Na S5-43 (#297), a linha de canal foi revista: o canal implementado é o chat web, a identidade operacional é o Supabase Auth e a entrega pelo Teams e pelo Copilot está prevista (Seção 5.2).
 
 **Plataforma de execução**
 
@@ -2115,7 +2204,7 @@ A decisão de não construir cliente próprio é o que torna o suporte a mobile 
 
 | Camada | Tecnologias | Papel |
 |---|---|---|
-| Canal | Microsoft Teams, Copilot Studio | Interface conversacional e orquestração de tópicos |
+| Canal | Chat web (React); aba no Teams e Copilot via MCP previstos | Interface conversacional; os fluxos de múltiplos turnos ficam nos workflows guiados do backend |
 | API da aplicação | Python 3.11, FastAPI, Uvicorn | Endpoint HTTP/JSON, validação de entrada e roteamento |
 | Núcleo de PLN | scikit-learn, PyTorch, Transformers (BERTimbau), nltk, joblib | Classificação de intenção em dois níveis, conforme as Seções 8.10 e 8.11 |
 | Recuperação | Índice vetorial e catálogo local de fontes | Seleção dos trechos que compõem o contexto |
@@ -2604,7 +2693,7 @@ O objetivo da modelagem é representar, de forma simples e implementável, os da
 
 ## 4.1 Especificação da Base de Dados
 
-A base de dados do MVP foi desenhada para funcionar como uma camada intermediária entre o agente conversacional, o núcleo de PLN, o Copilot Studio, os fluxos do Power Automate e as fontes simuladas do SharePoint. Como o projeto utiliza dados sintéticos, a modelagem não replica dados reais do Metrô; ela replica a estrutura necessária para representar projetos, subportfólios, artefatos documentais, cronogramas, avanços físico-econômicos, entregas, marcos, termos de abertura, termos de encerramento, riscos, mudanças, intenções e registros de auditoria.
+A base de dados do MVP foi desenhada para funcionar como uma camada intermediária entre o agente conversacional, o núcleo de PLN, os workflows guiados do backend (com Power Automate opcional) e as fontes simuladas do SharePoint. Como o projeto utiliza dados sintéticos, a modelagem não replica dados reais do Metrô; ela replica a estrutura necessária para representar projetos, subportfólios, artefatos documentais, cronogramas, avanços físico-econômicos, entregas, marcos, termos de abertura, termos de encerramento, riscos, mudanças, intenções e registros de auditoria.
 
 A decisão de modelagem adotada foi reduzir a complexidade para um MVP, evitando uma tabela para cada página, lista ou biblioteca do SharePoint. Em vez disso, documentos, links, anexos, prompts, normativos e planilhas são representados pela tabela `project_artifacts`. Quando uma lista do parceiro possui ciclo de vida e campos estruturados relevantes para consulta, ela é representada por uma tabela própria, como `project_progress_updates`, `project_deliverables_milestones`, `project_charters` ou `project_closure_terms`. Quando a origem é apenas documental ou um anexo de suporte, ela permanece como artefato consultável.
 
@@ -2630,7 +2719,7 @@ As principais entidades conceituais do MVP são:
 | Situação de Subportfólio | Registro periódico da situação de um subportfólio, com data de referência, item, situação e ano. |
 | Projeto | Iniciativa acompanhada pelo PMO, associada a um subportfólio e composta por documentos, cronograma, status, riscos e mudanças. |
 | Artefato do Projeto | Fonte de informação vinculada ao projeto, podendo ser TAP, cronograma, relatório, planilha, lista SharePoint, prompt ou normativo. |
-| Extrato de Fonte | Parte extraída de um documento, lista ou planilha para consulta, referência e montagem de contexto controlado no Copilot. |
+| Extrato de Fonte | Parte extraída de um documento, lista ou planilha para consulta, referência e montagem de contexto controlado na geração de respostas. |
 | Item de Cronograma | Linha estruturada extraída de um cronograma, inclusive quando a origem for uma planilha Excel vinculada no SharePoint. |
 | Avanço do Projeto | Medição periódica de avanço físico e econômico previsto e realizado. |
 | Entrega ou Marco | Entrega, marco ou etapa relevante do projeto, com datas prevista e realizada e status de acompanhamento. |
@@ -2656,7 +2745,7 @@ As principais entidades conceituais do MVP são:
   <img src="img/modelo-conceitual.png" alt="Modelo conceitual de dados" width="100%">
 </div>
 
-<p align="center"><strong>Figura 18</strong> - Modelo conceitual de dados.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 19</strong> - Modelo conceitual de dados.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/modelo-conceitual.puml`](diagrams/modelo-conceitual.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -2676,7 +2765,7 @@ Para manter o escopo adequado ao MVP e incorporar o inventário do parceiro, a m
 | subportfolio_status_updates | id | subportfolio_id → subportfolios.id | Armazena a situação periódica do subportfólio por data de referência, item, situação e ano. |
 | projects | id | subportfolio_id → subportfolios.id | Armazena os projetos do portfólio, incluindo status programa/projeto e identificador de origem. |
 | project_artifacts | id | project_id → projects.id | Representa documentos, listas, links, anexos, planilhas, prompts e normativos vindos do SharePoint ou da massa sintética. |
-| source_extracts | id | artifact_id → project_artifacts.id, project_id → projects.id | Armazena extratos consultáveis de documentos, listas e planilhas para composição de contexto no Copilot e rastreabilidade de fontes. |
+| source_extracts | id | artifact_id → project_artifacts.id, project_id → projects.id | Armazena extratos consultáveis de documentos, listas e planilhas para composição de contexto na geração de respostas e rastreabilidade de fontes. |
 | schedule_items | id | project_id → projects.id, artifact_id → project_artifacts.id, parent_item_id → schedule_items.id | Armazena linhas estruturadas de cronograma, inclusive extraídas de Excel. |
 | project_progress_updates | id | project_id → projects.id | Armazena avanço físico e econômico previsto e realizado por data de referência. |
 | project_status_updates | id | project_id → projects.id, artifact_id → project_artifacts.id | Armazena avanço, situação e resumo de status dos projetos. |
@@ -2690,7 +2779,7 @@ Para manter o escopo adequado ao MVP e incorporar o inventário do parceiro, a m
 | users | id | - | Armazena usuários simulados ou autenticados via Entra ID em evolução futura. |
 | access_rules | id | user_id → users.id, subportfolio_id → subportfolios.id, project_id → projects.id | Armazena regras de acesso por usuário, perfil e escopo. |
 | intent_catalog | id | - | Armazena macrointenção, intenção específica, fluxo, handler e limiares do classificador. |
-| prompt_templates | id | intent_id → intent_catalog.id | Armazena templates de prompts padronizados para Copilot, Power Automate, M365 Copilot e PLN local. |
+| prompt_templates | id | intent_id → intent_catalog.id | Armazena templates de prompts padronizados para o provedor de LLM, o Power Automate e o PLN local. |
 | ai_conversations | id | user_id → users.id | Armazena sessões conversacionais. |
 | ai_interactions | id | conversation_id → ai_conversations.id, user_id → users.id, intent_id → intent_catalog.id, prompt_template_id → prompt_templates.id | Armazena pergunta, macrointenção, intenção específica, confianças, handler, alternativas, rota, resposta e status da interação. |
 | consulted_sources | id | interaction_id → ai_interactions.id, artifact_id → project_artifacts.id, extract_id → source_extracts.id, project_id → projects.id | Armazena as fontes consultadas para compor uma resposta. |
@@ -2702,7 +2791,7 @@ Para manter o escopo adequado ao MVP e incorporar o inventário do parceiro, a m
   <img src="img/modelo-logico.png" alt="Modelo lógico de dados" width="100%">
 </div>
 
-<p align="center"><strong>Figura 19</strong> - Modelo lógico de dados.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 20</strong> - Modelo lógico de dados.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/modelo-logico.puml`](diagrams/modelo-logico.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -2730,7 +2819,162 @@ As principais regras de integridade do modelo lógico são:
 - casos de teste de intenção devem preservar template_id e dataset_split para evitar vazamento entre treino, validação e teste;
 - o agente deve consultar access_rules antes de retornar informações restritas;
 - perguntas fora do catálogo devem gerar registros em out_of_scope_requests;
-- leituras, classificações, consultas a fontes, respostas do Copilot e acionamentos de fluxos devem gerar eventos em audit_events.
+- leituras, classificações, consultas a fontes, respostas geradas e acionamentos de fluxos devem gerar eventos em audit_events.
+
+### 4.3.1 Autenticação e controle de acesso do MVP
+
+Para atender ao RNF02 sem introduzir a complexidade de uma solução corporativa
+de identidade, o MVP utiliza o **Supabase Auth** para autenticar quatro usuários
+sintéticos e as tabelas `public.users` e `public.access_rules` para autorizar
+cada operação. A implementação separa as duas responsabilidades: o JWT prova
+quem fez a requisição, enquanto as regras persistidas no PostgreSQL determinam
+o que essa pessoa pode fazer e quais projetos pode consultar.
+
+O desenho foi orientado pelas perguntas das personas fornecidas pelo parceiro.
+Cada perfil recebeu o menor conjunto de permissões e o menor escopo necessário
+para demonstrar seus casos de uso:
+
+| Perfil funcional | `role_name` interno | Escopo da regra | Referência da carga | Leitura | Escrita | Exportação |
+|---|---|---|---|:---:|:---:|:---:|
+| PMO | `pmo` | Portfólio | Todo o portfólio | Sim | Não | Sim |
+| Líder de subportfólio | `lider_subportfolio` | Subportfólio | `MOD` | Sim | Não | Sim |
+| Gerente de projeto | `equipe_projeto` | Projeto | `PRJ-0442` | Sim | Sim | Sim |
+| Consulta | `consulta` | Projeto | `PRJ-0510` | Sim | Não | Não |
+
+A massa da S5-03 também cria o subportfólio `DEMO-ACESSO` e o projeto
+`PRJ-DEMO-ACESSO`, ambos identificados explicitamente como sintéticos. Como a
+regra do líder aponta somente para `MOD`, esse segundo subportfólio permite
+validar a negação cruzada sem usar dados reais.
+
+#### Modelo de identidade e carga sintética
+
+Cada conta é criada em `auth.users` pela API administrativa do Supabase. O UUID
+do claim `sub` é persistido como texto em `public.users.entra_object_id`; essa é
+a ligação entre a identidade autenticada e o usuário de domínio. A função e o
+escopo não são obtidos de `user_metadata`, de campos enviados pelo navegador ou
+de custom claims do token: o backend sempre consulta `public.access_rules`.
+
+A carga é executada por `src/backend/scripts/seed_mvp_access.py` e
+combina a API administrativa do Auth com uma transação no PostgreSQL. Ela usa
+chaves naturais estáveis e operações de atualização/inserção para que possa ser
+executada novamente sem criar contas, usuários ou regras duplicadas. A
+`SUPABASE_SERVICE_ROLE_KEY` é necessária somente nesse comando administrativo;
+ela não é aceita como token de usuário e nunca é enviada ao frontend.
+
+As quatro senhas são configuradas separadamente para criar ou atualizar as
+contas sintéticas pela carga, sem versionar seus valores. No uso normal, a
+pessoa informa a senha na tela; o backend não lê essas quatro variáveis para
+compará-la, pois a validação é feita pelo próprio Supabase Auth:
+
+```ini
+SUPABASE_URL=https://<projeto>.supabase.co
+SUPABASE_PUBLISHABLE_KEY=<chave-publicavel>
+DATABASE_URL=postgresql://<usuario>:<senha>@<host>:5432/<banco>
+SUPABASE_SERVICE_ROLE_KEY=<somente-para-a-carga>
+MVP_AUTH_PMO_PASSWORD=<senha-do-pmo>
+MVP_AUTH_SUBPORTFOLIO_LEADER_PASSWORD=<senha-do-lider>
+MVP_AUTH_PROJECT_MANAGER_PASSWORD=<senha-do-gerente>
+MVP_AUTH_CONSULTA_PASSWORD=<senha-da-consulta>
+```
+
+#### Fluxo de autenticação no backend
+
+`POST /api/access/login` é a única rota interativa pública de autenticação. Ela
+recebe a persona e a senha, traduz a persona para o e-mail fixo da respectiva
+conta sintética e solicita uma sessão ao endpoint de senha do Supabase Auth.
+O navegador não precisa conhecer os e-mails das contas. Credenciais incorretas
+retornam `401 INVALID_CREDENTIALS`, enquanto indisponibilidade do provedor
+retorna `503 AUTHENTICATION_UNAVAILABLE`, sem propagar detalhes internos.
+
+Após receber o JWT, o backend também resolve `public.users` e
+`public.access_rules` e confirma que o perfil autenticado corresponde à persona
+selecionada. Só então devolve o token e o resumo seguro do perfil. A senha não é
+persistida nem registrada pela aplicação.
+
+As demais rotas interativas exigem `Authorization: Bearer <JWT>`. A dependência
+central em `app/security/access.py` executa o seguinte fluxo:
+
+1. extrai o Bearer token e rejeita cabeçalhos ausentes ou malformados;
+2. valida o token no servidor com `GET /auth/v1/user`, usando apenas
+   `SUPABASE_PUBLISHABLE_KEY` ou `SUPABASE_ANON_KEY` para identificar o projeto;
+3. usa exclusivamente o `sub` retornado pelo Supabase para localizar
+   `public.users.entra_object_id`;
+4. exige que o usuário e ao menos uma regra de acesso estejam ativos;
+5. constrói um `AccessContext` tipado com o usuário interno, papel, permissões e
+   projetos alcançados pelo escopo da regra.
+
+Tokens expirados ou inválidos retornam `401 UNAUTHENTICATED`. Um usuário válido
+sem cadastro ativo retorna `403 USER_NOT_PROVISIONED`; sem regra ativa, retorna
+`403 ACCESS_RULES_NOT_CONFIGURED`. Chaves administrativas `sb_secret_*` e JWTs
+com papel `service_role` são recusados explicitamente nessa fronteira.
+
+#### Autorização por operação e escopo
+
+O backend converte cada ação em uma permissão de `leitura`, `escrita` ou
+`exportacao`. O escopo `portfolio` alcança todos os projetos; o escopo
+`subportfolio` é expandido somente para seus projetos; e o escopo `project`
+alcança apenas o identificador ou código configurado. Uma referência explícita
+a outro projeto é recusada com `403 OUT_OF_SCOPE_FOR_PROFILE` antes de qualquer
+recuperação ou chamada ao modelo de linguagem.
+
+Essa verificação protege chat, confirmação proativa, áudio, métricas de voz,
+solicitações e artefatos de relatório, workflows e inscrições de alerta e a
+central de notificações. `GET /health` permanece público. Os callbacks técnicos
+representam comunicação máquina a máquina: o relatório usa
+`X-Callback-Token`, enquanto a confirmação de entrega autentica e protege a
+integridade do corpo com HMAC-SHA256 em `X-Webhook-Signature`.
+
+O controle também foi levado à recuperação de contexto. No PostgreSQL, a
+consulta filtra `project_id` antes do ranqueamento. No fallback que lê os JSONs
+do SharePoint simulado, os documentos são filtrados em memória antes da
+pontuação, da montagem do prompt, das fontes e da resposta. Dessa forma, um
+conteúdo fora do escopo não é apenas ocultado na interface: ele não participa
+do contexto enviado ao gerador.
+
+#### Entrada no frontend e ciclo da sessão
+
+Antes de montar a aplicação, a interface apresenta uma tela simples em que a
+pessoa escolhe a persona e informa sua senha. O frontend envia as credenciais
+uma única vez para `POST /api/access/login`; o endpoint autentica no Supabase,
+confere a persona contra o perfil resolvido no banco e devolve o JWT junto de
+nome, e-mail, papel, descrição do escopo e permissões. A persona selecionada
+somente identifica qual conta sintética deve ser autenticada; ela nunca concede
+ou altera acesso.
+
+A senha é descartada assim que a tentativa termina. O JWT permanece apenas no
+estado React durante a sessão e não é gravado em `localStorage`,
+`sessionStorage`, cookie, URL ou conteúdo visível do DOM. O cliente inclui o
+Bearer token em todas as chamadas protegidas. Ao sair ou receber `401`, a
+aplicação aborta requisições em andamento, desmonta o estado do chat e remove os
+dados da sessão. Um `403` mantém a sessão e exibe uma mensagem controlada de
+acesso negado, permitindo que a pessoa continue usando as ações que seu perfil
+possui.
+
+#### Auditoria e rastreabilidade
+
+Após a resolução da identidade, o UUID de `public.users.id` acompanha as novas
+conversas e interações e preenche `ai_interactions.user_id` e
+`audit_events.user_id`. Negativas geram o evento
+`authorization.access_denied`, com status `bloqueado`, correlação, operação e
+escopo solicitado. Uma falha ao gravar a auditoria é registrada como erro
+operacional, mas nunca transforma uma negação em permissão.
+
+#### Validação e limite assumido para o MVP
+
+A carga foi executada duas vezes no mesmo projeto Supabase sem aumentar as
+contagens: permaneceram quatro identidades Auth, quatro usuários públicos e
+quatro regras ativas. A matriz real confirmou que cada persona realizou as
+leituras, escritas ou exportações prometidas e recebeu negação controlada nos
+casos fora de sua permissão ou escopo. Também foram verificados quatro registros
+de interação com `user_id`, doze eventos de auditoria associados e sete
+negações, sem interação criada para pedidos recusados. A jornada de navegador
+teve 12 cenários aprovados, complementada por testes do backend e do frontend.
+
+Para manter o recorte objetivo, o MVP provisiona **uma regra ativa por usuário**.
+Combinações de várias regras com permissões divergentes não fazem parte desta
+entrega. A integração futura com Microsoft Entra ID poderá substituir a origem
+da identidade, preservando a resolução central de contexto, o modelo de escopo
+e a auditoria já implementados.
 
 ## 4.4 Modelo Físico de Dados
 
@@ -2760,7 +3004,7 @@ O modelo físico adota as seguintes decisões:
 - uso de `CHECK CONSTRAINTS` para domínios controlados, como status de projeto, tipo de artefato, tipo de fonte e perfil de usuário;
 - uso de `FOREIGN KEYS` para preservar integridade entre projetos, artefatos, cronogramas, interações, fontes consultadas e auditoria;
 - uso de índices para os principais caminhos de consulta do MVP, como projeto, subportfólio, status, artefato, cronograma, intenção, interação e eventos de auditoria;
-- compatibilidade com o ecossistema Microsoft, registrando o componente alvo da intenção, os prompts usados por Copilot/Power Automate/M365 Copilot e as fontes consultadas a partir do SharePoint.
+- compatibilidade com o ecossistema Microsoft, registrando o componente alvo da intenção, os prompts usados pelo provedor de LLM e pelo Power Automate e as fontes consultadas a partir do SharePoint.
 
 O tratamento das planilhas Excel vinculadas em listas do SharePoint também foi contemplado fisicamente. A tabela `project_artifacts` armazena o link da planilha, a aba e o intervalo de leitura; a tabela `schedule_items` armazena as linhas normalizadas do cronograma, incluindo a referência à aba, linha e intervalo de células de origem; a tabela `source_extracts` preserva extratos textuais ou estruturados quando a planilha também precisar ser usada como fonte consultável; e a tabela `consulted_sources` registra qual documento, extrato, planilha, linha ou intervalo foi utilizado para compor a resposta.
 
@@ -2778,7 +3022,7 @@ O que a Sprint 2 acrescentou foi a camada que faltava: o **domínio persistido**
   <img src="img/classes-consolidado.png" alt="Diagrama de classes consolidado, com o pipeline de processamento, a interação e governança, o conhecimento consultável e o domínio do portfólio" width="100%">
 </div>
 
-<p align="center"><strong>Figura 20</strong> - Diagrama de classes consolidado, unindo o pipeline de processamento e o domínio persistido.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 21</strong> - Diagrama de classes consolidado, unindo o pipeline de processamento e o domínio persistido.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/classes-consolidado.puml`](diagrams/classes-consolidado.puml). Para regerar a imagem, com PlantUML e Graphviz instalados:
 
@@ -2840,7 +3084,7 @@ As tabelas `project_status_updates` e `intent_test_cases` não aparecem como cla
 
 ## 5.2 Diagrama de Componentes da UML
 
-O Diagrama de Componentes representa a **estrutura lógica e técnica dos principais módulos da solução e suas interações**. A representação evidencia as fronteiras entre o chat web como canal de interação, o backend da aplicação, o núcleo autoral de Processamento de Linguagem Natural (PLN), a camada de recuperação aumentada por geração (RAG), os workflows guiados do backend e os serviços de Inteligência Artificial utilizados pela solução. Microsoft Teams, Microsoft Copilot Studio, Microsoft Entra ID e o SharePoint corporativo integram a arquitetura-alvo e são descritos como evolução na Seção 5.2.4 e no capítulo de evolução; eles não participam do runtime atualmente implementado.
+O Diagrama de Componentes representa a **estrutura lógica e técnica dos principais módulos da solução e suas interações**. A representação evidencia as fronteiras entre o chat web como canal de interação, o backend da aplicação, o núcleo autoral de Processamento de Linguagem Natural (PLN), a camada de recuperação aumentada por geração (RAG), os workflows guiados do backend e os serviços de Inteligência Artificial utilizados pela solução. Microsoft Teams, Microsoft Entra ID, o SharePoint corporativo e o acesso pelo Copilot via servidor MCP aparecem como **previstos**: estão no caminho de homologação da Seção 6.4.7, mas não participam do runtime atual. O Copilot Studio não faz parte da arquitetura, porque o Metrô não o disponibilizou.
 
 A arquitetura parte do **chat web** — a bancada React por onde o usuário interage com o agente — e de uma **API da aplicação** (FastAPI), que centraliza o recebimento das mensagens, o gerenciamento da conversa e a integração com os demais componentes. A entrada pode ocorrer por texto ou por voz, cuja transcrição é realizada pelo serviço de Speech-to-Text (Azure AI Speech) antes do processamento do núcleo da aplicação.
 
@@ -2850,11 +3094,11 @@ A partir dessa classificação, a conversa é encaminhada para a capacidade corr
 
 Solicitações associadas a **funcionalidades ou fluxos específicos** são encaminhadas a um **workflow guiado do backend**: o frontend conduz as perguntas estruturadas consumindo a API de sessões e, após a confirmação, o backend executa a operação localmente ou aciona o **Power Automate** por HTTP como fronteira assíncrona opcional, recebendo o resultado por webhook. O modo local/simulador mantém o fluxo executável sem depender do ambiente corporativo.
 
-A Figura 21 apresenta a arquitetura-alvo, na qual a orquestração dos fluxos funcionais é assumida por Microsoft Copilot Studio e Power Automate sobre os serviços corporativos. No runtime atualmente implementado, os componentes mantêm responsabilidades distintas: o **PLN interpreta e roteia**, o **RAG recupera conhecimento**, o **LLM gera respostas fundamentadas a partir do contexto recuperado** e os **workflows guiados do backend executam e orquestram os fluxos funcionais associados às intenções**, com Power Automate opcional e Supabase Storage para os artefatos gerados. Identidade, configuração e rastreabilidade atravessam os demais componentes.
+A Figura 22 apresenta a solução efetivamente implementada, revista na S5-43 ([#297](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/297)), com os componentes previstos em cinza e tracejado. Os componentes mantêm responsabilidades distintas: o **PLN interpreta e roteia**, o **RAG recupera conhecimento**, o **LLM gera respostas fundamentadas a partir do contexto recuperado** e os **workflows guiados do backend executam e orquestram os fluxos funcionais associados às intenções**, com Power Automate opcional e Supabase Storage para os artefatos gerados. Os webhooks de entrada e o RabbitMQ (S5-09 a S5-11, Seção 8.5.12) desacoplam o processamento assíncrono de alertas e de alterações do SharePoint simulado. Identidade, configuração e rastreabilidade atravessam os demais componentes.
 
 <div align="center">
-  <img src="img/componentes-metro-5.2.png" alt="Diagrama de componentes da arquitetura-alvo da solução" width="100%">
-  <p><strong>Figura 21</strong> - Diagrama de componentes da arquitetura-alvo da solução (visão de evolução corporativa; o runtime atual está descrito no texto desta seção e detalhado na Seção 8.5).</p>
+  <img src="img/componentes-metro-5.2.png" alt="Diagrama de componentes da solução implementada, com os componentes previstos destacados" width="100%">
+  <p><strong>Figura 22</strong> - Diagrama de componentes da solução implementada; componentes previstos em cinza e tracejado.</p>
   <sup>Fonte: Material produzido pelos autores, 2026.</sup>
 </div>
 
@@ -2866,43 +3110,41 @@ java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/componentes-
 
 ### 5.2.1 Componentes e responsabilidades
 
-| Componente | Responsabilidade |
-|---|---|
-| **Microsoft Teams** | Canal de interação com o usuário: recebe as solicitações e apresenta respostas, referências e resultados dos fluxos executados, dentro do ambiente de trabalho já utilizado pelas equipes. |
-| **API da Aplicação** | Expor o ponto de entrada HTTP/JSON, centralizar a comunicação entre interface, processamento e retorno das respostas. |
-| **Gerenciador de Conversação** | Manter o contexto necessário da interação e consolidar os resultados produzidos pelas diferentes rotas de processamento. |
-| **Pré-processamento** | Normalizar e preparar o texto para as etapas posteriores do pipeline de PLN. |
-| **Classificador de Intenções** | Identificar a intenção expressa pelo usuário e atribuir a categoria correspondente com sua confiança. |
-| **Catálogo de Intenções** | Associar as intenções reconhecidas às capacidades e funcionalidades disponíveis, determinando o próximo fluxo de processamento. |
-| **Validador de Escopo** | Verificar se a solicitação pertence ao conjunto de interações suportadas pela solução antes do acesso às fontes e aos fluxos. |
-| **Extração de Entidades** | Identificar entidades relevantes para a execução da intenção, como projeto, subportfólio, período e critérios de análise. |
-| **Recuperador RAG** | Buscar conteúdo relevante para consultas documentais a partir do índice vetorial e das fontes integradas. |
-| **Ingestão / Indexação Documental** | Preparar os documentos utilizados pela solução para posterior recuperação semântica. |
-| **Extração e Normalização** | Extrair e organizar o conteúdo proveniente dos documentos utilizados na base de conhecimento. |
-| **Geração de Embeddings** | Transformar os trechos normalizados em representações vetoriais utilizadas na busca semântica. |
-| **Índice Vetorial** | Armazenar embeddings e metadados para permitir a recuperação dos conteúdos mais relevantes. |
-| **Integração com SharePoint** | Intermediar o acesso aos documentos, listas e metadados disponibilizados pelo SharePoint. |
-| **Microsoft Copilot Studio** | Orquestrar os tópicos e fluxos associados às intenções funcionais identificadas pelo PLN. |
-| **Tópicos / Fluxos por Intenção** | Implementar os comportamentos específicos associados às funcionalidades previstas no catálogo de intenções. |
-| **Power Automate** | Executar automações e operações de integração necessárias aos fluxos funcionais. |
-| **API de LLM** | Gerar respostas em linguagem natural a partir do contexto recuperado pelo RAG. O provedor não está definido: a integração é feita por interface HTTP substituível, e a escolha será registrada quando o benchmark for realizado. |
-| **Azure AI Speech** | Consumir a API de Speech-to-Text documentada para converter entradas de voz em texto em português brasileiro antes do processamento pelo backend. |
-| **Microsoft Entra ID** | Fornecer a identidade do usuário e apoiar o controle de acesso às funcionalidades e informações. |
-| **Trilha de Auditoria** | Registrar eventos relevantes da interação, incluindo intenção, fontes consultadas e fluxos acionados. |
-| **Configuração / Secrets** | Armazenar configurações e credenciais necessárias aos serviços integrados sem expô-las à interface. |
+| Componente | Situação | Responsabilidade | Implementação |
+|---|---|---|---|
+| **Chat web** | Implementado | Canal de interação: recebe texto e voz, apresenta respostas com fontes, cartões de workflow e notificações. | `src/frontend` |
+| **Aba no Microsoft Teams** | Previsto (S5-19) | Publicar o mesmo frontend como aba, sem reconstruir a interface (Seção 6.4.7). | — |
+| **Copilot via servidor MCP** | Previsto (S5-18) | Expor operações da API como ferramentas MCP para o Copilot do Metrô, sem Copilot Studio. | — |
+| **Rotas de chat e áudio** | Implementado | Ponto de entrada HTTP/JSON (`/api/chat`, `/api/audio`), orquestração do pipeline e consolidação da resposta. | `app/main.py`, `app/pipeline.py` |
+| **Autenticação e escopo de acesso** | Implementado | Validar o JWT do Supabase Auth e resolver as permissões por perfil, subportfólio e projeto. | `app/security` |
+| **Barreira de dado sensível** | Implementado | Bloquear perguntas e mascarar fontes com dado sensível antes de qualquer chamada externa. | `app/security/sensitive_data.py` |
+| **Pré-processamento e entidades** | Implementado | Normalizar o texto e extrair projeto, subportfólio, período e prazos. | `app/nlp/preprocessing.py`, `app/nlp/entities.py` |
+| **Classificador de intenções** | Implementado | Identificar macrointenção e intenção específica com TF-IDF e embeddings do BERTimbau. | `app/nlp/inference.py` |
+| **Roteamento por catálogo e regras** | Implementado | Associar a intenção ao handler do catálogo e aplicar as regras de domínio (fora de escopo, consultas curtas). | `app/nlp/routing.py` |
+| **Recuperador RAG** | Implementado | Buscar trechos por pontuação lexical nos extratos do PostgreSQL ou nas listas simuladas do SharePoint. Não há índice vetorial documental. | `app/rag` |
+| **Contexto, citações e validação** | Implementado | Montar o contexto, exigir citação por afirmação e declarar ausência quando falta evidência. | `app/gemini/evidence.py` |
+| **Cliente de LLM** | Implementado | Chamar o provedor de linguagem (Gemini ou OpenRouter) por interface substituível, com credencial só no backend. | `app/gemini/client.py` |
+| **Workflows guiados** | Implementado | Conduzir relatório, alerta e alteração de dados com perguntas, confirmação, execução e histórico. | `app/reports`, `app/alerts`, `app/data_changes` |
+| **Webhooks de entrada** | Implementado | Receber alterações do SharePoint simulado, confirmações de entrega e resultados do Power Automate, com assinatura HMAC. | `app/sharepoint_webhooks`, `app/alerts/router.py`, `app/reports/router.py` |
+| **RabbitMQ e workers** | Implementado | Publicar a outbox em filas com DLQ e processar alertas e alterações do SharePoint de forma assíncrona e idempotente. | `app/alerts/worker.py`, `app/sharepoint_webhooks/worker.py` |
+| **Trilha de auditoria** | Implementado | Registrar interação, intenção, fontes, workflow e falhas. | `app/database/tracing.py` |
+| **PostgreSQL, Auth e Storage (Supabase)** | Implementado | Persistir portfólio, sessões, auditoria e outbox; autenticar personas; guardar os DOCX gerados. | `src/database/sql` |
+| **Azure AI Speech** | Implementado | Transcrever o áudio (STT) e sintetizar a resposta (TTS) em pt-BR. | `app/audio` |
+| **Power Automate** | Opcional | Executar o relatório por HTTP quando habilitado; o modo local e o simulador mantêm o fluxo sem o ambiente do Metrô. | `app/reports/service.py` |
+| **Entra ID e SharePoint corporativo** | Previsto | Identidade corporativa e fontes reais via Microsoft Graph, conforme a Seção 6.4.4. | — |
 
 ### 5.2.2 Fluxo de interação entre os componentes
 
 O fluxo de uma solicitação conversacional típica ocorre da seguinte forma:
 
-1. O **usuário** envia uma mensagem pelo **Microsoft Teams**. Quando a entrada é realizada por voz, o áudio pode ser encaminhado ao **Azure AI Speech**, que devolve a transcrição em texto.
+1. O **usuário**, autenticado pelo Supabase Auth, envia uma mensagem pelo **chat web**. Quando a entrada é realizada por voz, o áudio é encaminhado ao **Azure AI Speech**, que devolve a transcrição em texto. A aba no Teams e o acesso pelo Copilot via MCP são canais previstos que chegariam à mesma API.
 2. A **API da aplicação** recebe a solicitação por HTTP/JSON e a encaminha ao **gerenciador de conversação**.
 3. O **Pilar 1 — Núcleo de PLN e Roteamento** realiza o pré-processamento, identifica e classifica a intenção, valida se a solicitação está no escopo suportado, associa a intenção ao catálogo de capacidades e extrai as entidades relevantes para o fluxo selecionado.
 4. Após a validação de escopo, o **catálogo de intenções** associa a intenção reconhecida à capacidade responsável pelo processamento da solicitação.
-5. Quando a intenção corresponde a uma **consulta ou dúvida documental**, o **Recuperador RAG** busca os conteúdos relevantes no índice vetorial e, quando necessário, na integração com o **SharePoint**. Os resultados são organizados pelo componente de **Montagem de Contexto**.
+5. Quando a intenção corresponde a uma **consulta ou dúvida documental**, o **Recuperador RAG** busca os conteúdos relevantes por pontuação lexical nos extratos do PostgreSQL ou nas listas simuladas do **SharePoint**. Os resultados são organizados pelo componente de **Montagem de Contexto**.
 6. O contexto recuperado é enviado ao **LLM**, que produz a resposta em linguagem natural. O resultado retorna ao gerenciador de conversação.
 7. Quando a intenção corresponde a uma **funcionalidade estruturada**, o backend inicia um workflow guiado próprio e o frontend apresenta suas perguntas. O Power Automate é uma fronteira assíncrona opcional; o modo local/simulador mantém o fluxo executável sem acesso ao ambiente do Metrô.
-8. O resultado produzido pela rota escolhida é consolidado pelo **backend** e devolvido ao chat web; a integração futura com Microsoft Teams não é requisito do fluxo atual.
+8. O resultado produzido pela rota escolhida é consolidado pelo **backend** e devolvido ao chat web. Eventos assíncronos, como alertas e alterações do SharePoint simulado, seguem pela outbox e pelo RabbitMQ até os workers.
 9. Durante o processamento, os componentes de **identidade e auditoria** registram os elementos necessários para controle de acesso e rastreabilidade da interação.
 
 ### 5.2.3 Relação entre o catálogo de intenções e os fluxos da solução
@@ -2920,10 +3162,10 @@ O catálogo pode, portanto, evoluir juntamente com as funcionalidades priorizada
 
 ### 5.2.4 Decisões arquiteturais refletidas no diagrama
 
-- **O canal de interação é desacoplado da lógica de negócio.** O Teams entrega a mensagem à API da aplicação, que controla o roteamento e a consolidação da resposta. Trocar ou acrescentar um canal não exige reestruturar o núcleo de PLN nem as rotas de atendimento.
+- **O canal de interação é desacoplado da lógica de negócio.** O chat web entrega a mensagem à API da aplicação, e os canais previstos (aba no Teams e Copilot via MCP) usariam a mesma API, que controla o roteamento e a consolidação da resposta. Trocar ou acrescentar um canal não exige reestruturar o núcleo de PLN nem as rotas de atendimento.
 - **O núcleo de PLN permanece independente dos modelos generativos.** A identificação da intenção, o controle de escopo e o roteamento são responsabilidades do Pilar 1.
 - **O catálogo de intenções funciona como mecanismo de roteamento.** A mesma entrada conversacional pode ser direcionada a diferentes capacidades conforme a intenção identificada.
-- **O Copilot Studio foi retirado da arquitetura executável.** Os artefatos exportados permanecem apenas como referência histórica; a orquestração ativa está no backend e no frontend, com Power Automate opcional.
+- **O Copilot Studio não faz parte da arquitetura.** O Metrô não o disponibilizou; os artefatos exportados em `src/agent` permanecem apenas como referência histórica, e a orquestração está no backend e no frontend, com Power Automate opcional. O acesso pelo Copilot está previsto por servidor MCP (S5-18, [#272](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/272)), ainda sem código integrado.
 - **RAG e geração são componentes distintos.** O mecanismo de recuperação seleciona o contexto relevante e o LLM produz a resposta a partir desse contexto. No runtime atual a fonte documental são extratos sintéticos em JSON e no PostgreSQL; o SharePoint corporativo é a fonte prevista na arquitetura-alvo.
 - **A credencial do LLM é protegida no backend.** A interface não acessa diretamente a API generativa nem recebe suas credenciais.
 - **A camada de conhecimento é desacoplada dos canais e da geração.** A fonte documental e o índice podem evoluir sem exigir mudanças estruturais na interface ou no mecanismo de roteamento.
@@ -2945,7 +3187,7 @@ plantuml -charset UTF-8 -tpng -o ../img docs/diagrams/<arquivo>.puml
 ```
 
 
-Os diagramas de sequência desta seção detalham a ordem das interações entre os principais componentes da solução na arquitetura-alvo, na qual o canal é o Microsoft Teams, a identidade vem do Microsoft Entra ID e a orquestração de fluxos funcionais usa o Copilot Studio. No runtime atualmente implementado, o canal é o chat web, a identidade é simulada pelo token da bancada e os fluxos funcionais são conduzidos pelos workflows guiados do backend, com Power Automate como fronteira assíncrona opcional; o núcleo autoral de PLN, o catálogo de intenções, a arquitetura RAG, a geração pelo LLM e o Speech-to-Text permanecem idênticos nos dois cenários.
+Os diagramas de sequência desta seção detalham a ordem das interações entre os principais componentes da solução na arquitetura-alvo, na qual o canal é o Microsoft Teams e a identidade vem do Microsoft Entra ID. No runtime atualmente implementado, o canal é o chat web, a identidade é validada por JWT do Supabase Auth e os fluxos funcionais são conduzidos pelos workflows guiados do backend, com Power Automate como fronteira assíncrona opcional; o núcleo autoral de PLN, o catálogo de intenções, a arquitetura RAG, a geração pelo LLM e o Speech-to-Text permanecem idênticos nos dois cenários.
 
 A seleção dos cenários considera os caminhos centrais da solução: consultas documentais fundamentadas, análises comparativas, direcionamento para fluxos funcionais e entrada por voz. Em todos os casos, o PLN permanece responsável pela interpretação e classificação da solicitação, enquanto o catálogo de intenções determina a capacidade que deverá processá-la. A partir desse roteamento, a solicitação segue para a recuperação e geração de resposta ou para o workflow guiado correspondente no backend.
 
@@ -2961,7 +3203,7 @@ No contexto do MVP, a fonte utilizada para validação é a **base sintética as
   <img src="img/sequencia-rag-consulta.png" alt="Sequência: consulta documental via RAG" width="100%">
 </div>
 
-<p align="center"><strong>Figura 22</strong> - Sequência: consulta documental via RAG.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 23</strong> - Sequência: consulta documental via RAG.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-rag-consulta.puml`](diagrams/sequencia-rag-consulta.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -2983,7 +3225,7 @@ Assim como no cenário anterior, o MVP utiliza a **base sintética associada ao 
   <img src="img/sequencia-rag-comparacao.png" alt="Sequência: análise e comparação entre projetos via RAG" width="100%">
 </div>
 
-<p align="center"><strong>Figura 23</strong> - Sequência: análise e comparação entre projetos via RAG.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 24</strong> - Sequência: análise e comparação entre projetos via RAG.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-rag-comparacao.puml`](diagrams/sequencia-rag-comparacao.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -3003,23 +3245,22 @@ catálogo a associa ao workflow correspondente. A partir desse ponto, o
 frontend conduz as perguntas estruturadas consumindo a API de sessões; após a
 confirmação, o backend executa a operação localmente ou aciona o Power Automate
 por HTTP como fronteira assíncrona opcional e recebe o resultado por webhook.
-A figura abaixo apresenta a orquestração equivalente na arquitetura-alvo, com
-Copilot Studio como plataforma de execução do tópico; no runtime atual esse
-papel é desempenhado pelo próprio backend.
+A figura abaixo apresenta essa orquestração como implementada: o workflow guiado
+do backend conduz as perguntas e executa a operação, sem Copilot Studio.
 
 <div align="center">
-  <img src="img/sequencia-copilot-fluxo.png" alt="Sequência: direcionamento para fluxo funcional via Copilot Studio" width="100%">
+  <img src="img/sequencia-workflow-guiado.png" alt="Sequência: direcionamento para workflow funcional guiado" width="100%">
 </div>
 
-<p align="center"><strong>Figura 24</strong> - Sequência: direcionamento para fluxo funcional via Copilot Studio.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 25</strong> - Sequência: direcionamento para workflow funcional guiado.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
-O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-copilot-fluxo.puml`](diagrams/sequencia-copilot-fluxo.puml) e pode ser regerado com PlantUML e Graphviz instalados:
+O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-workflow-guiado.puml`](diagrams/sequencia-workflow-guiado.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
 ```bash
-java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/sequencia-copilot-fluxo.puml
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/sequencia-workflow-guiado.puml
 ```
 
-Nesta orquestração, o **Copilot Studio não é responsável por descobrir a intenção do usuário**. A decisão já foi tomada pelo núcleo de PLN e pelo catálogo de intenções, e o Copilot Studio atuaria como plataforma de execução do tópico ou fluxo selecionado. No runtime atual esse papel é desempenhado pelo workflow guiado do backend, que conduz as perguntas pelo frontend e consolida o resultado.
+Nesta orquestração, o **workflow guiado não descobre a intenção do usuário**. A decisão já foi tomada pelo núcleo de PLN e pelo catálogo de intenções; o workflow conduz as perguntas pelo frontend, pede confirmação e consolida o resultado.
 
 O retorno do **Power Automate** ocorre somente quando o fluxo efetivamente o aciona; no ramo puramente conversacional, o resultado é consolidado sem automação, evitando associar um retorno de automação a uma operação que não foi executada.
 
@@ -3033,7 +3274,7 @@ Este cenário demonstra a entrada por áudio utilizando a API de **Azure AI Spee
   <img src="img/sequencia-voz-stt.png" alt="Sequência: entrada por voz com Speech-to-Text" width="100%">
 </div>
 
-<p align="center"><strong>Figura 25</strong> - Sequência: entrada por voz com Speech-to-Text.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 26</strong> - Sequência: entrada por voz com Speech-to-Text.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
 O código-fonte do diagrama está versionado em [`docs/diagrams/sequencia-voz-stt.puml`](diagrams/sequencia-voz-stt.puml) e pode ser regerado com PlantUML e Graphviz instalados:
 
@@ -3047,51 +3288,169 @@ O ramo de falha contempla situações documentadas para o serviço de STT, como 
 
 ### 5.3.5 Considerações sobre os cenários
 
-Os quatro cenários apresentados cobrem os principais caminhos de interação da solução. A **consulta documental** representa o fluxo central de recuperação e geração fundamentada; a **análise comparativa** acrescenta a consolidação e interpretação de informações de múltiplos projetos; o **direcionamento para fluxos funcionais** demonstra a integração entre o núcleo de PLN, o catálogo de intenções e os workflows guiados do backend — com Copilot Studio previsto apenas na arquitetura-alvo; e a **entrada por voz** demonstra a utilização da API de Speech-to-Text como modalidade alternativa de entrada.
+Os quatro cenários apresentados cobrem os principais caminhos de interação da solução. A **consulta documental** representa o fluxo central de recuperação e geração fundamentada; a **análise comparativa** acrescenta a consolidação e interpretação de informações de múltiplos projetos; o **direcionamento para fluxos funcionais** demonstra a integração entre o núcleo de PLN, o catálogo de intenções e os workflows guiados do backend — sem dependência do Copilot Studio; e a **entrada por voz** demonstra a utilização da API de Speech-to-Text como modalidade alternativa de entrada.
 
 Em todos os cenários, o núcleo de PLN permanece como ponto comum de interpretação e decisão. A diferença entre os caminhos ocorre somente após a identificação e validação da intenção: consultas e análises documentais seguem para recuperação de contexto e geração de resposta, enquanto intenções funcionais são encaminhadas para o workflow guiado associado no backend.
 
-Os cenários também incorporam os requisitos transversais de **identidade, autorização e rastreabilidade**. Na arquitetura-alvo, a autenticação por Microsoft Entra ID antecede as operações protegidas; no runtime atual a identidade é simulada e o token da bancada habilita voz e relatórios. Em ambos os casos, o acesso às fontes ou serviços deve respeitar as permissões aplicáveis e os eventos relevantes da interação são registrados na trilha de auditoria. No caso de fontes corporativas, a autorização efetiva deve permanecer alinhada ao modelo de permissões do ambiente do Metrô.
+Os cenários também incorporam os requisitos transversais de **identidade, autorização e rastreabilidade**. No runtime atual, o Supabase Auth valida o JWT antes das operações protegidas e `access_rules` restringe permissões e projetos; na arquitetura-alvo, o Microsoft Entra ID poderá substituir o provedor de identidade sem remover essa camada de autorização. Em ambos os casos, o acesso às fontes ou serviços deve respeitar as permissões aplicáveis e os eventos relevantes da interação são registrados na trilha de auditoria. No caso de fontes corporativas, a autorização efetiva deve permanecer alinhada ao modelo de permissões do ambiente do Metrô.
 
 Por fim, a utilização da **base sintética / índice vetorial** nos cenários de recuperação explicita a delimitação do MVP. A arquitetura permanece preparada para receber as fontes corporativas, inclusive SharePoint, em uma evolução posterior, sem fazer da integração com o portfólio real uma dependência da validação inicial.
 
 ---
 
+## 5.4 Arquitetura e integrações no fechamento S5
+
+Data editorial 07/10; estado observado após pull em 06/10:
+`1ff5927a75b79219314068291b1aa43de3fe9674`. Seis frentes adicionais foram integradas;
+publicação, homologação e resultado de teste continuam estados distintos.
+
+O RAG executável usa recuperação lexical em PostgreSQL/exports JSON. Os índices
+vetoriais das visões iniciais são desenho histórico, não componente ativo desta
+versão; a Seção 6.4 detalha essa diferença. O diagrama abaixo descreve as ligações
+implementadas, mas o bloqueio de importação encontrado na Seção 14.1 impede
+declarar que o HEAD atual inicializa sem correção.
+
+### 5.4.1 Componentes e responsabilidades
+
+| Componente | Código/configuração | Responsabilidade |
+|---|---|---|
+| React/TypeScript | [frontend](../src/frontend/README.md) | Chat, áudio, autenticação e notificações; Vite local, nginx no contêiner. |
+| FastAPI | [main.py](../src/backend/app/main.py) | Rotas, validação HTTP, CORS e correlação. |
+| Identidade/acesso | [security](../src/backend/app/security/) | Bearer Supabase e autorização de perfil/escopo. |
+| Orquestração | [pipeline.py](../src/backend/app/pipeline.py) | Guarda de dados, classificação, rota, recuperação e geração. |
+| PLN | [notebooks](../src/notebooks/) e backend | Intenções, entidades, BERTimbau e fallback conforme confiança. |
+| RAG/LLM | [rag](../src/backend/app/rag/) | Contexto e referências; provedor de geração substituível. |
+| Banco | [database](../src/database/README.md) | Catálogo, fontes, rastros, acesso e workflows. |
+| Voz/VHS | [backend](../src/backend/README.md) | Azure STT/VHS e TTS Azure opcional integrado em !123; MP3/base64 e aviso de falha preservam a resposta textual. |
+| Relatórios | [agent](../src/agent/README.md) | Solicitação, confirmação, artefato, repositório/storage e callback. |
+| Alertas | [webhooks](evidencias/sprint-05/webhooks-rabbitmq.md) | Scheduler, outbox, publisher e consumer RabbitMQ; callbacks/tentativas. |
+| Implantação | [compose](../compose.prod.yml), [AWS](../infra/aws/) | Imagens, workers, rede privada e infraestrutura acadêmica. |
+
+### Fluxo e fronteiras de confiança
+
+```mermaid
+flowchart TD
+  U[Usuário] --> F[React]
+  F --> A[FastAPI: bearer e acesso]
+  A --> V[Áudio: Azure STT e VHS]
+  V --> P[Guarda sensível e PLN]
+  A --> P
+  P --> R[Recuperação]
+  R --> L[LLM e referências]
+  P --> W[Workflows]
+  W --> Q[Outbox e RabbitMQ]
+  Q --> C[Consumer e callbacks]
+  P --> D[(PostgreSQL / Supabase)]
+  R --> D
+  W --> D
+  L --> F
+  L --> S[Azure TTS opcional]
+  W --> S
+  S --> F
+  W --> F
+  C --> F
+```
+
+O backend valida identidade/escopo antes da operação. Texto passa pela guarda
+antes de classificação e LLM. Áudio real chega ao Azure antes da guarda textual:
+a barreira não garante que áudio sensível permaneceu na máquina. Classificação
+seleciona rota; consulta recupera contexto e cita fontes; workflows específicos
+evitam geração livre quando há operação definida. Alteração pelo chat exige
+permissão, confirmação e auditoria. Proatividade oferece próximo passo sem
+executá-lo automaticamente. Com banco configurado, rastros correlacionam
+interação, classificação, rota, fontes e operações.
+
+A saída textual pode receber síntese Azure opcional antes de retornar ao
+frontend. Falha ou indisponibilidade de TTS conserva a resposta textual;
+o áudio de saída não substitui a trilha de fontes nem o controle de acesso.
+
+A filtragem usa padrões/metadados; não identifica todos os nomes, endereços ou
+dados confidenciais por significado. A aprovação de testes controlados não
+constitui homologação com todos os dados reais do parceiro.
+
+### Modos de execução e persistência
+
+O banco é necessário para o fluxo autenticado e persistente completo. Fallbacks
+em memória/JSON atendem desenvolvimento/testes específicos. `DATABASE_URL` ou
+`SUPABASE_DATABASE_URL` controla conexão; credenciais ficam fora do Git.
+O Compose da base analisada não repassa a URL e a chave pública de Auth ao
+runtime. A configuração dessas variáveis permanece pendente antes da publicação.
+O compose observado usa `REPORT_REPOSITORY_MODE=memory`,
+`REPORT_STORAGE_MODE=local`, `REPORT_PORTFOLIO_SOURCE=synthetic`, embora alertas
+usem banco. Não torna todo relatório persistido no Supabase automaticamente.
+Ativar os modos database/storage conforme [manual](Manual-instalacao.md).
+
+VHS usa TTL 300s e limite 256 por worker; o compose usa um worker. Caches não
+são compartilhados entre processos. Outbox/callbacks requerem banco, RabbitMQ,
+secrets válidos e tratamento idempotente de reentrega.
+
+### Integrações e estado
+
+| Integração | Evidência e limite |
+|---|---|
+| Azure Speech/VHS real | [Ensaio local](evidencias/sprint-05/vhs-azure-real/README.md): um miss, quatro hits, uma chamada. Não comprova imagem final publicada. |
+| Supabase Auth/perfis | !119 integrado, SQL20/21, security e testes; perfis sintéticos não equivalem a Entra corporativo. |
+| Persistência/auditoria | [Ensaio](testes/sprint4/relatorio-s4-11.md); depende da configuração de runtime. |
+| Gemini/OpenRouter | Abstração e ensaios RNF04/05; quota/modelo/ambiente delimitam resultados. |
+| RabbitMQ/webhooks | [Evidência](evidencias/sprint-05/webhooks-rabbitmq.md); dependência externa de runtime. |
+| Teams/Entra/SharePoint/Copilot corporativos | Não homologados; Azure e JSON com formato SharePoint não provam conexão ao tenant do Metrô. |
+| AWS | Projeto 10.2, demo Learner Lab/URL efêmera; não prova operação sustentada. |
+| TTS, auditoria, gate e testes finais | !123/!117/!120/!124/!130 integrados. RNF07 reprovado; ver resultados abaixo. |
+| Escrita pelo chat e blocos estruturados | Contrato !132 integrado. A integração das implementações !133/!128/!129 não está comprovada por merge na base analisada. |
+
+### Serviços complementares e referências
+
+O código do grupo está neste GitLab; não foi identificado outro repositório
+próprio indispensável. Dependências externas: [FastAPI](https://fastapi.tiangolo.com/),
+[Supabase Auth](https://supabase.com/docs/guides/auth), [RabbitMQ](https://www.rabbitmq.com/docs),
+[Azure Speech](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/).
+Fontes primárias consultadas na auditoria; versões executadas vêm dos manifests
+e locks locais, não da versão mais recente das páginas.
+Requisitos, testes e implantação estão em [Projeto](Projeto.md), com fontes
+editáveis em [diagrams](diagrams/).
+
+
 # 6. Mapeamento técnico de infraestrutura e implantação
 
-Esta seção documenta a estratégia de implantação prevista para a solução, considerando que o projeto ainda está em estágio de PoC acadêmica e que a equipe não possui garantia de acesso a uma assinatura Azure corporativa. Portanto, a implantação descrita aqui não representa um deploy produtivo nem uma pipeline de CI/CD já implementada. O objetivo é registrar uma estratégia reprodutível e simples, capaz de orientar a publicação futura do MVP sem bloquear o desenvolvimento atual.
+Esta seção documenta a implantação da solução. A PoC foi publicada na Sprint 4 em uma EC2 da AWS, com Docker Compose, imagens no ECR, acesso HTTPS pelo Cloudflare Quick Tunnel e Supabase Cloud como banco gerenciado (Seção 10.2). Não é um deploy produtivo: o ambiente serve à demonstração e aos testes com dados sintéticos. A migração para o ambiente corporativo do Metrô está mapeada na Seção 6.4.
 
-A decisão principal é separar o que faz parte do MVP do que deve permanecer como evolução. Para o MVP, a nuvem comercial efetivamente assumida é o **Supabase Cloud**, utilizado como banco PostgreSQL gerenciado e ponto de persistência da trilha de auditoria. A aplicação, por sua vez, pode ser executada localmente durante o desenvolvimento e, quando houver código consolidado suficiente, publicada em uma hospedagem simples com domínio público temporário. O empacotamento em Docker, a criação de uma pipeline de deploy e a migração para Azure ficam documentados como evolução futura.
+O estado atual de cada componente da implantação é:
 
-O escopo atual de implantação contempla:
-
-| Componente | Situação no MVP | Papel na estratégia |
+| Componente | Situação na PoC | Papel na estratégia |
 |---|---|---|
-| Interface web | Em desenvolvimento pela equipe em `src/frontend` | Interface própria para interação com o agente durante a demonstração. |
-| API da aplicação | Planejada para expor os endpoints do MVP | Ponte entre frontend, classificação de intenção, recuperação de dados e integrações. |
-| Núcleo de PLN | Definido conceitualmente e avaliado no notebook do classificador | Responsável por classificar intenções e orientar o roteamento da solicitação. |
-| Banco de dados | Supabase Cloud | Persistência dos dados sintéticos, catálogo, interações e auditoria. |
-| Armazenamento | Supabase Storage | Área prevista para documentos sintéticos e, futuramente, artefatos do modelo. |
-| Autenticação | Microsoft Entra ID | Mecanismo previsto para autenticação do usuário no MVP. |
-| Orquestração | Copilot Studio | Integração prevista para tópicos e fluxos conversacionais. |
-| Automação | Power Automate | Evolução para execução de fluxos funcionais sobre dados sintéticos ou homologados. |
-| Docker e pipeline de deploy | Fora do escopo atual | Evolução futura, quando houver serviço suficientemente estável para empacotamento e publicação automatizada. |
+| Interface web | Implementada em `src/frontend`, servida por nginx no Compose | Canal da demonstração; a aba no Teams depende da S5-19. |
+| API da aplicação | Implementada (FastAPI), contêiner `backend` | Ponte entre interface, PLN, recuperação, workflows e integrações. |
+| Núcleo de PLN | Implementado e carregado pela API | Classifica intenções e orienta o roteamento. |
+| Mensageria | RabbitMQ e workers no Compose | Processa alertas e alterações do SharePoint simulado de forma assíncrona. |
+| Banco de dados | Supabase Cloud (PostgreSQL) | Persistência dos dados sintéticos, catálogo, sessões, interações, auditoria e outbox. |
+| Armazenamento | Supabase Storage | Artefatos DOCX dos relatórios. |
+| Autenticação | Supabase Auth no MVP; Microsoft Entra ID como evolução | Validação server-side do JWT e resolução das permissões em `access_rules`; a troca futura do provedor preserva a autorização de domínio. |
+| Orquestração | Workflows guiados do backend | Relatório, alerta e alteração de dados conduzidos pela API; Copilot Studio fora da arquitetura, por decisão do Metrô. |
+| Automação | Power Automate opcional | Execução do relatório por HTTP quando habilitada; modo local e simulador no MVP. |
+| Acesso pelo Copilot | Previsto por servidor MCP (S5-18) | Ferramentas MCP sobre a API REST, sem código integrado. |
+| Docker e pipeline | Docker Compose e imagens no ECR; GitLab CI com testes | O deploy na EC2 é manual e documentado na Seção 10.2. |
 
-Como o provedor de LLM externo ainda não está definido nem homologado, conforme registrado na Seção 5.2, a implantação do MVP não deve depender de API generativa externa. Quando a camada do Copilot Studio não estiver disponível, o MVP deve retornar uma resposta estruturada com base nos dados sintéticos recuperados.
+Como o provedor de LLM externo ainda não está definido nem homologado, conforme registrado na Seção 5.2, a implantação do MVP não deve depender de API generativa externa. Quando o provedor de LLM não estiver disponível, o MVP deve retornar uma resposta controlada, sem inventar informação.
 
 ## 6.1 Diagrama de implantação da UML
 
-A Figura 26 apresenta a visão de implantação da PoC. O diagrama separa o ambiente atualmente viável para o MVP dos componentes que dependem de desenvolvimento posterior ou provisionamento pela GTI.
+A Figura 27 apresenta a implantação da PoC como publicada na Sprint 4 (Seção 10.2) e revista na S5-43: EC2 com Docker Compose, acesso HTTPS por Cloudflare Quick Tunnel, Supabase Cloud e os serviços externos de voz e LLM. O ambiente-alvo do Metrô aparece como previsto, conforme a Seção 6.4.
 
 <div align="center">
-  <img src="img/implantacao-poc.png" alt="Diagrama de implantação planejada da PoC" width="100%">
+  <img src="img/implantacao-poc.png" alt="Diagrama de implantação da PoC em AWS EC2, com o ambiente-alvo do Metrô previsto" width="100%">
 </div>
 
-<p align="center"><strong>Figura 26</strong> - Diagrama de implantação planejada da PoC.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+<p align="center"><strong>Figura 27</strong> - Diagrama de implantação da PoC.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 
-O código-fonte do diagrama está versionado em [`docs/diagrams/implantacao-poc.puml`](diagrams/implantacao-poc.puml).
+O código-fonte do diagrama está versionado em [`docs/diagrams/implantacao-poc.puml`](diagrams/implantacao-poc.puml) e pode ser regerado com PlantUML e Graphviz instalados:
+
+```bash
+java -jar plantuml.jar -charset UTF-8 -tpng -o ../img docs/diagrams/implantacao-poc.puml
+```
 
 ## 6.2 Justificativa das escolhas de implantação
+
+> **Leitura das Seções 6.2 e 6.3.** Estas seções registram o planejamento de implantação feito antes do deploy. A implantação executada, com Docker, ECR e EC2, está na Seção 10.2 e na Figura 27. O Copilot Studio, citado no planejamento original, foi retirado porque o Metrô não o disponibilizou; os trechos correspondentes foram revistos na S5-43.
 
 As escolhas de implantação priorizam simplicidade, baixo custo e aderência ao estágio real do projeto. Como ainda não há um serviço final estabilizado para produção, esta seção evita tratar Docker, pipeline de CI/CD ou Azure como entregas já concluídas.
 
@@ -3140,13 +3499,13 @@ A interface principal do MVP é a aplicação própria desenvolvida pela equipe 
 
 A autenticação prevista é o **Microsoft Entra ID**, pois essa decisão mantém alinhamento com o ambiente do Metrô e permite evoluir para controle de acesso por perfil. Como o MVP usa dados sintéticos, a autenticação tem papel principalmente demonstrativo e de rastreabilidade.
 
-O **Copilot Studio** deve ser integrado ao backend por API/OpenAPI quando o serviço estiver consolidado. O papel do Copilot Studio é executar tópicos e fluxos conversacionais associados às intenções identificadas, sem substituir o núcleo autoral de PLN.
+O acesso pelo **Copilot** está previsto por servidor MCP (S5-18), que o próprio Metrô pode registrar no seu ambiente sem depender do Copilot Studio. Os fluxos conversacionais associados às intenções são executados pelos workflows guiados do backend, sem substituir o núcleo autoral de PLN.
 
 O **Power Automate** permanece como caminho para fluxos funcionais. No MVP, esses fluxos podem ser simulados ou executados apenas sobre dados sintéticos, evitando dependência de SharePoint real ou permissões corporativas.
 
 ### 6.2.5 Estratégia de fallback
 
-Como não há provedor de LLM definido para o produto e a camada generativa do Copilot Studio pode depender do ambiente disponível, o MVP deve prever um fallback simples. Nesse cenário, a aplicação retorna uma resposta estruturada contendo:
+Como o provedor de LLM pode estar indisponível ou não configurado no ambiente, o MVP deve prever um fallback simples. Nesse cenário, a aplicação retorna uma resposta estruturada contendo:
 
 - intenção identificada;
 - nível de confiança;
@@ -3168,7 +3527,7 @@ O processo recomendado para a PoC é:
 5. **Executar a aplicação localmente.** Rodar frontend e backend em ambiente de desenvolvimento, enquanto o serviço final não estiver estabilizado.
 6. **Validar a persistência.** Confirmar que interações, fontes consultadas e eventos de auditoria são gravados no Supabase.
 7. **Configurar autenticação Microsoft.** Registrar a aplicação no Entra ID quando houver URL de callback definida.
-8. **Preparar integração com Copilot Studio.** Documentar ou expor a especificação OpenAPI quando a API estiver estável.
+8. **Preparar o acesso pelo Copilot.** Manter a especificação OpenAPI estável, como base das ferramentas do servidor MCP previsto na S5-18.
 9. **Publicar em domínio temporário.** Realizar publicação manual em serviço simples somente quando houver versão demonstrável.
 10. **Registrar pendências de evolução.** Docker, pipeline CI/CD, Azure, Azure Machine Learning e Application Insights devem permanecer como próximos passos.
 
@@ -3184,8 +3543,6 @@ As variáveis mínimas planejadas para reprodução do MVP são:
 | `MICROSOFT_CLIENT_ID` | Frontend/backend | Identificador da aplicação registrada no Entra ID. |
 | `MICROSOFT_TENANT_ID` | Frontend/backend | Tenant usado para autenticação. |
 | `MICROSOFT_REDIRECT_URI` | Frontend | URL de retorno após login. |
-| `COPILOT_STUDIO_ENABLED` | Backend | Indica se a integração com Copilot Studio está ativa. |
-| `COPILOT_STUDIO_ENDPOINT` | Backend | Endpoint usado quando a integração estiver disponível. |
 | `APP_ENV` | Backend/frontend | Ambiente de execução, como `local`, `dev`, `hmg` ou `main`. |
 
 Exemplo de arquivo `.env` planejado para o backend:
@@ -3197,8 +3554,6 @@ SUPABASE_ANON_KEY=ey...
 SUPABASE_SERVICE_ROLE_KEY=ey...
 MICROSOFT_CLIENT_ID=00000000-0000-0000-0000-000000000000
 MICROSOFT_TENANT_ID=00000000-0000-0000-0000-000000000000
-COPILOT_STUDIO_ENABLED=false
-COPILOT_STUDIO_ENDPOINT=
 ```
 
 ### 6.2.8 Comandos de execução local
@@ -3254,7 +3609,7 @@ As métricas obrigatórias para o MVP são:
 | Taxa de sucesso das requisições | Identificar falhas de API, falhas de conexão com Supabase e erros de integração. | Backend e registros de auditoria. |
 | Tempo de resposta da recuperação de dados | Avaliar o impacto das consultas à base sintética. | Backend e registros de auditoria. |
 | Confiança da macrointenção e da intenção específica | Monitorar a qualidade do roteamento do PLN. | Tabela `ai_interactions`. |
-| Quantidade de respostas por fallback | Verificar indisponibilidade da camada generativa/Copilot ou ausência de evidência suficiente. | Tabela `ai_interactions` e logs. |
+| Quantidade de respostas por fallback | Verificar indisponibilidade do provedor de LLM ou ausência de evidência suficiente. | Tabela `ai_interactions` e logs. |
 | Quantidade de fontes recuperadas por consulta | Avaliar se o RAG está encontrando evidências suficientes. | Tabela `consulted_sources`. |
 
 Para a PoC, as métricas devem ser simples e associadas aos fluxos já implementados. Métricas mais avançadas de carregamento de modelo, consumo de memória, imagem Docker e telemetria de contêiner devem ser adicionadas somente quando o serviço de PLN estiver empacotado para publicação.
@@ -3302,7 +3657,7 @@ A seção de implantação deve deixar explícito que alguns itens dependem de d
 | Application Insights/Azure Monitor | Não obrigatório na PoC sem Azure. | Substituir por logs e métricas persistidas no Supabase; ativar em Azure no futuro. |
 | SharePoint real | Fora do MVP. | Usar apenas base sintética/anonimizada. |
 | Fluxos reais de Power Automate | Podem ser simulados no MVP. | Ativar fluxos reais apenas com dados e permissões homologadas. |
-| Camada generativa do Copilot Studio | Integração prevista no MVP, sujeita ao ambiente disponível. | Usar fallback estruturado se indisponível. |
+| Acesso pelo Copilot | Previsto por servidor MCP (S5-18), sem código integrado; o Copilot Studio não foi disponibilizado. | Manter a API REST documentada em OpenAPI como base das ferramentas MCP. |
 
 ### 6.3.5 Checklist de conclusão da implantação
 
@@ -3316,8 +3671,106 @@ Para considerar a estratégia de deploy reprodutível, a equipe deve validar:
 - [ ] autenticação Microsoft Entra ID configurada ou documentada para o ambiente disponível;
 - [ ] interação gravada nas tabelas de auditoria;
 - [ ] fallback estruturado funcionando sem API generativa externa;
-- [ ] endpoint OpenAPI preparado para conexão com Copilot Studio;
+- [ ] endpoint OpenAPI preparado como base das ferramentas do servidor MCP (S5-18);
 - [ ] Docker e pipeline registrados como evolução futura, sem arquivos de build ativando CI/CD nesta etapa;
+
+## 6.4 Tabela de-para para o ecossistema Microsoft do Metrô
+
+### 6.4.1 Objetivo, evidências e limites do mapeamento
+
+Esta seção atende à **S5-44 ([#298](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/298))**: identificar o que o Metrô pode reaproveitar da PoC e a qual componente Microsoft cada responsabilidade corresponde. A análise foi realizada em **06/10/2026**, sobre `develop` no commit `58da95da`, também base da branch `docs/tabela-de-para-microsoft`, com consulta aos oito MRs da imagem de acompanhamento. Os commits, arquivos examinados e diferenças das branches estão registrados na [evidência técnica da S5-44](evidencias/sprint-05/tabela-de-para-microsoft.md).
+
+**O estado executável prevalece sobre o desenho inicial.** A PoC possui interface React, API FastAPI, PLN autoral, recuperação lexical de fontes sintéticas, geração de respostas via Gemini/OpenRouter, workflows próprios, PostgreSQL/Supabase e alertas com RabbitMQ. Há autenticação Supabase implementada; isso não comprova Entra ID em operação. Docker, CI e a implantação de demonstração em AWS já têm artefatos e documentação na Seção 10.2. O Compose versionado ainda configura relatórios com repositório em memória e arquivos locais; os modos de banco e Storage são capacidades do código, não prova de configuração de toda implantação.
+
+O parceiro **não disponibilizou Copilot Studio**, conforme a Seção 6.4.2, Frente D, de [GestaoProjeto.md](GestaoProjeto.md) e o [README de `src/agent`](../src/agent/README.md). A exportação `src/agent/ONESHOT` é histórica. Teams, SharePoint corporativo, Entra ID e Power Automate real não têm homologação demonstrada neste recorte. O índice FAISS/ChromaDB, a ingestão documental com extratores e o spaCy representados nas visões iniciais tampouco descrevem o runtime atual: o RAG usa pontuação lexical e o PLN combina TF-IDF e BERTimbau, com pré-processamento NLTK/normalização própria. Embeddings do classificador não constituem um índice vetorial documental.
+
+As correspondências abaixo são **alternativas técnicas para homologação**, derivadas das responsabilidades existentes e verificadas na documentação Microsoft. Elas não afirmam que o Metrô possui assinatura, licença, recurso provisionado ou autorização para enviar dados a determinado serviço. A adoção depende da GTI. Não há correspondência obrigatória de um produto para outro: código Python pode continuar executando em Azure sem reescrita em Power Platform.
+
+### 6.4.2 Critérios de reaproveitamento e esforço
+
+| Classificação | Significado |
+|---|---|
+| **Direto** | Preservar código, regra ou contrato; mudar principalmente hospedagem/configuração. Exige validação no destino. |
+| **Adaptado** | Preservar domínio e comportamento, implementando um adaptador de identidade, dados, provedor ou canal. |
+| **Referência** | Reaproveitar especificação, prompts, testes ou desenho; reconstruir a execução na plataforma escolhida. |
+| **Planejado** | Capacidade ainda ausente do `develop`; não há implementação integrada a transferir. |
+
+O **esforço** é uma avaliação qualitativa da migração indicada, não uma estimativa de horas ou compromisso de entrega: **baixo**, para configuração e empacotamento sem mudar o contrato; **médio**, para um adaptador e regressão; **alto**, para mudanças em identidade/permissões, persistência transacional, canal ou processamento distribuído. Licenciamento, provisionamento, volume real e homologação podem alterar a avaliação. Quando a tabela apresenta alternativas, o esforço corresponde ao caminho explicitado na observação.
+
+### 6.4.3 Interface, API e inteligência da aplicação
+
+| Componente da PoC e evidência | Equivalente no ecossistema Microsoft | Reaproveitamento | Esforço | Observação |
+|---|---|---|---|---|
+| Chat React/TypeScript, componentes de fontes, histórico e controles — [`src/frontend`](../src/frontend/src/App.tsx) | Aplicação web em Azure; possível aba no Microsoft Teams | **Adaptado** | **Médio** | A aba preserva boa parte da UI. Exige manifesto, domínio HTTPS estável, integração TeamsJS, identidade e validação em desktop/mobile. Um bot conversacional demandaria outro adaptador de mensagens. Ver [Teams tabs](https://learn.microsoft.com/en-us/microsoftteams/platform/tabs/what-are-tabs) e Seção 6.4.7. |
+| API REST, schemas Pydantic e pipeline texto/áudio — [`main.py`](../src/backend/app/main.py), [`pipeline.py`](../src/backend/app/pipeline.py) | FastAPI em Azure Container Apps ou App Service; API consumível por aplicações Microsoft | **Direto** | **Médio** | Preservar rotas e contratos; configurar rede, HTTPS, identidade e limites de execução. [Container Apps](https://learn.microsoft.com/en-us/azure/container-apps/overview) hospeda APIs e processamento em segundo plano. Hospedagem não transforma a API em tópico Copilot. |
+| Normalização e extração de entidades do portfólio — [`app/nlp`](../src/backend/app/nlp/preprocessing.py) | O mesmo serviço Python hospedado em Azure | **Direto** | **Baixo** | Preservar normalização, léxico, entidades e testes. O catálogo e o léxico precisam refletir os dados homologados. Trocar por reconhecimento nativo de plataforma seria uma nova implementação, com nova avaliação. |
+| Classificador hierárquico, TF-IDF + BERTimbau, catálogo e limiares — [`inference.py`](../src/backend/app/nlp/inference.py), [`artefatos`](../src/notebooks/artefatos/catalogo_intencoes.json) | Inferência no backend Azure; Azure Machine Learning como alternativa de gestão/publicação do modelo | **Direto** | **Médio** | Conservar artefato, revisão imutável do encoder e ambiente de dependências. O [Azure ML](https://learn.microsoft.com/en-us/azure/machine-learning/concept-model-management-and-deployment?view=azureml-api-2) pode gerir versões e endpoints; não converte automaticamente o classificador em reconhecimento de tópicos. Revalidar qualidade e latência com consultas reais. |
+| Catálogo de handlers e workflows guiados de relatório/alerta — [`pipeline.py`](../src/backend/app/pipeline.py), [`reports/workflow.py`](../src/backend/app/reports/workflow.py), [`alerts/workflow.py`](../src/backend/app/alerts/workflow.py) | Backend próprio em Azure; tópicos de Copilot Studio apenas se houver ambiente disponível | **Direto** no backend; **Referência** para tópicos | **Médio** no backend; **Alto** para reconstrução | Manter confirmação, escopo, concorrência e execução idempotente. Copilot Studio está indisponível para a equipe; a exportação legada não é runtime. Reconstruir tópicos exigiria publicar e testar o fluxo no tenant. |
+| Sugestão proativa e confirmação explícita — [`proactivity.py`](../src/backend/app/rag/proactivity.py), [`proactive_confirmation.py`](../src/backend/app/rag/proactive_confirmation.py) | Regras na API Azure; apresentação no canal web/Teams | **Adaptado** | **Médio** | Preservar associação entre intenções, confirmação e rastreabilidade. Adaptar a apresentação ao canal e a persistência do estado quando houver múltiplas réplicas. A plataforma não substitui o consentimento de execução implementado. |
+| Cliente Gemini/OpenRouter e montagem de contexto — [`gemini/client.py`](../src/backend/app/gemini/client.py) | Endpoint de modelos homologados no Azure, incluindo Azure OpenAI/Microsoft Foundry | **Adaptado** | **Médio** | Reaproveitar contratos, prompts, limites e tratamento de erros; criar o cliente para autenticação, payload, resposta e consumo do endpoint escolhido. Não existe cliente Azure OpenAI integrado neste recorte. A [oferta de modelos Azure](https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure) não define o modelo aprovado pelo parceiro. |
+| Afirmações com citações, validação extrativa e abstenção — [`evidence.py`](../src/backend/app/gemini/evidence.py), [`schemas.py`](../src/backend/app/gemini/schemas.py) | Validação própria mantida antes da resposta em Azure | **Direto** | **Baixo** | Preservar `claims`, `citation_ids`, fontes e `evidence_status`; revalidar a aderência do novo modelo ao schema. Uma resposta fluente ou uma citação nativa de outra plataforma não substitui a conferência implementada nem comprova RNF04. |
+
+### 6.4.4 Conhecimento, dados e identidade
+
+| Componente da PoC e evidência | Equivalente no ecossistema Microsoft | Reaproveitamento | Esforço | Observação |
+|---|---|---|---|---|
+| Exports JSON de listas e fontes sintéticas — [`rag/data/sharepoint`](../src/backend/app/rag/data/sharepoint/README.md), seeds em [`src/database/sql`](../src/database/sql/04_rag_synthetic_data.sql) | SharePoint Online: listas e bibliotecas acessadas pelo Microsoft Graph | **Adaptado** | **Alto** | Reaproveitar modelo de fonte, atributos, datas e localizadores. Implementar leitura, atualização e mapeamento dos IDs/URLs reais, preservando permissões antes da recuperação. O [Graph](https://learn.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-1.0) expõe sites, listas e bibliotecas; os JSON atuais não são um conector autenticado. |
+| Recuperação lexical no PostgreSQL/JSON e seleção de contexto — [`rag/database.py`](../src/backend/app/rag/database.py), [`rag/sharepoint.py`](../src/backend/app/rag/sharepoint.py) | Manter recuperação própria em Azure; Azure AI Search como alternativa de busca textual/vetorial/híbrida | **Direto** ao manter; **Adaptado** ao trocar | **Médio** ao manter; **Alto** ao trocar | O [Azure AI Search](https://learn.microsoft.com/en-us/azure/search/search-what-is-azure-search) corresponde à responsabilidade de busca. Sua adoção exigiria ingestão, índice, política de atualização, filtro de acesso e nova avaliação RNF06. Não há índice FAISS/ChromaDB ativo nem pipeline genérico DOCX/XLSX/PDF a migrar. |
+| Esquema relacional do portfólio, sessões, execuções, notificações e outbox — [`src/database/sql`](../src/database/sql/01_create_database.sql), [`database/connection.py`](../src/backend/app/database/connection.py) | Azure Database for PostgreSQL Flexible Server; Dataverse/Azure SQL como alternativas de remodelagem | **Adaptado** para PostgreSQL; **Referência** para remodelagem | **Alto** | Preservar o modelo relacional e consultas PostgreSQL onde compatíveis. Migrar roles, RLS, funções e referências específicas de `auth`/`storage` do Supabase. [PostgreSQL gerenciado em Azure](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/overview) reduz a troca de dialeto; Dataverse e Listas SharePoint não recebem os scripts SQL nem substituem a outbox transacional automaticamente. |
+| Login de personas, validação de token Supabase e regras por perfil/projeto — [`security/access.py`](../src/backend/app/security/access.py), [`20_auth_access_foundation.sql`](../src/database/sql/20_auth_access_foundation.sql) | Microsoft Entra ID para identidade; autorização de domínio mantida na API | **Adaptado** | **Alto** | Substituir o login/validador Supabase, [validar tokens e claims](https://learn.microsoft.com/en-us/entra/identity-platform/claims-validation) do tenant e mapear identidades corporativas para os perfis e escopos internos. Manter checagens de leitura, escrita e exportação. Login Teams/Entra, sozinho, não concede acesso a todo o portfólio ou SharePoint. |
+| Arquivo DOCX local ou bucket privado Supabase — [`reports/storage.py`](../src/backend/app/reports/storage.py) | Azure Blob Storage para objetos privados; biblioteca SharePoint para publicação documental | **Adaptado** | **Médio** para Blob | Preservar hash, metadados, referência e download autorizado; criar adaptador de upload/download e política de retenção. [Blob Storage](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction) corresponde ao armazenamento de arquivos. Publicação em SharePoint é integração adicional, sujeita ao escopo do usuário. |
+| Trilhas de conversa, fontes consultadas e eventos de execução — [`database/tracing.py`](../src/backend/app/database/tracing.py), repositórios de relatório/alerta | Persistência da auditoria em PostgreSQL Azure; Dataverse como alternativa de remodelagem | **Adaptado** | **Médio** | Preservar IDs de interação, execução, usuário, fonte e correlação. Application Insights complementa diagnóstico operacional; não substitui sozinho o registro de negócio nem garante integridade/retenção. A correção do MR !117 está integrada no HEAD atual (3b95d985/9255e2f8); não comprova aplicação do backfill SQL19 em todo ambiente. |
+| Alteração de dados do projeto pelo chat, com prévia, confirmação, desfazer e histórico — [`data_changes`](../src/backend/app/data_changes/service.py), Seção 8.5.13 | Mesmo backend em Azure, gravando na fonte oficial dos dados: PostgreSQL Azure ou listas do SharePoint Online pelo Microsoft Graph | **Direto** no backend; **Adaptado** para gravar no SharePoint | **Médio** | Preservar extração, validação por campo, verificação de escopo na prévia, na confirmação e no desfazer, e a gravação de `change_records` e auditoria na mesma transação. A escrita em listas do SharePoint exige permissão do Graph concedida pela GTI. |
+| Controle preventivo de dado sensível — [`security/sensitive_data.py`](../src/backend/app/security/sensitive_data.py), integrado pelo MR !127 | Barreira própria na API; políticas de dados da Power Platform quando ela for utilizada | **Direto** | **Médio** | O controle bloqueia perguntas, mascara fontes e recusa prompts antes da chamada externa. As [políticas de dados da Power Platform](https://learn.microsoft.com/en-us/power-platform/admin/wp-data-loss-prevention) controlam conectores; não substituem esse filtro para chamadas Python a provedores. Testar o controle com o endpoint homologado e registrar seus limites. |
+
+### 6.4.5 Voz, relatórios, alertas e integrações
+
+| Componente da PoC e evidência | Equivalente no ecossistema Microsoft | Reaproveitamento | Esforço | Observação |
+|---|---|---|---|---|
+| Captura de áudio, validação, STT Azure e cache VHS — [`app/audio`](../src/backend/app/audio/transcription.py), [`vhs.py`](../src/backend/app/audio/vhs.py) | Azure AI Speech, já utilizado pelo adaptador STT | **Direto** | **Baixo** | Preservar contrato, validação de arquivo, tratamento de erro, idioma `pt-BR` e cache. Reconfigurar recurso/credencial e repetir a homologação no destino. O [Speech](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/overview) oferece STT/TTS. Captura no Teams requer teste específico de dispositivo/permissão; cache local não é compartilhado entre réplicas. |
+| Síntese e reprodução de resposta em áudio — [`audio/synthesis.py`](../src/backend/app/audio/synthesis.py), integrada pelo MR !123 | Text-to-Speech do Azure AI Speech | **Adaptado** | **Médio** | O módulo acrescenta síntese, contrato de áudio e reprodução no frontend. Validar texto elegível, tamanho, formato, credenciais e experiência no canal escolhido; a evidência do STT não vale para a síntese. |
+| Preparação de relatório, snapshot autorizado, máquina de estados e confirmação — [`app/reports`](../src/backend/app/reports/service.py) | Backend Azure; Power Automate como executor HTTP opcional | **Direto** no backend; **Adaptado** para executor | **Médio** | Preservar snapshot, hash, estado, confirmação e idempotência. `local` e `power_automate_simulator` não comprovam execução real no tenant. A API recebe callback autenticado, valida JSON e mantém a autoridade sobre o artefato final. |
+| Produção de DOCX com `python-docx` — [`reports/rendering.py`](../src/backend/app/reports/rendering.py), referência em [`support/word`](../src/agent/support/word/relatorio-executivo.template-manifest.json) | Mesmo renderer em Azure; Word Online (Business) como alternativa | **Direto** ao manter; **Referência** para Word Online | **Baixo** ao manter; **Alto** ao trocar | Preservar estrutura e fontes do relatório. O manifesto JSON não é um template Word pronto para importação. A alternativa com [Word Online](https://learn.microsoft.com/en-us/connectors/wordonlinebusiness/) exige template com controles compatíveis, conexões/licença e testes; o runtime atual não depende dela. |
+| Blueprint Power Automate, prompts AI Builder, contrato de callback e fixtures — [`src/agent/support`](../src/agent/support/IMPLEMENTATION.md) | Cloud flow Power Automate e prompts Microsoft/AI Builder no ambiente do parceiro | **Referência** | **Alto** | Reutilizar regras, schemas e exemplos; configurar conexões, tokens e endpoint HTTPS e testar sucesso, falha, repetição e autorização. Blueprint e [prompts](https://learn.microsoft.com/en-us/microsoft-copilot-studio/create-custom-prompt) não comprovam um fluxo importado/publicado. `ONESHOT` é legado e não deve ser sincronizado como runtime. |
+| Scheduler, avaliação de prazo e workers de alerta — [`alerts/worker.py`](../src/backend/app/alerts/worker.py), [`alerts/source.py`](../src/backend/app/alerts/source.py) | Workers em Azure Container Apps; jobs agendados para disparos delimitados | **Adaptado** | **Médio** | Preservar inscrição, revalidação de acesso, atualização dos dados, comparação estrita do prazo e idempotência. Escolher serviço contínuo ou job conforme o ciclo atual; um agendamento de infraestrutura não substitui as regras de negócio. Dias úteis dependem de calendário corporativo. |
+| RabbitMQ, publisher da outbox, eventos e dead-letter queues — [`alerts/messaging.py`](../src/backend/app/alerts/messaging.py), [`compose.rabbitmq.yml`](../compose.rabbitmq.yml) | RabbitMQ hospedado em Azure; Azure Service Bus como alternativa gerenciada | **Direto** ao manter; **Adaptado** para Service Bus | **Médio** ao manter; **Alto** ao trocar | Preservar eventos, `event_id`, `correlation_id`, outbox e consumidores idempotentes. O cliente atual `aio-pika` e a topologia RabbitMQ não são intercambiáveis com [Service Bus/AMQP 1.0](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-amqp-overview). A troca exige novo cliente, mapeamento de filas/tópicos, ack, retry e DLQ. |
+| Webhook de alterações do SharePoint simulado, inbox, publicação na fila e reindexação pelo consumidor — [`sharepoint_webhooks`](../src/backend/app/sharepoint_webhooks/router.py), [`consumer.py`](../src/backend/app/sharepoint_webhooks/consumer.py) | [Webhooks do SharePoint Online](https://learn.microsoft.com/en-us/sharepoint/dev/apis/webhooks/overview-sharepoint-webhooks) e notificações de alteração do Microsoft Graph | **Adaptado** | **Médio** | O payload segue o formato das notificações do SharePoint (`clientState` e lote `value`). No tenant, exige assinatura renovável, endpoint público validado e permissão do Graph. A reindexação ainda reaplica a massa inteira. |
+| Central web de notificações, estado de leitura e callback de entrega — [`alerts/router.py`](../src/backend/app/alerts/router.py), componentes do frontend | Central web em Teams; entrega de notificações via integração Microsoft homologada | **Adaptado** | **Médio** | Preservar destinatário, ocorrência, tentativa e confirmação de leitura/entrega. Notificação interna e confirmação por webhook não são prova de mensagem entregue no Teams. O adaptador externo precisa tratar identidade, permissão e deduplicação. |
+| Contratos REST/OpenAPI e callbacks de relatório/alerta — [`main.py`](../src/backend/app/main.py), [`report-generation.openapi.yaml`](../src/agent/support/openapi/report-generation.openapi.yaml) | Conector personalizado Power Platform/Logic Apps | **Adaptado** | **Médio** | Conservar semântica das operações, autenticação e erros. O contrato de suporte é OpenAPI 3.0.3; a [importação documentada de conector personalizado](https://learn.microsoft.com/en-us/connectors/custom-connectors/define-openapi-definition) exige OpenAPI 2.0. Preparar uma projeção compatível e testar; a existência de `/openapi.json` não comprova importação automática. |
+| Blocos de resposta do contrato `1.2.0`, integrados pelo MR !128 (#270), e renderização acessível do MR !129 (#271) | UI web na aba Teams; representação em cartões somente com adaptador específico | **Adaptado** para os blocos; renderização **Planejada** até a integração da #271 | **Médio** | O contrato `1.2.0` traz tabelas, indicadores e destaques com citações; a #271 os apresenta no frontend. JSON de blocos da aplicação não é um Adaptive Card pronto. Preservar vínculo com afirmações/fontes ao adaptar o canal. |
+| Servidor MCP solicitado na S5-18 ([#272](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/272)) | Ferramentas para conexão com o Copilot em cliente/ambiente que aceite MCP | **Planejado** | **Alto** | Há pedido e contratos REST reaproveitáveis, mas não foi localizado servidor MCP integrado nem nos oito MRs examinados. Implementar ferramentas, transporte e autenticação e validar no cliente escolhido pelo parceiro; REST/OpenAPI não constitui servidor MCP. |
+
+### 6.4.6 Hospedagem, operação e engenharia
+
+| Componente da PoC e evidência | Equivalente no ecossistema Microsoft | Reaproveitamento | Esforço | Observação |
+|---|---|---|---|---|
+| AWS EC2, Docker Compose, Dockerfiles e ECR — [`compose.prod.yml`](../compose.prod.yml), [`infra/aws`](../infra/aws/template.yaml), Seção 10.2 | Azure VM para preservar Compose; Container Apps + Azure Container Registry para hospedagem gerenciada | **Adaptado** | **Médio** para VM; **Alto** para serviços gerenciados | Reaproveitar imagens e definição dos serviços. CloudFormation, IAM e scripts AWS exigem substituição. Em serviços gerenciados, planejar workers, rede, armazenamento e prontidão do modelo; migrar Compose não é importar o arquivo diretamente. |
+| Nginx/proxy e publicação por Cloudflare Quick Tunnel — [`frontend/nginx.conf`](../src/frontend/nginx.conf), Seção 10.2.9 | Ingress HTTPS no Azure e domínio corporativo | **Adaptado** | **Médio** | Preservar roteamento de `/api` e servir a UI com domínio estável. Validar origem, certificados, callbacks e redirecionamento de login. URL temporária da demonstração não satisfaz por si só a publicação corporativa/Teams. |
+| Variáveis de ambiente e arquivo `runtime.env` fora do repo | Azure Key Vault e identidade gerenciada do serviço, quando disponível | **Adaptado** | **Médio** | Reaproveitar nomes e validação de configuração; adaptar obtenção e rotação de credenciais. O [Key Vault](https://learn.microsoft.com/en-us/azure/key-vault/general/overview) armazena segredos e controla seu acesso. Nunca copiar valores de credenciais da bancada para a documentação ou o frontend. |
+| Logs de contêiner, CloudWatch e tempos de pipeline/VHS | Azure Monitor, Log Analytics e Application Insights | **Adaptado** | **Médio** | Reaproveitar métricas e IDs de correlação; trocar exportação/coleta e instrumentar dependências com [OpenTelemetry/Application Insights](https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview). Preservar separação entre telemetria operacional e auditoria de negócio. |
+| GitLab CI, pytest, Vitest, Playwright e evidências de RNFs — [`.gitlab-ci.yml`](../.gitlab-ci.yml), [`app/tests`](../src/backend/app/tests/conftest.py), [`frontend/TESTES.md`](../src/frontend/TESTES.md) | Manter GitLab com destino Azure; Azure Repos/Pipelines como alternativa | **Direto** para testes; **Adaptado** para pipeline | **Médio** | Reaproveitar cenários, massa sintética, critérios e formatos de evidência. [Azure Pipelines](https://learn.microsoft.com/en-us/azure/devops/pipelines/get-started/what-is-azure-pipelines?view=azure-devops) é uma opção, não requisito de migração. YAML, conexões e gates precisam de tradução; !120/!124/!130 foram integrados no pull; preservar resultados reprovados dos RNFs e conferir execução da pipeline no HEAD atual. Repetir RNFs após trocar provedor, fonte, canal ou infraestrutura. |
+| Notebooks, datasets sintéticos, catálogo, benchmarks e artefatos do PLN — [`src/notebooks`](../src/notebooks/treinar_classificador_intencoes_v2.py) | Mesmo processo Python; Azure Machine Learning para governança de experimentos/modelos | **Direto** | **Médio** | Preservar treino, divisão de avaliação, métricas, versões e revisão do encoder. Datasets sintéticos são material de teste, não o portfólio produtivo. O notebook opcional do Compose e a landing page `src/lp` não são serviços necessários ao fluxo de atendimento. |
+
+### 6.4.7 Teams, dependência S5-19 e sequência de homologação
+
+A **S5-19 ([#273](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/273))** condiciona a integração ao tenant e ao registro de aplicativo. O planejamento da Sprint 5 em [GestaoProjeto.md](GestaoProjeto.md) registra esse condicionamento e a indisponibilidade de Copilot Studio. Neste recorte, não foi encontrada evidência de conclusão da S5-19 nem de aplicativo Teams publicado. Portanto, a avaliação abaixo registra um **caminho tecnicamente viável, pendente de confirmação do acesso pela GTI**, e não encerra a dependência.
+
+| Caminho | Reaproveitamento e decisão condicionada | Requisitos e bloqueios |
+|---|---|---|
+| **Manter aplicação web** | Caminho executável atual. Preserva frontend e backend enquanto o ambiente corporativo não está acessível. | Homologar hospedagem, dados, identidade, segurança e operação antes de usar dados reais. |
+| **Aba Teams para o frontend existente** | Alternativa de menor reconstrução da interface, a avaliar na S5-19. Não depende de tornar Copilot Studio o executor. | Tenant de teste, permissão para registrar/instalar aplicativo, manifesto/domínios, HTTPS estável, integração TeamsJS, autenticação e testes de áudio/iframe/mobile. Uma aba é conteúdo web incorporado, conforme a [documentação Microsoft](https://learn.microsoft.com/en-us/microsoftteams/platform/tabs/what-are-tabs). |
+| **Bot conversacional no Teams** | Alternativa com adaptação maior: mensagens, confirmações, fontes, arquivos e notificações precisam de representação própria. | Aplicativo/bot registrado, credenciais, endpoint de mensagens, permissões e teste no canal real. UI React não se converte automaticamente em bot. |
+| **Copilot com ferramentas MCP** | Frente prevista na S5-18; pode reutilizar operações da API. Não há servidor integrado neste recorte. | Confirmar qual produto/cliente Copilot será usado, sua configuração MCP, autenticação, transporte e disponibilidade de registro. Não presumir que o pedido libera o ambiente Copilot Studio. |
+
+A sequência recomendada para avaliação pelo parceiro é: **(1)** concluir S5-19 e confirmar serviços/licenças disponíveis; **(2)** homologar identidade, escopos e acesso aos dados; **(3)** preservar o núcleo Python e adaptar hospedagem, persistência e segredos; **(4)** conectar fontes corporativas e o modelo aprovado, repetindo os benchmarks; **(5)** validar workflows, outbox, callbacks e arquivos; **(6)** publicar o canal aprovado e repetir testes funcionais, RNFs e usabilidade. Essa sequência organiza a homologação, sem acrescentar entregas ao escopo da S5-44.
+
+### 6.4.8 Coerência arquitetural e critério de conclusão
+
+O mapeamento conserva a separação das responsabilidades descritas na Seção 5.2: **canal → API/PLN → recuperação/resposta ou workflow → persistência/auditoria**. Teams é canal; Copilot Studio seria uma opção de orquestração condicionada ao ambiente; SharePoint é fonte corporativa; Speech é serviço de voz. O núcleo autoral de PLN e as regras de autorização continuam reaproveitáveis fora dessas plataformas.
+
+A **S5-43 ([#297](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/297))** conciliou os diagramas (Figuras 22, 25 e 27), o RNF08 e as afirmações das Seções 3.2.2, 5.2, 5.3, 6.1–6.3 e 9.2.7 com esta tabela: o Copilot Studio não faz parte da arquitetura, e o acesso pelo Copilot fica previsto por servidor MCP. As Seções 3.3 e 3.4 permanecem como registro histórico da Sprint 1, com nota de leitura. Esta tabela deve ser conferida novamente se a S5-18 introduzir o servidor MCP ou se a S5-19 aprovar outro canal.
+
+A produção local da S5-44 entrega o inventário, as correspondências, a classificação, o esforço e as observações rastreáveis. O [registro da task](stories/S5-44.md) acompanha a revisão documental e as pendências. **A conclusão no GitLab continua condicionada** à evidência da S5-19, à conciliação com a revisão de arquitetura e a MR aprovado com comentário do revisor de outra frente e `Closes #298`. A análise de branches, os testes locais e a revisão QA não equivalem a essa aprovação externa.
 
 # 7. Projeto Visual da Solução
 
@@ -3491,7 +3944,7 @@ app/tests/test_sharepoint_rag.py::test_builds_prompt_with_source_labels_and_disc
 158 passed, 11 warnings in 15.69s
 ```
 
-**Verificação atual após a integração da interface.** A execução local em 10 de setembro de 2026 aprovou 171 testes do back-end, 46 testes unitários do front-end e 8 testes de navegador — quatro cenários em desktop e os mesmos quatro em celular. Também passaram lint sem avisos, verificação de formatação e build de produção. O merge da integração ponta a ponta acrescentou quatro testes de rota depois dessa execução, levando o back-end a 175 testes, conforme a Seção 8.11.7. A cobertura unitária do front-end foi de 87,10% das linhas, 84,33% das instruções, 73,12% das ramificações e 83,83% das funções. Os comandos, a matriz por comportamento e os limites da evidência estão em `src/frontend/TESTES.md`.
+**Verificação atual após a integração da interface.** A execução local em 10 de setembro de 2026 aprovou 171 testes do back-end, 46 testes unitários do front-end e 8 testes de navegador — quatro cenários em desktop e os mesmos quatro em celular. Também passaram lint sem avisos, verificação de formatação e build de produção. O merge da integração ponta a ponta acrescentou quatro testes de rota depois dessa execução, levando o back-end a 175 testes, conforme a Seção 8.11.7. A cobertura unitária do front-end foi de 87,10% das linhas, 84,33% das instruções, 73,12% das ramificações e 83,83% das funções. Os comandos, a matriz por comportamento e os limites da evidência estão em `src/frontend/TESTES.md`. A medição da Sprint 5, com data, commit e cobertura por área, está na Seção 8.5.14.
 
 **Cobertura ainda não atingida.** O teste de navegador atravessa front-end, FastAPI, validação WAV e pipeline, mas substitui Azure, Gemini e classificação nas fronteiras externas. Continuam sem evidência local as chamadas reais aos provedores, autenticação Entra ID, SharePoint corporativo, persistência PostgreSQL, latência de produção e validação manual completa com tecnologia assistiva. Os resultados determinísticos não devem ser usados como aprovação desses itens.
 
@@ -3532,7 +3985,7 @@ A visão completa de diretórios está na Seção 8.1. Para acompanhar uma requi
 | Cliente HTTP | `src/frontend/src/lib/api/` | Serializa JSON ou multipart, aplica prazo máximo, interpreta schemas e converte erros em mensagens seguras. |
 | API | `src/backend/app/main.py` | Expõe saúde, chat e áudio; valida o contrato externo e normaliza erros. |
 | Orquestração | `src/backend/app/pipeline.py` | Executa classificação opcional, resposta controlada fora de escopo e geração fundamentada. |
-| Voz | `src/backend/app/audio/` | Autentica a identidade simulada, limita concorrência, valida WAV e chama o Azure Speech-to-Text. |
+| Voz | `src/backend/app/audio/` | Usa a identidade Supabase já resolvida, limita concorrência por usuário, valida WAV e chama o Azure Speech-to-Text. |
 | Recuperação | `src/backend/app/rag/sharepoint.py` | Carrega exports JSON, ranqueia trechos e monta contexto com fontes declaradas. |
 | Geração | `src/backend/app/gemini/` | Chama o Gemini com timeout e retentativas e mapeia texto, uso, latência e fontes. |
 | PLN | `src/backend/app/nlp/` | Carrega artefatos treinados, extrai entidades e classifica macrointenção e intenção específica. |
@@ -3552,7 +4005,7 @@ Com o servidor local na porta padrão, ficam disponíveis:
 | ReDoc | `http://127.0.0.1:8000/redoc` | Contratos em formato de leitura. |
 | OpenAPI JSON | `http://127.0.0.1:8000/openapi.json` | Especificação utilizável por clientes e testes de contrato. |
 
-O título, a descrição e a versão exibidos são definidos na instância `FastAPI` em `app/main.py`. A referência automática demonstra o contrato exposto, mas não substitui as condições de operação registradas a seguir: o teste interativo de áudio exige um token simulado e credenciais válidas do Azure, enquanto o chat que chega ao Gemini requer a respectiva chave.
+O título, a descrição e a versão exibidos são definidos na instância `FastAPI` em `app/main.py`. A referência automática demonstra o contrato exposto, mas não substitui as condições de operação registradas a seguir: as rotas interativas exigem um JWT válido do Supabase Auth; o teste de áudio também depende das credenciais do Azure, enquanto o chat que chega ao Gemini requer a respectiva chave.
 
 ### 8.5.4 APIs consumidas pelo front-end
 
@@ -3561,11 +4014,13 @@ O front-end consome somente rotas de mesma origem. Em desenvolvimento, o Vite en
 | Método e rota | Entrada | Saída utilizada pela interface | Observações de reprodução |
 | --- | --- | --- | --- |
 | `GET /health` | Sem corpo ou autenticação. | `{"status":"ok"}`. | Confirma a inicialização do processo; não testa Azure, Gemini ou a disponibilidade dos dados. |
-| `POST /api/chat` | JSON com `message` (1 a 20.000 caracteres), `previous_interaction_id` opcional e `use_intent_classifier` booleano. | Texto, ID da interação, modelo, latências, consumo, intenção opcional e lista de fontes. | Não exige Bearer token na versão atual. O ID anterior mantém o encadeamento lógico da conversa. |
+| `POST /api/access/login` | JSON com `profile_key` e `password`; sem Bearer. | JWT temporário e resumo do perfil autenticado. | A persona é mapeada para uma conta sintética fixa, mas a senha é validada exclusivamente pelo Supabase Auth. |
+| `GET /api/access/me` | Bearer JWT do Supabase Auth. | Nome, e-mail, papel, escopo e permissões. | Permanece disponível para consultar uma sessão já autenticada. |
+| `POST /api/chat` | Bearer JWT e JSON com `message` (1 a 20.000 caracteres), `previous_interaction_id` opcional e `use_intent_classifier` booleano. | Texto, ID da interação, modelo, latências, consumo, intenção opcional e lista de fontes. | Exige identidade ativa e permissão de leitura no escopo solicitado. O ID anterior mantém o encadeamento lógico da conversa. |
 | `POST /api/audio` | Multipart com arquivo `audio`; `conversation_id`, `language`, `previous_interaction_id` e `use_intent_classifier` opcionais; cabeçalho `Authorization: Bearer <token>`. | Transcrição, conversa, interação, intenção, resposta resumida, resposta completa em `chat` e `pipeline_status`. | O navegador envia WAV PCM mono, 16 bits e 16 kHz. O back-end revalida o conteúdo e aceita uma requisição simultânea por identidade. |
 | `/api/workflow-sessions` e `/api/report-requests` | Respostas guiadas, revisão, ação idempotente e confirmação assinada. | Estado da sessão, execução e download autenticado do DOCX. | O modo local é completo; a automação externa é opcional. |
 | `/api/alert-workflow-sessions` e `/api/alert-subscriptions` | Configuração, confirmação e comandos de ciclo de vida da inscrição. | Estado da sessão e da inscrição recorrente. | O processamento posterior ocorre nos workers do projeto. |
-| `GET /api/notifications` e `POST /api/notifications/{id}/read` | Token de identidade simulado no ambiente local. | Lista de notificações e confirmação de leitura. | A central consulta periodicamente a API; não recebe webhook. |
+| `GET /api/notifications` e `POST /api/notifications/{id}/read` | Bearer JWT do Supabase Auth. | Lista de notificações e confirmação de leitura. | A central consulta periodicamente a API; não recebe webhook. |
 
 Uma chamada textual pode ser reproduzida sem o front-end, depois de iniciar o FastAPI e configurar o Gemini:
 
@@ -3579,6 +4034,7 @@ $body = @{
 $response = Invoke-RestMethod `
   -Method Post `
   -Uri http://127.0.0.1:8000/api/chat `
+  -Headers @{ Authorization = "Bearer $env:MVP_USER_JWT" } `
   -ContentType "application/json" `
   -Body $body
 
@@ -3604,10 +4060,10 @@ O cliente aplica limite de 120 segundos e permite cancelamento por `AbortControl
 | Gemini | `gemini/client.py` gera a resposta a partir da pergunta e do contexto recuperado, com timeout e backoff. | `GEMINI_API_KEY`, modelo, limite de saída, nível de raciocínio, timeout e retentativas. | Sem chave, o chat que precisa de geração devolve indisponibilidade controlada. |
 | RAG de SharePoint simulado | `rag/sharepoint.py` pesquisa exports JSON versionados e inclui rótulos de fonte no prompt. | `rag/data/sharepoint/` ou `SHAREPOINT_MOCK_DATA_DIR`. | Não acessa o tenant corporativo nem sincroniza alterações do SharePoint. |
 | Classificador local | `nlp/` carrega o `joblib` e o encoder BERTimbau via PyTorch/Transformers; `PLN_WARMUP=1` antecipa a carga. | Artefatos em `src/notebooks/artefatos/`; encoder obtido do repositório de modelo indicado na Seção 8.11 (`requirements-pln.txt`). | A primeira instalação/carga pode exigir internet e cache local; não executa transações. |
-| Identidade do áudio | `audio/security.py` resolve o Bearer token por um mapa simulado e limita uma transcrição ativa por identidade. | `AUDIO_SIMULATED_IDENTITIES`, por exemplo `token-local=usuario-local`. | Não valida JWT do Entra ID e não aplica as regras da tabela `access_rules`. |
-| RabbitMQ | `alerts/messaging.py` publica e consome eventos persistentes de avaliação, criação de notificação e confirmação de entrega, com confirmação manual e DLQ. | `RABBITMQ_URL` e `compose.rabbitmq.yml`. | Necessário para o alerta assíncrono persistente; AMQP, scheduler e outbox não são webhooks. A rodada documental usa double controlado, não broker externo. |
+| Identidade e acesso | `security/access.py` valida o JWT no Supabase Auth, resolve `public.users` e aplica `access_rules`; o áudio limita uma transcrição ativa por usuário. | `SUPABASE_URL` e `SUPABASE_PUBLISHABLE_KEY` ou `SUPABASE_ANON_KEY`. | O Entra ID permanece como evolução; o MVP usa identidades e escopos sintéticos. |
+| RabbitMQ | `alerts/messaging.py` publica e consome eventos persistentes de avaliação, criação de notificação, confirmação de entrega e alteração SharePoint simulada, com confirmação manual e DLQ. | `RABBITMQ_URL` e `compose.rabbitmq.yml`. | Necessário para o alerta e a reindexação assíncronos persistentes; AMQP, scheduler e outbox não são webhooks. A rodada documental usa doubles controlados, não broker externo. |
 
-O SharePoint corporativo, Entra ID, Teams e Copilot Studio aparecem nos desenhos e no modelo-alvo, mas não possuem adaptador ativo nesta versão. Power Automate possui um adaptador opcional apenas para relatórios; o modo local não depende dele e o alerta não o utiliza. As demais intenções transacionais continuam sem escrita externa. Essa distinção evita interpretar a bancada como um canal de produção ou como evidência de autorização corporativa.
+O SharePoint corporativo, o Entra ID e o Teams aparecem nos diagramas como componentes previstos, sem adaptador ativo nesta versão; o Copilot Studio não faz parte da arquitetura. O Supabase Auth é o provedor de identidade operacional do MVP. Power Automate possui um adaptador opcional apenas para relatórios; o modo local não depende dele e o alerta não o utiliza. As demais intenções transacionais continuam sem escrita externa. Essa distinção evita interpretar a bancada como um canal de produção ou como evidência de autorização corporativa.
 
 ### 8.5.6 Banco de dados: modelo e integrações operacionais
 
@@ -3649,7 +4105,7 @@ A bancada usa React 19, TypeScript e Vite. `App.tsx` instala `ThemeProvider` e `
 
 | Área | Responsabilidade observável |
 | --- | --- |
-| `components/sidebar/` | Criação, busca, seleção e exclusão de conversas da sessão, além do token simulado usado por áudio, relatórios e alertas. |
+| `components/sidebar/` | Criação, busca, seleção e exclusão de conversas da sessão, além da exibição da identidade, persona e escopo resolvidos. |
 | `components/chat/` | Estado vazio, histórico, Markdown seguro, classificação, fontes, workflows guiados, confirmação, progresso e download de relatório. |
 | `components/notifications/` | Central de notificações, contagem de não lidas e gestão de inscrições de alerta. |
 | `components/composer/` | Entrada de texto, alternância da validação de intenção, captura, prévia, descarte e envio de áudio. |
@@ -3666,14 +4122,19 @@ A rastreabilidade entre ação, estado e contrato ajuda a localizar uma alteraç
 | Interromper | `stop` aborta o controlador pendente | `AbortSignal` recebido pelo cliente comum | O indicador termina e nenhuma resposta tardia é aplicada. |
 | Trocar ou excluir conversa | `selectConversation` ou `deleteConversation` despacha no reducer | Nenhuma chamada HTTP | Histórico, fontes e documento selecionado mudam apenas na sessão. |
 | Abrir uma fonte | seleção derivada de `activeSources` | Nenhuma nova chamada HTTP | `DocumentViewer` mostra metadados e o trecho já devolvido pela API. |
+| Confirmar, cancelar ou desfazer uma alteração de dados | `updateDataChange` guarda a fase do cartão na mensagem | `confirmDataChange`, `cancelDataChange` e `undoDataChange` em `lib/api/data-changes.ts` | `DataChangeCard` mostra o valor gravado, o cancelamento, o erro ou o valor restaurado. |
+
+A alteração de dados pelo chat (S5-07, sobre o contrato da Seção 8.5.13) usa o cartão `DataChangeCard`. Quando a resposta traz `data_change`, o cartão mostra o valor antes e depois e os avisos, e a gravação só acontece no botão **Confirmar alteração**. Depois disso o cartão oferece **Desfazer** enquanto a janela de 15 minutos estiver aberta. Cancelamento e erro encerram o cartão informando que nada foi gravado, e **Tentar de novo** aparece só quando repetir adianta. **Histórico do campo** consulta a API ao ser aberto. Como a fase fica na mensagem, reabrir a conversa não oferece confirmar de novo.
 
 Essa cadeia também define onde testar: componentes verificam a apresentação, a store verifica concorrência e associação à conversa, o cliente verifica serialização e erros, e o Playwright atravessa as quatro camadas pelo comportamento observável.
 
-O envio por texto aceita uma sugestão ou mensagem digitada, usa `Enter` para enviar e `Shift+Enter` para nova linha. O envio por voz requer o token da bancada, permissão do microfone, conclusão da gravação e confirmação da prévia. A captura para em 60 segundos; o navegador converte o sinal para o formato aceito antes do upload. Durante qualquer chamada, a interface bloqueia duplicidade e oferece interrupção.
+O envio por texto aceita uma sugestão ou mensagem digitada, usa `Enter` para enviar e `Shift+Enter` para nova linha. O envio por voz requer uma sessão autenticada, permissão do microfone, conclusão da gravação e confirmação da prévia. A captura para em 60 segundos; o navegador converte o sinal para o formato aceito antes do upload. Durante qualquer chamada, a interface bloqueia duplicidade e oferece interrupção.
 
 Cada conversa mantém seu último `interaction_id`, mensagens, fontes e preferências enquanto a página permanece aberta. Criar ou selecionar outra conversa cancela a espera corrente, e o identificador interno da requisição impede que um retorno atrasado seja inserido no destino errado. A busca e a exclusão alteram apenas o estado local. Recarregar a página remove histórico e token; o tema é a única preferência com persistência prevista.
 
 No desktop, as três áreas ficam lado a lado. Abaixo de 1024 px, conversas e documentos abrem em diálogos que podem ser fechados com `Escape`. Estados de carregamento e mudanças relevantes possuem anúncios para tecnologias assistivas, os controles têm nomes acessíveis e o foco retorna ao contexto apropriado ao fechar um diálogo. Essas propriedades fazem parte dos testes descritos em `src/frontend/TESTES.md`, não apenas do desenho visual.
+
+O mapa de navegação, os fluxos entre telas, a estratégia de construção e a medição atual dos testes do front-end estão na Seção 8.5.14.
 
 ### 8.5.8 Back-end: ciclo de processamento
 
@@ -3681,9 +4142,9 @@ O back-end usa FastAPI e Pydantic. Na inicialização, `lifespan` lê `PLN_WARMU
 
 Em `POST /api/chat`, Pydantic remove espaços externos e rejeita mensagem vazia ou acima de 20.000 caracteres. `process_message` classifica somente quando solicitado. Uma classificação não roteável encerra o fluxo com uma resposta local e segura; as demais entradas seguem para recuperação de contexto e Gemini. Erros de configuração ou do provedor são convertidos em indisponibilidade ou falha controlada, sem expor detalhes internos.
 
-Em `POST /api/audio`, a identidade simulada é resolvida antes da leitura. O arquivo é lido em blocos de 64 KiB e interrompido assim que ultrapassa o teto, evitando manter em memória um upload que será recusado. Depois da validação e do Azure STT, a transcrição é entregue ao mesmo pipeline do chat por meio de uma thread, para não bloquear o laço assíncrono. A resposta combina o resultado de voz com o contrato completo do chat.
+Em `POST /api/audio`, a identidade Supabase e seu escopo são resolvidos antes da leitura. O arquivo é lido em blocos de 64 KiB e interrompido assim que ultrapassa o teto, evitando manter em memória um upload que será recusado. Depois da validação e do Azure STT, a transcrição é entregue ao mesmo pipeline do chat por meio de uma thread, para não bloquear o laço assíncrono. A resposta combina o resultado de voz com o contrato completo do chat.
 
-O RAG consulta o PostgreSQL quando configurado e usa como fallback explícito dados sintéticos substituíveis por diretório; em ambos os casos, pontua a correspondência e injeta somente resultados relevantes com identificação da fonte. O cliente Gemini controla timeout e retentativas de falhas transitórias. A rastreabilidade registra no banco o contrato de classificação, a rota, as fontes e os eventos de auditoria; autorização por perfil continua como fronteira de implementação futura.
+O RAG consulta o PostgreSQL quando configurado e usa como fallback explícito dados sintéticos substituíveis por diretório; em ambos os casos, restringe os projetos pelo `AccessContext` antes de pontuar a correspondência e injeta somente resultados relevantes com identificação da fonte. O cliente Gemini controla timeout e retentativas de falhas transitórias. A rastreabilidade registra no banco o usuário, o contrato de classificação, a rota, as fontes e os eventos de auditoria; negativas de autorização também geram eventos correlacionados.
 
 Para isolar uma falha sem confundir disponibilidade do processo com disponibilidade dos provedores, use os checkpoints na ordem:
 
@@ -3788,9 +4249,11 @@ junto da reexecução da regra com o código final e da saída dos testes.
 
 ### 8.5.12 Webhooks e mensageria integrados (S5-09 a S5-11)
 
-O estado atual possui **dois webhooks HTTP**. O primeiro recebe o resultado do
+O estado atual possui **três webhooks HTTP**. O primeiro recebe o resultado do
 processamento opcional de relatório. O segundo recebe a confirmação de entrega
-de uma notificação e inicia seu processamento assíncrono pela outbox. O
+de uma notificação e inicia seu processamento assíncrono pela outbox. O terceiro
+recebe alterações da fonte SharePoint simulada e as mantém em uma inbox para
+publicação posterior. O
 scheduler que solicita avaliações, os eventos AMQP e as consultas REST do
 frontend são mecanismos diferentes e não são chamados de webhook.
 
@@ -3888,11 +4351,11 @@ marca notificações como lidas pelas APIs da central.
 | Item | Contrato |
 | --- | --- |
 | Método e rota | `POST /api/integrations/notifications/delivery-results` |
-| Header obrigatório | `X-Callback-Token: <token>` |
-| Variável de ambiente | `NOTIFICATION_CALLBACK_TOKEN` |
+| Header obrigatório | `X-Webhook-Signature: sha256=<64 caracteres hexadecimais>` |
+| Variável de ambiente | `NOTIFICATION_CALLBACK_SECRET` |
 | Content-Type | `application/json` |
 | Persistência de entrada | `notification_delivery_callbacks` |
-| Autenticação atual | Token compartilhado comparado em tempo constante; ausente ou inválido retorna `401`. |
+| Autenticação atual | HMAC-SHA256 dos bytes exatos do corpo, comparada em tempo constante; assinatura ausente, malformada ou divergente retorna `401`. |
 | Processamento | Callback e evento são gravados atomicamente; a tentativa é criada pelo consumer. |
 
 | Campo | Tipo | Obrigatório | Descrição |
@@ -3909,7 +4372,7 @@ Exemplo completo:
 ```http
 POST /api/integrations/notifications/delivery-results HTTP/1.1
 Content-Type: application/json
-X-Callback-Token: <NOTIFICATION_CALLBACK_TOKEN>
+X-Webhook-Signature: sha256=<HMAC_SHA256_DO_CORPO>
 
 {
   "callback_id": "delivery-callback-001",
@@ -3920,6 +4383,26 @@ X-Callback-Token: <NOTIFICATION_CALLBACK_TOKEN>
   "error_code": null
 }
 ```
+
+A assinatura usa exatamente os bytes enviados no corpo, sem reserializar o
+JSON. Exemplo de geração em Python, considerando `body` como `bytes`:
+
+```python
+import hashlib
+import hmac
+import os
+
+secret = os.environ["NOTIFICATION_CALLBACK_SECRET"].encode("utf-8")
+signature = "sha256=" + hmac.new(
+    secret,
+    body,
+    hashlib.sha256,
+).hexdigest()
+```
+
+Alterar espaços, ordem, campos ou valores depois do cálculo invalida a
+assinatura. O segredo e a assinatura completa não devem ser registrados em
+logs.
 
 Exemplo de resposta `200`:
 
@@ -3938,14 +4421,16 @@ Exemplo de resposta `200`:
 | Código | Quando ocorre |
 | :---: | --- |
 | `200` | Callback novo persistido e enfileirado, ou repetição idêntica. |
-| `401` | `X-Callback-Token` ausente ou inválido. |
+| `401` | `X-Webhook-Signature` ausente, malformada, divergente ou calculada para outro corpo. |
 | `404` | `notification_id` não existe. |
 | `409` | Mesmo `callback_id` com payload diferente. |
 | `422` | UUID, status, data, tipo ou campo extra inválido. |
-| `503` | `NOTIFICATION_CALLBACK_TOKEN` ausente ou persistência indisponível. |
+| `503` | `NOTIFICATION_CALLBACK_SECRET` ausente ou persistência indisponível. |
 | `500` | Falha inesperada não classificada; não é usada como resposta normal do domínio. |
 
-**Idempotência e processamento.** A rota calcula SHA-256 do payload canônico.
+**Autenticação, idempotência e processamento.** Antes de aplicar o callback, a
+rota calcula HMAC-SHA256 sobre o corpo bruto e valida a assinatura. Depois da
+autenticação, calcula SHA-256 do payload canônico para idempotência.
 Na primeira chamada, `notification_delivery_callbacks` e o evento de outbox são
 gravados na mesma operação lógica — sob o mesmo lock em memória e na mesma
 transação PostgreSQL. Uma repetição idêntica devolve o `received_at` original e
@@ -3954,19 +4439,110 @@ consumer compara novamente o payload ao hash persistido e usa `callback_id`
 único em `notification_delivery_attempts`: `delivered` é armazenado no estado
 interno `available`; `failed` e `error_code` são preservados.
 
+#### Webhook 3 — alteração do SharePoint simulado
+
+**Finalidade.** Receber notificações de criação, atualização ou exclusão nos
+itens da fonte sintética, validar a origem pelo `clientState` e persistir cada
+evento uma única vez. A requisição HTTP não reindexa documentos e não publica
+diretamente no RabbitMQ; a S5-11 consome a inbox em uma etapa separada.
+
+| Item | Contrato |
+| --- | --- |
+| Método e rota | `POST /api/integrations/sharepoint/change-notifications` |
+| Handshake | Query string `validationToken`; resposta `200 text/plain` com o mesmo valor. |
+| Variáveis | `SHAREPOINT_WEBHOOK_CLIENT_STATE` e `SHAREPOINT_WEBHOOK_REPOSITORY_MODE=database` |
+| Content-Type normal | `application/json` |
+| Persistência | `sharepoint_webhook_events`, com `event_id` como chave primária e estado inicial `pending`. |
+| Autenticação atual | `clientState` compartilhado, comparado em tempo constante e nunca persistido. |
+
+O corpo normal contém `value`, um array de 1 a 100 notificações:
+
+| Campo | Tipo | Obrigatório | Descrição |
+| --- | --- | :---: | --- |
+| `eventId` | UUID | Sim | Chave idempotente global, estável e independente do conteúdo mutável. |
+| `subscriptionId` | string, 1–160 | Sim | Assinatura simulada que originou a notificação. |
+| `clientState` | string secreta | Sim | Deve coincidir com o segredo configurado; não é armazenado. |
+| `changeType` | enum | Sim | `created`, `updated` ou `deleted`. |
+| `resource` | string | Sim | Localizador `lists/<listId>/items/<itemId>`. |
+| `resourceData.siteId` | string | Sim | Site simulado, por exemplo `metro-sp-mock`. |
+| `resourceData.listId` | string | Sim | Nome estável da lista/biblioteca em minúsculas. |
+| `resourceData.itemId` | inteiro positivo | Sim | Identificador estável do item na fonte. |
+| `resourceData.partnerSourceId` | string | Sim | Deve ser `sharepoint-mock:<listId>:<itemId>`. |
+| `occurredAt` | data/hora ISO 8601 com fuso | Sim | Momento da alteração informado pelo simulador. |
+
+Handshake:
+
+```http
+POST /api/integrations/sharepoint/change-notifications?validationToken=validacao-123 HTTP/1.1
+```
+
+Resposta `200`, com `Content-Type: text/plain`:
+
+```text
+validacao-123
+```
+
+Exemplo de notificação válida:
+
+```json
+{
+  "value": [{
+    "eventId": "d6a29bb6-9d2d-40dd-aa3f-20dc8d7a1218",
+    "subscriptionId": "sharepoint-mock-documents",
+    "clientState": "<SHAREPOINT_WEBHOOK_CLIENT_STATE>",
+    "changeType": "updated",
+    "resource": "lists/documentos_projetos/items/5101",
+    "resourceData": {
+      "siteId": "metro-sp-mock",
+      "listId": "documentos_projetos",
+      "itemId": 5101,
+      "partnerSourceId": "sharepoint-mock:documentos_projetos:5101"
+    },
+    "occurredAt": "2026-10-07T12:30:00-03:00"
+  }]
+}
+```
+
+Primeira resposta `202`:
+
+```json
+{"status":"accepted","accepted":1,"created":1,"duplicates":0}
+```
+
+A repetição idêntica também recebe `202`, mas devolve `created: 0` e
+`duplicates: 1`.
+
+| Código | Quando ocorre |
+| :---: | --- |
+| `200` | Handshake válido por `validationToken`. |
+| `202` | Lote válido persistido ou repetição idêntica. |
+| `401` | `clientState` presente, mas divergente do segredo esperado. |
+| `409` | Mesmo `eventId` reutilizado com conteúdo diferente. |
+| `422` | Corpo ausente, campo extra, tipo inválido ou identificadores incoerentes. |
+| `503` | Segredo, modo de repositório ou banco indisponível. |
+
+**Idempotência e fronteira assíncrona.** A inbox armazena um SHA-256 do payload
+canônico sem `clientState`. `ON CONFLICT (event_id) DO NOTHING` torna a inserção
+segura sob concorrência; o hash existente distingue repetição de colisão. A
+interface interna `list_pending()` entrega somente payloads sanitizados, e
+`mark_published()` muda `pending` para `published`. Essas operações preparam o
+produtor da S5-11, mas não comprovam tráfego RabbitMQ nem conexão com Microsoft
+Graph ou SharePoint corporativo.
+
 #### Topologia RabbitMQ
 
 | Elemento | Valor e responsabilidade |
 | --- | --- |
 | Exchange principal | `metro.alerts`, tipo `topic`, durável. |
 | Dead-letter exchange | `metro.alerts.dlx`, tipo `direct`, durável. |
-| Routing keys/filas | `alert.evaluation.requested`, `alert.notification.requested` e `notification.delivery.received`; uma fila durável por chave. |
+| Routing keys/filas | `alert.evaluation.requested`, `alert.notification.requested`, `notification.delivery.received` e `sharepoint.change.received`; uma fila durável por chave. |
 | DLQs | `<routing-key>.dead`, ligadas à DLX com a mesma routing key. |
 | Produtor de avaliação | Scheduler → repository/outbox. |
 | Produtor de notificação | Evaluator → repository/outbox. |
 | Produtor de entrega | Webhook 2 → callback + outbox na mesma operação. |
+| Produtor SharePoint | Worker `app.sharepoint_webhooks.worker publisher`; lê a inbox S5-09 e publica somente payload sanitizado. |
 | Publisher | `python -m app.alerts.worker publisher`; reivindica a outbox com `FOR UPDATE SKIP LOCKED` e publica mensagens persistentes. |
-| Consumers | `evaluator`, `notifier` e `delivery`, executados por `app.alerts.worker`. |
+| Consumers | `evaluator`, `notifier` e `delivery`, executados por `app.alerts.worker`, e `sharepoint`, executado por `app.sharepoint_webhooks.worker consumer`. |
 | Confirmação | `incoming.process(...)` confirma somente quando o handler termina sem exceção. |
 | Retry do publisher | Falha volta a `pending` com atraso de `30 s × tentativas`; após cinco tentativas fica `failed`, com `last_error`. |
 | Retry do consumer | Primeira falha é reenfileirada; uma falha após redelivery é rejeitada e roteada à DLQ. |
@@ -3999,20 +4575,680 @@ O fluxo regular do alerta continua diferente: scheduler → outbox →
 `GET /api/notifications` e `POST /api/notifications/{id}/read`; AMQP e
 scheduler não são webhooks.
 
+Fluxo completo da alteração do SharePoint simulado:
+
+```text
+simulador SharePoint
+  -> POST /api/integrations/sharepoint/change-notifications
+  -> validação de clientState + schema + hash idempotente
+  -> sharepoint_webhook_events (pending)
+  -> sharepoint-publisher
+  -> exchange metro.alerts / sharepoint.change.received
+  -> fila sharepoint.change.received
+  -> sharepoint-consumer revalida envelope e hash da inbox
+  -> claim published → processing
+  -> reindex_sharepoint_mock
+  -> processed + ACK
+  -> em falha: uma redelivery; nova falha ou mensagem inválida segue para
+     sharepoint.change.received.dead
+```
+
+O Compose de produção executa `sharepoint-publisher` e
+`sharepoint-consumer` como processos separados, com repositório em modo
+`database`. O `compose.rabbitmq.yml` permanece propositalmente restrito ao
+broker local; os workers podem ser iniciados pela CLI contra esse broker.
+
 #### Testes e limites comprovados
 
 Em 25/09/2026, os comandos focados aprovaram **22 testes de alertas** e **24
-testes de relatórios** (46 no total). Eles cobrem sucesso, autenticação inválida,
+testes de relatórios** (46 no total). Em 07/10/2026, a regressão relacionada da
+S5-11 aprovou **66 testes**. Eles cobrem sucesso, autenticação inválida,
 payload inválido, repetição, conflito, ausência do recurso, persistência em
 memória, outbox, routing keys, publisher com double, consumers de sucesso/falha
-e evento inválido. O registro reproduzível está em
+e evento inválido. A validação do Compose foi executada sem iniciar os serviços.
+O registro reproduzível está em
 [`docs/evidencias/sprint-05/webhooks-rabbitmq.md`](evidencias/sprint-05/webhooks-rabbitmq.md).
 
 Não houve execução real de Power Automate, Teams, SharePoint corporativo ou
 Copilot Studio. O modo `power_automate_simulator` e doubles controlados validam
-os contratos. Nesta rodada, o publisher RabbitMQ também foi testado com double,
-sem conexão a broker externo; portanto a documentação não usa esses testes como
-evidência de homologação Microsoft ou de tráfego RabbitMQ em produção.
+os contratos. Nesta rodada, os publishers e consumers RabbitMQ também foram
+testados com doubles, sem conexão a broker externo; portanto a documentação não
+usa esses testes como evidência de homologação Microsoft ou de tráfego RabbitMQ
+em produção.
+
+### 8.5.13 Contrato de alteração de dados pelo chat (S5-05)
+
+O parceiro pediu, com ênfase, que os dados do projeto pudessem ser alterados
+diretamente pelo chat. É também a capacidade de maior risco da Sprint 5: o R17
+de [`GestaoProjeto.md`](GestaoProjeto.md) trata da alteração indevida ou não
+auditada de dados pelo chat. Esta seção é o contrato que a implementação
+(S5-06, [#260](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/260))
+e a interface (S5-07, [#261](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/261))
+seguem. Ele define quais campos podem mudar, quem pode mudá-los e quais
+garantias cercam cada escrita, e se apoia no controle de acesso da Seção 4.3.1.
+
+#### Princípios
+
+1. **O cartão é a única via de escrita.** Uma mensagem no chat só produz uma
+   prévia, e o valor é gravado apenas quando a pessoa confirma no cartão, que
+   chama a rota de confirmação. Nem o texto da pessoa nem a resposta do modelo
+   de linguagem gravam dados.
+2. **Nenhum modelo de linguagem no caminho da escrita.** O pedido é interpretado
+   por um extrator determinístico, que combina um léxico de verbos e campos, o
+   código do projeto e a leitura de datas, status e percentuais. Nada do pedido
+   nem do registro sai para o provedor, o que preserva o RNF01. Quando falta
+   informação, o chat pergunta em vez de adivinhar.
+3. **Uma alteração por vez.** Cada prévia muda um campo de um registro. Um
+   pedido com várias mudanças recebe a orientação de fazer uma de cada vez, o
+   que mantém a prévia legível e o desfazer exato.
+4. **A permissão vem da regra que cobre o alvo** e é verificada na prévia, na
+   confirmação e no desfazer. Ter escrita em um projeto não concede escrita em
+   outro.
+5. **Tudo ou nada.** O novo valor, o registro em `change_records` e o evento em
+   `audit_events` são gravados na mesma transação. Se qualquer parte falhar,
+   nada é gravado.
+
+#### Campos editáveis e regras de validação
+
+Somente os campos abaixo podem ser alterados pelo chat, e sempre em registros
+vinculados a um projeto (no caso dos riscos, `scope_type = 'projeto'`). Qualquer
+outro campo, como custo, escopo, título, descrição, gerente, patrocinador,
+criticidade ou probabilidade, é recusado com `FIELD_NOT_EDITABLE`, e a resposta
+lista os campos permitidos.
+
+| Registro | Campo (chave do contrato) | Coluna | Regra de validação | `change_type` |
+|---|---|---|---|---|
+| Projeto | `projeto.status` | `projects.status` | Um de `planejado`, `em_andamento`, `atencao`, `critico` ou `suspenso`. `concluido` e `descontinuado` são recusados, porque encerrar ou descontinuar um projeto segue o processo formal do PMO. | `outro` |
+| Projeto | `projeto.prazo_final` | `projects.planned_end_date` | Data válida, não anterior a `start_date`. É recusada se o projeto estiver `concluido` ou `descontinuado`. | `prazo` |
+| Atividade do cronograma | `cronograma.prazo` | `schedule_items.planned_end_date` | Data válida, não anterior a `planned_start_date`. | `prazo` |
+| Atividade do cronograma | `cronograma.status` | `schedule_items.status` | Um de `planejado`, `em_andamento`, `atrasado`, `concluido`, `cancelado` ou `bloqueado`. | `outro` |
+| Atividade do cronograma | `cronograma.progresso` | `schedule_items.progress_percent` | Número de 0 a 100, com até duas casas decimais. | `outro` |
+| Marco ou entrega | `marco.data_prevista` | `project_deliverables_milestones.planned_date` | Data válida. | `prazo` |
+| Marco ou entrega | `marco.status` | `project_deliverables_milestones.status` | Um de `planejado`, `em_andamento`, `atrasado`, `concluido` ou `cancelado`. A coluna não tem restrição no banco, então o contrato fixa esse conjunto. | `outro` |
+| Marco ou entrega | `marco.data_conclusao` | `project_deliverables_milestones.completed_date` | Data válida, não posterior a hoje. | `prazo` |
+| Risco ou problema | `risco.status` | `risk_issue_items.status` | Um de `aberto`, `em_tratamento`, `mitigado`, `resolvido`, `aceito` ou `cancelado`. | `outro` |
+| Risco ou problema | `risco.responsavel` | `risk_issue_items.owner_name` | Texto de 2 a 160 caracteres, depois de remover espaços extras, sem caracteres de controle e sem nenhum padrão da barreira de dado sensível da S5-27 (e-mail, CPF, telefone etc.). | `responsavel` |
+| Risco ou problema | `risco.prazo` | `risk_issue_items.due_date` | Data válida. | `prazo` |
+
+Regras comuns a todos os campos:
+
+- **Data válida** é uma data do calendário entre 01/01/2020 e 31/12/2036. O
+  extrator aceita `31/03/2027`, `31/03` (próxima ocorrência da data) e
+  `31 de março de 2027`. Um mês sem dia, como "até março", gera uma pergunta
+  pelo dia. Uma data prevista no passado é aceita, mas a prévia mostra um aviso.
+- **Hoje** é calculado no fuso `America/Sao_Paulo`.
+- O novo valor precisa ser diferente do atual. Se for igual, a resposta informa
+  que nada mudou (`NO_CHANGE`) e nenhuma prévia é criada.
+- Campos derivados não são recalculados. Resolver um risco não preenche
+  `closed_at`, e concluir um marco não preenche `completed_date`. Quando isso
+  deixar o registro incoerente, por exemplo um marco `concluido` sem data de
+  conclusão, a prévia mostra um aviso.
+
+#### Perfis autorizados
+
+A regra vale para **todos os campos da tabela acima**: a alteração exige a
+operação `write` sobre o projeto do registro. Essa permissão é lida na regra de
+`access_rules` que cobre aquele projeto, e não no agregado das regras do
+usuário. A regra precisa estar ativa e ter `can_write = true`. Com a carga da
+S5-03 (Seção 4.3.1), o resultado esperado é este:
+
+| Perfil | Regra da carga | O que pode alterar pelo chat | Exemplo de negação |
+|---|---|---|---|
+| Gerente de projeto | Projeto `PRJ-0442`, com escrita | Os campos da tabela, só no `PRJ-0442` | Alterar o `PRJ-0510` |
+| PMO | Portfólio, sem escrita | Nada | Qualquer alteração |
+| Líder de subportfólio | Subportfólio `MOD`, sem escrita | Nada | Qualquer alteração |
+| Consulta | Projeto `PRJ-0510`, sem escrita | Nada | Qualquer alteração |
+
+Nenhum campo tem regra própria de perfil. Mudar quem pode alterar é mudar a
+regra em `access_rules`, sem mudança de código.
+
+#### Entrada
+
+A mensagem segue o caminho atual de `POST /api/chat` até a barreira de dado
+sensível da S5-27. Logo depois, e antes do classificador, o extrator verifica se
+ela é um pedido de alteração: um verbo de alteração (alterar, mudar, atualizar,
+prorrogar, adiar, antecipar, marcar, definir, passar, trocar) junto de um termo
+de campo (prazo, data, término, status, situação, progresso, avanço, percentual,
+responsável). A detecção não depende do classificador, que hoje leva
+"prorroga o prazo do PRJ-0442 até março" para consulta (Seção 8.11.6), nem do
+switch de validação de intenção. Uma mensagem classificada como `TRANSACAO` de
+atualização, mas sem pedido reconhecível, recebe uma orientação com exemplos em
+vez de uma resposta do RAG.
+
+O extrator produz uma proposta estruturada:
+
+```json
+{
+  "project_code": "PRJ-0442",
+  "entity": "risco",
+  "item_reference": "interferência com a operação comercial",
+  "field": "risco.status",
+  "raw_value": "em tratamento"
+}
+```
+
+- O projeto é identificado pelo código (`PRJ-…`). Sem código, o chat pergunta
+  qual é o projeto.
+- Atividades, marcos e riscos são localizados pelo nome dentro do projeto, sem
+  diferenciar maiúsculas e acentos. Se nenhum registro corresponder, a resposta
+  é `TARGET_NOT_FOUND`. Se mais de um corresponder, o chat mostra até cinco
+  candidatos e a pessoa escolhe um antes da prévia.
+
+Exemplos com a massa sintética:
+
+| Mensagem | Campo | Antes | Depois |
+|---|---|---|---|
+| "Prorroga o prazo do PRJ-0442 para 31/03/2027" | `projeto.prazo_final` | 20/12/2026 | 31/03/2027 |
+| "Muda o status do risco Interferência com a operação comercial do PRJ-0442 para em tratamento" | `risco.status` | `aberto` | `em_tratamento` |
+| "Marca o marco Início da operação assistida na Linha Azul do PRJ-0442 como em andamento" | `marco.status` | `planejado` | `em_andamento` |
+
+#### Prévia
+
+Com a proposta completa, o backend executa, nesta ordem, as seguintes etapas:
+
+1. valida a permissão de escrita no projeto;
+2. localiza o registro;
+3. valida o valor;
+4. lê o valor atual.
+
+Só então ele cria a prévia em `pending_data_changes` e devolve o cartão. Nada é
+gravado no registro do projeto nesta etapa. A resposta de `POST /api/chat`
+ganha o campo opcional `data_change`:
+
+```json
+{
+  "text": "Confira a alteração antes de confirmar.",
+  "model": "alteracao-dados-chat",
+  "data_change": {
+    "status": "preview",
+    "preview": {
+      "pending_change_id": "6f1c2e4a-…",
+      "project": { "code": "PRJ-0442", "title": "Modernizacao do Sistema de Sinalizacao da Linha Azul" },
+      "target": { "entity": "projeto", "id": "…", "label": "PRJ-0442" },
+      "field": { "key": "projeto.prazo_final", "label": "Prazo final previsto" },
+      "before": { "value": "2026-12-20", "display": "20/12/2026" },
+      "after": { "value": "2027-03-31", "display": "31/03/2027" },
+      "warnings": [],
+      "expires_at": "2026-10-06T15:10:00-03:00",
+      "undo_window_minutes": 15
+    }
+  }
+}
+```
+
+`data_change.status` também pode ter dois outros valores:
+
+- `needs_input`, com `missing` (`project`, `target`, `field` ou `value`),
+  `question` e, quando há escolha a fazer, `candidates` (`id` e `label`);
+- `rejected`, com `code` e `message`.
+
+Os três trazem `draft`, com o que já foi entendido do pedido (`project_code`,
+`entity`, `field`, `target_id`, `item_reference` e `raw_value`), para que a
+interface complete o que falta sem reinterpretar o texto.
+
+Nos três casos a resposta HTTP é `200`, porque um pedido incompleto, inválido ou
+negado é parte da conversa, e não uma falha da requisição.
+
+A escolha de um candidato não depende de nova interpretação de texto: a
+interface chama `POST /api/data-change-previews` com a proposta completa
+(`project_code`, `entity`, `target_id`, `field` e `raw_value`), e o backend
+repete as etapas acima. A prévia vale por **10 minutos** e pertence ao usuário e
+à conversa que a criaram.
+
+#### Confirmação e saída
+
+`POST /api/data-change-previews/{pending_change_id}/confirm`
+
+O corpo é opcional: `{ "reason": "Replanejamento aprovado na reunião de 03/10" }`,
+com até 500 caracteres. A justificativa também passa pela barreira de dado
+sensível. Em uma única transação, o backend executa estas etapas:
+
+1. confere que a prévia existe, pertence ao usuário autenticado, não expirou e
+   não foi usada;
+2. verifica de novo a permissão de escrita, porque a regra pode ter mudado desde
+   a prévia;
+3. trava o registro (`SELECT … FOR UPDATE`) e confere que o valor atual ainda é
+   o `before` da prévia;
+4. valida o valor de novo;
+5. grava o novo valor, insere `change_records` e `audit_events` e marca a prévia
+   como confirmada.
+
+Saída (`200`):
+
+```json
+{
+  "change_id": "c2a9d7b0-…",
+  "status": "aplicada",
+  "field": { "key": "projeto.prazo_final", "label": "Prazo final previsto" },
+  "before": { "value": "2026-12-20", "display": "20/12/2026" },
+  "after": { "value": "2027-03-31", "display": "31/03/2027" },
+  "applied_at": "2026-10-06T15:02:11-03:00",
+  "undo_available_until": "2026-10-06T15:17:11-03:00",
+  "correlation_id": "…"
+}
+```
+
+Confirmar de novo a mesma prévia devolve a mesma resposta, sem nova escrita, de
+modo que um clique duplo não altera o valor duas vezes.
+`POST /api/data-change-previews/{pending_change_id}/cancel` descarta a prévia e
+devolve `{ "status": "cancelada" }`. Essa rota também é idempotente.
+
+#### Desfazer
+
+`POST /api/data-changes/{change_id}/undo`
+
+O valor anterior só é restaurado quando todas as condições abaixo valem:
+
+- quem pede é o autor da alteração;
+- passaram no máximo **15 minutos** desde `applied_at`;
+- o valor atual ainda é o que a alteração gravou, ou seja, ninguém o mudou
+  depois;
+- a pessoa ainda tem escrita no projeto;
+- a alteração ainda não foi desfeita.
+
+A verificação e a restauração ocorrem na mesma transação, com o registro
+travado. A saída (`200`) é
+`{ "change_id": "…", "status": "desfeita", "restored": { "value": "2026-12-20", "display": "20/12/2026" }, "undone_at": "…" }`.
+Um desfazer não pode ser desfeito; para voltar ao valor, faz-se uma nova
+alteração.
+
+#### Histórico
+
+`GET /api/data-changes?project_code=PRJ-0442&field=projeto.prazo_final&target_id=<uuid>`
+exige leitura no projeto. Ele devolve as alterações feitas pelo chat naquele
+campo, da mais recente para a mais antiga (até 20), com autor, antes, depois,
+data e a indicação de desfeita. Cada item traz também `can_undo` e
+`undo_available_until`, verdadeiros só para o autor dentro da janela. É a fonte
+do histórico exibido pela S5-07.
+
+#### Erros
+
+Todas as rotas usam o envelope das demais APIs, `{"error": {"code": "…", "message": "…"}}`,
+com mensagem em português e sem detalhes internos. **Nenhum erro grava no
+registro do projeto.**
+
+No chat, os pedidos recusados voltam com `data_change.status = "rejected"` e
+HTTP `200`:
+
+| Código | Situação |
+|---|---|
+| `FIELD_NOT_EDITABLE` | O campo não está na tabela de campos editáveis. |
+| `INVALID_VALUE` | O valor viola a regra do campo; a mensagem diz qual é a regra. |
+| `TARGET_NOT_FOUND` | O projeto ou o registro não foi encontrado no escopo da pessoa. |
+| `OUT_OF_SCOPE_FOR_PROFILE` | A pessoa não tem escrita no projeto. |
+| `NO_CHANGE` | O valor pedido é igual ao atual. |
+| `MULTIPLE_CHANGES` | A mensagem pede mais de uma alteração. |
+| `DATA_CHANGE_UNAVAILABLE` | O backend está sem banco configurado. A escrita exige PostgreSQL, e o modo em memória não altera dados. |
+
+Nas rotas do cartão:
+
+| Código | HTTP | Rota | Situação |
+|---|---|---|---|
+| `UNAUTHENTICATED` | 401 | todas | Token ausente, inválido ou expirado. |
+| `OUT_OF_SCOPE_FOR_PROFILE` | 403 | criar prévia, confirmar, desfazer | Sem escrita no projeto. |
+| `UNDO_NOT_AUTHOR` | 403 | desfazer | A alteração foi feita por outra pessoa. |
+| `TARGET_NOT_FOUND` | 404 | criar prévia | Projeto ou registro inexistente no escopo. |
+| `PREVIEW_NOT_FOUND` | 404 | confirmar, cancelar | Prévia inexistente ou de outro usuário. |
+| `CHANGE_NOT_FOUND` | 404 | desfazer | Alteração inexistente. |
+| `PREVIEW_CANCELLED` | 409 | confirmar | A prévia foi cancelada. |
+| `STALE_PREVIEW` | 409 | confirmar | O valor mudou depois da prévia; é preciso gerar outra. |
+| `VALUE_CHANGED_SINCE` | 409 | desfazer | O valor foi alterado de novo depois desta alteração. |
+| `ALREADY_UNDONE` | 409 | desfazer | A alteração já foi desfeita. |
+| `PREVIEW_EXPIRED` | 410 | confirmar | Passaram mais de 10 minutos desde a prévia. |
+| `UNDO_WINDOW_EXPIRED` | 410 | desfazer | Passaram mais de 15 minutos desde a alteração. |
+| `PREVIEW_ALREADY_CONFIRMED` | 409 | cancelar | A prévia já foi confirmada; resta o desfazer. |
+| `DATA_CHANGE_INVALID_INPUT` | 422 | todas | Corpo ou parâmetro malformado, como justificativa acima de 500 caracteres. |
+| `FIELD_NOT_EDITABLE`, `INVALID_VALUE` | 422 | criar prévia, confirmar | Campo ou valor fora do contrato. |
+| `DATA_CHANGE_UNAVAILABLE` | 503 | todas | Sem banco ou falha na gravação; a transação é desfeita. |
+
+#### Registro em `change_records`
+
+Cada confirmação cria uma linha em `change_records`:
+
+| Coluna | Valor |
+|---|---|
+| `scope_type` | `projeto` |
+| `project_id` | Projeto do registro alterado |
+| `change_type` | O da tabela de campos |
+| `title` | `Alteração pelo chat: <rótulo do campo> de <alvo>`, com até 240 caracteres |
+| `source_label` | `chat` |
+| `reason` | Justificativa informada na confirmação, quando houver |
+| `impact_summary` | `<rótulo>: <antes> → <depois>` |
+| `requested_by` | `users.display_name` de quem confirmou |
+| `approved_by`, `approval_date` | Vazios, porque a confirmação no chat não é uma aprovação formal do PMO |
+| `status` | `implementada`; passa a `cancelada` quando a alteração é desfeita |
+| `registration_date` | Data da confirmação, no fuso de São Paulo |
+| `decided_at` | Instante da confirmação |
+| `metadata` | Objeto descrito abaixo |
+
+```json
+{
+  "origin": "chat",
+  "contract": "s5-05/v1",
+  "field": "projeto.prazo_final",
+  "table": "projects",
+  "column": "planned_end_date",
+  "target_id": "…",
+  "before": "2026-12-20",
+  "after": "2027-03-31",
+  "user_id": "…",
+  "interaction_id": "…",
+  "pending_change_id": "…",
+  "correlation_id": "…",
+  "applied_at": "2026-10-06T18:02:11Z",
+  "undo": null
+}
+```
+
+Ao desfazer, `undo` recebe `{ "undone_at": "…", "undone_by": "<user_id>" }`. A
+chave `metadata.origin = 'chat'` separa essas linhas das solicitações de mudança
+que vieram da carga do parceiro. Como o relatório executivo lê
+`change_records`, as alterações feitas pelo chat também aparecem nele.
+
+#### Eventos em `audit_events`
+
+Todos os eventos usam `component = 'api'`, o `user_id` de quem agiu, o
+`interaction_id` da mensagem que originou a prévia e o mesmo `correlation_id`
+em todo o fluxo. O payload leva a chave do campo, o projeto, o registro, o
+antes, o depois, os IDs da prévia e da alteração e, nas falhas, o código do
+erro. Ele nunca leva a mensagem original.
+
+| `event_type` | `event_status` | Quando |
+|---|---|---|
+| `project_data.change_previewed` | `pendente` | A prévia foi criada. |
+| `project_data.change_rejected` | `falha` | O pedido foi recusado por campo, valor ou registro. |
+| `authorization.access_denied` | `bloqueado` | A pessoa não tem escrita. É o evento da S5-04, com `operation = write`. |
+| `project_data.change_applied` | `sucesso` | A confirmação foi gravada. |
+| `project_data.change_cancelled` | `sucesso` | A prévia foi cancelada. |
+| `project_data.change_confirm_failed` | `falha` | A prévia estava expirada, cancelada ou desatualizada. |
+| `project_data.change_undone` | `sucesso` | A alteração foi desfeita. |
+| `project_data.undo_denied` | `bloqueado` | O desfazer foi pedido fora da janela, por outra pessoa ou com o valor já alterado. |
+| `project_data.chat_request` | `sucesso` | Registrado pelo rastreamento RNF03 na interação do chat, com o status do `data_change`. |
+
+`change_applied` e `change_undone` são gravados na mesma transação da escrita.
+Os demais seguem a regra da S5-04: uma falha ao gravar a auditoria é registrada
+como erro operacional e nunca transforma uma negação em permissão.
+
+#### Persistência da prévia
+
+`22_data_change_previews.sql` cria a tabela `pending_data_changes`, no mesmo
+padrão de `pending_proactive_suggestions`, e
+`23_rollback_data_change_previews.sql` a remove. As colunas são `id`,
+`user_id`, `correlation_id`, `external_conversation_id`, `interaction_id`,
+`project_id`, `entity`, `target_id`, `field_key`, `before_value` e
+`after_value` (JSONB), `status` (`pendente`, `confirmada` ou `cancelada`),
+`change_record_id`, `reason`, `expires_at`, `decided_at`, `created_at` e
+`updated_at`. Restrições `CHECK` limitam `entity`, `field_key` e `status` aos
+valores do contrato. A expiração é avaliada na leitura, sem job. Como nas
+tabelas de workflow, a tabela tem RLS habilitada sem policies e os papéis
+`anon` e `authenticated` não têm acesso. A migração também cria um índice
+parcial em `change_records` para o histórico por campo.
+
+O `interaction_id` só existe depois que o rastreamento RNF03 grava a interação.
+Por isso a prévia e seus eventos nascem com o `correlation_id`, e o pipeline
+liga os dois à interação logo em seguida.
+
+#### Cenários de aceite
+
+Estes cenários orientam os testes da S5-06 e da S5-08. Em todos eles, nenhuma
+chamada é feita ao provedor de LLM.
+
+| # | Perfil | Ação | Resultado esperado |
+|---|---|---|---|
+| 1 | Gerente | Prorrogar o prazo do `PRJ-0442` e confirmar | Valor gravado, `change_records` com `implementada` e evento `change_applied`. |
+| 2 | Gerente | Gerar a mesma prévia e cancelar | Nada gravado no projeto; evento `change_cancelled`. |
+| 3 | Gerente | Confirmar e desfazer em até 15 minutos | Valor anterior restaurado, `change_records` com `cancelada` e evento `change_undone`. |
+| 4 | Gerente | Desfazer depois de 15 minutos | `410 UNDO_WINDOW_EXPIRED`; nada muda. |
+| 5 | Gerente | Alterar o `PRJ-0510` | `rejected` com `OUT_OF_SCOPE_FOR_PROFILE`, sem prévia; evento `access_denied`. |
+| 6 | PMO | Qualquer alteração | `rejected` com `OUT_OF_SCOPE_FOR_PROFILE`, sem prévia. |
+| 7 | Gerente | Progresso de 140% | `rejected` com `INVALID_VALUE`, sem prévia. |
+| 8 | Gerente | Status do projeto `concluido` | `rejected` com `INVALID_VALUE`, sem prévia. |
+| 9 | Gerente | Alterar o orçamento | `rejected` com `FIELD_NOT_EDITABLE`. |
+| 10 | Gerente | Confirmar depois que o mesmo campo mudou por outra via | `409 STALE_PREVIEW`; nada muda. |
+| 11 | Gerente | Confirmar depois de 10 minutos | `410 PREVIEW_EXPIRED`; nada muda. |
+| 12 | Gerente | Confirmar duas vezes a mesma prévia | Uma única escrita e a mesma resposta nas duas chamadas. |
+
+#### Implementação (S5-06)
+
+A implementação está em `src/backend/app/data_changes/`:
+
+| Módulo | Responsabilidade |
+|---|---|
+| `fields.py` | Tabela de campos do contrato, leitura e validação de valores, forma canônica e exibição. |
+| `extractor.py` | Extrator determinístico do pedido, sem modelo de linguagem. |
+| `service.py` | Prévia, confirmação, cancelamento, desfazer e histórico, com a permissão verificada pela regra. |
+| `repository.py` | Unidade de trabalho transacional em PostgreSQL (`SELECT … FOR UPDATE`) e em memória para testes. |
+| `router.py` | As rotas do cartão. |
+
+A verificação por regra está em `authorize_project_write`, em
+`app/security/access.py`. O pipeline chama o extrator depois da barreira de
+dado sensível e antes do classificador. As intenções
+`transacao_atualizar_cronograma` e `transacao_atualizar_status`, quando não há
+pedido reconhecível, recebem a orientação com exemplos. Sem banco configurado,
+o chat responde `DATA_CHANGE_UNAVAILABLE`.
+
+Os testes cobrem os 12 cenários de aceite, o extrator, as regras de cada campo,
+a API e a integração com PostgreSQL real, incluindo duas confirmações
+simultâneas do mesmo campo e a falha da auditoria no meio da transação. A
+execução está registrada em
+[`docs/evidencias/sprint-05/s5-06-alteracao-dados-chat.md`](evidencias/sprint-05/s5-06-alteracao-dados-chat.md).
+
+#### Limites assumidos
+
+- **O RAG continua lendo documentos.** As respostas do RAG vêm de
+  `source_extracts`, e não das tabelas alteradas. Depois de uma alteração, uma
+  pergunta pode citar o valor do documento até que ele seja atualizado na
+  origem. O relatório executivo e o alerta de prazo leem as tabelas e já
+  refletem a alteração. A confirmação mostra o novo valor, e o cartão leva ao
+  histórico.
+- **Reaplicar a carga `13` limpa o histórico.** A `13` passou a trazer cinco
+  atividades sintéticas do `PRJ-0442` em `schedule_items`, usadas pelos campos
+  `cronograma.*`, mas continua apagando as mudanças registradas dos três
+  projetos antes de recriá-las, inclusive as feitas pelo chat.
+- **O extrator reconhece formas comuns de pedido**, e não qualquer frase. Fora
+  delas, o chat pergunta ou orienta com exemplos.
+- **A alteração vale para a base da aplicação.** Ela não é sincronizada com o
+  SharePoint nem com outro sistema do Metrô. O catálogo ainda registra
+  `transacao_atualizar_cronograma` com destino `power_automate`, mas no MVP a
+  alteração é executada pelo backend.
+- **A carga continua com uma regra ativa por usuário** (Seção 4.3.1). Mesmo
+  assim, o contrato já exige a verificação pela regra que cobre o alvo, para que
+  várias regras não abram uma escrita indevida.
+
+### 8.5.13.1 SharePoint simulado ampliado (S5-12)
+
+A S5-12 corrige a causa de `DEF-RF06-01`: a massa documental consultada pelo
+chat tinha fonte vinculada apenas ao `PRJ-0442`, embora o portfólio sintético
+também contenha `PRJ-0510` e `PRJ-0587`. A massa passa a ter 11 documentos. O
+item `201` de `comunicados_servico.json` permanece ligado ao `PRJ-0442`, e
+`documentos_projetos.json` acrescenta um status executivo sintético para cada
+um dos outros dois projetos.
+
+O material estrutural externo citado no planejamento não está versionado. Por
+decisão de produto registrada em `docs/stories/S5-12.md`, esta entrega usa como
+contrato substituto os JSONs locais e as tabelas `projects`,
+`project_artifacts` e `source_extracts`. Portanto, ela demonstra uma simulação
+reproduzível; não comprova integração ou homologação com o SharePoint
+corporativo do Metrô.
+
+| Origem JSON | Destino persistido | Regra |
+|---|---|---|
+| `site` | `project_artifacts.metadata.site` | site fictício preservado para rastreabilidade |
+| `list.id` e `list.displayName` | `sharepoint_library` e `metadata.list` | lista/biblioteca simulada |
+| `value[].id` | `sharepoint_item_id` | ID estável do item |
+| `project_code` / `fields.CodigoProjeto` | `projects.code` e chaves `project_id` | vínculo do artefato e do extrato ao projeto |
+| `fields.Title` / `fields.Conteudo` | artefato e extrato recuperável | conteúdo usado pelo RAG |
+| `webUrl` / `lastModifiedDateTime` | URL, extração e metadados | referência da versão simulada |
+
+`partner_source_id` segue o formato
+`sharepoint-mock:<list_id>:<item_id>`. A carga SQL faz upsert do artefato,
+atualiza o extrato de mesmo artefato/localizador e insere somente o ausente.
+Não há exclusão ampla de dados. A validação pós-carga exige ao menos um
+artefato e um extrato mock para cada um dos três projetos e rejeita grupos de
+extratos duplicados.
+
+Com `DATABASE_URL` ou `SUPABASE_DATABASE_URL` configurada, a reprodução parte
+de `src/backend`:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.reindex_sharepoint_mock apply
+.\.venv\Scripts\python.exe -m scripts.reindex_sharepoint_mock status
+```
+
+Os dois comandos devolvem JSON. `apply` reaplica a carga e depois valida;
+`status` executa apenas a validação. Sem URL de banco, os mesmos JSONs continuam
+disponíveis como fallback local. O carregador inclui código e nome do projeto
+no texto pesquisável, restringe o conjunto pelo escopo antes do ranqueamento e
+permite consultas individuais e comparativas sem incluir fontes de outro
+projeto. Testes e limitações estão registrados em
+[`docs/evidencias/sprint-05/sharepoint-simulado.md`](evidencias/sprint-05/sharepoint-simulado.md).
+
+### 8.5.14 Front-end: navegabilidade, estratégia de construção e testes (S5-24)
+
+Esta seção reúne, para o front-end em `src/frontend`, três coisas que a Seção 8.5.7 só cita: como a pessoa usuária se move entre as telas, por que o código foi construído do jeito que está e quais testes verificam cada fluxo, com a cobertura medida. A versão descrita é a do commit `f7ba157`, que soma à `develop` de 06/10/2026 a interface de alteração de dados da S5-07 (Seção 8.5.13), ainda em revisão no momento da medição.
+
+#### Mapa de navegação
+
+A aplicação tem só duas telas de verdade: a de **entrada** e a **área de trabalho**. Não existem rotas de URL. Quem decide qual das duas aparece é o estado da sessão: o `SessionBoundary`, em `App.tsx`, mostra a entrada enquanto não há sessão válida e a área de trabalho depois do login. Todo o resto acontece dentro da área de trabalho, de dois jeitos: em painéis e menus que abrem ao lado ou por cima do chat, ou em cartões que aparecem dentro da própria mensagem do agente.
+
+<p align="center"><img src="img/navegabilidade-frontend.png" alt="Mapa de navegação do front-end: da tela de entrada para a área de trabalho, onde a conversa dá acesso a painéis, menus, entrada por voz e cartões de relatório, alerta, alteração de dados e sugestão proativa" width="100%"></p>
+
+<p align="center"><strong>Figura 28</strong> - Mapa de navegação do front-end.<br><sup>Fonte: Material produzido pelos autores, 2026. Fonte editável em <code>docs/diagrams/navegabilidade-frontend.dot</code>.</sup></p>
+
+A Figura 28 parte da tela de entrada. **Entrar** leva ao chat vazio. **Sair**, na engrenagem, ou uma sessão expirada (HTTP 401) trazem de volta à entrada, de qualquer ponto da área de trabalho. Um HTTP 403 não derruba a sessão: a ação negada mostra erro e o perfil continua válido. A conversa é o centro da área de trabalho: dela saem os painéis, os menus e os cartões.
+
+| Tela ou elemento | Como se chega | O que permite | Como se sai |
+| --- | --- | --- | --- |
+| Tela de entrada (`AccessScreen`) | Abrir a aplicação sem sessão, **Sair** ou sessão expirada (401). | Escolher a persona (PMO, Líder de subportfólio, Gerente de projeto ou Consulta) e informar a senha, validada no Supabase Auth. | **Entrar** abre a área de trabalho. Credencial inválida mantém a tela, limpa a senha e devolve o foco ao campo da persona. |
+| Chat vazio (`ChatEmptyState`) | Primeiro acesso ou **Nova conversa**. | Escolher uma sugestão de pergunta, digitar ou gravar. | O primeiro envio cria a conversa. |
+| Conversa (`MessageList` e `Composer`) | Enviar uma mensagem ou selecionar uma conversa. | Ler respostas em Markdown, abrir citações `[n]`, ver o erro controlado e usar **Interromper resposta** durante o envio. | Trocar de conversa cancela a espera em andamento. |
+| Conversas (`ConversationSidebar`) | Fixa à esquerda a partir de 1024 px. Abaixo disso, **Abrir conversas** abre um diálogo. | Criar, buscar por título ou conteúdo, selecionar e excluir conversas da sessão. | Selecionar ou **Escape** fecha o diálogo e devolve o foco ao botão que o abriu. |
+| Fontes da resposta (`DocumentPanel`) | Uma citação `[n]` ou o botão **Fontes** do cabeçalho. O painel começa fechado. Fica fixo a partir de 1280 px e vira diálogo abaixo disso. | Ver a lista de fontes, o trecho recuperado e a origem. A aba **Resposta**, com as métricas, só aparece no modo técnico. | O mesmo botão ou **Escape**. |
+| Ajustes do agente (`AgentSettings`) | Engrenagem do cabeçalho. | Ligar a validação de intenção, as sugestões proativas (que dependem da validação) e os detalhes técnicos, ver o perfil da sessão e sair. Os controles ficam bloqueados enquanto há uma resposta em andamento. | **Escape**. **Sair** volta para a entrada. |
+| Notificações (`NotificationCenter`) | Sino do cabeçalho, com a contagem de não lidas. A lista é atualizada a cada 30 segundos. | Marcar notificações como lidas e pausar, retomar ou cancelar inscrições de alerta. | **Escape**. |
+| Entrada por voz (`AudioButton`, `RecordingBar` e `RecordingPreview`) | Microfone no campo de mensagem. Exige sessão e permissão do navegador. | Gravar até 60 segundos, concluir e ouvir a prévia. | **Enviar áudio** transforma a transcrição em mensagem. **Descartar** apaga a captura. |
+| Cartão de relatório (`ReportWorkflowCard`) | Resposta classificada como `transacao_gerar_relatorio`. | Responder às perguntas, revisar, confirmar a geração e acompanhar o processamento. | **Baixar no chat** entrega o DOCX. Também é possível cancelar. |
+| Cartão de alerta (`AlertWorkflowCard`) | Resposta classificada como `alerta_prazo_atraso`. | Configurar o limiar e confirmar a inscrição. | A inscrição ativa passa a ser gerida pelo sino. |
+| Cartão de alteração de dados (`DataChangeCard`, S5-07) | Resposta do chat com `data_change`. | Ver a prévia (antes, depois e avisos), confirmar com justificativa opcional, desfazer em até 15 minutos e abrir o histórico do campo. | Confirmada, cancelada, desfeita ou com erro. A fase fica salva na mensagem, então reabrir a conversa não pede confirmação de novo. |
+| Sugestão proativa (`ProactiveSuggestion`) | Validação de intenção e sugestões proativas ligadas, e o backend propõe uma intenção secundária. | Aceitar, recusar ou desativar as sugestões, tudo no mesmo cartão. | A decisão substitui os botões e o foco vai para o resultado. |
+
+#### Fluxos entre telas
+
+Os fluxos abaixo são os caminhos completos que a interface precisa sustentar. A última coluna indica onde cada um é verificado. Os testes unitários aparecem pelo nome do arquivo e os de navegador pelo nome do cenário no Playwright.
+
+| Fluxo | Caminho | Resultado esperado | Verificado em |
+| --- | --- | --- | --- |
+| F1 — Entrar e sair | Entrada → chat vazio → engrenagem → **Sair** → entrada | O token só existe na memória. O logout desmonta o estado do chat e apaga as conversas da persona anterior. Um 401 encerra a sessão e um 403 a preserva. | `access-session.test.tsx`; `app-shell.test.tsx`; E2E "autentica a persona, envia Bearer e limpa o chat no logout" |
+| F2 — Consulta por texto | Chat vazio → conversa → citação `[n]` → fontes | A resposta aparece com as citações. A fonte abre com o trecho e a origem, sem inventar métricas ausentes. | `components.test.tsx`; `references.test.tsx`; `chat-store.test.tsx`; E2E "texto, fontes, modo técnico e navegação responsiva" |
+| F3 — Consulta por voz | Conversa → microfone → concluir → prévia → **Enviar áudio** → conversa | O áudio sai em WAV PCM mono, 16 bits e 16 kHz. A transcrição vira mensagem da pessoa usuária e a resposta segue o mesmo caminho do texto. | `use-audio-recorder.test.tsx`; `audio.test.ts`; `chat-store.test.tsx`; E2E "gravação sintética, WAV, upload e resposta pelo backend" |
+| F4 — Relatório guiado | Conversa → cartão (perguntas) → revisão → **Confirmar e gerar DOCX** → **Baixar no chat** | O cartão coleta escopo, período, público e ênfases, exige confirmação e entrega um DOCX válido sem sair do chat. | `report-workflow-card.test.tsx`; `client.test.ts`; E2E "PLN inicia fluxo guiado e entrega DOCX baixavel no chat" |
+| F5 — Alerta de prazo | Conversa → cartão → confirmação → inscrição ativa → sino | A inscrição confirmada mostra a próxima avaliação. Depois ela pode ser pausada, retomada ou cancelada pelo sino. | `alert-workflow-card.test.tsx`; `notification-center.test.tsx`. Ainda sem cenário de navegador. |
+| F6 — Alteração de dados | Conversa → prévia → **Confirmar alteração** → **Desfazer** ou **Histórico do campo**. Alternativas: **Cancelar** ou erro. | Nada é gravado antes da confirmação. O cancelamento informa que nada foi gravado. O erro final não oferece repetir. Desfazer só aparece dentro da janela. | `data-change-card.test.tsx`; `data-change-flow.test.tsx`; E2E "prévia, confirmação, histórico e desfazer" e "cancelamento não grava e erro final não oferece repetir" |
+| F7 — Sugestão proativa | Engrenagem → ligar validação e proativas → resposta com sugestão → aceitar, recusar ou desativar | Nada é executado sem escolha explícita. Recusar preserva a resposta principal. Uma confirmação interrompida devolve a sugestão para pendente. | `components.test.tsx`; `chat-store.test.tsx`; `agent-settings.test.tsx` |
+| F8 — Falha e interrupção | Conversa → erro do provedor ou da rede → mensagem controlada → novo envio. Durante o envio: **Interromper resposta**. | Nenhum detalhe interno aparece na tela. A pergunta é mantida e um novo envio é liberado. Resposta atrasada não é aplicada. | `client.test.ts`; `chat-store.test.tsx`; E2E "falha controlada, recuperação e interrupção" |
+| F9 — Troca de conversa, largura e teclado | Conversas ↔ conversa. Abaixo de 1024 px, conversas e fontes em diálogo. Fluxo completo só pelo teclado. | A resposta atrasada não cai em outra conversa. Não há rolagem horizontal. **Escape** fecha diálogos e devolve o foco. **Pular para o campo de mensagem** é o primeiro Tab. | `chat-store.test.tsx`; `app-shell.test.tsx`; E2E de `responsividade-acessibilidade.spec.ts` |
+
+#### Estratégia de construção
+
+As decisões abaixo explicam a forma do código. Cada uma traz o motivo, para que uma mudança futura saiba o que está trocando.
+
+1. **Duas telas e o resto dentro do chat.** Relatório, alerta, alteração de dados e sugestão proativa aparecem como cartões na mensagem que os originou, e não em telas próprias. Assim a pessoa não perde o contexto da conversa, a confirmação fica visível ao lado do pedido e não foi preciso criar roteamento. A tela padrão também ficou enxuta, como o parceiro pediu na S5-20: validação de intenção, proatividade, modo técnico e perfil foram para a engrenagem, e o painel de fontes só abre quando a pessoa pede.
+2. **A sessão delimita o estado.** O `ChatStoreProvider` recebe `key={session.sessionKey}`. Por isso, trocar de sessão ou sair desmonta todo o estado de conversa em vez de limpá-lo campo a campo. O token e as conversas ficam só em memória. O tema é a única preferência gravada no navegador.
+3. **Camadas com uma direção só.** O caminho é sempre componente → estado (`state/chat-store.tsx`, com reducer) → cliente (`lib/api/`) → backend. Nenhum componente chama `fetch`. Os contratos ficam declarados em `lib/api/schemas.ts` e são convertidos em `lib/domain.ts`, então a interface nunca lê o JSON cru. Isso permite testar cada camada substituindo apenas a de baixo.
+4. **Estados com nome.** Cada cartão tem fases explícitas: o `status` do workflow de relatório e de alerta, e a `phase` da alteração de dados (`idle`, `applied`, `cancelled`, `failed` e `undone`). Cada fase tem a sua renderização. A fase da alteração fica salva na mensagem, e é por isso que voltar à conversa não pede confirmação de novo.
+5. **Falha nunca aparece crua.** O cliente converte os códigos HTTP 400, 401, 403, 413, 422, 429, 500, 502, 503 e 504, a queda de rede e a resposta sem JSON em mensagens próprias. Na tela, essas mensagens usam `role=alert`. HTML de proxy, traceback e texto do provedor não chegam à pessoa usuária.
+6. **Os mesmos componentes em três larguras.** `hooks/use-media-query.ts` define as faixas de 1024 e 1280 px. Conversas e fontes usam o mesmo componente como painel fixo ou como diálogo. Ao fechar um diálogo, o foco volta ao botão que o abriu.
+7. **Acessibilidade como contrato de teste.** Os testes localizam os elementos por papel e nome acessível (`getByRole` e `getByLabelText`), e não por classe CSS. Se um botão perde o nome, o teste quebra. No navegador, o axe roda nos dois temas e nas três larguras.
+8. **Primitivos reutilizados e substitutos só nas bordas.** Diálogos, abas, popovers e switches vêm do Radix, em `components/ui/`. Os testes usam esses componentes reais e só substituem o que está fora do front-end: `fetch`, a store (quando o teste é de um componente isolado) e o microfone.
+9. **Qualidade no pipeline.** O job `frontend-unit` do `.gitlab-ci.yml` roda lint sem avisos, verificação de formatação, testes com cobertura e build. O job `frontend-e2e` roda o Playwright e publica `playwright-report/` e `test-results/` como artefatos, mesmo quando falha.
+
+#### Testes: camadas, casos e resultados esperados
+
+A suíte é dividida pelo que cada camada isola:
+
+| Camada | Ferramenta | O que é real e o que é substituído | Arquivos | Casos |
+| --- | --- | --- | --- | --- |
+| Componentes | Vitest, Testing Library e jsdom | O componente e os primitivos de UI são reais. A store e a API são substituídas quando o componente é testado sozinho. | `components.test.tsx`, `data-change-card`, `report-workflow-card`, `alert-workflow-card`, `references`, `notification-center`, `agent-settings` e `user-card` | 56 |
+| Tela e estado integrados | Vitest | A aplicação, a store e o cliente são reais. Só o `fetch` é substituído. | `app-shell`, `data-change-flow`, `chat-store` e `access-session` | 25 |
+| Cliente HTTP e conversões | Vitest | A serialização, os contratos e a conversão de áudio são reais. `fetch` e microfone são substituídos. | `client`, `domain`, `audio` e `use-audio-recorder` | 25 |
+| Navegador (E2E) | Playwright com Chromium em 1440 × 900, 768 × 1024 e 390 × 844 | O front-end Vite e as rotas FastAPI são reais (`app/tests/e2e_server.py`). Gemini, Azure e o classificador respondem de forma determinística. As rotas da S5-06 são simuladas com `page.route`. | 3 specs | 12 cenários × 3 larguras = 36 execuções |
+
+Casos unitários e o resultado esperado de cada arquivo:
+
+| Arquivo | Casos | Resultado esperado |
+| --- | --- | --- |
+| `components/components.test.tsx` | 25 | Cada componente do chat, do campo de mensagem, das fontes e da barra lateral tem nome acessível, renderiza Markdown sem executar HTML, mostra o erro controlado e a origem do áudio, esconde intenção e modelo fora do modo técnico, envia com Enter e quebra linha com Shift+Enter, bloqueia texto acima do limite e não inventa métricas. |
+| `chat/data-change-card.test.tsx` | 14 | A prévia não grava nada. A confirmação grava e oferece desfazer. O cancelamento informa que nada foi gravado. O erro final não oferece repetir e o erro transitório permite tentar de novo. A janela de 15 minutos e a prévia expirada são respeitadas. Histórico, avisos e perguntas com candidatos ou com valor inválido funcionam. |
+| `chat/data-change-flow.test.tsx` | 2 | Na aplicação real, a resposta com `data_change` vira cartão, e depois de confirmado o cartão não volta a pedir confirmação. Uma resposta sem `data_change` não desenha cartão. |
+| `chat/report-workflow-card.test.tsx` | 3 | O cartão envia a opção escolhida, coleta intervalo, seleção múltipla e texto opcional, confirma, cancela e baixa o artefato. |
+| `chat/alert-workflow-card.test.tsx` | 1 | Depois da confirmação, o cartão mostra a próxima avaliação automática. |
+| `documents/references.test.tsx` | 3 | A fonte mostra identificadores e períodos disponíveis. Fontes consultadas que não sustentam a resposta são sinalizadas. |
+| `notifications/notification-center.test.tsx` | 2 | O resumo de não lidas é acessível e as notificações abrem a partir do sino. |
+| `settings/agent-settings.test.tsx` | 6 | A engrenagem começa fechada, troca os modos, bloqueia a proatividade sem a validação de intenção, não troca de modo durante uma resposta e mostra o perfil só quando há sessão. |
+| `sidebar/user-card.test.tsx` | 2 | O perfil, o escopo e as permissões aparecem sem expor o token. O perfil de consulta é descrito como só leitura. |
+| `layout/app-shell.test.tsx` | 7 | A aplicação integra envio, fontes, busca, seleção, exclusão, tema, saída pela engrenagem, atalho de teclado e os diálogos de 1024 a 1279 px e do celular, que devolvem o foco ao fechar. |
+| `state/chat-store.test.tsx` | 9 | A conversa é criada no primeiro envio e preserva o contexto. Não há envio duplicado. Uma resposta atrasada é descartada. A falha libera um novo envio. O áudio exige token. A sugestão aceita, recusada ou interrompida volta ao estado correto. |
+| `state/access-session.test.tsx` | 7 | A aplicação não abre antes da validação. Persona divergente e credencial inválida são recusadas. O logout limpa a persona anterior. Um 401 encerra a sessão e um 403 a preserva. O formulário funciona pelo teclado. |
+| `lib/api/client.test.ts` | 17 | O cliente envia JSON e multipart corretos, executa o workflow com identidade, revisão e idempotência e baixa o DOCX. Os códigos 400 a 504 e a queda de rede viram mensagens controladas. O cancelamento chega até o `fetch`. |
+| `lib/domain.test.ts` | 2 | A conversão preserva evidências, períodos e correlação, e a abstenção não ganha afirmações nem metadados. |
+| `lib/audio.test.ts` | 1 | O áudio sai em PCM mono, 16 bits e 16 kHz, limitado a 60 segundos. |
+| `hooks/use-audio-recorder.test.tsx` | 5 | O gravador converte para WAV, libera o microfone e a prévia, descarta o cancelamento sem upload, libera a captura concedida depois da desmontagem, comunica permissão negada e permite tentar de novo depois de erro. |
+
+Cenários de navegador. Os cenários marcados com "claro e escuro" rodam uma vez em cada tema:
+
+| Cenário (`e2e/`) | Resultado esperado |
+| --- | --- |
+| `chat.spec.ts` — texto, fontes, modo técnico e navegação responsiva | A resposta e a fonte aparecem. A tela padrão não mostra detalhes técnicos. O modo técnico mostra a aba **Resposta**. |
+| `chat.spec.ts` — falha controlada, recuperação e interrupção | O 503 do provedor vira um alerta de indisponibilidade sem o detalhe privado. **Interromper resposta** libera o envio e a pergunta seguinte é respondida. |
+| `chat.spec.ts` — gravação sintética, WAV, upload e resposta pelo backend | O microfone sintético produz um WAV aceito pela validação real e a resposta chega marcada como **Transcrito**. |
+| `chat.spec.ts` — acessibilidade automática e tema nas três larguras | O axe não encontra violações e o tema escuro é aplicado. |
+| `chat.spec.ts` — PLN inicia fluxo guiado e entrega DOCX baixável no chat | O fluxo completo do cartão termina em um arquivo `.docx` válido, que começa por `PK`. |
+| `chat.spec.ts` — autentica a persona, envia Bearer e limpa o chat no logout | As chamadas levam `Authorization: Bearer`. Sair limpa a conversa. |
+| `responsividade-acessibilidade.spec.ts` — largura e verificação automática nos estados principais (claro e escuro) | Nos estados vazio, resposta, ajustes e fontes, não há rolagem horizontal nem violação WCAG 2.0, 2.1 e 2.2 A/AA. |
+| `responsividade-acessibilidade.spec.ts` — fluxo principal só pelo teclado | O primeiro Tab foca **Pular para o campo de mensagem** e o fluxo completo funciona sem mouse. |
+| `alteracao-dados.spec.ts` — prévia, confirmação, histórico e desfazer (claro e escuro) | A prévia mostra o antes e o depois, a confirmação grava, o histórico abre e o desfazer restaura o valor. O axe roda sobre o cartão. |
+| `alteracao-dados.spec.ts` — cancelamento não grava e erro final não oferece repetir | O cancelamento informa que nada foi gravado. O erro final não oferece **Tentar de novo**. |
+
+#### Cobertura medida
+
+A medição foi feita em **06/10/2026, às 22h27 (horário de Brasília)**, sobre o commit `f7ba157`, com Node.js 24.21.0 e Vitest 5.0.0, rodando `npm run test:coverage` em `src/frontend`. Resultado: **106 testes aprovados em 16 arquivos, sem falhas**. O relatório V8 considera os arquivos de `src/components`, `src/hooks`, `src/lib` e `src/state` (62 arquivos), inclusive os que nenhum teste importa. A cobertura dos testes de navegador não entra nesta conta.
+
+| Métrica | Coberto / total | 06/10/2026 | 10/09/2026 (Seção 8.4) | Mínimo proposto na S5-22 |
+| --- | --- | --- | --- | --- |
+| Linhas | 964 / 1.135 | **84,93%** | 87,10% | 80% |
+| Instruções | 1.025 / 1.248 | **82,13%** | 84,33% | 80% |
+| Funções | 307 / 382 | **80,36%** | 83,83% | 75% |
+| Ramificações | 814 / 1.078 | **75,51%** | 73,12% | 70% |
+
+De setembro para cá, a suíte passou de 46 para 106 testes, e o código medido passou de 636 para 1.135 linhas, com autenticação, engrenagem, notificações, alerta e alteração de dados. A cobertura de linhas caiu 2,2 pontos porque o código cresceu mais rápido do que os testes, mas as quatro métricas ficam acima dos mínimos que a S5-22 propõe para o pipeline.
+
+| Área | Linhas | Funções | Ramificações |
+| --- | --- | --- | --- |
+| `components/sidebar` | 100,0% | 100,0% | 86,4% |
+| `components/settings` | 100,0% | 100,0% | 100,0% |
+| `components/ui` | 96,9% | 89,5% | 92,3% |
+| `components/access` | 96,3% | 71,4% | 80,0% |
+| `components/documents` | 95,7% | 92,9% | 81,8% |
+| `hooks` | 90,1% | 85,7% | 63,5% |
+| `components/layout` | 87,5% | 75,0% | 86,0% |
+| `components/chat` | 86,9% | 81,4% | 84,4% |
+| `components/composer` | 85,7% | 72,7% | 74,2% |
+| `lib/api` | 80,9% | 75,0% | 76,2% |
+| `lib` (`domain`, `audio`, `format`, `utils`) | 78,8% | 96,0% | 56,0% |
+| `state` | 77,5% | 75,4% | 66,3% |
+| `components/notifications` | 65,6% | 28,6% | 25,0% |
+
+Os pontos fracos estão concentrados no alerta: `notification-center.tsx` (pausar, retomar e cancelar não são exercitados), `alert-workflow-card.tsx` (33% das linhas) e `lib/api/alert-workflow.ts` (0%). Os ramos de erro da gravação em `lib/audio.ts` também ficam descobertos. `ui/skeleton.tsx` aparece com 0% porque é decorativo e nenhuma tela o usa hoje.
+
+Para reproduzir a medição, use **Node.js 24**, a versão pedida no README e usada pela imagem `node:24-bookworm` do pipeline. Com o Node.js 22, o caso `client.test.ts › baixa o DOCX pelo backend e revoga a URL temporaria` falha por incompatibilidade entre o `Blob` do jsdom e o `Response` do Node. Não é um defeito da aplicação: o mesmo arquivo aprova os 17 casos no Node.js 24. A saída completa e o resumo por arquivo estão em `docs/evidencias/sprint-05/s5-24-documentacao-frontend.md`.
+
+```sh
+cd src/frontend
+npm ci
+npm run test:coverage      # 106 testes e cobertura em coverage/
+npx playwright install chromium
+npm run test:e2e           # 36 execuções; relatório em playwright-report/
+```
 
 ## 8.6 Requisitos das APIs de voz (STT/TTS)
 
@@ -4025,14 +5261,14 @@ Os dois serviços ocupam posições diferentes no fluxo de voz:
 1. o **STT** recebe o áudio enviado pelo usuário e produz a solicitação textual encaminhada ao pipeline de PLN;
 2. o **TTS** recebe a resposta textual final produzida pelo agente e sintetiza um áudio que poderá ser devolvido pelo canal de interação.
 
-Essa distinção preserva a delimitação da Sprint 1. A arquitetura inicial prevê solicitações por texto ou áudio e um componente de conversão de áudio em texto, enquanto os critérios de aceitação do RF01 exigem, no MVP, que o pipeline aceite solicitações textuais. A Seção 8.8 detalha o STT previsto na solução atual. A Seção 8.9 registra a avaliação e o contrato técnico de TTS, mas sua implementação continua classificada na Seção 3.4.5 como evolução; documentar a API não altera o escopo do MVP.
+Essa distinção preserva a delimitação da Sprint 1. A arquitetura inicial prevê solicitações por texto ou áudio e um componente de conversão de áudio em texto, enquanto os critérios de aceitação do RF01 exigem, no MVP, que o pipeline aceite solicitações textuais. A Seção 8.8 detalha o STT previsto na solução atual. A síntese, então registrada como evolução na Seção 3.4.5, foi acrescentada na Sprint 5 conforme a Seção 8.9.4.
 
 ### 8.6.2 Entradas, saídas e formatos
 
 | Serviço | Entrada esperada | Saída esperada | Formatos e metadados adotados ou exigidos | Destino no fluxo | Situação no escopo |
 |---|---|---|---|---|---|
 | **STT** | Fala em português do Brasil (`pt-BR`), capturada pelo canal como arquivo ou fluxo de áudio. O caso de uso atual é uma pergunta curta do usuário. | Transcrição textual estruturada. Quando disponível, a resposta deve expor o estado do reconhecimento, o texto normalizado e a confiança ou as alternativas retornadas pelo provedor. | A avaliação deve registrar contêiner, codec, taxa de amostragem, número de canais, duração e tamanho máximos, envio binário ou multipart e suporte a processamento síncrono ou streaming. No contrato adotado na Seção 8.8, usa-se preferencialmente WAV com PCM, 16 kHz e mono; OGG com OPUS, 16 kHz e mono também é aceito pelo endpoint documentado. | O texto final é encaminhado ao pipeline de PLN como uma solicitação textual; o STT não classifica a intenção nem gera a resposta do agente. | Componente previsto na arquitetura e detalhado na Seção 8.8. A disponibilidade no ambiente do parceiro ainda depende de confirmação com a GTI. |
-| **TTS** | Resposta textual final do agente em português do Brasil, codificada em um documento SSML válido após a aplicação das regras de acesso e fundamentação. | Bytes do áudio sintetizado, acompanhados do tipo de mídia correspondente ao formato solicitado. | O contrato da Seção 8.9 adota `application/ssml+xml` na entrada e `audio-24khz-48kbitrate-mono-mp3` na saída, adequado à reprodução direta. `riff-24khz-16bit-mono-pcm` (WAV) é a alternativa documentada para processamento sem perdas. Devem ser respeitados os limites de tamanho do SSML, duração e taxa de requisições do provedor. | O áudio é devolvido pela camada de interface sem alterar o conteúdo textual fundamentado, que permanece como resposta canônica do agente. | Contrato técnico documentado na Seção 8.9; a implementação permanece como evolução e não é requisito de entrega do MVP. |
+| **TTS** | Resposta textual final do agente em português do Brasil, codificada em um documento SSML válido após a aplicação das regras de acesso e fundamentação. | Bytes do áudio sintetizado, acompanhados do tipo de mídia correspondente ao formato solicitado. | O contrato da Seção 8.9 adota `application/ssml+xml` na entrada e `audio-24khz-48kbitrate-mono-mp3` na saída, adequado à reprodução direta. `riff-24khz-16bit-mono-pcm` (WAV) é a alternativa documentada para processamento sem perdas. Devem ser respeitados os limites de duração e taxa de requisições do provedor. | O áudio é devolvido pela camada de interface sem alterar o conteúdo textual fundamentado, que permanece como resposta canônica do agente. | Contrato e implementação da Sprint 5 na Seção 8.9.4. |
 
 Para ambas as APIs, o contrato técnico deve documentar autenticação, parâmetros obrigatórios, exemplo de requisição e resposta, códigos de erro, limites de uso e comportamento quando não for possível processar a entrada. No caso de STT, uma transcrição utilizável é o dado de entrada do restante do pipeline. No caso de TTS, a síntese acrescenta uma modalidade de apresentação e não modifica o conteúdo produzido pelo pipeline.
 
@@ -4061,7 +5297,7 @@ Os critérios abaixo orientam a pesquisa e a comparação de serviços de voz. E
 - O SSML, o MP3 adotado e o WAV alternativo descritos na Seção 8.9 pertencem ao contrato do endpoint Azure selecionado para TTS e não constituem exigências universais para outros provedores.
 - As APIs de voz não devem receber dados reais ou sensíveis em serviço não homologado. Durante a prova de conceito, aplicam-se as exigências de dados sintéticos ou anonimizados do RNF01.
 - A trilha prevista no RNF03 continua baseada na solicitação textual, na intenção, nas fontes e na resposta produzida. Este levantamento não cria uma nova obrigação de armazenar gravações ou áudios sintetizados.
-- A escolha técnica do Azure AI Speech para TTS na Seção 8.9 permite reutilizar o recurso e a autenticação do STT, mas não antecipa sua implementação: a síntese de fala permanece fora do escopo do MVP, conforme a Seção 3.4.5.
+- A escolha técnica do Azure AI Speech para TTS na Seção 8.9 reutiliza o recurso e a autenticação do STT. A Seção 3.4.5 registra o escopo inicial; a implementação posterior da Sprint 5 está descrita na Seção 8.9.4.
 
 ## 8.7 API de recebimento de áudio
 
@@ -4143,11 +5379,14 @@ entidades extraídas e métricas do percurso de áudio e PLN, mantendo RNF05
 rastreável no contrato HTTP e RNF11 com mensagens controladas para entradas sem
 rota segura. No exemplo, `chat` omite `intent`, `entities` e `pipeline_metrics`,
 que repetem os objetos do nível superior; `answer.sources` também omite os
-campos nulos. O contrato completo das referências é descrito a seguir.
+campos nulos. O contrato completo das referências é descrito a seguir. A versão `1.2.0`
+acrescenta `chat.blocks` e `answer.blocks`, descritos no
+[contrato de respostas estruturadas](contracts/respostas-estruturadas-1.2.0.md).
+Os exemplos abaixo omitem os blocos para destacar os campos existentes.
 
 ```json
 {
-  "contract_version": "1.1.0",
+  "contract_version": "1.2.0",
   "conversation_id": "1f5c9a24-1c2e-4a8f-9a3e-2b6d8c0f1a77",
   "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
   "trace_id": "0d6f2c1e-4b7a-4f0e-9c3d-5a8b7e6f1d20",
@@ -4186,7 +5425,7 @@ campos nulos. O contrato completo das referências é descrito a seguir.
     "total_ms": 456
   },
   "chat": {
-    "contract_version": "1.1.0",
+    "contract_version": "1.2.0",
     "text": "O prazo do projeto XPTO e 30/09/2026. [Fonte 1]",
     "model": "gemini-3.7-flash",
     "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
@@ -4258,7 +5497,7 @@ campos nulos. O contrato completo das referências é descrito a seguir.
 
 | Campo | Tipo | Descrição |
 |---|---|---|
-| `contract_version` | `string` | Versão do contrato de resposta, comum a texto e áudio (`1.1.0`). |
+| `contract_version` | `string` | Versão do contrato de resposta, comum a texto e áudio (`1.2.0`). |
 | `conversation_id` | `string` | Valor recebido no formulário ou UUID gerado pela API se o campo não foi enviado. |
 | `interaction_id` | `string` | UUID gerado para a interação. |
 | `trace_id` | `string \| null` | Identificador do registro de auditoria (`ai_interactions`), comum a `consulted_sources` e `audit_events`; `null` sem persistência disponível. |
@@ -4271,6 +5510,7 @@ campos nulos. O contrato completo das referências é descrito a seguir.
 | `chat` | `object` | Resposta textual completa no mesmo contrato de `POST /api/chat`, incluindo `intent`, `entities`, fontes, afirmações verificadas e métricas do pipeline. |
 | `answer.text` | `string` | Espelho compatível do texto de resposta usado pelo frontend atual. |
 | `answer.evidence_status` | `string` | `referenced` quando cada afirmação reproduz integralmente a fonte citada; `insufficient` na abstenção. |
+| `answer.blocks` | `array` | Tabelas, indicadores numéricos e destaques com citações; espelho de `chat.blocks`. Ver [contrato 1.2.0](contracts/respostas-estruturadas-1.2.0.md). |
 | `answer.claims` | `array` | Afirmações com as citações e a evidência integral que as sustenta, iguais às de `chat.claims`. |
 | `answer.sources` | `array` | Mesmos campos de `chat.sources`, com os aliases legados `artifact` (título) e `section` (localizador ou lista). |
 | `pipeline_status` | `string` | `completed` quando validação, STT e pipeline de chat terminam com resposta controlada. |
@@ -4304,12 +5544,13 @@ O corpo de erro segue estrutura única, para que o canal possa exibir a mensagem
 | `502 Bad Gateway` | `PROCESSING_PROVIDER_ERROR` | A transcrição foi concluída, mas o provedor de resposta falhou de forma controlada. |
 | `503 Service Unavailable` | `PROCESSING_UNAVAILABLE` | A transcrição foi concluída, mas o pipeline de PLN ou geração está indisponível. |
 
-O código `403 OUT_OF_SCOPE_FOR_PROFILE`, previsto para a autorização por
-`access_rules`, ainda não é retornado por esta rota: essa verificação depende
-da persistência e será acrescentada em tarefa própria. Os erros do endpoint
-usam sempre o envelope acima; o campo opcional `detail` contém somente dados
-seguros da própria requisição, como tipo de mídia recebido, duração ou limite
-de tamanho, e nunca detalhes internos do servidor.
+O código `403 OUT_OF_SCOPE_FOR_PROFILE` é retornado quando a transcrição ou a
+solicitação referencia explicitamente um projeto fora do escopo definido em
+`access_rules`. A negação ocorre antes de recuperar contexto ou chamar o modelo
+de linguagem. Os erros do endpoint usam sempre o envelope acima; o campo
+opcional `detail` contém somente dados seguros da própria requisição, como tipo
+de mídia recebido, duração ou limite de tamanho, e nunca detalhes internos do
+servidor.
 
 ### 8.7.7 Situação de implementação
 
@@ -4317,14 +5558,13 @@ O endpoint está implementado em `src/backend/app/main.py` e pode ser consultado
 também pela documentação interativa do FastAPI (`/docs`). Ele valida o
 `Authorization: Bearer <TOKEN>`, aceita uma solicitação em processamento por
 usuário e realiza todas as validações locais antes de qualquer integração
-externa. Na prova de conceito, quando a variável `AUDIO_SIMULATED_IDENTITIES`
-não é configurada, qualquer token Bearer não vazio identifica o usuário de
-forma estável; quando ela é configurada, apenas os tokens mapeados são aceitos.
+externa. O token é validado pelo Supabase Auth e associado a um usuário público
+ativo e às respectivas regras de acesso, conforme a Seção 4.3.1.
 
 O upload, a validação, a transcrição, o encaminhamento ao pipeline de PLN e os
 retornos de erro desta seção estão concluídos para a prova de conceito. A
-autorização de escopo corporativa e a persistência continuam fora desta entrega;
-respostas aprovadas retornam `pipeline_status` igual a `completed`.
+autorização sintética por perfil e projeto integra esta entrega; respostas
+aprovadas retornam `pipeline_status` igual a `completed`.
 
 ## 8.8 Speech-to-Text
 
@@ -4601,7 +5841,7 @@ Text-to-Speech (TTS), ou síntese de fala, é a tecnologia responsável por conv
 
 No projeto, o TTS é previsto como modalidade de saída do agente: depois que a resposta textual é gerada pelo pipeline de PLN, esse texto é convertido em áudio e devolvido ao usuário. A responsabilidade desta etapa é somente sintetizar a fala a partir de um texto já pronto, de forma simétrica ao papel do STT na entrada.
 
-**Delimitação de escopo.** Esta seção especifica a API a ser utilizada, com benchmark, decisão e contrato técnico, mas a implementação da síntese de fala permanece como evolução, conforme registrado na Seção 3.4.5. O texto continua sendo a resposta canônica do agente; o áudio acrescenta uma modalidade de apresentação, sem alterar o conteúdo fundamentado produzido pelo pipeline.
+**Delimitação de escopo.** Esta seção especifica a API utilizada, com benchmark, decisão e contrato técnico. A Seção 3.4.5 registra a síntese como evolução do escopo inicial; a Seção 8.9.4 descreve sua implementação na Sprint 5. O texto continua sendo a resposta canônica do agente; o áudio acrescenta uma modalidade de apresentação, sem alterar o conteúdo fundamentado produzido pelo pipeline.
 
 Os requisitos considerados para a escolha da API foram:
 
@@ -4747,14 +5987,24 @@ Status HTTP esperado: `200 OK`. O corpo da resposta não é JSON: são os **byte
 |---|---|---|
 | Requisições de síntese em tempo real | 20 a cada 60 segundos | 30 TPS por padrão (ajustável até 1.000 TPS) |
 | Duração máxima de áudio por requisição | 10 minutos | 10 minutos |
-| Tamanho máximo da mensagem SSML por conexão | 64 KB | 64 KB |
+| Tamanho máximo de SSML por turno no WebSocket | 64 KB | 64 KB |
 | Tags `<voice>`/`<audio>` distintas por SSML | 50 | 50 |
 
 #### Requisição opcional de token
 
 Idêntica à já documentada para o STT (Seção 8.8.3): trocar a chave por um token Bearer válido por 10 minutos, usando o mesmo endpoint `/sts/v1.0/issueToken` do mesmo recurso Azure.
 
-### 8.9.4 Referências
+### 8.9.4 Implementação da resposta em áudio
+
+A síntese integra a saída do agente na bancada web. `POST /api/chat` e `POST /api/audio` aceitam o parâmetro opcional `include_audio`, com padrão `false`. A interface envia `true` nos dois fluxos. Depois que o pipeline produz a resposta textual fundamentada, `app/audio/synthesis.py` envia o texto final ao Azure AI Speech; a transcrição STT permanece em `app/audio/transcription.py`. A resposta textual, suas fontes e seus identificadores continuam canônicos. A síntese não altera o registro da interação.
+
+Quando solicitada e concluída, a resposta completa do chat inclui `speech.status=available`, `speech.media_type=audio/mpeg` e `speech.data_base64` com o MP3. Em `POST /api/audio`, esses campos aparecem dentro de `chat`. O frontend converte o Base64 em `Blob` apenas na memória da sessão e apresenta um reprodutor associado à mensagem. A reprodução depende de acionamento do usuário. Clientes que não pedem áudio recebem `speech=null`.
+
+Timeout, indisponibilidade, limite de requisições, credencial ausente, conteúdo não reconhecido como MP3 ou texto além do limite operacional de síntese resultam em `speech.status=unavailable` e um aviso para a interface. Nesses casos, a rota principal ainda responde com o texto e as fontes. O backend limita o prazo total de TTS por `AZURE_TTS_TIMEOUT_SECONDS` (padrão de oito segundos) e tenta novamente apenas uma vez em falha transitória. Respostas acima de 4.000 caracteres ficam somente em texto, evitando áudio truncado pelo limite de duração do provedor. O MP3 não é persistido nem armazenado em cache.
+
+O serviço utiliza `AZURE_SPEECH_KEY` exclusivamente no backend. `AZURE_SPEECH_REGION`, quando presente, define o endpoint regional TTS; na ausência dela, o backend deriva o endpoint de `AZURE_SPEECH_ENDPOINT` ou `AZURE_SPEECH_RESOURCE`. O operador deve confirmar a região e a disponibilidade da voz `pt-BR-FranciscaNeural` no recurso real. A chamada ao Azure, o tempo de TTS e o tamanho do áudio ficam fora da medição do pipeline textual do RNF05 descrita na Seção 9.2.4. Uma chamada com `include_audio=true` aguarda a síntese ou seu prazo antes de devolver o JSON; sua latência total deve ser registrada separadamente na homologação.
+
+### 8.9.5 Referências
 
 - Microsoft. [Preços do Azure AI Speech](https://azure.microsoft.com/en-us/pricing/details/speech/). Acesso em: 27 ago. 2026.
 - Microsoft. [Quotas e limites do Azure AI Speech](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-services-quotas-and-limits). Acesso em: 27 ago. 2026.
@@ -4867,7 +6117,7 @@ O desempenho por macrointenção no teste é homogêneo, com precisão entre 0,9
 | FORA_DE_ESCOPO | 0,932 | 0,891 | 0,911 | 46 |
 | TRANSACAO | 0,955 | 0,957 | 0,956 | 395 |
 
-**Aderência ao RNF06.** O requisito exige F1-macro igual ou superior a 0,80 na classificação de intenções. No nível de macrointenção o critério é atendido com folga (0,9477). No nível de intenção específica, **não é**: 0,7401 está abaixo do limiar exigido. É por isso que o limiar de confiança existe — ele converte a incerteza em fluxo genérico em vez de handler errado. Fechar essa lacuna é trabalho da Sprint 3.
+**Aderência ao RNF06.** O requisito exige F1-macro igual ou superior a 0,80 na classificação de intenções. No nível de macrointenção o critério é atendido com folga (0,9477). No nível de intenção específica, **não é**: 0,7401 está abaixo do limiar exigido. É por isso que o limiar de confiança existe — ele converte a incerteza em fluxo genérico em vez de handler errado. A lacuna foi fechada pela versão 2 do classificador, que atingiu F1-macro de 0,8327 na intenção específica (Seção 8.10.7).
 
 **Efeito prático dos limiares no teste.** Aplicando 0,550 e 0,700 aos 1.135 pedidos do conjunto de teste:
 
@@ -5464,7 +6714,7 @@ as regras de validação e a sugestão proativa estão consolidados nesta seçã
 
 ```json
 {
-  "contract_version": "1.1.0",
+  "contract_version": "1.2.0",
   "text": "Status: Em acompanhamento [Fonte 1]",
   "interaction_id": "8b3e0d51-77aa-4c19-9f2b-5e1c7a4d3e90",
   "trace_id": "0d6f2c1e-4b7a-4f0e-9c3d-5a8b7e6f1d20",
@@ -5684,7 +6934,7 @@ As evidências desta execução são mantidas em `src/backend/evidencias/rf01-rf
 | Recuperação                         | RAG sobre os extratos documentais sintéticos (`source_extracts`, no Supabase)     |
 | Projetos utilizados                 | `PRJ-0442` e `PRJ-0510`                                                           |
 | Projeto inexistente de controle     | `INEXISTENTE-999`                                                                 |
-| Autenticação da proatividade        | Bearer de identidade simulada configurado no ambiente; valor não versionado       |
+| Autenticação da proatividade        | Bearer JWT do Supabase Auth; valor não versionado                                  |
 | Reteste do CT-RF09-01               | 24/09/2026, commit `c793983`, limite de 1024 tokens                               |
 
 A execução utilizou os estados `APROVADO`, `FALHOU`, `BLOQUEADO` e `NÃO EXECUTADO`. Os testes não foram alterados para forçar aprovação. Quando o caminho estava disponível e a resposta divergiu do critério funcional, o caso foi registrado como `FALHOU`. Os comandos para reproduzir os casos de API estão no README da pasta de evidências.
@@ -5792,7 +7042,7 @@ A falha de CT-RF08-01 decorre da mesma causa raiz identificada em CT-RF06-01 e, 
 | CT-RF09-01 | Positivo | Proatividade ativa; consulta `Qual é o prazo do projeto PRJ-0442?`; registro da sugestão; confirmação com `accept`. | Resposta principal normal; sugestão separada e opcional; nenhuma execução antes da confirmação; processamento após aceite. | A resposta principal foi preservada e retornou `sugerir_recuperacao_prazo`, `requires_confirmation=true`. A confirmação em `/api/chat/proactive-confirmation` retornou HTTP `200` e `status=accepted`, mas a resposta ao aceite foi cortada e a ação sugerida não chegou ao usuário. No reteste, as cinco respostas ao aceite chegaram inteiras. | **FALHOU** na rodada; **APROVADO** no reteste | `src/backend/evidencias/rf01-rf10/rf09/CT-RF09-01-sugestao.txt`, `CT-RF09-01-accept.txt` e `CT-RF09-01-reteste.txt` |
 | CT-RF09-02 | Negativo | \(a\) alerta sem secundária compatível; (b) nova sugestão elegível seguida de `decline`.                            | \(a\) nenhuma sugestão fictícia; (b) recusa encerra a sugestão sem executar a ação secundária.                             | \(a\) `proactive_suggestion=null`; (b) HTTP `200`, `status=declined` e `result=null`.                                                                                                                  | **APROVADO** | `src/backend/evidencias/rf01-rf10/rf09/CT-RF09-02-sem-secundaria.txt` e `CT-RF09-02-decline.txt` |
 
-A proatividade exige identidade. Tentativas de preparação sem Bearer válido retornaram `401` e foram tratadas como falha de pré-condição da execução, não como falha funcional. A rodada válida utilizou a identidade simulada configurada no ambiente sem registrar o valor do token.
+A proatividade exige identidade. Tentativas de preparação sem Bearer válido retornaram `401` e foram tratadas como falha de pré-condição da execução, não como falha funcional. A rodada válida utilizou uma identidade autenticada configurada no ambiente sem registrar o valor do token.
 
 Na rodada, a resposta ao aceite do CT-RF09-01 parou depois da primeira linha, sem a ação de recuperação: dos 508 tokens de saída, 463 foram de raciocínio, com o limite de 512. A rodada não registrou o motivo de parada, mas 508 tokens é o valor de todas as respostas encerradas pelo limite de 512 no reteste do truncamento da Seção 9.2.7, e nenhuma resposta completa chegou a esse valor. É o `DEF-RNF04-02`, registrado nessa seção. O `result.intent=null` não indica falha, porque a resposta ao aceite não traz esse campo; a intenção confirmada vai no prompt.
 
@@ -5824,7 +7074,7 @@ Além das falhas funcionais, a execução revelou cinco pontos que não alterara
 
 1.  **Ruído de recuperação:** fontes não relacionadas apareceram em algumas consultas com score baixo. Nos casos aprovados, a resposta final não atribuiu esse conteúdo ao projeto solicitado.
 2.  **Sensibilidade lexical:** formulações semanticamente equivalentes de consulta de status produziram classificações diferentes, formalizadas em DEF-RF02-01.
-3.  **Proatividade autenticada:** o caminho proativo exige identidade válida. Respostas `401` durante a preparação foram resolvidas com a identidade simulada prevista pela PoC.
+3.  **Proatividade autenticada:** o caminho proativo exige identidade válida. Respostas `401` durante a preparação foram resolvidas com um JWT válido do Supabase Auth.
 4.  **Incidente de provedor:** uma tentativa anterior com a configuração inicial encontrou HTTP `429`. A rodada funcional válida foi repetida com OpenRouter e `google/gemini-3.7-flash`; o incidente permanece apenas como histórico de execução.
 5.  **Resposta cortada no CT-RF10-02:** a resposta da comparação terminou no meio da frase, com 508 tokens de saída, pelo mesmo `DEF-RNF04-02`. O status não muda: o corte não depende do controle de proatividade, e a resposta já tinha declarado a insuficiência do contexto antes de parar.
 
@@ -5913,6 +7163,19 @@ Os cenários negativos de ausência de informação apresentaram comportamento s
 
 Com isso, todos os casos possuem classificação, resultado observado, evidência associada e, quando aplicável, defeito ou observação de qualidade rastreável.
 
+#### 9.1.5.9 Reexecução após as correções da Sprint 5
+
+A S5-33 ([#287](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/287)) reexecutou em 7 de outubro de 2026, no commit `e544388`, os casos cujas correções já estavam integradas. As entradas foram as mesmas de 23/09, enviadas a `POST /api/chat` com o classificador v2, as regras de roteamento e a extração de entidades reais. Só a geração do texto pelo LLM foi substituída por um duplo, porque esses casos são julgados pela classificação e pelo encaminhamento.
+
+| Caso | Rodada de 23/09 | Reexecução de 07/10 | Observação |
+|:--|:--|:--|:--|
+| CT-RF02-01 | **FALHOU** | **APROVADO** | `CONSULTA` / `consulta_status_projeto`, encaminhada ao catálogo pela regra `consulta_status_explicita` da #282. As probabilidades do modelo não mudaram. |
+| CT-RF03-02 | **FALHOU** | **APROVADO** | `FORA_DE_ESCOPO` pela regra `limite_agendamento`, sem chamada ao provedor e com 0 tokens. |
+| CT-RF06-01 | **FALHOU** | **BLOQUEADO** | Depende da S5-12 (#266), ainda não iniciada; a base continua sem documento do `PRJ-0510`. |
+| CT-RF08-01 | **FALHOU** | **BLOQUEADO** | Mesma dependência e mesma causa (`DEF-RF06-01`). |
+
+Com a reexecução, o resultado funcional passa a 18 casos aprovados, nenhuma falha confirmada após correção e 2 casos bloqueados pela #266. Os defeitos `DEF-RF02-01` e `DEF-RF03-01` ficam corrigidos no comportamento do sistema, e o `DEF-RF06-01` continua aberto. Detalhes, ambiente e evidências estão no [relatório S5-33](testes/sprint5/relatorio-s5-33.md).
+
 ## 9.2 Testes de RNFs
 
 ### 9.2.1 Planejamento
@@ -5934,7 +7197,7 @@ Os dados, prompts, perfis e fontes devem ser sintéticos ou anonimizados. Cada e
 | RNF05 | Manter P95 de consulta simples em até 10 s e de comparação em até 20 s, sem erro HTTP ou de contrato na carga definida. | CT-RNF05-P, CT-RNF05-N | `Locust`, CSV/HTML, log da API e configuração do ambiente. |
 | RNF06 | Atingir F1 macro ≥ 0,80 na classificação de intenções e *recall* ≥ 0,80 na recuperação. | CT-RNF06-P, CT-RNF06-N | `scikit-learn`, notebook executado e `metricas.json`. |
 | RNF07 | Compreender ou orientar a reformulação em pelo menos 80% das formulações em português da amostra. | CT-RNF07-P, CT-RNF07-N | `pytest`, roteiro de usuários e planilha consolidada. |
-| RNF08 | Manter Teams como canal previsto, contrato OpenAPI válido e componentes compatíveis com o ecossistema Microsoft. | CT-RNF08-P, CT-RNF08-N | `/openapi.json`, checklist arquitetural e relatório de validação. |
+| RNF08 | Contrato OpenAPI válido, componentes do runtime com equivalente Microsoft mapeado (Seção 6.4) e canal publicável no Teams e acessível pelo Copilot via MCP, sem dependência do Copilot Studio. Critério revisado na S5-43. | CT-RNF08-P, CT-RNF08-N | `/openapi.json`, checklist arquitetural e relatório de validação. |
 | RNF09 | Executar o núcleo com dados estruturados sem depender da plataforma final ou de uma fonte concreta. | CT-RNF09-P, CT-RNF09-N | `pytest` do RAG, configuração da fonte e log de execução local. |
 | RNF10 | Preservar separação entre interface, negócio e dados, API documentada, testes e instruções reproduzíveis. | CT-RNF10-P, CT-RNF10-N | Testes de importação, checklist de estrutura e documentação. |
 | RNF11 | Tratar 100% das falhas previstas com resposta controlada, sem *stack trace*, segredo ou corpo bruto do provedor. | CT-RNF11-P, CT-RNF11-N | `pytest`/`TestClient`, respostas HTTP e logs sanitizados. |
@@ -5953,7 +7216,7 @@ Os dados, prompts, perfis e fontes devem ser sintéticos ou anonimizados. Cada e
 | CT-RNF05-N | Provar que a medição detecta uma violação. | 1. Subir `api_com_atraso.py`, uma segunda instância da API em que um duplo acrescenta 25 s a toda comparação da massa congelada, sem alterar o restante do pipeline. 2. Rodar o `locustfile.py` contra ela com `RNF05_SO_COMPARACAO=1`, 5 usuários por 6 minutos. | P95 comparativo acima de 20 s: a rodada precisa reprovar. Se aprovar, a medição não enxerga violação e as rodadas positivas não valem. |
 | CT-RNF06-P / CT-RNF06-N | Avaliar qualidade do PLN contra limiares reproduzíveis. | **P:** executar integralmente `src/notebooks/classificador_intencoes_metro.ipynb` com o conjunto de teste fechado e calcular F1 macro e *recall*. **N:** avaliar separadamente classes e termos ausentes ou fracos, sem treiná-los novamente, e aplicar os mesmos limiares. | `metricas.json` e notebook registram valores e versão da massa; qualquer métrica abaixo de 0,80 reprova o requisito e identifica as classes afetadas. |
 | CT-RNF07-P / CT-RNF07-N | Verificar interação em português natural e orientação de reformulação. | Congelar ao menos 20 formulações. **P:** participantes enviam frases naturais válidas sem conhecer nomes internos. **N:** enviar frases ambíguas, com sinônimos não cadastrados e erros leves; registrar se houve compreensão ou orientação útil. | Pelo menos 80% do conjunto total é compreendido ou recebe reformulação acionável; anexar roteiro, respostas anonimizadas e cálculo. |
-| CT-RNF08-P / CT-RNF08-N | Conferir aderência aos contratos e ao ecossistema definido. | **P:** iniciar a API, abrir `/openapi.json` e confrontar canal, conector e componentes com a arquitetura. **N:** validar uma cópia do contrato com operação obrigatória removida ou tipo incompatível. | Contrato real é válido e a arquitetura mantém Teams/Copilot/SharePoint/Azure previstos; a cópia alterada reprova no checklist, sem substituir o contrato versionado. |
+| CT-RNF08-P / CT-RNF08-N | Conferir aderência aos contratos e ao ecossistema definido. | **P:** iniciar a API, abrir `/openapi.json` e confrontar os componentes da Figura 22 com a tabela de-para da Seção 6.4. **N:** validar uma cópia do contrato com operação obrigatória removida ou tipo incompatível. | Contrato real é válido, cada componente do runtime tem equivalente Microsoft mapeado e nenhum depende do Copilot Studio; a cópia alterada reprova no checklist, sem substituir o contrato versionado. |
 | CT-RNF09-P / CT-RNF09-N | Provar portabilidade da origem de dados. | **P:** apontar a configuração para um diretório sintético alternativo e executar a mesma consulta localmente. **N:** apontar para arquivo ausente e depois para formato inválido, observando inicialização e resposta. | A troca válida não exige alteração no núcleo; origens inválidas geram falha explícita e localizada, sem acoplamento à interface ou à fonte concreta. |
 | CT-RNF10-P / CT-RNF10-N | Verificar manutenibilidade por evidências estruturais e reprodução. | **P:** seguir o README em ambiente limpo, executar testes e conferir limites entre interface, negócio e dados. **N:** aplicar o checklist a uma cópia com instrução obrigatória removida ou dependência direta de acesso externo introduzida na rota. | A estrutura real passa nos itens objetivos; a violação controlada é detectada pelo teste de importação ou checklist. Anexar comandos, árvore relevante e resultado. |
 | CT-RNF11-P / CT-RNF11-N | Garantir respostas controladas para falhas previstas e inesperadas. | **P:** parametrizar falha de classificação, ausência de resultado, indisponibilidade da fonte e *timeout*. **N:** fazer o duplo retornar exceção inesperada e payload inválido; inspecionar resposta e logs. | Todos os casos retornam código e mensagem definidos, preservam auditoria e não expõem *stack trace*, segredo ou corpo bruto do provedor. |
@@ -6055,7 +7318,7 @@ Executados em 22 e 23/09/2026 por Henrique Diniz. O índice completo das rodadas
 | `rnf04/avaliar_rnf04.py` | Apura fundamentação e alucinação com numerador e denominador explícitos | Aplica o critério sobre o conjunto completo, nunca sobre um subconjunto escolhido depois |
 | `executar_rodada_rnf.sh` | Encadeia a coleta do RNF04 e as três rodadas do RNF05 numa campanha | Reproduz a execução completa com um comando |
 | SQL em `public.ai_interactions` | Compara o tempo do pipeline, gravado pela auditoria do RNF03, com o tempo do cliente | Separa o custo do sistema do custo do que vem depois do pipeline, sem instrumentação nova |
-| [`evidencias/graficos_rnf05.ipynb`](../src/backend/evidencias/graficos_rnf05.ipynb) | Gera as Figuras 27 e 28 a partir dos CSVs versionados | Nenhum número das figuras é digitado à mão |
+| [`evidencias/graficos_rnf05.ipynb`](../src/backend/evidencias/graficos_rnf05.ipynb) | Gera as Figuras 29 e 30 a partir dos CSVs versionados | Nenhum número das figuras é digitado à mão |
 | OpenRouter | Chama o `gemini-3.7-flash` em plano pago | Mesmo modelo da bancada, sem o limite de 20 requisições por dia do *Free Tier*; o adaptador envia exatamente o mesmo texto que o Gemini direto receberia |
 
 **Comandos do RNF04**, a partir de `src/backend`, com a API no ar como na Seção 9.2.4. Os do RNF05 estão no item 6 da revisão do protocolo, na mesma seção.
@@ -6090,21 +7353,21 @@ Executados em 22 e 23/09/2026 por Henrique Diniz. O índice completo das rodadas
 
 **Estados usados na tabela.** *Aprovado* e *reprovado* comparam o observado com o critério; *validado* indica o cenário negativo que reprovou, como exigido; *inconclusivo* é a janela com menos de 40 amostras em alguma rota, que não aprova nem reprova; *bloqueado* é a execução impedida por dependência externa; *não executado*, o caso que não chegou a rodar.
 
-A Figura 27 compara o P95 de cada rodada positiva com o teto do requisito. As barras vermelhas são as rodadas reprovadas: na 1ª, a comparação com um usuário teve 10 amostras e o P95 coincidiu com a pior requisição; na 2ª, houve um erro com um usuário e P95 simples de 11,0 s com cinco. Na 3ª, com cache quente e com cache frio, todas as rotas ficaram abaixo do teto, com pelo menos 64 amostras cada.
+A Figura 29 compara o P95 de cada rodada positiva com o teto do requisito. As barras vermelhas são as rodadas reprovadas: na 1ª, a comparação com um usuário teve 10 amostras e o P95 coincidiu com a pior requisição; na 2ª, houve um erro com um usuário e P95 simples de 11,0 s com cinco. Na 3ª, com cache quente e com cache frio, todas as rotas ficaram abaixo do teto, com pelo menos 64 amostras cada.
 
 <div align="center">
   <img src="img/rnf05-p95-rodadas.png" alt="P95 da consulta simples e da comparação em cada rodada positiva do RNF05, contra os tetos de 10 e 20 segundos" width="100%">
 </div>
 
-<p align="center"><strong>Figura 27</strong> - RNF05: P95 medido pelo cliente em cada rodada positiva.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
+<p align="center"><strong>Figura 29</strong> - RNF05: P95 medido pelo cliente em cada rodada positiva.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
 
-A Figura 28 abre os percentis da 3ª rodada. As quatro curvas positivas ficam abaixo dos tetos até o P95; a comparação com um usuário tem uma requisição de 13,5 s, que aparece no P99 e no máximo, ainda abaixo do teto de 20 s. A curva do cenário negativo fica acima de 30 s em todos os percentis: a medição enxerga a violação.
+A Figura 30 abre os percentis da 3ª rodada. As quatro curvas positivas ficam abaixo dos tetos até o P95; a comparação com um usuário tem uma requisição de 13,5 s, que aparece no P99 e no máximo, ainda abaixo do teto de 20 s. A curva do cenário negativo fica acima de 30 s em todos os percentis: a medição enxerga a violação.
 
 <div align="center">
   <img src="img/rnf05-rodada3-percentis.png" alt="Mediana, P90, P95, P99 e máximo de cada janela e rota da 3ª rodada do RNF05, com o cenário negativo acima dos tetos" width="100%">
 </div>
 
-<p align="center"><strong>Figura 28</strong> - RNF05: percentis da 3ª rodada por janela e rota, com o cenário negativo.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
+<p align="center"><strong>Figura 30</strong> - RNF05: percentis da 3ª rodada por janela e rota, com o cenário negativo.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos CSVs do Locust.</sup></p>
 
 **Registros das execuções aprovadas.** Saídas dos apuradores, reproduzíveis a partir dos arquivos de evidência.
 
@@ -6143,7 +7406,7 @@ Log da API na 3ª rodada, resumido sem identificadores ([`api-log-resumo.txt`](.
 | --- | --- | --- |
 | DEF-RNF04-01 | Vigência, status e linha do extrato eram recuperados do banco e descartados antes do prompt; perguntas de cronograma recebiam "contexto insuficiente" | Corrigido em `build_rag_input`, com 10 testes de regressão; as perguntas afetadas passaram a responder as datas corretas |
 | DEF-RNF04-02 | Respostas truncadas pelo limite de tokens entregues como completas | Mecanismo confirmado nas rodadas do RNF05: 36 de 451 respostas (8,0%) na 2ª e 50 de 860 (5,8%) na 3ª terminaram por limite de tokens no caminho do OpenRouter, porque o raciocínio do modelo consome o mesmo orçamento de 512 tokens do texto. O adaptador passou a registrar cada ocorrência em log. Nenhuma das 35 respostas coletadas pelo Gemini direto terminou cortada. Depois do teste de usabilidade, em que duas respostas chegaram vazias (Seção 9.3.2), o limite passou a 1024 tokens e a resposta interrompida passou a vir com um aviso ao usuário; no reteste, 0 de 38 respostas foram cortadas, contra 4 de 38 com o limite antigo, com cerca de 0,2 s a mais na mediana do tempo do modelo ([relatório](../src/backend/evidencias/reteste-truncamento/RELATORIO.md)). As rodadas do RNF05 foram medidas com o limite de 512 |
-| DEF-RNF05-01 | O Gemini no *Free Tier*, provedor da bancada, tem piso de 14,7 s a 37,7 s por chamada trivial, acima do teto do RNF05 | Característica da bancada, não do produto: o *Free Tier* é usado para não gerar custo, e o ambiente do Metrô usará o Copilot Studio com modelos GPT. As rodadas do RNF05 foram medidas com provedor pago. Ver Seção 3.2.2 |
+| DEF-RNF05-01 | O Gemini no *Free Tier*, provedor da bancada, tem piso de 14,7 s a 37,7 s por chamada trivial, acima do teto do RNF05 | Característica da bancada, não do produto: o *Free Tier* é usado para não gerar custo, e o modelo de produção será o aprovado pela GTI no Azure (Seção 6.4.3). As rodadas do RNF05 foram medidas com provedor pago. Ver Seção 3.2.2 |
 | DEF-RNF05-02 | A gravação da auditoria do RNF03 é síncrona e fica no caminho da resposta. Na 2ª rodada, sob carga, a distância entre o P95 do cliente e o do pipeline foi de 4,1 s, e, sem limite de tempo nas consultas ao banco, uma gravação presa segurou uma resposta por mais de 60 s | Aplicados antes da 3ª rodada: limite de 5 s por consulta ao banco (`statement_timeout`) e *keepalive* de TCP nas conexões, com 9 testes. Na 3ª rodada a distância caiu para 1,8 s, sem erro. A gravação fora do caminho da resposta, por fila ou tarefa em segundo plano, fica para a mensageria prevista na Sprint 5: muda a semântica da auditoria verificada nos testes do RNF03 e é decisão do grupo |
 | — | Cada requisição abria duas conexões novas com o Supabase, cerca de 1 s cada | Pool de conexões: de 1.209 ms para 599 ms por acesso, ou cerca de 1,2 s a menos por requisição, com qualquer provedor de LLM |
 | — | 21 testes do *backend* falhavam quando havia `.env` configurado | Isolamento do ambiente de teste; 322 testes passam com e sem `.env` |
@@ -6157,7 +7420,7 @@ O que elas **não** cobrem, e por quê:
 
 | Fora da cobertura | Motivo | Efeito sobre a leitura do resultado |
 | --- | --- | --- |
-| Modelo de produção | O Metrô usará o Copilot Studio com modelos GPT; as rodadas usam o `gemini-3.7-flash`, o modelo da bancada | Fundamentação e latência valem para o modelo medido e são medidas de novo na homologação, com a mesma amostra e o mesmo protocolo |
+| Modelo de produção | O modelo de produção será o aprovado pela GTI no Azure (Seção 6.4.3); as rodadas usam o `gemini-3.7-flash`, o modelo da bancada | Fundamentação e latência valem para o modelo medido e são medidas de novo na homologação, com a mesma amostra e o mesmo protocolo |
 | Base real | A massa tem nove extratos recuperáveis e um projeto | O custo da recuperação e o risco de confundir entidades podem crescer com a base real |
 | Comparação efetivamente produzida | A massa tem um único projeto, o `PRJ-0442`, e a comparação entre projetos foi adiada para a Sprint 5 (Seção 6.4.1 do `GestaoProjeto.md`). Os prompts comparativos pedem a comparação com o `PRJ-0518`, que não existe | O P95 comparativo mede o sistema tratando o pedido de comparação e declarando a limitação, com chamada ao LLM; **não** demonstra o teto de 20 s para uma comparação real, que é medida quando a funcionalidade existir |
 | Rotulagem independente | A planilha é cega, mas foi rotulada por quem construiu a amostra | Cada rótulo pode ser auditado um a um; uma segunda rotulagem por outro integrante daria garantia processual mais forte, e a margem do RNF04 é de um caso em cada critério |
@@ -6182,7 +7445,35 @@ A avaliação prospectiva ampliada do RNF06 foi executada uma única vez em 23 d
 
 A linha de base de 22 de setembro recuperou 11 de 18 fontes e registrou *recall*@3 de 0,611111. As equivalências lexicais adicionadas em seguida foram escolhidas a partir dos erros desses mesmos casos; por isso, a reexecução com 18 de 18 fontes e *recall*@3 de 1,000000 é apenas evidência de regressão conhecida, não de generalização. A avaliação prospectiva v2 corrige essa contaminação metodológica: suas 72 consultas não repetem a massa v1, foram congeladas contra a implementação anterior e não foram reutilizadas para ajuste. Ela revelou fragilidade especialmente em consultas curtas e sinônimos novos (0,333333), formulações implícitas e paráfrases (0,444444). A autoria interna não cega e o uso de fontes sintéticas ainda limitam a validade externa; a conclusão não substitui homologação com solicitações reais e SharePoint do parceiro.
 
+**Reexecução prevista na Sprint 5.** A S5-33 não reexecutou a recuperação do RNF06: o recuperador e o corpus continuam os mesmos da avaliação v2, e a ampliação da base depende da S5-12 (#266), ainda não iniciada. A nova massa prospectiva será congelada sobre o corpus ampliado, antes da única medição, conforme o [relatório S5-33](testes/sprint5/relatorio-s5-33.md). Até lá, o RNF06 permanece **reprovado** na recuperação.
+
 Os demais CT-RNF permanecem sem resultado nesta subseção até que sejam executados com as evidências previstas. Casos bloqueados devem identificar a dependência e o plano de desbloqueio.
+
+#### RNF10 a RNF12 — Sprint 5
+
+A execução da S5-32 ([#286](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/286)) ocorreu em 7 de outubro de 2026, no commit `84df352` da `develop`, com a API em processo (`TestClient`), duplos na fronteira do provedor e da fonte, e sem banco, rede ou `.env`. O relatório completo, com comandos e limites, está em [`testes/sprint5/relatorio-s5-32.md`](testes/sprint5/relatorio-s5-32.md), e as evidências em [`src/backend/evidencias/rnf10-rnf12/rodada-01/`](../src/backend/evidencias/rnf10-rnf12/rodada-01/manifesto.json).
+
+| Caso | Resultado observado | Situação |
+| --- | --- | --- |
+| CT-RNF10-P | Checklist de camadas, README, contrato OpenAPI e testes versionados sem violações; README reproduzido em ambiente limpo | Aprovado |
+| CT-RNF10-N | README sem instrução de teste e rota com acesso externo direto, ambos em cópias, detectados pelo checklist | Aprovado |
+| CT-RNF11-P | Falha de classificação (503), ausência de resultado (200, sem chamar o provedor), fonte indisponível (503), *timeout* (502) e provedor 5xx (502): mensagem definida, auditoria registrada e nenhum vazamento | Aprovado |
+| CT-RNF11-N | Payload inválido do provedor controlado (502). Exceção inesperada: 500 genérico do Starlette, sem mensagem do projeto e sem auditoria (`DEF-S5-32-01`) | **Reprovado** |
+| CT-RNF12-P | `scripts/validar_massa_sintetica.py` encontrou as seis categorias: 3 projetos, 1 subportfólio, 10 marcos, 10 riscos, 17 indicadores e 9 documentos | Aprovado |
+| CT-RNF12-N | Seis cópias, cada uma sem uma categoria, reprovadas com a categoria ausente identificada | Aprovado |
+
+O `DEF-S5-32-01` decorre da falta de um tratador global de exceções em `/api/chat`: uma exceção sem tratador registrado escapa antes do registro de auditoria. Na consolidação dos testes sistêmicos (Seção 9.5.3), o defeito foi encaminhado à Seção 12.2, item 5.
+
+#### RNF08 — reavaliação na Sprint 5
+
+A S5-31 reprovou o CT-RNF08-P porque o critério da época exigia o Copilot Studio na arquitetura (`DEF-S5-31-01`). Com o critério revisado na S5-43 ([#297](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/297)), a S5-36 ([#290](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/290)) reavaliou o requisito em 7 de outubro de 2026 com [`test_rnf08_s5_36.py`](../src/backend/app/tests/test_rnf08_s5_36.py). O teste descobre os pacotes de `src/backend/app` no disco e exige, para cada um, uma linha nas Seções 6.4.3 a 6.4.6 com o equivalente Microsoft preenchido. Também procura variável `COPILOT_STUDIO_*` ou endpoint do serviço no código e na configuração do runtime.
+
+| Caso | Resultado observado | Situação |
+| --- | --- | --- |
+| CT-RNF08-P | `/health` e `/openapi.json` com HTTP 200 e contrato sem erro; os 13 componentes do runtime com equivalente mapeado; nenhuma dependência do Copilot Studio no runtime nem na Figura 22; Teams e Copilot via MCP previstos na Seção 5.2.1 | Aprovado |
+| CT-RNF08-N | Em cópias: contrato sem `POST /api/chat`, tipo incompatível, de-para sem os alertas, equivalente vazio no PLN, `COPILOT_STUDIO_ENDPOINT` no `.env.example` e Copilot Studio como componente da Figura 22, todos detectados | Aprovado |
+
+A primeira execução local reprovou o caso positivo: `data_changes` e `sharepoint_webhooks` estavam no runtime sem linha na Seção 6.4, e o `.env.example` do backend ainda dizia que o agente usaria o Copilot Studio no Metrô. As duas linhas e o comentário foram corrigidos na mesma entrega. A verificação é local e documental e não substitui a homologação no tenant. Detalhes e evidências estão no [relatório S5-36](testes/sprint5/relatorio-s5-36.md#reavaliação-do-rnf08).
 
 ## 9.3 Testes de Usabilidade
 
@@ -6196,42 +7487,42 @@ O planejamento prevê a realização dos testes com pelo menos cinco usuários e
 
 A planilha de execução funciona como instrumento de campo para o moderador e os observadores. A aba "Registro dos testes" organiza os cenários em blocos sequenciais, mantendo o mesmo padrão visual do modelo do grupo: título da tarefa, descrição da atividade, resultado geral, cinco etapas observáveis e campo de observações por usuário. A aba "Ocorrências" concentra problemas identificados durante as sessões, incluindo tarefa relacionada, severidade, resumo do ocorrido, potenciais melhorias e participante afetado. Dessa forma, o artefato permite registrar tanto o desempenho objetivo em cada etapa quanto evidências qualitativas de dificuldade, dúvida, hesitação, necessidade de ajuda ou quebra de confiança.
 
-As Figuras 29 a 33 apresentam os principais recortes da planilha criada para conduzir e registrar os testes. Esses prints documentam como o roteiro foi operacionalizado em tarefas observáveis, permitindo que diferentes avaliadores registrem os resultados de forma padronizada.
+As Figuras 31 a 35 apresentam os principais recortes da planilha criada para conduzir e registrar os testes. Esses prints documentam como o roteiro foi operacionalizado em tarefas observáveis, permitindo que diferentes avaliadores registrem os resultados de forma padronizada.
 
 <div align="center">
   <img src="img/testes-usabilidade-p1e2.png" alt="Planilha de testes de usabilidade com os cenários 1 e 2" width="900">
-  <p><strong>Figura 29</strong> - Registro dos cenários 1 e 2 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 31</strong> - Registro dos cenários 1 e 2 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 29 apresenta os dois primeiros cenários do roteiro: entrada em linguagem natural e consulta de status ou prazo. Esses cenários validam se o usuário consegue iniciar a interação com o agente sem comandos técnicos e se consegue interpretar uma resposta objetiva, incluindo a verificação da fonte indicada.
+A Figura 31 apresenta os dois primeiros cenários do roteiro: entrada em linguagem natural e consulta de status ou prazo. Esses cenários validam se o usuário consegue iniciar a interação com o agente sem comandos técnicos e se consegue interpretar uma resposta objetiva, incluindo a verificação da fonte indicada.
 
 <div align="center">
   <img src="img/testes-usabilidade-p3e4.png" alt="Planilha de testes de usabilidade com os cenários 3 e 4" width="900">
-  <p><strong>Figura 30</strong> - Registro dos cenários 3 e 4 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 32</strong> - Registro dos cenários 3 e 4 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 30 mostra os cenários voltados à consulta de riscos e à análise comparativa entre projetos. Nessa parte do teste, o observador registra se o participante consegue escolher o tema da consulta, compreender as informações retornadas, pedir detalhes quando necessário e avaliar se a comparação apresentada apoia a tomada de decisão.
+A Figura 32 mostra os cenários voltados à consulta de riscos e à análise comparativa entre projetos. Nessa parte do teste, o observador registra se o participante consegue escolher o tema da consulta, compreender as informações retornadas, pedir detalhes quando necessário e avaliar se a comparação apresentada apoia a tomada de decisão.
 
 <div align="center">
   <img src="img/testes-usabilidade-p5e6.png" alt="Planilha de testes de usabilidade com os cenários 5 e 6" width="900">
-  <p><strong>Figura 31</strong> - Registro dos cenários 5 e 6 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 33</strong> - Registro dos cenários 5 e 6 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 31 registra os cenários de informação ausente ou fora de escopo e de sugestão proativa. Esses testes são importantes para avaliar confiança e controle: o agente deve declarar limites quando não houver informação suficiente e, quando sugerir um próximo passo, deve deixar claro que a ação depende da confirmação do usuário.
+A Figura 33 registra os cenários de informação ausente ou fora de escopo e de sugestão proativa. Esses testes são importantes para avaliar confiança e controle: o agente deve declarar limites quando não houver informação suficiente e, quando sugerir um próximo passo, deve deixar claro que a ação depende da confirmação do usuário.
 
 <div align="center">
   <img src="img/testes-usabilidade-p7.png" alt="Planilha de testes de usabilidade com o cenário 7" width="900">
-  <p><strong>Figura 32</strong> - Registro do cenário 7 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 34</strong> - Registro do cenário 7 dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 32 apresenta o cenário de entrada por voz. O objetivo desse bloco é observar se o participante consegue acionar a entrada por áudio, formular uma pergunta curta, conferir a transcrição e obter uma resposta coerente, mantendo o mesmo fluxo previsto para solicitações textuais.
+A Figura 34 apresenta o cenário de entrada por voz. O objetivo desse bloco é observar se o participante consegue acionar a entrada por áudio, formular uma pergunta curta, conferir a transcrição e obter uma resposta coerente, mantendo o mesmo fluxo previsto para solicitações textuais.
 
 <div align="center">
   <img src="img/testes-usabilidade-ocorrencias.png" alt="Planilha de ocorrências dos testes de usabilidade" width="900">
-  <p><strong>Figura 33</strong> - Aba de ocorrências dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
+  <p><strong>Figura 35</strong> - Aba de ocorrências dos testes de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026.</sup></p>
 </div>
 
-A Figura 33 apresenta a aba de ocorrências, usada para consolidar problemas identificados durante as sessões. O registro separado por tarefa, severidade, descrição do ocorrido, melhoria potencial e participante afetado permite priorizar correções após os testes, distinguindo falhas críticas de ajustes menores de clareza ou interface.
+A Figura 35 apresenta a aba de ocorrências, usada para consolidar problemas identificados durante as sessões. O registro separado por tarefa, severidade, descrição do ocorrido, melhoria potencial e participante afetado permite priorizar correções após os testes, distinguindo falhas críticas de ajustes menores de clareza ou interface.
 
 Os perfis desejados são:
 
@@ -6321,7 +7612,7 @@ Quatro dicas do moderador foram necessárias, todas nos cenários 5 e 6 e todas 
   <img src="img/usabilidade-resultado-por-cenario.png" alt="Resultado de cada cenário do teste de usabilidade, com a distribuição dos seis participantes entre concluído, concluído com dificuldade e falhou" width="100%">
 </div>
 
-<p align="center"><strong>Figura 34</strong> - Resultado por cenário do teste de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos dados anonimizados das seis sessões.</sup></p>
+<p align="center"><strong>Figura 36</strong> - Resultado por cenário do teste de usabilidade.<br><sup>Fonte: Material produzido pelos autores, 2026, a partir dos dados anonimizados das seis sessões.</sup></p>
 
 **Ocorrências.**
 
@@ -6385,6 +7676,78 @@ com Azure real repete um áudio autorizado, mede miss e hits separadamente,
 publica mediana/P95 sem expor áudio ou transcrição e remove a conversa sintética
 do banco ao final. A homologação externa só é considerada aprovada após a saída
 sanitizada dessa execução ser anexada às evidências.
+
+**Execução contra o Azure real.** O roteiro foi executado com o Azure AI Speech
+e o PostgreSQL reais do projeto, repetindo cinco vezes o mesmo áudio de fala em
+português. O critério congelado do plano foi atendido integralmente:
+`provider_call=1`, `miss=1`, `record=1`, `hit=4` e `provider_error=0`, com
+quatro chamadas evitadas e taxa de hit de 80%. O miss custou 1.540 ms na ida ao
+provedor; os quatro hits foram servidos entre 0,11 e 0,19 ms, com transcrições
+idênticas. Duas execuções independentes produziram os mesmos hashes de áudio e
+de transcrição. A transcrição real foi classificada como `CONSULTA` /
+`consulta_status_projeto`, e a interação sintética foi removida do banco sem
+resíduo. A rodada partiu do ambiente local de desenvolvimento; a mesma coleta
+na imagem publicada acompanha a publicação da versão final. Resultados,
+latências e hashes estão nas
+[evidências da homologação com Azure real](evidencias/sprint-05/vhs-azure-real/README.md).
+
+#### Integração frontend-backend e falhas de comunicação — S5-23
+
+A S5-23 ([#277](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/277)) automatizou no Playwright os fluxos principais da interface contra o backend de testes (`app/tests/e2e_server.py`), que usa as rotas reais da API, repositórios em memória e provedores determinísticos. A suíte terminou com 60 testes aprovados: 20 cenários em desktop, tablet e celular. Texto, áudio, relatório e alerta percorrem o backend; o alerta vai até a assinatura ativa, conferida em `GET /api/alert-subscriptions`. A alteração de dados é exercitada com a API simulada, e o contrato do backend correspondente é coberto pelos testes de `data_changes`.
+
+As falhas de comunicação simuladas foram 503, 502 e 500 do backend, 504 de gateway, *timeout* do cliente, perda de conexão e 503 no meio do workflow de alerta. Em todas, a interface exibiu mensagem controlada, sem detalhe interno, e voltou a funcionar no envio seguinte. O job `frontend-e2e` publica o relatório HTML como artefato do MR e o JUnit na aba de testes. Resultados, mudanças e limites estão no [relatório S5-23](testes/sprint5/relatorio-s5-23.md).
+
+## 9.5 Consolidação final dos testes
+
+A S5-36 ([#290](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/290)) reúne, em 7 de outubro de 2026, o resultado vigente de cada requisito, a evidência que o sustenta e o destino de cada defeito aberto. O resultado vigente é o da última execução do caso; uma correção integrada sem nova execução não muda o resultado e aparece na coluna de situação. O detalhamento está no [relatório S5-36](testes/sprint5/relatorio-s5-36.md).
+
+### 9.5.1 Resultado por requisito
+
+| Requisito | Resultado vigente | Situação e evidência |
+| --- | :---: | --- |
+| RF01, RF04, RF05, RF07, RF10 | **Aprovado** | Rodada de 23/09, 2/2 casos cada (Seção 9.1.5.7) |
+| RF02, RF03 | **Aprovado** | Falhas de 23/09 corrigidas pela S5-28 e aprovadas na reexecução de 07/10 (Seção 9.1.5.9) |
+| RF09 | **Aprovado** | Aprovado no reteste depois da correção do `DEF-RNF04-02` (Seção 9.1.5.2) |
+| RF06, RF08 | **Bloqueado** | Caso positivo bloqueado pelo `DEF-RF06-01`, que depende da S5-12 ([#266](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/266)); caso negativo aprovado |
+| RNF01 | **Aprovado** | CT-RNF01-P aprovado na S4-33; CT-RNF01-N aprovado depois da correção da S5-27 ([verificação](evidencias/sprint-05/s5-27-dado-sensivel.md#execução)) |
+| RNF02 | **Bloqueado** | Resultado da S4-33 (24/09). Perfis e regras chegaram com a S5-03 e a S5-04; a reexecução é da S5-30 ([#284](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/284)), ainda aberta |
+| RNF03 | **Reprovado** | Resultado da S4-33 (24/09): faltavam perfil e fontes. As correções da S5-04, S5-25 e S5-26 estão integradas; a reexecução é da S5-30 |
+| RNF04 | **Aprovado** | 91,67% fundamentadas e 4,17% de alucinação (Seção 9.2.7) |
+| RNF05 | **Aprovado** | 3ª rodada da Sprint 4, sem erro e dentro dos tetos (Seção 9.2.7) |
+| RNF06 | **Reprovado** | F1-macro 0,8327 aprovado; *recall*@3 0,5556 reprovado; nova medição depende da S5-12 (Seção 9.2.7) |
+| RNF07 | **Reprovado** | 6 de 20 formulações, contra a meta de 16, em coleta anterior à S5-28 ([consolidação S5-31](testes/sprint5/consolidacao-s5-31.md)) |
+| RNF08 | **Aprovado** | Reavaliado pelo critério revisado na S5-43 (Seção 9.2.7) |
+| RNF09 | **Aprovado** | Aprovado depois da correção do `DEF-S5-31-02` ([reteste](testes/sprint5/reteste-s5-31-rnf09.md)) |
+| RNF10, RNF12 | **Aprovado** | S5-32 (Seção 9.2.7) |
+| RNF11 | **Reprovado** | CT-RNF11-N reprovado pelo `DEF-S5-32-01` (Seção 9.2.7) |
+
+**Totais.** Funcionais: 18 casos aprovados e 2 bloqueados, sem falha em aberto; 8 requisitos aprovados e 2 bloqueados. Não funcionais: 7 requisitos aprovados, 4 reprovados e 1 bloqueado.
+
+### 9.5.2 Demais frentes de teste
+
+| Frente | Resultado vigente | Evidência |
+| --- | --- | --- |
+| Unitários do frontend (S5-22) | **Aprovado**: 112 testes; 86,36% das linhas e 75,25% das ramificações, acima dos mínimos do job `frontend-unit` | [Relatório S5-22](testes/sprint5/relatorio-s5-22.md) |
+| Integração do backend (S4-32B e #255) | **Aprovado**: suíte `integration` no job `backend-api`, depois do gate de conflitos | [S4-32B](testes/sprint4/relatorio-s4-32b.md), [#255](testes/sprint5/issue-255-gate-integracao.md) |
+| E2E textual com RAG (S4-20) | CT-E2E-01 a 05 **aprovados**; CT-E2E-06 **cancelado**, porque o Copilot Studio saiu da arquitetura; CT-E2E-07 **não aplicável**, porque não há fallback automático entre modelos e a falha do provedor é coberta por CT-E2E-03 e CT-RNF11-P | [S4-20](testes/sprint4/relatorio-s4-20.md) |
+| E2E da interface e falhas de comunicação (S5-23) | **Aprovado**: 60 testes, 20 cenários em três tamanhos de tela | [S5-23](testes/sprint5/relatorio-s5-23.md) |
+| Cache VHS com Azure Speech real | **Aprovado**: 1 chamada ao provedor e 4 acertos em 5 envios | Seção 9.4.2 |
+| Usabilidade | Seis sessões e SUS médio de 86,25; sem nova sessão depois das correções | Seção 9.3.2 |
+
+### 9.5.3 Defeitos remanescentes e destino
+
+Os defeitos já encerrados (`DEF-RF02-01`, `DEF-RF03-01`, `DEF-RNF04-01`, `DEF-RNF04-02`, `DEF-S5-31-01` e `DEF-S5-31-02`) estão listados no relatório. Ficam abertos:
+
+| Defeito | Afeta | Destino |
+| --- | --- | --- |
+| `DEF-RF06-01` e recuperação do RNF06 | RF06, RF08 e RNF06 | S5-12 ([#266](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/266)); sem ela nesta sprint, Seção 12.2, item 1 |
+| D-01 a D-06, corrigidos e não reexecutados | RNF02 e RNF03 | S5-30 ([#284](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/284)). O backfill `19_backfill_s5_25_audit.sql` ainda precisa ser aplicado no banco de destino |
+| RNF07 abaixo da meta | RNF07 | Seção 12.2, item 6 |
+| `DEF-S5-32-01` | RNF11 | Seção 12.2, item 5 |
+| `DEF-RNF05-01`, provedor da bancada | Leitura do RNF05 | Medição com o modelo de produção na homologação (Seção 12.2, item 4) |
+| `DEF-RNF05-02`, auditoria no caminho da resposta | Latência do RNF05 | Seção 12.2, item 16 |
+| O2, O3 e O4 | Usabilidade | S5-29 ([#283](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/283)) |
+| O1 e O8, corrigidos sem nova sessão; perfis não cobertos | Usabilidade | S5-34 ([#288](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/288)); sem ela, Seção 12.2, item 3 |
 
 # 10. Procedimentos de Implantação
 
@@ -6455,6 +7818,9 @@ O arquivo [`compose.prod.yml`](../compose.prod.yml) foi usado tanto nos testes l
 | `publisher` | `python -m app.alerts.worker publisher` | Apenas `app-private` |
 | `evaluator` | `python -m app.alerts.worker evaluator` | Apenas `app-private` |
 | `notifier` | `python -m app.alerts.worker notifier` | Apenas `app-private` |
+| `delivery` | `python -m app.alerts.worker delivery` | Apenas `app-private` |
+| `sharepoint-publisher` | `python -m app.sharepoint_webhooks.worker publisher` | Apenas `app-private` |
+| `sharepoint-consumer` | `python -m app.sharepoint_webhooks.worker consumer` | Apenas `app-private` |
 
 O notebook foi mantido no profile opcional `notebook` e não é iniciado nem baixado na configuração padrão da EC2. Os contêineres usam limites de CPU e memória, `read_only`, `tmpfs`, `no-new-privileges`, descarte de capabilities e rotação do driver de logs. Backend, frontend e RabbitMQ possuem *health checks*; os workers não usam health check HTTP porque não servem requisições.
 
@@ -6612,9 +7978,10 @@ sudo /usr/local/bin/m7-compose-up
 
 `m7-compose-up` valida a presença das variáveis, confirma que a URL AMQP corresponde às credenciais do RabbitMQ e inicia `rabbitmq`, `backend`, `frontend`, `scheduler`, `publisher`, `evaluator` e `notifier`. O arquivo instalado foi conferido como `root:root` modo `0600`.
 
-> **Nota temporal — Sprint 5:** esse registro descreve o deploy anterior ao
-> webhook de confirmação. O `compose.prod.yml` atual também declara o consumer
-> `delivery`, mas não houve nova execução na AWS que comprove esse contêiner no
+> **Nota temporal — Sprint 5:** esse registro descreve o deploy anterior aos
+> novos workers de webhook. O `compose.prod.yml` atual também declara o consumer
+> `delivery` e os workers `sharepoint-publisher` e `sharepoint-consumer`, mas não
+> houve nova execução na AWS que comprove esses contêineres no
 > ambiente publicado.
 
 O frontend permaneceu em `127.0.0.1:80`; o backend e o broker não publicam portas no host. O health check interno foi executado antes de criar qualquer acesso externo:
@@ -6737,7 +8104,7 @@ sudo /usr/local/bin/m7-compose stop
 
 Não se deve usar `docker compose down -v` enquanto os volumes de RabbitMQ ou artefatos ainda forem necessários. Mesmo com a EC2 parada, EBS, ECR e CloudWatch continuam armazenados e podem gerar custo. As principais limitações permanecem sendo as credenciais temporárias do Learner Lab, o SSH dependente do IP do operador, a URL temporária do Cloudflare e a ausência de autenticação adequada para divulgação pública.
 
-Os procedimentos detalhados de diagnóstico, atualização, rollback e encerramento, assim como o histórico das decisões de implantação, estão consolidados nesta seção e nas stories de [infraestrutura AWS](stories/phase-4-aws-mvp.md), [substituição da EC2](stories/phase-4-ec2-ssh-replacement-preparation.md) e [workers/atualização](stories/phase-4-alert-workers-local-update.md).
+Os procedimentos detalhados de diagnóstico, atualização, rollback e encerramento, assim como o histórico das decisões de implantação, estão consolidados nesta seção e nas stories de [infraestrutura AWS](Projeto.md), [substituição da EC2](Projeto.md) e [workers/atualização](Projeto.md).
 
 # 11. Análise de Viabilidade Financeira
 
@@ -6907,6 +8274,484 @@ O fluxo confirma que todos os pagamentos mapeados podem ser liquidados e que o s
 
 Nas premissas adotadas, a entrega é financeiramente viável pelo preço de **R$ 192.195,11**. Esse valor paga os R$ 115.400,00 de custos diretos, os R$ 15.771,36 de despesas operacionais, os R$ 5.684,09 de juros, o imposto único estimado em R$ 30.270,73 e o lucro de R$ 25.068,93. O empréstimo de R$ 131.171,36 resolve o descasamento entre os pagamentos do desenvolvimento e o recebimento final, enquanto a inclusão dos juros na formação do preço preserva o lucro desejado de 15% após a quitação. Portanto, a viabilidade depende de cumprir o prazo, controlar o uso das ferramentas e receber do cliente na data contratada.
 
+## 11.10 Custos de implementação da PoC e da solução final
+
+Esta subseção atende à **S5-39 ([#293](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/293))**. Ela consolida os insumos das S4-52A a S4-52C ([#246](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/246) a [#248](https://git.inteli.edu.br/graduacao/2026-2a/t17/g05/-/issues/248)), já refletidos nas Seções 11.2 e 11.3, e separa os custos em dois objetos:
+
+- **PoC:** o que foi construído no módulo, com dados sintéticos e ambiente de demonstração.
+- **Solução final:** a evolução da PoC para operar no ambiente corporativo do Metrô, seguindo o caminho de homologação da Seção 6.4.7.
+
+Em ambos, o custo tem duas partes, **pessoal e tecnologia**, cada linha com premissa, quantidade e valor. Tributos, margem e despesas administrativas pertencem à formação do preço das Seções 11.4 a 11.6 e não entram aqui.
+
+### 11.10.1 Premissas comuns
+
+| Premissa | Valor adotado | Fonte ou justificativa |
+|---|---|---|
+| Equipe | 6 pessoas desenvolvedoras júnior PJ | Composição do grupo, Seção 11.2.1 |
+| Dedicação | 8 horas por pessoa por dia útil | Dedicação integral, a mesma da Seção 11.2.1 |
+| Capacidade da equipe | 48 horas por dia útil; 480 horas por sprint de duas semanas (`6 × 8 × 10`) | Derivada das duas linhas anteriores |
+| Valor-hora | R$ 50,00 | Taxa PJ júnior da Seção 11.2.1, com referência no [Guia Salarial 2026 da Robert Half](https://www.roberthalf.com/br/pt/insights/salary-guide) |
+| Câmbio | R$ 5,1795 por US$ 1,00 | PTAX de venda de 24/09/2026, a mesma da Seção 11.3.1 |
+| Região de nuvem da solução final | Azure Brazil South | Dados do Metrô permanecem no país; preços da [API pública de preços do Azure](https://prices.azure.com/api/retail/prices), consultada em 07/10/2026 |
+
+### 11.10.2 PoC
+
+**Pessoal.** A PoC foi desenvolvida em cinco sprints, entre 3 de agosto e 7 de outubro de 2026, o que dá 47 dias úteis.
+
+| Item | Premissa | Quantidade | Valor unitário | Valor |
+|---|---|---:|---:|---:|
+| Desenvolvimento | 6 pessoas × 47 dias úteis × 8 h | 2.256 h | R$ 50,00/h | R$ 112.800,00 |
+| **Total de pessoal da PoC** | | **2.256 h** | | **R$ 112.800,00** |
+
+**Tecnologia.** Valores das Seções 11.2.2 e 11.3.1, mantidos como preço de mercado. Créditos acadêmicos e camadas gratuitas usados pela equipe não reduzem o orçamento, porque não estariam disponíveis para uma startup contratada.
+
+| Item | Premissa | Quantidade | Valor unitário | Valor |
+|---|---|---:|---:|---:|
+| Codex | Assistente de código para cada integrante | 6 pessoas × 3 meses | R$ 100,00/mês | R$ 1.800,00 |
+| Gemini / OpenRouter | Franquia para desenvolvimento, integração e testes do agente | 1 franquia | R$ 500,00 | R$ 500,00 |
+| Azure AI Speech | Franquia para integração e testes de transcrição | 1 franquia | R$ 300,00 | R$ 300,00 |
+| AWS EC2 `t3.large` | Execução sob demanda | ~6 semanas | — | R$ 393,01 |
+| AWS EBS `gp3` 50 GB, IPv4, ECR e CloudWatch | Armazenamento, endereço, imagens e logs | ~6 semanas | — | R$ 69,37 |
+| Supabase Pro | Banco gerenciado | ~2 meses | — | R$ 258,98 |
+| **Total de tecnologia da PoC** | | | | **R$ 3.321,36** |
+
+| Resumo da PoC | Valor |
+|---|---:|
+| Pessoal | R$ 112.800,00 |
+| Tecnologia | R$ 3.321,36 |
+| **Custo de implementação da PoC** | **R$ 116.121,36** |
+
+### 11.10.3 Solução final
+
+**Escopo.** A solução final mantém o núcleo Python da PoC e adapta hospedagem, identidade, dados, modelo de linguagem e canal ao ecossistema Microsoft, pelo caminho recomendado na Seção 6.4.7:
+
+- aplicação web publicada como aba do Teams;
+- API e workers em Azure Container Apps;
+- PostgreSQL gerenciado em Azure;
+- Microsoft Entra ID para identidade;
+- SharePoint corporativo acessado pelo Microsoft Graph;
+- Azure OpenAI no lugar do Gemini;
+- Azure AI Speech para voz;
+- servidor MCP para conexão com o Copilot, pedido na S5-18.
+
+Ficam fora do escopo: reconstruir os fluxos em Power Automate ou Copilot Studio, trocar o RabbitMQ por Service Bus e adotar Azure AI Search. A Seção 6.4 classifica esses três caminhos como opcionais e de esforço alto.
+
+**Método do esforço.** As horas vêm da avaliação de esforço que a Seção 6.4 atribui a cada componente:
+
+| Nível de esforço | Horas por componente |
+|---|---:|
+| Baixo | 32 h |
+| Médio | 96 h |
+| Alto | 192 h |
+
+Somam-se **20%** para homologação e regressão no ambiente do Metrô: repetir os testes funcionais, os RNFs (em especial RNF04 a RNF06, com dados reais) e a usabilidade. Para calibrar: na PoC, as 2.256 horas produziram os 32 componentes inventariados na Seção 6.4, uma média de 70,5 h por componente. As 96 h de um componente médio ficam acima dessa média porque cobrem o adaptador e sua validação no ambiente corporativo, que a PoC não teve. A proporção 1 : 3 : 6 entre os níveis acompanha a escala qualitativa da Seção 6.4.2.
+
+**Pessoal.**
+
+| Frente | Componentes da Seção 6.4 e esforço | Horas |
+|---|---|---:|
+| Interface e canal | Aba Teams (médio); domínio e ingress HTTPS (médio); blocos de resposta no canal (médio); notificações no Teams (médio) | 384 h |
+| API e inteligência | API em Container Apps (médio); classificador e catálogo (médio); workflows de relatório e alerta (médio); proatividade (médio); cliente Azure OpenAI (médio); normalização e entidades (baixo); validação de citações (baixo) | 544 h |
+| Dados e identidade | SharePoint via Graph (alto); PostgreSQL gerenciado (alto); Entra ID e mapeamento de perfis (alto); recuperação mantida e reavaliada (médio); Blob Storage (médio); auditoria (médio); barreira de dado sensível (médio) | 960 h |
+| Voz, relatórios e alertas | STT (baixo); TTS (médio); serviço de relatórios (médio); renderização DOCX (baixo); workers de alerta (médio); RabbitMQ em contêiner (médio) | 448 h |
+| Copilot | Servidor MCP com ferramentas, transporte e autenticação (alto) | 192 h |
+| Hospedagem e operação | Container Apps e registro de imagens (alto); Key Vault (médio); Azure Monitor e Application Insights (médio); CI/CD do GitLab para Azure (médio) | 480 h |
+| **Subtotal dos componentes** | | **3.008 h** |
+| Homologação e regressão | 20% do subtotal | 601,6 h |
+| **Esforço estimado** | | **3.609,6 h** |
+
+Com 480 horas por sprint, o esforço exige **8 sprints**, ou 16 semanas (cerca de 4 meses). A equipe é contratada pela capacidade das sprints, e as 230,4 horas que sobram (6% do total) funcionam como reserva.
+
+| Item | Premissa | Quantidade | Valor unitário | Valor |
+|---|---|---:|---:|---:|
+| Desenvolvimento e homologação | 6 pessoas × 8 h × 80 dias úteis | 3.840 h | R$ 50,00/h | R$ 192.000,00 |
+| **Total de pessoal da solução final** | | **3.840 h** | | **R$ 192.000,00** |
+
+**Tecnologia durante a implementação** (8 sprints, cerca de 4 meses):
+
+| Item | Premissa | Quantidade | Valor unitário | Valor |
+|---|---|---:|---:|---:|
+| Codex | Assistente de código para cada integrante | 6 pessoas × 4 meses | R$ 100,00/mês | R$ 2.400,00 |
+| Ambiente Azure de homologação | PostgreSQL B1ms (US$ 0,035/h × 730 h), registro de imagens Basic (US$ 0,1666/dia), testes no Azure OpenAI (1 M de tokens de entrada e 0,3 M de saída) e 15% de reserva para armazenamento, backup e tráfego. Container Apps, Log Analytics e Speech dentro das cotas gratuitas mensais | 4 meses × US$ 36,23 | R$ 187,65/mês | R$ 750,61 |
+| **Total de tecnologia da implementação** | | | | **R$ 3.150,61** |
+
+| Resumo da solução final | Valor |
+|---|---:|
+| Pessoal | R$ 192.000,00 |
+| Tecnologia durante a implementação | R$ 3.150,61 |
+| **Custo de implementação da solução final** | **R$ 195.150,61** |
+
+**Operação mensal após a implantação.** A operação não faz parte do custo de implementação, mas define o que o Metrô passa a pagar todo mês. O volume adotado é este:
+
+- 30 usuários (PMO e gestores dos 48 projetos ativos do cenário de protótipo da Seção 3.8.3), 10 consultas por usuário por dia útil e 21 dias úteis: **6.300 consultas por mês**;
+- 70% das consultas chegam ao modelo de linguagem; o restante é resolvido por roteamento local, como mostrou a hipótese de tokens da Sprint 4;
+- 2.000 tokens de entrada e 600 de saída por chamada, mais que os cerca de 200 e 140 da massa sintética, porque os documentos reais são maiores;
+- 20% das perguntas por voz, com 15 segundos cada;
+- 30% das respostas reproduzidas em áudio, com 600 caracteres cada.
+
+| Item | Premissa | Quantidade por mês | Preço unitário (US$) | Valor mensal |
+|---|---|---:|---:|---:|
+| Container Apps, vCPU | API com 1 vCPU e 2 GiB; frontend, worker de alertas e RabbitMQ com 0,25 vCPU e 0,5 GiB cada; 24 × 7; descontada a cota gratuita | 4.419.000 vCPU-s faturáveis | 0,000024 | R$ 549,34 |
+| Container Apps, memória | Mesmos contêineres | 8.838.000 GiB-s faturáveis | 0,000003 | R$ 137,31 |
+| PostgreSQL Flexible B2s | Banco do portfólio, sessões e auditoria, 24 × 7 | 730 h | 0,14 | R$ 529,34 |
+| Azure OpenAI `gpt-4.1-mini` | 4.410 chamadas | 8,82 M tokens de entrada / 2,65 M de saída | 0,40 / 1,60 por M | R$ 40,19 |
+| Speech, STT | 1.260 perguntas por voz | 5,25 h de áudio | 1,00/h | R$ 27,19 |
+| Speech, TTS neural | 1.890 respostas em áudio | 1,13 M caracteres | 15,00 por M | R$ 88,10 |
+| Registro de imagens Basic | Imagens da API e do frontend | 30,42 dias | 0,1666/dia | R$ 26,26 |
+| Key Vault | Leitura de segredos pela aplicação | 100 mil operações | 0,03 por 10 mil | R$ 1,55 |
+| Log Analytics | Logs e telemetria acima dos 5 GB gratuitos | 3 GB | 4,60/GB | R$ 71,48 |
+| Reserva de 15% | Armazenamento do banco e de arquivos, backup, tráfego de saída | — | — | R$ 220,61 |
+| **Total mensal de operação** | | | | **R$ 1.691,37** |
+
+Isso dá cerca de **R$ 20.296 por ano**. O valor se concentra em computação e banco, que respondem por 72% do total. O modelo de linguagem pesa pouco nesse volume: dobrar as consultas acrescentaria cerca de R$ 40 por mês nessa linha.
+
+**O que não está no custo.**
+
+- Teams, Entra ID e SharePoint fazem parte do Microsoft 365 que o Metrô já usa, então o custo incremental foi considerado zero.
+- Licenças de Copilot para os usuários, se o Metrô quiser usar o agente pelo Copilot, dependem do contrato Microsoft dele e não foram orçadas.
+- O preço do `gpt-4.1-mini` é o da implantação global. Se a GTI exigir processamento restrito a uma zona de dados, o valor por token muda e precisa ser revisto.
+- Sustentação, operação assistida e evolução depois da implantação exigem outra equipe e outro orçamento.
+
+### 11.10.4 Comparação
+
+| | PoC | Solução final |
+|---|---:|---:|
+| Duração | 5 sprints (47 dias úteis) | 8 sprints (80 dias úteis) |
+| Horas de desenvolvimento | 2.256 h | 3.840 h |
+| Pessoal | R$ 112.800,00 | R$ 192.000,00 |
+| Tecnologia durante a implementação | R$ 3.321,36 | R$ 3.150,61 |
+| **Custo de implementação** | **R$ 116.121,36** | **R$ 195.150,61** |
+| Operação depois da entrega | Não prevista (demonstração) | R$ 1.691,37 por mês |
+
+Nos dois casos, pessoal responde por mais de 97% do custo de implementação. Por isso, o prazo é a variável que mais pesa: cada sprint a mais da equipe custa R$ 24.000,00. A solução final custa cerca de 1,7 vez a PoC porque troca dados sintéticos e serviços de demonstração por identidade, fontes e hospedagem corporativas. Essa diferença acompanha o esforço que a Seção 6.4 atribui a cada componente.
+
+# 12. Benefícios Entregues e Aperfeiçoamentos Futuros
+
+Esta seção registra o valor que a prova de conceito entrega ao PMO do Metrô e prioriza as melhorias que ficam para depois do módulo. Cada benefício está ligado à funcionalidade que o produz e à evidência que o sustenta, de modo que nenhum deles depende de declaração: todos remetem a uma medição ou a um registro de execução do próprio documento.
+
+## 12.1 Benefícios entregues
+
+Os Business Drivers da Seção 2.10 definiram quatro resultados esperados: agilizar o acesso às informações (BD01), ampliar a capacidade de análise (BD02), aumentar a confiabilidade das respostas (BD03) e tornar a interação mais acessível (BD04). A tabela mostra o que foi efetivamente entregue para cada um.
+
+| Benefício entregue | Funcionalidade que o produz | Evidência | Driver |
+| --- | --- | --- | :---: |
+| Consulta ao portfólio em linguagem comum, sem conhecer a estrutura dos documentos | Pipeline de PLN com entrada por texto e por voz (Seções 8.7, 8.8 e 8.11) | No teste de usabilidade, a pergunta em linguagem comum funcionou sem comando técnico nas seis sessões, e a transcrição por voz preservou a intenção em todas elas (Seção 9.3.2) | BD04 |
+| Identificação confiável do que foi pedido | Classificador hierárquico de intenções, versão 2 (Seção 8.10.7) | F1-macro de 0,8327 na intenção específica, sobre 1.135 solicitações de teste mantidas fechadas durante a seleção, acima do mínimo de 0,80 (Seção 9.2) | BD01, BD04 |
+| Respostas que indicam a origem e declaram o que não sabem | Recuperação com citação de fonte e resposta controlada quando falta informação (Seção 8.5) | 91,67% de respostas fundamentadas e 4,17% de alucinação na amostra avaliada às cegas, dentro dos limites de 90% e 5% do RNF04 (Seção 9.2) | BD03 |
+| Resposta em tempo de conversa | Pipeline completo de classificação, recuperação e geração | P95 de consulta simples entre 7,0 e 7,6 s, contra teto de 10 s do RNF05, sem erro em 1.379 requisições (Seção 9.2) | BD01 |
+| Relatório executivo sem redação manual | Despacho determinístico de `transacao_gerar_relatorio`, sem LLM na decisão da rota (Seção 8.5.10) | Geração rastreável com webhook de resultado e entrega pela fila (Seções 8.5.10 e 8.5.12) | BD02 |
+| Fim da cobrança manual de prazos | Alerta autônomo de atraso, configurado por fluxo guiado no chat (Seção 8.5.11) | Execução registrada em `src/backend/evidencias/alerta-prazo-atraso/` | BD01 |
+| Próximo passo sugerido sem perda de controle | Sugestão proativa com confirmação explícita e controle de ativação | Nenhuma sugestão é executada sem confirmação, e desativar as sugestões não altera a resposta principal (RF09 e RF10, Seção 3.1) | BD02 |
+| Menos espera e menos custo no provedor de voz | Cache VHS de transcrições (Seção 9.4) | Contra o Azure real, quatro de cinco envios repetidos foram servidos do cache em cerca de 0,1 ms, contra 1.540 ms da chamada ao provedor (Seção 9.4.2) | BD01 |
+| Solução demonstrável fora da máquina da equipe | Publicação em AWS EC2, com banco no Supabase (Seção 10.2) | Aplicação validada pela rede externa ao fim da Sprint 4 (Seção 10.2.10) | — |
+
+**O que os benefícios ainda não comprovam.** Três limites acompanham a leitura da tabela. O primeiro é que o RNF06 consolidado segue reprovado pela recuperação: a classificação passou, mas o *recall*@3 das fontes ficou em 0,556, contra o mínimo de 0,80 (Seção 9.2). O benefício de identificar o que foi pedido está entregue; o de encontrar sempre a fonte certa, ainda não. O segundo é que a percepção declarada no SUS, com média de 86,25, é mais favorável do que a observação das tarefas: nenhum participante concluiu sem dificuldade os cenários de informação ausente e de sugestão proativa (Seção 9.3.2). O terceiro é que todas as medições usam massa sintética, com um único projeto, em ambiente de demonstração, e não o portfólio real nem o ambiente corporativo do Metrô.
+
+## 12.2 Aperfeiçoamentos futuros
+
+A ordem segue dois critérios, nesta precedência. Primeiro vem o que hoje reprova um requisito ou impede o uso pelo PMO, porque nenhum ganho novo compensa uma resposta que não encontra a fonte certa. Depois vêm os pedidos do parceiro com menor custo de construção, porque reaproveitam infraestrutura que já existe.
+
+**Prioridade 1 — reprovam requisito ou impedem o uso real**
+
+| # | Aperfeiçoamento | Motivo | Ponto de partida |
+| :---: | --- | --- | --- |
+| 1 | Base documental de portfólio para a recuperação | Reprova a recuperação do RNF06 (*recall*@3 de 0,556). A massa tem um único projeto, e as listas simuladas do SharePoint ainda tratam de atendimento ao passageiro, não de portfólio | Pedido do parceiro de reproduzir a estrutura do SharePoint do Metrô; o contrato de leitura das listas já existe (Seção 8.5) |
+| 2 | Medição com solicitações reais do PMO | Classificação e recuperação foram medidas em frases sintéticas derivadas de templates; o desempenho com perguntas reais não é conhecido | Protocolo de avaliação reutilizável das Seções 8.10.1 e 9.2 |
+| 3 | Usabilidade com os perfis ainda não cobertos | As vagas de gestão de projetos, análise de indicadores e ferramentas Microsoft ficaram sem participante; as respostas não foram avaliadas por quem acompanha o portfólio na rotina | Roteiro, planilha e SUS da Seção 9.3.1 |
+| 4 | Homologação no ambiente corporativo | Entra ID, Azure e Teams dependem do provisionamento da GTI; a coleta do VHS na imagem publicada acompanha a publicação final | Roteiros das Seções 9.4.2 e 10.2 |
+| 5 | Tratamento das exceções inesperadas em `/api/chat` | Reprova o RNF11: uma exceção sem tratador volta como 500 genérico, sem a mensagem do projeto e sem registro na auditoria (`DEF-S5-32-01`, Seção 9.2.7) | O CT-RNF11-N da S5-32 já reproduz o caso e serve de teste de regressão |
+| 6 | Nova aplicação do RNF07 | Reprova o RNF07: 6 de 20 formulações compreendidas, contra a meta de 16, em coleta anterior à correção das perguntas curtas (S5-28) | Amostra, protocolo e apuração da S5-31, prontos para nova sessão com participantes |
+
+**Prioridade 2 — pedidos do parceiro que reaproveitam infraestrutura existente**
+
+| # | Aperfeiçoamento | O que já existe | O que falta |
+| :---: | --- | --- | --- |
+| 7 | Lembretes do projeto | Agendador, filas e central de notificações do alerta de prazo (Seção 8.5.11) | Intenção de lembrete, fluxo guiado e disparo por horário, e não por condição de atraso |
+| 8 | Tarefas e calendário do projeto no chat | Dados em `schedule_items` e `project_deliverables_milestones` (Seção 4.4) | Rota de leitura por projeto e as visões de lista e de calendário |
+| 9 | Agente exposto como servidor MCP | Rotas de consulta, relatório e alerta com contrato estável | Ferramentas MCP com autenticação, para o próprio Metrô conectar o agente ao Copilot sem depender do Copilot Studio, hoje indisponível para a equipe |
+| 10 | Integração com o Microsoft Teams | Contrato OpenAPI e arquitetura com o Teams como canal previsto (Seção 5.2) | Canal publicado no tenant do Metrô, após homologação |
+| 11 | Preenchimento assistido de documentos | Fluxo guiado do alerta e do relatório; tabelas `project_charters` e `project_benefits` no modelo físico (Seção 4.4) | Entrevista guiada para o Termo de Abertura e o Mapa de Benefícios, com validação das regras do cronograma — soma dos pesos em 100% e coerência de datas —, promessa do Canvas da Sprint 1 ainda não construída (Seção 2.9.1) |
+
+Os itens 7 e 8 estavam na linha de corte do planejamento da Sprint 5, que previa registrá-los aqui caso não coubessem na capacidade (Seção 6.5.1 do `GestaoProjeto.md`).
+
+**Prioridade 3 — evolução técnica**
+
+| # | Aperfeiçoamento | Motivo |
+| :---: | --- | --- |
+| 12 | Cache VHS compartilhado entre réplicas | O cache é hoje em memória e por processo, com validade de 300 s; não sobrevive a reinício e impede escalar a API horizontalmente sem perder os acertos |
+| 13 | Lock do classificador restrito ao carregamento | O lock global serializa todas as classificações, embora só o carregamento dos artefatos precise dele; a medição da Seção 8.11.8 mostrou vazão até 2,3 vezes maior sem ele |
+| 14 | Ajuste supervisionado do encoder | O encoder é usado congelado, como extrator de atributos; o ajuste para as intenções do projeto depende de GPU |
+| 15 | Integração com o Power BI | Evolução prevista desde o Canvas da Seção 2.9, para levar os indicadores do agente aos painéis que o PMO já usa |
+| 16 | Auditoria fora do caminho da resposta | A gravação da auditoria do RNF03 ainda é síncrona; na 3ª rodada do RNF05, a distância entre o P95 do cliente e o do pipeline ainda era de 1,8 s (`DEF-RNF05-02`, Seção 9.2.7). Mover para fila ou tarefa em segundo plano muda a semântica verificada pelo RNF03 |
+
+
+# 13. Plano de Adoção e Mobilização do Ecossistema
+
+O agente só gera valor se o PMO, os líderes e a diretoria do Metrô passarem a usá-lo na rotina, e o principal obstáculo para isso não é técnico. A Seção 2.2 registra que experiências anteriores do parceiro com IA generativa falharam porque as respostas nem sempre estavam fundamentadas na documentação oficial, e que isso reduziu a confiança das equipes. A adoção, portanto, parte de uma confiança já quebrada naquele PMO, e não de um terreno neutro. Esta seção descreve quem vai usar o agente, o que deve travar cada público e o que a solução faz, na prática, para destravar.
+
+## 13.1 Mapa de adoção e aculturamento organizacional
+
+### 13.1.1 Público-alvo principal
+
+O público é definido pelos perfis de acesso do modelo de dados, e não por cargos genéricos. Cada usuário tem um `role_name` na tabela `users`, e as regras de `access_rules` delimitam, por subportfólio ou por projeto, o que ele pode ler, alterar e exportar (Seção 4.4). As personas da Seção 2.5 correspondem a esses perfis.
+
+| Perfil no sistema | Quem é no Metrô | Persona | O que faz com o agente | Alcance da permissão |
+| --- | --- | --- | --- | --- |
+| `pmo` | Analistas do PMO Corporativo, responsáveis pela consolidação e pela qualidade dos dados do portfólio | Mariana | Consolida o balanço mensal, confere consistência, gera o relatório executivo e configura alertas de prazo | Portfólio inteiro, com leitura e exportação |
+| `lider_subportfolio` | Gerentes de portfólio de cada subportfólio | Carlos | Prepara reuniões de acompanhamento, compara projetos, investiga desvios e recebe alertas | Projetos do próprio subportfólio |
+| `equipe_projeto` | Líderes e equipes que alimentam os documentos de cada projeto | — | Consulta o próprio projeto e responde às pendências de atualização | Projetos em que atua |
+| `diretoria` | Diretoria de Planejamento e Gestão Estratégica | Roberto | Lê resumos executivos com fonte, sem navegar nos documentos | Visão consolidada, sem edição |
+| `gti` | Gerência de Tecnologia da Informação | — | Homologa o ambiente, provisiona Entra ID, Azure e Teams e opera a solução | Infraestrutura, não o conteúdo do portfólio |
+| `admin` | Equipe de sustentação do agente | — | Mantém catálogo de intenções, léxico do domínio e regras de acesso | Configuração do agente |
+
+O público de **entrada** é o PMO. É ali que a dor central do projeto se concentra — a consolidação manual do balanço mensal, descrita na jornada de Mariana — e é o perfil com maior afinidade tecnológica e com acesso ao portfólio inteiro, o que permite medir o ganho antes de expandir. Os líderes de subportfólio entram em seguida, porque dependem de dados que o PMO já validou. A diretoria entra por último, quando já houver histórico de respostas confiáveis: é o público que menos tolera erro e o que tem menos tempo para aprender uma ferramenta nova.
+
+### 13.1.2 Barreiras culturais e técnicas esperadas
+
+As barreiras abaixo foram extraídas de fatos do próprio projeto — do diagnóstico do problema, das restrições do parceiro e do que foi observado no teste de usabilidade da Seção 9.3 —, e não de uma lista genérica de resistência à mudança.
+
+| Barreira | Tipo | Público mais afetado | De onde vem |
+| --- | --- | --- | --- |
+| Desconfiança em resposta gerada por IA | Cultural | PMO e diretoria | Experiência anterior do Metrô com IA generativa sem lastro documental (Seção 2.2) |
+| Receio de expor dado confidencial | Cultural e técnica | Todos, sobretudo a GTI | Restrição de que dado sensível de projeto não trafegue por serviço não homologado (Seção 2.1, RNF01) |
+| Medo de perder o controle do próprio trabalho | Cultural | PMO e equipes de projeto | A consolidação é a atividade do PMO; uma ferramenta que a executa pode ser lida como substituição, e não como apoio |
+| Receio de alteração indevida de dados | Cultural e técnica | `pmo`, `lider_subportfolio` | Um agente que escreve no portfólio, por linguagem natural, sem que a pessoa veja o que vai mudar |
+| Não saber o que perguntar nem como | Técnica | `equipe_projeto` e quem tem pouca familiaridade com agentes | No teste, um participante procurou um menu de comandos antes de digitar, e perguntas curtas sobre temas da base foram recusadas (ocorrência O1, Seção 9.3.2) |
+| Não perceber a fonte nem o controle da sugestão | Técnica | Todos | Dois participantes não viram a fonte citada na primeira leitura; o controle da proatividade não foi percebido sem ajuda (O8) |
+| Mais uma ferramenta na rotina | Cultural | Diretoria e líderes | O PMO já opera SharePoint, Excel, Power BI e Teams; uma interface nova compete por atenção |
+| Ciclo longo de homologação | Técnica e organizacional | GTI e patrocinadores | A adoção de tecnologia nova depende de provisionamento da GTI e de aprovação de compliance (Seção 2.1) |
+
+### 13.1.3 Ações de onboarding e educação
+
+Cada ação responde a uma barreira da tabela anterior. Parte delas já está no comportamento do agente, e o onboarding consiste em torná-las visíveis; a outra parte é organizacional e depende do patrocínio do PMO.
+
+**O que o próprio agente já faz para educar**
+
+| Ação | Barreira atendida | Como funciona |
+| --- | --- | --- |
+| Toda resposta cita a fonte e declara quando não sabe | Desconfiança em IA | A resposta remete ao documento consultado e, sem informação suficiente, declara o limite em vez de completar (RF08). É a resposta direta à experiência anterior do PMO, e por isso o onboarding começa por ela |
+| Classificação antes da geração | Receio de expor dado | A solicitação é classificada localmente, e só o contexto estruturado e validado segue para a camada generativa; fora de escopo recebe resposta controlada, sem chamar o provedor (Seção 8.11.5) |
+| Prévia com confirmação assinada antes de criar alerta ou relatório | Receio de alteração indevida | O agente mostra o resumo do que será criado e só executa após confirmação explícita. A confirmação carrega uma assinatura da prévia exibida, e o backend recusa confirmar uma versão diferente da que a pessoa viu (Seções 8.5.10 e 8.5.11) |
+| Sugestão sempre opcional e desativável | Medo de perder o controle | Nenhuma sugestão é executada sem confirmação, e o controle de proatividade desliga as sugestões sem alterar a resposta principal (RF09 e RF10) |
+| Fluxo guiado em vez de formulário | Não saber o que perguntar | Relatório e alerta são configurados por perguntas sucessivas no chat, com opções a escolher, como no alerta de prazo (Seção 8.5.11) |
+
+**O que a implantação precisa fazer**
+
+| Fase | Público | Ação | Critério para avançar |
+| :---: | --- | --- | --- |
+| 0 | `gti` | Homologar o ambiente: Entra ID, recurso Azure e canal no Teams. Apresentar à GTI e ao compliance a fronteira de confidencialidade e a trilha de auditoria do RNF03 | Ambiente homologado e perfis carregados a partir do Entra ID |
+| 1 | `pmo` e um subportfólio piloto | Sessão de apresentação de 30 minutos centrada em três demonstrações: a fonte citada, a declaração de limite e a prévia antes da escrita. Distribuir um cartão de perguntas de exemplo por perfil | Uso recorrente pelo PMO e indicadores de qualidade da Seção 13.2.4 dentro da meta por quatro semanas |
+| 2 | `lider_subportfolio` e `equipe_projeto` | Expandir por subportfólio, um de cada vez, com o multiplicador do subportfólio conduzindo a primeira sessão da própria equipe | Subportfólio com multiplicador ativo e pendências de atualização respondidas pelo agente |
+| 3 | `diretoria` | Entregar o resumo executivo mensal gerado pelo agente junto do material habitual, sem pedir que a diretoria opere o chat | Diretoria consultando o agente diretamente, sem intermediação do PMO |
+
+O piloto começa pelo **Mapa de Benefícios**, o mesmo documento escolhido como piloto das transações do agente na Seção 2.9: é o artefato de entrada do ciclo de vida do projeto, o PMO já conhece o fluxo, e os fluxos AS-IS e TO-BE da Seção 2.6 mostram onde o trabalho muda. Começar por um documento conhecido reduz o que o usuário precisa aprender ao mesmo tempo.
+
+
+## 13.2 Mecanismos de incentivo e engajamento
+
+A adoção contínua depende do que cada pessoa ganha ao mudar sua forma de trabalhar. As três dimensões abaixo foram desenhadas para o modelo de trabalho do PMO do Metrô, e, sempre que possível, cada mecanismo aponta para um dado que a solução já registra, para que o engajamento possa ser acompanhado em vez de presumido. Os mecanismos que dependem de algo ainda não construído estão identificados como tal.
+
+### 13.2.1 Utilidade e ganho de produtividade
+
+O ganho é diferente para cada perfil, porque o trabalho que o agente substitui é diferente.
+
+| Perfil | O que deixa de fazer | O que passa a ter |
+| --- | --- | --- |
+| `pmo` | Compilar o balanço mensal a partir de SharePoint, listas, Power BI e planilhas, e cobrar atualização pessoa por pessoa | Uma consulta única sobre projetos e subportfólios, o relatório executivo gerado a partir dos dados consolidados e o alerta de prazo cobrando no seu lugar |
+| `lider_subportfolio` | Cruzar Power BI, documentos e relatos de líderes para investigar um desvio antes da reunião | Comparação entre projetos e alerta quando um marco atrasa além do limite que ele mesmo configurou |
+| `equipe_projeto` | Responder a cobranças avulsas e preencher formulários estáticos | Pendências que chegam pelo alerta, com o item exato a atualizar, e configuração por fluxo guiado no chat |
+| `diretoria` | Ler documentos extensos ou esperar a consolidação manual do PMO | Resumo executivo que indica a origem de cada número |
+
+Dois resultados medidos sustentam esse ganho desde já: a resposta chega em tempo de conversa, com P95 de consulta simples entre 7,0 e 7,6 s, e 91,67% das respostas são fundamentadas nas fontes (Seção 9.2). A redução do tempo para encontrar uma informação, prevista na matriz de objetivos da Seção 2.4 com meta de 50%, depende da comparação entre a busca manual e a consulta ao agente sobre os mesmos casos; essa comparação é feita no piloto e entra como indicador na Seção 13.2.4.
+
+### 13.2.2 Governança e voz ativa
+
+O usuário precisa ver que o que ele reporta muda o agente. Os mecanismos abaixo transformam uso em melhoria.
+
+| Mecanismo | Como funciona | Dado que o alimenta |
+| --- | --- | --- |
+| Perguntas não atendidas viram backlog | Toda solicitação classificada como fora de escopo já é gravada pelo backend. Uma vez por mês, o PMO revisa essas perguntas e decide quais são lacunas do agente e quais estão de fato fora do escopo | `out_of_scope_requests` |
+| Avaliação de cada resposta no próprio chat | A construir. O usuário marca a resposta como útil ou não útil e, no segundo caso, escolhe o motivo: fonte errada, informação incompleta ou pergunta mal entendida | Campo de avaliação a acrescentar à interação em `ai_interactions` |
+| Curadoria da base de conhecimento com o PMO | O léxico do domínio e o catálogo de intenções foram construídos para serem substituídos pela base real sem alterar código. A curadoria decide o que entra; uma intenção nova exige retreino e reavaliação pelo protocolo da Seção 8.10, e por isso é decisão de governança, e não ajuste de configuração | `lexico_dominio.json`, `intent_catalog` |
+| Grupo de usuários-chave | Um multiplicador por subportfólio, mais o PMO, prioriza a cada trimestre as melhorias seguintes, partindo da lista priorizada da Seção 12.2 | Ata da priorização |
+| Indicadores publicados | Os indicadores da Seção 13.2.4 são divulgados mensalmente ao grupo de usuários-chave, inclusive os que pioraram | Painel mensal |
+
+A combinação dos dois primeiros mecanismos responde à barreira mais grave da Seção 13.1.2: a desconfiança nasce de respostas sem lastro, e o PMO passa a ver, com dados, onde o agente erra e o que foi feito a respeito.
+
+### 13.2.3 Comunidade e reconhecimento
+
+| Mecanismo | Como funciona |
+| --- | --- |
+| Rede de multiplicadores | Um usuário de referência por subportfólio, escolhido entre os primeiros a adotar, conduz a primeira sessão da própria equipe na fase 2 do onboarding e é o primeiro contato para dúvidas |
+| Reconhecimento dos primeiros adotantes | Os participantes do piloto têm o nome registrado na comunicação do PMO e voto na primeira priorização trimestral |
+| Destaque à qualidade dos dados | O agente já sabe quando um dado está velho: um item de cronograma sem atualização há mais de 45 dias é marcado como desatualizado, e o alerta de prazo deixa de concluir sobre ele. O percentual de projetos atualizados por subportfólio é publicado no painel mensal, e o subportfólio com maior completude é destacado na reunião do PMO |
+| Biblioteca de perguntas por perfil | Um canal no Teams reúne as perguntas que funcionaram, organizadas por perfil, e alimenta o cartão de exemplos entregue no onboarding |
+
+O destaque à qualidade dos dados tem um efeito que vai além da adoção: o agente responde melhor quanto mais atualizada estiver a base, e o reconhecimento dá ao líder de projeto um motivo próprio para manter o dado em dia, e não apenas a cobrança do PMO.
+
+### 13.2.4 Indicadores de uso e qualidade
+
+Os indicadores de uso e de qualidade dos dados vêm de tabelas que o backend já preenche, sem coleta manual. Os de qualidade das respostas exigem avaliação amostral, como a feita no RNF04; a avaliação no chat ainda precisa ser construída; e a comparação com a busca manual é feita sobre os mesmos casos no piloto. As metas de qualidade repetem as dos requisitos não funcionais, e os indicadores de uso partem de uma linha de base medida nas quatro primeiras semanas do piloto.
+
+| Indicador | Dimensão | Meta | Fonte |
+| --- | --- | --- | --- |
+| Usuários ativos por perfil, por semana | Uso | Crescimento a cada fase do onboarding | `ai_interactions` cruzada com `users` |
+| Usuários que voltam a usar em quatro semanas | Uso | Linha de base no piloto | `ai_interactions` |
+| Subportfólios com multiplicador ativo | Comunidade | Todos os subportfólios da fase 2 | Registro do grupo de usuários-chave |
+| Respostas fundamentadas nas fontes | Qualidade | ≥ 90% (RNF04) | `consulted_sources` e avaliação amostral |
+| Taxa de alucinação | Qualidade | ≤ 5% (RNF04) | Avaliação amostral |
+| Solicitações compreendidas ou orientadas para reformulação | Qualidade | ≥ 80% (Seção 2.4) | `ai_interactions` e `out_of_scope_requests` |
+| P95 de consulta simples | Qualidade | ≤ 10 s (RNF05) | Métricas de etapa devolvidas pela API |
+| Respostas avaliadas como não úteis | Qualidade | Tendência de queda | Avaliação no chat, a construir |
+| Sugestões proativas aceitas sobre oferecidas | Utilidade | Linha de base no piloto | `pending_proactive_suggestions` |
+| Tempo para encontrar uma informação, comparado à busca manual | Produtividade | Redução de 50% (Seção 2.4) | Comparação sobre os mesmos casos no piloto |
+| Projetos com dados atualizados nos últimos 45 dias | Qualidade dos dados | Crescimento por subportfólio | Regra de frescor do alerta |
+
+Os quatro indicadores de qualidade com meta definida já têm linha de base medida na Seção 9.2. Quando um deles cair abaixo da meta por duas medições seguidas, a expansão para a fase seguinte do onboarding é suspensa até a causa ser tratada — regra que impede que a adoção avance sobre uma confiança que o próprio agente esteja corroendo.
+
+
+# 14. Consolidação documental e auditoria do repositório
+
+## 14.1 Auditoria dos critérios do Escritório de Projetos
+
+
+Grupo G05 / Oneshot, T17-M7. Data editorial 07/10/2026.
+
+A avaliação recebida indicava **81%** e situação Conforme. Esta auditoria
+reproduz seus 37 critérios, registra correções verificáveis e explicita as
+pendências. Todos os critérios estão rastreados, mas isso não comprova que
+todos estejam conformes. O percentual oficial depende da reavaliação do
+Escritório. A disponibilidade de links externos, a verificação de dados sensíveis
+e a limpeza de branches exigem evidências específicas de conclusão.
+
+### Checklist e evidências
+
+| # | Critério da avaliação | Correção / evidência verificável | Situação local |
+|---|---|---|---|
+| 1 | Nome do projeto presente | README, título inicial. | Conforme |
+| 2 | Nome do grupo presente | README, Oneshot. | Conforme |
+| 3 | Integrantes descritos | README, seis nomes. | Conforme |
+| 4 | Links dos integrantes corretos | README, perfis LinkedIn identificados; rede externa pode exigir login. | Estrutura conforme; disponibilidade externa condicionada |
+| 5 | Descrição curta | README, descrição do problema e propósito. | Conforme |
+| 6 | Estrutura de pastas conforme modelo | README mapeia docs/src e frontend/backend/database; lp/notebooks são complementares explicados. | Conforme quanto à organização; interpretação do modelo sujeita ao EP |
+| 7 | Instalação clara com versões | README e Seção 14.2: Python3.12/3.13, Node24, locks/requirements e comandos. | Conforme |
+| 8 | Histórico de lançamentos | README, versões0.1.0–0.5.0 com datas. | Conforme documental; 0.5.0 é fechamento editorial |
+| 9 | Histórico adequado | README cronológico; não confunde data editorial com tag remota. | Conforme |
+| 10 | Licença | README, CC BY4.0. | Conforme |
+| 11 | Inteli na licença | Atribuição e link institucional. | Conforme |
+| 12 | Grupo/integrantes na licença | Oneshot e seis integrantes. | Conforme |
+| 13 | Links na licença | Links de integrantes/instituição. | Estrutura conforme; acesso externo condicionado |
+| 14 | Referências além do modelo | Bibliografia formal README e fontes primárias em Arquitetura. | Conforme |
+| 15 | Instruções genéricas/template removidos | [Guia de padrões](GuiaPadroesDesenvolvimento.md) disponível em documento próprio. Contém marcadores de template e exemplos de stack distintos do runtime atual. | Pendente de atualização específica do guia; padrões não duplicados em Projeto.md |
+| 16 | README coerente com repositório | Estrutura atual e links; modos/limites no manual/Arquitetura. | Conforme |
+| 17 | Seção de requisitos | Prioridades MVP no README; requisitos completos Projeto. | Conforme |
+| 18 | Instruções de execução/instalação | Dois terminais e configuração; Seção 14.2 atualizada para Auth/banco. O smoke do HEAD atual encontra Header não definido; ver conciliação abaixo. | Instruções presentes; execução backend bloqueada no HEAD atual |
+| 19 | Repositório não expõe dados sensíveis | Exemplos sem secrets; varredura atual registra candidatos sem imprimir valores. | Conforme dentro do escopo da varredura; não é certificação universal |
+| 20 | Ausência verificada nos artefatos | Varredura de arquivos públicos versionados e alterados; binários/histórico têm limite declarado. | Verificação realizada; limitações documentadas |
+| 21 | Pasta código-fonte | src. | Conforme |
+| 22 | Código organizado | agent/backend/database/frontend e complementares. | Conforme |
+| 23 | Pasta frontend | src/frontend. | Conforme |
+| 24 | Pasta lógica/codificação | src/backend. | Conforme |
+| 25 | Database com README | [README raiz do banco](../src/database/README.md), modelo/migração/rollback. Corrige a observação que citava src/backend/database. | Conforme |
+| 26 | Configuração de ambiente produtivo | compose.prod.yml, infra/aws, Projeto10.2, Arquitetura e manual. | Conforme documental; homologação externa discriminada |
+| 27 | Docs na raiz | docs/. | Conforme |
+| 28 | Documentação acessível/localizável | README e Index com links relativos resolvíveis. | Conforme localmente |
+| 29 | Docs .md | Documentos principais e evidências Markdown. | Conforme |
+| 30 | Links funcionam sem restrição | Caminhos locais validados; localhost escrito como instrução, exige servidores; GitLab/LinkedIn exigem direitos externos. | Conforme em links locais; acesso irrestrito externo não demonstrado |
+| 31 | Formatação mínima | Títulos, listas e tabelas; validação editorial. | Conforme |
+| 32 | Seções principais preenchidas | GestãoProjeto/Configuração, Guia e Projeto, mais fechamento S5. | Conforme |
+| 33 | Temporários/irrelevantes removidos | Arquivos temporários de trabalho e .env não integram os artefatos versionados de fechamento. Arquivos complementares têm finalidade documentada. | Conforme nos artefatos de fechamento |
+| 34 | Versão PDF da documentação, se exigida | Documentação mantida em Markdown, em Projeto.md e GestaoProjeto.md. O critério de PDF é condicional e sua exigência não está confirmada. | Aplicabilidade pendente de confirmação na reavaliação do EP |
+| 35 | Repositórios auxiliares/complementares linkados | Arquitetura identifica o repositório do projeto e as referências das integrações externas. | Conforme documental |
+| 36 | Arquitetura detalhada | Componentes, fluxo, controles, persistência, ambientes, dependências e limites em Seção 5.4 deste documento. | Conforme |
+| 37 | Estrutura formal de testes | backend/app/tests, frontend/tests/e2e, docs/testes e evidências RNF. | Conforme |
+
+Cobertura de auditoria: **37/37 critérios rastreados**, cada qual com evidência,
+correção, pendência ou justificativa. Não se atribui percentual de conformidade
+a esse número. O item de PDF é condicional; os condicionamentos de acesso
+externo e aceite do modelo permanecem visíveis.
+
+### Destino das divergências de Configuração 7.4 (S4)
+
+| Divergência histórica | Destino no fechamento |
+|---|---|
+| Variáveis alheias à aplicação no exemplo raiz | Pendência documentada; exemplos e configuração de runtime foram preservados nesta consolidação. |
+| Nove referências para arquivos removidos | Redirecionadas ao conteúdo técnico/evidências vigentes; links relativos validados. |
+| Pipeline não obrigatório | Snapshot GitLab mostra only_allow_merge_if_pipeline_succeeds=true. |
+| Título de MR sem gate | Job validar-titulo-mr e dois scripts presentes; !118 integrado. |
+| Gate integração/marcadores ausente | !120 integrado: job conflict-markers no estágio validate, título de MR no mesmo job, backend com seleção integration/strict-markers e frontend com typecheck/cobertura. Resultado remoto do HEAD atual não reconsultado; evidência versionada registra limitação de jobs do GitLab. |
+| Temporárias pós-merge e nomes fora da regra | Inventário realizado; limpeza pendente. Preservar branches permanentes, MRs abertos e conteúdo sem integração comprovada. |
+| Coerência develop/hmg/main | Ancestralidade e conteúdo devem ser verificados e registrados na promoção final; igualdade de conteúdo não comprova identidade do histórico. |
+| Cobertura do job backend | CI atual usa pytest app/tests -m integration --strict-markers. Coleta local de síntese/tracing falhou por Header não definido em main.py; integração do YAML não implica backend ou pipeline aprovados. |
+
+### Aceite e resultado
+
+As correções locais resolvem os itens documentais parciais/não conformes:
+referências, README de banco, descrição das integrações, arquitetura e instruções atuais.
+**Não se declara 100% oficial ou acesso externo irrestrito sem evidência.** Os
+critérios condicionados acima ficam prontos para inspeção do EP, com limites
+explícitos. As correções e pendências são rastreadas nas issues #302–#307
+e nas frentes técnicas da Sprint 5. O registro de validação nesta seção e
+[fechamento](GestaoProjeto.md) permitem revisão do pacote.
+
+
+### Estado integrado e verificação da base — 06/10/2026
+
+Base analisada: `1ff5927a75b79219314068291b1aa43de3fe9674` de develop.
+A versão inclui a tabela Microsoft (Seção 6.4), a resposta em áudio (Seção 8.9.4),
+os testes finais, o gate de integração e a correção da auditoria do fluxo guiado.
+
+| Frente integrada | Evidência atual | Conclusão e limite |
+|---|---|---|
+| Tabela Microsoft #298 / !131 | Seção 6.4, d894b193/1e1465af | Mapeamento integrado; não é homologação de tenant. |
+| Auditoria #279 / !117 | tracing.py, SQL19, 3b95d985/9255e2f8 | Correção integrada; migração por ambiente não comprovada. |
+| Gate #255 / !120 | .gitlab-ci.yml, scripts/tests, 761c7769/5b3c57a0 | Implementado; execução remota atual não reconsultada. |
+| Testes unitários #276 / !124 | [Relatório S5-22](testes/sprint5/relatorio-s5-22.md), cb99aad7/b1859266 | Relatório da entrega registra 112 testes/18 arquivos; suíte atual também recebe o teste TTS. |
+| RNFs #285 / !130 | [Consolidação S5-31](testes/sprint5/consolidacao-s5-31.md), d38a8b20/e50742ea | Três casos aprovados/três reprovados. RNF07: 6/20 (30%); RNF08-P reprovado pelo critério Copilot; RNF08-N e RNF09-P/N aprovados no escopo local. |
+| Voz de saída #269 / !123 | Seção 8.9.4, synthesis.py, 919ef0f1/1ff5927a | TTS Azure opcional integrado; falhas preservam texto. Não comprova execução publicada com provedor real. |
+
+**Bloqueio encontrado no HEAD atual.** A execução local de testes de síntese,
+tracing, persistência e fontes (`PYTHON_DOTENV_DISABLED=1`) parou na coleta de
+síntese e tracing: `NameError: name 'Header' is not defined` em
+`src/backend/app/main.py:390`. A função usa `Header(default=None)` sem importá-lo.
+Assim, não se declara runtime backend aprovado ou entrega 100% conforme.
+Uma segunda seleção (persistência e fontes) confirmou o mesmo bloqueio no
+setup: 22 erros e 12 skips, estes por ausência de banco no modo isolado.
+Os sete testes locais do gate de marcadores passaram.
+A correção do import e a repetição da coleta e do smoke são necessárias
+para validar a inicialização da aplicação nessa versão.
+
+**Frontend no HEAD atualizado.** Lint, `npm run typecheck` e build passaram.
+Vitest com `--pool=forks --maxWorkers=1 --testTimeout=20000` concluiu com
+**133 testes aprovados e nove falhas em 22 arquivos** (18 arquivos aprovados,
+quatro reprovados). As falhas estão em AppShell (um teste), notificações (seis),
+UserCard (um) e sugestão proativa (um). No AppShell, o teste novo de áudio tenta
+encontrar o campo de mensagem antes de autenticar; no UserCard, falta o provider
+de sessão. Os demais resultados precisam ser conciliados com os componentes
+atuais; falha de teste não prova isoladamente falha da aplicação publicada.
+O resultado antigo de 112 testes do relatório S5-22 descreve sua própria base,
+não a aprovação dos 142 testes alcançados pelo HEAD integrado atual.
+
+**Resultado da verificação:** links, tabelas e formatação aprovados; runtime
+com bloqueios de inicialização e testes reprovados. Esses resultados impedem
+declarar conformidade integral da versão. O aceite final depende da correção
+dos bloqueios e de revisão por outro integrante.
+
+O Git comprova os merges listados, mas os registros disponíveis não confirmam
+as aprovações, os comentários de revisão e o fechamento das issues após essas
+integrações. Esses itens devem ser conferidos no GitLab no encerramento.
+
+## 14.2 Instalação e identidade na versão S5
+
+O fluxo autenticado exige banco, Supabase Auth e regras de perfil. Fallbacks
+JSON/memória são modos de teste/desenvolvimento; não provam acesso real.
+Aplicar SQL20 após suas dependências e conferir o seed administrativo com
+`src/backend/scripts/seed_mvp_access.py --dry-run` antes de aplicação autorizada.
+SQL21 é o rollback. URL, chave administrativa e senhas ficam no ambiente local,
+nunca no navegador ou no Git. O seed valida o projeto-alvo Oneshot.
+O compose atual não repassa as variáveis públicas de Auth: essa pendência de
+implantação deve ser conferida pelo responsável antes da publicação.
+
 # Referências
 
 - Microsoft. [Preços do Azure AI Speech](https://azure.microsoft.com/en-us/pricing/details/speech/). Acesso em: 19 ago. 2026.
@@ -6932,5 +8777,6 @@ Nas premissas adotadas, a entrega é financeiramente viável pelo preço de **R$
 - Robert Half. [Guia Salarial 2026](https://www.roberthalf.com/br/pt/insights/salary-guide). Acesso em: 25 set. 2026.
 - Robert Half. [Desenvolvedor(a) full-stack júnior](https://www.roberthalf.com/br/pt/vagas-detalhes/desenvolvedora-full-stack-junior). Acesso em: 25 set. 2026.
 - Supabase. [Preços](https://supabase.com/pricing). Acesso em: 25 set. 2026.
+- Nações Unidas Brasil. [Os Objetivos de Desenvolvimento Sustentável no Brasil](https://brasil.un.org/pt-br/sdgs). Acesso em: 3 out. 2026.
 
 <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">Agente de IA para o Portfólio de Projetos do Metrô</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://git.inteli.edu.br/graduacao/2026-2a/t17/g05">Oneshot</a>, <a href="https://www.inteli.edu.br/">Inteli</a>, <a href="https://www.linkedin.com/in/ntsfelipe/">Felipe Neves</a>, <a href="https://www.linkedin.com/in/henrique-rodrigues-diniz-b7b011319/">Henrique Diniz</a>, <a href="https://www.linkedin.com/in/jaimeandradedealmeida/">Jaime Almeida</a>, <a href="https://www.linkedin.com/in/leonardoramosvieira">Leonardo Ramos</a>, <a href="https://www.linkedin.com/in/pedro-uchoaa/">Pedro Uchoa</a> e <a href="https://www.linkedin.com/in/wendel-feitosa-975bb1346/">Wendel Feitosa</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="license noopener noreferrer">Attribution 4.0 International</a>.</p>

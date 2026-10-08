@@ -1,0 +1,254 @@
+......................ssssssssssss.............F........................ [ 23%]
+........................................................................ [ 47%]
+...................ssssss.......FFF...........x......................... [ 71%]
+.................................................FF..................... [ 95%]
+...............                                                          [100%]
+=================================== FAILURES ===================================
+__________ test_audio_transcription_is_classified_by_real_classifier ___________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x716f26a14c20>
+provider = []
+
+>   ???
+E   assert 503 == 200
+E    +  where 503 = <Response [503 Service Unavailable]>.status_code
+
+C:\Users\Inteli\g05-02\g05\src\backend\app\tests\test_pipeline_api.py:356: AssertionError
+_______________________________ test_ct_rnf07_p ________________________________
+
+    def test_ct_rnf07_p():
+>       check_rnf07("CT-RNF07-P")
+
+app/tests/test_rnf07_rnf09_s5_31.py:106: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+case = 'CT-RNF07-P'
+
+    def check_rnf07(case):
+        """Apura transcrições recebidas; não simula nem reaplica a sessão humana."""
+        sample_path = ROOT / "docs/testes/sprint5/amostra-rnf07.csv"
+        collection_path = ROOT / "src/backend/evidencias/rnf07-rnf09/coleta-rnf07-p01.csv"
+        with sample_path.open(encoding="utf-8", newline="") as stream:
+            sample = {row["id"]: row for row in csv.DictReader(stream)}
+        with collection_path.open(encoding="utf-8", newline="") as stream:
+            rows = list(csv.DictReader(stream))
+        assert len(rows) == len(sample) == 20
+        assert len({row["id"] for row in rows}) == 20
+        assert {row["id"] for row in rows} == set(sample)
+        images_dir = collection_path.parent / "imagens"
+        images = json.loads((images_dir / "manifesto-imagens.json").read_text(encoding="utf-8"))
+        assert len(images) == 17
+        assert {phrase for entry in images for phrase in entry["frases"]} == set(sample)
+        for entry in images:
+            assert hashlib.sha256((images_dir / entry["arquivo"]).read_bytes()).hexdigest() == entry["sha256"]
+        for row in rows:
+            assert row["pergunta_observada"] == sample[row["id"]]["frase"]
+            assert row["caso"] == sample[row["id"]]["caso"]
+            assert row["resposta_observada"] and row["evidencia"]
+            assert row["avaliacao_tecnica_preliminar"] in {"compreendida", "orientacao_util", "falhou"}
+        accepted = {"compreendida", "orientacao_util"}
+        total_success = sum(row["avaliacao_tecnica_preliminar"] in accepted for row in rows)
+        subset = [row for row in rows if row["caso"] == case]
+        assert len(subset) == 10
+        evidence(f"{case}.json", {
+            "scope": "apuração técnica das transcrições visuais da sessão P01; revisão independente pendente",
+            "collection": str(collection_path.relative_to(ROOT)),
+            "ids": [row["id"] for row in subset],
+            "subset_success": sum(row["avaliacao_tecnica_preliminar"] in accepted for row in subset),
+            "subset_total": len(subset), "total_success": total_success,
+            "total": len(rows), "percentage": 100 * total_success / len(rows),
+            "required_success": 16, "protocol_confirmation": "pendente",
+            "participant_ratings": "pendentes", "original_image_files": "17 arquivos incorporados; hashes verificados",
+        })
+        # A meta publicada é conjunta, não um novo limiar para cada subgrupo.
+>       assert total_success >= 16, f"RNF07: {total_success}/20 abaixo de 16/20; avaliação técnica preliminar"
+E       AssertionError: RNF07: 6/20 abaixo de 16/20; avaliação técnica preliminar
+E       assert 6 >= 16
+
+app/tests/test_rnf07_rnf09_s5_31.py:102: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"artifact": "CT-RNF07-P.json", "observation": {"scope": "apura\u00e7\u00e3o t\u00e9cnica das transcri\u00e7\u00f5es visuais da sess\u00e3o P01; revis\u00e3o independente pendente", "collection": "src/backend/evidencias/rnf07-rnf09/coleta-rnf07-p01.csv", "ids": ["P06", "P07", "P08", "P09", "P10", "P02", "P03", "P01", "P04", "P05"], "subset_success": 4, "subset_total": 10, "total_success": 6, "total": 20, "percentage": 30.0, "required_success": 16, "protocol_confirmation": "pendente", "participant_ratings": "pendentes", "original_image_files": "17 arquivos incorporados; hashes verificados"}}
+_______________________________ test_ct_rnf07_n ________________________________
+
+    def test_ct_rnf07_n():
+>       check_rnf07("CT-RNF07-N")
+
+app/tests/test_rnf07_rnf09_s5_31.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+case = 'CT-RNF07-N'
+
+    def check_rnf07(case):
+        """Apura transcrições recebidas; não simula nem reaplica a sessão humana."""
+        sample_path = ROOT / "docs/testes/sprint5/amostra-rnf07.csv"
+        collection_path = ROOT / "src/backend/evidencias/rnf07-rnf09/coleta-rnf07-p01.csv"
+        with sample_path.open(encoding="utf-8", newline="") as stream:
+            sample = {row["id"]: row for row in csv.DictReader(stream)}
+        with collection_path.open(encoding="utf-8", newline="") as stream:
+            rows = list(csv.DictReader(stream))
+        assert len(rows) == len(sample) == 20
+        assert len({row["id"] for row in rows}) == 20
+        assert {row["id"] for row in rows} == set(sample)
+        images_dir = collection_path.parent / "imagens"
+        images = json.loads((images_dir / "manifesto-imagens.json").read_text(encoding="utf-8"))
+        assert len(images) == 17
+        assert {phrase for entry in images for phrase in entry["frases"]} == set(sample)
+        for entry in images:
+            assert hashlib.sha256((images_dir / entry["arquivo"]).read_bytes()).hexdigest() == entry["sha256"]
+        for row in rows:
+            assert row["pergunta_observada"] == sample[row["id"]]["frase"]
+            assert row["caso"] == sample[row["id"]]["caso"]
+            assert row["resposta_observada"] and row["evidencia"]
+            assert row["avaliacao_tecnica_preliminar"] in {"compreendida", "orientacao_util", "falhou"}
+        accepted = {"compreendida", "orientacao_util"}
+        total_success = sum(row["avaliacao_tecnica_preliminar"] in accepted for row in rows)
+        subset = [row for row in rows if row["caso"] == case]
+        assert len(subset) == 10
+        evidence(f"{case}.json", {
+            "scope": "apuração técnica das transcrições visuais da sessão P01; revisão independente pendente",
+            "collection": str(collection_path.relative_to(ROOT)),
+            "ids": [row["id"] for row in subset],
+            "subset_success": sum(row["avaliacao_tecnica_preliminar"] in accepted for row in subset),
+            "subset_total": len(subset), "total_success": total_success,
+            "total": len(rows), "percentage": 100 * total_success / len(rows),
+            "required_success": 16, "protocol_confirmation": "pendente",
+            "participant_ratings": "pendentes", "original_image_files": "17 arquivos incorporados; hashes verificados",
+        })
+        # A meta publicada é conjunta, não um novo limiar para cada subgrupo.
+>       assert total_success >= 16, f"RNF07: {total_success}/20 abaixo de 16/20; avaliação técnica preliminar"
+E       AssertionError: RNF07: 6/20 abaixo de 16/20; avaliação técnica preliminar
+E       assert 6 >= 16
+
+app/tests/test_rnf07_rnf09_s5_31.py:102: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"artifact": "CT-RNF07-N.json", "observation": {"scope": "apura\u00e7\u00e3o t\u00e9cnica das transcri\u00e7\u00f5es visuais da sess\u00e3o P01; revis\u00e3o independente pendente", "collection": "src/backend/evidencias/rnf07-rnf09/coleta-rnf07-p01.csv", "ids": ["N06", "N07", "N08", "N09", "N10", "N01", "N02", "N03", "N04", "N05"], "subset_success": 2, "subset_total": 10, "total_success": 6, "total": 20, "percentage": 30.0, "required_success": 16, "protocol_confirmation": "pendente", "participant_ratings": "pendentes", "original_image_files": "17 arquivos incorporados; hashes verificados"}}
+_______________________________ test_ct_rnf08_p ________________________________
+
+    def test_ct_rnf08_p():
+        contract = live_contract()
+        errors = contract_errors(contract)
+        evidence("openapi-real.json", contract)
+        agent_readme = (ROOT / "src/agent/README.md").read_text(encoding="utf-8")
+        removed = "O Copilot Studio foi removido da arquitetura de execucao" in agent_readme
+        evidence("CT-RNF08-P.json", {
+            "health_http": 200, "openapi_http": 200, "contract_errors": errors,
+            "architecture_reference": "src/agent/README.md",
+            "copilot_removed_from_runtime": removed,
+            "criterion": "Seção 9.2.3 exige Teams/Copilot/SharePoint/Azure previstos",
+            "scope": "ASGI local com lifespan; sem homologação no tenant Microsoft",
+        })
+        assert not errors, errors
+>       assert not removed, "DEF-S5-31-01: arquitetura vigente remove Copilot exigido pelo critério ainda publicado"
+E       AssertionError: DEF-S5-31-01: arquitetura vigente remove Copilot exigido pelo critério ainda publicado
+E       assert not True
+
+app/tests/test_rnf07_rnf09_s5_31.py:127: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"artifact": "openapi-real.json", "observation": {"sha256": "34062228e948180b0a1fb2846ad2768114cb666600b0dbece69fa2d370a8472d"}}
+{"artifact": "CT-RNF08-P.json", "observation": {"health_http": 200, "openapi_http": 200, "contract_errors": [], "architecture_reference": "src/agent/README.md", "copilot_removed_from_runtime": true, "criterion": "Se\u00e7\u00e3o 9.2.3 exige Teams/Copilot/SharePoint/Azure previstos", "scope": "ASGI local com lifespan; sem homologa\u00e7\u00e3o no tenant Microsoft"}}
+__________ test_chat_real_classifier_contract_and_minimal_persistence __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x716f24f8e4a0>
+
+    def test_chat_real_classifier_contract_and_minimal_persistence(monkeypatch):
+        monkeypatch.setenv("PLN_WARMUP", "0")
+        monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
+        cursor = FakeCursor(
+            fetch_values=[
+                ("intent-1",),
+                ("conversation-1",),
+                ("interaction-1",),
+            ]
+        )
+        connection = FakeConnection(cursor)
+        provider_calls = []
+    
+        def fake_provider(request, intent=None, entities=None, **_kwargs):
+            provider_calls.append((request, intent, entities))
+            return _response_with_db_source()
+    
+        monkeypatch.setattr("app.pipeline.generate_chat_response", fake_provider)
+        monkeypatch.setattr(
+            "app.database.tracing.open_database_connection",
+            lambda **_kwargs: connection,
+        )
+    
+        with TestClient(app) as client:
+            result = client.post(
+                "/api/chat",
+                json={
+                    "message": "qual é o status da extensão da Linha 5-Lilás?",
+                    "use_intent_classifier": True,
+                },
+            )
+    
+>       assert result.status_code == 200
+E       assert 503 == 200
+E        +  where 503 = <Response [503 Service Unavailable]>.status_code
+
+app/tests/test_traceability.py:210: AssertionError
+_________ test_audio_real_classifier_contract_and_minimal_persistence __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x716f2172a270>
+
+    def test_audio_real_classifier_contract_and_minimal_persistence(monkeypatch):
+        transcript = "qual é o status da extensão da Linha 5-Lilás?"
+        external_conversation_id = "s4-13-audio-success"
+        monkeypatch.setenv("PLN_WARMUP", "0")
+        monkeypatch.setenv("DATABASE_URL", "postgresql://user:secret@example/postgres")
+        cursor = FakeCursor(
+            fetch_values=[
+                ("intent-1",),
+                None,
+                ("conversation-1",),
+                ("interaction-1",),
+            ]
+        )
+        connection = FakeConnection(cursor)
+        provider_calls = []
+    
+        def fake_provider(request, intent=None, entities=None, **_kwargs):
+            provider_calls.append((request, intent, entities))
+            return _response_with_db_source()
+    
+        monkeypatch.setattr(
+            transcription,
+            "transcribe",
+            transcricao_fixa(text=transcript, confidence=.97, duration_seconds=1),
+        )
+        monkeypatch.setattr("app.pipeline.generate_chat_response", fake_provider)
+        monkeypatch.setattr(
+            "app.database.tracing.open_database_connection",
+            lambda **_kwargs: connection,
+        )
+    
+        with TestClient(app) as client:
+            result = client.post(
+                "/api/audio",
+                files={"audio": ("teste.wav", _build_wav(), "audio/wav")},
+                headers=AUTH_HEADER,
+                data={
+                    "conversation_id": external_conversation_id,
+                    "use_intent_classifier": "true",
+                },
+            )
+    
+>       assert result.status_code == 200
+E       assert 503 == 200
+E        +  where 503 = <Response [503 Service Unavailable]>.status_code
+
+app/tests/test_traceability.py:287: AssertionError
+=============================== warnings summary ===============================
+../../../../g05venv/lib/python3.13/site-packages/fastapi/testclient.py:1
+  <sessao>/g05venv/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED app/tests/test_pipeline_api.py::test_audio_transcription_is_classified_by_real_classifier
+FAILED app/tests/test_rnf07_rnf09_s5_31.py::test_ct_rnf07_p - AssertionError:...
+FAILED app/tests/test_rnf07_rnf09_s5_31.py::test_ct_rnf07_n - AssertionError:...
+FAILED app/tests/test_rnf07_rnf09_s5_31.py::test_ct_rnf08_p - AssertionError:...
+FAILED app/tests/test_traceability.py::test_chat_real_classifier_contract_and_minimal_persistence
+FAILED app/tests/test_traceability.py::test_audio_real_classifier_contract_and_minimal_persistence
+6 failed, 278 passed, 18 skipped, 1 xfailed, 1 warning in 17.99s

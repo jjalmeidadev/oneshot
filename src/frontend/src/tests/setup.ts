@@ -10,7 +10,8 @@ afterEach(() => {
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation((query: string) => ({
-    matches: query.includes('1024'),
+    // Por padrao, os testes rodam na largura de desktop amplo (>= 1280 px).
+    matches: /1024|1280/.test(query),
     media: query,
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),

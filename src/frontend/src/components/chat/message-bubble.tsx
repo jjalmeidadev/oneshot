@@ -1,10 +1,13 @@
 import { AlertTriangle, AudioLines, Sparkles, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { IntentBadge } from '@/components/chat/intent-badge';
 import { MarkdownMessage } from '@/components/chat/markdown-message';
 import { ProactiveSuggestion } from '@/components/chat/proactive-suggestion';
 import { ReportWorkflowCard } from '@/components/chat/report-workflow-card';
 import { AlertWorkflowCard } from '@/components/chat/alert-workflow-card';
+import { DataChangeCard } from '@/components/chat/data-change-card';
+import { ResponseBlocks } from '@/components/chat/response-blocks';
 import { SourceCitations } from '@/components/chat/source-citations';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -17,6 +20,8 @@ export function MessageBubble({
   selectedSourceId,
   onSelectSource,
   onResolveProactiveSuggestion,
+  onDisableProactivity,
+  showTechnicalDetails = false,
 }: {
   message: ChatMessage;
   selectedSourceId: string | null;
@@ -25,6 +30,9 @@ export function MessageBubble({
     messageId: string,
     decision: ProactiveDecision,
   ) => void;
+  onDisableProactivity?: () => void;
+  /** Modo tecnico: selo de intencao e modelo no rodape da resposta. */
+  showTechnicalDetails?: boolean;
 }) {
   if (message.role === 'user') {
     return <UserMessage message={message} />;
@@ -36,6 +44,8 @@ export function MessageBubble({
       selectedSourceId={selectedSourceId}
       onSelectSource={onSelectSource}
       onResolveProactiveSuggestion={onResolveProactiveSuggestion}
+      onDisableProactivity={onDisableProactivity}
+      showTechnicalDetails={showTechnicalDetails}
     />
   );
 }
@@ -84,6 +94,8 @@ function AssistantMessage({
   selectedSourceId,
   onSelectSource,
   onResolveProactiveSuggestion,
+  onDisableProactivity,
+  showTechnicalDetails = false,
 }: {
   message: ChatMessage;
   selectedSourceId: string | null;
@@ -92,6 +104,9 @@ function AssistantMessage({
     messageId: string,
     decision: ProactiveDecision,
   ) => void;
+  onDisableProactivity?: () => void;
+  /** Modo tecnico: selo de intencao e modelo no rodape da resposta. */
+  showTechnicalDetails?: boolean;
 }) {
   const isError = message.status === 'error';
 
@@ -118,11 +133,29 @@ function AssistantMessage({
         ) : (
           <>
             <MarkdownMessage content={message.content} />
+            {message.evidenceStatus !== 'insufficient' && (
+              <ResponseBlocks
+                blocks={message.blocks ?? []}
+                sources={message.sources ?? []}
+                onSelectSource={onSelectSource}
+              />
+            )}
+            {message.speech?.status === 'available' && message.speech.data_base64 && (
+              <SpeechPlayer data={message.speech.data_base64} />
+            )}
+            {message.speech?.status === 'unavailable' && message.speech.warning && (
+              <p role="status" className="mt-2 text-xs text-fg-muted">
+                {message.speech.warning}
+              </p>
+            )}
             {message.workflow?.workflow === 'transacao_gerar_relatorio' && (
               <ReportWorkflowCard workflow={message.workflow} />
             )}
             {message.workflow?.workflow === 'alerta_prazo_atraso' && (
               <AlertWorkflowCard workflow={message.workflow} />
+            )}
+            {message.dataChange && (
+              <DataChangeCard messageId={message.id} state={message.dataChange} />
             )}
           </>
         )}
@@ -140,18 +173,19 @@ function AssistantMessage({
           <ProactiveSuggestion
             suggestion={message.proactiveSuggestion}
             onResolve={(decision) => onResolveProactiveSuggestion(message.id, decision)}
+            onDisable={onDisableProactivity}
           />
         )}
 
         <div className="mt-2.5 flex flex-wrap items-center gap-2 text-2xs text-fg-subtle">
           <span>{formatTime(message.createdAt)}</span>
-          {message.intent && (
+          {showTechnicalDetails && message.intent && (
             <>
               <span aria-hidden>·</span>
               <IntentBadge intent={message.intent} />
             </>
           )}
-          {message.metrics && (
+          {showTechnicalDetails && message.metrics && (
             <>
               <span aria-hidden>·</span>
               <span className="font-mono">{message.metrics.model}</span>
@@ -160,5 +194,42 @@ function AssistantMessage({
         </div>
       </div>
     </div>
+  );
+}
+
+function SpeechPlayer({ data }: { data: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    try {
+      const decoded = atob(data);
+      const bytes = new Uint8Array(decoded.length);
+      for (let index = 0; index < decoded.length; index += 1) {
+        bytes[index] = decoded.charCodeAt(index);
+      }
+      objectUrl = URL.createObjectURL(new Blob([bytes], { type: 'audio/mpeg' }));
+      setUrl(objectUrl);
+      setFailed(false);
+    } catch {
+      setUrl(null);
+      setFailed(true);
+    }
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [data]);
+
+  if (failed) {
+    return (
+      <p role="status" className="mt-2 text-xs text-fg-muted">
+        Não foi possível reproduzir o áudio desta resposta.
+      </p>
+    );
+  }
+  if (!url) return null;
+  return (
+    <audio controls src={url} aria-label="Resposta em áudio" className="mt-3 w-full" />
   );
 }

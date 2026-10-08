@@ -61,7 +61,9 @@ export const INTENT_CATALOG_SIZE = 31;
 /** Resposta controlada do RF08, em `app/nlp/inference.LIMITATION_ANSWER`. */
 export const INTENT_LIMITATION_ANSWER =
   'Não consegui identificar com segurança o que você precisa dentro do ' +
-  'portfólio. Pode reformular indicando o projeto e a informação desejada?';
+  'portfólio ou nos temas da base. Pode reformular indicando o tema e a ' +
+  "informação desejada? Por exemplo: 'Como funciona o Bilhete digital?' " +
+  "ou 'Qual é o status do projeto PRJ-0442?'";
 
 /* --- Rota de texto: app/gemini/schemas.py --- */
 

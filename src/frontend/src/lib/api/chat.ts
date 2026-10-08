@@ -35,6 +35,7 @@ export async function sendChatMessage(input: SendMessageInput): Promise<ChatResp
     conversation_id: input.conversationId,
     use_intent_classifier: input.useIntentClassifier,
     proactivity_enabled: input.proactivityEnabled,
+    include_audio: true,
     previous_interaction_id: input.previousInteractionId,
   };
 
@@ -42,9 +43,7 @@ export async function sendChatMessage(input: SendMessageInput): Promise<ChatResp
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(input.proactivityEnabled
-        ? { Authorization: `Bearer ${input.accessToken}` }
-        : {}),
+      Authorization: `Bearer ${input.accessToken}`,
     },
     body: JSON.stringify(body),
     signal: input.signal,

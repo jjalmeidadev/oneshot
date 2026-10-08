@@ -4,6 +4,7 @@ import asyncio
 import struct
 from types import SimpleNamespace
 from hashlib import sha256
+from uuid import NAMESPACE_URL, uuid5
 
 import httpx
 import pytest
@@ -124,7 +125,7 @@ def reset_concurrency_control(monkeypatch: pytest.MonkeyPatch) -> None:
     from app.gemini.schemas import GeminiChatResponse, GeminiUsage
     monkeypatch.setattr(
         "app.pipeline.generate_chat_response",
-        lambda request, intent=None, entities=None: GeminiChatResponse(
+        lambda request, intent=None, entities=None, **_kwargs: GeminiChatResponse(
             text="Resposta fundamentada de teste",
             model="teste",
             interaction_id="interaction-teste",
@@ -412,7 +413,7 @@ class TestAudioUploadEndpoint:
         response = self.client.post(
             "/api/audio", files={"audio": ("p.wav", _build_wav(), "audio/wav")}
         )
-        assert_error(response, 401, "UNAUTHENTICATED")
+        assert_error(response, 401, "AUTHENTICATION_REQUIRED")
 
     def test_token_outside_the_simulated_identities_returns_401(
         self, monkeypatch: pytest.MonkeyPatch
@@ -426,7 +427,7 @@ class TestAudioUploadEndpoint:
             files={"audio": ("p.wav", _build_wav(), "audio/wav")},
             headers={"Authorization": "Bearer token-invalido"},
         )
-        assert_error(response, 401, "UNAUTHENTICATED")
+        assert_error(response, 401, "INVALID_ACCESS_TOKEN")
 
     def test_too_large_file_returns_413(self) -> None:
         oversized = _build_wav(duration_seconds=0.1) + b"\x00" * (3 * 1024 * 1024)
@@ -475,7 +476,9 @@ class TestAudioUploadEndpoint:
         )
 
     def test_concurrent_request_for_the_same_user_returns_429(self) -> None:
-        security._active_identities.add(sha256(TOKEN.encode("utf-8")).hexdigest())
+        subject = uuid5(NAMESPACE_URL, "legacy-test-user")
+        public_user_id = uuid5(NAMESPACE_URL, f"public:{subject}")
+        security._active_identities.add(str(public_user_id))
         assert_error(
             post_audio(self.client, _build_wav(), "p.wav", "audio/wav"),
             429,

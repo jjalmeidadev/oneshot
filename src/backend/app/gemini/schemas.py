@@ -2,9 +2,11 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.gemini.blocks import ResponseBlock, build_blocks
 from app.nlp.schemas import AudioIntent, ChatPipelineMetrics, PublicEntity
 from app.reports.schemas import WorkflowDirective
 from app.alerts.schemas import AlertDirective
+from app.data_changes.schemas import DataChangeOutcome
 
 
 class GeminiChatRequest(BaseModel):
@@ -13,6 +15,7 @@ class GeminiChatRequest(BaseModel):
     previous_interaction_id: str | None = Field(default=None, max_length=1024)
     use_intent_classifier: bool = True
     proactivity_enabled: bool = False
+    include_audio: bool = False
 
     @field_validator("message")
     @classmethod
@@ -75,9 +78,18 @@ class ProactiveSuggestion(BaseModel):
     requires_confirmation: bool = True
 
 
+class SpeechResponse(BaseModel):
+    status: Literal["available", "unavailable"]
+    media_type: Literal["audio/mpeg"] | None = None
+    data_base64: str | None = None
+    warning: str | None = None
+
+
 class GeminiChatResponse(BaseModel):
-    contract_version: Literal["1.1.0"] = "1.1.0"
+    contract_version: Literal["1.2.0"] = "1.2.0"
     text: str
+    blocks: list[ResponseBlock] = Field(default_factory=list)
+    speech: SpeechResponse | None = None
     model: str
     interaction_id: str | None = None
     trace_id: str | None = None
@@ -90,11 +102,16 @@ class GeminiChatResponse(BaseModel):
     # Somente na resposta secundaria confirmada: analise rotulada, nao fato.
     recommendation: str | None = None
     trace_sources: list[dict] = Field(default_factory=list, exclude=True)
+    # Resumo da barreira de dado sensivel (RNF01), so para a auditoria. Traz
+    # etapa, categorias e contagens; nunca o valor encontrado.
+    security_report: dict | None = Field(default=None, exclude=True)
     intent: AudioIntent | None = None
     entities: list[PublicEntity] = Field(default_factory=list)
     pipeline_metrics: ChatPipelineMetrics = Field(default_factory=ChatPipelineMetrics)
     proactive_suggestion: ProactiveSuggestion | None = None
     workflow: WorkflowDirective | AlertDirective | None = None
+    # Alteracao de dados pelo chat (S5-06): previa, pergunta ou recusa.
+    data_change: DataChangeOutcome | None = None
 
     @model_validator(mode="after")
     def validate_claim_references(self):
@@ -131,6 +148,9 @@ class GeminiChatResponse(BaseModel):
                     raise ValueError(problem)
             if self.text != render_answer(self.claims, self.recommendation):
                 raise ValueError("Texto deve corresponder as afirmacoes verificadas")
+        allowed_blocks = build_blocks(self.claims)
+        if any(block not in allowed_blocks for block in self.blocks):
+            raise ValueError("Bloco deve corresponder as afirmacoes verificadas")
         return self
 
 

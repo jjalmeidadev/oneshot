@@ -1,4 +1,5 @@
 import { API_BASE_URL, parseError, requestJson } from './client';
+import { notifyUnauthorized } from './session-events';
 import type { WorkflowSessionResponse, WorkflowStep } from './schemas';
 
 function authHeaders(accessToken: string): HeadersInit {
@@ -90,7 +91,11 @@ export async function downloadReportArtifact(input: {
     `${API_BASE_URL}/report-requests/${input.executionId}/artifact`,
     { headers: { Authorization: `Bearer ${input.accessToken}` } },
   );
-  if (!response.ok) throw await parseError(response);
+  if (!response.ok) {
+    const error = await parseError(response);
+    if (response.status === 401) notifyUnauthorized();
+    throw error;
+  }
   const url = URL.createObjectURL(await response.blob());
   try {
     const anchor = document.createElement('a');
