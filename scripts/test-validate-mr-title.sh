@@ -32,4 +32,13 @@ expect_invalid 'feat: ajustar pipeline'
 expect_invalid 'feat: ajustar pipeline (#1 #2)'
 expect_invalid 'feat(escopo inválido): ajustar pipeline (#256)'
 
+invalid_output="$(sh "$validator" 'resolve merge' 2>&1)" || :
+case "$invalid_output" in
+  *'Título de merge request recebido: <resolve merge>'*) ;;
+  *)
+    echo 'O validador deve exibir o título rejeitado.' >&2
+    exit 1
+    ;;
+esac
+
 echo "Casos de validação de título executados com sucesso."
