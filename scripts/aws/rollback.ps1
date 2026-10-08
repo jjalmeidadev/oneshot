@@ -43,11 +43,16 @@ try {
         $images = Invoke-M7AwsJson -Arguments @('ecr','describe-images','--repository-name',$item.Name,'--image-ids',"imageTag=$($item.Tag)")
         if (@($images.ImageDetails).Count -ne 1 -or $images.ImageDetails[0].ImageDigest -ne $item.Digest) { throw "Rollback tag/digest mismatch in $($item.Name)." }
     }
-    Write-Output 'Read-only rollback preflight passed: target running, SSH key assigned, immutable ECR tags/digests match.'
-    if (-not $ExecuteRollback) { Write-Output 'No remote command executed.'; return }
     $ssh = Get-Command ssh -ErrorAction SilentlyContinue
     if (-not $ssh) { throw 'OpenSSH client is required.' }
     $target = 'ubuntu@' + $instance.PublicIpAddress
+    $null = & $ssh.Source -i $PrivateKeyPath -o BatchMode=yes -o StrictHostKeyChecking=yes $target "set -o pipefail; sudo -n /usr/local/bin/m7-compose config --services | grep -q '^sharepoint-consumer$'"
+    if ($LASTEXITCODE -eq 0) {
+        throw 'This Compose has Sprint 5 workers. Restore the complete pre-update backup with m7-restore-backup; changing image tags alone is unsafe.'
+    }
+    if ($LASTEXITCODE -ne 1) { throw 'Could not inspect remote Compose before rollback.' }
+    Write-Output 'Read-only rollback preflight passed: target running, SSH key assigned, immutable ECR tags/digests match; Compose has no Sprint 5 workers.'
+    if (-not $ExecuteRollback) { Write-Output 'No remote mutation performed.'; return }
     if ($PSCmdlet.ShouldProcess($target, 'Run m7-rollback over SSH')) {
         & $ssh.Source -i $PrivateKeyPath -o BatchMode=yes -o StrictHostKeyChecking=yes $target "sudo /usr/local/bin/m7-rollback $PreviousBackendImageTag $PreviousFrontendImageTag"
         if ($LASTEXITCODE -ne 0) { throw 'SSH rollback failed. Inspect target via SSH.' }
