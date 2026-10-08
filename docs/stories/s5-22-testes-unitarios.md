@@ -20,6 +20,8 @@ Cobrir cada componente da interface com testes unitários e definir a cobertura 
 
 ## Tasks
 
+- [x] Estabilizar a verificação E2E de contraste dos blocos na pipeline, aguardando opacidade final da mensagem (#271, #302; job #125085).
+
 - [x] Levantar componentes sem teste direto e registrar rastreabilidade.
 - [x] Escrever testes faltantes com asserções de comportamento.
 - [x] Definir limites globais e gate por arquivo em `vitest.config.ts`.
@@ -30,6 +32,9 @@ Cobrir cada componente da interface com testes unitários e definir a cobertura 
 - [ ] Publicar MR com `Closes #276`, registrar execução remota e obter revisão de outra frente com comentário e aprovação.
 
 ## File List
+
+- `src/frontend/e2e/response-blocks.spec.ts`
+- `docs/evidencias/sprint-05/blocos-271.md`
 
 - `.gitlab-ci.yml`
 - `src/frontend/package.json`
@@ -58,3 +63,5 @@ O MR remoto, o comentário e a aprovação de outra frente e os campos de planni
 
 - 2026-10-05: registro da tarefa #276 e implementação dos testes e gates; validação em andamento.
 - 2026-10-05: validação técnica concluída; Ready for Review, com pendências remotas preservadas e descrição de MR preparada.
+
+- 2026-10-07: correção de sincronização no E2E de contraste (#271, #302); 18 cenários E2E e 169 unitários aprovados, lint, tipos, formatação e build aprovados. Evidência em `docs/evidencias/sprint-05/blocos-271.md`; nova pipeline remota pendente.
