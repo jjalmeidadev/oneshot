@@ -57,7 +57,7 @@ CARTAO = "4111 1111 1111 1111"
         ("escreva para joao.silva@metro.sp.gov.br", "email", "[E-MAIL]"),
         ("ligue (11) 98765-4321", "telefone", "[TELEFONE]"),
         (f"cartao {CARTAO}", "cartao", "[CARTÃO]"),
-        ("chave REDACTED_FOR_PUBLIC_RELEASE", "credencial", "[CREDENCIAL]"),
+        ("chave " + "AIza" + "A" * 35, "credencial", "[CREDENCIAL]"),
         ("token sk-or-v1-abcdefghijklmnopqrstuvwxyz0123", "credencial", "[CREDENCIAL]"),
         ("senha: Metro@2026", "credencial", "[CREDENCIAL]"),
         ("documento CONFIDENCIAL do contrato", "marcador_classificacao", "[DADO CLASSIFICADO]"),
